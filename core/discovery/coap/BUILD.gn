@@ -1,0 +1,53 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+shared_library("disc_coap_module") {
+  sources = [
+    "src/disc_coap.c",
+    "src/disc_nstackx_adapter.c",
+  ]
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/components/dfinder/include",
+    "//third_party/bounds_checking_function/include",
+    "//third_party/cJSON",
+    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+  ]
+  cflags = [
+    "-Wall",
+    "-fPIC",
+    "-std=c99",
+  ]
+  ldflags = [
+    "-lnstackx_ctrl",
+    "-lnstackx_util",
+  ]
+  deps = [
+    "$dsoftbus_root_path/components/dfinder:dfinder",
+    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/core/bus_center:softbus_bus_center",
+    "$dsoftbus_root_path/core/common/json_utils:json_utils",
+    "//third_party/bounds_checking_function:libsec_shared",
+  ]
+}

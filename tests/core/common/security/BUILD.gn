@@ -1,0 +1,72 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus_standard/common"
+
+ohos_prebuilt_etc("softbus_permission_json_test") {
+  source = "softbus_permission_test.json"
+  install_enable = true
+  relative_install_dir = "communication/softbus"
+}
+
+ohos_unittest("softbus_permission_test") {
+  module_out_path = module_output_path
+
+  #ldflags = [ "-lstdc++" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "//base/security/permission/interfaces/innerkits/permission_standard/permissionsdk/main/cpp/include",
+    "//foundation/appexecfwk/standard/kits/appkit/native/app/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core/include/bundlemgr/",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//utils/system/safwk/native/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/common/security/permission/common/permission_entry.c",
+    "$dsoftbus_root_path/core/common/security/permission/standard_system/permission_utils.cpp",
+    "$dsoftbus_root_path/core/common/security/permission/standard_system/softbus_permission.cpp",
+    "softbus_permission_test.cpp",
+  ]
+  defines = [ "PERMISSION_TEST" ]
+  deps = [
+    ":softbus_permission_json_test",
+    "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
+    "//foundation/appexecfwk/standard/kits:appkit_native",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "aafwk_standard:want",
+    "appexecfwk_standard:appexecfwk_core",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "permission_standard:libpermissionsdk_standard",
+  ]
+}

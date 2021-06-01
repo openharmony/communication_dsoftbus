@@ -1,0 +1,270 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "softbus_utils.h"
+
+#include "pthread.h"
+
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/entropy.h"
+#include "securec.h"
+#include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+#include "softbus_mem_interface.h"
+#include "softbus_os_interface.h"
+#include "softbus_type_def.h"
+
+#ifndef MBEDTLS_CTR_DRBG_C
+#define MBEDTLS_CTR_DRBG_C
+#endif
+
+#ifndef MBEDTLS_ENTROPY_C
+#define MBEDTLS_ENTROPY_C
+#endif
+static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
+static void *g_timerId = NULL;
+static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
+
+SoftBusList *CreateSoftBusList(void)
+{
+    SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    if (list == NULL) {
+        LOG_ERR("malloc failed");
+        return NULL;
+    }
+    (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
+
+    if (pthread_mutex_init(&list->lock, NULL) != 0) {
+        LOG_ERR("init lock failed");
+        SoftBusFree(list);
+        return NULL;
+    }
+
+    ListInit(&list->list);
+    return list;
+}
+
+void DestroySoftBusList(SoftBusList *list)
+{
+    ListDelInit(&list->list);
+    pthread_mutex_destroy(&list->lock);
+    SoftBusFree(list);
+    return;
+}
+
+int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
+{
+    if (callback == NULL || timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM ||
+        timerFunId < SOFTBUS_CONN_TIMER_FUN) {
+        return SOFTBUS_ERR;
+    }
+
+    if (g_timerFunList[timerFunId] != NULL) {
+        return SOFTBUS_OK;
+    }
+
+    g_timerFunList[timerFunId] = callback;
+    return SOFTBUS_OK;
+}
+
+static void HandleTimeoutFun(void)
+{
+    int32_t i;
+    for (i = 0; i < SOFTBUS_MAX_TIMER_FUN_NUM; i++) {
+        if (g_timerFunList[i] != NULL) {
+            g_timerFunList[i]();
+        }
+    }
+}
+
+int32_t SoftBusTimerInit(void)
+{
+    if (g_timerId != NULL) {
+        return SOFTBUS_OK;
+    }
+    g_timerId = SoftBusCreateTimer(&g_timerId, (void *)HandleTimeoutFun, TIMER_TYPE_PERIOD);
+    if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
+        LOG_ERR("start timer failed.");
+        (void)SoftBusDeleteTimer(g_timerId);
+        g_timerId = NULL;
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void SoftBusTimerDeInit(void)
+{
+    if (g_timerId != NULL) {
+        (void)SoftBusDeleteTimer(g_timerId);
+        g_timerId = NULL;
+    }
+}
+
+int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
+{
+    if (randStr == NULL || len == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    mbedtls_entropy_context *entropy = (mbedtls_entropy_context *)SoftBusCalloc(sizeof(mbedtls_entropy_context));
+    if (entropy == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    mbedtls_ctr_drbg_context *ctrDrbg = SoftBusCalloc(sizeof(mbedtls_ctr_drbg_context));
+    if (ctrDrbg == NULL) {
+        SoftBusFree(entropy);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (pthread_mutex_lock(&g_randomLock) != 0) {
+        LOG_ERR("lock mutex failed");
+        SoftBusFree(ctrDrbg);
+        SoftBusFree(entropy);
+        return SOFTBUS_ERR;
+    }
+    mbedtls_ctr_drbg_init(ctrDrbg);
+    mbedtls_entropy_init(entropy);
+    int ret = mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func, entropy, NULL, 0);
+    if (ret != 0) {
+        pthread_mutex_unlock(&g_randomLock);
+        LOG_ERR("gen random seed error, ret[%d]", ret);
+        SoftBusFree(ctrDrbg);
+        SoftBusFree(entropy);
+        return SOFTBUS_ERR;
+    }
+    ret = mbedtls_ctr_drbg_random(ctrDrbg, randStr, len);
+    if (ret != 0) {
+        pthread_mutex_unlock(&g_randomLock);
+        SoftBusFree(ctrDrbg);
+        SoftBusFree(entropy);
+        LOG_ERR("gen random error, ret[%d]", ret);
+        return SOFTBUS_ERR;
+    }
+    pthread_mutex_unlock(&g_randomLock);
+    SoftBusFree(ctrDrbg);
+    SoftBusFree(entropy);
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, int32_t inLen)
+{
+    (void)outBufLen;
+
+    if ((outBuf == NULL) || (inBuf == NULL) || (inLen % HEXIFY_UNIT_LEN != 0)) {
+        LOG_ERR("invalid param");
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t outLen = UN_HEXIFY_LEN(inLen);
+    uint32_t i = 0;
+    while (i < outLen) {
+        unsigned char c = *inBuf++;
+        if ((c >= '0') && (c <= '9')) {
+            c -= '0';
+        } else if ((c >= 'a') && (c <= 'f')) {
+            c -= 'a' - DEC_MAX_NUM;
+        } else if ((c >= 'A') && (c <= 'F')) {
+            c -= 'A' - DEC_MAX_NUM;
+        } else {
+            LOG_ERR("HexToString Error! %c", c);
+            return SOFTBUS_ERR;
+        }
+
+        unsigned char c2 = *inBuf++;
+        if ((c2 >= '0') && (c2 <= '9')) {
+            c2 -= '0';
+        } else if ((c2 >= 'a') && (c2 <= 'f')) {
+            c2 -= 'a' - DEC_MAX_NUM;
+        } else if ((c2 >= 'A') && (c2 <= 'F')) {
+            c2 -= 'A' - DEC_MAX_NUM;
+        } else {
+            LOG_ERR("HexToString Error! %c2", c2);
+            return SOFTBUS_ERR;
+        }
+
+        *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
+        i++;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, int32_t inLen)
+{
+    if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < (uint32_t)HEXIFY_LEN(inLen))) {
+        return SOFTBUS_ERR;
+    }
+
+    while (inLen > 0) {
+        unsigned char h = *inBuf / HEX_MAX_NUM;
+        unsigned char l = *inBuf % HEX_MAX_NUM;
+
+        if (h < DEC_MAX_NUM) {
+            *outBuf++ = '0' + h;
+        } else {
+            *outBuf++ = 'a' + h - DEC_MAX_NUM;
+        }
+
+        if (l < DEC_MAX_NUM) {
+            *outBuf++ = '0' + l;
+        } else {
+            *outBuf++ = 'a' + l - DEC_MAX_NUM;
+        }
+
+        ++inBuf;
+        inLen--;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GenerateRandomStr(char *str, uint32_t len)
+{
+    if ((str == NULL) ||  (len < HEXIFY_UNIT_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint32_t hexLen = len / HEXIFY_UNIT_LEN;
+    unsigned char *hexAuthId = (unsigned char *)SoftBusMalloc(hexLen);
+    if (hexAuthId == NULL) {
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(hexAuthId, hexLen, 0, hexLen);
+
+    if (GenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
+        SoftBusFree(hexAuthId);
+        return SOFTBUS_ERR;
+    }
+
+    if (ConvertBytesToHexString(str, len, hexAuthId, hexLen) != SOFTBUS_OK) {
+        SoftBusFree(hexAuthId);
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusFree(hexAuthId);
+    return SOFTBUS_OK;
+}
+
+bool IsValidString(const char *input, uint32_t maxLen)
+{
+    if (input == NULL) {
+        return false;
+    }
+
+    uint32_t len = strlen(input);
+    if ((len == 0) || (len >= maxLen)) {
+        return false;
+    }
+
+    return true;
+}
