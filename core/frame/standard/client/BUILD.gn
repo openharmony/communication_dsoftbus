@@ -1,0 +1,230 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+config("softbus_proxy_config") {
+  include_dirs = [
+    "$dsoftbus_root_path/core/frame/standard/client/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+  ]
+}
+
+commonInclude = [
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/common/frame/include",
+  "$dsoftbus_root_path/core/common/message_handler/include",
+  "$dsoftbus_root_path/core/common/inner_communication",
+  "$dsoftbus_root_path/core/common/security/include",
+  "$dsoftbus_root_path/core/common/softbus_property/include",
+  "$dsoftbus_root_path/core/common/security/sequence_verification/include",
+
+  "$dsoftbus_root_path/sdk/transmission/session/include/",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/include",
+
+  "$dsoftbus_root_path/sdk/transmission/session/cpp/src",
+
+  "//third_party/cJSON",
+  "//third_party/mbedtls/include",
+  "//third_party/mbedtls/include/mbedtls/",
+  "//third_party/bounds_checking_function/include",
+]
+
+commonSrc = [
+  "$dsoftbus_root_path/core/common/json_utils/softbus_json_utils.c",
+  "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
+  "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
+  "$dsoftbus_root_path/core/common/security/mbedtls/softbus_crypto.c",
+  "$dsoftbus_root_path/core/common/softbus_property/src/softbus_property.c",
+  "$dsoftbus_root_path/core/common/security/sequence_verification/src/softbus_sequence_verification.c",
+]
+
+sdkFrameInclude = [
+  "$dsoftbus_root_path/sdk/frame/include",
+  "$dsoftbus_root_path/sdk/discovery/include",
+
+  "$dsoftbus_root_path/core/common/inner_communication",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/adapter/kernel/include",
+  "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+
+  "$dsoftbus_root_path/interfaces/kits",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/core/transmission/pending_packet/include",
+]
+
+sdkFrameSrc = [
+  "$dsoftbus_root_path/sdk/frame/softbus_client_event_manager.c",
+  "$dsoftbus_root_path/sdk/frame/softbus_client_frame_manager.c",
+]
+
+sdkBusCenterInclude = [ "$dsoftbus_root_path/sdk/bus_center/include" ]
+
+sdkBusCenterSrc =
+    [ "$dsoftbus_root_path/sdk/bus_center/src/client_bus_center.c" ]
+
+sdkDiscoveryInclude = [ "$dsoftbus_root_path/sdk/discovery/include" ]
+
+sdkDiscoverySrc =
+    [ "$dsoftbus_root_path/sdk/discovery/src/client_disc_manager.c" ]
+
+sdkBusTransmissionInclude = [
+  "$dsoftbus_root_path/sdk/transmission/session/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_root_path/core/transmission/common/include",
+
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_root_path/core/connection/interface",
+  "$dsoftbus_root_path/core/transmission/pending_packet/include",
+  "$dsoftbus_root_path/core/connection/common/include",
+]
+
+sdkBusTransmissionSrc = [
+  "$dsoftbus_root_path/sdk/transmission/session/src/client_trans_message_service.c",
+  "$dsoftbus_root_path/sdk/transmission/session/src/client_trans_session_callback.c",
+  "$dsoftbus_root_path/sdk/transmission/session/src/client_trans_session_manager.c",
+  "$dsoftbus_root_path/sdk/transmission/session/src/client_trans_session_service.c",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/src/client_trans_channel_callback.c",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/src/client_trans_channel_manager.c",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src/client_trans_proxy_manager.c",
+
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src/client_trans_tcp_direct_listener.c",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src/client_trans_tcp_direct_manager.c",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src/client_trans_tcp_direct_message.c",
+
+  "$dsoftbus_root_path/core/connection/common/src/softbus_base_listener.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_thread_pool.c",
+  "$dsoftbus_root_path/core/transmission/pending_packet/src/trans_pending_pkt.c",
+
+  "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_callback_mock.cpp",
+  "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_impl.cpp",
+  "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_mock.cpp",
+  "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_service_impl.cpp"
+]
+
+clientStubSrc = [
+  "$dsoftbus_root_path/core/frame/standard/client/src/softbus_client_stub.cpp",
+]
+
+clientProxyInclude = [
+  "//utils/native/base/include",
+  "$dsoftbus_root_path/core/frame/standard/client/include",
+  "$dsoftbus_root_path/core/common/inner_communication",
+  "$dsoftbus_root_path/core/common/include",
+]
+
+clientProxySrc = [
+  "$dsoftbus_root_path/core/frame/standard/client/src/if_softbus_client.cpp",
+  "$dsoftbus_root_path/core/frame/standard/client/src/softbus_client_proxy.cpp",
+]
+
+serverProxyInclude = [
+  "$dsoftbus_root_path/core/frame/standard/server/include",
+  "$dsoftbus_root_path/core/frame/standard/client/include",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/common/inner_communication",
+  "$dsoftbus_root_path/sdk/frame/include",
+  "//utils/system/safwk/native/include",
+]
+
+serverProxySrc = [
+  "$dsoftbus_root_path/core/frame/standard/server/src/if_softbus_server.cpp",
+  "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server_proxy.cpp",
+  "$dsoftbus_root_path/core/frame/standard/server/src/softbus_interface_server.cpp",
+  "$dsoftbus_root_path/core/frame/standard/server/src/softbus_client_death_recipient.cpp",
+]
+
+coreAdapterInclude = [
+  "$dsoftbus_root_path/core/adapter/kernel/include",
+  "$dsoftbus_root_path/core/adapter/bus_center/include",
+]
+
+coreAdapterSrc = [
+  "$dsoftbus_root_path/core/adapter/kernel/liteos_a/softbus_mem_interface.c",
+  "$dsoftbus_root_path/core/adapter/kernel/liteos_a/softbus_os_interface.c",
+  "$dsoftbus_root_path/core/adapter/bus_center/platform/bus_center_adapter_weak.c",
+]
+
+sdkInclude = [
+  "$dsoftbus_root_path/sdk/frame/include",
+  "$dsoftbus_root_path/sdk/transmission/session/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/interfaces/kits",
+  "//third_party/bounds_checking_function/include",
+  "$dsoftbus_root_path/core/adapter/kernel/include",
+]
+
+ohos_shared_library("softbus_client") {
+  sources = sdkFrameSrc
+  sources += sdkBusCenterSrc
+  sources += sdkBusTransmissionSrc
+  sources += clientStubSrc
+  sources += commonSrc
+  sources += clientProxySrc
+  sources += serverProxySrc
+  sources += coreAdapterSrc
+  sources += sdkDiscoverySrc
+
+  include_dirs = sdkFrameInclude
+  include_dirs += sdkBusCenterInclude
+  include_dirs += sdkBusTransmissionInclude
+  include_dirs += commonInclude
+  include_dirs += clientProxyInclude
+  include_dirs += serverProxyInclude
+  include_dirs += coreAdapterInclude
+  include_dirs += sdkDiscoveryInclude
+  include_dirs += sdkInclude
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-fPIC",
+    "-fno-builtin",
+    "-std=c99",
+  ]
+
+  public_configs = [ ":softbus_proxy_config" ]
+
+  if (is_standard_system) {
+    defines = [ "STANDARD_SYSTEM_ENABLE" ]
+    external_deps = [
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_single",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/cJSON:cjson_static",
+      "//utils/native/base:utils",
+    ]
+    part_name = "dsoftbus_standard"
+  }
+  subsystem_name = "communication"
+}

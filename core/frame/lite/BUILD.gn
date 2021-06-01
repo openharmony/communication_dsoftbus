@@ -1,0 +1,78 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+if (ohos_kernel_type == "liteos_m") {
+  static_library("softbus_server_frame") {
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/transmission/session/include",
+      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/sdk/bus_center/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    ]
+
+    sources = [
+      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_client_interface.c",
+      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_server_interface_impl.c",
+      "src/softbus_server_frame.c",
+      "src/softbus_server_frame_weak.c",
+    ]
+  }
+} else {
+  shared_library("softbus_server_frame") {
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/common/inner_communication/ipc/include",
+      "$dsoftbus_root_path/core/transmission/session/include",
+      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/sdk/bus_center/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "//utils/native/lite/include",
+      "//third_party/bounds_checking_function/include",
+      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    ]
+
+    sources = [
+      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_client_interface.c",
+      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_server_interface_impl.c",
+      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_server_weak.c",
+      "src/softbus_client_info_manager.c",
+      "src/softbus_server_frame.c",
+      "src/softbus_server_frame_weak.c",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "//foundation/communication/ipc_lite:liteipc",
+      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+    ]
+  }
+}

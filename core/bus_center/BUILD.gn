@@ -1,0 +1,132 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+if (ohos_kernel_type == "liteos_m") {
+  static_library("softbus_bus_center") {
+    sources = [
+      "ipc/mini_system/lnn_bus_center_ipc.c",
+      "lnn/lane_hub/lane_manager/src/lnn_lane_info.c",
+      "lnn/lane_hub/lane_manager/src/lnn_lane_manager.c",
+      "lnn/lane_hub/lane_manager/src/lnn_smart_communication.c",
+      "lnn/net_builder/src/lnn_net_builder.c",
+      "lnn/net_builder/src/lnn_network_id.c",
+      "lnn/net_builder/src/lnn_state_machine.c",
+      "lnn/net_ledger/common/src/lnn_device_info.c",
+      "lnn/net_ledger/common/src/lnn_map.c",
+      "lnn/net_ledger/common/src/lnn_net_capability.c",
+      "lnn/net_ledger/common/src/lnn_node_info.c",
+      "lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c",
+      "lnn/net_ledger/local_ledger/src/lnn_local_net_ledger.c",
+      "lnn/net_ledger/sync_ledger/src/lnn_exchange_ledger_info.c",
+      "lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
+      "service/src/bus_center_event.c",
+      "service/src/bus_center_manager.c",
+      "utils/src/lnn_connection_addr_utils.c",
+    ]
+
+    include_dirs = [
+      "interface",
+      "ipc/include",
+      "lnn/lane_hub/lane_manager/include",
+      "lnn/net_builder/include",
+      "lnn/net_ledger/common/include",
+      "lnn/net_ledger/distributed_ledger/include",
+      "lnn/net_ledger/local_ledger/include",
+      "lnn/net_ledger/sync_ledger/include",
+      "service/include",
+      "utils/include",
+      "$dsoftbus_root_path/core/adapter/bus_center/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/transmission/interface",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "//third_party/cJSON",
+      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    ]
+
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+      "-fno-builtin",
+      "-std=c99",
+    ]
+  }
+} else {
+  shared_library("softbus_bus_center") {
+    sources = [
+      "ipc/mini_system/lnn_bus_center_ipc.c",
+      "lnn/lane_hub/lane_manager/src/lnn_lane_info.c",
+      "lnn/lane_hub/lane_manager/src/lnn_lane_manager.c",
+      "lnn/lane_hub/lane_manager/src/lnn_smart_communication.c",
+      "lnn/net_builder/src/lnn_net_builder.c",
+      "lnn/net_builder/src/lnn_network_id.c",
+      "lnn/net_builder/src/lnn_state_machine.c",
+      "lnn/net_ledger/common/src/lnn_device_info.c",
+      "lnn/net_ledger/common/src/lnn_map.c",
+      "lnn/net_ledger/common/src/lnn_net_capability.c",
+      "lnn/net_ledger/common/src/lnn_node_info.c",
+      "lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c",
+      "lnn/net_ledger/local_ledger/src/lnn_local_net_ledger.c",
+      "lnn/net_ledger/sync_ledger/src/lnn_exchange_ledger_info.c",
+      "lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
+      "service/src/bus_center_event.c",
+      "service/src/bus_center_manager.c",
+      "utils/src/lnn_connection_addr_utils.c",
+    ]
+
+    include_dirs = [
+      "interface",
+      "ipc/include",
+      "lnn/lane_hub/lane_manager/include",
+      "lnn/net_builder/include",
+      "lnn/net_ledger/common/include",
+      "lnn/net_ledger/distributed_ledger/include",
+      "lnn/net_ledger/local_ledger/include",
+      "lnn/net_ledger/sync_ledger/include",
+      "service/include",
+      "utils/include",
+      "$dsoftbus_root_path/core/adapter/bus_center/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/transmission/interface",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "//third_party/bounds_checking_function/include",
+      "//third_party/cJSON",
+    ]
+
+    cflags = [
+      "-Wall",
+      "-fPIC",
+    ]
+  }
+}

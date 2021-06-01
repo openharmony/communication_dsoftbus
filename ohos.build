@@ -1,0 +1,39 @@
+{
+    "parts": {
+        "dsoftbus_standard": {
+            "module_list": [
+                "//foundation/communication/dsoftbus/core/frame/standard/server:softbus_server",
+                "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
+                "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
+                "//foundation/communication/dsoftbus/core/common/security/permission:softbus_permission"
+            ],
+            "test_list": [
+                "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
+                "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
+                "//foundation/communication/dsoftbus/tests/core/common/security:softbus_permission_test",
+                "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
+                "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
+                "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
+                "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
+                "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
+                "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel/tcp_direct:unittest"
+            ],
+            "inner_kits": [
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
+                    "header": {
+                        "header_files": [
+                        "bus_center/softbus_bus_center.h",
+                        "common/softbus_common.h",
+                        "discovery/discovery_service.h",
+                        "transport/session.h"
+                        ],
+                        "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
+                    }
+                }
+            ]
+        }
+    },
+    "subsystem": "communication"
+}

@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SOFTBUS_DEF_H
+#define SOFTBUS_DEF_H
+
+#include  <pthread.h>
+#include "stdint.h"
+#include "common_list.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+#define INVALID_SESSION_ID (-1)
+#define INVALID_CHANNEL_ID (-1)
+
+#define PKG_NAME_SIZE_MAX 65
+#define SESSION_NAME_SIZE_MAX 65
+#define DEVICE_ID_SIZE_MAX 65
+#define GROUP_ID_SIZE_MAX 65
+#define AUTH_STATE_SIZE_MAX 65
+
+#define MAX_DEV_INFO_VALUE_LEN 65
+#define MAX_CAPABILITY_LEN 33
+#define MAX_CAPABILITY_DATA_LEN 512
+#define MAX_PACKAGE_NAME_LEN 33
+#define MAX_DEV_INFO_COUNT 32
+#define MAX_PUBLISH_INFO_COUNT 32
+#define IP_LEN 46
+#define MAX_PEERS_NUM 32
+#define MAX_OPERATION_CODE_LEN 32
+#define SESSION_KEY_LENGTH 32
+#define DEVICE_KEY_LEN 16
+
+#define MAX_SESSION_ID 16
+#define MAX_SESSION_SERVER_NUMBER 8
+
+#ifdef SOFTBUS_WATCH
+#define TRANS_BYTES_LENGTH_MAX (3 * 1024)
+#else
+#define TRANS_BYTES_LENGTH_MAX (4 * 1024)
+#endif
+#define TRANS_MESSAGE_LENGTH_MAX 1024
+
+typedef struct {
+    pthread_mutex_t lock;
+    unsigned int cnt;
+    ListNode list;
+} SoftBusList;
+
+typedef enum {
+    SEC_TYPE_UNKNOWN = 0,
+    SEC_TYPE_PLAINTEXT = 1,
+    SEC_TYPE_CIPHERTEXT = 2,
+} SoftBusSecType;
+
+/* Timer type */
+enum {
+    TIMER_TYPE_ONCE,
+    TIMER_TYPE_PERIOD,
+    TIMER_TYPE_MAX,
+};
+
+struct CommonScvId {
+    unsigned int handle;
+    unsigned int token;
+    unsigned int cookie;
+    void *ipcCtx;
+    unsigned int cbId;
+};
+
+typedef enum {
+    TRANS_SESSION_BYTES = 0,
+    TRANS_SESSION_MESSAGE,
+} SessionPktType;
+
+typedef enum {
+    CHANNEL_TYPE_TCP_DIRECT = 0,
+    CHANNEL_TYPE_PROXY,
+    CHANNEL_TYPE_FILE,
+    CHANNEL_TYPE_BUTT,
+} ChannelType;
+
+typedef struct {
+    int32_t channelId;
+    int32_t channelType;
+    int32_t fd;
+    bool isServer;
+    bool isEnabled;
+    int32_t peerUid;
+    int32_t peerPid;
+    char *groupId;
+    uint32_t keyLen;
+    char *sessionKey;
+    char *peerSessionName;
+    char *peerDeviceId;
+} ChannelInfo;
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* SOFTBUS_DEF_H */
+
