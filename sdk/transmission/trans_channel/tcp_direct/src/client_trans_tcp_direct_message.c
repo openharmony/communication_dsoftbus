@@ -247,18 +247,19 @@ static int32_t TransTdcProcessPackets(int32_t fd, char *data, uint32_t size, uin
     }
 
     uint32_t dataLen = pktHead->dataLen;
-    if (dataLen > size) {
-        LOG_ERR("buffer is not enough");
+    if (dataLen + offset > size) {
+        LOG_ERR("buffer is not enough. bufsize[%d] datalen[%d]", size, dataLen + offset);
         return SOFTBUS_INVALID_FD;
     }
-    int rc = RecvTcpData(fd, data + offset, dataLen, 0);
-    if (rc < 0) {
-        LOG_ERR("connection break");
-        return SOFTBUS_INVALID_FD;
-    }
-    if ((uint32_t)rc != dataLen) {
-        LOG_ERR("dataPacketRecv failed");
-        return SOFTBUS_ERR;
+
+    uint32_t recved = 0;
+    while (recved < dataLen) {
+        int rc = RecvTcpData(fd, data + offset + recved, dataLen - recved, 0);
+        if (rc < 0) {
+            LOG_ERR("connection break");
+            return SOFTBUS_INVALID_FD;
+        }
+        recved += rc;
     }
 
     return SOFTBUS_OK;
@@ -268,6 +269,7 @@ int32_t TransTdcPreProcessRecvData(int32_t fd, char *data, uint32_t size)
 {
     ssize_t rc = RecvTcpData(fd, data, DC_DATA_HEAD_SIZE, 0);
     if (rc < 0) {
+        LOG_ERR("recv head fail. rc[%d] errno[%d]", rc, errno);
         return SOFTBUS_INVALID_FD;
     }
     if (rc == DC_DATA_HEAD_SIZE) {
