@@ -16,9 +16,11 @@
 #include "softbus_server_frame.h"
 
 #include "message_handler.h"
+#include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_session_manager.h"
 
 int __attribute__ ((weak)) BusCenterServerInit(void)
 {
@@ -26,15 +28,6 @@ int __attribute__ ((weak)) BusCenterServerInit(void)
 }
 
 void __attribute__ ((weak)) BusCenterServerDeinit(void)
-{
-}
-
-int __attribute__ ((weak)) TransServerInit(void)
-{
-    return SOFTBUS_OK;
-}
-
-void __attribute__ ((weak)) TransServerDeinit(void)
 {
 }
 
@@ -53,15 +46,6 @@ int __attribute__ ((weak)) ConnServerInit(void)
 }
 
 void __attribute__ ((weak)) ConnServerDeinit(void)
-{
-}
-
-int __attribute__ ((weak)) DiscServerInit(void)
-{
-    return SOFTBUS_OK;
-}
-
-void __attribute__ ((weak)) DiscServerDeinit(void)
 {
 }
 
@@ -117,4 +101,10 @@ ERR_EXIT:
     ServerModuleDeinit();
     LOG_ERR("softbus server framework init failed.");
     return;
+}
+
+void ClientDeathCallback(const char *pkgName)
+{
+    DiscServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName);
 }

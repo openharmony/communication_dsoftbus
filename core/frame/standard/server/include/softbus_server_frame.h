@@ -20,14 +20,8 @@
 extern "C" {
 #endif
 
-int DiscServerInit(void);
-void DiscServerDeinit(void);
-
 int ConnServerInit(void);
 void ConnServerDeinit(void);
-
-int TransServerInit(void);
-void TransServerDeinit(void);
 
 int BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
@@ -36,6 +30,8 @@ int AuthInit(void);
 void AuthDeinit(void);
 
 void InitSoftBusServer();
+
+void ClientDeathCallback(const char *pkgName);
 
 #ifdef __cplusplus
 }
