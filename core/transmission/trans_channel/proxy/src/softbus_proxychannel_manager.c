@@ -1036,7 +1036,7 @@ void TransProxyDeathCallback(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item != NULL && strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
+        if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
             TransProxyCloseProxyChannel(item->channelId);
             continue;
         }

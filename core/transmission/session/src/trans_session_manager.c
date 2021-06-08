@@ -85,7 +85,7 @@ void TransServerDeathCallback(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        if (pos != NULL && strcmp(pos->pkgName, pkgName) == 0) {
+        if (strcmp(pos->pkgName, pkgName) == 0) {
             ListDelete(&pos->node);
             g_sessionServerList->cnt--;
             SoftBusFree(pos);
