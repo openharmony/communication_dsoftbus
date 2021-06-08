@@ -17,12 +17,14 @@
 
 #include "softbus_log.h"
 #include "softbus_server.h"
+#include "softbus_server_frame.h"
 
 namespace OHOS {
 void SoftBusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    LOG_INFO("service died, remove the proxy object");
-    SoftBusServer::GetInstance()->SoftbusRemoveService(remote.promote());
-    LOG_INFO("recv death notice success");
+    std::string pkgName;
+    SoftBusServer::GetInstance()->SoftbusRemoveService(remote.promote(), pkgName);
+    LOG_INFO("client service %{public}s died, remove it from softbus server", pkgName.c_str());
+    ClientDeathCallback(pkgName.c_str());
 }
 }  // namespace OHOS

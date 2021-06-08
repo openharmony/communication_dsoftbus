@@ -35,6 +35,11 @@ void DiscServerDeinit(void)
     DiscMgrDeinit();
 }
 
+void DiscServerDeathCallback(const char *pkgName)
+{
+    DiscMgrDeathCallback(pkgName);
+}
+
 int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
 {
     if (CheckDiscPermission(packageName) != true) {

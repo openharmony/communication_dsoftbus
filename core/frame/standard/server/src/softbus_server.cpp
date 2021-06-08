@@ -204,7 +204,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServer::SoftbusRemoveService(const sptr<IRemoteObject> &object)
+int32_t SoftBusServer::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName)
 {
     if (object == nullptr) {
         LOG_ERR("RemoveService object is nullptr\n");
@@ -213,6 +213,7 @@ int32_t SoftBusServer::SoftbusRemoveService(const sptr<IRemoteObject> &object)
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
         if (iter->second == object) {
+            pkgName = iter->first;
             (void)clientObjectMap_.erase(iter);
             if (abilityDeath_ != nullptr) {
                 object->RemoveDeathRecipient(abilityDeath_);

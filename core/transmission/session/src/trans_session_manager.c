@@ -36,7 +36,7 @@ typedef struct {
 static SoftBusList *g_sessionServerList = NULL;
 static bool g_transSessionInitFlag = false;
 
-int TransServerInit(void)
+int32_t TransServerInit(void)
 {
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;
@@ -71,6 +71,31 @@ void TransServerDeinit(void)
     g_transSessionInitFlag = false;
     TransChannelDeinit();
     TransPermissionDeinit();
+}
+
+void TransServerDeathCallback(const char *pkgName)
+{
+    if (pkgName == NULL || g_sessionServerList == NULL) {
+        return;
+    }
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+        LOG_ERR("lock mutex fail!");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+        if (pos != NULL && strcmp(pos->pkgName, pkgName) == 0) {
+            ListDelete(&pos->node);
+            g_sessionServerList->cnt--;
+            SoftBusFree(pos);
+            pos = NULL;
+            break;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+
+    TransChannelDeathCallback(pkgName);
 }
 
 static bool TransSessionServerIsExist(const char *sessionName)

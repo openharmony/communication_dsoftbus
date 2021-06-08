@@ -54,7 +54,7 @@ public:
 
     static sptr<SoftBusServer> GetInstance();
     sptr<ISoftBusClient> GetSoftbusClientProxy(const char *pkgName);
-    int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object);
+    int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName);
     void GetSoftbusClientProxyMap(std::map<std::string, sptr<ISoftBusClient>> &softbusClientMap);
 
 protected:

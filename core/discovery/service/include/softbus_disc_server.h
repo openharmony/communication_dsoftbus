@@ -22,6 +22,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+int32_t DiscServerInit(void);
+void DiscServerDeinit(void);
+void DiscServerDeathCallback(const char *pkgName);
+
 int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info);
 int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId);
 int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info);
