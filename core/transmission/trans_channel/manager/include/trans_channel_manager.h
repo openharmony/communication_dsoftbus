@@ -33,6 +33,7 @@ int32_t TransCloseChannel(int32_t channelId);
 
 int32_t TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType);
 
+void TransChannelDeathCallback(const char *pkgName);
 #ifdef __cplusplus
 }
 #endif

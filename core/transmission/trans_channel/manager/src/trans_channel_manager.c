@@ -241,3 +241,8 @@ int32_t TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t 
     return TransProxyPostSessionData(channelId, (uint8_t*)data, len, msgType);
 }
 
+void TransChannelDeathCallback(const char *pkgName)
+{
+    TransProxyDeathCallback(pkgName);
+    TransTdcDeathCallback(pkgName);
+}

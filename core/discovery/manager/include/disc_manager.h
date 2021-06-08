@@ -70,7 +70,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info, con
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
 int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscoveryCallback *cb);
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId);
-
+void DiscMgrDeathCallback(const char *pkgName);
 #ifdef __cplusplus
 #if __cplusplus
 }

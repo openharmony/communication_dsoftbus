@@ -1021,3 +1021,25 @@ void TransProxyManagerDeinit(void)
 {
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
 }
+
+void TransProxyDeathCallback(const char *pkgName)
+{
+    if (g_proxyChannelList == NULL) {
+        LOG_ERR("get proxy info error, info list is null.");
+        return;
+    }
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+
+    if (pthread_mutex_lock(&g_proxyChannelList->lock) != 0) {
+        LOG_ERR("lock mutex fail!");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item != NULL && strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
+            TransProxyCloseProxyChannel(item->channelId);
+            continue;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_proxyChannelList->lock);
+}

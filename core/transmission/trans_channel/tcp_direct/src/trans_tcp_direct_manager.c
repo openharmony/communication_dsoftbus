@@ -302,3 +302,24 @@ void TransTcpDirectDeinit(void)
 {
     (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
 }
+
+void TransTdcDeathCallback(const char *pkgName)
+{
+    if (g_sessionConnList == NULL) {
+        LOG_ERR("get tdc info error, info list is null.");
+        return;
+    }
+
+    SessionConn *connInfo = NULL;
+    if (pthread_mutex_lock(&(g_sessionConnList->lock)) != 0) {
+        LOG_ERR("lock mutex fail!");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo != NULL && strcmp(connInfo->appInfo.myData.pkgName, pkgName) == 0) {
+            TransTdcCloseSessionConn(connInfo->channelId);
+            continue;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_sessionConnList->lock);
+}
