@@ -31,6 +31,12 @@ int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName,
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len);
 
+int32_t TransServerInit(void);
+
+void TransServerDeinit(void);
+
+void TransServerDeathCallback(const char *pkgName);
+
 #ifdef __cplusplus
 }
 #endif

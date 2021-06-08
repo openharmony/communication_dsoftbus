@@ -1208,7 +1208,7 @@ int32_t DiscMgrInit(void)
     return SOFTBUS_OK;
 }
 
-static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type)
+static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type, const char *pkgName)
 {
     DiscItem *itemNode = NULL;
     DiscItem *itemNodeNext = NULL;
@@ -1221,6 +1221,9 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(itemNode, itemNodeNext, &(itemList->list), DiscItem, node) {
+        if ((pkgName != NULL) && (strcmp(itemNode->packageName, pkgName) != 0)) {
+            continue;
+        }
         LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(itemNode->InfoList), DiscInfo, node) {
             ListDelete(&(infoNode->node));
             DeleteInfoFromCapability(infoNode, type);
@@ -1231,7 +1234,6 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type)
         SoftBusFree(itemNode);
     }
     (void)pthread_mutex_unlock(&(itemList->lock));
-    DestroySoftBusList(itemList);
 }
 
 void DiscMgrDeinit(void)
@@ -1239,8 +1241,10 @@ void DiscMgrDeinit(void)
     if (g_isInited == false) {
         return;
     }
-    DiscMgrInfoListDeinit(g_publishInfoList, PUBLISH_SERVICE);
-    DiscMgrInfoListDeinit(g_discoveryInfoList, SUBSCRIBE_SERVICE);
+    DiscMgrInfoListDeinit(g_publishInfoList, PUBLISH_SERVICE, NULL);
+    DiscMgrInfoListDeinit(g_discoveryInfoList, SUBSCRIBE_SERVICE, NULL);
+    DestroySoftBusList(g_publishInfoList);
+    DestroySoftBusList(g_discoveryInfoList);
     g_publishInfoList = NULL;
     g_discoveryInfoList = NULL;
     g_discCoapInterface = NULL;
@@ -1248,4 +1252,13 @@ void DiscMgrDeinit(void)
     DiscCoapDeinit();
     DiscBleDeinit();
     g_isInited = false;
+}
+
+void DiscMgrDeathCallback(const char *pkgName)
+{
+    if (pkgName == NULL || g_isInited == false) {
+        return;
+    }
+    DiscMgrInfoListDeinit(g_publishInfoList, PUBLISH_SERVICE, pkgName);
+    DiscMgrInfoListDeinit(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName);
 }

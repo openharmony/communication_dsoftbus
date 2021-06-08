@@ -43,5 +43,5 @@ int32_t TransProxySetChiperSide(int32_t channelId, int32_t side);
 int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
-
+void TransProxyDeathCallback(const char *pkgName);
 #endif

@@ -92,7 +92,7 @@ SoftBusList *GetTdcInfoList(void);
 void SetTdcInfoList(SoftBusList *sessionConnList);
 int32_t TransTcpDirectInit(void);
 void TransTcpDirectDeinit(void);
-
+void TransTdcDeathCallback(const char *pkgName);
 #ifdef __cplusplus
 }
 #endif
