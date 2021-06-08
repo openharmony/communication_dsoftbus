@@ -316,7 +316,7 @@ void TransTdcDeathCallback(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo != NULL && strcmp(connInfo->appInfo.myData.pkgName, pkgName) == 0) {
+        if (strcmp(connInfo->appInfo.myData.pkgName, pkgName) == 0) {
             TransTdcCloseSessionConn(connInfo->channelId);
             continue;
         }
