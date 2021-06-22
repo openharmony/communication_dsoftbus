@@ -18,8 +18,8 @@
     "SEC_LEVEL": "public",
     "APP_INFO": [
       {
-        "TYPE": "system_app",
-        "PKG_NAME": "com.huawei.hwddmp",
+        "TYPE": "normal_app",
+        "PKG_NAME": "ohos.distributeddata",
         "ACTIONS": "create,open"
       }
     ]
