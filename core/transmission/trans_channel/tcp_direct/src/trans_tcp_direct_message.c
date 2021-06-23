@@ -247,7 +247,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     GetTdcInfoList()->cnt--;
     pthread_mutex_unlock(&(GetTdcInfoList()->lock));
 
-    if (tdcInfo->serverSide == true || tdcInfo->openChannelFinished == true) {
+    if (ret == SOFTBUS_OK && (tdcInfo->serverSide == true || tdcInfo->openChannelFinished == true)) {
         SoftBusFree(tdcInfo);
     }
     return ret;
