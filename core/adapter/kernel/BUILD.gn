@@ -19,7 +19,7 @@ if (ohos_kernel_type == "liteos_m") {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
-      "//kernel/liteos_m/components/bounds_checking_function/include",
+      "//third_party/bounds_checking_function/include",
       "//kernel/liteos_m/kal/cmsis",
       "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     ]
