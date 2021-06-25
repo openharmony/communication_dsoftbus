@@ -488,7 +488,7 @@ void ConnServerDeinit(void)
     ConnListenerNode *item = NULL;
     if (g_listenerList != NULL) {
         while (!IsListEmpty(&g_listenerList->list)) {
-            item = LIST_ENTRY(&(g_listenerList->list.next), ConnListenerNode, node);
+            item = LIST_ENTRY((&g_listenerList->list)->next, ConnListenerNode, node);
             ListDelete(&item->node);
             SoftBusFree(item);
         }
