@@ -215,16 +215,16 @@ void TransTdcCloseSessionConn(int32_t channelId)
         LOG_ERR("get tdc intfo err");
         return;
     }
-    pthread_mutex_lock(&(g_sessionConnList->lock));
-    ListDelete(&tdcInfo->node);
-    g_sessionConnList->cnt--;
-    pthread_mutex_unlock(&(g_sessionConnList->lock));
     int fd = tdcInfo->appInfo.fd;
     TransTdcStopSessionConn(tdcInfo->channelId);
     if (fd >= 0) {
         LOG_INFO("fd[%d] is shutdown", fd);
         TcpShutDown(fd);
     }
+    pthread_mutex_lock(&(g_sessionConnList->lock));
+    ListDelete(&tdcInfo->node);
+    g_sessionConnList->cnt--;
+    pthread_mutex_unlock(&(g_sessionConnList->lock));
     NotifyChannelClosed(tdcInfo->channelId);
 }
 
