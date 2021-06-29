@@ -15,11 +15,11 @@
 
 #include "trans_pending_pkt.h"
 
+#include <sys/time.h>
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_utils.h"
-#include "time.h"
 #include "unistd.h"
 
 #define TIME_OUT 2
