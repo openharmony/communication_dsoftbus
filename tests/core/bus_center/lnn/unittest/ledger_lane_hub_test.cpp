@@ -250,7 +250,7 @@ static void GetWiFiLocalInfo(void)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
@@ -273,7 +273,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_BYTES_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_BYTES_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
@@ -296,7 +296,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_BYTES_LANE_Test_001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_FILE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_FILE_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
@@ -319,7 +319,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_FILE_LANE_Test_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_STREAM_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_STREAM_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
@@ -342,7 +342,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_STREAM_LANE_Test_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_MESSAGE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_MESSAGE_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan5GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN5G_NUM]);
@@ -365,7 +365,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_MESSAGE_LANE_Test_001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_BYTES_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_BYTES_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan5GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN5G_NUM]);
@@ -388,7 +388,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_BYTES_LANE_Test_001, TestSize.Level0
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_FILE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_FILE_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN5G_NUM]);
@@ -411,7 +411,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_FILE_LANE_Test_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_STREAM_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_STREAM_LANE_Test_001, TestSize.Level1)
 {
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[WLAN5G_NUM]);
@@ -434,7 +434,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_STREAM_LANE_Test_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_MESSAGE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_MESSAGE_LANE_Test_001, TestSize.Level1)
 {
     ConstructBRNode();
     LnnAddOnlineNode(&g_nodeInfo[BR_NUM]);
@@ -456,7 +456,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_MESSAGE_LANE_Test_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_BYTES_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_BYTES_LANE_Test_001, TestSize.Level1)
 {
     ConstructBRNode();
     LnnAddOnlineNode(&g_nodeInfo[BR_NUM]);
@@ -478,7 +478,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_BYTES_LANE_Test_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_FILE_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_FILE_LANE_Test_001, TestSize.Level1)
 {
     ConstructBRNode();
     LnnAddOnlineNode(&g_nodeInfo[BR_NUM]);
@@ -500,7 +500,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_FILE_LANE_Test_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_STREAM_LANE_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_STREAM_LANE_Test_001, TestSize.Level1)
 {
     ConstructBRNode();
     LnnAddOnlineNode(&g_nodeInfo[BR_NUM]);
@@ -518,7 +518,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_STREAM_LANE_Test_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000FK6IU
 */
-HWTEST_F(LedgerLaneHubTest, LANE_HUB_LnnRequestLanesObject_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LANE_HUB_LnnRequestLanesObject_Test_001, TestSize.Level1)
 {
     struct timeval start;
     struct timeval end;
@@ -549,7 +549,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_LnnRequestLanesObject_Test_001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require: AR000FK6J0
 */
-HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.Level1)
 {
     NodeInfo *infoNetwork = NULL;
     NodeInfo *infoUuid = NULL;
@@ -574,7 +574,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.L
 * @tc.type: FUNC
 * @tc.require: AR000FK6J0
 */
-HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.Level1)
 {
     char deviceName[DEVICE_NAME_BUF_LEN] = {0};
     char macAddr[MAC_LEN] = {0};
@@ -607,7 +607,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.L
 * @tc.type: FUNC
 * @tc.require: AR000FK6J0
 */
-HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSize.Level1)
 {
     char deviceName[DEVICE_NAME_BUF_LEN] = {0};
     ConstructWlan2P4GNode();
@@ -629,7 +629,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSiz
 * @tc.type: FUNC
 * @tc.require: AR000FK6J0
 */
-HWTEST_F(LedgerLaneHubTest, LEDGER_LocalLedgerGetInfo_Test_001, TestSize.Level0)
+HWTEST_F(LedgerLaneHubTest, LEDGER_LocalLedgerGetInfo_Test_001, TestSize.Level1)
 {
     char des[LOCAL_MAX_SIZE] = {0};
     int32_t ret;
