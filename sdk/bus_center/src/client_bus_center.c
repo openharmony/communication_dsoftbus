@@ -69,7 +69,8 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
-        return true;
+        return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0)
+            && (addr1->info.ip.port == addr2->info.ip.port);
     }
     return false;
 }

@@ -27,9 +27,11 @@ extern "C" {
 
 #define FSM_FLAG_RUNNING 0x1
 
-typedef void (*StateEnterFunc)(void);
-typedef void (*StateExitFunc)(void);
-typedef bool (*StateProcessFunc)(int32_t msgType, void *para);
+struct tagFsmStateMachine;
+
+typedef void (*StateEnterFunc)(struct tagFsmStateMachine *fsm);
+typedef void (*StateExitFunc)(struct tagFsmStateMachine *fsm);
+typedef bool (*StateProcessFunc)(struct tagFsmStateMachine *fsm, int32_t msgType, void *para);
 
 typedef struct {
     ListNode list;
@@ -37,8 +39,6 @@ typedef struct {
     StateProcessFunc process;
     StateExitFunc exit;
 } FsmState;
-
-struct tagFsmStateMachine;
 
 typedef void (*FsmDinitCallback)(struct tagFsmStateMachine *fsm);
 

@@ -49,8 +49,7 @@ typedef struct {
 int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType);
 int32_t LnnInitSyncLedgerItem(void);
 void LnnDeinitSyncLedgerItem(void);
-void LnnDeleteSyncItemInfo(SyncItemInfo *info);
-int32_t LnnSendMessageToPeer(int32_t channelId);
+
 #ifdef __cplusplus
 }
 #endif

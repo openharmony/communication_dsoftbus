@@ -27,7 +27,7 @@ extern "C" {
 
 #define MESSAGE_INDEX_LEN 4
 #define ENCRYPT_OVER_HEAD_LEN (OVERHEAD_LEN + MESSAGE_INDEX_LEN)
-#define MAX_KEY_LIST_SIZE 10
+#define MAX_KEY_LIST_SIZE 20
 #define LOW_32_BIT 0xFFFFFFFF
 
 typedef struct {

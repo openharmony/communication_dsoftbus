@@ -109,6 +109,7 @@ coreBuscenterInclude = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/include",
   "$dsoftbus_root_path/core/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/bus_center/monitor/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
 ]
@@ -117,7 +118,9 @@ coreBuscenterSrc = [
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_info.c",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_manager.c",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_smart_communication.c",
-  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/ip/ip_hook.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_coap_discovery_impl.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_discovery_manager.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_id.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_state_machine.c",
@@ -130,9 +133,13 @@ coreBuscenterSrc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/src/lnn_exchange_ledger_info.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
   "$dsoftbus_root_path/core/bus_center/ipc/standard_system/lnn_bus_center_ipc.cpp",
+   "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c",
+   "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_netlink_monitor.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
+  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ip_utils.c",
 ]
 
 coreAuthenticationInclude = [

@@ -13,35 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CONFIG_H
-#define SOFTBUS_CONFIG_H
+#ifndef LNN_IP_UTILS_H
+#define LNN_IP_UTILS_H
+
+#include <stdbool.h>
+
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif /* __cplusplus */
 
-static const char* SOFTBUS_CONFIG =
-"{\
-\"MAX_BYTES_LENGTH\" : 4194304,\
-\"MAX_MESSAGE_LENGTH\" : 4096,\
-\"CONN_BR_MAX_DATA_LENGTH\" : 4096,\
-\"CONN_RFCOM_SEND_MAX_LEN\" : 990,\
-\"CONN_BR_RECEIVE_MAX_LEN\" : 10,\
-\"CONN_TCP_MAX_LENGTH\" : 3072,\
-\"CONN_TCP_MAX_CONN_NUM\" : 30,\
-\"CONN_TCP_TIME_OUT\" : 100,\
-\"MAX_NODE_STATE_CB_CNT\" : 10,\
-\"MAX_LNN_CONNECTION_CNT\" : 10,\
-\"LNN_SUPPORT_CAPBILITY\" : 22,\
-\"AUTH_ABILITY_COLLECTION\" : 0\
-}";
+#define LNN_LOOPBACK_IP "127.0.0.1"
+#define LNN_LOOPBACK_IFNAME "lo"
+#define LNN_WLAN_IF_NAME_PREFIX "wlan"
+#define LNN_ETH_IF_NAME_PREFIX  "eth"
+int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, ConnectionAddrType type);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif
-#endif /* __cplusplus */
-
-#endif // SOFTBUS_CONFIG_H
+#endif /* LNN_IP_UTILS_H */

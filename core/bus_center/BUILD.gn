@@ -34,6 +34,7 @@ if (ohos_kernel_type == "liteos_m") {
       "lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
       "service/src/bus_center_event.c",
       "service/src/bus_center_manager.c",
+      "utils/src/lnn_async_callback_utils.c",
       "utils/src/lnn_connection_addr_utils.c",
     ]
 
@@ -91,8 +92,10 @@ if (ohos_kernel_type == "liteos_m") {
       "lnn/net_ledger/local_ledger/src/lnn_local_net_ledger.c",
       "lnn/net_ledger/sync_ledger/src/lnn_exchange_ledger_info.c",
       "lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
+      "monitor/src/lnn_event_monitor.c",
       "service/src/bus_center_event.c",
       "service/src/bus_center_manager.c",
+      "utils/src/lnn_async_callback_utils.c",
       "utils/src/lnn_connection_addr_utils.c",
     ]
 
@@ -105,6 +108,7 @@ if (ohos_kernel_type == "liteos_m") {
       "lnn/net_ledger/distributed_ledger/include",
       "lnn/net_ledger/local_ledger/include",
       "lnn/net_ledger/sync_ledger/include",
+      "monitor/include",
       "service/include",
       "utils/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",

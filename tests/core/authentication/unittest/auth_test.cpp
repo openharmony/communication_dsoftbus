@@ -65,17 +65,16 @@ void AuthTest::TearDown()
 {
 }
 
-void OnDeviceVerifyPass(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
+void OnKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
 {
     (void)option;
     (void)peerVersion;
-    LOG_INFO("OnDeviceVerifyPass! authId=%lld", authId);
+    LOG_INFO("%s: authId=%lld", __func__, authId);
 }
 
-void OnDeviceVerifyFail(int64_t authId, ConnectOption *option)
+void OnDeviceVerifyFail(int64_t authId)
 {
-    (void)option;
-    LOG_INFO("OnDeviceVerifyFail! authId=%lld", authId);
+    LOG_INFO("%s: authId=%lld", __func__, authId);
 }
 
 void OnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUdid, uint8_t *data, uint32_t len)
@@ -84,13 +83,23 @@ void OnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUdi
     (void)peerUdid;
     (void)data;
     (void)len;
-    LOG_INFO("OnRecvSyncDeviceInfo! authId=%lld", authId);
+    LOG_INFO("%s: authId=%lld", __func__, authId);
+}
+
+void OnDeviceVerifyPass(int64_t authId)
+{
+    LOG_INFO("%s: authId=%lld", __func__, authId);
 }
 
 void OnDeviceNotTrusted(const char *peerUdid)
 {
     (void)peerUdid;
-    LOG_INFO("OnDeviceNotTrusted!");
+    LOG_INFO("%s", __func__);
+}
+
+void OnDisconnect(int64_t authId)
+{
+    LOG_INFO("%s: authId=%lld", __func__, authId);
 }
 
 /*
@@ -120,10 +129,12 @@ HWTEST_F(AuthTest, AUTH_REG_CB_Test_001, TestSize.Level0)
 {
     int32_t ret;
     VerifyCallback cb = {0};
-    cb.onDeviceVerifyPass = OnDeviceVerifyPass;
+    cb.onKeyGenerated = OnKeyGenerated;
     cb.onDeviceVerifyFail = OnDeviceVerifyFail;
     cb.onRecvSyncDeviceInfo = OnRecvSyncDeviceInfo;
     cb.onDeviceNotTrusted = OnDeviceNotTrusted;
+    cb.onDeviceVerifyPass = OnDeviceVerifyPass;
+    cb.onDisconnect = OnDisconnect;
 
     ret = AuthRegCallback(LNN, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
