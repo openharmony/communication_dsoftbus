@@ -27,6 +27,8 @@ extern "C" {
 
 int64_t GetSeq(AuthSideFlag flag);
 void UniqueIdInit(void);
+void AuthGetAbility(void);
+bool AuthIsSupportServerSide(void);
 AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq);
 int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectOption *option);
 int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInfo);

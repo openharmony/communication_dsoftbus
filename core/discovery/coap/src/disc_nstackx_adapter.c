@@ -31,6 +31,7 @@
 #define SERVICE_DATA_PORT "port"
 #define DEVICE_UDID "UDID"
 #define AUTH_PORT_LEN 6
+#define WLAN_IFACE_NAME_PREFIX "wlan"
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
@@ -38,7 +39,8 @@ static char *g_capabilityData = NULL;
 
 static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
-    if (!GetJsonObjectStringItem(data, JSON_WLAN_IP, device->addr[0].addr, sizeof(device->addr[0].addr))) {
+    if (!GetJsonObjectStringItem(data, JSON_WLAN_IP, device->addr[0].info.ip.ip,
+        sizeof(device->addr[0].info.ip.ip))) {
         LOG_ERR("parse wifi ip address failed.");
         return;
     }
@@ -95,7 +97,7 @@ static void ParseServiceData(const cJSON *data, DeviceInfo *device)
         LOG_ERR("not find auth port.");
         return;
     }
-    device->addr[0].port = authPort;
+    device->addr[0].info.ip.port = (uint16_t)authPort;
 }
 
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
@@ -156,7 +158,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         discDeviceInfo.addrNum = 1;
         discDeviceInfo.devType = nstackxDeviceInfo->deviceType;
         discDeviceInfo.capabilityBitmapNum = nstackxDeviceInfo->capabilityBitmapNum;
-        discDeviceInfo.addr[0].type = CONNECT_ADDR_WLAN;
+        if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX))== 0) {
+            discDeviceInfo.addr[0].type = CONNECTION_ADDR_WLAN;
+        } else {
+            discDeviceInfo.addr[0].type = CONNECTION_ADDR_ETH;
+        }
         if (ParseDeviceUdid(nstackxDeviceInfo, &discDeviceInfo) != SOFTBUS_OK) {
             LOG_ERR("parse device udid failed.");
             return;
@@ -335,6 +341,26 @@ static int32_t SetLocalDeviceInfo()
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+void DiscCoapUpdateLocalIp(void)
+{
+    size_t len = sizeof(g_localDeviceInfo->networkIpAddr);
+    (void)memset_s(g_localDeviceInfo->networkIpAddr, len, 0, len);
+    len = sizeof(g_localDeviceInfo->networkName);
+    (void)memset_s(g_localDeviceInfo->networkName, len, 0, len);
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
+                           sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
+        LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
+                           sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK) {
+        LOG_ERR("get local device info from lnn failed.");
+        return;
+    }
+
+    if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
+        LOG_ERR("register new ip to dfinder failed.");
+        return;
+    }
 }
 
 static void DeinitLocalInfo()

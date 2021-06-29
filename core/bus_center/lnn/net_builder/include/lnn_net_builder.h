@@ -18,8 +18,6 @@
 
 #include <stdint.h>
 
-#include "lnn_sync_ledger_item_info.h"
-#include "lnn_conn_type_hook.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -31,29 +29,12 @@ typedef enum {
     NODE_TYPE_L
 } NodeType;
 
-typedef enum {
-    FSM_MSG_TYPE_JOIN_LNN,
-    FSM_MSG_TYPE_DISCOVERY_TIMEOUT,
-    FSM_MSG_TYPE_AUTH_DONE,
-    FSM_MSG_TYPE_SYNC_DEVICE_INFO,
-    FSM_MSG_TYPE_SYNC_DEVICE_INFO_DONE,
-    FSM_MSG_TYPE_EST_HEART_BEAT,
-    FSM_MSG_TYPE_LEAVE_LNN,
-    FSM_MSG_TYPE_NOT_TRUSTED,
-    FSM_MSG_TYPE_PEER_INFO_CHANGE,
-    FSM_MSG_TYPE_JOIN_LNN_TIMEOUT,
-    FSM_MSG_TYPE_SYNC_OFFLINE_DONE,
-    FSM_MSG_TYPE_SEND_OFFLINE_MESSAGE,
-    FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
-} StateMessageType;
-
 int32_t LnnInitNetBuilder(void);
 void LnnDeinitNetBuilder(void);
 
-int32_t LnnRegisterConnTypeHook(ConnectionAddrType type, const ConnTypeHook *hook);
-int32_t LnnNotifyPeerDevInfoChanged(const char *udid, SyncItemInfo *info);
-int32_t LnnNotifySyncOfflineFinish(void);
-int32_t LnnNotifySendOfflineMessage(int32_t id);
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
+int32_t LnnNotifySyncOfflineFinish(const char *networkId);
+int32_t LnnRequestCleanConnectionFsm(const ConnectionAddr *addr);
 
 #ifdef __cplusplus
 }

@@ -135,9 +135,17 @@ static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        if (sessionKeyList->type == devInfo->type &&
+        if (sessionKeyList->type == devInfo->type && sessionKeyList->side == CLIENT_SIDE_FLAG &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            LOG_INFO("get last session key succ");
+            LOG_INFO("get client last session key succ");
+            return sessionKeyList;
+        }
+    }
+    LIST_FOR_EACH(item, &g_sessionKeyListHead) {
+        sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
+        if (sessionKeyList->type == devInfo->type && sessionKeyList->side == SERVER_SIDE_FLAG &&
+            strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
+            LOG_INFO("get server last session key succ");
             return sessionKeyList;
         }
     }
@@ -160,7 +168,6 @@ static SessionKeyList *GetSessionKeyByDevinfo(const NecessaryDevInfo *devInfo)
     LIST_FOR_EACH(item, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
         if (sessionKeyList->type == devInfo->type &&
-            sessionKeyList->side == devInfo->side &&
             sessionKeyList->seq == devInfo->seq &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
             LOG_INFO("get session key seccessfully.");

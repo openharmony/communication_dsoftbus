@@ -18,11 +18,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event_monitor.h"
 #include "lnn_exchange_ledger_info.h"
 #include "lnn_lane_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
+#include "lnn_sync_ledger_item_info.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -45,6 +48,14 @@ int32_t BusCenterServerInit(void)
         LOG_ERR("init sync ledger item fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitEventMonitor() != SOFTBUS_OK) {
+        LOG_ERR("init event monitor failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
+        LOG_ERR("init lnn discovery manager fail!");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {
         LOG_ERR("init net builder fail!");
         return SOFTBUS_ERR;
@@ -60,6 +71,7 @@ void BusCenterServerDeinit(void)
     LnnDeinitDistributedLedger();
     LnnDeinitNetBuilder();
     LnnDeinitSyncLedgerItem();
+    LnnDeinitEventMonitor();
     LOG_INFO("bus center server deinit");
 }
 

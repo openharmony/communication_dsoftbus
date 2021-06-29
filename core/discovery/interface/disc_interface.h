@@ -67,6 +67,11 @@ typedef struct {
     unsigned int dataLen;
 } SubscribeInnerInfo;
 
+typedef enum {
+    LINK_STATUS_UP = 0,
+    LINK_STATUS_DOWN,
+} LinkStatus;
+
 /**
  * @ingroup softbus_disc_manager
  * Inner Callback.
@@ -227,6 +232,8 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInnerInfo *info);
  *
  */
 int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
+
+void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium);
 
 #ifdef __cplusplus
 #if __cplusplus

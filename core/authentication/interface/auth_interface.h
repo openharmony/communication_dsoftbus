@@ -97,10 +97,12 @@ typedef struct {
 } AuthDataHead;
 
 typedef struct {
-    void (*onDeviceVerifyPass)(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion);
-    void (*onDeviceVerifyFail)(int64_t authId, ConnectOption *option);
+    void (*onKeyGenerated)(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion);
+    void (*onDeviceVerifyFail)(int64_t authId);
     void (*onRecvSyncDeviceInfo)(int64_t authId, AuthSideFlag side, const char *peerUuid, uint8_t *data, uint32_t len);
+    void (*onDeviceVerifyPass)(int64_t authId);
     void (*onDeviceNotTrusted)(const char *peerUdid);
+    void (*onDisconnect)(int64_t authId);
 } VerifyCallback;
 
 uint32_t AuthGetEncryptHeadLen(void);
@@ -112,12 +114,13 @@ void CloseAuthServer(void);
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb);
 
 int32_t AuthVerifyInit(void);
-int32_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option);
+int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option);
 int32_t AuthVerifyDeinit(void);
 
 int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len);
 int32_t AuthHandleLeaveLNN(int64_t authId);
 
+void AuthIpChanged(ConnectType type);
 int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t bufLen);
 
 #ifdef __cplusplus
