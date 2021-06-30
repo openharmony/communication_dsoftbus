@@ -48,10 +48,18 @@ extern "C" {
 #define LOG_DOMAIN 0xD0015C0
 #define LOG_TAG "dsoftbus_standard"
 
-#define LOG_DBG(fmt, ...) HILOG_DEBUG(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_WARN(fmt, ...) HILOG_WARN(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_ERR(fmt, ...) HILOG_ERROR(LOG_CORE, fmt"\n", ##__VA_ARGS__);
+#define LOG_DBG(fmt, ...) do { \
+    printf("DEBUG:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+} while (0)
+#define LOG_INFO(fmt, ...) do { \
+    printf("INFO:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+} while (0)
+#define LOG_WARN(fmt, ...) do { \
+    printf("WARN:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+} while (0)
+#define LOG_ERR(fmt, ...)  do { \
+    printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+} while (0)
 #endif
 #else
 enum {
