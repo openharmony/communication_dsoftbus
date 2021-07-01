@@ -113,9 +113,9 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(head->authId, false);
+    auth = AuthGetManagerByAuthId(head->authId, CLIENT_SIDE_FLAG);
     if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(head->authId, true);
+        auth = AuthGetManagerByAuthId(head->authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
             LOG_ERR("no match auth found, AuthPostData failed");
             return SOFTBUS_ERR;
@@ -384,9 +384,9 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
     AuthManager *auth = NULL;
     AuthDataHead head;
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
-    auth = AuthGetManagerByAuthId(authId, false);
+    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
     if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(authId, true);
+        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
             LOG_ERR("no match auth found");
             return false;

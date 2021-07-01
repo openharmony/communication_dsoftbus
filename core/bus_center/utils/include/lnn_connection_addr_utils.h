@@ -19,12 +19,15 @@
 #include <stdbool.h>
 
 #include "softbus_bus_center.h"
+#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
+bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
+bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
 
 #ifdef __cplusplus
 }

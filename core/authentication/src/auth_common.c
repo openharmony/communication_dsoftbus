@@ -20,16 +20,21 @@
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_property.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define GET_AUTH_ABILITY_COLLECTION "AUTH_ABILITY_COLLECTION"
+#define DEFAULT_AUTH_ABILITY_COLLECTION 0
+#define AUTH_SUPPORT_SERVER_SIDE_MASK 0x01
 #define INTERVAL_VALUE 2
 #define OFFSET_BITS 24
 #define INT_MAX_VALUE 0xFFFFFEL
 #define LOW_24_BITS 0xFFFFFFL
 static uint64_t g_uniqueId = 0;
+static uint32_t g_authAbility = 0;
 
 int64_t GetSeq(AuthSideFlag flag)
 {
@@ -51,6 +56,20 @@ AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq)
 {
     /* even odd check */
     return (seq % 2) == 0 ? SERVER_SIDE_FLAG : CLIENT_SIDE_FLAG;
+}
+
+void AuthGetAbility(void)
+{
+    if (GetPropertyInt(GET_AUTH_ABILITY_COLLECTION, (int32_t *)&g_authAbility) != SOFTBUS_OK) {
+        LOG_ERR("Cannot get auth ability from config file");
+        g_authAbility = DEFAULT_AUTH_ABILITY_COLLECTION;
+    }
+    LOG_INFO("auth ability is %u", g_authAbility);
+}
+
+bool AuthIsSupportServerSide(void)
+{
+    return (g_authAbility & AUTH_SUPPORT_SERVER_SIDE_MASK) ? true : false;
 }
 
 void UniqueIdInit(void)

@@ -1179,6 +1179,21 @@ int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
     return SOFTBUS_OK;
 }
 
+void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium)
+{
+    switch (medium) {
+        case COAP:
+            if (g_discCoapInterface == NULL) {
+                return;
+            }
+            g_discCoapInterface->LinkStatusChanged(status);
+            break;
+        default:
+            LOG_ERR("unsupport medium.");
+            break;
+    }
+}
+
 int32_t DiscMgrInit(void)
 {
     if (g_isInited) {

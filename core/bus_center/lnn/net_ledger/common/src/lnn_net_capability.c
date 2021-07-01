@@ -19,6 +19,11 @@
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_property.h"
+
+#define CONFIG_LNN_CAPBILITY_KEY "LNN_SUPPORT_CAPBILITY"
+/* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
+#define DEFAUTL_LNN_CAPBILITY 0x16
 
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
@@ -33,6 +38,29 @@ int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 uint32_t LnnGetNetCapabilty(void)
 {
     uint32_t capability = 0;
-    capability = capability | (1 << BIT_BR);
+    uint32_t configValue;
+
+    if (GetPropertyInt(CONFIG_LNN_CAPBILITY_KEY, (int32_t *)&configValue) != SOFTBUS_OK) {
+        LOG_ERR("get lnn capbility fail, use default value");
+        configValue = DEFAUTL_LNN_CAPBILITY;
+    }
+    if ((configValue & (1 << BIT_BLE)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_BLE);
+    }
+    if ((configValue & (1 << BIT_BR)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_BR);
+    }
+    if ((configValue & (1 << BIT_WIFI)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_WIFI);
+    }
+    if ((configValue & (1 << BIT_WIFI_24G)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_WIFI_24G);
+    }
+    if ((configValue & (1 << BIT_WIFI_5G)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_WIFI_5G);
+    }
+    if ((configValue & (1 << BIT_ETH)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_ETH);
+    }
     return capability;
 }

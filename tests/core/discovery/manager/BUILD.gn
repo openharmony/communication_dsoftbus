@@ -24,6 +24,7 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/core/adapter/kernel/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",

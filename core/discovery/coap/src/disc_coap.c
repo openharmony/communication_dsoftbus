@@ -355,6 +355,12 @@ static int32_t CoapStopAdvertise(const SubscribeOption *option)
     return SOFTBUS_OK;
 }
 
+static void CoapUpdateLocalIp(LinkStatus status)
+{
+    (void)status;
+    DiscCoapUpdateLocalIp();
+}
+
 static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .Publish = CoapPublish,
     .StartScan = CoapStartScan,
@@ -363,7 +369,8 @@ static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .StartAdvertise = CoapStartAdvertise,
     .Subscribe = CoapSubscribe,
     .StopAdvertise = CoapStopAdvertise,
-    .Unsubscribe = CoapUnsubscribe
+    .Unsubscribe = CoapUnsubscribe,
+    .LinkStatusChanged = CoapUpdateLocalIp
 };
 
 static DiscCoapInfo *NewDiscCoapInfo()
