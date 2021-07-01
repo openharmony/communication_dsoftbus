@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define SOFTBUS_DEBUG
 #ifndef SOFTBUS_DEBUG
 #if defined(__LITEOS_M__)
 #include "hiview_log.h"
