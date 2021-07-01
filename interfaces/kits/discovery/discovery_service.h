@@ -18,6 +18,8 @@
 
 #include <stdbool.h>
 
+#include "softbus_common.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -271,34 +273,6 @@ typedef enum {
 } DeviceType;
 
 /**
- * @brief Enumerates connection types returned by <b>IDiscoveryCallback</b>.
- *
- */
-typedef enum {
-    /** WLAN */
-    CONNECT_ADDR_WLAN = 1,
-    /** BR */
-    CONNECT_ADDR_BR,
-    /** BLE */
-    CONNECT_ADDR_BLE,
-    /** MAX */
-    CONNECT_ADDR_TYPE_MAX
-} ConnectAddrType;
-
-/**
- * @brief Defines connection information.
- *
- */
-typedef struct  {
-    /** Connection type. For details, see {@link ConnectAddrType}. */
-    ConnectAddrType type;
-    /** Connection address. For its length, see {@link CONNECT_ADDR_LEN}. */
-    char addr[CONNECT_ADDR_LEN];
-    /** Port number */
-    int port;
-} ConnectAddr;
-
-/**
  * @brief Defines the device information returned by <b>IDiscoveryCallback</b>.
  *
  */
@@ -314,7 +288,7 @@ typedef struct {
     /** Number of available connections */
     unsigned int addrNum;
     /** Connection information. For details, see {@link ConnectAddr}. */
-    ConnectAddr addr[CONNECT_ADDR_TYPE_MAX];
+    ConnectionAddr addr[CONNECTION_ADDR_MAX];
     /** Number of capabilities */
     unsigned int capabilityBitmapNum;
     /** Device capability bitmap.

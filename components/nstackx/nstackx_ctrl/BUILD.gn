@@ -48,7 +48,6 @@ if (defined(ohos_lite)) {
       "//third_party/cJSON:cjson_static",
       "//third_party/libcoap:libcoap",
     ]
-    defines = [ "SUPPORT_SMARTGENIUS" ]
     subsystem_name = "communication"
     part_name = "dsoftbus_standard"
   }

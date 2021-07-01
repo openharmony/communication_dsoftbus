@@ -115,7 +115,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     if (IsDuplicateState(fsm, state) == true) {
         fsm->curState = state;
         if (fsm->curState->enter != NULL) {
-            fsm->curState->enter();
+            fsm->curState->enter(fsm);
         }
         fsm->flag |= FSM_FLAG_RUNNING;
     }
@@ -143,11 +143,11 @@ static void ProcessChangeStateMessage(SoftBusMessage *msg)
 
     if (IsDuplicateState(fsm, state)) {
         if (fsm->curState->exit != NULL) {
-            fsm->curState->exit();
+            fsm->curState->exit(fsm);
         }
         fsm->curState = state;
         if (fsm->curState->enter != NULL) {
-            fsm->curState->enter();
+            fsm->curState->enter(fsm);
         }
     }
 }
@@ -169,7 +169,7 @@ static void ProcessDataMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState->process != NULL) {
-        fsm->curState->process((int32_t)msg->arg1, ctrlMsgObj->obj);
+        fsm->curState->process(fsm, (int32_t)msg->arg1, ctrlMsgObj->obj);
     }
 }
 

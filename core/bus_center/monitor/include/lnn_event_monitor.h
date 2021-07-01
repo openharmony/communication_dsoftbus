@@ -13,35 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CONFIG_H
-#define SOFTBUS_CONFIG_H
+#ifndef LNN_EVENT_MONITOR_H
+#define LNN_EVENT_MONITOR_H
+
+#include <stdint.h>
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif /* __cplusplus */
 
-static const char* SOFTBUS_CONFIG =
-"{\
-\"MAX_BYTES_LENGTH\" : 4194304,\
-\"MAX_MESSAGE_LENGTH\" : 4096,\
-\"CONN_BR_MAX_DATA_LENGTH\" : 4096,\
-\"CONN_RFCOM_SEND_MAX_LEN\" : 990,\
-\"CONN_BR_RECEIVE_MAX_LEN\" : 10,\
-\"CONN_TCP_MAX_LENGTH\" : 3072,\
-\"CONN_TCP_MAX_CONN_NUM\" : 30,\
-\"CONN_TCP_TIME_OUT\" : 100,\
-\"MAX_NODE_STATE_CB_CNT\" : 10,\
-\"MAX_LNN_CONNECTION_CNT\" : 10,\
-\"LNN_SUPPORT_CAPBILITY\" : 22,\
-\"AUTH_ABILITY_COLLECTION\" : 0\
-}";
+typedef enum {
+    LNN_MONITOR_EVENT_IP_ADDR_CHANGED,
+    LNN_MONITOR_EVENT_TYPE_MAX,
+} LnnMonitorEventType;
+
+typedef void (*LnnMonitorEventHandler)(LnnMonitorEventType event, const void *para);
+
+int32_t LnnInitEventMonitor(void);
+void LnnDeinitEventMonitor(void);
+
+int32_t LnnRegisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
+void LnnUnregisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif
-#endif /* __cplusplus */
-
-#endif // SOFTBUS_CONFIG_H
+#endif /* LNN_EVENT_MONITOR_H */

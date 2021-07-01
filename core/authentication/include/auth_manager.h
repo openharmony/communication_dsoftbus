@@ -45,7 +45,6 @@ extern "C" {
 #define IN_SYNC_PROGRESS 3
 #define SYNC_FINISH 4
 #define AUTH_PASSED 5
-#define AUTH_FAIL 6
 
 typedef struct {
     uint32_t type;
@@ -83,9 +82,11 @@ typedef struct {
 AuthManager *AuthGetManagerByRequestId(uint32_t requestId);
 AuthManager *AuthGetManagerByAuthId(int64_t authId, AuthSideFlag side);
 AuthManager *AuthGetManagerByFd(int32_t fd);
+int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data);
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen);
+void AuthNotifyLnnDisconnByIp(const char *ip);
 
 #ifdef __cplusplus
 }

@@ -22,6 +22,7 @@
 
 #include <securec.h>
 
+#include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
@@ -63,6 +64,11 @@ typedef struct {
     SyncItemInfo *info[ITEM_INFO_COUNT];
 } SyncElement;
 
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    SyncItemInfo *info;
+} PeerInfoChangeMsgPara;
+
 static SyncLedgerItem g_syncLedgerItem;
 
 static int32_t AddNewElementToMap(const char *key, const char *udid, SyncItemInfo *itemInfo)
@@ -87,6 +93,17 @@ static int32_t AddNewElementToMap(const char *key, const char *udid, SyncItemInf
     return SOFTBUS_OK;
 }
 
+static void DeleteSyncItemInfo(SyncItemInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+    if (info->buf != NULL) {
+        SoftBusFree(info->buf);
+    }
+    SoftBusFree(info);
+}
+
 static int32_t ServerProccess(const char *key, const char *udid)
 {
     int32_t ret;
@@ -96,7 +113,7 @@ static int32_t ServerProccess(const char *key, const char *udid)
         LOG_ERR("server element should be null!");
         for (uint32_t i = 0; i < ITEM_INFO_COUNT; i++) {
             if (element->info[i] != NULL) {
-                LnnDeleteSyncItemInfo(element->info[i]);
+                DeleteSyncItemInfo(element->info[i]);
                 element->info[i] = NULL;
             }
         }
@@ -106,14 +123,36 @@ static int32_t ServerProccess(const char *key, const char *udid)
     return ret;
 }
 
-int32_t LnnSendMessageToPeer(int32_t channelId)
+static void NotifySyncOfflineFinish(int32_t channelId)
+{
+    char key[INT_TO_STR_SIZE] = {0};
+    if (sprintf_s(key, INT_TO_STR_SIZE, "%d", channelId) == -1) {
+        LOG_ERR("int convert char error!");
+        return;
+    }
+    SyncElement *element = (SyncElement *)LnnMapGet(&g_syncLedgerItem.idMap, key);
+    if (element == NULL) {
+        LOG_INFO("no element item");
+        LnnNotifySyncOfflineFinish(NULL);
+        return;
+    }
+    NodeInfo *info = LnnGetNodeInfoById(element->udid, CATEGORY_UDID);
+    if (info == NULL) {
+        LOG_ERR("get node info failed");
+        LnnNotifySyncOfflineFinish(NULL);
+        return;
+    }
+    LnnNotifySyncOfflineFinish(info->networkId);
+}
+
+static int32_t SendMessageToPeer(int32_t channelId)
 {
     char key[INT_TO_STR_SIZE] = {0};
     if (sprintf_s(key, INT_TO_STR_SIZE, "%d", channelId) == -1) {
         LOG_ERR("int convert char error!");
         return SOFTBUS_ERR;
     }
-    LOG_INFO("LnnSendMessageToPeer enter channelId =%d!", channelId);
+    LOG_INFO("SendMessageToPeer enter channelId =%d!", channelId);
     SyncElement *element = (SyncElement *)LnnMapGet(&g_syncLedgerItem.idMap, key);
     if (element == NULL) {
         LOG_ERR("key not exist!");
@@ -122,10 +161,10 @@ int32_t LnnSendMessageToPeer(int32_t channelId)
     // send message to peer.
     for (uint32_t i = 0; i < ITEM_INFO_COUNT; i++) {
         if (element->info[i] != NULL) {
-            LOG_INFO("LnnSendMessageToPeer send data!");
+            LOG_INFO("SendMessageToPeer send data!");
             TransSendNetworkingMessage(channelId, (char *)element->info[i]->buf,
                 element->info[i]->bufLen, CONN_HIGH);
-            LnnDeleteSyncItemInfo(element->info[i]);
+            DeleteSyncItemInfo(element->info[i]);
             element->info[i] = NULL;
         }
     }
@@ -133,8 +172,40 @@ int32_t LnnSendMessageToPeer(int32_t channelId)
     if (TransCloseNetWorkingChannel(channelId) != SOFTBUS_OK) {
         LOG_ERR("TransCloseNetWorkingChannel error!");
     }
+    NotifySyncOfflineFinish(channelId);
     ReleaseMsgResources(channelId);
-    LnnNotifySyncOfflineFinish();
+    return SOFTBUS_OK;
+}
+
+static void HandleSendOfflineMessage(void *para)
+{
+    if (para == NULL) {
+        LOG_ERR("HandleSendOfflineMessage: null para");
+        return;
+    }
+    if (SendMessageToPeer(*(int32_t *)para) != SOFTBUS_OK) {
+        LOG_ERR("send offline to peer failed");
+    }
+    SoftBusFree(para);
+}
+
+static int32_t PrepareSendOfflineMessage(int32_t channelId)
+{
+    int32_t *para = NULL;
+
+    para = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (para == NULL) {
+        LOG_ERR("malloc id message fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *para = channelId;
+
+    // switch to default thread, then report device info changed event
+    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), HandleSendOfflineMessage, para) != SOFTBUS_OK) {
+        LOG_ERR("async handle send off message fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -155,10 +226,10 @@ static int32_t OnChannelOpened(int32_t id, const char *peerUuid, unsigned char i
         return SOFTBUS_ERR;
     }
     if (isServer == 0) {
-        if (LnnNotifySendOfflineMessage(id) != SOFTBUS_OK) {
+        if (PrepareSendOfflineMessage(id) != SOFTBUS_OK) {
             if (TransCloseNetWorkingChannel(id) != SOFTBUS_OK) {
+                NotifySyncOfflineFinish(id);
                 ReleaseMsgResources(id);
-                LnnNotifySyncOfflineFinish();
             }
         }
         return SOFTBUS_OK;
@@ -177,7 +248,7 @@ static void ReleaseMsgResources(int32_t channelId)
     if (element != NULL) {
         for (uint32_t i = 0; i < ITEM_INFO_COUNT; i++) {
             if (element->info[i] != NULL) {
-                LnnDeleteSyncItemInfo(element->info[i]);
+                DeleteSyncItemInfo(element->info[i]);
                 element->info[i] = NULL;
             }
         }
@@ -189,14 +260,14 @@ static void OnChannelOpenFailed(int32_t channelId, const char *uuid)
 {
     (void)uuid;
     LOG_INFO("open channel fail channelId = %d", channelId);
+    NotifySyncOfflineFinish(channelId);
     ReleaseMsgResources(channelId);
-    LnnNotifySyncOfflineFinish();
 }
 
 static void  OnChannelClosed(int32_t channelId)
 {
+    NotifySyncOfflineFinish(channelId);
     ReleaseMsgResources(channelId);
-    LnnNotifySyncOfflineFinish();
 }
 
 static uint8_t *ConvertToDeviceName(const uint8_t *msg, uint32_t len, uint32_t *outLen)
@@ -239,6 +310,52 @@ static int32_t ConvertMsgToSyncItemInfo(const uint8_t *message, uint32_t len, Sy
     return SOFTBUS_ERR;
 }
 
+static void HandlePeerDevInfoChangedMessage(void *para)
+{
+    PeerInfoChangeMsgPara *msgPara = (PeerInfoChangeMsgPara *)para;
+
+    if (msgPara == NULL) {
+        LOG_ERR("NotifyPeerDevInfoChanged: null para");
+        return;
+    }
+    if (msgPara->info == NULL) {
+        LOG_ERR("NotifyPeerDevInfoChanged: sync info is null");
+        SoftBusFree(para);
+        return;
+    }
+    if (msgPara->info->type == INFO_TYPE_DEVICE_NAME) {
+        LOG_INFO("peer device info changed");
+        LnnSetDLDeviceInfoName(msgPara->udid, (char *)msgPara->info->buf);
+    } else {
+        LOG_ERR("invalid peer dev info change type: %d", msgPara->info->type);
+    }
+    DeleteSyncItemInfo(msgPara->info);
+    SoftBusFree(msgPara);
+}
+
+static int32_t PreparePeerDevInfoChangedMessage(const char *udid, SyncItemInfo *info)
+{
+    PeerInfoChangeMsgPara *para = SoftBusCalloc(sizeof(PeerInfoChangeMsgPara));
+    if (para == NULL) {
+        LOG_ERR("malloc peer info change msg para fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strncpy_s(para->udid, UDID_BUF_LEN, udid, strlen(udid)) != EOK) {
+        LOG_ERR("copy udid fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    para->info = info;
+
+    // switch to default thread, then report device info changed event
+    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), HandlePeerDevInfoChangedMessage, para) != SOFTBUS_OK) {
+        LOG_ERR("async handle peer message fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void OnMessageReceived(int32_t id, const char *message, uint32_t len)
 {
     char *peerUdid = NULL;
@@ -264,10 +381,10 @@ static void OnMessageReceived(int32_t id, const char *message, uint32_t len)
         SoftBusFree(itemInfo);
         return;
     }
-    // Notify netbuild report name change
-    if (LnnNotifyPeerDevInfoChanged(peerUdid, itemInfo) != SOFTBUS_OK) {
-        LOG_ERR("NotifyPeerDevInfoChange error!");
-        LnnDeleteSyncItemInfo(itemInfo);
+
+    if (PreparePeerDevInfoChangedMessage(peerUdid, itemInfo) != SOFTBUS_OK) {
+        LOG_ERR("PreparePeerDevInfoChangedMessage error!");
+        DeleteSyncItemInfo(itemInfo);
     }
 }
 
@@ -455,21 +572,10 @@ int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType
     LOG_INFO("OpenNetWorkingChannel channelId =%d!", channelId);
     if (SaveMsgToBuf(channelId, udid, itemInfo) != SOFTBUS_OK) {
         LOG_ERR("SaveMsgToBuf error!");
-        LnnDeleteSyncItemInfo(itemInfo);
+        DeleteSyncItemInfo(itemInfo);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
-}
-
-void LnnDeleteSyncItemInfo(SyncItemInfo *info)
-{
-    if (info == NULL) {
-        return;
-    }
-    if (info->buf != NULL) {
-        SoftBusFree(info->buf);
-    }
-    SoftBusFree(info);
 }
 
 int32_t LnnInitSyncLedgerItem(void)
