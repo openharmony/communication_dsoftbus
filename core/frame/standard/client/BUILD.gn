@@ -161,6 +161,7 @@ serverProxySrc = [
 coreAdapterInclude = [
   "$dsoftbus_root_path/core/adapter/kernel/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
+  "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
 ]
 
 coreAdapterSrc = [
@@ -220,6 +221,7 @@ ohos_shared_library("softbus_client") {
 
     deps = [
       "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",
