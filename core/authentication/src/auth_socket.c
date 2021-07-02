@@ -120,38 +120,61 @@ static void AuthNotifyLnnDisconn(int32_t fd)
     AuthNotifyLnnDisconnByIp(auth->option.info.ipOption.ip);
 }
 
+static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
+{
+    char *data = NULL;
+    int32_t remainLen;
+    ssize_t len;
+
+    char *ipData = (char *)SoftBusMalloc(head->len);
+    if (ipData == NULL) {
+        LOG_ERR("SoftBusMalloc failed");
+        return;
+    }
+    data = ipData;
+    remainLen = head->len;
+    do {
+        len = RecvTcpData(fd, data, remainLen, 0);
+        if (len <= 0) {
+            LOG_ERR("auth recv data len not correct, len %d", len);
+            break;
+        } else if (len < remainLen) {
+            data = data + len;
+            remainLen = remainLen - len;
+        } else {
+            AuthIpOnDataReceived(fd, head, ipData, head->len);
+            remainLen = 0;
+        }
+    } while (remainLen > 0);
+    SoftBusFree(ipData);
+}
+
 static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
 {
     if (events != SOFTBUS_SOCKET_IN) {
         return SOFTBUS_ERR;
     }
-    ConnPktHead *head = NULL;
-    char *ipData = NULL;
     uint32_t headSize = sizeof(ConnPktHead);
+    ssize_t len;
 
-    char *data = (char *)SoftBusMalloc(AUTH_MAX_DATA_LEN);
-    if (data == NULL) {
-        LOG_ERR("SoftBusMalloc failed");
-        return SOFTBUS_ERR;
-    }
-    ssize_t len = RecvTcpData(fd, data, AUTH_MAX_DATA_LEN, 0);
+    ConnPktHead head = {0};
+    len = RecvTcpData(fd, (void *)&head, headSize, 0);
     if (len < (int32_t)headSize) {
-        if (len <= 0) {
+        if (len < 0) {
             LOG_ERR("auth RecvTcpData failed, DelTrigger");
             (void)DelTrigger(AUTH, fd, RW_TRIGGER);
             AuthNotifyLnnDisconn(fd);
         }
-        LOG_ERR("auth recv data len not correct, len %d", len);
-        SoftBusFree(data);
+        LOG_ERR("auth recv data head len not correct, len %d", len);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("AuthOnDataEvent len is %d", len);
-    head = (ConnPktHead *)data;
-    LOG_INFO("auth recv eth data, head.len is %d, module = %d, flag = %d, seq = %lld",
-        head->len, head->module, head->flag, head->seq);
-    ipData = data + headSize;
-    AuthIpOnDataReceived(fd, head, ipData, head->len);
-    SoftBusFree(data);
+    LOG_INFO("auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
+        head.len, head.module, head.flag, head.seq);
+    if (head.len > AUTH_MAX_DATA_LEN) {
+        LOG_ERR("auth head len is out of size");
+        return SOFTBUS_ERR;
+    }
+    AuthIpDataProcess(fd, &head);
     return SOFTBUS_OK;
 }
 
