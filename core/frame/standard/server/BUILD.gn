@@ -133,8 +133,8 @@ coreBuscenterSrc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/src/lnn_exchange_ledger_info.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/src/lnn_sync_ledger_item_info.c",
   "$dsoftbus_root_path/core/bus_center/ipc/standard_system/lnn_bus_center_ipc.cpp",
-   "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c",
-   "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_netlink_monitor.c",
+  "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c",
+  "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_netlink_monitor.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
@@ -196,6 +196,7 @@ coreTransmissionSrc = [
 coreAdapterInclude = [
   "$dsoftbus_root_path/core/adapter/kernel/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
+  "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
 ]
 
 coreAdapterSrc = [
@@ -323,6 +324,7 @@ ohos_shared_library("softbus_server") {
     external_deps = [
       "aafwk_standard:want",
       "appexecfwk_standard:appexecfwk_core",
+      "deviceauth_standard:deviceauth_sdk",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "permission_standard:libpermissionsdk_standard",
@@ -334,7 +336,7 @@ ohos_shared_library("softbus_server") {
       ":softbus_server.rc",
       "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-      "//base/security/deviceauth/services:deviceauth_sdk",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//foundation/appexecfwk/standard/kits:appkit_native",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/cJSON:cjson_static",

@@ -78,6 +78,7 @@ static int32_t EventInLooper(int64_t authId)
     msgDelay->handler = &g_authHandler;
     if (g_authHandler.looper == NULL || g_authHandler.looper->PostMessageDelay == NULL) {
         LOG_ERR("softbus handler is null");
+        SoftBusFree(msgDelay);
         return SOFTBUS_ERR;
     }
     g_authHandler.looper->PostMessageDelay(g_authHandler.looper, msgDelay, AUTH_DELAY_MS);
@@ -254,14 +255,7 @@ static void HandleAuthFail(AuthManager *auth)
         return;
     }
     EventRemove(auth->authId);
-    if (auth->side == CLIENT_SIDE_FLAG) {
-        auth->cb->onDeviceVerifyFail(auth->authId);
-    } else {
-        if (auth->option.type == CONNECT_TCP) {
-            AuthCloseTcpFd(auth->fd);
-        }
-        DeleteAuth(auth);
-    }
+    auth->cb->onDeviceVerifyFail(auth->authId);
 }
 
 static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const ConnectOption *option)
@@ -332,11 +326,6 @@ int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option)
         LOG_ERR("invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_authLock) != 0) {
-        LOG_ERR("lock mutex failed");
-        return SOFTBUS_ERR;
-    }
-    (void)pthread_mutex_unlock(&g_authLock);
     if (g_hichainGaInstance == NULL || g_hichainGmInstance == NULL) {
         LOG_ERR("need to call AuthVerifyInit!");
         return SOFTBUS_ERR;
@@ -406,6 +395,7 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
     }
     if (auth->hichain->authDevice(auth->authId, authParams, &g_hichainCallback) != 0) {
         LOG_ERR("authDevice failed");
+        cJSON_free(authParams);
         HandleAuthFail(auth);
         return;
     }
@@ -804,7 +794,7 @@ static void AuthTimeout(SoftBusMessage *msg)
             return;
         }
     }
-    HandleAuthFail(auth);
+    auth->cb->onDeviceVerifyFail(auth->authId);
 }
 
 int32_t AuthVerifyInit(void)
@@ -972,6 +962,12 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
         (void)pthread_mutex_unlock(&g_authLock);
         LOG_ERR("ServerIpAuthInit failed");
         SoftBusFree(auth);
+        return SOFTBUS_ERR;
+    }
+    if (EventInLooper(auth->authId) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_authLock);
+        LOG_ERR("ip auth EventInLooper failed");
+        DeleteAuth(auth);
         return SOFTBUS_ERR;
     }
     (void)pthread_mutex_unlock(&g_authLock);
