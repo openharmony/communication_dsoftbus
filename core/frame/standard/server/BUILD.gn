@@ -139,6 +139,7 @@ coreBuscenterSrc = [
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
+  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ip_utils.c",
 ]
 
