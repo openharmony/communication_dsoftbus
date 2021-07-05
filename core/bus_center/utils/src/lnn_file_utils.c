@@ -33,7 +33,7 @@ int32_t LnnFileCreate(LnnFileId id)
     int32_t ret;
     char *dir = NULL;
     char dirPath[LNN_MAX_DIR_PATH_LEN];
-    int32_t fd;
+    int32_t fd = -1;
 
     if (id >= LNN_FILE_ID_MAX) {
         LOG_ERR("invalid create file id: %d", id);
