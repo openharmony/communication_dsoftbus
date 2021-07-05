@@ -36,6 +36,7 @@ if (ohos_kernel_type == "liteos_m") {
       "service/src/bus_center_manager.c",
       "utils/src/lnn_async_callback_utils.c",
       "utils/src/lnn_connection_addr_utils.c",
+      "utils/src/lnn_file_utils.c",
     ]
 
     include_dirs = [
@@ -97,6 +98,7 @@ if (ohos_kernel_type == "liteos_m") {
       "service/src/bus_center_manager.c",
       "utils/src/lnn_async_callback_utils.c",
       "utils/src/lnn_connection_addr_utils.c",
+      "utils/src/lnn_file_utils.c",
     ]
 
     include_dirs = [
