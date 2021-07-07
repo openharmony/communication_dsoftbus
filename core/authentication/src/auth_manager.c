@@ -423,6 +423,11 @@ void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
         return;
     }
     if (auth->side == SERVER_SIDE_FLAG) {
+        if (EventInLooper(auth->authId) != SOFTBUS_OK) {
+            LOG_ERR("auth EventInLooper failed");
+            HandleAuthFail(auth);
+            return;
+        }
         if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
             HandleAuthFail(auth);
         }
@@ -560,12 +565,6 @@ static AuthManager *CreateServerAuth(uint32_t connectionId, AuthDataInfo *authDa
         (void)pthread_mutex_unlock(&g_authLock);
         LOG_ERR("ServerAuthInit failed");
         SoftBusFree(auth);
-        return NULL;
-    }
-    if (EventInLooper(auth->authId) != SOFTBUS_OK) {
-        (void)pthread_mutex_unlock(&g_authLock);
-        LOG_ERR("auth EventInLooper failed");
-        DeleteAuth(auth);
         return NULL;
     }
     (void)pthread_mutex_unlock(&g_authLock);
@@ -962,12 +961,6 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
         (void)pthread_mutex_unlock(&g_authLock);
         LOG_ERR("ServerIpAuthInit failed");
         SoftBusFree(auth);
-        return SOFTBUS_ERR;
-    }
-    if (EventInLooper(auth->authId) != SOFTBUS_OK) {
-        (void)pthread_mutex_unlock(&g_authLock);
-        LOG_ERR("ip auth EventInLooper failed");
-        DeleteAuth(auth);
         return SOFTBUS_ERR;
     }
     (void)pthread_mutex_unlock(&g_authLock);
