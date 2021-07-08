@@ -24,8 +24,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define DEFAULT_DEVICE_NAME "UNKNOWN"
-
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
@@ -33,9 +31,14 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
+    const char* sn = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+            sn = GetSerial();
+            if (sn == NULL) {
+                LOG_ERR("GetSerial failed!");
+            }
+            if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
