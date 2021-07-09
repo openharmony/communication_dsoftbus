@@ -56,10 +56,10 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            item->detail.sequence++;
             if (info != NULL) {
                 (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             }
+            item->detail.sequence++;
             (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             return item;
         }
@@ -95,11 +95,12 @@ int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->detail.fd == fd) {
-            (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             if (!IsPassSeqCheck(&(item->detail.verifyInfo), seq)) {
                 LOG_WARN("SeqCheck is false");
+                (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
                 return SOFTBUS_ERR;
             }
+            (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             return SOFTBUS_OK;
         }
     }
