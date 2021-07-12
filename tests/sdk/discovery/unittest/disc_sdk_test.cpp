@@ -19,21 +19,85 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include "client_disc_manager.h"
+#include "permission/permission.h"
+#include "permission/permission_kit.h"
 #include "softbus_common.h"
 #include "softbus_interface.h"
 #include "softbus_log.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::Permission;
 
 #define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
+const string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
+const string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
+const string BIND_DISCOVER_SERVICE = "com.huawei.hwddmp.permission.BIND_DISCOVER_SERVICE";
+const string TEST_LABEL = "test label";
+const string TEST_DESCRIPTION = "test description";
+const int TEST_LABEL_ID = 9527;
+const int TEST_DESCRIPTION_ID = 9528;
+const string PERMISSION_PKGNAME = "ohos.distributeddata";
 
 namespace OHOS {
 static int g_subscribeId = 0;
 static int g_publishId = 0;
-static const char *g_pkgName = "Softbus_Kits";
+static const char *g_pkgName = "ohos.distributeddata";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
 
 const int32_t ERRO_CAPDATA_LEN = 514;
+
+void AddPermission(const string &pkgName)
+{
+    std::vector<PermissionDef> permDefList;
+    PermissionDef permissionDefAlpha = {
+        .permissionName = SYSTEM_APP_PERMISSION,
+        .bundleName = pkgName,
+        .grantMode = GrantMode::SYSTEM_GRANT,
+        .availableScope = AVAILABLE_SCOPE_ALL,
+        .label = TEST_LABEL,
+        .labelId = TEST_LABEL_ID,
+        .description = TEST_DESCRIPTION,
+        .descriptionId = TEST_DESCRIPTION_ID
+    };
+    PermissionDef permissionDefBeta = {
+        .permissionName = DANGER_APP_PERMISSION,
+        .bundleName = pkgName,
+        .grantMode = GrantMode::SYSTEM_GRANT,
+        .availableScope = AVAILABLE_SCOPE_ALL,
+        .label = TEST_LABEL,
+        .labelId = TEST_LABEL_ID,
+        .description = TEST_DESCRIPTION,
+        .descriptionId = TEST_DESCRIPTION_ID
+    };
+    PermissionDef permissionDefGamma = {
+        .permissionName = BIND_DISCOVER_SERVICE,
+        .bundleName = pkgName,
+        .grantMode = GrantMode::SYSTEM_GRANT,
+        .availableScope = AVAILABLE_SCOPE_ALL,
+        .label = TEST_LABEL,
+        .labelId = TEST_LABEL_ID,
+        .description = TEST_DESCRIPTION,
+        .descriptionId = TEST_DESCRIPTION_ID
+    };
+    permDefList.emplace_back(permissionDefAlpha);
+    permDefList.emplace_back(permissionDefBeta);
+    permDefList.emplace_back(permissionDefGamma);
+    PermissionKit::AddDefPermissions(permDefList);
+    std::vector<std::string> permList;
+    permList.push_back(SYSTEM_APP_PERMISSION);
+    permList.push_back(DANGER_APP_PERMISSION);
+    permList.push_back(BIND_DISCOVER_SERVICE);
+    PermissionKit::AddSystemGrantedReqPermissions(pkgName, permList);
+    PermissionKit::GrantSystemGrantedPermission(pkgName, SYSTEM_APP_PERMISSION);
+    PermissionKit::GrantSystemGrantedPermission(pkgName, DANGER_APP_PERMISSION);
+    PermissionKit::GrantSystemGrantedPermission(pkgName, BIND_DISCOVER_SERVICE);
+}
+
+void RemovePermission(const string &pkgName)
+{
+    int ret = PermissionKit::RemoveDefPermissions(pkgName);
+    ret = PermissionKit::RemoveSystemGrantedReqPermissions(pkgName);
+}
 
 class Disc_Test : public testing::Test {
 public:
@@ -50,10 +114,14 @@ public:
 };
 
 void Disc_Test::SetUpTestCase(void)
-{}
+{
+    AddPermission(g_pkgName);
+}
 
 void Disc_Test::TearDownTestCase(void)
-{}
+{
+    RemovePermission(g_pkgName);
+}
 
 static int GetSubscribeId(void)
 {
