@@ -46,7 +46,6 @@ static SoftBusHandler g_authHandler = {0};
 
 static pthread_mutex_t g_authLock;
 static bool g_isAuthInit = false;
-static int32_t HichainServiceInit(void);
 
 int32_t __attribute__ ((weak)) HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
 {
@@ -327,7 +326,7 @@ int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option)
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_hichainGaInstance == NULL || g_hichainGmInstance == NULL) {
-        LOG_ERR("need to call AuthVerifyInit!");
+        LOG_ERR("need to call HichainServiceInit!");
         return SOFTBUS_ERR;
     }
     authId = HandleVerifyDevice(moduleId, option);
@@ -496,10 +495,6 @@ static int32_t ServerAuthInit(AuthManager *auth, int64_t authId, uint64_t connec
         LOG_ERR("GetDefaultAuthCallback failed");
         return SOFTBUS_ERR;
     }
-    if (AuthVerifyInit() != SOFTBUS_OK) {
-        LOG_ERR("AuthVerifyInit failed");
-        return SOFTBUS_ERR;
-    }
 
     auth->side = SERVER_SIDE_FLAG;
     auth->status = WAIT_CONNECTION_ESTABLISHED;
@@ -507,7 +502,7 @@ static int32_t ServerAuthInit(AuthManager *auth, int64_t authId, uint64_t connec
     auth->connectionId = connectionId;
     auth->softbusVersion = SOFT_BUS_NEW_V1;
     if (g_hichainGaInstance == NULL || g_hichainGmInstance == NULL) {
-        LOG_ERR("need to AuthVerifyInit!");
+        LOG_ERR("need to HichainServiceInit!");
         return SOFTBUS_ERR;
     }
     auth->hichain = g_hichainGaInstance;
@@ -796,21 +791,6 @@ static void AuthTimeout(SoftBusMessage *msg)
     auth->cb->onDeviceVerifyFail(auth->authId);
 }
 
-int32_t AuthVerifyInit(void)
-{
-    if (HichainServiceInit() != SOFTBUS_OK) {
-        LOG_ERR("HichainServiceInit failed");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t AuthVerifyDeinit(void)
-{
-    DestroyDeviceAuthService();
-    return SOFTBUS_OK;
-}
-
 static int32_t AuthCallbackInit(uint32_t moduleNum)
 {
     if (g_verifyCallback != NULL) {
@@ -920,7 +900,7 @@ static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peer
     auth->status = WAIT_CONNECTION_ESTABLISHED;
     auth->softbusVersion = SOFT_BUS_NEW_V1;
     if (g_hichainGaInstance == NULL || g_hichainGmInstance == NULL) {
-        LOG_ERR("need to AuthVerifyInit!");
+        LOG_ERR("need to HichainServiceInit!");
         return SOFTBUS_ERR;
     }
     auth->hichain = g_hichainGaInstance;
@@ -942,10 +922,7 @@ static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peer
 int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
 {
     AuthManager *auth = NULL;
-    if (AuthVerifyInit() != SOFTBUS_OK) {
-        LOG_ERR("AuthVerifyInit failed");
-        return SOFTBUS_ERR;
-    }
+
     if (pthread_mutex_lock(&g_authLock) != 0) {
         LOG_ERR("lock mutex failed");
         return SOFTBUS_ERR;
@@ -984,12 +961,14 @@ void AuthNotifyLnnDisconnByIp(const char *ip)
     LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (strncmp(auth->option.info.ipOption.ip, ip, strlen(ip)) == 0) {
+            EventRemove(auth->authId);
             auth->cb->onDisconnect(auth->authId);
         }
     }
     LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (strncmp(auth->option.info.ipOption.ip, ip, strlen(ip)) == 0) {
+            EventRemove(auth->authId);
             if (auth->status < IN_SYNC_PROGRESS) {
                 LOG_INFO("auth no need to notify lnn");
                 (void)AuthHandleLeaveLNN(auth->authId);
@@ -1013,12 +992,14 @@ void AuthIpChanged(ConnectType type)
     LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->option.type == CONNECT_TCP) {
+            EventRemove(auth->authId);
             auth->cb->onDisconnect(auth->authId);
         }
     }
     LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->option.type == CONNECT_TCP) {
+            EventRemove(auth->authId);
             if (auth->status < IN_SYNC_PROGRESS) {
                 LOG_INFO("auth no need to notify lnn");
                 (void)AuthHandleLeaveLNN(auth->authId);
@@ -1119,6 +1100,7 @@ int32_t AuthDeinit(void)
         SoftBusFree(g_verifyCallback);
         g_verifyCallback = NULL;
     }
+    DestroyDeviceAuthService();
     ClearAuthManager();
     AuthClearAllSessionKey();
     pthread_mutex_destroy(&g_authLock);
@@ -1145,6 +1127,11 @@ int32_t AuthInit(void)
     }
     AuthLooperInit();
     UniqueIdInit();
+    if (HichainServiceInit() != SOFTBUS_OK) {
+        LOG_ERR("auth hichain init failed");
+        (void)AuthDeinit();
+        return SOFTBUS_ERR;
+    }
     if (pthread_mutex_init(&g_authLock, NULL) != 0) {
         LOG_ERR("mutex init fail!");
         (void)AuthDeinit();
