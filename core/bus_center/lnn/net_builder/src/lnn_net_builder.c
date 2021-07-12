@@ -195,10 +195,6 @@ static LnnConnectionFsm *StartNewConnectionFsm(ConnectionAddr *addr)
         LnnDestroyConnectionFsm(connFsm);
         return NULL;
     }
-    if (g_netBuilder.connCount == 0) {
-        (void)AuthVerifyInit();
-        LOG_INFO("hichain init ok....");
-    }
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     ++g_netBuilder.connCount;
     return connFsm;
@@ -251,10 +247,6 @@ static void StopConnectionFsm(LnnConnectionFsm *connFsm)
     }
     ListDelete(&connFsm->node);
     --g_netBuilder.connCount;
-    if (g_netBuilder.connCount == 0) {
-        LOG_INFO("all connection disconnect");
-        (void)AuthVerifyDeinit();
-    }
 }
 
 static int32_t ProcessCleanConnectionFsm(ConnectionAddr *addr)
