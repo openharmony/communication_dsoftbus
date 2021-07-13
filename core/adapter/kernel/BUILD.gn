@@ -11,35 +11,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_adapter_kernel") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/common/include",
-      "//third_party/bounds_checking_function/include",
-      "//kernel/liteos_m/kal/cmsis",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    sources = [
-      "liteos_m/softbus_mem_interface.c",
-      "liteos_m/softbus_os_interface.c",
-    ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  config("dsoftbus_adapter_kernel_interface") {
+    include_dirs = [ "include" ]
+  }
+
+  common_include = [
+    "$dsoftbus_root_path/core/common/include",
+    "$libsec_include_path",
+    "$hilog_lite_include_path",
+  ]
+
+  common_deps = [
+    "$hilog_lite_deps_path",
+    "$libsec_deps_path",
+  ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_adapter_kernel") {
+      include_dirs = common_include
+      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
+      sources = [
+        "liteos_m/softbus_mem_interface.c",
+        "liteos_m/softbus_os_interface.c",
+      ]
+      deps = common_deps
+      public_configs = [ ":dsoftbus_adapter_kernel_interface" ]
+    }
+  } else {
+    shared_library("softbus_adapter_kernel") {
+      include_dirs = common_include
+      sources = [
+        "liteos_a/softbus_mem_interface.c",
+        "liteos_a/softbus_os_interface.c",
+      ]
+      cflags = [ "-fPIC" ]
+      deps = common_deps
+      public_configs = [ ":dsoftbus_adapter_kernel_interface" ]
+    }
   }
 } else {
-  shared_library("softbus_adapter_kernel") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/common/include",
-      "//third_party/bounds_checking_function/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
+  import("//build/ohos.gni")
+
+  config("config_adapter_kernel") {
+    include_dirs = [ "$dsoftbus_root_path/core/adapter/kernel/include" ]
+  }
+
+  ohos_shared_library("softbus_adapter_kernel") {
+    include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
     sources = [
       "liteos_a/softbus_mem_interface.c",
       "liteos_a/softbus_os_interface.c",
     ]
-    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    public_configs = [ ":config_adapter_kernel" ]
+
+    public_deps = [ "//utils/native/base:utilsecurec_shared" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

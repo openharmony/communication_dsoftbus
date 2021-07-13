@@ -15,7 +15,6 @@
 
 #include "softbus_proxychannel_control.h"
 
-#include <securec.h>
 #include <string.h>
 
 #include "auth_interface.h"

@@ -13,33 +13,97 @@
  * limitations under the License.
  */
 
-#include "softbus_errcode.h"
 #include "softbus_permission.h"
 
-int32_t TransPermissionInit(void)
+#include <unistd.h>
+
+#include "liteipc_adapter.h"
+#include "permission_entry.h"
+#include "pms_interface.h"
+#include "pms_types.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+#include "softbus_mem_interface.h"
+
+#define SOFTBUS_PERMISSION_NAME "ohos.permission.DISTRIBUTED_DATASYNC"
+
+#define SHELL_UID 2
+#define INVALID_UID (-1)
+#define FIRST_APPLICATION_UID 10000
+
+#define PERMISSION_JSON_FILE "/etc/softbus_trans_permission.json"
+
+static int32_t CheckSoftBusSysPermission(int32_t callingUid)
 {
+    if (CheckPermission(callingUid, SOFTBUS_PERMISSION_NAME) != GRANTED) {
+        LOG_ERR("softbus CheckPermission fail");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    LOG_INFO("CheckSoftBusSysPermission uid:%d success", callingUid);
     return SOFTBUS_OK;
+}
+
+static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgName)
+{
+    (void)pkgName;
+    if (callingUid == getuid() && callingPid == getpid()) {
+        LOG_INFO("self app");
+        return SELF_APP;
+    }
+    if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {
+        LOG_INFO("system app");
+        return SYSTEM_APP;
+    }
+    if (callingUid > INVALID_UID && callingUid < FIRST_APPLICATION_UID && callingUid != SHELL_UID) {
+        LOG_INFO("native app");
+        return NATIVE_APP;
+    }
+    return SOFTBUS_PERMISSION_DENIED;
+}
+
+int32_t TransPermissionInit()
+{
+    return LoadPermissionJson(PERMISSION_JSON_FILE);
 }
 
 void TransPermissionDeinit(void)
-{}
-
-int32_t CheckTransPermission(const char *pkgName, const char *sessionName, uint32_t action)
 {
-    (void)pkgName;
-    (void)sessionName;
-    (void)action;
-    return SOFTBUS_OK;
+    DeinitPermissionJson();
 }
 
-bool CheckDiscPermission(const char *pkgName)
+int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+    const char *pkgName, const char *sessionName, uint32_t actions)
 {
-    (void)pkgName;
-    return SOFTBUS_OK;
+    int32_t permType = GetPermType(callingUid, callingPid, pkgName);
+    if (permType < 0) {
+        return permType;
+    }
+    SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
+    if (pItem == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t ret = CheckPermissionEntry(sessionName, pItem);
+    SoftBusFree(pItem);
+    if (ret >= SYSTEM_APP) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool CheckBusCenterPermission(const char *pkgName)
+bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
     (void)pkgName;
-    return true;
+    if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {
+        return true;
+    }
+    return false;
+}
+
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
+{
+    (void)pkgName;
+    if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {
+        return true;
+    }
+    return false;
 }

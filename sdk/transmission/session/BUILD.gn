@@ -11,60 +11,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_client_trans_session") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/sdk/frame/include",
-      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-fno-builtin",
-      "-std=c99",
-    ]
-    sources = [
-      "src/client_trans_message_service.c",
-      "src/client_trans_session_callback.c",
-      "src/client_trans_session_manager.c",
-      "src/client_trans_session_service.c",
-    ]
+common_src = [
+  "src/client_trans_message_service.c",
+  "src/client_trans_session_service.c",
+]
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  common_include = [
+    "include",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_sdk_path/frame/common/include",
+    "$libsec_include_path",
+    "$hilog_lite_include_path",
+  ]
+
+  common_deps = [
+    "$dsoftbus_core_path/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_sdk_path/frame:softbus_client_frame",
+    "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",
+    "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
+    "$hilog_lite_deps_path",
+    "$libsec_deps_path",
+  ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_trans_session_sdk") {
+      include_dirs = common_include
+      sources = common_src
+      deps = common_deps
+    }
+  } else {
+    shared_library("dsoftbus_trans_session_sdk") {
+      include_dirs = common_include
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      sources = common_src
+      deps = common_deps
+    }
   }
 } else {
-  shared_library("softbus_client_trans_session") {
+  import("//build/ohos.gni")
+  config("trans_session_sdk_interface") {
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+  }
+
+  ohos_shared_library("dsoftbus_trans_session_sdk") {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/sdk/frame/include",
-      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
-      "//third_party/bounds_checking_function/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+      "$dsoftbus_core_path/common/include",
+      "$dsoftbus_sdk_path/frame/common/include",
     ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-    ]
+
     sources = [
-      "src/client_trans_message_service.c",
-      "src/client_trans_session_callback.c",
-      "src/client_trans_session_manager.c",
-      "src/client_trans_session_service.c",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_callback_mock.cpp",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_impl.cpp",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_mock.cpp",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/src/session_service_impl.cpp",
     ]
+    sources += common_src
+    deps = [
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_sdk_path/bus_center/service:dsoftbus_bus_center_service_sdk",
+      "$dsoftbus_sdk_path/frame:softbus_client_frame",
+      "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",
+      "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    public_configs = [ ":trans_session_sdk_interface" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

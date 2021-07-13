@@ -18,10 +18,10 @@
 
 #include "bus_center_info_key.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_exchange_ledger_info.h"
+#include "lnn_exchange_device_info.h"
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_sync_ledger_item_info.h"
+#include "lnn_sync_item_info.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -46,6 +46,7 @@ constexpr char NODE3_UUID[] = "235689BNHFCX";
 constexpr char NODE3_BT_MAC[] = "56789TYX";
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr uint32_t REMOTE_AUTH_PORT = 7070;
+constexpr uint32_t REMOTE_SESSION_PORT = 6060;
 constexpr uint32_t NODE_NUM = 3;
 constexpr char LOCAL_UDID[] = "123456LOCALTEST";
 constexpr char LOCAL_NETWORKID[] = "235689LOCAL";
@@ -55,7 +56,7 @@ constexpr char LOCAL_CHANAGE_DEVNAME[] = "local";
 constexpr char LOCAL_BT_MAC[] = "56789TUT";
 constexpr char LOCAL_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_DEVTYPE[] = TYPE_WATCH;
-constexpr uint32_t LOCAL_SESSION_POORT = 5000;
+constexpr uint32_t LOCAL_SESSION_PORT = 5000;
 constexpr uint32_t LOCAL_AUTH_PORT = 6000;
 constexpr uint32_t LOCAL_PROXY_PORT = 7000;
 constexpr uint32_t BR_NUM = 0;
@@ -139,6 +140,8 @@ static void ConstructWlan2P4GNode(void)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetProxyPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_PROXY_PORT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnSetSessionPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_SESSION_PORT);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnSetWiFiIp(&g_nodeInfo[WLAN2P4G_NUM], LOCAL_WLAN_IP);
     ret = LnnSetAuthPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_AUTH_PORT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -163,6 +166,8 @@ static void ConstructWlan5GNode(void)
     ret = LnnSetDiscoveryType(&g_nodeInfo[WLAN5G_NUM], DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetProxyPort(&g_nodeInfo[WLAN5G_NUM], REMOTE_PROXY_PORT);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnSetSessionPort(&g_nodeInfo[WLAN5G_NUM], REMOTE_SESSION_PORT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnSetWiFiIp(&g_nodeInfo[WLAN5G_NUM], LOCAL_WLAN_IP);
     ret = LnnSetAuthPort(&g_nodeInfo[WLAN5G_NUM], REMOTE_AUTH_PORT);
@@ -197,7 +202,7 @@ static void ConstructWiFiLocalInfo(bool is5G)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalLedgerNumInfo(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalLedgerNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_POORT);
+    ret = LnnSetLocalLedgerNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     if (is5G) {
         ret = LnnSetLocalLedgerNumInfo(NUM_KEY_NET_CAP, 1 << BIT_WIFI_5G);
@@ -242,7 +247,7 @@ static void GetWiFiLocalInfo(void)
     ret = LnnGetLocalLedgerNumInfo(NUM_KEY_PROXY_PORT, &port);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_PROXY_PORT));
     ret = LnnGetLocalLedgerNumInfo(NUM_KEY_SESSION_PORT, &port);
-    EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_SESSION_POORT));
+    EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_SESSION_PORT));
 }
 /*
 * @tc.name: LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001
@@ -286,7 +291,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_BYTES_LANE_Test_001, TestSize.Leve
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == false &&
         laneInfo->conOption.type == CONNECTION_ADDR_WLAN &&
         strncmp(laneInfo->conOption.info.ip.ip, LOCAL_WLAN_IP, strlen(LOCAL_WLAN_IP)) == 0 &&
-        laneInfo->conOption.info.ip.port == REMOTE_AUTH_PORT);
+        laneInfo->conOption.info.ip.port == REMOTE_SESSION_PORT);
     LnnReleaseLanesObject(lanesObj);
 }
 
@@ -378,7 +383,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_BYTES_LANE_Test_001, TestSize.Level1
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == false &&
         laneInfo->conOption.type == CONNECTION_ADDR_WLAN &&
         strncmp(laneInfo->conOption.info.ip.ip, LOCAL_WLAN_IP, strlen(LOCAL_WLAN_IP)) == 0 &&
-        laneInfo->conOption.info.ip.port == REMOTE_AUTH_PORT);
+        laneInfo->conOption.info.ip.port == REMOTE_SESSION_PORT);
     LnnReleaseLanesObject(lanesObj);
 }
 

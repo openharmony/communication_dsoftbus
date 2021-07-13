@@ -1,0 +1,56 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  import("//build/lite/config/test.gni")
+  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+  if (ohos_build_type == "debug") {
+    unittest("seq_verification_test") {
+      output_extension = "bin"
+      output_dir = "$root_out_dir/test/unittest/dsoftbus"
+      sources = [ "unittest/sequence_verification_test.cpp" ]
+      include_dirs = [
+        "$dsoftbus_root_path/core/common/security/sequence_verification/include",
+        "$dsoftbus_root_path/core/common/include",
+      ]
+      ldflags = [
+        "-lstdc++",
+        "-Wl,-rpath-link=$ohos_root_path/$root_out_dir",
+      ]
+      deps = [ "$dsoftbus_root_path/core/common/security/sequence_verification:softbus_seq_verification" ]
+    }
+  }
+} else {
+  import("//build/test.gni")
+  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+  module_output_path = "softbus_L2/sequence_verification"
+  ohos_unittest("seq_verification_test") {
+    module_out_path = module_output_path
+    sources = [ "unittest/sequence_verification_test.cpp" ]
+
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/security/sequence_verification/include",
+      "$dsoftbus_root_path/core/common/include",
+    ]
+
+    deps = [ "$dsoftbus_root_path/core/frame/standard/server:softbus_server" ]
+  }
+
+  group("unittest") {
+    testonly = true
+    deps = [ ":seq_verification_test" ]
+  }
+}

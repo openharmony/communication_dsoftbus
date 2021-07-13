@@ -1,0 +1,107 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+config("trans_udp_channel_sdk_interface") {
+  include_dirs = [ "common/include" ]
+}
+
+if (enable_trans_udp == true) {
+  common_src = [
+    "common/src/client_trans_udp_manager.c",
+    "stream/src/client_trans_stream.c",
+  ]
+} else {
+  common_src = [ "common/src/client_trans_udp_virtual.c" ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  if (enable_trans_udp == true) {
+    common_deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
+      "$hilog_lite_deps_path",
+    ]
+  }
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_trans_udp_channel_sdk") {
+      include_dirs = [
+        "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_core_path/common/include",
+        "$dsoftbus_root_path/sdk/transmission/session/include",
+        "stream/include",
+      ]
+      sources = common_src
+      public_configs = [ ":trans_udp_channel_sdk_interface" ]
+
+      if (enable_trans_udp == true) {
+        deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+        deps += common_deps
+      }
+    }
+  } else {
+    shared_library("dsoftbus_trans_udp_channel_sdk") {
+      include_dirs = [
+        "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_core_path/common/include",
+        "$dsoftbus_root_path/sdk/transmission/session/include",
+        "stream/include",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      sources = common_src
+      public_configs = [ ":trans_udp_channel_sdk_interface" ]
+
+      if (enable_trans_udp == true) {
+        deps = [
+          "stream/adaptor:dsoftbus_trans_dstream",
+          "//third_party/bounds_checking_function:libsec_shared",
+        ]
+        deps += common_deps
+      }
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("dsoftbus_trans_udp_channel_sdk") {
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_core_path/common/include",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+    ]
+    sources = common_src
+    public_configs = [ ":trans_udp_channel_sdk_interface" ]
+    if (enable_trans_udp == true) {
+      deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
+        "//utils/native/base:utilsecurec_shared",
+      ]
+    }
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
+}

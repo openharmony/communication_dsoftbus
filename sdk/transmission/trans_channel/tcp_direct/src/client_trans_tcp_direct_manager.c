@@ -17,7 +17,7 @@
 
 #include <securec.h>
 
-#include "client_trans_session_callback.h"
+#include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -56,10 +56,10 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
+            item->detail.sequence++;
             if (info != NULL) {
                 (void)memcpy_s(info, sizeof(TcpDirectChannelInfo), item, sizeof(TcpDirectChannelInfo));
             }
-            item->detail.sequence++;
             (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             return item;
         }
@@ -95,12 +95,11 @@ int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->detail.fd == fd) {
+            (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             if (!IsPassSeqCheck(&(item->detail.verifyInfo), seq)) {
                 LOG_WARN("SeqCheck is false");
-                (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
                 return SOFTBUS_ERR;
             }
-            (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             return SOFTBUS_OK;
         }
     }
@@ -112,6 +111,9 @@ int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
 void TransTdcCloseChannel(int32_t channelId)
 {
     LOG_INFO("TransCloseTcpDirectChannel, channelId [%d]", channelId);
+    if (ClientTransTdcOnSessionClosed(channelId) != SOFTBUS_OK) {
+        LOG_INFO("notify tdc close err");
+    }
 
     TcpDirectChannelInfo *item = NULL;
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
@@ -122,7 +124,7 @@ void TransTdcCloseChannel(int32_t channelId)
             SoftBusFree(item);
             item = NULL;
             (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
-            DelPendingPacketById(channelId, PENDING_TYPE_DIRECT);
+            DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
             LOG_INFO("Delete chanel item success.");
             return;
         }
@@ -132,10 +134,25 @@ void TransTdcCloseChannel(int32_t channelId)
     (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
 }
 
-int32_t TransTdcOnChannelOpened(const ChannelInfo *channel)
+static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
 {
-    if (channel == NULL) {
-        LOG_ERR("Para wrong");
+    TcpDirectChannelInfo *item = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    if (item == NULL) {
+        return NULL;
+    }
+    item->channelId = channel->channelId;
+    item->detail.fd = channel->fd;
+    item->detail.channelType = channel->channelType;
+    if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        SoftBusFree(item);
+        return NULL;
+    }
+    return item;
+}
+
+int32_t TransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+{
+    if (sessionName == NULL || channel == NULL) {
         return SOFTBUS_ERR;
     }
 
@@ -143,52 +160,65 @@ int32_t TransTdcOnChannelOpened(const ChannelInfo *channel)
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channel->channelId) {
-            (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
             LOG_ERR("tcp direct channel id exist already.");
-            return SOFTBUS_ERR;
+            goto EXIT_ERR;
         }
     }
 
-    item = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
-        (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
-        LOG_ERR("create tdc channel info failed");
-        return SOFTBUS_ERR;
+        LOG_ERR("get new channel err");
+        goto EXIT_ERR;
     }
-    item->channelId = channel->channelId;
-    item->detail.fd = channel->fd;
-    item->detail.type = channel->channelType;
-    if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+
+    if (TransAddDataBufNode(channel->channelId, channel->fd) != SOFTBUS_OK) {
+        LOG_ERR("add data buf node fail.");
         SoftBusFree(item);
-        (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
-        LOG_ERR("memcpy_s failed");
-        return SOFTBUS_ERR;
+        goto EXIT_ERR;
     }
-    ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
-
-    (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
-
-    if (TransTdcCreateListener(item->detail.fd) != SOFTBUS_OK) {
+    if (TransTdcCreateListener(channel->fd) != SOFTBUS_OK) {
         LOG_ERR("trans tcp direct create listener failed.");
-        return SOFTBUS_ERR;
+        TransDelDataBufNode(channel->channelId);
+        SoftBusFree(item);
+        goto EXIT_ERR;
     }
 
     int32_t ret = SetTcpKeepAlive(channel->fd, HEART_TIME);
     if (ret != SOFTBUS_OK) {
+        TransDelDataBufNode(channel->channelId);
+        SoftBusFree(item);
         LOG_ERR("SetTcpKeepAlive failed.");
+        goto EXIT_ERR;
+    }
+
+    ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
+    (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
+
+    if (ClientTransTdcOnSessionOpened(sessionName, channel) != SOFTBUS_OK) {
+        LOG_ERR("notify on session opened err.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+EXIT_ERR:
+    (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);
+    return SOFTBUS_ERR;
 }
 
-int32_t TransTdcManagerInit(void)
+int32_t TransTdcManagerInit(const IClientSessionCallBack *cb)
 {
     g_tcpDirectChannelInfoList = CreateSoftBusList();
-    if (g_tcpDirectChannelInfoList == NULL) {
-        LOG_ERR("init tcp direct channel info list fail.");
+    if (g_tcpDirectChannelInfoList == NULL || TransDataListInit() != SOFTBUS_OK) {
+        LOG_ERR("init tcp direct channel fail.");
         return SOFTBUS_ERR;
     }
-    LOG_INFO("init tcp direct channel info list success.");
+    if (ClientTransTdcSetCallBack(cb) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (PendingInit(PENDING_TYPE_DIRECT) == SOFTBUS_ERR) {
+        LOG_ERR("trans pending init failed.s");
+        return SOFTBUS_ERR;
+    }
+    LOG_INFO("init tcp direct channel success.");
     return SOFTBUS_OK;
 }
 
@@ -198,7 +228,14 @@ void TransTdcManagerDeinit(void)
         return;
     }
 
+    TransDataListDeinit();
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = NULL;
+    PendingDeinit(PENDING_TYPE_DIRECT);
+}
+
+int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId)
+{
+    return ClientTransTdcOnSessionOpenFailed(channelId);
 }
 

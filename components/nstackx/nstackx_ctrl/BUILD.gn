@@ -15,6 +15,45 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
+  config("dfinder_interface") {
+    include_dirs = [ "interface" ]
+  }
+  shared_library("nstackx_ctrl") {
+    sources = [
+      "core/coap_discover/coap_app.c",
+      "core/coap_discover/coap_client.c",
+      "core/coap_discover/coap_discover.c",
+      "core/coap_discover/json_payload.c",
+      "core/nstackx_common.c",
+      "core/nstackx_database.c",
+      "core/nstackx_device.c",
+      "core/nstackx_smartgenius.c",
+    ]
+    include_dirs = [
+      "include",
+      "include/coap_discover",
+    ]
+    public_configs = [ ":dfinder_interface" ]
+    deps = [
+      "../nstackx_util:nstackx_util",
+      "//build/lite/config/component/cJSON:cjson_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
+      "//third_party/libcoap:libcoap",
+    ]
+    if (ohos_kernel_type == "liteos_a") {
+      defines = [
+        "NSTACKX_WITH_LITEOS",
+        "LWIP_LITEOS_A_COMPAT",
+      ]
+    }
+    cflags = [
+      "-Wall",
+      "-fPIC",
+      "-std=c99",
+    ]
+    cflags_cc = cflags
+    ldflags = [ "-fPIC" ]
+  }
 } else {
   import("//build/ohos.gni")
 

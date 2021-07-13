@@ -39,6 +39,15 @@ SmartLaneMapEntry g_smartLaneMap[LNN_LANE_PROPERTY_BUTT] = {
     [LNN_STREAM_LANE] = {2, {GetLaneOf5GWlan, GetLaneOf2P4GWlan}}, // the preferredLinkNum is 2
 };
 
+static bool IsSupportUdp(LnnLaneProperty prop)
+{
+    if (prop == LNN_FILE_LANE || prop == LNN_STREAM_LANE) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL) {
@@ -49,6 +58,7 @@ int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
     for (uint8_t i = 0; i < g_smartLaneMap[prop].preferredLinkNum; i++) {
         lane = g_smartLaneMap[prop].getLaneByType[i](netWorkId, prop);
         if (lane >= 0) {
+            LnnSetLaneSupportUdp(netWorkId, lane, IsSupportUdp(prop));
             return lane;
         }
     }

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "softbus_errcode.h"
 #include "softbus_permission.h"
+
+#include "softbus_errcode.h"
 
 int32_t TransPermissionInit(void)
 {
@@ -24,22 +25,27 @@ int32_t TransPermissionInit(void)
 void TransPermissionDeinit(void)
 {}
 
-int32_t CheckTransPermission(const char *pkgName, const char *sessionName, uint32_t action)
+int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+    const char *pkgName, const char *sessionName, uint32_t actions)
 {
+    (void)callingUid;
+    (void)callingPid;
     (void)pkgName;
     (void)sessionName;
-    (void)action;
-    return SOFTBUS_OK;
+    (void)actions;
+    return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool CheckDiscPermission(const char *pkgName)
+bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
+    (void)callingUid;
     (void)pkgName;
-    return SOFTBUS_OK;
+    return true;
 }
 
-bool CheckBusCenterPermission(const char *pkgName)
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
+    (void)callingUid;
     (void)pkgName;
     return true;
 }

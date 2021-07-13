@@ -18,15 +18,12 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "client_trans_channel_callback.h"
+#include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
-#include "securec.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
-#include "softbus_property.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "trans_pending_pkt.h"
@@ -44,37 +41,25 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 static int32_t OnDataEvent(int events, int32_t fd)
 {
     TcpDirectChannelInfo channel;
-    (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
-        LOG_WARN("can not match fd.(%d)", fd);
+        LOG_WARN("can not match fd.[%d]", fd);
         return SOFTBUS_ERR;
     }
 
     if (events == SOFTBUS_SOCKET_IN) {
         int32_t channelId = channel.channelId;
-        char *data = (char *)SoftBusCalloc(MAX_BUF_LENGTH);
-        if (data == NULL) {
-            LOG_ERR("malloc failed.");
-            return SOFTBUS_MALLOC_ERR;
+        int32_t ret = TransTdcRecvData(channelId);
+        if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
+            return SOFTBUS_OK;
         }
-        int32_t ret = TransTdcPreProcessRecvData(fd, data, MAX_BUF_LENGTH);
         if (ret != SOFTBUS_OK) {
+            LOG_ERR("client process data fail");
+            TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
-            TransOnChannelClosed(NULL, channelId);
-            SoftBusFree(data);
-            LOG_ERR("preparing for data processing failed.[%d]", ret);
-            return ret;
-        }
-        if (TransTdcProcessRecvData(channelId, data) != SOFTBUS_OK) {
-            TransTdcCloseChannel(channelId);
-            TransOnChannelClosed(NULL, channelId);
-            SoftBusFree(data);
-            LOG_ERR("process data failed.");
+            ClientTransTdcOnSessionClosed(channelId);
             return SOFTBUS_ERR;
         }
-        SoftBusFree(data);
     }
-
     return SOFTBUS_OK;
 }
 

@@ -21,7 +21,6 @@
 
 #include <securec.h>
 
-#include "bus_center_event.h"
 #include "lnn_map.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
@@ -275,65 +274,6 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo **info, int32_t infoNum)
         }
     }
     LnnMapDeinitIterator(it);
-    return SOFTBUS_OK;
-}
-
-static int32_t PostDeviceBasicInfoChanged(const NodeInfo *info, NodeBasicInfoType type)
-{
-    NodeBasicInfo basic;
-    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
-        LOG_ERR("memset_s basic fail!");
-    }
-    if (info == NULL) {
-        LOG_ERR("para error!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (ConvertNodeInfoToBasicInfo(info, &basic) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    LnnNotifyBasicInfoChanged(&basic, type);
-    return SOFTBUS_OK;
-}
-
-static int32_t PostOnline(NodeBasicInfo *basic)
-{
-    if (basic == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    LnnNotifyOnlineState(true, basic);
-    return SOFTBUS_OK;
-}
-
-static int32_t PostOffline(NodeBasicInfo *basic)
-{
-    if (basic == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    LnnNotifyOnlineState(false, basic);
-    return SOFTBUS_OK;
-}
-
-static int32_t PostToClient(const NodeInfo *info, ConnectStatus status)
-{
-    NodeBasicInfo basic;
-    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
-        LOG_ERR("memset_s basic fail!");
-    }
-    if (info == NULL) {
-        LOG_ERR("para error!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (ConvertNodeInfoToBasicInfo(info, &basic) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (status == STATUS_ONLINE) {
-        PostOnline(&basic);
-    } else if (status == STATUS_OFFLINE) {
-        PostOffline(&basic);
-    } else {
-        LOG_ERR("status error!");
-    }
-
     return SOFTBUS_OK;
 }
 
@@ -664,7 +604,7 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     return (*ptr);
 }
 
-void LnnAddOnlineNode(NodeInfo *info)
+ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
     const char *deviceId = NULL;
@@ -688,7 +628,7 @@ void LnnAddOnlineNode(NodeInfo *info)
     map = &g_distributedNetLedger.distributedInfo;
     if (pthread_mutex_lock(&g_distributedNetLedger.lock) != 0) {
         LOG_ERR("lock mutex fail!");
-        return;
+        return REPORT_NONE;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, deviceId);
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
@@ -710,20 +650,17 @@ void LnnAddOnlineNode(NodeInfo *info)
     LnnMapSet(&map->udidMap, deviceId, info, sizeof(NodeInfo));
     pthread_mutex_unlock(&g_distributedNetLedger.lock);
     if (isOffline) {
-        PostToClient(info, STATUS_ONLINE);
+        return REPORT_ONLINE;
     }
     if (isChanged) {
-        PostDeviceBasicInfoChanged(info, TYPE_NETWORK_ID);
+        return REPORT_CHANGE;
     }
+    return REPORT_NONE;
 }
 
 void LnnSetNodeOffline(const char *udid)
 {
     NodeInfo *info = NULL;
-    NodeBasicInfo basic;
-    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
-        LOG_ERR("memset_s basic fail!");
-    }
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (pthread_mutex_lock(&g_distributedNetLedger.lock) != 0) {
         LOG_ERR("lock mutex fail!");
@@ -739,14 +676,24 @@ void LnnSetNodeOffline(const char *udid)
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    if (ConvertNodeInfoToBasicInfo(info, &basic) != SOFTBUS_OK) {
-        pthread_mutex_unlock(&g_distributedNetLedger.lock);
-        return;
-    }
     pthread_mutex_unlock(&g_distributedNetLedger.lock);
-    if (PostOffline(&basic) != SOFTBUS_OK) {
-        LOG_ERR("post offline fail!");
+}
+
+int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo)
+{
+    if (udid == NULL || basicInfo == NULL) {
+        LOG_ERR("PARA ERROR!");
+        return SOFTBUS_INVALID_PARAM;
     }
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    if (pthread_mutex_lock(&g_distributedNetLedger.lock) != 0) {
+        LOG_ERR("lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    int32_t ret = ConvertNodeInfoToBasicInfo(info, basicInfo);
+    (void)pthread_mutex_unlock(&g_distributedNetLedger.lock);
+    return ret;
 }
 
 void LnnRemoveNode(const char *udid)
@@ -781,10 +728,6 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     NodeInfo *info = NULL;
-    NodeBasicInfo basic;
-    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
-        LOG_ERR("memset_s basic fail!");
-    }
     if (udid == NULL || name == NULL) {
         LOG_ERR("para error!");
         return false;
@@ -807,11 +750,7 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
         LOG_ERR("set device name error!");
         goto EXIT;
     }
-    if (ConvertNodeInfoToBasicInfo(info, &basic) != SOFTBUS_OK) {
-        goto EXIT;
-    }
     pthread_mutex_unlock(&g_distributedNetLedger.lock);
-    LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
     return true;
 EXIT:
     pthread_mutex_unlock(&g_distributedNetLedger.lock);

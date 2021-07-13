@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_APP_INFO_H
 #define SOFTBUS_APP_INFO_H
 
+#include "session.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
@@ -49,14 +50,7 @@ typedef enum {
     TYPE_INVALID_CHANNEL = -1,
     TYPE_UDP_CHANNEL_OPEN = 1,
     TYPE_UDP_CHANNEL_CLOSE = 2,
-} UdpChannelType;
-
-typedef enum {
-    BUSINESS_TYPE_MESSAGE = 1,
-    BUSINESS_TYPE_BYTE = 2,
-    BUSINESS_TYPE_FILE = 3,
-    BUSINESS_TYPE_STREAM = 4,
-} BusinessType;
+} UdpChannelOptType;
 
 typedef struct {
     ApiVersion apiVersion;
@@ -68,7 +62,7 @@ typedef struct {
     char authState[AUTH_STATE_SIZE_MAX];
     char ip[IP_LEN];
     int port;
-    int32_t channelId;
+    int64_t channelId;
 } AppInfoData;
 
 typedef struct {
@@ -76,8 +70,9 @@ typedef struct {
     char sessionKey[SESSION_KEY_LENGTH];
     RouteType routeType;
     BusinessType businessType;
+    StreamType streamType;
     UdpConnType udpConnType;
-    UdpChannelType udpChannelType;
+    UdpChannelOptType udpChannelOptType;
     int fd;
     AppType appType;
     AppInfoData myData;

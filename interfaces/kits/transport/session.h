@@ -42,6 +42,9 @@
  */
 #ifndef SESSION_H
 #define SESSION_H
+
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,6 +62,33 @@ typedef enum {
     TYPE_BUTT,
 } SessionType;
 
+typedef enum  {
+    INVALID = -1,
+    /*
+     * Send any segment of a frame each time.
+     */
+    RAW_STREAM,
+    /*
+     * Send a whole video frame each time.
+     */
+    COMMON_VIDEO_STREAM,
+    /*
+     * Send a whole audio frame each time.
+     */
+    COMMON_AUDIO_STREAM,
+    /*
+     * Slice frame mode.
+     */
+    VIDEO_SLICE_STREAM,
+} StreamType;
+
+typedef enum  {
+    LINK_TYPE_WIFI_WLAN_5G = 0,
+    LINK_TYPE_WIFI_WLAN_2G = 1,
+    LINK_TYPE_WIFI_P2P = 2,
+    LINK_TYPE_BR = 3,
+} LinkType;
+
 /**
  * @brief session attribute.
  *
@@ -69,8 +99,36 @@ typedef enum {
  */
 typedef struct {
     /** @brief dataType{@link SessionType} */
-    unsigned int dataType;
+    int dataType;
+    int lintTypeNum;
+    int *lintType;
+    union {
+        struct StreamAttr {
+            int streamType;
+        } streamAttr;
+    } attr;
 } SessionAttribute;
+
+typedef struct {
+    char *buf;
+    int bufLen;
+} StreamData;
+
+typedef struct {
+    int type;
+    int64_t value;
+} TV;
+
+typedef struct {
+    int frameType;
+    int64_t timeStamp;
+    int seqNum;
+    int seqSubNum;
+    int level;
+    int bitMap;
+    int tvCount;
+    TV *tvList;
+} FrameInfo;
 
 /**
  * @brief Defines session callbacks.
@@ -132,6 +190,8 @@ typedef struct {
      * @version 1.0
      */
     void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
+
+    void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
 } ISessionListener;
 
 /**
@@ -217,6 +277,8 @@ int SendBytes(int sessionId, const void *data, unsigned int len);
  * @version 1.0
  */
 int SendMessage(int sessionId, const void *data, unsigned int len);
+
+int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
 
 /**
  * @brief Obtains the session name registered by the local device based on the session ID.

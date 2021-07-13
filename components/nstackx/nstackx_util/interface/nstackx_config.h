@@ -40,6 +40,9 @@
 #define NSTACKX_SUPPORT_ENCRYPT 0
 #endif
 
+#ifndef NSTACKX_2_4G_WIFI
+#define NSTACKX_2_4G_WIFI
+#endif
 #endif /* NSTACKX_WITH_HMOS_LINUX */
 
 #ifndef NSTACKX_SUPPORT_FILLP

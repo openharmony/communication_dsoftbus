@@ -75,7 +75,7 @@ public:
     int SendBytes(const void *buf, ssize_t len) const override;
 
 private:
-    NO_COPY_AND_ASSIGN(SessionImpl)
+    NO_COPY_AND_ASSIGN(SessionImpl);
 
     const int MAX_BYTES_LENGTH = 128 * 1024 * 1024;
     const std::string nullString_ = "";

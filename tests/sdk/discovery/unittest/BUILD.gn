@@ -27,23 +27,21 @@ ohos_unittest("DiscSdkTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/discovery/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "//base/security/permission/interfaces/innerkits/permission_standard/permissionsdk/main/cpp/include",
     "//utils/native/base/include",
     "unittest/common/",
+    "$dsoftbus_root_path/sdk/discovery/manager/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/frame/standard/client:softbus_client",
+    "$dsoftbus_root_path/sdk/discovery/service:dsoftbus_disc_service_sdk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
-      "permission_standard:libpermissionsdk_standard"
-    ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps = [ "hilog:libhilog" ]
   }

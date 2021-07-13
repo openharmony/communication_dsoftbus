@@ -56,6 +56,8 @@ extern "C" {
 #endif
 #define TRANS_MESSAGE_LENGTH_MAX 1024
 
+#define WAIT_SERVER_READY_INTERVAL 200
+
 typedef struct {
     pthread_mutex_t lock;
     unsigned int cnt;
@@ -75,14 +77,6 @@ enum {
     TIMER_TYPE_MAX,
 };
 
-struct CommonScvId {
-    unsigned int handle;
-    unsigned int token;
-    unsigned int cookie;
-    void *ipcCtx;
-    unsigned int cbId;
-};
-
 typedef enum {
     TRANS_SESSION_BYTES = 0,
     TRANS_SESSION_MESSAGE,
@@ -91,13 +85,21 @@ typedef enum {
 typedef enum {
     CHANNEL_TYPE_TCP_DIRECT = 0,
     CHANNEL_TYPE_PROXY,
-    CHANNEL_TYPE_FILE,
+    CHANNEL_TYPE_UDP,
     CHANNEL_TYPE_BUTT,
 } ChannelType;
+
+typedef enum {
+    BUSINESS_TYPE_MESSAGE = 1,
+    BUSINESS_TYPE_BYTE = 2,
+    BUSINESS_TYPE_FILE = 3,
+    BUSINESS_TYPE_STREAM = 4,
+} BusinessType;
 
 typedef struct {
     int32_t channelId;
     int32_t channelType;
+    int32_t businessType;
     int32_t fd;
     bool isServer;
     bool isEnabled;
@@ -108,6 +110,9 @@ typedef struct {
     char *sessionKey;
     char *peerSessionName;
     char *peerDeviceId;
+    char *myIp;
+    char *peerIp;
+    int32_t peerPort;
 } ChannelInfo;
 
 #ifdef __cplusplus

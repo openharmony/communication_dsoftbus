@@ -1,0 +1,85 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+config("bus_center_hub_interface") {
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  if (ohos_kernel_type == "liteos_m") {
+  } else {
+    shared_library("dsoftbus_bus_center_hub") {
+      sources = [
+        "src/lnn_lane_info.c",
+        "src/lnn_lane_manager.c",
+        "src/lnn_smart_communication.c",
+      ]
+      include_dirs = [
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/include",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-Werror",
+        "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
+      ]
+      public_configs = [ ":bus_center_hub_interface" ]
+      deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$hilog_lite_deps_path",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("dsoftbus_bus_center_hub") {
+    sources = [
+      "src/lnn_lane_info.c",
+      "src/lnn_lane_manager.c",
+      "src/lnn_smart_communication.c",
+    ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/common/include",
+    ]
+    public_configs = [ ":bus_center_hub_interface" ]
+    deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "//utils/native/base:utils",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
+}

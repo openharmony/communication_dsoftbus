@@ -36,6 +36,7 @@ extern "C" {
 static ListNode g_authClientHead;
 static ListNode g_authServerHead;
 static VerifyCallback *g_verifyCallback = NULL;
+static AuthTransCallback *g_transCallback = NULL;
 static ConnectCallback g_connCallback = {0};
 static ConnectResult g_connResult = {0};
 static const GroupAuthManager *g_hichainGaInstance = NULL;
@@ -411,6 +412,40 @@ static void VerifyDeviceDevLvl(AuthManager *auth)
     }
 }
 
+static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    if (sessionKey == NULL) {
+        LOG_ERR("invalid parameter");
+        return;
+    }
+    AuthManager *auth = NULL;
+    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
+    if (auth == NULL) {
+        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
+        if (auth == NULL) {
+            LOG_ERR("no match auth found");
+            return;
+        }
+    }
+    LOG_INFO("auth get session key succ, authId is %lld", authId);
+    NecessaryDevInfo devInfo = {0};
+    if (AuthGetDeviceKey(devInfo.deviceKey, MAX_DEVICE_KEY_LEN, &devInfo.deviceKeyLen, &auth->option) != SOFTBUS_OK) {
+        LOG_ERR("auth get device key failed");
+        return;
+    }
+    if (pthread_mutex_lock(&g_authLock) != 0) {
+        LOG_ERR("lock mutex failed");
+        return;
+    }
+    devInfo.type = auth->option.type;
+    devInfo.side = auth->side;
+    devInfo.seq = (int32_t)((uint64_t)authId & LOW_32_BIT);
+    AuthSetLocalSessionKey(&devInfo, auth->peerUdid, sessionKey, sessionKeyLen);
+    auth->status = IN_SYNC_PROGRESS;
+    (void)pthread_mutex_unlock(&g_authLock);
+    auth->cb->onKeyGenerated(authId, &auth->option, auth->peerVersion);
+}
+
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
 {
     if (auth == NULL || data == NULL) {
@@ -423,11 +458,6 @@ void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
         return;
     }
     if (auth->side == SERVER_SIDE_FLAG) {
-        if (EventInLooper(auth->authId) != SOFTBUS_OK) {
-            LOG_ERR("auth EventInLooper failed");
-            HandleAuthFail(auth);
-            return;
-        }
         if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
             HandleAuthFail(auth);
         }
@@ -567,6 +597,12 @@ static AuthManager *CreateServerAuth(uint32_t connectionId, AuthDataInfo *authDa
         SoftBusFree(auth);
         return NULL;
     }
+    if (EventInLooper(auth->authId) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_authLock);
+        LOG_ERR("auth EventInLooper failed");
+        DeleteAuth(auth);
+        return NULL;
+    }
     (void)pthread_mutex_unlock(&g_authLock);
     LOG_INFO("create auth as server side, authId is %lld", auth->authId);
     return auth;
@@ -630,40 +666,6 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
     }
     recvData = (uint8_t *)data + sizeof(AuthDataInfo);
     HandleReceiveData(connectionId, &authDataInfo, side, recvData);
-}
-
-static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
-{
-    if (sessionKey == NULL) {
-        LOG_ERR("invalid parameter");
-        return;
-    }
-    AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
-    if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
-        if (auth == NULL) {
-            LOG_ERR("no match auth found");
-            return;
-        }
-    }
-    LOG_INFO("auth get session key succ, authId is %lld", authId);
-    NecessaryDevInfo devInfo = {0};
-    if (AuthGetDeviceKey(devInfo.deviceKey, MAX_DEVICE_KEY_LEN, &devInfo.deviceKeyLen, &auth->option) != SOFTBUS_OK) {
-        LOG_ERR("auth get device key failed");
-        return;
-    }
-    if (pthread_mutex_lock(&g_authLock) != 0) {
-        LOG_ERR("lock mutex failed");
-        return;
-    }
-    devInfo.type = auth->option.type;
-    devInfo.side = auth->side;
-    devInfo.seq = (int32_t)((uint64_t)authId & LOW_32_BIT);
-    AuthSetLocalSessionKey(&devInfo, auth->peerUdid, sessionKey, sessionKeyLen);
-    auth->status = IN_SYNC_PROGRESS;
-    (void)pthread_mutex_unlock(&g_authLock);
-    auth->cb->onKeyGenerated(authId, &auth->option, auth->peerVersion);
 }
 
 static void AuthOnError(int64_t authId, int operationCode, int errorCode, const char *errorReturn)
@@ -808,6 +810,44 @@ int32_t AuthVerifyInit(void)
 int32_t AuthVerifyDeinit(void)
 {
     DestroyDeviceAuthService();
+    return SOFTBUS_OK;
+}
+
+void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len)
+{
+    int32_t i;
+    if (g_transCallback == NULL) {
+        LOG_ERR("auth trans callback is null");
+        return;
+    }
+    for (i = 0; i < MODULE_NUM; i++) {
+        if (g_transCallback[i].onTransUdpDataRecv != NULL) {
+            AuthTransDataInfo info = {0};
+            info.flags = head->flag;
+            info.seq = head->seq;
+            info.data = data;
+            info.len = len;
+            g_transCallback[i].onTransUdpDataRecv(auth->authId, &(auth->option), &info);
+        }
+    }
+}
+
+int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
+{
+    if (cb == NULL || cb->onTransUdpDataRecv == NULL || moduleId >= MODULE_NUM) {
+        LOG_ERR("invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_transCallback == NULL) {
+        g_transCallback = (AuthTransCallback *)SoftBusMalloc(sizeof(AuthTransCallback) * MODULE_NUM);
+        if (g_transCallback == NULL) {
+            LOG_ERR("SoftBusMalloc failed");
+            return SOFTBUS_ERR;
+        }
+        (void)memset_s(g_transCallback, sizeof(AuthTransCallback) * MODULE_NUM, 0,
+            sizeof(AuthTransCallback) * MODULE_NUM);
+    }
+    g_transCallback[moduleId].onTransUdpDataRecv = cb->onTransUdpDataRecv;
     return SOFTBUS_OK;
 }
 
@@ -963,6 +1003,12 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
         SoftBusFree(auth);
         return SOFTBUS_ERR;
     }
+    if (EventInLooper(auth->authId) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_authLock);
+        LOG_ERR("ip auth EventInLooper failed");
+        DeleteAuth(auth);
+        return SOFTBUS_ERR;
+    }
     (void)pthread_mutex_unlock(&g_authLock);
     LOG_INFO("create ip auth as server side");
     return SOFTBUS_OK;
@@ -1028,6 +1074,40 @@ void AuthIpChanged(ConnectType type)
         }
     }
     (void)pthread_mutex_unlock(&g_authLock);
+}
+
+int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
+{
+    AuthManager *auth = NULL;
+    ListNode *item = NULL;
+    ListNode *tmp = NULL;
+    if (pthread_mutex_lock(&g_authLock) != 0) {
+        LOG_ERR("lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+    LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
+        auth = LIST_ENTRY(item, AuthManager, node);
+        if ((option->type == CONNECT_TCP && strncmp(auth->option.info.ipOption.ip, option->info.ipOption.ip,
+            strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
+            strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
+            *authId = auth->authId;
+            (void)pthread_mutex_unlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
+        auth = LIST_ENTRY(item, AuthManager, node);
+        if ((option->type == CONNECT_TCP && strncmp(auth->option.info.ipOption.ip, option->info.ipOption.ip,
+            strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
+            strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
+            *authId = auth->authId;
+            (void)pthread_mutex_unlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_authLock);
+    LOG_ERR("auth get id by option failed");
+    return SOFTBUS_ERR;
 }
 
 int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t bufLen)

@@ -23,6 +23,7 @@
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_utils.h"
+#include "trans_server_proxy.h"
 
 #define ID_NOT_USED 0
 #define ID_USED 1
@@ -55,6 +56,11 @@ int TransClientInit(void)
 
     if (RegisterTimeoutCallback(SOFTBUS_SESSION_TIMER_FUN, TransSessionTimer) != SOFTBUS_OK) {
         LOG_ERR("init trans timer failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransServerProxyInit() != SOFTBUS_OK) {
+        LOG_ERR("init trans ipc proxy failed");
         return SOFTBUS_ERR;
     }
 
@@ -96,11 +102,8 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         SessionInfo *sessionNode = NULL;
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-            (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-            ListDelete(&(sessionNode->node));
-            DestroySessionId(sessionNode->sessionId);
-            server->listener.session.OnSessionClosed(sessionNode->sessionId);
-            SoftBusFree(sessionNode);
+            int32_t ret = ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+            LOG_INFO("trans close channel ret = %d", ret);
         }
     }
 
@@ -662,7 +665,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t *sessionId)
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId)
 {
     if ((channelId < 0) || (sessionId == NULL)) {
         LOG_ERR("Invalid param");
@@ -688,7 +691,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t *sessionId)
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId) {
+            if (sessionNode->channelId == channelId && sessionNode->channelType == channelType) {
                 *sessionId = sessionNode->sessionId;
                 (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;

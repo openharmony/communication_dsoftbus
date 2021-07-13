@@ -15,71 +15,86 @@
 
 #include "client_trans_channel_callback.h"
 
-#include "client_trans_channel_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
-#ifndef SOFTBUS_WATCH
 #include "client_trans_tcp_direct_manager.h"
-#include "client_trans_tcp_direct_message.h"
-#endif
+#include "client_trans_udp_manager.h"
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t TransOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
+int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    (void)pkgName;
-    if ((sessionName == NULL) || (channel == NULL)) {
-        LOG_ERR("Invalid param");
+    if (sessionName == NULL || channel == NULL) {
+        LOG_ERR("invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = SOFTBUS_ERR;
-    uint32_t flag = TYPE_BUTT;
+    int32_t udpPort = 0;
     switch (channel->channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransOnProxyChannelOpened(channel);
-            flag = TYPE_MESSAGE;
+            ret = ClientTransProxyOnChannelOpened(sessionName, channel);
             break;
-#ifndef SOFTBUS_WATCH
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransTdcOnChannelOpened(channel);
+            ret = TransTdcOnChannelOpened(sessionName, channel);
             break;
-#endif
+        case CHANNEL_TYPE_UDP:
+            ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
+            break;
         default:
-            LOG_ERR("Invalid type");
-            return SOFTBUS_ERR;
+            LOG_ERR("invalid type");
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("channel open failed");
-        return SOFTBUS_ERR;
-    }
-
-    ret = TransOnSessionOpened(sessionName, channel, flag);
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("TransOnSessionOpened failed");
-        (void)ClientTransCloseChannel(channel->channelId, channel->channelType);
+    if (channel->channelType == CHANNEL_TYPE_UDP && channel->isServer) {
+        return udpPort;
     }
 
     return ret;
 }
 
-int32_t TransOnChannelOpenFailed(const char *pkgName, int32_t channelId)
+int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 {
-    (void)pkgName;
-    return TransOnSessionOpenFailed(channelId);
+    LOG_INFO("[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
+        channelId, channelType);
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            return ClientTransProxyOnChannelOpenFailed(channelId);
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return ClientTransTdcOnChannelOpenFailed(channelId);
+        case CHANNEL_TYPE_UDP:
+            return TransOnUdpChannelOpenFailed(channelId);
+        default:
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
 }
 
-int32_t TransOnChannelClosed(const char *pkgName, int32_t channelId)
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    (void)pkgName;
-    return TransOnSessionClosed(channelId);
+    LOG_INFO("[client] TransOnChannelClosed: channelId=%d, channelType=%d",
+        channelId, channelType);
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            return ClientTransProxyOnChannelClosed(channelId);
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return ClientTransProxyOnChannelClosed(channelId);
+        case CHANNEL_TYPE_UDP:
+            return TransOnUdpChannelClosed(channelId);
+        default:
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
 }
 
-int32_t TransOnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data, uint32_t len,
-    SessionPktType type)
+int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, SessionPktType type)
 {
-    (void)pkgName;
-    return TransOnDataReceived(channelId, data, len, type);
+    LOG_INFO("[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
+        channelId, channelType);
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            return ClientTransProxyOnDataReceived(channelId, data, len, type);
+        default:
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
 }

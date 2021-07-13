@@ -46,7 +46,6 @@ typedef struct {
     TaskHandle readHandle;
     TaskHandle writeHandle;
     TaskHandle errorHandle;
-    TaskHandle endHandle;
     void *ptr;
     uint64_t count;
 } EpollTask;

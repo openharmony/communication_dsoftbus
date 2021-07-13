@@ -33,6 +33,7 @@ typedef enum {
 } LnnLaneLinkType;
 
 typedef struct {
+    bool isSupportUdp;
     bool isProxy;
     ConnectionAddr conOption;
 } LnnLaneInfo;
@@ -50,6 +51,7 @@ void LnnReleaseLane(int32_t laneId);
 const LnnLaneInfo *LnnGetConnection(int32_t laneId);
 bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool mode);
 void LnnLanesInit(void);
+void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport);
 
 #ifdef __cplusplus
 }

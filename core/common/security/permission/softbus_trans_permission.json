@@ -1,0 +1,14 @@
+[
+  {
+    "SESSION_NAME": "DistributedFileService.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "1000",
+        "ACTIONS": "create,open"
+      }
+    ]
+  }
+]

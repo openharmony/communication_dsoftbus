@@ -19,7 +19,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "softbus_errcode.h"
-#include "softbus_interface.h"
+#include "softbus_ipc_def.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_server.h"
@@ -62,7 +62,7 @@ SoftBusServerStub::SoftBusServerStub()
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    LOG_INFO("SoftBusServerStub::OnReceived, code = %u", code);
+    LOG_INFO("SoftBusServerStub::OnReceived, code = %{public}u", code);
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
@@ -241,7 +241,12 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         LOG_ERR("CloseChannelInner read channel Id failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = CloseChannel(channelId);
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        LOG_ERR("CloseChannelInner read channel channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = CloseChannel(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
         LOG_ERR("CloseChannelInner write reply failed!");
         return SOFTBUS_ERR;
@@ -330,6 +335,7 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
     void *nodeInfo = nullptr;
     int32_t infoNum;
     uint32_t infoTypeLen;
+
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         LOG_ERR("GetAllOnlineNodeInfoInner read clientName failed!");
@@ -369,6 +375,7 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
 {
     void *nodeInfo = nullptr;
     uint32_t infoTypeLen;
+
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         LOG_ERR("GetLocalDeviceInfoInner read clientName failed!");

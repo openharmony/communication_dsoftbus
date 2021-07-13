@@ -15,7 +15,6 @@
 
 #include "softbus_thread_pool.h"
 
-#include <securec.h>
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"

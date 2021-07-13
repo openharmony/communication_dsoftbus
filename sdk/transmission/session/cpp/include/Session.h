@@ -90,7 +90,7 @@ public:
     virtual void SetPeerPid(pid_t peerPid) = 0;
 
 private:
-    NO_COPY_AND_ASSIGN(Session)
+    NO_COPY_AND_ASSIGN(Session);
 };
 } // namespace SoftBus
 } // namespace Communication

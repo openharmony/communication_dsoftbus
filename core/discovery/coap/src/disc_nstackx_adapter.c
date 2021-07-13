@@ -15,7 +15,6 @@
 
 #include "disc_nstackx_adapter.h"
 
-#include <stdlib.h>
 #include <string.h>
 #include "bus_center_manager.h"
 #include "nstackx.h"
@@ -146,6 +145,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             LOG_INFO("duplicate  device is not reported.");
             continue;
         }
+
         DeviceInfo discDeviceInfo;
         (void)memset_s(&discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
         if (memcpy_s(discDeviceInfo.devName, sizeof(discDeviceInfo.devName),
@@ -158,7 +158,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         discDeviceInfo.addrNum = 1;
         discDeviceInfo.devType = nstackxDeviceInfo->deviceType;
         discDeviceInfo.capabilityBitmapNum = nstackxDeviceInfo->capabilityBitmapNum;
-        if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX))== 0) {
+        if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
             discDeviceInfo.addr[0].type = CONNECTION_ADDR_WLAN;
         } else {
             discDeviceInfo.addr[0].type = CONNECTION_ADDR_ETH;
@@ -189,7 +189,6 @@ int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
     if (discCoapCb == NULL || g_discCoapInnerCb == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         LOG_ERR("memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
@@ -202,7 +201,6 @@ int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
     if (capabilityBitmapNum == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != 0) {
         return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
     }
@@ -214,7 +212,6 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     if (capabilityBitmapNum == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
@@ -251,7 +248,6 @@ int32_t DiscCoapStartDiscovery(DiscCoapMode mode)
         LOG_ERR("invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-
     switch (mode) {
         case ACTIVE_PUBLISH:
             if (NSTACKX_StartDeviceFindAn(PUBLISH_MODE_PROACTIVE) != SOFTBUS_OK) {

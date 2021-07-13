@@ -16,7 +16,7 @@
 #ifndef CLIENT_TRANS_TCP_DIRECT_MESSAGE_H
 #define CLIENT_TRANS_TCP_DIRECT_MESSAGE_H
 
-#include <stdint.h>
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,8 +47,14 @@ typedef struct {
     uint32_t dataLen;
 } __attribute__((packed)) TcpDataPacketHead;
 
-int32_t TransTdcPreProcessRecvData(int32_t fd, char *data, uint32_t size);
-int32_t TransTdcProcessRecvData(int32_t channelId, const char *data);
+int32_t TransTdcRecvData(int32_t fd);
+
+int32_t TransDataListInit(void);
+void TransDataListDeinit(void);
+int32_t TransDelDataBufNode(int32_t channelId);
+int32_t TransAddDataBufNode(int32_t channelId, int32_t fd);
+int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len);
+int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len);
 
 #ifdef __cplusplus
 }
