@@ -22,14 +22,14 @@
 extern "C" {
 #endif
 
-int32_t TransOnChannelOpened(const char *pkgName, const char* sessionName, const ChannelInfo *channel);
+int32_t TransOnChannelOpened(const char* sessionName, const ChannelInfo *channel);
 
-int32_t TransOnChannelOpenFailed(const char *pkgName, int32_t channelId);
+int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType);
 
-int32_t TransOnChannelClosed(const char *pkgName, int32_t channelId);
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType);
 
-int32_t TransOnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data, unsigned int len,
-    SessionPktType type);
+int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
+    const void *data, unsigned int len, SessionPktType type);
 
 #ifdef __cplusplus
 }

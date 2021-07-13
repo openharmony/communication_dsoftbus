@@ -19,10 +19,11 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
-#include "parameter.h"
-#include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+
+#define DEFAULT_DEVICE_NAME "UNKNOWN"
+#define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
 
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
@@ -30,24 +31,14 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
         LOG_ERR("fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    char localUdid[UDID_BUF_LEN] = {0};
-    const char* sn = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            sn = GetSerial();
-            if (sn == NULL) {
-                LOG_ERR("GetSerial failed!");
-            }
-            if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
+            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
-            if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {
-                LOG_ERR("GetDevUdid failed!");
-                return SOFTBUS_ERR;
-            }
-            if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {
+            if (strncpy_s(value, len, DEFAULT_UDID_NAME, strlen(DEFAULT_UDID_NAME)) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;

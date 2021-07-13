@@ -28,6 +28,7 @@ extern "C" {
 #define LNN_LOOPBACK_IFNAME "lo"
 #define LNN_WLAN_IF_NAME_PREFIX "wlan"
 #define LNN_ETH_IF_NAME_PREFIX  "eth"
+
 int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, ConnectionAddrType type);
 
 #ifdef __cplusplus

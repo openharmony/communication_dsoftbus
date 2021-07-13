@@ -56,22 +56,14 @@ typedef struct {
 } DiscoveryFuncInterface;
 
 typedef struct {
-    void (*OnServerPublishSuccess)(const char *packageName, int32_t publishId);
-    void (*OnServerPublishFail)(const char *packageName, int32_t publishId, PublishFailReason reason);
-} IServerPublishCallback;
+    int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device);
+} IServerDiscInnerCallback;
 
-typedef struct {
-    void (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device);
-    void (*OnServerDiscoverFailed)(const char *packageName, int32_t subscribeId, DiscoveryFailReason failReason);
-    void (*OnServerDiscoverySuccess)(const char *packageName, int32_t subscribeId);
-} IServerDiscoveryCallback;
-
-void DiscOnDeviceFound(const DeviceInfo *device);
-int32_t DiscPublishService(const char *packageName, const PublishInfo *info, const IServerPublishCallback *cb);
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info);
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
-int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscoveryCallback *cb);
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb);
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId);
-void DiscMgrDeathCallback(const char *pkgName);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

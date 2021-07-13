@@ -19,7 +19,6 @@
 #include <sys/types.h>
 
 #include "common_list.h"
-#include "pthread.h"
 #include "securec.h"
 #include "softbus_def.h"
 #include "softbus_log.h"
@@ -380,7 +379,8 @@ struct LoopConfigItem {
 static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, NULL},
     {LOOP_TYPE_BR_SEND, NULL},
-    {LOOP_TYPE_BR_RECV, NULL}
+    {LOOP_TYPE_BR_RECV, NULL},
+    {LOOP_TYPE_P2P, NULL}
 };
 
 SoftBusLooper *GetLooper(int type)

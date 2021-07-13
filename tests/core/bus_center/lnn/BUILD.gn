@@ -26,9 +26,9 @@ ohos_unittest("LNNTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
@@ -44,6 +44,11 @@ ohos_unittest("LNNTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+    "$dsoftbus_root_path/core/bus_center/monitor:dsoftbus_bus_center_monitor",
+    "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
     "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

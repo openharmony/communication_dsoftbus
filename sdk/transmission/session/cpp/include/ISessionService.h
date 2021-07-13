@@ -43,7 +43,7 @@ public:
     virtual int GrantPermission(int uid, int pid, const std::string &busName) = 0;
 
 private:
-    NO_COPY_AND_ASSIGN(ISessionService)
+    NO_COPY_AND_ASSIGN(ISessionService);
     static std::shared_ptr<ISessionService> instance_;
     static std::shared_mutex instanceMutex_;
 };

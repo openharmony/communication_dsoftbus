@@ -54,6 +54,7 @@ The main code directory structure of DSoftBus is as follows:
 
 -   The devices between which you want to set up a connection must be in the same LAN.
 -   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see relevant descriptions in the Security subsystem readme file.
+-   A device can only be connected to another one device.
 
 ## Usage<a name="section1312121216216"></a>
 
@@ -245,12 +246,12 @@ The main code directory structure of DSoftBus is as follows:
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
-[DSoftBus subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/dsoftbus.md)
+DSoftBus subsystem
 
 **communication_dsoftbus**
 
-[communication_bluetooth](https://gitee.com/openharmony/communication_bluetooth/blob/master/README.md)
+communication_bluetooth
 
-[communication_ipc](https://gitee.com/openharmony/communication_ipc/blob/master/README.md)
+communication_ipc
 
 communication_wifi

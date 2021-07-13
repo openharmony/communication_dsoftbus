@@ -206,6 +206,10 @@ int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 
     SetLogLevel(NSTACKX_LOG_LEVEL_DEBUG);
 
+#ifdef NSTACKX_WITH_LITEOS
+    EpollEventPtrInit(); /* init g_epollEventPtrMutex g_epollEventPtrArray */
+#endif
+
     g_epollfd = CreateEpollDesc();
     if (!IsEpollDescValid(g_epollfd)) {
         LOGE(TAG, "epoll create fail! errno: %d", errno);

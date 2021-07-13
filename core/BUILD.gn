@@ -14,14 +14,5 @@
 import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_server") {
-  features = [
-    "connection:softbus_connection",
-    "frame/lite:softbus_server_frame",
-    "common:softbus_core_common",
-    "bus_center:softbus_bus_center",
-
-    "transmission:softbus_server_transmission",
-    "adapter/kernel:softbus_adapter_kernel",
-    "adapter/bus_center:softbus_adapter_bus_center",
-  ]
+  features = [ "frame:softbus_server" ]
 }

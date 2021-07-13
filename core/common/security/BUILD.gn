@@ -13,29 +13,51 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_crypto") {
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "//third_party/bounds_checking_function/include",
-      "//third_party/mbedtls/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    cflags = [ "-Wall" ]
-    sources = [ "mbedtls/softbus_crypto.c" ]
+if (defined(ohos_lite)) {
+  common_include = [
+    "$dsoftbus_root_path/core/common/include",
+    "$libsec_include_path",
+    "//third_party/mbedtls/include",
+    "$hilog_lite_include_path",
+  ]
+  common_deps = [
+    "$hilog_lite_deps_path",
+    "$libsec_deps_path",
+    "//third_party/mbedtls:mbedtls_shared",
+  ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_crypto") {
+      include_dirs = common_include
+      cflags = [ "-Wall" ]
+      sources = [ "mbedtls/softbus_crypto.c" ]
+      deps = common_deps
+    }
+  } else {
+    shared_library("softbus_crypto") {
+      include_dirs = common_include
+      cflags = [ "-Wall" ]
+      sources = [ "mbedtls/softbus_crypto.c" ]
+      deps = common_deps
+    }
   }
 } else {
-  shared_library("softbus_crypto") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("softbus_crypto") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "//third_party/bounds_checking_function/include",
       "//third_party/mbedtls/include",
     ]
-    cflags = [ "-Wall" ]
     sources = [ "mbedtls/softbus_crypto.c" ]
     public_deps = [
-      "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/mbedtls:mbedtls_shared",
+      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "//utils/native/base:utilsecurec_shared",
     ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

@@ -10,81 +10,123 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import("//build/lite/config/component/lite_component.gni")
+
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_client_frame") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/sdk/include",
-      "$dsoftbus_root_path/sdk/discovery/include",
-      "$dsoftbus_root_path/sdk/transmission/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
 
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/bus_center/interface",
-      "$dsoftbus_root_path/core/transmission/session/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-      "$dsoftbus_root_path/core/transmission/pending_packet/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    sources = [
-      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_client_interface_impl.c",
-      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_server_interface.c",
-      "softbus_client_event_manager.c",
-      "softbus_client_frame_manager.c",
-      "softbus_client_frame_manager_weak.c",
-    ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_client_frame") {
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/sdk/include",
+        "$dsoftbus_root_path/sdk/discovery/include",
+        "$dsoftbus_root_path/sdk/transmission/common/include",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/interfaces/kits",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/transmission/session/include",
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+        "$dsoftbus_root_path/core/transmission/pending_packet/include",
+        "$hilog_lite_include_path",
+      ]
+      sources = [
+        "$dsoftbus_root_path/core/common/inner_communication/c/softbus_client_interface_impl.c",
+        "$dsoftbus_root_path/core/common/inner_communication/c/softbus_server_interface.c",
+        "softbus_client_event_manager.c",
+        "softbus_client_frame_manager.c",
+        "softbus_client_frame_manager_weak.c",
+      ]
+
+      deps = [ "$hilog_lite_deps_path" ]
+    }
+  } else {
+    shared_library("softbus_client_frame") {
+      include_dirs = [
+        "common/include",
+        "small/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+
+      sources = [
+        "common/src/softbus_client_event_manager.c",
+        "common/src/softbus_client_frame_manager.c",
+        "small/src/bus_center_client_stub.c",
+        "small/src/disc_client_stub.c",
+        "small/src/softbus_client_context_manager.c",
+        "small/src/softbus_client_stub.c",
+        "small/src/softbus_server_proxy.c",
+        "small/src/trans_client_stub.c",
+      ]
+
+      defines = [ "SOFTBUS_WATCH" ]
+
+      deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
+        "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
+        "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
+        "$hilog_lite_deps_path",
+        "//foundation/communication/ipc_lite:liteipc_adapter",
+        "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
   }
 } else {
-  shared_library("softbus_client_frame") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/sdk/include",
-      "$dsoftbus_root_path/sdk/discovery/include",
-      "$dsoftbus_root_path/sdk/transmission/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/common/inner_communication/ipc/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
+  import("//build/ohos.gni")
 
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/bus_center/interface",
-      "$dsoftbus_root_path/core/transmission/session/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-      "//foundation/distributedschedule/samgr_lite/interfaces/kits/registry",
-      "//foundation/distributedschedule/samgr_lite/interfaces/kits/samgr",
-      "//third_party/bounds_checking_function/include",
-      "//foundation/communication/ipc_lite/interfaces/kits",
-      "//utils/native/lite/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+  ohos_shared_library("softbus_client_frame") {
+    include_dirs = [
+      "common/include",
+      "standard/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "//utils/system/safwk/native/include",
+      "$dsoftbus_root_path/sdk/discovery/manager/include",
+      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/core/frame/standard/client/include",
     ]
 
     sources = [
-      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_client_interface_impl.c",
-      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_client_weak.c",
-      "$dsoftbus_root_path/core/common/inner_communication/ipc/softbus_server_interface.c",
-      "softbus_client_event_manager.c",
-      "softbus_client_frame_manager.c",
-      "softbus_client_frame_manager_weak.c",
+      "$dsoftbus_root_path/core/frame/standard/client/src/softbus_client_stub.cpp",
+      "common/src/softbus_client_event_manager.c",
+      "common/src/softbus_client_frame_manager.c",
+      "standard/src/softbus_client_death_recipient.cpp",
+      "standard/src/softbus_server_proxy_frame.cpp",
+      "standard/src/softbus_server_proxy_standard.cpp",
     ]
 
-    deps = [
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/transmission/pending_packet:trans_pending",
-      "//foundation/communication/ipc_lite:liteipc",
-      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
-    ]
+    defines = [ "SOFTBUS_WATCH" ]
+
+    if (is_standard_system) {
+      external_deps = [
+        "ipc:ipc_single",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+      deps = [
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
+        "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
+        "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
+        "//utils/native/base:utils",
+      ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

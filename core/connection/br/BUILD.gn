@@ -13,17 +13,74 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-static_library("br_connection") {
-  sources = [ "br_connection.c" ]
-  include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/adapter/br/include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
-    "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/core/connection/interface",
-    "//third_party/cJSON",
-  ]
-  deps = [ "$dsoftbus_root_path/core/adapter/br/mock:br_adapter" ]
+if (enable_connection_br == false) {
+  sources_br = [ "src/br_connection_virtual.c" ]
+  deps_br = []
+} else {
+  sources_br = [ "src/br_connection.c" ]
+  deps_br = [ "$dsoftbus_root_path/core/adapter/br/mock:br_adapter" ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("br_connection") {
+      sources = sources_br
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/core/connection/br/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/adapter/br/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/interface",
+        "//third_party/cJSON",
+      ]
+      deps = deps_br
+    }
+  } else {
+    shared_library("br_connection") {
+      sources = sources_br
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/core/connection/br/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/adapter/br/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/interface",
+        "//third_party/cJSON",
+      ]
+      deps = deps_br
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("br_connection") {
+    sources = sources_br
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/connection/br/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/adapter/br/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/connection/manager",
+      "$dsoftbus_root_path/core/connection/interface",
+      "//third_party/cJSON",
+    ]
+    deps = deps_br
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

@@ -19,9 +19,9 @@
 
 #include "softbus_crypto.h"
 #include "softbus_errcode.h"
-#include "softbus_interface.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
+#include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_transmission_interface.h"
 
@@ -49,7 +49,7 @@ typedef struct  {
 int32_t NotifyClientMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len,
     SessionPktType type)
 {
-    int32_t ret = GetClientProvideInterface()->onChannelMsgReceived(pkgName, channelId, data, len, type);
+    int32_t ret = TransProxyOnMsgReceived(pkgName, channelId, data, len,  type);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("notify err(%d)", ret);
     }
@@ -255,8 +255,11 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
         case PROXY_FLAG_BYTES:
             return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_BYTES);
         case PROXY_FLAG_MESSAGE:
-            TransProxySendSessionAck(channelId, seq);
-            return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
+            if (NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE) == SOFTBUS_OK) {
+                TransProxySendSessionAck(channelId, seq);
+                return SOFTBUS_OK;
+            }
+            return SOFTBUS_ERR;
         case PROXY_FLAG_ASYNC_MESSAGE:
             return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
         default:

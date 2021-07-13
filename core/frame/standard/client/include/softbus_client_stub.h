@@ -27,16 +27,15 @@ public:
     SoftBusClientStub();
     virtual ~SoftBusClientStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void OnDeviceFound(const void *device) override;
+    void OnDeviceFound(const DeviceInfo *device) override;
     void OnDiscoverFailed(int subscribeId, int failReason) override;
     void OnDiscoverySuccess(int subscribeId) override;
     void OnPublishSuccess(int publishId) override;
     void OnPublishFail(int publishId, int reason) override;
-    int32_t OnChannelOpened(const char *pkgName, const char *sessionName, const void *info) override;
-    int32_t OnChannelOpenFailed(const char *pkgName, int32_t channelId) override;
-    int32_t OnChannelClosed(const char *pkgName, int32_t channelId) override;
-    int32_t OnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data, uint32_t len,
-        int32_t type) override;
+    int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *info) override;
+    int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelMsgReceived(int32_t channelId, const void *data, uint32_t len, int32_t type) override;
     int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;

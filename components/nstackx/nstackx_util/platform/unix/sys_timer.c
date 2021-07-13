@@ -137,18 +137,16 @@ Timer *TimerStart(EpollDesc epollfd, uint32_t ms, uint8_t repeated, TimeoutHandl
         TimerDelete(timer);
         return NULL;
     }
+    timer->task.epollfd = epollfd;
+    timer->task.readHandle = TimerReadHandle;
+    timer->task.writeHandle = NULL;
+    timer->task.errorHandle = NULL;
+    timer->task.ptr = timer;
 
     if (TimerSetTimeout(timer, ms, repeated) != NSTACKX_EOK) {
         TimerDelete(timer);
         return NULL;
     }
-
-    timer->task.epollfd = epollfd;
-    timer->task.readHandle = TimerReadHandle;
-    timer->task.writeHandle = NULL;
-    timer->task.endHandle = NULL;
-    timer->task.errorHandle = NULL;
-    timer->task.ptr = timer;
 
     if (RegisterEpollTask(&timer->task, EPOLLIN) != NSTACKX_EOK) {
         LOGE(TAG, "RegisterEpollTask failed");

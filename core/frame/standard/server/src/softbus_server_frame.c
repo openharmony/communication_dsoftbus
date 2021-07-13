@@ -15,39 +15,17 @@
 
 #include "softbus_server_frame.h"
 
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
+#include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_session_manager.h"
-
-int __attribute__ ((weak)) BusCenterServerInit(void)
-{
-    return SOFTBUS_OK;
-}
-
-void __attribute__ ((weak)) BusCenterServerDeinit(void)
-{
-}
-
-int __attribute__ ((weak)) AuthInit(void)
-{
-    return SOFTBUS_OK;
-}
-
-void __attribute__ ((weak)) AuthDeinit(void)
-{
-}
-
-int __attribute__ ((weak)) ConnServerInit(void)
-{
-    return SOFTBUS_OK;
-}
-
-void __attribute__ ((weak)) ConnServerDeinit(void)
-{
-}
+#include "trans_session_service.h"
 
 static void ServerModuleDeinit(void)
 {
@@ -62,44 +40,44 @@ static void ServerModuleDeinit(void)
 
 void InitSoftBusServer(void)
 {
-    if (SoftBusTimerInit() != SOFTBUS_OK) {
+    if (SoftBusTimerInit() == SOFTBUS_ERR) {
         return;
     }
 
-    if (LooperInit() != SOFTBUS_OK) {
+    if (LooperInit() == -1) {
         return;
     }
-
-    if (ConnServerInit() != SOFTBUS_OK) {
+    if (ConnServerInit() == SOFTBUS_ERR) {
         LOG_ERR("softbus conn server init failed.");
         goto ERR_EXIT;
     }
 
-    if (TransServerInit() != SOFTBUS_OK) {
+    if (TransServerInit() == SOFTBUS_ERR) {
         LOG_ERR("softbus trans server init failed.");
         goto ERR_EXIT;
     }
 
-    if (AuthInit() != SOFTBUS_OK) {
+    if (AuthInit() == SOFTBUS_ERR) {
         LOG_ERR("softbus auth init failed.");
         goto ERR_EXIT;
     }
 
-    if (BusCenterServerInit() != SOFTBUS_OK) {
+    if (BusCenterServerInit() == SOFTBUS_ERR) {
         LOG_ERR("softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
 
-    if (DiscServerInit() != SOFTBUS_OK) {
+    if (DiscServerInit() == SOFTBUS_ERR) {
         LOG_ERR("softbus disc server init failed.");
         goto ERR_EXIT;
     }
 
+    LOG_INFO("softbus framework init success.");
     return;
 
 ERR_EXIT:
     ServerModuleDeinit();
-    LOG_ERR("softbus server framework init failed.");
+    LOG_ERR("softbus framework init failed.");
     return;
 }
 
@@ -107,4 +85,5 @@ void ClientDeathCallback(const char *pkgName)
 {
     DiscServerDeathCallback(pkgName);
     TransServerDeathCallback(pkgName);
+    BusCenterServerDeathCallback(pkgName);
 }

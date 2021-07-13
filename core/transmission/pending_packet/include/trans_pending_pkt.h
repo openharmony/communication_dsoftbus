@@ -40,16 +40,14 @@ typedef struct {
     pthread_mutex_t lock;
     int32_t channelId;
     int32_t seq;
-    bool setFlag;
-    bool destroyFlag;
+    bool finded;
 } PendingPktInfo;
 
 int32_t PendingInit(int type);
 void PendingDeinit(int type);
-int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int type);
+int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type);
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type);
-int32_t DelPendingPacket(int32_t channelId, int32_t seqNum, int type);
-int32_t DelPendingPacketById(int32_t channelId, int type);
+int32_t DelPendingPacket(int32_t channelId, int type);
 
 #ifdef __cplusplus
 #if __cplusplus

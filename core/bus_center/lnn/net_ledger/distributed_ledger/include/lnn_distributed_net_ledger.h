@@ -40,9 +40,15 @@ typedef enum {
     CATEGORY_NETWORK_ID,
 } IdCategory;
 
+typedef enum {
+    REPORT_NONE,
+    REPORT_CHANGE,
+    REPORT_ONLINE,
+} ReportCategory;
+
 int32_t LnnInitDistributedLedger(void);
 void LnnDeinitDistributedLedger(void);
-void LnnAddOnlineNode(NodeInfo *info);
+ReportCategory LnnAddOnlineNode(NodeInfo *info);
 void LnnSetNodeOffline(const char *udid);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
@@ -52,6 +58,7 @@ int32_t LnnGetDLStrInfo(const char *networkId, InfoKey key, char *info, uint32_t
 int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info);
 short LnnGetCnnCode(const char *uuid, DiscoveryType type);
 int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
+int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 
 #ifdef __cplusplus
 }

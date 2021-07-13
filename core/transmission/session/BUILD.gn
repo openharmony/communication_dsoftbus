@@ -11,51 +11,120 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_server_session") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/core/transmission/common/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/common/security/include",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/sdk/transmission/session/include/",
-      "$dsoftbus_root_path/core/common/frame/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "//third_party/cJSON",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    sources = [ "src/trans_session_manager.c" ]
-    deps = [ "//build/lite/config/component/cJSON:cjson_static" ]
+config("trans_session_interface") {
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+  ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  common_include = [
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/security/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "//third_party/cJSON",
+    "$libsec_include_path",
+    "$hilog_lite_include_path",
+  ]
+
+  common_deps = [
+    "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
+    "$dsoftbus_root_path/core/transmission/ipc:dsoftbus_trans_ipc_proxy",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation:dsoftbus_trans_udp_channel",
+    "$hilog_lite_deps_path",
+  ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_trans_session") {
+      include_dirs = common_include
+      sources = [
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
+        "src/trans_session_manager.c",
+        "src/trans_session_service.c",
+      ]
+
+      public_configs = [ ":trans_session_interface" ]
+      deps = common_deps
+    }
+  } else {
+    shared_library("dsoftbus_trans_session") {
+      include_dirs = common_include
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      sources = [
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
+        "src/trans_session_manager.c",
+        "src/trans_session_service.c",
+      ]
+
+      public_configs = [ ":trans_session_interface" ]
+      deps = common_deps
+      deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    }
   }
 } else {
-  shared_library("softbus_server_session") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("dsoftbus_trans_session") {
     include_dirs = [
-      "include",
       "$dsoftbus_root_path/core/adapter/kernel/include",
       "$dsoftbus_root_path/core/transmission/common/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/core/common/security/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/sdk/transmission/session/include/",
-      "$dsoftbus_root_path/core/common/frame/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "//third_party/cJSON",
-      "//third_party/bounds_checking_function/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/transmission/ipc/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     ]
-    sources = [ "src/trans_session_manager.c" ]
-    deps = []
+    sources = [
+      "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
+      "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
+      "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
+      "src/trans_session_manager.c",
+      "src/trans_session_service.c",
+    ]
+    public_configs = [ ":trans_session_interface" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    deps = [
+      "$dsoftbus_core_path/common/security/permission:softbus_permission",
+      "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/transmission/ipc:dsoftbus_trans_ipc_proxy",
+      "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
+      "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel",
+      "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation:dsoftbus_trans_udp_channel",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

@@ -15,7 +15,6 @@
 
 #include "softbus_mem_interface.h"
 #include <securec.h>
-#include <stdlib.h>
 
 #if defined(OHOS_MEM)
 #include "ohos_mem_pool.h"

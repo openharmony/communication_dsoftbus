@@ -54,6 +54,7 @@
 
 -   组网设备需在同一局域网中。
 -   组网之前，需先完成设备绑定，绑定流程参见安全子系统中说明。
+-   只能和一个设备进行组网。
 
 ## 说明<a name="section1312121216216"></a>
 
@@ -245,12 +246,12 @@
 
 ## 相关仓<a name="section1371113476307"></a>
 
-[分布式软总线子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%88%86%E5%B8%83%E5%BC%8F%E8%BD%AF%E6%80%BB%E7%BA%BF%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
+分布式软总线子系统
 
 **communication_dsoftbus**
 
-[communication_bluetooth](https://gitee.com/openharmony/communication_bluetooth/blob/master/README_zh.md)
+communication_bluetooth
 
-[communication_ipc](https://gitee.com/openharmony/communication_ipc/blob/master/README_zh.md)
+communication_ipc
 
-[communication_wifi](https://gitee.com/openharmony/communication_wifi/blob/master/README_zh.md)
+communication_wifi

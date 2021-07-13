@@ -11,22 +11,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_library("trans_pending") {
-  target_type = "static_library"
-  include_dirs = [
-    "include",
+config("softbus_trans_pending_interface") {
+  include_dirs = [ "include" ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  common_include = [
     "$dsoftbus_root_path/core/common/include",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    "$hilog_lite_include_path",
     "$dsoftbus_root_path/core/adapter/kernel/include",
   ]
-  cflags = [
-    "-Wall",
-    "-fPIC",
-    "-fno-builtin",
-    "-std=c99",
+  common_deps = [
+    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$hilog_lite_deps_path",
   ]
-  sources = [ "src/trans_pending_pkt.c" ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_trans_pending") {
+      include_dirs = common_include
+      public_configs = [ ":softbus_trans_pending_interface" ]
+      sources = [ "src/trans_pending_pkt.c" ]
+      deps = common_deps
+    }
+  } else {
+    shared_library("softbus_trans_pending") {
+      include_dirs = common_include
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      public_configs = [ ":softbus_trans_pending_interface" ]
+      sources = [ "src/trans_pending_pkt.c" ]
+      deps = common_deps
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("softbus_trans_pending") {
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+    ]
+    public_configs = [ ":softbus_trans_pending_interface" ]
+    sources = [ "src/trans_pending_pkt.c" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    ]
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

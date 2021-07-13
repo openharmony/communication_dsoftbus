@@ -90,7 +90,7 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t* channelId, int32
 
 int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId);
 
-int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t* sessionId);
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t* sessionId);
 
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t* sessionId);
 
@@ -100,6 +100,9 @@ int32_t ClientGetSessionCallbackByName(const char* sessionName, ISessionListener
 
 int32_t ClientAddSessionServer(SoftBusSecType type, const char* pkgName, const char* sessionName,
     const ISessionListener* listener);
+
+int TransClientInit(void);
+void TransClientDeinit(void);
 
 #ifdef __cplusplus
 }

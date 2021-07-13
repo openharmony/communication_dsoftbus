@@ -607,45 +607,32 @@ void DestroyBaseListener(ListenerModule module)
     pthread_mutex_unlock(&g_listenerList[module].lock);
 }
 
-static int32_t OnAddTrigger(fd_set *set, int32_t fd)
+static void OnAddTrigger(fd_set *set, int32_t fd)
 {
-    if (FD_ISSET(fd, set)) {
-        LOG_ERR("fd already in set");
-        return SOFTBUS_ERR;
-    }
     FD_SET(fd, set);
-    return SOFTBUS_OK;
 }
 
-static int32_t OnDelTrigger(fd_set *set, int32_t fd)
+static void OnDelTrigger(fd_set *set, int32_t fd)
 {
-    if (!FD_ISSET(fd, set)) {
-        LOG_ERR("fd not in set");
-        return SOFTBUS_ERR;
-    }
     FD_CLR(fd, set);
-    return SOFTBUS_OK;
 }
 
 static int32_t AddTriggerToSet(SoftbusBaseListenerInfo *info, int32_t fd, TriggerType triggerType)
 {
-    int32_t ret;
+    int32_t ret = SOFTBUS_OK;
     switch (triggerType) {
         case READ_TRIGGER:
-            ret = OnAddTrigger(&info->readSet, fd);
+            OnAddTrigger(&info->readSet, fd);
             break;
         case WRITE_TRIGGER:
-            ret = OnAddTrigger(&info->writeSet, fd);
+            OnAddTrigger(&info->writeSet, fd);
             break;
         case EXCEPT_TRIGGER:
-            ret = OnAddTrigger(&info->exceptSet, fd);
+            OnAddTrigger(&info->exceptSet, fd);
             break;
         case RW_TRIGGER:
-            ret = OnAddTrigger(&info->readSet, fd);
-            if (ret != SOFTBUS_OK) {
-                break;
-            }
-            ret = OnAddTrigger(&info->writeSet, fd);
+            OnAddTrigger(&info->readSet, fd);
+            OnAddTrigger(&info->writeSet, fd);
             break;
         default:
             ret = SOFTBUS_INVALID_PARAM;
@@ -658,23 +645,20 @@ static int32_t AddTriggerToSet(SoftbusBaseListenerInfo *info, int32_t fd, Trigge
 
 static int32_t DelTriggerFromSet(SoftbusBaseListenerInfo *info, int32_t fd, TriggerType triggerType)
 {
-    int32_t ret;
+    int32_t ret = SOFTBUS_OK;
     switch (triggerType) {
         case READ_TRIGGER:
-            ret = OnDelTrigger(&info->readSet, fd);
+            OnDelTrigger(&info->readSet, fd);
             break;
         case WRITE_TRIGGER:
-            ret = OnDelTrigger(&info->writeSet, fd);
+            OnDelTrigger(&info->writeSet, fd);
             break;
         case EXCEPT_TRIGGER:
-            ret = OnDelTrigger(&info->exceptSet, fd);
+            OnDelTrigger(&info->exceptSet, fd);
             break;
         case RW_TRIGGER:
-            ret = OnDelTrigger(&info->readSet, fd);
-            if (ret != SOFTBUS_OK) {
-                break;
-            }
-            ret = OnDelTrigger(&info->writeSet, fd);
+            OnDelTrigger(&info->readSet, fd);
+            OnDelTrigger(&info->writeSet, fd);
             break;
         default:
             ret = SOFTBUS_INVALID_PARAM;
@@ -757,6 +741,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     }
 
     pthread_mutex_unlock(&g_listenerList[module].lock);
+    LOG_INFO("AddTrigger fd:%d success, current fdcount:%d", fd, info->fdCount);
     return SOFTBUS_OK;
 }
 

@@ -15,78 +15,17 @@
 
 #include "softbus_client_stub.h"
 
-#include "discovery_service.h"
+#include "client_bus_center_manager.h"
+#include "client_disc_manager.h"
+#include "client_trans_channel_callback.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "securec.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_interface.h"
+#include "softbus_ipc_def.h"
 #include "softbus_log.h"
-
-extern "C" void __attribute__ ((weak)) DiscClientOnDeviceFound(const DeviceInfo *device)
-{
-    (void)device;
-    LOG_INFO("client DiscOnDeviceFound Weak!\n");
-}
-
-extern "C" void __attribute__ ((weak)) DiscClientOnDiscoverySuccess(int32_t subscribeId)
-{
-    (void)subscribeId;
-    LOG_INFO("client DiscOnDiscoverySuccess Weak!\n");
-}
-
-extern "C" void __attribute__ ((weak)) DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
-{
-    (void)subscribeId;
-    (void)failReason;
-    LOG_INFO("client DiscOnDiscoverFailed Weak!\n");
-}
-
-extern "C" void __attribute__ ((weak)) DiscClientOnPublishSuccess(int32_t publishId)
-{
-    (void)publishId;
-    LOG_INFO("client DiscOnPublishSuccess Weak!\n");
-}
-
-extern "C" void __attribute__ ((weak)) DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
-{
-    (void)publishId;
-    (void)reason;
-    LOG_INFO("client DiscOnPublishFail Weak!\n");
-}
-
-extern "C" int __attribute__ ((weak)) TransOnChannelOpened(const char *pkgName, const char *sessionName,
-    const ChannelInfo *channel)
-{
-    LOG_INFO("client TransOnChannelOpened Weak!\n");
-    return SOFTBUS_OK;
-}
-
-extern "C" int __attribute__ ((weak)) TransOnChannelOpenFailed(const char *pkgName, int32_t channelId)
-{
-    LOG_INFO("client TransOnChannelOpenFailed Weak!\n");
-    return SOFTBUS_OK;
-}
-
-extern "C" int __attribute__ ((weak)) TransOnChannelClosed(const char *pkgName, int32_t channelId)
-{
-    LOG_INFO("client TransOnChannelClosed Weak!\n");
-    return SOFTBUS_OK;
-}
-
-extern "C" int __attribute__ ((weak)) TransOnChannelMsgReceived(const char *pkgName, int32_t channelId,
-    const void *data, uint32_t len, int32_t type)
-{
-    LOG_INFO("client TransOnChannelMsgReceived Weak!\n");
-    return SOFTBUS_OK;
-}
-
-extern "C" int __attribute__ ((weak)) LnnOnJoinResult(void *addr, const char *networkId, int retCode);
-extern "C" int __attribute__ ((weak)) LnnOnLeaveResult(const char *networkId, int retCode);
-extern "C" int __attribute__ ((weak)) LnnOnNodeOnlineStateChanged(bool isOnline, void *info);
-extern "C" int __attribute__ ((weak)) LnnOnNodeBasicInfoChanged(void *info, int32_t type);
 
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
@@ -178,9 +117,9 @@ int32_t SoftBusClientStub::OnPublishFailInner(MessageParcel &data, MessageParcel
     return SOFTBUS_OK;
 }
 
-void SoftBusClientStub::OnDeviceFound(const void *device)
+void SoftBusClientStub::OnDeviceFound(const DeviceInfo *device)
 {
-    DiscClientOnDeviceFound((DeviceInfo *)device);
+    DiscClientOnDeviceFound(device);
 }
 
 void SoftBusClientStub::OnDiscoverFailed(int subscribeId, int failReason)
@@ -203,37 +142,31 @@ void SoftBusClientStub::OnPublishFail(int publishId, int reason)
     DiscClientOnPublishFail(publishId, (PublishFailReason)reason);
 }
 
-int32_t SoftBusClientStub::OnChannelOpened(const char *pkgName, const char *sessionName, const void *info)
+int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
 {
-    return TransOnChannelOpened(pkgName, sessionName, (ChannelInfo *)info);
+    return TransOnChannelOpened(sessionName, info);
 }
 
-int32_t SoftBusClientStub::OnChannelOpenFailed(const char *pkgName, int32_t channelId)
+int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType)
 {
-    return TransOnChannelOpenFailed(pkgName, channelId);
+    return TransOnChannelOpenFailed(channelId, channelType);
 }
 
-int32_t SoftBusClientStub::OnChannelClosed(const char *pkgName, int32_t channelId)
+int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    return TransOnChannelClosed(pkgName, channelId);
+    return TransOnChannelClosed(channelId, channelType);
 }
 
-int32_t SoftBusClientStub::OnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data,
-    uint32_t len, int32_t type)
+int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, const void *data, uint32_t len, int32_t type)
 {
-    return TransOnChannelMsgReceived(pkgName, channelId, data, len, type);
+    return TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, len, static_cast<SessionPktType>(type));
 }
 
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
 {
-    const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        LOG_ERR("OnChannelOpenedInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
     const char *sessionName = data.ReadCString();
     if (sessionName == nullptr) {
-        LOG_ERR("OnChannelOpenedInner read pkgName failed!");
+        LOG_ERR("OnChannelOpenedInner read sessionName failed!");
         return SOFTBUS_ERR;
     }
 
@@ -288,7 +221,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         return SOFTBUS_ERR;
     }
 
-    int ret = OnChannelOpened(pkgName, sessionName, &channel);
+    int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         LOG_ERR("OnChannelOpenedInner write reply failed!");
@@ -299,19 +232,19 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
 
 int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, MessageParcel &reply)
 {
-    const char* pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        LOG_ERR("OnChannelOpenedInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         LOG_ERR("OnChannelOpenFailedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
 
-    int ret = OnChannelOpenFailed(pkgName, channelId);
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        LOG_ERR("OnChannelOpenFailedInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int ret = OnChannelOpenFailed(channelId, channelType);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         LOG_ERR("OnChannelOpenFailedInner write reply failed!");
@@ -322,19 +255,19 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
 
 int32_t SoftBusClientStub::OnChannelClosedInner(MessageParcel &data, MessageParcel &reply)
 {
-    const char* pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        LOG_ERR("OnChannelOpenedInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         LOG_ERR("OnChannelClosedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
 
-    int ret = OnChannelClosed(pkgName, channelId);
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        LOG_ERR("OnChannelOpenFailedInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int ret = OnChannelClosed(channelId, channelType);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         LOG_ERR("OnChannelClosedInner write reply failed!");
@@ -345,12 +278,6 @@ int32_t SoftBusClientStub::OnChannelClosedInner(MessageParcel &data, MessageParc
 
 int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, MessageParcel &reply)
 {
-    const char* pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        LOG_ERR("OnChannelMsgReceivedInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         LOG_ERR("OnChannelMsgReceivedInner read channel id failed!");
@@ -371,7 +298,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         LOG_ERR("OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    int ret = OnChannelMsgReceived(pkgName, channelId, dataInfo, len, type);
+    int ret = OnChannelMsgReceived(channelId, dataInfo, len, type);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         LOG_ERR("OnChannelMsgReceivedInner write reply failed!");

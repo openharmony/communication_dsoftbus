@@ -16,7 +16,6 @@
 #include "softbus_os_interface.h"
 
 #include "cmsis_os2.h"
-#include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "utils_file.h"

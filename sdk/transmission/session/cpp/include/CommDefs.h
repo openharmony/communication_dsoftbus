@@ -19,9 +19,9 @@
 #define COMM_UNUSED __attribute__((unused))
 #define COMM_EXPORT __attribute__((visibility("default")))
 
-#define NO_COPY_AND_ASSIGN(TypeName)  \
-    TypeName(const TypeName &) = delete;  \
-    TypeName(TypeName &&) = delete;  \
+#define NO_COPY_AND_ASSIGN(TypeName)                   \
+    TypeName(const TypeName &) = delete;               \
+    TypeName(TypeName &&) = delete;                    \
     TypeName &operator = (const TypeName &) = delete;  \
     TypeName &operator = (TypeName &&) = delete;
 #endif // COMM_DEFS_H

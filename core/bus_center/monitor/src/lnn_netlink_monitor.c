@@ -15,6 +15,10 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <arpa/inet.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>

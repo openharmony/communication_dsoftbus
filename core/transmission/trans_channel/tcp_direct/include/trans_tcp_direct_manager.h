@@ -22,6 +22,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_property.h"
+#include "trans_channel_callback.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,15 +34,16 @@ extern "C" {
 
 #define MAGIC_NUMBER 0xBABEFACE
 #define MODULE_SESSION 6
+#define FLAG_REQUEST 0
 #define FLAG_REPLY 1
 
 #define SKEY_LENGTH 16
 
 typedef enum {
-    TCP_DIRECT_CHANNEL_STATUS_CONNECTED,
-    TCP_DIRECT_CHANNEL_STATUS_CONNECTING,
     TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING,
-    TCP_DIRECT_CHANNEL_STATUS_HANDSHAKE_TIMEOUT,
+    TCP_DIRECT_CHANNEL_STATUS_CONNECTING,
+    TCP_DIRECT_CHANNEL_STATUS_CONNECTED,
+    TCP_DIRECT_CHANNEL_STATUS_TIMEOUT,
 } TcpDirectChannelStatus;
 
 typedef struct {
@@ -50,17 +52,17 @@ typedef struct {
 } IAuthConnection;
 
 typedef struct {
-    uint32_t offset;
-    uint8_t data[MAX_BUF_LENGTH];
-} DcDataBuffer;
+    char data[MAX_BUF_LENGTH];
+    char *w;
+} DataBuffer;
 
 typedef struct {
     ListNode node;
-    DcDataBuffer dataBuffer;
+    DataBuffer dataBuffer;
     bool serverSide;
     bool authStarted;
     bool openChannelFinished;
-    long channelId;
+    int32_t channelId;
     TriggerType triggerType;
     pthread_mutex_t lock;
     pthread_cond_t cond;
@@ -79,18 +81,20 @@ typedef struct {
 } TdcPacketHead;
 
 int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int *fd);
-int32_t TransCloseDirectChannel(int32_t channelId);
+
 uint64_t TransTdcGetNewSeqId(bool serverSide);
 SessionConn *GetTdcInfoByChannelId(int32_t channelId);
 SessionConn *GetTdcInfoByFd(int fd);
 
-int32_t TransTdcAddSessionConn(SessionConn *conn, const TriggerType triggerType);
-void TransTdcStopSessionConn(int32_t channelId);
-void TransTdcCloseSessionConn(int32_t channelId);
+int32_t TransTdcAddSessionConn(SessionConn *conn);
+void TransTdcStopListen(int32_t channelId);
+
+void TransTdcDelSessionConn(SessionConn *conn);
+void TransTdcDelSessionConnByChannelId(int32_t channelId);
 
 SoftBusList *GetTdcInfoList(void);
 void SetTdcInfoList(SoftBusList *sessionConnList);
-int32_t TransTcpDirectInit(void);
+int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 void TransTcpDirectDeinit(void);
 void TransTdcDeathCallback(const char *pkgName);
 #ifdef __cplusplus

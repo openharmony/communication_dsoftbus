@@ -15,9 +15,11 @@
 
 #include "lnn_ip_utils.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <arpa/inet.h>
-#include <linux/sockios.h>
-#include <netinet/in.h>
 #include <net/if.h>
 #include <securec.h>
 #include <stdint.h>

@@ -21,14 +21,13 @@
 #include <securec.h>
 
 #include "bus_center_info_key.h"
-#include "lnn_file_utils.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
-static int32_t GenerateRandomId(char *id, uint32_t len)
+static int32_t GenerateRandomId(char *id, int32_t len)
 {
     uint32_t hexLen = len / HEXIFY_UNIT_LEN;
     uint8_t *hexId = NULL;
@@ -53,53 +52,7 @@ static int32_t GenerateRandomId(char *id, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t GetUuidFromFile(char *id, uint32_t len)
-{
-    int32_t fd;
-    bool needWrite = false;
-
-    fd = LnnFileOpen(LNN_FILE_ID_UUID);
-    if (fd < 0) {
-        LOG_INFO("create uuid file");
-        if (LnnFileCreate(LNN_FILE_ID_UUID) != SOFTBUS_OK) {
-            LOG_ERR("create file failed");
-            return SOFTBUS_ERR;
-        }
-        fd = LnnFileOpen(LNN_FILE_ID_UUID);
-        if (fd < 0) {
-            LOG_ERR("open uuid file failed");
-            return SOFTBUS_ERR;
-        }
-        needWrite = true;
-    }
-    if (needWrite) {
-        if (GenerateRandomId(id, len) != SOFTBUS_OK) {
-            LOG_ERR("generate uuid id fail");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
-        if (LnnFileWrite(fd, (uint8_t *)id, len, true) != (int32_t)len) {
-            LOG_ERR("write uuid to file failed");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
-    } else {
-        if (LnnFileRead(fd, (uint8_t *)id, len, true) != (int32_t)len) {
-            LOG_ERR("read uuid from file failed");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
-        if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
-            LOG_ERR("uuid is invalid format from file");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
-    }
-    LnnFileClose(fd);
-    return SOFTBUS_OK;
-}
-
-int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
+int32_t LnnGenLocalNetworkId(char *networkId, int32_t len)
 {
     if (networkId == NULL || len < NETWORK_ID_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -113,7 +66,7 @@ int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, int32_t len)
 {
     static bool isGenerated = false;
     static char localUuid[UUID_BUF_LEN] = {0};
@@ -123,8 +76,8 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     }
 
     if (isGenerated == false) {
-        if (GetUuidFromFile(localUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-            LOG_ERR("get uuid from file failed");
+        if (GenerateRandomId(localUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+            LOG_ERR("generate network id fail");
             return SOFTBUS_ERR;
         }
         isGenerated = true;

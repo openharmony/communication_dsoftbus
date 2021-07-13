@@ -17,13 +17,15 @@
 
 #include <securec.h>
 
+#include "ble_connection.h"
+#include "br_connection.h"
 #include "common_list.h"
 #include "softbus_conn_interface.h"
-#include "softbus_conn_manager_weak.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
+#include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
@@ -41,7 +43,7 @@ static int32_t ModuleCheck(ConnModule moduleId)
     ConnModule id[] = {
         MODULE_TRUST_ENGINE, MODULE_HICHAIN, MODULE_AUTH_SDK, MODULE_AUTH_CONNECTION, MODULE_MESSAGE_SERVICE,
         MODULE_BLUETOOTH_MANAGER, MODULE_CONNECTION, MODULE_DIRECT_CHANNEL, MODULE_PROXY_CHANNEL,
-        MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_PKG_VERIFY, MODULE_BLE_NET,
+        MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_UDP_INFO, MODULE_PKG_VERIFY, MODULE_BLE_NET,
         MODULE_BLE_CONN
     };
     int32_t i;

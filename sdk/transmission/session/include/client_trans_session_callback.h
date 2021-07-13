@@ -16,21 +16,26 @@
 #ifndef CLIENT_TRANS_SESSION_CALLBACK_H
 #define CLIENT_TRANS_SESSION_CALLBACK_H
 
+#include "session.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, uint32_t flag);
+typedef struct {
+    int32_t (*OnSessionOpened)(const char *sessionName, const ChannelInfo *channel, SessionType flag);
+    int32_t (*OnSessionClosed)(int32_t channelId, int32_t channelType);
+    int32_t (*OnSessionOpenFailed)(int32_t channelId, int32_t channelType);
+    int32_t (*OnDataReceived)(int32_t channelId, int32_t channelType,
+        const void *data, uint32_t len, SessionPktType type);
+    void (*OnStreamReceived)(int32_t channelId, int32_t channelType,
+        const StreamData *data, const StreamData *ext, const FrameInfo *param);
+} IClientSessionCallBack;
 
-int32_t TransOnSessionOpenFailed(int32_t channelId);
-
-int32_t TransOnSessionClosed(int32_t channelId);
-
-int32_t TransOnDataReceived(int32_t channelId, const void *data, uint32_t len, SessionPktType type);
+IClientSessionCallBack *GetClientSessionCb(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // CLIENT_TRANS_SESSION_CALLBACK_H
+#endif

@@ -11,30 +11,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("message_handler") {
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//device/hisilicon/hispark_pegasus/sdk_liteos/platform/os/Huawei_LiteOS/components/lib/libc/musl/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    sources = [ "message_handler.c" ]
+config("message_handler_interface") {
+  include_dirs = [ "include" ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  common_include = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$libsec_include_path",
+    "$hilog_lite_include_path",
+  ]
+  common_deps = [
+    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$hilog_lite_deps_path",
+    "$libsec_deps_path",
+  ]
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("message_handler") {
+      include_dirs = common_include
+      include_dirs += "//device/hisilicon/hispark_pegasus/sdk_liteos/platform/os/Huawei_LiteOS/components/lib/libc/musl/include"
+      sources = [ "message_handler.c" ]
+      deps = common_deps
+      public_configs = [ ":message_handler_interface" ]
+    }
+  } else {
+    shared_library("message_handler") {
+      include_dirs = common_include
+      sources = [ "message_handler.c" ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      deps = common_deps
+      public_configs = [ ":message_handler_interface" ]
+    }
   }
 } else {
-  static_library("message_handler") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("message_handler") {
     include_dirs = [
-      "include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//third_party/bounds_checking_function/include",
     ]
     sources = [ "message_handler.c" ]
-
-    deps = []
+    public_deps =
+        [ "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel" ]
+    public_configs = [ ":message_handler_interface" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

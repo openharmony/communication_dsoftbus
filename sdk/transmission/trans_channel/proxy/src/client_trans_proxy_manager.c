@@ -16,31 +16,92 @@
 #include "client_trans_proxy_manager.h"
 
 #include "softbus_errcode.h"
-#include "softbus_interface.h"
 #include "softbus_log.h"
+#include "trans_server_proxy.h"
 
-int32_t TransCloseProxyChannel(int32_t channelId)
+static IClientSessionCallBack g_sessionCb;
+
+int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
 {
-    LOG_INFO("TransCloseProxyChannel, channelId [%d]", channelId);
-    return GetServerProvideInterface()->closeChannel(channelId);
+    if (cb == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    g_sessionCb = *cb;
+    return SOFTBUS_OK;
 }
 
-int32_t TransOnProxyChannelOpened(const ChannelInfo *channel)
+int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    LOG_INFO("no need do anything");
+    if (sessionName == NULL || channel == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("notify session open fail");
+        return ret;
+    }
+
     return SOFTBUS_OK;
+}
+
+int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
+{
+    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("notify session openfail err");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId)
+{
+    int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("notify session openfail err");
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransProxyOnDataReceived(int32_t channelId,
+    const void *data, uint32_t len, SessionPktType type)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, type);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("notify data recv err");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+void ClientTransProxyCloseChannel(int32_t channelId)
+{
+    LOG_INFO("TransCloseProxyChannel, channelId [%d]", channelId);
+    if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
+        LOG_INFO("server close channel err");
+    }
+    if (ClientTransProxyOnChannelClosed(channelId) != SOFTBUS_OK) {
+        LOG_INFO("server close channel err");
+    }
 }
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
 {
-    int ret = GetServerProvideInterface()->sendMessage(channelId, data, len, TRANS_SESSION_BYTES);
+    int ret = ServerIpcSendMessage(channelId, data, len, TRANS_SESSION_BYTES);
     LOG_INFO("send bytes: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
 
 int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
 {
-    int ret = GetServerProvideInterface()->sendMessage(channelId, data, len, TRANS_SESSION_MESSAGE);
+    int ret = ServerIpcSendMessage(channelId, data, len, TRANS_SESSION_MESSAGE);
     LOG_INFO("send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }

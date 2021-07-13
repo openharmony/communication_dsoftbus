@@ -20,8 +20,9 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message.h"
+#include "trans_channel_callback.h"
 
-int32_t TransProxyManagerInit(void);
+int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 
 int32_t TransProxyGetNewChanSeq(int32_t channelId);
@@ -34,7 +35,6 @@ void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo);
 void TransProxyonMessageReceived(const ProxyMessage *msg);
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int32_t sessionKeySize);
 int16_t TransProxyGetNewMyId(void);
-int32_t TransProxyManagerInit(void);
 void TransProxyDelChanByReqId(int32_t reqId);
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);

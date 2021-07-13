@@ -1,0 +1,56 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+config("stream_test") {
+  defines = [ "FILLP_LINUX" ]
+}
+
+executable("dstream_adaptor_server_test") {
+  configs += [ ":stream_test" ]
+  sources = [ "dstream_adaptor_server_test.c" ]
+  include_dirs = [
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-std=c99",
+  ]
+
+  deps = [
+    "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/stream/adaptor:dsoftbus_trans_dstream",
+    "//third_party/bounds_checking_function:libsec_shared",
+  ]
+}
+
+executable("dstream_adaptor_client_test") {
+  configs += [ ":stream_test" ]
+  sources = [ "dstream_adaptor_client_test.c" ]
+  include_dirs = [
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+  ]
+  cflags = [
+    "-Wall",
+    "-std=c99",
+  ]
+
+  deps = [
+    "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/stream/adaptor:dsoftbus_trans_dstream",
+    "//third_party/bounds_checking_function:libsec_shared",
+  ]
+}

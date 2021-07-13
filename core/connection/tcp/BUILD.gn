@@ -11,28 +11,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("tcp_connection") {
-    sources = [ "src/softbus_tcp_connect_manager.c" ]
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/connection/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "$dsoftbus_root_path/core/connection/interface",
-      "$dsoftbus_root_path/core/connection/manager",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/bounds_checking_function/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    deps = [ "$dsoftbus_root_path/core/connection/common:conn_common" ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("tcp_connection") {
+      if (enable_connection_tcp == true) {
+        sources = [ "src/softbus_tcp_connect_manager.c" ]
+      } else {
+        sources = [ "src/softbus_tcp_connect_virtual.c" ]
+      }
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/common/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      deps = [
+        "$dsoftbus_root_path/core/connection/common:conn_common",
+        "$hilog_lite_deps_path",
+      ]
+    }
+  } else {
+    shared_library("tcp_connection") {
+      if (enable_connection_tcp == true) {
+        sources = [ "src/softbus_tcp_connect_manager.c" ]
+      } else {
+        sources = [ "src/softbus_tcp_connect_virtual.c" ]
+      }
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/common/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      deps = [
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/connection/common:conn_common",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
+    }
   }
 } else {
-  shared_library("tcp_connection") {
-    sources = [ "src/softbus_tcp_connect_manager.c" ]
+  import("//build/ohos.gni")
+
+  ohos_shared_library("tcp_connection") {
+    if (enable_connection_tcp == true) {
+      sources = [ "src/softbus_tcp_connect_manager.c" ]
+    } else {
+      sources = [ "src/softbus_tcp_connect_virtual.c" ]
+    }
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
@@ -41,11 +83,16 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/connection/manager",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/bounds_checking_function/include",
     ]
     deps = [
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
     ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

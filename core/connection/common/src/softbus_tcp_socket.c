@@ -20,7 +20,6 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <securec.h>
-#include <stdint.h>
 #include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -271,7 +270,7 @@ ssize_t SendTcpData(int fd, const char *buf, size_t len, int timeout)
 static ssize_t OnRecvData(int fd, char *buf, size_t len, int timeout, int flags)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        LOG_ERR("fd=%d invalid params", fd);
+        LOG_ERR("fd[%d] len[%d] invalid params", fd, len);
         return -1;
     }
 

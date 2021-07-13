@@ -15,6 +15,8 @@
 #ifndef SOFTBUS_JSON_UTILS_H
 #define SOFTBUS_JSON_UTILS_H
 
+#include <stdint.h>
+
 #include "cJSON.h"
 #include "string.h"
 #include "stdbool.h"
@@ -30,6 +32,8 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
 
 bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target);
 
+bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target);
+
 bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target);
 
 bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target);
@@ -37,6 +41,8 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
 bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
 
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
+
+bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num);
 
 #ifdef __cplusplus
 #if __cplusplus

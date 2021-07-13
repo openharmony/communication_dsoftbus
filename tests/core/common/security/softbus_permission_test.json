@@ -1,0 +1,175 @@
+[
+  {
+    "SESSION_NAME": "com\\.profile.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.profile",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com\\.def.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.def",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "DBinder.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "granted_app",
+        "PKG_NAME": "DBinderBus",
+        "ACTIONS": "open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com\\.hwddmp.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.hwddmp",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.devicegroupmanage",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "com.devicegroupmanage",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com\\.dmsdp.*",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.dmsdp",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "SPE",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "self_app",
+        "UID": "1000",
+        "PKG_NAME": "com.nearby",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.nearby.MsgMiddleware",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "self_app",
+        "UID": "1000",
+        "PKG_NAME": "com.nearby",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "distributeddata.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.hwddmp",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "SystemAbilityManager_DDC.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "1000",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "hiview_distributed_network_softbus",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "0",
+        "PKG_NAME": "hiview_distributed_network_softbus",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "DistributedFileService.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "1000",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.systemserver_CHANNEL_DPMS",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "UID": "1000",
+        "PKG_NAME": "com.systemserver",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.devicemanager",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "com.devicemanager",
+        "ACTIONS": "create,open"
+      }
+    ]
+  }
+]
