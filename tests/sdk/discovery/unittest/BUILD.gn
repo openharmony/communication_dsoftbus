@@ -27,6 +27,7 @@ ohos_unittest("DiscSdkTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/discovery/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "//base/security/permission/interfaces/innerkits/permission_standard/permissionsdk/main/cpp/include",
     "//utils/native/base/include",
     "unittest/common/",
   ]
@@ -39,7 +40,10 @@ ohos_unittest("DiscSdkTest") {
   ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [
+      "hiviewdfx_hilog_native:libhilog",
+      "permission_standard:libpermissionsdk_standard"
+    ]
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
