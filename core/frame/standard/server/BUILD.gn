@@ -16,8 +16,13 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ohos_prebuilt_etc("softbus_server.rc") {
   relative_install_dir = "init"
-  source =
+  if (use_musl) {
+    source =
+      "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.cfg"
+  } else {
+    source =
       "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.rc"
+  }
   part_name = "dsoftbus_standard"
   subsystem_name = "communication"
 }
