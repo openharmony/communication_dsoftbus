@@ -129,6 +129,8 @@ uint32_t ConnGetHeadSize(void);
 
 int32_t ConnServerInit(void);
 
+void ConnServerDeinit(void);
+
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
 
 void ConnUnSetConnectCallback(ConnModule moduleId);
