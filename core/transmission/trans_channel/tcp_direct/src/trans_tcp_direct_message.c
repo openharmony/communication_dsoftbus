@@ -139,7 +139,7 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
 
     OutBuf outbuf = {0};
     outbuf.bufLen = pktHead->dataLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1;
-    outbuf.buf = out;
+    outbuf.buf = (uint8_t *)out;
     int32_t ret = AuthDecrypt(&option, side, (uint8_t *)data, len, &outbuf);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("AuthDecrypt err.");
