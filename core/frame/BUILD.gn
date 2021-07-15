@@ -56,7 +56,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "//base/security/deviceauth/huawei_property/interface",
+      "//base/security/deviceauth/interfaces/innerkits",
       "//utils/native/lite/include",
       "$hilog_lite_include_path",
     ]
