@@ -31,6 +31,7 @@ if (defined(ohos_lite)) {
         "src/lnn_async_callback_utils.c",
         "src/lnn_connection_addr_utils.c",
         "src/lnn_ip_utils.c",
+        "src/lnn_file_utils.c",
       ]
       include_dirs = [
         "$dsoftbus_root_path/core/connection/interface",
@@ -64,6 +65,7 @@ if (defined(ohos_lite)) {
       "src/lnn_async_callback_utils.c",
       "src/lnn_connection_addr_utils.c",
       "src/lnn_ip_utils.c",
+      "src/lnn_file_utils.c",
     ]
     include_dirs = [
       "$dsoftbus_root_path/core/connection/interface",
