@@ -1041,7 +1041,11 @@ void TransProxyDeathCallback(const char *pkgName)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            TransProxyCloseProxyChannel(item->channelId);
+            TransProxyResetPeer(item);
+            (void)TransProxyCloseConnChannel(item->connId);
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            g_proxyChannelList->cnt--;
             continue;
         }
     }
