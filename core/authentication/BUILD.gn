@@ -93,10 +93,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
       "$dsoftbus_root_path/core/connection/manager:conn_manager",
-      "//base/security/deviceauth/services:deviceauth_sdk",
     ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [
+        "hiviewdfx_hilog_native:libhilog",
+        "deviceauth_standard:deviceauth_sdk",
+      ]
     }
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
