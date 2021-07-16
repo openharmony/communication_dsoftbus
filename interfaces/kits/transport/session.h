@@ -102,6 +102,7 @@ typedef struct {
     int dataType;
     int lintTypeNum;
     int *lintType;
+    bool unique;
     union {
         struct StreamAttr {
             int streamType;
