@@ -301,17 +301,17 @@ static SessionInfo *GetExistSession(const SessionParam *param)
     /* need get lock before */
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-    SessionTag *tagInfo = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if ((strcmp(serverNode->sessionName, param->sessionName) != 0) || IsListEmpty(&serverNode->sessionList)) {
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             tagInfo = &sessionNode->info;
-            if ((strcmp(tagInfo->peerSessionName, param->peerSessionName) != 0) ||
-                (strcmp(tagInfo->peerDeviceId, param->peerDeviceId) != 0) ||
-                (strcmp(tagInfo->groupId, param->groupId) != 0) ||
-                (tagInfo->flag != param->attr->dataType)) {
+            if ((strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
+                (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
+                (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
+                (sessionNode->info.flag != param->attr->dataType) ||
+                (param->attr->unique && sessionNode->isServer)) {
                 continue;
             }
             return sessionNode;
