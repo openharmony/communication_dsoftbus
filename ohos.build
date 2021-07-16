@@ -10,7 +10,6 @@
             "test_list": [
                 "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
                 "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
-                "//foundation/communication/dsoftbus/tests/core/common/security:softbus_permission_test",
                 "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
                 "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
                 "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
