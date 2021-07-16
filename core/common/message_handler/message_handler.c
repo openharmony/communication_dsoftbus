@@ -141,11 +141,18 @@ static void *LoopTask(void *arg)
             LOG_INFO("LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
                 context->name, msg->handler->name, msg->what, context->msgSize);
         } else {
+#ifdef __LITEOS_M__
             uint64_t diff = time - now;
             struct timespec tv;
             tv.tv_sec = diff / TIME_THOUSANDS_MULTIPLIER / TIME_THOUSANDS_MULTIPLIER;
             tv.tv_nsec = diff % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER) * TIME_THOUSANDS_MULTIPLIER;
             pthread_cond_timedwait(&context->cond, &context->lock, &tv);
+#else
+            struct timespec tv;
+            tv.tv_sec = time / TIME_THOUSANDS_MULTIPLIER / TIME_THOUSANDS_MULTIPLIER;
+            tv.tv_nsec = time % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER) * TIME_THOUSANDS_MULTIPLIER;
+            pthread_cond_timedwait(&context->cond, &context->lock, &tv);
+#endif
         }
 
         if (msg == NULL) {
