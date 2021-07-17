@@ -306,7 +306,6 @@ static SessionInfo *GetExistSession(const SessionParam *param)
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            tagInfo = &sessionNode->info;
             if ((strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
                 (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
                 (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
