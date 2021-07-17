@@ -24,6 +24,8 @@ static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = ClientIpcOnDeviceFound,
 };
 
+static bool g_isCallLnn = true;
+
 int32_t DiscServerInit(void)
 {
     int32_t ret = DiscMgrInit();
@@ -86,6 +88,7 @@ int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
 
 int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info)
 {
+    SetCallLnnStatus(false);
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("ServerStartDiscovery failed");
@@ -106,4 +109,14 @@ int32_t DiscIpcStopDiscovery(const char *packageName, int32_t subscribeId)
     }
     LOG_INFO("ServerStopDiscovery success!");
     return SOFTBUS_OK;
+}
+
+void SetCallLnnStatus(bool flag)
+{
+    g_isCallLnn = flag;
+}
+
+bool GetCallLnnStatus()
+{
+    return g_isCallLnn;
 }
