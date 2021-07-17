@@ -39,7 +39,7 @@ ohos_shared_library("softbus_client") {
   public_deps = [
     "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
     "$dsoftbus_root_path/sdk/bus_center/service:dsoftbus_bus_center_service_sdk",
-    "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_service_sdk",
+    "$dsoftbus_root_path/sdk/discovery/service:dsoftbus_disc_service_sdk",
     "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
     "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
     "$dsoftbus_root_path/sdk/transmission/session:dsoftbus_trans_session_sdk",
