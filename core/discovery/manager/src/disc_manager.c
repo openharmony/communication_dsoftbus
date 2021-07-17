@@ -216,7 +216,10 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
         LOG_ERR("OnDeviceFound not regist");
         return;
     }
-    infoNode->item->callback.innerCb.OnDeviceFound(device);
+    bool isCallLnn = GetCallLnnStatus();
+    if (isCallLnn) {
+        infoNode->item->callback.innerCb.OnDeviceFound(device);
+    }
 }
 
 static void DiscOnDeviceFound(const DeviceInfo *device)
