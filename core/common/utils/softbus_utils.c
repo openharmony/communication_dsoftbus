@@ -15,8 +15,6 @@
 
 #include "softbus_utils.h"
 
-#include "pthread.h"
-
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "securec.h"
@@ -40,6 +38,7 @@ static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 
 SoftBusList *CreateSoftBusList(void)
 {
+    pthread_mutexattr_t attr;
     SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     if (list == NULL) {
         LOG_ERR("malloc failed");
@@ -47,7 +46,9 @@ SoftBusList *CreateSoftBusList(void)
     }
     (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
 
-    if (pthread_mutex_init(&list->lock, NULL) != 0) {
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    if (pthread_mutex_init(&list->lock, &attr) != 0) {
         LOG_ERR("init lock failed");
         SoftBusFree(list);
         return NULL;
@@ -122,7 +123,7 @@ int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
     if (entropy == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    mbedtls_ctr_drbg_context *ctrDrbg = SoftBusCalloc(sizeof(mbedtls_ctr_drbg_context));
+    mbedtls_ctr_drbg_context *ctrDrbg = (mbedtls_ctr_drbg_context *)SoftBusCalloc(sizeof(mbedtls_ctr_drbg_context));
     if (ctrDrbg == NULL) {
         SoftBusFree(entropy);
         return SOFTBUS_MALLOC_ERR;

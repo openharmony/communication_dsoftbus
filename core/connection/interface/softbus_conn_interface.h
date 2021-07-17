@@ -38,6 +38,7 @@ typedef enum {
     MODULE_PROXY_CHANNEL = 13,
     MODULE_DEVICE_AUTH = 14,
     MODULE_P2P_LINK = 15,
+    MODULE_UDP_INFO = 17,
     MODULE_PKG_VERIFY = 20,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101
@@ -127,6 +128,8 @@ typedef struct {
 uint32_t ConnGetHeadSize(void);
 
 int32_t ConnServerInit(void);
+
+void ConnServerDeinit(void);
 
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
 

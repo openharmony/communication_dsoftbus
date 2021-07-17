@@ -22,6 +22,8 @@
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 
+static IClientSessionCallBack g_sessionCb;
+
 static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo *channel, uint32_t flag,
     int32_t *sessionId)
 {
@@ -40,7 +42,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
-        LOG_ERR("client add peer session name or device id or group id failed");
+        LOG_ERR("client add peer session name, device id, group id failed");
         SoftBusFree(session);
         return SOFTBUS_MEM_ERR;
     }
@@ -54,13 +56,14 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     return SOFTBUS_OK;
 }
 
-static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t *sessionId, ISessionListener *listener)
+static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelType,
+    int32_t *sessionId, ISessionListener *listener)
 {
     if ((channelId < 0) || (sessionId == NULL) || (listener == NULL)) {
         LOG_ERR("Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = ClientGetSessionIdByChannelId(channelId, sessionId);
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("get sessionId failed, channelId [%d]", channelId);
         return SOFTBUS_ERR;
@@ -107,11 +110,11 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpenFailed(int32_t channelId)
+int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
 {
     int32_t sessionId;
     ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, &sessionId, &listener);
+    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("get session callback failed");
         return ret;
@@ -125,11 +128,11 @@ int32_t TransOnSessionOpenFailed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionClosed(int32_t channelId)
+int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
     int32_t sessionId;
     ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, &sessionId, &listener);
+    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("get session callback failed");
         return ret;
@@ -147,11 +150,12 @@ int32_t TransOnSessionClosed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnDataReceived(int32_t channelId, const void *data, uint32_t len, SessionPktType type)
+int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;
     ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, &sessionId, &listener);
+    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("get session callback failed");
         return ret;
@@ -175,3 +179,29 @@ int32_t TransOnDataReceived(int32_t channelId, const void *data, uint32_t len, S
 
     return SOFTBUS_OK;
 }
+
+int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
+    const StreamData *data, const StreamData *ext, const FrameInfo *param)
+{
+    int32_t sessionId;
+    ISessionListener listener = {0};
+    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("get session callback failed");
+        return ret;
+    }
+
+    listener.OnStreamReceived(sessionId, data, ext, param);
+    return SOFTBUS_OK;
+}
+
+IClientSessionCallBack *GetClientSessionCb(void)
+{
+    g_sessionCb.OnSessionOpened = TransOnSessionOpened;
+    g_sessionCb.OnSessionClosed = TransOnSessionClosed;
+    g_sessionCb.OnSessionOpenFailed = TransOnSessionOpenFailed;
+    g_sessionCb.OnDataReceived = TransOnDataReceived;
+    g_sessionCb.OnStreamReceived = TransOnOnStreamRecevied;
+    return &g_sessionCb;
+}
+

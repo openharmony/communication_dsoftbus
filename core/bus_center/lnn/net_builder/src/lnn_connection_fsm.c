@@ -21,9 +21,9 @@
 #include "bus_center_event.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_exchange_ledger_info.h"
+#include "lnn_exchange_device_info.h"
 #include "lnn_net_builder.h"
-#include "lnn_sync_ledger_item_info.h"
+#include "lnn_sync_item_info.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
@@ -130,6 +130,28 @@ static void FreeUnhandledMessage(const LnnConnectionFsm *connFsm, int32_t msgTyp
     }
 }
 
+static void ReportResult(const char *udid, ReportCategory report)
+{
+    NodeBasicInfo basic;
+    (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
+        LOG_ERR("GetBasicInfoByUdid?fail!");
+        return;
+    }
+    switch (report) {
+        case REPORT_CHANGE:
+            LnnNotifyBasicInfoChanged(&basic, TYPE_NETWORK_ID);
+            break;
+        case REPORT_ONLINE:
+            LnnNotifyOnlineState(true, &basic);
+            break;
+        case REPORT_NONE:
+            /* fall-through */
+        default:
+            break;
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -137,7 +159,8 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     if (retCode == SOFTBUS_OK) {
         if (strncpy_s(connInfo->peerNetworkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) == EOK) {
-            LnnAddOnlineNode(connInfo->nodeInfo);
+            ReportCategory report = LnnAddOnlineNode(connInfo->nodeInfo);
+            ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         } else {
             LOG_ERR("copy peer network id error");
         }
@@ -173,6 +196,11 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
         if (info != NULL) {
             udid = LnnGetDeviceUdid(info);
             LnnSetNodeOffline(udid);
+            NodeBasicInfo basic;
+            (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+            if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
+                LnnNotifyOnlineState(false, &basic);
+            }
             // just remove node when peer device is not trusted
             if ((connInfo->flag & CONN_INFO_FLAG_LEAVING_PASSIVE) != 0) {
                 LOG_INFO("[id=%u]remove node", connFsm->id);

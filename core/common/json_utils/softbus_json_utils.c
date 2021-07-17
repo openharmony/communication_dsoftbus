@@ -16,7 +16,6 @@
 #include "softbus_json_utils.h"
 
 #include <securec.h>
-#include <stdlib.h>
 
 bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, int targetLen)
 {
@@ -69,6 +68,20 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
     return true;
 }
 
+bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
+{
+    if (json == NULL || string == NULL || target == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
+        LOG_ERR("Cannot find or invalid [%s]", string);
+        return false;
+    }
+    *target = (int64_t)item->valuedouble;
+    return true;
+}
+
 bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
@@ -101,6 +114,23 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
 }
 
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+{
+    if (json == NULL || string == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_CreateNumber(num);
+    if (item == NULL) {
+        LOG_ERR("Cannot create cJSON number object [%s]", string);
+        return false;
+    }
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
+bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num)
 {
     if (json == NULL || string == NULL) {
         return false;

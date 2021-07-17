@@ -73,3 +73,8 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
 {
     return GetClientProvideInterface()->onNodeBasicInfoChanged(info, infoTypeLen, type);
 }
+
+void BusCenterServerDeathCallback(const char *pkgName)
+{
+    (void)pkgName;
+}

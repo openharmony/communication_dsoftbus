@@ -16,35 +16,18 @@
 #include "trans_tcp_direct_manager.h"
 
 #include <securec.h>
-#include <stdlib.h>
 
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_tcp_socket.h"
-#include "trans_tcp_direct_listener.h"
+#include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_message.h"
 
-#define TCP_DIRECT_CHANNEL_OPEN_TIMEOUT 19
+#define HANDSHAKE_TIMEOUT 19
 
 static SoftBusList *g_sessionConnList = NULL;
-
-static int32_t InitTdcInfo(SessionConn *newConn)
-{
-    if (pthread_mutex_init(&(newConn->lock), NULL)) {
-        LOG_ERR("create mutex lock fail.");
-        return SOFTBUS_ERR;
-    }
-
-    if (TransTdcAddSessionConn(newConn, RW_TRIGGER) != SOFTBUS_OK) {
-        TransTdcCloseSessionConn(newConn->channelId);
-        LOG_ERR("TransTdc add sessionConn err.");
-        return SOFTBUS_ERR;
-    }
-
-    return SOFTBUS_OK;
-}
 
 static void TransTdcTimerProc(void)
 {
@@ -61,9 +44,9 @@ static void TransTdcTimerProc(void)
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_sessionConnList->list, SessionConn, node) {
         removeNode->timeout++;
-        if (removeNode->status == TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING) {
-            if (removeNode->timeout >= TCP_DIRECT_CHANNEL_OPEN_TIMEOUT) {
-                removeNode->status = TCP_DIRECT_CHANNEL_STATUS_HANDSHAKE_TIMEOUT;
+        if (removeNode->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
+            if (removeNode->timeout >= HANDSHAKE_TIMEOUT) {
+                removeNode->status = TCP_DIRECT_CHANNEL_STATUS_TIMEOUT;
 
                 (void)pthread_mutex_unlock(&g_sessionConnList->lock);
                 NotifyChannelOpenFailed(removeNode->channelId);
@@ -74,11 +57,11 @@ static void TransTdcTimerProc(void)
                 int fd = removeNode->appInfo.fd;
                 if (fd >= 0) {
                     LOG_INFO("fd[%d] is shutdown", fd);
-                    DelTrigger(DIRECT_CHANNEL_SERVER, fd, removeNode->triggerType);
+                    DelTrigger(DIRECT_CHANNEL_SERVER, fd, RW_TRIGGER);
                     TcpShutDown(fd);
                 }
 
-                LOG_ERR("channel (%ld) handshake is timeout", removeNode->channelId);
+                LOG_ERR("channel[%d] handshake is timeout", removeNode->channelId);
                 SoftBusFree(removeNode);
             }
         }
@@ -104,6 +87,72 @@ static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
     return fd;
 }
 
+int32_t TransTdcAddSessionConn(SessionConn *conn)
+{
+    if (conn == NULL || g_sessionConnList == NULL) {
+        LOG_ERR("invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    pthread_mutex_lock(&(g_sessionConnList->lock));
+    ListInit(&conn->node);
+    ListTailInsert(&g_sessionConnList->list, &conn->node);
+    g_sessionConnList->cnt++;
+    pthread_mutex_unlock(&g_sessionConnList->lock);
+    conn->authStarted = false;
+    conn->openChannelFinished = false;
+
+    return SOFTBUS_OK;
+}
+
+void TransTdcStopListen(int32_t channelId)
+{
+    SessionConn *conn = GetTdcInfoByChannelId(channelId);
+    if (conn == NULL) {
+        LOG_ERR("get tdc intfo err");
+        return;
+    }
+    DelTrigger(DIRECT_CHANNEL_SERVER, conn->appInfo.fd, conn->triggerType);
+    return;
+}
+
+void TransTdcDelSessionConn(SessionConn *conn)
+{
+    if (conn == NULL || g_sessionConnList == NULL) {
+        LOG_ERR("input illegal or session conn list illegal.");
+        return;
+    }
+
+    pthread_mutex_lock(&g_sessionConnList->lock);
+    ListDelete(&conn->node);
+    SoftBusFree(conn);
+    g_sessionConnList->cnt--;
+    pthread_mutex_unlock(&g_sessionConnList->lock);
+}
+
+void TransTdcDelSessionConnByChannelId(int32_t channelId)
+{
+    if (g_sessionConnList == NULL) {
+        LOG_ERR("get tdc info fail, info list is null.");
+        return;
+    }
+
+    SessionConn *item = NULL;
+    SessionConn *next = NULL;
+    pthread_mutex_lock(&g_sessionConnList->lock);
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
+        if (item->channelId == channelId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            g_sessionConnList->cnt--;
+            return;
+        }
+    }
+    pthread_mutex_unlock(&g_sessionConnList->lock);
+
+    LOG_ERR("get tdc info is null");
+}
+
 int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int *fd)
 {
     if (appInfo == NULL || connInfo == NULL || fd == NULL) {
@@ -116,116 +165,48 @@ int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInf
     appInfo->routeType = WIFI_STA;
     SessionConn *newConn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
     if (newConn == NULL) {
-        LOG_ERR("Malloc err.");
-        return SOFTBUS_ERR;
+        LOG_ERR("malloc fail.");
+        return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
         SoftBusFree(newConn);
-        LOG_ERR("Memcpy ip err.");
-        return SOFTBUS_ERR;
+        LOG_ERR("memcpy_s ip fail.");
+        return SOFTBUS_MEM_ERR;
     }
     newConn->appInfo.fd = -1;
     newConn->serverSide = false;
     newConn->channelId = INVALID_CHANNEL_ID;
     if (strcpy_s(newConn->appInfo.peerData.ip, IP_LEN, ip) != EOK) {
         SoftBusFree(newConn);
-        LOG_ERR("strcpy_s err.");
-        return SOFTBUS_ERR;
+        LOG_ERR("strcpy_s fail.");
+        return SOFTBUS_MEM_ERR;
     }
     newConn->appInfo.peerData.port = sessionPort;
     newConn->status = TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING;
     newConn->timeout = 0;
 
-    if (InitTdcInfo(newConn) != SOFTBUS_OK) {
-        SoftBusFree(newConn);
-        return SOFTBUS_ERR;
-    }
-
     *fd = OpenConnTcp(appInfo, connInfo);
-    if (*fd <= 0) {
-        TransCloseDirectChannel(newConn->channelId);
+    if (*fd < 0) {
         SoftBusFree(newConn);
-        LOG_ERR("OpenConnTcp err.");
+        LOG_ERR("tcp connect fail.");
         return SOFTBUS_ERR;
     }
-
     newConn->appInfo.fd = *fd;
     newConn->channelId = *fd;
-    if (AddTrigger(DIRECT_CHANNEL_SERVER, newConn->appInfo.fd, RW_TRIGGER) != SOFTBUS_OK) {
-        TransCloseDirectChannel(newConn->channelId);
+    newConn->dataBuffer.w = newConn->dataBuffer.data;
+
+    if (TransTdcAddSessionConn(newConn) != SOFTBUS_OK) {
         SoftBusFree(newConn);
-        LOG_ERR("AddTrigger failed");
+        LOG_ERR("add session conn fail.");
+        return SOFTBUS_ERR;
+    }
+    if (AddTrigger(DIRECT_CHANNEL_SERVER, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+        TransTdcDelSessionConn(newConn);
+        LOG_ERR("add trigger fail, delete session conn.");
         return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
-}
-
-int32_t TransCloseDirectChannel(int channelId)
-{
-    SessionConn *tdcInfo = GetTdcInfoByChannelId(channelId);
-    if (tdcInfo == NULL) {
-        LOG_ERR("SessionConn is not exit");
-        return SOFTBUS_ERR;
-    }
-    TransTdcCloseSessionConn(channelId);
-    SoftBusFree(tdcInfo);
-    return SOFTBUS_OK;
-}
-
-int32_t TransTdcAddSessionConn(SessionConn *conn, TriggerType triggerType)
-{
-    if (conn == NULL || g_sessionConnList == NULL || TransTdcGetSessionListener() == NULL) {
-        LOG_ERR("invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    pthread_mutex_lock(&(g_sessionConnList->lock));
-    ListInit(&conn->node);
-    ListTailInsert(&g_sessionConnList->list, &conn->node);
-    g_sessionConnList->cnt++;
-    pthread_mutex_unlock(&g_sessionConnList->lock);
-    conn->triggerType = triggerType;
-    conn->authStarted = false;
-    conn->openChannelFinished = false;
-    if (conn->appInfo.fd >= 0) {
-        if (AddTrigger(DIRECT_CHANNEL_SERVER, conn->appInfo.fd, triggerType) != SOFTBUS_OK) {
-            LOG_ERR("AddTrigger failed");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
-void TransTdcStopSessionConn(int32_t channelId)
-{
-    SessionConn *tdcInfo = GetTdcInfoByChannelId(channelId);
-    if (tdcInfo == NULL) {
-        LOG_ERR("get tdc intfo err");
-        return;
-    }
-    DelTrigger(DIRECT_CHANNEL_SERVER, tdcInfo->appInfo.fd, tdcInfo->triggerType);
-    return;
-}
-
-void TransTdcCloseSessionConn(int32_t channelId)
-{
-    SessionConn *tdcInfo = GetTdcInfoByChannelId(channelId);
-    if (tdcInfo == NULL || g_sessionConnList == NULL) {
-        LOG_ERR("get tdc intfo err");
-        return;
-    }
-    int fd = tdcInfo->appInfo.fd;
-    TransTdcStopSessionConn(tdcInfo->channelId);
-    if (fd >= 0) {
-        LOG_INFO("fd[%d] is shutdown", fd);
-        TcpShutDown(fd);
-    }
-    pthread_mutex_lock(&(g_sessionConnList->lock));
-    ListDelete(&tdcInfo->node);
-    g_sessionConnList->cnt--;
-    pthread_mutex_unlock(&(g_sessionConnList->lock));
-    NotifyChannelClosed(tdcInfo->channelId);
 }
 
 SessionConn *GetTdcInfoByChannelId(int32_t channelId)
@@ -289,8 +270,11 @@ void SetTdcInfoList(SoftBusList *sessionConnList)
     return;
 }
 
-int32_t TransTcpDirectInit(void)
+int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
+    if (TransTdcSetCallBack(cb) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     if (RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc) != SOFTBUS_OK) {
         LOG_ERR("RegisterTimeoutCallback failed");
         return SOFTBUS_ERR;
@@ -310,14 +294,19 @@ void TransTdcDeathCallback(const char *pkgName)
         return;
     }
 
-    SessionConn *connInfo = NULL;
+    SessionConn *conn = NULL;
+    SessionConn *next = NULL;
+
     if (pthread_mutex_lock(&(g_sessionConnList->lock)) != 0) {
         LOG_ERR("lock mutex fail!");
         return;
     }
-    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (strcmp(connInfo->appInfo.myData.pkgName, pkgName) == 0) {
-            TransTdcCloseSessionConn(connInfo->channelId);
+    LIST_FOR_EACH_ENTRY_SAFE(conn, next, &g_sessionConnList->list, SessionConn, node) {
+        if (strcmp(conn->appInfo.myData.pkgName, pkgName) == 0) {
+            ListDelete(&conn->node);
+            DelTrigger(DIRECT_CHANNEL_SERVER, conn->appInfo.fd, RW_TRIGGER);
+            SoftBusFree(conn);
+            g_sessionConnList->cnt--;
             continue;
         }
     }

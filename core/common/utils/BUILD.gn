@@ -10,36 +10,63 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import("//build/lite/config/component/lite_component.gni")
+
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_utils") {
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//third_party/bounds_checking_function/include",
-      "//third_party/mbedtls/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    cflags = [ "-Wall" ]
-    sources = [ "softbus_utils.c" ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  common_include = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$libsec_include_path",
+    "//third_party/mbedtls/include",
+    "$hilog_lite_include_path",
+  ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_utils") {
+      include_dirs = common_include
+      cflags = [ "-Wall" ]
+      sources = [ "softbus_utils.c" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
+    }
+  } else {
+    shared_library("softbus_utils") {
+      include_dirs = common_include
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      sources = [ "softbus_utils.c" ]
+      public_deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+        "//third_party/mbedtls:mbedtls_shared",
+      ]
+    }
   }
 } else {
-  shared_library("softbus_utils") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("softbus_utils") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//third_party/bounds_checking_function/include",
       "//third_party/mbedtls/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     ]
-    cflags = [ "-Wall" ]
     sources = [ "softbus_utils.c" ]
     public_deps = [
+      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
-      "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/mbedtls:mbedtls_shared",
+      "//utils/native/base:utilsecurec_shared",
     ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

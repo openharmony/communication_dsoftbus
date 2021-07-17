@@ -19,8 +19,8 @@
 #include "bus_center_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
-#include "softbus_interface.h"
 #include "softbus_log.h"
+#include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_proxychannel_session.h"
@@ -28,14 +28,14 @@
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t channelId)
 {
-    int32_t ret = GetClientProvideInterface()->onChannelClosed(pkgName, channelId);
+    int32_t ret = TransProxyOnChannelClosed(pkgName, channelId);
     LOG_INFO("proxy channel close, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
 
 static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t channelId)
 {
-    int32_t ret = GetClientProvideInterface()->onChannelOpenFailed(pkgName, channelId);
+    int32_t ret = TransProxyOnChannelOpenFailed(pkgName, channelId);
     LOG_INFO("proxy channel open fail, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
@@ -49,7 +49,6 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.isEnabled = true;
     info.groupId = (char*)appInfo->groupId;
     info.peerSessionName = (char*)appInfo->peerData.sessionName;
-    info.peerDeviceId = (char*)appInfo->peerData.deviceId;
     info.peerPid = appInfo->peerData.pid;
     info.peerUid = appInfo->peerData.uid;
     char buf[NETWORK_ID_BUF_LEN] = {0};
@@ -60,8 +59,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     }
     info.peerDeviceId = buf;
 
-    ret = GetClientProvideInterface()->onChannelOpened(appInfo->myData.pkgName,
-        appInfo->myData.sessionName, &info);
+    ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
     LOG_INFO("proxy channel open, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }

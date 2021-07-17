@@ -11,35 +11,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_seq_verification") {
-    sources = [ "src/softbus_sequence_verification.c" ]
-    include_dirs = [
-      "include",
-      "$dsoftbus_root_path/core/common/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_seq_verification") {
+      sources = [ "src/softbus_sequence_verification.c" ]
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/core/common/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+      deps = [ "$hilog_lite_deps_path" ]
+    }
+  } else {
+    shared_library("softbus_seq_verification") {
+      sources = [ "src/softbus_sequence_verification.c" ]
+      include_dirs = [
+        "include",
+        "$dsoftbus_root_path/core/common/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+      deps = [ "$hilog_lite_deps_path" ]
+    }
   }
 } else {
-  shared_library("softbus_seq_verification") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("softbus_seq_verification") {
     sources = [ "src/softbus_sequence_verification.c" ]
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

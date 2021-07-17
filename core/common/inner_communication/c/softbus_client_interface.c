@@ -20,15 +20,6 @@
 #include "softbus_errcode.h"
 
 #if defined(__LITEOS_M__)
-extern int TransOnChannelOpened(const char *pkgName, const char* sessionName, const ChannelInfo* channel);
-
-extern int TransOnChannelOpenFailed(const char *pkgName, int32_t channelId);
-
-extern int  TransOnChannelClosed(const char *pkgName, int32_t channelId);
-
-extern int TransOnChannelMsgReceived(const char *pkgName, int32_t channelId,
-    const void *data, unsigned int len, int32_t type);
-
 extern int LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 
 extern int  LnnOnLeaveResult(const char *networkId, int32_t retCode);
@@ -37,37 +28,6 @@ extern int LnnOnNodeOnlineStateChanged(bool isOnline, void *info);
 
 extern int LnnOnNodeBasicInfoChanged(void *info, int32_t type);
 #else
-int __attribute__ ((weak)) TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
-{
-    (void)sessionName;
-    (void)channel;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int __attribute__ ((weak)) TransOnChannelOpenFailed(const char *pkgName, int32_t channelId)
-{
-    (void)pkgName;
-    (void)channelId;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int __attribute__ ((weak)) TransOnChannelClosed(const char *pkgName, int32_t channelId)
-{
-    (void)pkgName;
-    (void)channelId;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int __attribute__ ((weak)) TransOnChannelMsgReceived(const char *pkgName, int32_t channelId,
-    const void *data, unsigned int len, int32_t type)
-{
-    (void)channelId;
-    (void)data;
-    (void)len;
-    (void)type;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int __attribute__ ((weak)) LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     (void)addr;

@@ -11,13 +11,95 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-ohos_prebuilt_etc("softbus_permission") {
-  source = "permission.json"
-  install_enable = true
-  relative_install_dir = "communication/softbus"
-  part_name = "dsoftbus_standard"
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  copy("permission_json") {
+    sources = [ "softbus_trans_permission.json" ]
+    outputs = [ "$root_out_dir/etc/softbus_trans_permission.json" ]
+  }
+
+  common_include = [
+    "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/common/security/permission/include",
+    "//foundation/communication/ipc_lite/interfaces/kits",
+    "//base/security/permission/interfaces/kits/permission_lite",
+    "//third_party/cJSON",
+  ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_permission") {
+      include_dirs = common_include
+      sources = [ "mini_system/softbus_permission.c" ]
+      deps = []
+    }
+  } else {
+    shared_library("softbus_permission") {
+      include_dirs = common_include
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      sources = [
+        "common/permission_entry.c",
+        "small_system/permission_utils.c",
+        "small_system/softbus_permission.c",
+      ]
+      deps = [
+        ":permission_json",
+        "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_core_path/common/utils:softbus_utils",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+        "//base/security/permission/services/permission_lite:permission_lite",
+        "//foundation/communication/ipc_lite:liteipc_adapter",
+      ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_prebuilt_etc("softbus_permission_json") {
+    source = "softbus_trans_permission.json"
+    install_enable = true
+    relative_install_dir = "communication/softbus"
+    part_name = "dsoftbus_standard"
+  }
+
+  ohos_shared_library("softbus_permission") {
+    include_dirs = [
+      "$dsoftbus_core_path/common/include",
+      "$dsoftbus_core_path/common/security/permission/include",
+      "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
+      "//foundation/appexecfwk/standard/kits/appkit/native/app/include",
+      "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+      "//foundation/aafwk/standard/interfaces/innerkits/want/include",
+      "//utils/system/safwk/native/include",
+    ]
+    sources = [
+      "common/permission_entry.c",
+      "standard_system/permission_utils.cpp",
+      "standard_system/softbus_permission.cpp",
+    ]
+    deps = [
+      ":softbus_permission_json",
+      "$dsoftbus_core_path/common/json_utils:json_utils",
+      "$dsoftbus_core_path/common/utils:softbus_utils",
+      "//foundation/appexecfwk/standard/kits:appkit_native",
+      "//third_party/cJSON:cjson_static",
+      "//utils/native/base:utils",
+    ]
+    external_deps = [
+      "aafwk_standard:want",
+      "appexecfwk_standard:appexecfwk_core",
+      "ipc:ipc_core",
+      "hiviewdfx_hilog_native:libhilog",
+      "permission_standard:libpermissionsdk_standard",
+      "samgr_L2:samgr_proxy",
+    ]
+
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

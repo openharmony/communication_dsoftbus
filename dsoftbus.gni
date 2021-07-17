@@ -12,3 +12,27 @@
 # limitations under the License.
 
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
+dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
+dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
+
+if (defined(ohos_lite)) {
+  libsec_include_path = "//third_party/bounds_checking_function/include"
+  if (ohos_kernel_type == "liteos_m") {
+    import("$dsoftbus_root_path/config/mini/config.gni")
+    hilog_lite_include_path =
+        "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
+    hilog_lite_deps_path =
+        "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
+
+    libsec_deps_path = "//third_party/bounds_checking_function:libsec_static"
+  } else {
+    import("$dsoftbus_root_path/config/small/config.gni")
+    hilog_lite_include_path =
+        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
+    hilog_lite_deps_path =
+        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared"
+    libsec_deps_path = "//third_party/bounds_checking_function:libsec_shared"
+  }
+} else {
+  import("$dsoftbus_root_path/config/standard/config.gni")
+}

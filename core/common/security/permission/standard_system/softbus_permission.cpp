@@ -33,6 +33,7 @@ using namespace OHOS::AppExecFwk;
 using namespace OHOS::Security::Permission;
 
 namespace {
+    const std::string PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
     const std::string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const std::string BIND_DISCOVER_SERVICE = "com.huawei.hwddmp.permission.BIND_DISCOVER_SERVICE";
@@ -90,12 +91,9 @@ namespace {
     }
 }
 
-int32_t TransPermissionInit(const char *fileName)
+int32_t TransPermissionInit()
 {
-    if (fileName == nullptr) {
-        return SOFTBUS_PERMISSION_DENIED;
-    }
-    return LoadPermissionJson(fileName);
+    return LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
 }
 
 void TransPermissionDeinit(void)

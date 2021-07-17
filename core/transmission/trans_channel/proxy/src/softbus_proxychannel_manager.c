@@ -23,12 +23,12 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
+#include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
-#include "trans_session_manager.h"
 
 #define PROXY_CHANNEL_CONTROL_TIMEOUT 19
 #define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240 // 4min
@@ -605,7 +605,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         SoftBusFree(chan);
         return;
     }
-    int32_t ret = TransGetPkgNameBySessionName(chan->appInfo.myData.sessionName,
+    int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
         chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
     if (ret != SOFTBUS_OK) {
         LOG_ERR("proc handshake get pkg name fail");
@@ -965,10 +965,14 @@ void TransProxyTimerProc(void)
     TransProxyTimerItemProc(&proxyProcList);
 }
 
-int32_t TransProxyManagerInit(void)
+int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 {
     if (pthread_mutex_init(&g_myIdLock, NULL) != 0) {
         LOG_ERR("init lock failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransProxySetCallBack(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
@@ -1005,7 +1009,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
         SoftBusFree(chan);
         return SOFTBUS_ERR;
     }
-    if (TransGetPkgNameBySessionName(chan->appInfo.myData.sessionName, pkgName, pkgLen) != SOFTBUS_OK) {
+    if (TransProxyGetPkgName(chan->appInfo.myData.sessionName, pkgName, pkgLen) != SOFTBUS_OK) {
         SoftBusFree(chan);
         return SOFTBUS_ERR;
     }
@@ -1037,7 +1041,11 @@ void TransProxyDeathCallback(const char *pkgName)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            TransProxyCloseProxyChannel(item->channelId);
+            TransProxyResetPeer(item);
+            (void)TransProxyCloseConnChannel(item->connId);
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            g_proxyChannelList->cnt--;
             continue;
         }
     }

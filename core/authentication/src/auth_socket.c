@@ -20,7 +20,6 @@
 #include "auth_connection.h"
 #include "bus_center_manager.h"
 #include "softbus_base_listener.h"
-#include "softbus_conn_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
@@ -79,7 +78,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         LOG_ERR("ip get auth failed");
         return;
     }
-    if (auth->authId != head->seq && auth->authId != 0) {
+    if (auth->authId != head->seq && auth->authId != 0 && head->module != MODULE_UDP_INFO) {
         return;
     }
     LOG_INFO("auth ip data module is %d", head->module);
@@ -98,6 +97,10 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         }
         case MODULE_AUTH_CONNECTION: {
             AuthHandlePeerSyncDeviceInfo(auth, (uint8_t *)data, head->len);
+            break;
+        }
+        case MODULE_UDP_INFO: {
+            AuthHandleTransInfo(auth, head, data, head->len);
             break;
         }
         default: {
@@ -165,9 +168,10 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
             (void)DelTrigger(AUTH, fd, RW_TRIGGER);
             AuthNotifyLnnDisconn(fd);
         }
-        LOG_ERR("auth recv data head len not correct, len %d", len);
+        LOG_ERR("auth recv data head len not correct, len is %d", len);
         return SOFTBUS_ERR;
     }
+
     LOG_INFO("auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
         head.len, head.module, head.flag, head.seq);
     if (head.len > AUTH_MAX_DATA_LEN) {
@@ -175,6 +179,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
         return SOFTBUS_ERR;
     }
     AuthIpDataProcess(fd, &head);
+
     return SOFTBUS_OK;
 }
 
@@ -189,8 +194,13 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
     char *connPostData = NULL;
     ethHead.magic = MAGIC_NUMBER;
     ethHead.module = head->module;
-    ethHead.seq = auth->authId;
-    ethHead.flag = auth->side;
+    if (head->module == MODULE_UDP_INFO) {
+        ethHead.seq = head->seq;
+        ethHead.flag = head->flag;
+    } else {
+        ethHead.seq = auth->authId;
+        ethHead.flag = auth->side;
+    }
     ethHead.len = len;
     postDataLen = sizeof(ConnPktHead) + len;
     char *buf = (char *)SoftBusMalloc(postDataLen);

@@ -16,6 +16,7 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
+#include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
@@ -25,9 +26,9 @@ class ISoftBusServer : public IRemoteBroker {
 public:
     virtual ~ISoftBusServer() = default;
 
-    virtual int32_t StartDiscovery(const char *pkgName, const void *info) = 0;
+    virtual int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) = 0;
     virtual int32_t StopDiscovery(const char *pkgName, int subscribeId) = 0;
-    virtual int32_t PublishService(const char *pkgName, const void *info) = 0;
+    virtual int32_t PublishService(const char *pkgName, const PublishInfo *info) = 0;
     virtual int32_t UnPublishService(const char *pkgName, int publishId) = 0;
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
 
@@ -35,7 +36,7 @@ public:
     virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
     virtual int32_t OpenSession(const char *mySessionName, const char *peerSessionName,
         const char *peerDeviceId, const char *groupId, int32_t flags) = 0;
-    virtual int32_t CloseChannel(int32_t channelId) = 0;
+    virtual int32_t CloseChannel(int32_t channelId, int32_t channelType) = 0;
     virtual int32_t SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType) = 0;
 
     virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) = 0;

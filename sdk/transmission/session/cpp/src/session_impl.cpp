@@ -69,7 +69,6 @@ const std::string &SessionImpl::GetPeerDeviceId() const
     return peerDeviceId_;
 }
 
-
 void SessionImpl::SetDeviceId(const std::string &name)
 {
     deviceId_ = name;

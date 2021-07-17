@@ -24,9 +24,10 @@ void DeleteEventNode(EventNode *node);
 EventNode *SearchEventNode(const List *eventNodeChain, EpollDesc epollfd)
 {
     List *pos = NULL;
+    List *tmp = NULL;
     EventNode *node = NULL;
 
-    LIST_FOR_EACH(pos, eventNodeChain) {
+    LIST_FOR_EACH_SAFE(pos, tmp, eventNodeChain) {
         node = (EventNode *)pos;
         if (IsEpollDescEqual(node->epollfd, epollfd)) {
             break;

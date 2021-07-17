@@ -35,10 +35,6 @@ static SoftbusBaseListener *g_sessionListener = NULL;
 static int32_t StartVerifySession(SessionConn *conn)
 {
     LOG_INFO("StartVerifySession");
-    if (conn->authStarted == true) {
-        return SOFTBUS_OK;
-    }
-
     uint64_t seq = TransTdcGetNewSeqId(conn->serverSide);
     if (GenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LOG_ERR("Generate SessionKey failed");
@@ -49,13 +45,13 @@ static int32_t StartVerifySession(SessionConn *conn)
         LOG_ERR("Pack Request failed");
         return SOFTBUS_ERR;
     }
-    uint32_t flags = 0;
+
     uint32_t dataLen = strlen(bytes) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
         .seq = seq,
-        .flags = flags,
+        .flags = FLAG_REQUEST,
         .dataLen = dataLen,
     };
 
@@ -67,7 +63,6 @@ static int32_t StartVerifySession(SessionConn *conn)
     SoftBusFree(bytes);
     LOG_INFO("StartVerifySession ok");
 
-    conn->authStarted = true;
     return SOFTBUS_OK;
 }
 
@@ -111,6 +106,7 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
     item->channelId = cfd;
     item->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
     item->timeout = 0;
+    item->dataBuffer.w = item->dataBuffer.data;
 
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, item->appInfo.myData.deviceId,
         sizeof(item->appInfo.myData.deviceId)) != 0) {
@@ -135,10 +131,14 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
         return SOFTBUS_MEM_ERR;
     }
 
-    if (TransTdcAddSessionConn(item, RW_TRIGGER) != SOFTBUS_OK) {
+    if (TransTdcAddSessionConn(item) != SOFTBUS_OK) {
         LOG_ERR("TransTdcAddSessionConn failed");
-        TransTdcCloseSessionConn(item->channelId);
         SoftBusFree(item);
+        return SOFTBUS_ERR;
+    }
+    if (AddTrigger(DIRECT_CHANNEL_SERVER, cfd, READ_TRIGGER) != SOFTBUS_OK) {
+        LOG_ERR("add trigger failed, delete session conn.");
+        TransTdcDelSessionConn(item);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -146,38 +146,39 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 
 static int32_t OnDataEvent(int events, int fd)
 {
-    SessionConn *item = GetTdcInfoByFd(fd);
-    if (item == NULL || item->appInfo.fd != fd) {
-        LOG_ERR("fd[%d] is not exist tdc info", fd);
+    SessionConn *conn = GetTdcInfoByFd(fd);
+    if (conn == NULL || conn->appInfo.fd != fd) {
+        LOG_ERR("fd[%d] is not exist tdc info.", fd);
         return SOFTBUS_ERR;
     }
-
-    if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        LOG_ERR("Exception occurred");
-        TransTdcCloseSessionConn(item->channelId);
-        if (item->serverSide == true || item->openChannelFinished == true) {
-            SoftBusFree(item);
-        }
-        return SOFTBUS_ERR;
-    }
-    if (events == SOFTBUS_SOCKET_OUT && item->serverSide == false) {
-        if (StartVerifySession(item) != SOFTBUS_OK) {
-            TransTdcCloseSessionConn(item->channelId);
-            if (item->serverSide == true || item->openChannelFinished == true) {
-                SoftBusFree(item);
+    int32_t ret = SOFTBUS_ERR;
+    if (events == SOFTBUS_SOCKET_IN) {
+        ret = TransTdcProcessPacket(conn->channelId);
+        if (ret != SOFTBUS_DATA_NOT_ENOUGH) {
+            DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+            if (ret != SOFTBUS_OK) {
+                NotifyChannelOpenFailed(conn->channelId);
             }
-            return SOFTBUS_ERR;
+            TransTdcDelSessionConn(conn);
         }
-    }
-    if (TransTdcProcessPacket(item->channelId) != SOFTBUS_OK) {
-        LOG_ERR("ProcessPacket err");
-        TransTdcCloseSessionConn(item->channelId);
-        if (item->serverSide == true || item->openChannelFinished == true) {
-            SoftBusFree(item);
+    } else if (events == SOFTBUS_SOCKET_OUT) {
+        if (conn->serverSide == true) {
+            return ret;
         }
-        return SOFTBUS_ERR;
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
+        AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        ret = StartVerifySession(conn);
+        if (ret != SOFTBUS_OK) {
+            LOG_ERR("start verify session fail.");
+            NotifyChannelOpenFailed(conn->channelId);
+            TransTdcDelSessionConn(conn);
+        }
+    } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
+        LOG_ERR("exception occurred.");
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
+        TransTdcDelSessionConn(conn);
     }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t TransTdcStartSessionListener(const char *ip, const int port)

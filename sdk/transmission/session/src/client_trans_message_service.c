@@ -64,3 +64,25 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 
     return ClientTransChannelSendMessage(channelId, type, data, len);
 }
+
+int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+{
+    if ((data == NULL) || (ext == 0) || (param == NULL)) {
+        LOG_ERR("Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("get channel failed");
+        return ret;
+    }
+    if (type == CHANNEL_TYPE_BUTT) {
+        LOG_INFO("channel opening");
+        return SOFTBUS_TRANS_SESSION_OPENING;
+    }
+
+    return ClientTransChannelSendStream(channelId, type, data, ext, param);
+}

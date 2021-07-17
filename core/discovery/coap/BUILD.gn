@@ -11,43 +11,95 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-shared_library("disc_coap_module") {
-  sources = [
-    "src/disc_coap.c",
-    "src/disc_nstackx_adapter.c",
-  ]
-  include_dirs = [
-    "include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/components/dfinder/include",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/cJSON",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-  ]
-  cflags = [
-    "-Wall",
-    "-fPIC",
-    "-std=c99",
-  ]
-  ldflags = [
-    "-lnstackx_ctrl",
-    "-lnstackx_util",
-  ]
-  deps = [
-    "$dsoftbus_root_path/components/dfinder:dfinder",
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
-    "$dsoftbus_root_path/core/bus_center:softbus_bus_center",
-    "$dsoftbus_root_path/core/common/json_utils:json_utils",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
+config("discovery_coap_config") {
+  cflags = [ "-Wno-error" ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (enable_discovery_coap == true) {
+    sources_coap = [
+      "src/disc_coap.c",
+      "src/disc_nstackx_adapter.c",
+    ]
+    deps_coap = [
+      "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common/json_utils:json_utils",
+      "$hilog_lite_deps_path",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  } else {
+    sources_coap = [ "src/disc_coap_virtual.c" ]
+    deps_coap = []
+  }
+
+  shared_library("dsoftbus_disc_coap") {
+    sources = sources_coap
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "//third_party/bounds_checking_function/include",
+      "//third_party/cJSON",
+      "$hilog_lite_include_path",
+    ]
+    cflags = [
+      "-Wall",
+      "-fPIC",
+      "-std=c99",
+    ]
+
+    deps = deps_coap
+  }
+} else {
+  import("//build/ohos.gni")
+
+  if (enable_discovery_coap == true) {
+    sources_coap = [
+      "src/disc_coap.c",
+      "src/disc_nstackx_adapter.c",
+    ]
+  } else {
+    sources_coap = [ "src/disc_coap_virtual.c" ]
+  }
+
+  ohos_shared_library("dsoftbus_disc_coap") {
+    sources = sources_coap
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "//third_party/cJSON",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common/json_utils:json_utils",
+    ]
+    configs = [ ":discovery_coap_config" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }
