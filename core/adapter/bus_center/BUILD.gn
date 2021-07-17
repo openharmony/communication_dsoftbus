@@ -45,11 +45,15 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
     ]
-    sources = [ "platform/bus_center_adapter_weak.c" ]
+    sources = [ "platform/bus_center_adapter.c" ]
     deps = [
       "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
