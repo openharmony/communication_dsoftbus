@@ -40,6 +40,9 @@ typedef enum {
 #define MAX_THREAD_NAME_LEN 100
 #define THREAD_MAXIMUM_PRIORITY (-20)
 
+#define BLOCK_LEN          512
+#define MAX_NAME_LEN       99
+
 NSTACKX_EXPORT int32_t GetTargetFileSize(const char *dir, uint64_t *size);
 NSTACKX_EXPORT int32_t CheckPathSeprator(const char *path);
 NSTACKX_EXPORT int32_t CheckFilenameSeprator(const char *fileName);

@@ -24,15 +24,11 @@
 #include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
-#define DISCOVERY_CB_LEN (sizeof(IServerDiscoveryCallback))
-#define PUBLISH_CB_LEN   (sizeof(IServerPublishCallback))
-
 static bool g_isInited = false;
 static SoftBusList *g_publishInfoList = NULL;
 static SoftBusList *g_discoveryInfoList = NULL;
-static DiscInnerCallback g_discMgrMediumCb = { DiscOnDeviceFound };
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
-static DiscoveryFuncInterface *g_discBleInterface = NULL;
+static DiscInnerCallback g_discMgrMediumCb;
 static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
 static const char *g_discModuleMap[] = {
     "MODULE_LNN",
@@ -61,8 +57,7 @@ typedef union {
 } InnerOption;
 
 typedef union  {
-    IServerPublishCallback publishCb;
-    IServerDiscoveryCallback subscribeCb;
+    IServerDiscInnerCallback serverCb;
     DiscInnerCallback innerCb;
 } InnerCallback;
 
@@ -83,17 +78,6 @@ typedef struct {
     ListNode capNode;
     DiscItem *item;
 } DiscInfo;
-
-void __attribute__ ((weak)) DiscBleDeinit(void)
-{
-    return;
-}
-
-DiscoveryFuncInterface __attribute__ ((weak)) *DiscBleInit(DiscInnerCallback *bleCb)
-{
-    (void)bleCb;
-    return NULL;
-}
 
 static void BitmapSet(uint32_t *bitMap, const uint32_t pos)
 {
@@ -140,14 +124,11 @@ static int32_t DiscInterfaceProcess(const InnerOption *option, const DiscoveryFu
 static int32_t DiscInterfaceByMedium(const DiscInfo *info, const InterfaceFuncType type)
 {
     switch (info->medium) {
-        case BLE:
-            return DiscInterfaceProcess(&(info->option), g_discBleInterface, info->mode, type);
         case COAP:
             return DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
         case AUTO: {
-            int32_t ret1 = DiscInterfaceProcess(&(info->option), g_discBleInterface, info->mode, type);
-            int32_t ret2 = DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
-            if ((ret1 == SOFTBUS_OK) || (ret2 == SOFTBUS_OK)) {
+            int32_t ret = DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
+            if (ret == SOFTBUS_OK) {
                 return SOFTBUS_OK;
             }
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
@@ -228,7 +209,7 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
         isInnerInfo = true;
     }
     if (isInnerInfo == false) {
-        infoNode->item->callback.subscribeCb.OnServerDeviceFound(infoNode->item->packageName, device);
+        (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device);
         return;
     }
     if (infoNode->item->callback.innerCb.OnDeviceFound == NULL) {
@@ -238,7 +219,7 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
     infoNode->item->callback.innerCb.OnDeviceFound(device);
 }
 
-void DiscOnDeviceFound(const DeviceInfo *device)
+static void DiscOnDeviceFound(const DeviceInfo *device)
 {
     uint32_t tmp;
     DiscInfo *infoNode = NULL;
@@ -252,25 +233,6 @@ void DiscOnDeviceFound(const DeviceInfo *device)
         }
     }
     return;
-}
-
-static int32_t UpdateItemCallback(DiscItem *item, const InnerCallback *cb, const ServiceType type)
-{
-    if ((type != PUBLISH_SERVICE) && (type != SUBSCRIBE_SERVICE)) {
-        return SOFTBUS_OK;
-    }
-
-    if ((type == PUBLISH_SERVICE) &&
-        (memcpy_s(&(item->callback.publishCb), PUBLISH_CB_LEN, cb, PUBLISH_CB_LEN) != EOK)) {
-        LOG_ERR("memcpy_s failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    if ((type == SUBSCRIBE_SERVICE) &&
-        (memcpy_s(&(item->callback.subscribeCb), DISCOVERY_CB_LEN, cb, DISCOVERY_CB_LEN) != EOK)) {
-        LOG_ERR("memcpy_s failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 static int32_t PublishInfoCheck(const char *packageName, const PublishInfo *info)
@@ -393,6 +355,21 @@ static int32_t SubscribeInnerInfoCheck(const SubscribeInnerInfo *info)
     return SOFTBUS_OK;
 }
 
+static void AddCallbackToItem(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
+{
+    if ((type != SUBSCRIBE_INNER_SERVICE) && (type != SUBSCRIBE_SERVICE)) {
+        return;
+    }
+    if (type == SUBSCRIBE_SERVICE) {
+        itemNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
+        return;
+    }
+    if ((itemNode->callback.innerCb.OnDeviceFound != NULL) && (cb->innerCb.OnDeviceFound == NULL)) {
+        return;
+    }
+    itemNode->callback.innerCb.OnDeviceFound = cb->innerCb.OnDeviceFound;
+}
+
 static DiscItem *CreateNewItem(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
     const ServiceType type)
 {
@@ -413,29 +390,14 @@ static DiscItem *CreateNewItem(SoftBusList *serviceList, const char *packageName
     if ((type == PUBLISH_SERVICE) || (type == SUBSCRIBE_SERVICE)) {
         ListTailInsert(&(serviceList->list), &(itemNode->node));
     }
-    if ((type == PUBLISH_SERVICE) &&
-        ((memcpy_s(&(itemNode->callback.publishCb), PUBLISH_CB_LEN, cb, PUBLISH_CB_LEN) != EOK) ||
-        (memcpy_s(itemNode->packageName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX) != EOK))) {
+
+    if (memcpy_s(itemNode->packageName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX) != EOK) {
         LOG_ERR("memcpy_s failed");
         SoftBusFree(itemNode);
         return NULL;
     }
-    if ((type == SUBSCRIBE_SERVICE) &&
-        ((memcpy_s(&(itemNode->callback.subscribeCb), DISCOVERY_CB_LEN, cb, DISCOVERY_CB_LEN) != EOK) ||
-        (memcpy_s(itemNode->packageName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX) != EOK))) {
-        LOG_ERR("memcpy_s failed");
-        SoftBusFree(itemNode);
-        return NULL;
-    }
-    if (((type == PUBLISH_INNER_SERVICE) || (type == SUBSCRIBE_INNER_SERVICE)) &&
-        (memcpy_s(itemNode->packageName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX) != EOK)) {
-        LOG_ERR("memcpy_s failed");
-        SoftBusFree(itemNode);
-        return NULL;
-    }
-    if (type == SUBSCRIBE_INNER_SERVICE) {
-        itemNode->callback.innerCb.OnDeviceFound = cb->innerCb.OnDeviceFound;
-    }
+
+    AddCallbackToItem(itemNode, cb, type);
     serviceList->cnt++;
     ListInit(&(itemNode->InfoList));
     return itemNode;
@@ -624,11 +586,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
-        if (UpdateItemCallback(itemNode, cb, type) != SOFTBUS_OK) {
-            LOG_ERR("update item fail");
-            (void)pthread_mutex_unlock(&(serviceList->lock));
-            return SOFTBUS_MEM_ERR;
-        }
+        AddCallbackToItem(itemNode, cb, type);
         isPackageNameExist = true;
         itemNode->infoNum++;
         info->item = itemNode;
@@ -694,19 +652,11 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
     return infoNode;
 }
 
-static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const IServerPublishCallback *cb,
-    const ServiceType type)
+static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
     int32_t ret;
-    InnerCallback callback;
 
-    if ((cb != NULL) &&
-        (memcpy_s(&(callback.publishCb), PUBLISH_CB_LEN, cb, PUBLISH_CB_LEN) != EOK)) {
-        LOG_ERR("memcpy_s erro");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    ret = AddInfoToList(g_publishInfoList, packageName, &callback, info, type);
+    ret = AddInfoToList(g_publishInfoList, packageName, NULL, info, type);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("add list fail");
         return ret;
@@ -736,20 +686,15 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
     return SOFTBUS_OK;
 }
 
-static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, const IServerDiscoveryCallback *cb,
+static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, const IServerDiscInnerCallback *cb,
     const ServiceType type)
 {
     int32_t ret;
     InnerCallback callback;
 
-    if ((cb != NULL) &&
-        (memcpy_s(&(callback.subscribeCb), DISCOVERY_CB_LEN, cb, DISCOVERY_CB_LEN) != EOK)) {
-        LOG_ERR("memcpy_s erro");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    if (type == SUBSCRIBE_INNER_SERVICE) {
-        callback.innerCb.OnDeviceFound = NULL;
+    callback.innerCb.OnDeviceFound = NULL;
+    if (cb != NULL) {
+        callback.serverCb.OnServerDeviceFound = cb->OnServerDeviceFound;
     }
 
     ret = AddInfoToList(g_discoveryInfoList, packageName, &callback, info, type);
@@ -884,7 +829,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE;
     }
 
-    int32_t ret = InnerPublishService(packageName, infoNode, NULL, PUBLISH_INNER_SERVICE);
+    int32_t ret = InnerPublishService(packageName, infoNode, PUBLISH_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(packageName);
         ReleaseInfoNodeMem(infoNode, PUBLISH_INNER_SERVICE);
@@ -922,7 +867,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE;
     }
 
-    int32_t ret = InnerPublishService(packageName, infoNode, NULL, PUBLISH_INNER_SERVICE);
+    int32_t ret = InnerPublishService(packageName, infoNode, PUBLISH_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
         ReleaseInfoNodeMem(infoNode, PUBLISH_INNER_SERVICE);
         SoftBusFree(packageName);
@@ -1059,46 +1004,38 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscPublishService(const char *packageName, const PublishInfo *info, const IServerPublishCallback *cb)
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 {
     int32_t ret;
 
-    if ((packageName == NULL) || (info == NULL) || (cb == NULL)) {
+    if ((packageName == NULL) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
 
     ret = PublishInfoCheck(packageName, info);
     if (ret != SOFTBUS_OK) {
-        goto EXIT;
+        return ret;
     }
 
     if (g_isInited == false) {
         LOG_ERR("not init");
         ret = SOFTBUS_DISCOVER_MANAGER_NOT_INIT;
-        goto EXIT;
+        return ret;
     }
 
     DiscInfo *infoNode = CreateNewPublishInfoNode(info);
     if (infoNode == NULL) {
         LOG_ERR("infoNode create failed");
         ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE;
-        goto EXIT;
-    }
-
-    ret = InnerPublishService(packageName, infoNode, cb, PUBLISH_SERVICE);
-    if (ret != SOFTBUS_OK) {
-        ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
-        goto EXIT;
-    }
-    cb->OnServerPublishSuccess(packageName, info->publishId);
-    return SOFTBUS_OK;
-EXIT:
-    if (ret == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
-        cb->OnServerPublishFail(packageName, info->publishId, PUBLISH_FAIL_REASON_NOT_SUPPORT_MEDIUM);
         return ret;
     }
-    cb->OnServerPublishFail(packageName, info->publishId, PUBLISH_FAIL_REASON_INTERNAL);
-    return ret;
+
+    ret = InnerPublishService(packageName, infoNode, PUBLISH_SERVICE);
+    if (ret != SOFTBUS_OK) {
+        ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
@@ -1119,7 +1056,7 @@ int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscoveryCallback *cb)
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb)
 {
     int32_t ret;
 
@@ -1129,36 +1066,28 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, c
 
     ret = SubscribeInfoCheck(packageName, info);
     if (ret != SOFTBUS_OK) {
-        goto EXIT;
+        return ret;
     }
 
     if (g_isInited == false) {
         LOG_ERR("not init");
         ret = SOFTBUS_DISCOVER_MANAGER_NOT_INIT;
-        goto EXIT;
+        return ret;
     }
 
     DiscInfo *infoNode = CreateNewSubscribeInfoNode(info);
     if (infoNode == NULL) {
         LOG_ERR("infoNode create failed");
         ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE;
-        goto EXIT;
+        return ret;
     }
 
     ret = InnerStartDiscovery(packageName, infoNode, cb, SUBSCRIBE_SERVICE);
     if (ret != SOFTBUS_OK) {
         ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
-        goto EXIT;
-    }
-    cb->OnServerDiscoverySuccess(packageName, info->subscribeId);
-    return SOFTBUS_OK;
-EXIT:
-    if (ret == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
-        cb->OnServerDiscoverFailed(packageName, info->subscribeId, DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM);
         return ret;
     }
-    cb->OnServerDiscoverFailed(packageName, info->subscribeId, DISCOVERY_FAIL_REASON_INTERNAL);
-    return ret;
+    return SOFTBUS_OK;
 }
 
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
@@ -1199,10 +1128,9 @@ int32_t DiscMgrInit(void)
     if (g_isInited) {
         return SOFTBUS_OK;
     }
-
+    g_discMgrMediumCb.OnDeviceFound = DiscOnDeviceFound;
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
-    g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
-    if ((g_discCoapInterface == NULL) && (g_discBleInterface == NULL)) {
+    if (g_discCoapInterface == NULL) {
         LOG_ERR("medium init all fail");
         return SOFTBUS_ERR;
     }
@@ -1263,9 +1191,7 @@ void DiscMgrDeinit(void)
     g_publishInfoList = NULL;
     g_discoveryInfoList = NULL;
     g_discCoapInterface = NULL;
-    g_discBleInterface = NULL;
     DiscCoapDeinit();
-    DiscBleDeinit();
     g_isInited = false;
 }
 

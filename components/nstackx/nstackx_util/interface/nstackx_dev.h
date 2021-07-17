@@ -53,7 +53,7 @@ NSTACKX_EXPORT int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in 
 NSTACKX_EXPORT int32_t GetIfBroadcastIp(const char *ifName, char *ipString, size_t ipStringLen);
 NSTACKX_EXPORT int32_t GetConnectionType(const uint32_t sourceIp, const uint32_t destinationIp, uint16_t *connectType);
 NSTACKX_EXPORT int32_t BindToTargetDev(SocketDesc sockfd, const char *targetInterfaceName);
-NSTACKX_EXPORT int32_t GetInterfaceNameByIP(uint32_t sourceIp, char *interfaceName);
+NSTACKX_EXPORT int32_t GetInterfaceNameByIP(uint32_t sourceIp, char *interfaceName, size_t nameLen);
 NSTACKX_EXPORT void BindToDevInTheSameLan(SocketDesc sockfd, const struct sockaddr_in *sockAddr);
 
 #endif // NSTACKX_DEV_H

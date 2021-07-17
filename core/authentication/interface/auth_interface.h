@@ -80,6 +80,7 @@ typedef enum {
 
 typedef enum {
     LNN = 0,
+    TRANS,
     MODULE_NUM,
 } AuthModuleId;
 
@@ -93,8 +94,16 @@ typedef struct {
     AuthDataType dataType;
     int32_t module;
     int64_t authId;
-    AuthSideFlag flag;
+    int32_t flag;
+    int64_t seq;
 } AuthDataHead;
+
+typedef struct {
+    int32_t flags;
+    int64_t seq;
+    char *data;
+    uint32_t len;
+} AuthTransDataInfo;
 
 typedef struct {
     void (*onKeyGenerated)(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion);
@@ -105,6 +114,10 @@ typedef struct {
     void (*onDisconnect)(int64_t authId);
 } VerifyCallback;
 
+typedef struct {
+    void (*onTransUdpDataRecv)(int64_t authId, ConnectOption *option, AuthTransDataInfo *info);
+} AuthTransCallback;
+
 uint32_t AuthGetEncryptHeadLen(void);
 int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf);
 int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *data, uint32_t len, OutBuf *outbuf);
@@ -112,6 +125,7 @@ int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *dat
 int32_t OpenAuthServer(void);
 void CloseAuthServer(void);
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb);
+int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb);
 
 int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option);
 
@@ -120,7 +134,10 @@ int32_t AuthHandleLeaveLNN(int64_t authId);
 
 void AuthIpChanged(ConnectType type);
 int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t bufLen);
+int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId);
 
+int32_t AuthInit(void);
+int32_t AuthDeinit(void);
 #ifdef __cplusplus
 }
 #endif

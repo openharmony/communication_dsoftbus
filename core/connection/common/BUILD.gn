@@ -10,51 +10,87 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import("//build/lite/config/component/lite_component.gni")
+
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("conn_common") {
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/connection/common/include",
-      "$dsoftbus_root_path/core/connection/interface",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//third_party/bounds_checking_function/include",
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-fno-builtin",
-      "-std=c99",
-    ]
-    sources = [
-      "src/softbus_base_listener.c",
-      "src/softbus_tcp_socket.c",
-      "src/softbus_thread_pool.c",
-    ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("conn_common") {
+      include_dirs = [
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
+      ]
+      sources = [
+        "src/softbus_base_listener.c",
+        "src/softbus_tcp_socket.c",
+        "src/softbus_thread_pool.c",
+      ]
+      deps = [ "$hilog_lite_deps_path" ]
+    }
+  } else {
+    shared_library("conn_common") {
+      include_dirs = [
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
+      ]
+      sources = [
+        "src/softbus_base_listener.c",
+        "src/softbus_tcp_socket.c",
+        "src/softbus_thread_pool.c",
+      ]
+      deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
+    }
   }
 } else {
-  shared_library("conn_common") {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("conn_common") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/connection/common/include",
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/adapter/kernel/include",
-      "//third_party/bounds_checking_function/include",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-fno-builtin",
-      "-std=c99",
     ]
     sources = [
       "src/softbus_base_listener.c",
       "src/softbus_tcp_socket.c",
       "src/softbus_thread_pool.c",
     ]
-    deps = []
+    public_deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

@@ -86,7 +86,7 @@ static int MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
         GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
-        LOG_ERR("[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail\n");
+        LOG_ERR("[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }

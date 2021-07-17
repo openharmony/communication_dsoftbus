@@ -16,15 +16,25 @@
 #ifndef CLIENT_TRANS_PROXY_CHANNEL_H
 #define CLIENT_TRANS_PROXY_CHANNEL_H
 
+#include "client_trans_session_callback.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t TransCloseProxyChannel(int32_t channelId);
+int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb);
 
-int32_t TransOnProxyChannelOpened(const ChannelInfo *channel);
+int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+
+int32_t ClientTransProxyOnChannelClosed(int32_t channelId);
+
+int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId);
+
+int32_t ClientTransProxyOnDataReceived(int32_t channelId,
+    const void *data, uint32_t len, SessionPktType type);
+
+void ClientTransProxyCloseChannel(int32_t channelId);
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len);
 
@@ -33,4 +43,4 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
 #ifdef __cplusplus
 }
 #endif
-#endif // CLIENT_TRANS_PROXY_CHANNEL_H
+#endif

@@ -19,6 +19,12 @@
 #include <stdint.h>
 #include "softbus_def.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer); // compatible nearby
     void (*onChannelOpenFailed)(int32_t channelId, const char *uuid);
@@ -34,5 +40,9 @@ int TransSendNetworkingMessage(int32_t channelId, const char *data, int dataLen,
 
 int TransRegisterNetworkingChannelListener(const INetworkingListener *listener);
 
-
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
 #endif

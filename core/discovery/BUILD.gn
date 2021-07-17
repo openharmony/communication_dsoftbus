@@ -11,11 +11,89 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_discovery") {
-  features = [
-    "manager:disc_manager",
-    "coap:disc_coap_module",
+config("disc_server_interface") {
+  include_dirs = [
+    "service/include",
+    "interface",
+    "manager/include",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
+}
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  shared_library("dsoftbus_disc_server") {
+    sources = [
+      "ipc/small/disc_client_proxy.c",
+      "manager/src/disc_manager.c",
+      "manager/src/softbus_disc_server.c",
+    ]
+    include_dirs = [
+      "coap/include",
+      "ipc/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/interfaces/innerkits/discovery",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "//third_party/bounds_checking_function/include",
+      "$hilog_lite_include_path",
+    ]
+    cflags = [
+      "-Wall",
+      "-fPIC",
+    ]
+    public_configs = [ ":disc_server_interface" ]
+    deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+      "$hilog_lite_deps_path",
+      "coap:dsoftbus_disc_coap",
+      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("dsoftbus_disc_server") {
+    include_dirs = [
+      "coap/include",
+      "ipc/include",
+      "ipc/standard/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/frame/standard/client/include",
+      "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
+      "//utils/system/safwk/native/include",
+    ]
+
+    sources = [
+      "ipc/standard/src/disc_client_proxy.cpp",
+      "ipc/standard/src/disc_client_proxy_standard.cpp",
+      "manager/src/disc_manager.c",
+      "manager/src/softbus_disc_server.c",
+    ]
+
+    public_configs = [ ":disc_server_interface" ]
+    if (is_standard_system) {
+      external_deps = [
+        "ipc:ipc_core",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    }
+    deps = [
+      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
+      "coap:dsoftbus_disc_coap",
+      "//utils/native/base:utils",
+    ]
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

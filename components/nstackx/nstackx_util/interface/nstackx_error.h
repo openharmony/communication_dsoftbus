@@ -77,6 +77,10 @@ extern "C" {
 #define NSTACKX_TRUE 1
 #define NSTACKX_FALSE 0
 
+#define NSTACKX_TCP_EAGAIN (11)
+
+#define NSTACKX_NOTSUPPORT (-12)
+
 #ifdef __cplusplus
 }
 #endif

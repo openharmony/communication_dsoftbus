@@ -45,8 +45,6 @@ typedef struct {
     int32_t len;
 } ConnPktHead;
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
-
 #ifdef __cplusplus
 #if __cplusplus
 }

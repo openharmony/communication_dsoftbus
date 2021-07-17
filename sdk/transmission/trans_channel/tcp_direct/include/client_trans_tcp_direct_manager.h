@@ -16,7 +16,8 @@
 #ifndef CLIENT_TRANS_TCP_DIRECT_MANAGER_H
 #define CLIENT_TRANS_TCP_DIRECT_MANAGER_H
 
-#include "softbus_app_info.h"
+#include "client_trans_session_callback.h"
+#include "client_trans_tcp_direct_message.h"
 #include "softbus_sequence_verification.h"
 
 #ifdef __cplusplus
@@ -25,13 +26,12 @@ extern "C" {
 
 typedef struct {
     int fd;
-    int32_t type;
+    int32_t channelType;
+    int32_t businessType;
     bool aliveState;
     int apiVersion;
     int32_t sequence;
     SeqVerifyInfo verifyInfo;
-    pthread_cond_t cond;
-    pthread_mutex_t lock;
     char sessionKey[SESSION_KEY_LENGTH];
     SoftBusList *pendingPacketsList;
 } TcpDirectChannelDetail;
@@ -42,7 +42,9 @@ typedef struct {
     TcpDirectChannelDetail detail;
 } TcpDirectChannelInfo;
 
-int32_t TransTdcOnChannelOpened(const ChannelInfo *channel);
+int32_t TransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId);
+
 int32_t TransTdcCheckSeq(int32_t fd, int32_t seq);
 void TransTdcCloseChannel(int32_t channelId);
 
@@ -50,8 +52,11 @@ TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInf
 TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info);
 TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirectChannelInfo *info);
 
+int32_t TransTdcManagerInit(const IClientSessionCallBack *callback);
+void TransTdcManagerDeinit(void);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // CLIENT_TRANS_TCP_DIRECT_MANAGER_H
+#endif

@@ -29,7 +29,7 @@ void TransChannelDeinit(void);
 int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags);
 
-int32_t TransCloseChannel(int32_t channelId);
+int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 
 int32_t TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType);
 

@@ -100,6 +100,13 @@ void DiscMgrDeinit(void);
 
 /**
  * @ingroup softbus_disc_manager
+ * @brief softbus discovery manager death callback
+ *
+ */
+void DiscMgrDeathCallback(const char *pkgName);
+
+/**
+ * @ingroup softbus_disc_manager
  * @brief Subscribe inner callback update.
  *
  * @param  moduleId    [IN]  Type  #DiscModule module ID.

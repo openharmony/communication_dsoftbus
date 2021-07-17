@@ -16,26 +16,32 @@
 #ifndef TRANS_SESSION_MANAGER_H
 #define TRANS_SESSION_MANAGER_H
 
-#include <stdint.h>
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName);
+typedef struct {
+    ListNode node;
+    SoftBusSecType type;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+} SessionServer;
 
-int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName);
+int TransSessionMgrInit(void);
 
-int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
-    const char *groupId, int flags);
+void TransSessionMgrDeinit(void);
+
+bool TransSessionServerIsExist(const char *sessionName);
+
+int32_t TransSessionServerAddItem(SessionServer *newNode);
+
+int32_t TransSessionServerDelItem(const char *sessionName);
+
+void TransDelItemByPackageName(const char *pkgName);
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len);
-
-int32_t TransServerInit(void);
-
-void TransServerDeinit(void);
-
-void TransServerDeathCallback(const char *pkgName);
 
 #ifdef __cplusplus
 }

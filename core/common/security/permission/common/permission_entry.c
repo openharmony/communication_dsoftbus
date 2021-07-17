@@ -15,7 +15,6 @@
 #include "permission_entry.h"
 
 #include <securec.h>
-#include <stdlib.h>
 
 #include "cJSON.h"
 #include "common_list.h"

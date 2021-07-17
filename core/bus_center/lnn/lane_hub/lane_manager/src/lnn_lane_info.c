@@ -104,7 +104,7 @@ static bool SetPeerIPInfo(const char *netWorkId, LnnLaneLinkType type, bool mode
     if (mode) {
         ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_PROXY_PORT, &port);
     } else {
-        ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_AUTH_PORT, &port);
+        ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_SESSION_PORT, &port);
     }
     if (ret < 0) {
         LOG_ERR("LnnGetRemoteNumInfo error.");
@@ -163,4 +163,28 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
     g_lanes[type].isUse = true;
     (void)pthread_mutex_unlock(&g_lanes[type].lock);
     return ret;
+}
+
+void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
+{
+    int32_t ret;
+    int32_t port;
+    if (laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
+        LOG_ERR("param error. laneId = %d", laneId);
+        return;
+    }
+    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+        LOG_ERR("lock failed");
+        return;
+    }
+    if (isSupport) {
+        ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_AUTH_PORT, &port);
+        if (ret < 0) {
+            LOG_ERR("LnnGetRemoteNumInfo error, ret = %d.", ret);
+            return;
+        }
+        g_lanes[laneId].laneInfo.conOption.info.ip.port = (uint16_t)port;
+    }
+    g_lanes[laneId].laneInfo.isSupportUdp = isSupport;
+    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
 }

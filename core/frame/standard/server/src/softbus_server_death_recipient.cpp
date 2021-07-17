@@ -16,14 +16,14 @@
 #include "softbus_server_death_recipient.h"
 
 #include "softbus_log.h"
-#include "softbus_server.h"
+#include "softbus_server_data.h"
 #include "softbus_server_frame.h"
 
 namespace OHOS {
 void SoftBusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     std::string pkgName;
-    SoftBusServer::GetInstance()->SoftbusRemoveService(remote.promote(), pkgName);
+    SoftBusServerData::GetInstance().SoftbusRemoveService(remote.promote(), pkgName);
     LOG_INFO("client service %{public}s died, remove it from softbus server", pkgName.c_str());
     ClientDeathCallback(pkgName.c_str());
 }

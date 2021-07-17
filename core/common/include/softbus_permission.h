@@ -16,15 +16,15 @@
 #ifndef SOFTBUS_PERMISSION_H
 #define SOFTBUS_PERMISSION_H
 
+#include <stdbool.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define PERMISSION_JSON_FILE "/system/etc/communication/softbus/permission.json"
 
 #define ACTION_CREATE 0x1
 #define ACTION_OPEN 0x2
@@ -37,11 +37,12 @@ enum {
     GRANTED_APP,
 };
 
-int32_t TransPermissionInit(const char *fileName);
+int32_t TransPermissionInit();
 void TransPermissionDeinit(void);
-int32_t CheckTransPermission(const char *pkgName, const char *SessionName, uint32_t action);
-bool CheckDiscPermission(const char *pkgName);
-bool CheckBusCenterPermission(const char *pkgName);
+int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+    const char *pkgName, const char *sessionName, uint32_t actions);
+bool CheckDiscPermission(pid_t callingUid, const char *pkgName);
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName);
 
 #ifdef __cplusplus
 #if __cplusplus

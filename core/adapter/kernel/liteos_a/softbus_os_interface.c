@@ -18,11 +18,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "securec.h"
@@ -58,11 +56,10 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
-    if (timerId == NULL) {
+    if (timerId < 0) {
         LOG_ERR("timerId is null");
         return SOFTBUS_ERR;
     }
-
     struct itimerspec value;
     (void)memset_s(&value, sizeof(value), 0, sizeof(value));
     value.it_value.tv_sec = tickets / MS_PER_SECOND;

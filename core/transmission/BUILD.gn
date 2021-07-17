@@ -15,8 +15,5 @@ import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 lite_component("softbus_server_transmission") {
-  features = [
-    "session:softbus_server_session",
-    "trans_channel:softbus_server_trans_channel",
-  ]
+  features = [ "session:dsoftbus_trans_session" ]
 }

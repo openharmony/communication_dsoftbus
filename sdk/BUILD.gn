@@ -16,8 +16,8 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 lite_component("softbus_client") {
   features = [
-    "frame:softbus_client_frame",
-    "bus_center:softbus_client_bus_center",
-    "transmission:softbus_client_transmission",
+    "discovery/service:dsoftbus_disc_service_sdk",
+    "transmission/session:dsoftbus_trans_session_sdk",
+    "bus_center/service:dsoftbus_bus_center_service_sdk",
   ]
 }

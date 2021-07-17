@@ -18,5 +18,6 @@ lite_component("dsoftbus") {
   features = [
     "core:softbus_server",
     "sdk:softbus_client",
+    "tests:softbus_test",
   ]
 }

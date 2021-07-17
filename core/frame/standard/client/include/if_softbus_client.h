@@ -16,25 +16,26 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 #define INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 
+#include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "softbus_def.h"
 
 namespace OHOS {
 class ISoftBusClient : public IRemoteBroker {
 public:
     virtual ~ISoftBusClient() = default;
 
-    virtual void OnDeviceFound(const void *device) = 0;
+    virtual void OnDeviceFound(const DeviceInfo *device) = 0;
     virtual void OnDiscoverFailed(int subscribeId, int failReason) = 0;
     virtual void OnDiscoverySuccess(int subscribeId) = 0;
     virtual void OnPublishSuccess(int publishId) = 0;
     virtual void OnPublishFail(int publishId, int reason) = 0;
-    virtual int32_t OnChannelOpened(const char *pkgName, const char *sessionName, const void *channel) = 0;
-    virtual int32_t OnChannelOpenFailed(const char *pkgName, int32_t channelId) = 0;
-    virtual int32_t OnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data, uint32_t len,
-        int32_t type) = 0;
-    virtual int32_t OnChannelClosed(const char *pkgName, int32_t channelId) = 0;
+    virtual int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) = 0;
+    virtual int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t OnChannelMsgReceived(int32_t channelId, const void *data, uint32_t len, int32_t type) = 0;
+    virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType) = 0;
     virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) = 0;
     virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode) = 0;
     virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;

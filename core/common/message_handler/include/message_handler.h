@@ -60,7 +60,8 @@ void FreeMessage(SoftBusMessage *msg);
 enum LooperType {
     LOOP_TYPE_DEFAULT = 1,
     LOOP_TYPE_BR_SEND,
-    LOOP_TYPE_BR_RECV
+    LOOP_TYPE_BR_RECV,
+    LOOP_TYPE_P2P
 };
 
 SoftBusLooper *GetLooper(int looper);

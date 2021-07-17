@@ -15,7 +15,6 @@
 
 #include "softbus_mem_interface.h"
 #include <securec.h>
-#include <stdlib.h>
 
 #include "softbus_log.h"
 

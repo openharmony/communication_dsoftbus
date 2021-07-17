@@ -25,6 +25,7 @@
 #include "common_list.h"
 #include "device_auth.h"
 #include "softbus_common.h"
+#include "softbus_conn_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,6 +88,7 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data);
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen);
 void AuthNotifyLnnDisconnByIp(const char *ip);
+void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len);
 
 #ifdef __cplusplus
 }

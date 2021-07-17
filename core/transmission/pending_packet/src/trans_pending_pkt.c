@@ -16,11 +16,12 @@
 #include "trans_pending_pkt.h"
 
 #include <sys/time.h>
+#include <unistd.h>
+
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_utils.h"
-#include "unistd.h"
 
 #define TIME_OUT 2
 #define USECTONSEC 1000
@@ -53,7 +54,7 @@ void PendingDeinit(int type)
     LOG_INFO("PendigPackManagerDeinit init ok");
 }
 
-int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int type)
+int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
         return SOFTBUS_ERR;
@@ -75,7 +76,6 @@ int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int type)
     }
     item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
-        LOG_ERR("Malloc error");
         pthread_mutex_unlock(&pendingList->lock);
         return SOFTBUS_ERR;
     }
@@ -84,34 +84,66 @@ int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int type)
     pthread_cond_init(&item->cond, NULL);
     item->channelId = channelId;
     item->seq = seqNum;
-    item->setFlag = false;
-    item->destroyFlag = false;
+    item->finded = false;
 
     ListAdd(&pendingList->list, &item->node);
     pendingList->cnt++;
     pthread_mutex_unlock(&pendingList->lock);
 
-    pthread_mutex_lock(&item->lock);
     struct timespec outtime;
     struct timeval now;
     gettimeofday(&now, NULL);
     outtime.tv_sec = now.tv_sec + TIME_OUT;
     outtime.tv_nsec = now.tv_usec * USECTONSEC;
+
+    pthread_mutex_lock(&item->lock);
     pthread_cond_timedwait(&item->cond, &item->lock, &outtime);
 
-    if (item->destroyFlag == true) {
-        pthread_mutex_unlock(&item->lock);
-        return SOFTBUS_ERR;
-    }
-    if (item->setFlag != true) {
-        pthread_mutex_unlock(&item->lock);
-        return SOFTBUS_TIMOUT;
+    int32_t ret = SOFTBUS_OK;
+    if (item->finded != true) {
+        ret = SOFTBUS_TIMOUT;
     }
     pthread_mutex_unlock(&item->lock);
-    return SOFTBUS_OK;
+
+    pthread_mutex_lock(&pendingList->lock);
+    ListDelete(&item->node);
+    pthread_mutex_destroy(&item->lock);
+    pthread_cond_destroy(&item->cond);
+    SoftBusFree(item);
+    pendingList->cnt--;
+    pthread_mutex_unlock(&pendingList->lock);
+
+    return ret;
 }
 
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
+{
+    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+        LOG_ERR("type[%d] illegal.", type);
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusList *pendingList = g_pendingList[type];
+    if (pendingList == NULL) {
+        LOG_ERR("pendind list not exist");
+        return SOFTBUS_ERR;
+    }
+
+    PendingPktInfo *item = NULL;
+    pthread_mutex_lock(&pendingList->lock);
+    LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
+        if (item->seq == seqNum && item->channelId == channelId) {
+            item->finded = true;
+            pthread_cond_signal(&item->cond);
+            pthread_mutex_unlock(&pendingList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    pthread_mutex_unlock(&pendingList->lock);
+    return SOFTBUS_ERR;
+}
+
+int32_t DelPendingPacket(int32_t channelId, int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
         return SOFTBUS_ERR;
@@ -125,80 +157,13 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     PendingPktInfo *item = NULL;
     pthread_mutex_lock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
-        if (item->seq == seqNum && item->channelId == channelId) {
-            break;
-        }
-    }
-    pthread_mutex_unlock(&pendingList->lock);
-
-    if (item != NULL && item->seq == seqNum && item->channelId == channelId) {
-        pthread_mutex_lock(&item->lock);
-        item->setFlag = true;
-        pthread_cond_signal(&item->cond);
-        pthread_mutex_unlock(&item->lock);
-        return SOFTBUS_OK;
-    }
-    return SOFTBUS_ERR;
-}
-
-int32_t DelPendingPacket(int32_t channelId, int32_t seqNum, int type)
-{
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
-        return SOFTBUS_ERR;
-    }
-
-    SoftBusList *pendingList = g_pendingList[type];
-    if (pendingList == NULL) {
-        return SOFTBUS_ERR;
-    }
-
-    PendingPktInfo *item = NULL;
-    PendingPktInfo *next = NULL;
-    pthread_mutex_lock(&pendingList->lock);
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &pendingList->list, PendingPktInfo, node) {
-        if (item->seq == seqNum && item->channelId == channelId) {
-            ListDelete(&item->node);
-            pthread_mutex_destroy(&item->lock);
-            pthread_cond_destroy(&item->cond);
-            SoftBusFree(item);
-            pendingList->cnt--;
+        if (item->channelId == channelId) {
+            pthread_cond_signal(&item->cond);
             pthread_mutex_unlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
     pthread_mutex_unlock(&pendingList->lock);
-    return SOFTBUS_ERR;
-}
-
-int32_t DelPendingPacketById(int32_t channelId, int type)
-{
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
-        return SOFTBUS_ERR;
-    }
-
-    SoftBusList *pendingList = g_pendingList[type];
-    if (pendingList == NULL) {
-        return SOFTBUS_ERR;
-    }
-
-    PendingPktInfo *item = NULL;
-    PendingPktInfo *next = NULL;
-    pthread_mutex_lock(&pendingList->lock);
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &pendingList->list, PendingPktInfo, node) {
-        if (item->channelId == channelId) {
-            ListDelete(&item->node);
-            pthread_mutex_lock(&item->lock);
-            item->destroyFlag = true;
-            pthread_cond_signal(&item->cond);
-            pthread_mutex_unlock(&item->lock);
-
-            pthread_mutex_destroy(&item->lock);
-            pthread_cond_destroy(&item->cond);
-            SoftBusFree(item);
-            pendingList->cnt--;
-            break;
-        }
-    }
-    pthread_mutex_unlock(&pendingList->lock);
     return SOFTBUS_OK;
 }
+
