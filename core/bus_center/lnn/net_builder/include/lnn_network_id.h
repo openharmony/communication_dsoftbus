@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-int32_t LnnGenLocalNetworkId(char *networkId, int32_t len);
-int32_t LnnGenLocalUuid(char *uuid, int32_t len);
+int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
 
 #ifdef __cplusplus
 }
