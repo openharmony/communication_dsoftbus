@@ -297,6 +297,7 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const void *para
         if (StartCoapDiscovery() != SOFTBUS_OK) {
             LOG_ERR("start discovery failed");
         }
+        SetCallLnnStatus(true);
     } else {
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
         AuthIpChanged(CONNECT_TCP);
