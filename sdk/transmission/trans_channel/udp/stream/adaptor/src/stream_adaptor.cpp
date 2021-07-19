@@ -81,7 +81,7 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     streamManager_ =  Communication::SoftBus::IStreamManager::GetInstance(nullptr, adaptorListener);
     streamManager_->PrepareEnvironment(param->pkgName);
     serverSide_ = isServerSide;
-    sessionKey_ = std::string(param->sessionKey, 0, SESSION_KEY_LENGTH);
+    sessionKey_ = std::string(param->sessionKey, SESSION_KEY_LENGTH);
     callback_ = callback;
     streamType_ = param->type;
     channelId_ = channelId;
