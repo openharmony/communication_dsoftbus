@@ -75,8 +75,9 @@ int TransClientInit(void)
 
 static int32_t GenerateSessionId(void)
 {
+    #define SESSION_ID_INIT_VALUE 1
     /* need get lock before */
-    for (uint32_t id = 0; id < MAX_SESSION_ID; id++) {
+    for (uint32_t id = SESSION_ID_INIT_VALUE; id < MAX_SESSION_ID; id++) {
         if (((g_idFlagBitmap[(id >> SHIFT_3)] >> (id & 0x7)) & ID_USED) == ID_NOT_USED) {
             g_idFlagBitmap[(id >> SHIFT_3)] |= (ID_USED << (id & 0x7));
             return (int32_t)id;
