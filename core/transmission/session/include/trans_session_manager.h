@@ -45,6 +45,8 @@ void TransDelItemByPackageName(const char *pkgName);
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len);
 
+int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid);
+
 #ifdef __cplusplus
 }
 #endif
