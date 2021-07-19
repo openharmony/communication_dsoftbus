@@ -50,7 +50,7 @@ int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
     return g_channelCb.GetPkgNameBySessionName(sessionName, pkgName, len);
 }
 
-int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t pid)
+int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
 }
