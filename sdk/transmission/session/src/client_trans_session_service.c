@@ -271,7 +271,7 @@ void CloseSession(int sessionId)
     }
     ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
     if (ret != SOFTBUS_OK) {
-        LOG_INFO("Get Channel err: ret=%d", ret);
+        LOG_ERR("get channel err");
         return;
     }
     ret = ClientTransCloseChannel(channelId, type);
