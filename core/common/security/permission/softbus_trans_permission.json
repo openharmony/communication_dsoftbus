@@ -1,26 +1,25 @@
 [
   {
     "SESSION_NAME": "DBinderService",
-    "DEVID": "UUID",
+    "DEVID": "NETWORKID",
     "APP_INFO": [
       {
         "TYPE": "native_app",
         "UID": "1000",
-        "PKG_NAME":"DBinderService",
+        "PKG_NAME": "DBinderService",
         "ACTIONS": "create,open"
       }
     ]
   },
   {
-    "SESSION_NAME": "DBinder.",
+    "SESSION_NAME": "DBinder.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
-    "SEC_LEVEL":"public",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "granted_app",
-        "UID": "1000",
-        "PKG_NAME":"DBinderBus",
+        "PKG_NAME": "DBinderBus",
         "ACTIONS": "create,open"
       }
     ]
@@ -29,6 +28,7 @@
     "SESSION_NAME": "DistributedFileService.*",
     "REGEXP": "true",
     "DEVID": "UUID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "native_app",
@@ -44,7 +44,7 @@
     "APP_INFO": [
       {
         "TYPE": "normal_app",
-        "PKG_NAME":"ohos.distributeddata",
+        "PKG_NAME": "ohos.distributeddata",
         "ACTIONS": "create,open"
       }
     ]
