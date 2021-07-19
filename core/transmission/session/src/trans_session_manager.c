@@ -194,3 +194,34 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     (void)pthread_mutex_unlock(&g_sessionServerList->lock);
     return SOFTBUS_ERR;
 }
+
+int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    if (sessionName == NULL || (uid == NULL) || (pid == NULL)) {
+        return SOFTBUS_ERR;
+    }
+    if (g_sessionServerList == NULL) {
+        LOG_INFO("not init");
+        return SOFTBUS_ERR;
+    }
+
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+        LOG_ERR("lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *uid = pos->uid;
+            *pid = pos->pid;
+            LOG_INFO("TransGetUidAndPid: sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
+                sessionName, pos->uid, pos->pid);
+            return SOFTBUS_OK;
+        }
+    }
+
+    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    LOG_ERR("TransGetUidAndPid err:  sessionName=%{public}s", sessionName);
+    return SOFTBUS_ERR;
+}
