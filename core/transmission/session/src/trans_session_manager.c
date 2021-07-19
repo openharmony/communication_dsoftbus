@@ -197,8 +197,8 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
 
 int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
-    if (sessionName == NULL || (uid == NULL) || (pid == NULL)) {
-        return SOFTBUS_ERR;
+    if (sessionName == NULL || uid == NULL || pid == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
         LOG_INFO("not init");
@@ -209,7 +209,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     SessionServer *tmp = NULL;
     if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
         LOG_ERR("lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
@@ -217,11 +217,12 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
             *pid = pos->pid;
             LOG_INFO("TransGetUidAndPid: sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 sessionName, pos->uid, pos->pid);
+            (void)pthread_mutex_unlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
     }
 
     (void)pthread_mutex_unlock(&g_sessionServerList->lock);
-    LOG_ERR("TransGetUidAndPid err:  sessionName=%{public}s", sessionName);
+    LOG_ERR("TransGetUidAndPid err: sessionName=%{public}s", sessionName);
     return SOFTBUS_ERR;
 }
