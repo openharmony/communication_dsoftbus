@@ -39,7 +39,7 @@ typedef enum {
 } ConfigType;
 
 typedef struct {
-    int (* SetConfig)(ConfigType type, unsigned char *val, int len);
+    int (* SetConfig)(ConfigType type, const unsigned char *val, int len);
 } ConfigSetProc;
 
 #ifdef __cplusplus
