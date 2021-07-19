@@ -27,6 +27,7 @@ static IClientSessionCallBack g_sessionCb;
 static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo *channel, uint32_t flag,
     int32_t *sessionId)
 {
+    LOG_INFO("AcceptSessionAsServer");
     SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
         LOG_ERR("malloc failed");
@@ -53,6 +54,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         return SOFTBUS_ERR;
     }
     *sessionId = session->sessionId;
+    LOG_INFO("AcceptSessionAsServer ok");
     return SOFTBUS_OK;
 }
 
@@ -82,6 +84,8 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         LOG_ERR("Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    LOG_INFO("TransOnSessionOpened: sessionName=%{public}s, flag=%{public}d, isServer=%{public}d",
+        sessionName, flag, channel->isServer);
 
     ISessionListener listener = {0};
     int32_t ret = ClientGetSessionCallbackByName(sessionName, &listener);
@@ -107,11 +111,13 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
     }
+    LOG_INFO("TransOnSessionOpened ok");
     return SOFTBUS_OK;
 }
 
 int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
 {
+    LOG_INFO("TransOnSessionOpenFailed: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
     int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
@@ -125,11 +131,13 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
     }
 
     (void)ClientDeleteSession(sessionId);
+    LOG_INFO("TransOnSessionOpenFailed ok");
     return SOFTBUS_OK;
 }
 
 int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
+    LOG_INFO("TransOnSessionClosed: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
     int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
@@ -147,6 +155,7 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
         LOG_ERR("client delete session failed");
         return SOFTBUS_ERR;
     }
+    LOG_INFO("TransOnSessionClosed ok");
     return SOFTBUS_OK;
 }
 

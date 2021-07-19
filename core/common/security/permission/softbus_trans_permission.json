@@ -28,7 +28,6 @@
     "SESSION_NAME": "DistributedFileService.*",
     "REGEXP": "true",
     "DEVID": "UUID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "native_app",
@@ -41,6 +40,7 @@
     "SESSION_NAME": "distributeddata-default",
     "REGEXP": "true",
     "DEVID": "UUID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "normal_app",
