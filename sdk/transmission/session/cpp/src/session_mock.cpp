@@ -16,6 +16,7 @@
 #include "session_mock.h"
 
 #include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
 #include "session.h"
 #include "session_callback_mock.h"
 
@@ -40,7 +41,7 @@ int OpenSessionInner(const char *mySessionName, const char *peerSessionName, con
     const char *groupId, int flag)
 {
     SessionAttribute attr = {flag};
-    return OpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, &attr);
+    return OpenSessionSync(mySessionName, peerSessionName, peerDeviceId, groupId, &attr);
 }
 
 void CloseSessionInner(int sessionId)

@@ -15,6 +15,8 @@
 
 #include "softbus_server.h"
 
+#include "ipc_skeleton.h"
+#include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
@@ -87,7 +89,9 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
 
 int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName)
 {
-    return TransCreateSessionServer(pkgName, sessionName);
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return TransCreateSessionServer(pkgName, sessionName, (int32_t)callingUid, (int32_t)callingPid);
 }
 
 int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName)

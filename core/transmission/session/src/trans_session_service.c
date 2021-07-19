@@ -67,12 +67,14 @@ void TransServerDeathCallback(const char *pkgName)
     TransChannelDeathCallback(pkgName);
 }
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) ||
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    LOG_INFO("TransCreateSessionServer:pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
+    LOG_INFO("TransCreateSessionServer:uid=%{public}d, pid=%{public}d", uid, pid);
 
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     if (newNode == NULL) {
@@ -87,17 +89,19 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName)
         return SOFTBUS_ERR;
     }
     newNode->type = SEC_TYPE_CIPHERTEXT;
+    newNode->uid = uid;
+    newNode->pid = pid;
 
     int ret = TransSessionServerAddItem(newNode);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(newNode);
         if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-            LOG_INFO("SessionServer is already created [%s]", sessionName);
+            LOG_INFO("session server is already created");
             return SOFTBUS_SERVER_NAME_REPEATED;
         }
         return ret;
     }
-    LOG_INFO("CreateSessionServer OK, pkg name: [%s], session name: [%s]", pkgName, sessionName);
+    LOG_INFO("CreateSessionServer ok");
     return SOFTBUS_OK;
 }
 
@@ -116,8 +120,10 @@ int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName,
     LOG_INFO("trans server opensession.");
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX) ||
-        !IsValidString(groupId, GROUP_ID_SIZE_MAX)) {
+        !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX)) {
+        return INVALID_CHANNEL_ID;
+    }
+    if (groupId == NULL || strlen(groupId) >= GROUP_ID_SIZE_MAX) {
         return INVALID_CHANNEL_ID;
     }
 

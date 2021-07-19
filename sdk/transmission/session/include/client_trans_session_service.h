@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+    const char *groupId, const SessionAttribute *attr);
 
 #ifdef __cplusplus
 }

@@ -77,10 +77,9 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnChannelClosed(channelId);
-        case CHANNEL_TYPE_TCP_DIRECT:
-            return ClientTransProxyOnChannelClosed(channelId);
         case CHANNEL_TYPE_UDP:
             return TransOnUdpChannelClosed(channelId);
+        case CHANNEL_TYPE_TCP_DIRECT:
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }

@@ -78,6 +78,7 @@ int SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, const st
 std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySessionName,
     const std::string &peerSessionName, const std::string &peerDeviceId, const std::string &groupId, int flags)
 {
+    LOG_INFO("SessionServiceImpl::OpenSession");
     if (mySessionName.empty() || peerSessionName.empty() || peerDeviceId.empty()) {
         return nullptr;
     }
@@ -87,13 +88,16 @@ std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySe
         LOG_ERR("SessionServiceImpl:OpenSession, invalid sessionId.");
         return nullptr;
     }
-    std::shared_ptr<Session> session = std::make_shared<SessionImpl>();
-    session->SetSessionId(sessionId);
-    session->SetMySessionName(mySessionName);
-    session->SetPeerSessionName(peerSessionName);
-    session->SetPeerDeviceId(peerDeviceId);
+     
+    std::shared_ptr<Session> session;
     std::lock_guard<std::mutex> autoLock(sessionMutex_);
     sessionMap_.insert(std::pair<int, std::shared_ptr<Session>>(sessionId, session));
+    auto iter = sessionMap_.find(sessionId);
+    if (iter == sessionMap_.end()) {
+        session = iter->second;
+        LOG_INFO("session fine");
+    }
+    LOG_INFO("SessionServiceImpl::OpenSession ok");
     return session;
 }
 
@@ -157,37 +161,60 @@ int SessionServiceImpl::CreatNewSession(int sessionId)
 
 int SessionServiceImpl::OpenSessionCallback(int sessionId)
 {
+    LOG_INFO("SessionServiceImpl::OpenSessionCallback");
     int isServer;
     if (IsServerSideInner(sessionId, &isServer) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (isServer && CreatNewSession(sessionId) != SOFTBUS_OK) {
-        LOG_ERR("OpenSessionCallback create new session failed.");
+
+    std::shared_ptr<Session> session = std::make_shared<SessionImpl>();
+    session->SetSessionId(sessionId);
+    char str[SESSION_NAME_SIZE_MAX];
+    if (GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    std::string mySessionName(str);
+    session->SetMySessionName(mySessionName);
+
+    if (GetPeerSessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    std::string peerSessionName(str);
+    session->SetPeerSessionName(peerSessionName);
+
+    char deviceId[DEVICE_ID_SIZE_MAX];
+    if (GetPeerDeviceIdInner(sessionId, deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    std::string peerDeviceId(deviceId);
+    session->SetPeerDeviceId(peerDeviceId);
+    session->SetIsServer(isServer);
+
+    std::lock_guard<std::mutex> autoLock(sessionMutex_);
+    sessionMap_.insert(std::pair<int, std::shared_ptr<Session>>(sessionId, session));
+
     std::shared_ptr<ISessionListener> listener;
-    std::shared_ptr<Session> session;
-    if (GetSessionListener(sessionId, listener, session) != SOFTBUS_OK) {
-        LOG_ERR("OpenSessionCallback get session listener failed.");
+    if (GetSessionListenerOnSessionOpened(sessionId, listener, session) != SOFTBUS_OK) {
+        LOG_ERR("OpenSessionCallback get session listener failed");
         return SOFTBUS_ERR;
     }
+
     NodeBasicInfo info;
-    int ret = GetLocalNodeDeviceInfo((session->GetMySessionName()).c_str(), &info);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    if (GetLocalNodeDeviceInfo((session->GetMySessionName()).c_str(), &info) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
     }
     session->SetDeviceId(info.networkId);
+
     int tmp;
-    ret = GetPeerUidInner(sessionId, &tmp);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    if (GetPeerUidInner(sessionId, &tmp) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
     }
     session->SetPeerUid(static_cast<uid_t>(tmp));
-    ret = GetPeerPidInner(sessionId, &tmp);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    if (GetPeerPidInner(sessionId, &tmp) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
     }
     session->SetPeerPid(static_cast<pid_t>(tmp));
+    LOG_INFO("SessionServiceImpl::OpenSessionCallback");
     return listener->OnSessionOpened(session);
 }
 
@@ -238,6 +265,25 @@ int SessionServiceImpl::GetSessionListener(int sessionId, std::shared_ptr<ISessi
             listener = iterListener->second;
             return SOFTBUS_OK;
         }
+    }
+    return SOFTBUS_ERR;
+}
+
+int SessionServiceImpl::GetSessionListenerOnSessionOpened(int sessionId,
+    std::shared_ptr<ISessionListener> &listener, std::shared_ptr<Session> &session)
+{
+    (void)session;
+    char str[SESSION_NAME_SIZE_MAX];
+    if (GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    std::string mySessionName(str);
+
+    std::lock_guard<std::mutex> autoLock(listenerMutex_);
+    auto iterListener = listenerMap_.find(mySessionName);
+    if (iterListener != listenerMap_.end()) {
+        listener = iterListener->second;
+        return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
 }

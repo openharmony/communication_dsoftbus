@@ -27,9 +27,11 @@ typedef struct {
     SoftBusSecType type;
     char pkgName[PKG_NAME_SIZE_MAX];
     char sessionName[SESSION_NAME_SIZE_MAX];
+    int32_t uid;
+    int32_t pid;
 } SessionServer;
 
-int TransSessionMgrInit(void);
+int32_t TransSessionMgrInit(void);
 
 void TransSessionMgrDeinit(void);
 
@@ -42,6 +44,8 @@ int32_t TransSessionServerDelItem(const char *sessionName);
 void TransDelItemByPackageName(const char *pkgName);
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len);
+
+int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid);
 
 #ifdef __cplusplus
 }
