@@ -1010,7 +1010,9 @@ void AuthNotifyLnnDisconnByIp(const char *ip)
             EventRemove(auth->authId);
             if (auth->status < IN_SYNC_PROGRESS) {
                 LOG_INFO("auth no need to notify lnn");
+                (void)pthread_mutex_unlock(&g_authLock);
                 (void)AuthHandleLeaveLNN(auth->authId);
+                (void)pthread_mutex_lock(&g_authLock);
             } else {
                 auth->cb->onDisconnect(auth->authId);
             }
@@ -1041,7 +1043,9 @@ void AuthIpChanged(ConnectType type)
             EventRemove(auth->authId);
             if (auth->status < IN_SYNC_PROGRESS) {
                 LOG_INFO("auth no need to notify lnn");
+                (void)pthread_mutex_unlock(&g_authLock);
                 (void)AuthHandleLeaveLNN(auth->authId);
+                (void)pthread_mutex_lock(&g_authLock);
             } else {
                 auth->cb->onDisconnect(auth->authId);
             }
