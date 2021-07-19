@@ -213,7 +213,7 @@ int SessionServiceImpl::OpenSessionCallback(int sessionId)
         return SOFTBUS_ERR;
     }
     session->SetPeerPid(static_cast<pid_t>(tmp));
-    LOG_INFO("SessionServiceImpl::OpenSessionCallback");
+    LOG_INFO("SessionServiceImpl::OpenSessionCallback Ok");
     return listener->OnSessionOpened(session);
 }
 
