@@ -93,9 +93,9 @@ std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySe
     std::lock_guard<std::mutex> autoLock(sessionMutex_);
     sessionMap_.insert(std::pair<int, std::shared_ptr<Session>>(sessionId, session));
     auto iter = sessionMap_.find(sessionId);
-    if (iter == sessionMap_.end()) {
+    if (iter != sessionMap_.end()) {
         session = iter->second;
-        LOG_INFO("session fine");
+        LOG_INFO("SessionServiceImpl::session find");
     }
     LOG_INFO("SessionServiceImpl::OpenSession ok");
     return session;
