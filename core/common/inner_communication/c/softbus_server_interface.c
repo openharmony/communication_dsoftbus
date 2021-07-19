@@ -19,7 +19,7 @@
 #include "softbus_log.h"
 
 #if defined(__LITEOS_M__)
-extern int TransCreateSessionServer(const char *pkgName, const char *sessionName);
+extern int TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
 
 extern int TransRemoveSessionServer(const char *pkgName, const char *sessionName);
 
@@ -41,10 +41,13 @@ extern int LnnIpcGetLocalDeviceInfo(void *info, uint32_t infoTypeLen);
 extern int LnnIpcGetNodeKeyInfo(const char *networkId, int key, unsigned char *buf, uint32_t len);
 
 #else
-int __attribute__ ((weak)) TransCreateSessionServer(const char *pkgName, const char *sessionName)
+int __attribute__ ((weak)) TransCreateSessionServer(const char *pkgName, const char *sessionName,
+    int32_t uid, int32_t pid)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)uid;
+    (void)pid;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

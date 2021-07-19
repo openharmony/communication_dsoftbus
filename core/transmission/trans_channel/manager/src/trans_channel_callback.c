@@ -86,5 +86,6 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     g_channelCallBack.OnChannelOpenFailed = TransServerOnChannelOpenFailed;
     g_channelCallBack.OnDataReceived = TransServerOnMsgReceived;
     g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
+    g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
     return &g_channelCallBack;
 }

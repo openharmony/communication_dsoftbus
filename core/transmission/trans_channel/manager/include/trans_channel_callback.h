@@ -33,6 +33,7 @@ typedef struct {
     int32_t (*OnDataReceived)(const char *pkgName, int32_t channelId,
         const void *data, uint32_t len, int32_t type);
     int32_t (*GetPkgNameBySessionName)(const char *sessionName, char *pkgName, uint16_t len);
+    int32_t (*GetUidAndPidBySessionName)(const char *sessionName, int32_t *uid, int32_t *pid);
 } IServerChannelCallBack;
 
 IServerChannelCallBack *TransServerGetChannelCb(void);

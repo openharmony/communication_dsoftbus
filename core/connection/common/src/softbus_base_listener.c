@@ -342,26 +342,28 @@ static int32_t SelectThread(const SoftbusListenerNode *node)
         pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_ERR;
     }
+
+    int32_t maxFd = listenerInfo->maxFd;
+    struct timeval tv;
+    tv.tv_sec = listenerInfo->tv.tv_sec;
+    tv.tv_usec = listenerInfo->tv.tv_usec;
+    pthread_mutex_unlock(&g_listenerList[module].lock);
+
     fd_set readSet;
     fd_set writeSet;
     fd_set exceptSet;
     if (SetSelect(module, &readSet, &writeSet, &exceptSet) != SOFTBUS_OK) {
         LOG_ERR("select failed with invalid listener");
-        pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_ERR;
     }
-    int32_t nEvents = select(listenerInfo->maxFd + 1, &readSet, &writeSet,
-        &exceptSet, &listenerInfo->tv);
+    int32_t nEvents = select(maxFd + 1, &readSet, &writeSet, &exceptSet, &tv);
     if (nEvents < 0) {
         LOG_ERR("select failed, errno=%d", errno);
-        pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_TCP_SOCKET_ERR;
     } else if (nEvents == 0) {
-        pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_OK;
     } else {
         ProcessData(module, &readSet, &writeSet, &exceptSet);
-        pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_OK;
     }
 }

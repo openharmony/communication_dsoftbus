@@ -61,6 +61,10 @@ private:
 
     int GetSessionListener(int sessionId, std::shared_ptr<ISessionListener> &listener,
         std::shared_ptr<Session> &session);
+
+    int GetSessionListenerOnSessionOpened(int sessionId,
+        std::shared_ptr<ISessionListener> &listener, std::shared_ptr<Session> &session);
+
     int CreatNewSession(int sessionId);
 };
 } // namespace SoftBus

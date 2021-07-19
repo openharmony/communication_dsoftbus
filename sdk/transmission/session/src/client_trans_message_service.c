@@ -23,6 +23,7 @@
 
 int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 {
+    LOG_INFO("SendBytes: sessionId=%{public}d", sessionId);
     if ((data == NULL) || (len == 0) || (len > TRANS_BYTES_LENGTH_MAX) || sessionId < 0) {
         LOG_ERR("Invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -45,6 +46,7 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 
 int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 {
+    LOG_INFO("SendMessage: sessionId=%{public}d", sessionId);
     if ((data == NULL) || (len == 0) || (len > TRANS_MESSAGE_LENGTH_MAX)) {
         LOG_ERR("Invalid param");
         return SOFTBUS_INVALID_PARAM;
