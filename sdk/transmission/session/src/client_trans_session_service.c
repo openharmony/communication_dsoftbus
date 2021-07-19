@@ -71,9 +71,10 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidListener(listener)) {
-        LOG_ERR("invalid param");
+        LOG_ERR("CreateSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    LOG_INFO("CreateSessionServer: pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
 
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         LOG_ERR("init softbus err");
@@ -98,15 +99,17 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         LOG_ERR("Server createSessionServer failed");
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
     }
+    LOG_INFO("CreateSessionServer ok: ret=%d", ret);
     return ret;
 }
 
 int RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
-        LOG_ERR("invalid param");
+        LOG_ERR("RemoveSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    LOG_INFO("RemoveSessionServer: pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
@@ -118,6 +121,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     if (ret != SOFTBUS_OK) {
         LOG_ERR("delete session server [%s] failed", sessionName);
     }
+    LOG_INFO("RemoveSessionServer ok: ret=%d", ret);
     return ret;
 }
 
@@ -127,16 +131,14 @@ static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSess
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX) ||
-        !IsValidString(groupId, GROUP_ID_SIZE_MAX) ||
         (attr == NULL) ||
         (attr->dataType >= TYPE_BUTT)) {
         LOG_ERR("invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (strcmp(mySessionName, peerSessionName) != 0) {
-        LOG_ERR("session name not same");
-        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
+    if (groupId == NULL || strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+        return SOFTBUS_INVALID_PARAM;
     }
 
     return SOFTBUS_OK;
@@ -147,8 +149,10 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerDeviceId, groupId, attr);
     if (ret != SOFTBUS_OK) {
+        LOG_ERR("OpenSession invalid param");
         return INVALID_SESSION_ID;
     }
+    LOG_INFO("OpenSession: mySessionName=%{public}s, peerSessionName=%{public}s", mySessionName, peerSessionName);
 
     SessionParam param = {
         .sessionName = mySessionName,
@@ -167,7 +171,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
             LOG_INFO("session already opened");
             return OpenSessionWithExistSession(sessionId, isEnabled);
         }
-        LOG_ERR("client open session failed, ret [%d]", ret);
+        LOG_ERR("add session err: ret=%d", ret);
         return ret;
     }
 
@@ -179,7 +183,78 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    LOG_INFO("OpenSession channelId [%d]", channelId);
+    LOG_INFO("OpenSession ok: sessionId=%{public}d, channelId=%{public}", sessionId, channelId);
+    return sessionId;
+}
+
+static void CheckSessionIsOpened(int32_t sessionId)
+{
+#define SESSION_STATUS_CHECK_MAX_NUM 100
+#define SESSION_CHECK_PERIOD 50000
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t i = 0;
+
+    while (i < SESSION_STATUS_CHECK_MAX_NUM) {
+        if (ClientGetChannelBySessionId(sessionId, &channelId, &type) != SOFTBUS_OK) {
+            return;
+        }
+        if (type != CHANNEL_TYPE_BUTT) {
+            LOG_INFO("CheckSessionIsOpened session is enable");
+            return;
+        }
+        LOG_ERR("CheckSessionIsOpened session is opening, i=%{public}d", i);
+        usleep(SESSION_CHECK_PERIOD);
+        i++;
+    }
+
+    LOG_ERR("CheckSessionIsOpened session open timeout");
+    return;
+}
+
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+    const char *groupId, const SessionAttribute *attr)
+{
+    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerDeviceId, groupId, attr);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("OpenSessionSync invalid param");
+        return INVALID_SESSION_ID;
+    }
+    LOG_INFO("OpenSessionSync: mySessionName=%{public}s, peerSessionName=%{public}s", mySessionName, peerSessionName);
+
+    SessionParam param = {
+        .sessionName = mySessionName,
+        .peerSessionName = peerSessionName,
+        .peerDeviceId = peerDeviceId,
+        .groupId = groupId,
+        .attr = attr,
+    };
+
+    int32_t sessionId = INVALID_SESSION_ID;
+    bool isEnabled = false;
+
+    ret = ClientAddSession(&param, &sessionId, &isEnabled);
+    if (ret != SOFTBUS_OK) {
+        if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
+            LOG_INFO("session already opened");
+            CheckSessionIsOpened(sessionId);
+            return OpenSessionWithExistSession(sessionId, isEnabled);
+        }
+        LOG_ERR("add session err: ret=%d", ret);
+        return ret;
+    }
+
+    int32_t channelId = ServerIpcOpenSession(mySessionName, peerSessionName,
+        peerDeviceId, groupId, (int32_t)attr->dataType);
+    ret = ClientSetChannelBySessionId(sessionId, channelId);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("server open session err: ret=%{public}d", ret);
+        (void)ClientDeleteSession(sessionId);
+        return INVALID_SESSION_ID;
+    }
+
+    CheckSessionIsOpened(sessionId);
+    LOG_INFO("OpenSessionSync ok: sessionId=%{public}d, channelId=%{public}", sessionId, channelId);
     return sessionId;
 }
 
@@ -204,6 +279,7 @@ void CloseSession(int sessionId)
         LOG_INFO("close channel err: ret=%d, channelId=%d, channeType=%d", ret, channelId, type);
         return;
     }
+    LOG_INFO("CloseSession ok");
     return;
 }
 
