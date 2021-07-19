@@ -167,6 +167,8 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerSessionName = conn->appInfo.peerData.sessionName;
     info.groupId = conn->appInfo.groupId;
     info.keyLen = SESSION_KEY_LENGTH;
+    info.peerUid = conn->appInfo.peerData.uid;
+    info.peerPid = conn->appInfo.peerData.pid;
 
     char buf[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
@@ -177,7 +179,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerDeviceId = buf;
 
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if (TransTdcGetPkgName(info.peerSessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         LOG_ERR("get pkg name fail.");
         return SOFTBUS_ERR;
     }
@@ -196,7 +198,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
     }
 
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if (TransTdcGetPkgName(conn->appInfo.peerData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         LOG_ERR("get pkg name fail.");
         return SOFTBUS_ERR;
     }
@@ -227,6 +229,7 @@ int32_t NotifyChannelClosed(int32_t channelId)
 
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
+    LOG_INFO("OpenDataBusReply: channelId=%{public}d", channelId);
     SessionConn *conn = GetTdcInfoByChannelId(channelId);
     if (conn == NULL) {
         LOG_ERR("notify channel open failed, get tdcInfo is null");
@@ -240,7 +243,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-
+    LOG_INFO("OpenDataBusReply ok");
     return SOFTBUS_OK;
 }
 
@@ -254,8 +257,11 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
         LOG_ERR("UnpackRequest error");
         return SOFTBUS_ERR;
     }
+    if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
+        &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
 
-    int32_t ret = NotifyChannelOpened(channelId);
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
@@ -263,13 +269,12 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
         .flags = FLAG_REPLY,
         .dataLen = 0,
     };
-
+    int32_t ret = NotifyChannelOpened(channelId);
     if (ret != SOFTBUS_OK) {
         LOG_ERR("NotifyChannelOpened err");
         char *errDesc = "notifyChannelOpened";
         char *errReply = PackError(ret, errDesc);
         if (errReply == NULL) {
-            LOG_ERR("Failed to send notify channel opened");
             return SOFTBUS_ERR;
         }
 
@@ -284,13 +289,11 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
 
     char *reply = PackReply(&conn->appInfo);
     if (reply == NULL) {
-        LOG_ERR("PackReply failed");
         return SOFTBUS_ERR;
     }
 
     packetHead.dataLen = strlen(reply) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
-    ret = TransTdcPostBytes(channelId, &packetHead, reply);
-    if (ret != SOFTBUS_OK) {
+    if (TransTdcPostBytes(channelId, &packetHead, reply) != SOFTBUS_OK) {
         LOG_ERR("TransTdc post bytes failed");
         SoftBusFree(reply);
         return SOFTBUS_ERR;
