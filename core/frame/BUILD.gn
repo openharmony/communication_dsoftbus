@@ -30,6 +30,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
     ]
 
     sources = [

@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_session_manager.h"
+#include "softbus_feature_config.h"
 
 static void ServerModuleDeinit(void)
 {
@@ -37,6 +38,8 @@ static void ServerModuleDeinit(void)
 
 void InitSoftBusServer(void)
 {
+    SoftbusConfigInit();
+    
     if (ServerStubInit() != SOFTBUS_OK) {
         LOG_ERR("server stub init failed.");
         return;
