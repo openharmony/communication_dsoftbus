@@ -21,9 +21,9 @@
 #include "ohos_init.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "trans_session_manager.h"
-#include "softbus_feature_config.h"
 
 static void ServerModuleDeinit(void)
 {
