@@ -16,7 +16,6 @@
 #ifndef CLIENT_TRANS_UDP_STREAM_ADAPTOR_LISTENER_H_
 #define CLIENT_TRANS_UDP_STREAM_ADAPTOR_LISTENER_H_
 
-#include "stream_adaptor_listener.h"
 #include "i_stream.h"
 #include "i_stream_manager.h"
 #include "softbus_log.h"
