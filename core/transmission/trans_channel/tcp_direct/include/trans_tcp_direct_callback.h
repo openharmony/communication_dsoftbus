@@ -37,6 +37,8 @@ int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t channelId);
 
 int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len);
 
+int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
