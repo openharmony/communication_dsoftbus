@@ -40,7 +40,7 @@ int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = TransCreateSessionServer(pkgName, sessionName);
+    int32_t ret = TransCreateSessionServer(pkgName, sessionName, callingUid, callingPid);
     IpcIoPushInt32(reply, ret);
     return ret;
 }
