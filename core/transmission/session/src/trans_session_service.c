@@ -27,7 +27,7 @@
 
 static bool g_transSessionInitFlag = false;
 
-int TransServerInit(void)
+int32_t TransServerInit(void)
 {
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;
@@ -92,7 +92,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->uid = uid;
     newNode->pid = pid;
 
-    int ret = TransSessionServerAddItem(newNode);
+    int32_t ret = TransSessionServerAddItem(newNode);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(newNode);
         if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
