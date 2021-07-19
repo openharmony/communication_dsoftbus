@@ -82,7 +82,7 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = RAW_STREAM;
     }
-    if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.uid) != SOFTBUS_OK) {
+    if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
