@@ -71,6 +71,7 @@ void TransChannelDeinit(void)
 static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags)
 {
+    LOG_INFO("GetAppInfo");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -80,6 +81,9 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
     if (flags == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = RAW_STREAM;
+    }
+    if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.uid) != SOFTBUS_OK) {
+        goto EXIT_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
@@ -104,7 +108,7 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
         LOG_ERR("get remote node uuid err");
         goto EXIT_ERR;
     }
-
+    LOG_INFO("GetAppInfo ok");
     return appInfo;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -214,6 +218,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags)
 {
+    LOG_INFO("server TransOpenChannel");
     int32_t channelId = INVALID_CHANNEL_ID;
     LnnLanesObject *object = NULL;
     const LnnLaneInfo *info = NULL;
@@ -221,7 +226,10 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
     ConnectOption connOpt = {0};
 
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) || !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX) ||
-        !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) || !IsValidString(groupId, GROUP_ID_SIZE_MAX)) {
+        !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX)) {
+        return channelId;
+    }
+    if (groupId == NULL) {
         return channelId;
     }
 
@@ -247,7 +255,7 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
 
     LnnReleaseLanesObject(object);
     SoftBusFree(appInfo);
-    LOG_INFO("open channel ok: channelId=%d, channelType=%d", channelId, channelType);
+    LOG_INFO("server TransOpenChannel ok: channelId=%d, channelType=%d", channelId, channelType);
     return channelId;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -260,7 +268,7 @@ EXIT_ERR:
         (void)TransCloseChannel(channelId, channelType);
     }
 
-    LOG_INFO("open channel err");
+    LOG_INFO("server TransOpenChannel err");
     return INVALID_CHANNEL_ID;
 }
 
