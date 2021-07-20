@@ -47,4 +47,6 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type);
 
 int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionName,
     uint16_t pkgNameLen, uint16_t sessionNameLen);
+
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
 #endif // !TRANS_UDP_CHANNEL_MANAGER_H
