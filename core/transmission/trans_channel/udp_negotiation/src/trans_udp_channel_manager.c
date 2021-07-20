@@ -321,3 +321,36 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
     LOG_ERR("udp channel not found.[channelId = %d]", channelId);
     return SOFTBUS_ERR;
 }
+
+void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
+{
+    if (g_udpChannelMgr == NULL) {
+        LOG_ERR("udp channel manager hasn't initialized.");
+        return;
+    }
+
+    if (appInfo == NULL) {
+        LOG_ERR("invalid param.");
+        return;
+    }
+
+    if (pthread_mutex_lock(&(g_udpChannelMgr->lock)) != 0) {
+        LOG_ERR("lock failed");
+        return;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->seq == seq) {
+            if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
+                LOG_ERR("memcpy_s failed.");
+                (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+                return;
+            }
+            (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+    LOG_ERR("udp channel not found.[seq = %lld]", seq);
+}

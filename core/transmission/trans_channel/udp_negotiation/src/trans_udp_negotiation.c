@@ -347,6 +347,7 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
             LOG_ERR("process udp channel state failed.");
             ProcessAbnormalUdpChannelState(&(channel.info), false);
         }
+        TransUpdateUdpChannelInfo(seq, &(channel.info));
     } else {
         /* receive request message */
         LOG_INFO("receive request udp negotiation info.");
@@ -519,12 +520,12 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     LOG_INFO("server trans close udp channel.");
     UdpChannelInfo channel = {0};
     ConnectOption connOpt = {0};
-    if (TransGetUdpChannelById(channelId, &channel) != SOFTBUS_OK) {
-        LOG_ERR("get udp channel by channel id failed.[id = %d]", channelId);
-        return SOFTBUS_ERR;
-    }
     if (TransSetUdpChannelOptType(channelId, TYPE_UDP_CHANNEL_CLOSE) != SOFTBUS_OK) {
         LOG_ERR("set udp channel close type failed.");
+        return SOFTBUS_ERR;
+    }
+    if (TransGetUdpChannelById(channelId, &channel) != SOFTBUS_OK) {
+        LOG_ERR("get udp channel by channel id failed.[id = %d]", channelId);
         return SOFTBUS_ERR;
     }
     connOpt.type = CONNECT_TCP;
