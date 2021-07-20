@@ -88,7 +88,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
         LOG_ERR("make stream failed, stream is nullptr");
         return SOFTBUS_ERR;
     }
-    return adaptor->GetStreamManager()->Send(std::move(stream)) ? 0 : -1;
+    return adaptor->GetStreamManager()->Send(std::move(stream)) ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
@@ -104,7 +104,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         LOG_WARN("adaptor already existed!");
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
 
     {
@@ -116,7 +116,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
             LOG_WARN("adaptor already existed!");
-            return SOFTBUS_OK;
+            return SOFTBUS_ERR;
         }
     }
 
@@ -150,7 +150,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         LOG_WARN("adaptor already existed!");
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
 
     {
@@ -162,7 +162,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
             LOG_WARN("adaptor already existed!");
-            return SOFTBUS_OK;
+            return SOFTBUS_ERR;
         }
     }
 
