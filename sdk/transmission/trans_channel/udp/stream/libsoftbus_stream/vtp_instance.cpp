@@ -15,6 +15,7 @@
 
 #include "vtp_instance.h"
 
+#include <algorithm>
 #include <cstdarg>
 #include <thread>
 #include <unistd.h>
