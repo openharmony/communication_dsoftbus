@@ -421,11 +421,11 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     }
 
     // bind
-    sockaddr_in localSockAddr = {
-        .sin_family = AF_INET,
-        .sin_port = htons((short)local.port),
-        .sin_addr.s_addr = inet_addr(local.ip.c_str())
-    };
+    sockaddr_in localSockAddr = {0};
+    localSockAddr.sin_family = AF_INET;
+    localSockAddr.sin_port = htons((short)local.port);
+    localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
+
     socklen_t localAddrLen = sizeof(localSockAddr);
     int ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
     if (ret == -1) {
@@ -540,10 +540,9 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
         return -1;
     }
 
-    struct SpungeEpollEvent event = {
-        .events = SPUNGE_EPOLLIN,
-        .data.fd = fd,
-    };
+    struct SpungeEpollEvent event = {0};
+    event.events = SPUNGE_EPOLLIN;
+    event.data.fd = fd;
 
     auto ret = FtEpollCtl(epollFd_, SPUNGE_EPOLL_CTL_ADD, fd, &event);
     if (ret != ERR_OK) {
