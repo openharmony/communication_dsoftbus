@@ -17,6 +17,10 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("stream_config") {
   defines = [ "FILLP_LINUX" ]
   cflags_cc = [ "-std=c++14" ]
+  ldflags = [
+    "-lstdc++",
+    "-lDstreamSo",
+  ]
 }
 
 shared_library("libsoftbus_stream") {
@@ -56,7 +60,6 @@ shared_library("libsoftbus_stream") {
     "vtp_instance.cpp",
     "vtp_stream_socket.cpp",
   ]
-  ldflags = [ "-lDstreamSo" ]
   deps = [
     "$dsoftbus_root_path/components/dfinder:dfinder",
     "$dsoftbus_root_path/core/common:softbus_core_common",

@@ -20,6 +20,7 @@ config("stream_config") {
     "-std=c++14",
     "-g",
   ]
+  ldflags = [ "-lstdc++" ]
 }
 
 config("stream_common_config") {
