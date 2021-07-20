@@ -53,7 +53,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_core_path/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
-        "//base/security/permission/services/permission_lite:permission_lite",
+        "//base/security/permission/services/permission_lite/pms_client:pms_client",
         "//foundation/communication/ipc_lite:liteipc_adapter",
       ]
     }
