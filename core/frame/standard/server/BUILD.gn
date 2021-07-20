@@ -52,6 +52,7 @@ ohos_shared_library("softbus_server") {
     "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
     "$dsoftbus_root_path/core/common/message_handler:message_handler",
     "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/connection/manager:conn_manager",
     "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
     "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",

@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_core_common") {
@@ -19,5 +20,6 @@ lite_component("softbus_core_common") {
     "softbus_property:softbus_property",
     "message_handler:message_handler",
     "security:softbus_crypto",
+    "log:softbus_log",
   ]
 }

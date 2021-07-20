@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define SOFTBUS_DEBUG
 #ifndef SOFTBUS_DEBUG
 #if defined(__LITEOS_M__)
 #include "log.h"
@@ -30,17 +29,18 @@
 
 #ifdef __cplusplus
 #if __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 #endif
 
 #ifndef SOFTBUS_DEBUG
 #if defined(__LITEOS_M__)
 
-#define LOG_DBG(fmt, ...) HILOG_DEBUG(HILOG_MODULE_SOFTBUS, fmt"\n", ##__VA_ARGS__);
-#define LOG_INFO(fmt, ...) HILOG_INFO(HILOG_MODULE_SOFTBUS, fmt"\n", ##__VA_ARGS__);
-#define LOG_WARN(fmt, ...) HILOG_WARN(HILOG_MODULE_SOFTBUS, fmt"\n", ##__VA_ARGS__);
-#define LOG_ERR(fmt, ...) HILOG_ERROR(HILOG_MODULE_SOFTBUS, fmt"\n", ##__VA_ARGS__);
+#define LOG_DBG(fmt, ...) HILOG_DEBUG(HILOG_MODULE_SOFTBUS, fmt "\n", ##__VA_ARGS__);
+#define LOG_INFO(fmt, ...) HILOG_INFO(HILOG_MODULE_SOFTBUS, fmt "\n", ##__VA_ARGS__);
+#define LOG_WARN(fmt, ...) HILOG_WARN(HILOG_MODULE_SOFTBUS, fmt "\n", ##__VA_ARGS__);
+#define LOG_ERR(fmt, ...) HILOG_ERROR(HILOG_MODULE_SOFTBUS, fmt "\n", ##__VA_ARGS__);
 #else
 
 #undef LOG_DOMAIN
@@ -48,13 +48,14 @@ extern "C" {
 #define LOG_DOMAIN 0xD0015C0
 #define LOG_TAG "dsoftbus_standard"
 
-#define LOG_DBG(fmt, ...) HILOG_DEBUG(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_WARN(fmt, ...) HILOG_WARN(LOG_CORE, fmt"\n", ##__VA_ARGS__);
-#define LOG_ERR(fmt, ...) HILOG_ERROR(LOG_CORE, fmt"\n", ##__VA_ARGS__);
+#define LOG_DBG(fmt, ...) HILOG_DEBUG(LOG_CORE, fmt "\n", ##__VA_ARGS__);
+#define LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, fmt "\n", ##__VA_ARGS__);
+#define LOG_WARN(fmt, ...) HILOG_WARN(LOG_CORE, fmt "\n", ##__VA_ARGS__);
+#define LOG_ERR(fmt, ...) HILOG_ERROR(LOG_CORE, fmt "\n", ##__VA_ARGS__);
 #endif
 #else
-enum {
+enum
+{
     SOFTBUS_LOG_LEVEL_DEBUG = 0,
     SOFTBUS_LOG_LEVEL_INFO,
     SOFTBUS_LOG_LEVEL_WARNING,
@@ -63,30 +64,64 @@ enum {
 
 #define SOFTBUS_LOG_LEVEL SOFTBUS_LOG_LEVEL_INFO
 
-#define LOG_DBG(fmt, ...) do { \
-    if (SOFTBUS_LOG_LEVEL_DEBUG >= SOFTBUS_LOG_LEVEL) { \
-        printf("DEBUG:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-    } \
-} while (0)
+#define LOG_DBG(fmt, ...)                                                           \
+    do                                                                              \
+    {                                                                               \
+        if (SOFTBUS_LOG_LEVEL_DEBUG >= SOFTBUS_LOG_LEVEL)                           \
+        {                                                                           \
+            printf("DEBUG:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        }                                                                           \
+    } while (0)
 
-#define LOG_INFO(fmt, ...) do { \
-    if (SOFTBUS_LOG_LEVEL_INFO >= SOFTBUS_LOG_LEVEL) { \
-        printf("INFO:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-    } \
-} while (0)
+#define LOG_INFO(fmt, ...)                                                         \
+    do                                                                             \
+    {                                                                              \
+        if (SOFTBUS_LOG_LEVEL_INFO >= SOFTBUS_LOG_LEVEL)                           \
+        {                                                                          \
+            printf("INFO:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        }                                                                          \
+    } while (0)
 
-#define LOG_WARN(fmt, ...) do { \
-    if (SOFTBUS_LOG_LEVEL_WARNING >= SOFTBUS_LOG_LEVEL) { \
-        printf("WARN:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-    } \
-} while (0)
+#define LOG_WARN(fmt, ...)                                                         \
+    do                                                                             \
+    {                                                                              \
+        if (SOFTBUS_LOG_LEVEL_WARNING >= SOFTBUS_LOG_LEVEL)                        \
+        {                                                                          \
+            printf("WARN:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        }                                                                          \
+    } while (0)
 
-#define LOG_ERR(fmt, ...) do { \
-    if (SOFTBUS_LOG_LEVEL_ERROR >= SOFTBUS_LOG_LEVEL) { \
-        printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-    } \
-} while (0)
+#define LOG_ERR(fmt, ...)                                                           \
+    do                                                                              \
+    {                                                                               \
+        if (SOFTBUS_LOG_LEVEL_ERROR >= SOFTBUS_LOG_LEVEL)                           \
+        {                                                                           \
+            printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        }                                                                           \
+    } while (0)
 #endif
+
+    typedef enum
+    {
+        SOFTBUS_LOG_AUTH,
+        SOFTBUS_LOG_TRAN,
+        SOFTBUS_LOG_CONN,
+        SOFTBUS_LOG_LNN,
+        SOFTBUS_LOG_DISC,
+        SOFTBUS_LOG_COMM,
+        SOFTBUS_LOG_MODULE_MAX,
+    } SoftBusLogModule;
+
+    typedef enum
+    {
+        SOFTBUS_LOG_DBG,
+        SOFTBUS_LOG_INFO,
+        SOFTBUS_LOG_WARN,
+        SOFTBUS_LOG_ERROR,
+        SOFTBUS_LOG_LEVEL_MAX,
+    } SoftBusLogLevel;
+
+    void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
 
 #ifdef __cplusplus
 #if __cplusplus
