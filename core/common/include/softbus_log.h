@@ -87,6 +87,26 @@ enum {
 } while (0)
 #endif
 
+    typedef enum {
+        SOFTBUS_LOG_AUTH,
+        SOFTBUS_LOG_TRAN,
+        SOFTBUS_LOG_CONN,
+        SOFTBUS_LOG_LNN,
+        SOFTBUS_LOG_DISC,
+        SOFTBUS_LOG_COMM,
+        SOFTBUS_LOG_MODULE_MAX,
+    } SoftBusLogModule;
+
+    typedef enum {
+        SOFTBUS_LOG_DBG,
+        SOFTBUS_LOG_INFO,
+        SOFTBUS_LOG_WARN,
+        SOFTBUS_LOG_ERROR,
+        SOFTBUS_LOG_LEVEL_MAX,
+    } SoftBusLogLevel;
+
+    void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
