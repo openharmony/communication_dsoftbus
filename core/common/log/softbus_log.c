@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <securec.h>
 #include "softbus_log.h"
+
+#include <securec.h>
 
 #define LOG_NAME_MAX_LEN 5
 #define LOG_PRINT_MAX_LEN 256
@@ -35,8 +36,7 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
 
 void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
 {
-    switch (level)
-    {
+    switch (level) {
         case SOFTBUS_LOG_DBG:
             HILOG_DEBUG(LOG_CORE, "%{public}s", buf);
             break;
@@ -66,7 +66,11 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
         return;
     }
 
-    sprintf_s(szStr, sizeof(szStr), "[%s]", g_logInfo[module].name);
+    ret = sprintf_s(szStr, sizeof(szStr), "[%s]", g_logInfo[module].name);
+    if (ret < 0) {
+        HILOG_ERROR(LOG_CORE, "[COMM]softbus log error");
+        return;
+    }
     ulPos = strlen(szStr);
     (void)memset_s(&arg, sizeof(va_list), 0, sizeof(va_list));
     va_start(arg, fmt);
@@ -76,7 +80,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
         HILOG_ERROR(LOG_CORE, "[COMM]softbus log len error");
         return;
     }
-    SoftBusOutPrint(szStr,level);
+    SoftBusOutPrint(szStr, level);
 
     return;
 }
