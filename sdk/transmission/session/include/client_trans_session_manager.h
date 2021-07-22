@@ -68,6 +68,7 @@ typedef enum {
     KEY_IS_SERVER,
     KEY_PEER_PID,
     KEY_PEER_UID,
+    KEY_PKG_NAME,
 } SessionKey;
 
 int32_t ClientAddNewSession(const char* sessionName, SessionInfo* session);

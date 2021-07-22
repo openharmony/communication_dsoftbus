@@ -45,6 +45,9 @@ public:
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
     int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
         uint32_t len) override;
+
+private:
+    static inline BrokerDelegator<DiscServerProxy> delegator_;
 };
 } // namespace OHOS
 
