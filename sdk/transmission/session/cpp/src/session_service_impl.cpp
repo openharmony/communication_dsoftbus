@@ -199,7 +199,11 @@ int SessionServiceImpl::OpenSessionCallback(int sessionId)
     }
 
     NodeBasicInfo info;
-    if (GetLocalNodeDeviceInfo((session->GetMySessionName()).c_str(), &info) != SOFTBUS_OK) {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    if (GetPkgNameInner(sessionId, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (GetLocalNodeDeviceInfo(pkgName, &info) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     session->SetDeviceId(info.networkId);
