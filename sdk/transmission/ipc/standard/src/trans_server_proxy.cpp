@@ -50,16 +50,12 @@ static sptr<IRemoteObject> GetSystemAbility()
 
 int32_t TransServerProxyInit(void)
 {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    sptr<IRemoteObject> object = GetSystemAbility();
+    g_serverProxy = new (std::nothrow) TransServerProxy(object);
     if (g_serverProxy == nullptr) {
-        std::lock_guard<std::mutex> lock(g_mutex);
-        if (g_serverProxy == nullptr) {
-            sptr<IRemoteObject> object = GetSystemAbility();
-            g_serverProxy = new (std::nothrow) TransServerProxy(object);
-            if (g_serverProxy == nullptr) {
-                LOG_ERR("Get remote softbus object failed!\n");
-                return SOFTBUS_ERR;
-            }
-        }
+        LOG_ERR("Get remote softbus object failed!\n");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

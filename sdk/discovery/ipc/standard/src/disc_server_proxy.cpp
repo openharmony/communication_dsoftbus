@@ -50,16 +50,12 @@ static sptr<IRemoteObject> GetSystemAbility()
 
 int32_t DiscServerProxyInit(void)
 {
-    if (g_serverProxy == nullptr) {
-        std::lock_guard<std::mutex> lock(g_mutex);
-        if (g_serverProxy == nullptr) {
-            sptr<IRemoteObject> object = GetSystemAbility();
-            g_serverProxy = new (std::nothrow) DiscServerProxy(object);
-            if (g_serverProxy == nullptr) {
-                LOG_ERR("Get remote softbus object failed!\n");
-                return SOFTBUS_ERR;
-            }
-        }
+    std::lock_guard<std::mutex> lock(g_mutex);
+	sptr<IRemoteObject> object = GetSystemAbility();
+	g_serverProxy = new (std::nothrow) DiscServerProxy(object);
+	if (g_serverProxy == nullptr) {
+        LOG_ERR("Get remote softbus object failed!\n");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
