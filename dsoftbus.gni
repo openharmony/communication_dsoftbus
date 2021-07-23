@@ -15,10 +15,16 @@ dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
 
+declare_args()
+{
+  softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
+  softbus_adapter_config = "//foundation/communication/dsoftbus/adapter/default_config"
+}
+
 if (defined(ohos_lite)) {
   libsec_include_path = "//third_party/bounds_checking_function/include"
   if (ohos_kernel_type == "liteos_m") {
-    import("$dsoftbus_root_path/config/mini/config.gni")
+    import("$softbus_adapter_config/feature_config/mini/config.gni")
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
     hilog_lite_deps_path =
@@ -26,7 +32,7 @@ if (defined(ohos_lite)) {
 
     libsec_deps_path = "//third_party/bounds_checking_function:libsec_static"
   } else {
-    import("$dsoftbus_root_path/config/small/config.gni")
+    import("$softbus_adapter_config/feature_config/small/config.gni")
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
     hilog_lite_deps_path =
@@ -34,5 +40,5 @@ if (defined(ohos_lite)) {
     libsec_deps_path = "//third_party/bounds_checking_function:libsec_shared"
   }
 } else {
-  import("$dsoftbus_root_path/config/standard/config.gni")
+  import("$softbus_adapter_config/feature_config/standard/config.gni")
 }

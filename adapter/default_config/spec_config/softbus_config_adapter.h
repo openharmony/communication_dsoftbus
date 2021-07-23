@@ -23,7 +23,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-void SoftbusConfigAdaptInit(const ConfigSetProc *sets);
+void SoftbusConfigAdapterInit(const ConfigSetProc *sets);
 
 #ifdef __cplusplus
 #if __cplusplus
