@@ -25,8 +25,8 @@
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_feature_config.h"
+#include "softbus_log.h"
 
 static bool g_isInited = false;
 static pthread_mutex_t g_isInitedLock = PTHREAD_MUTEX_INITIALIZER;
