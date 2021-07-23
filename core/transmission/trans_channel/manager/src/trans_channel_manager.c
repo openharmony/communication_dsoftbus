@@ -81,6 +81,8 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
     if (flags == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
         appInfo->streamType = RAW_STREAM;
+    } else if (flags == TYPE_FILE) {
+        appInfo->businessType = BUSINESS_TYPE_FILE;
     }
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         goto EXIT_ERR;
