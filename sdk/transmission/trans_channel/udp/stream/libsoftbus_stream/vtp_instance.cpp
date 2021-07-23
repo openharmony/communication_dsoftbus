@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "common_inner.h"
+#include "fillptypes.h"
 #include "securec.h"
 #include "stream_common.h"
 
@@ -29,8 +30,7 @@ namespace SoftBus {
 namespace {
 int UpdateVtpLogLevel()
 {
-    LOG_DBG("Unsupport API");
-    return 0;
+    return FILLP_DBG_LVL_WARNING;
 }
 }
 bool VtpInstance::isDebuged_ = false;
