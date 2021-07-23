@@ -20,6 +20,7 @@ if (defined(ohos_lite)) {
     "//third_party/cJSON",
     "$libsec_include_path",
     "$hilog_lite_include_path",
+    "$softbus_adapter_config/spec_config",
   ]
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_property") {
@@ -27,12 +28,12 @@ if (defined(ohos_lite)) {
       sources = [ 
         "src/softbus_property.c",
         "src/softbus_feature_config.c",
-        "src/softbus_config_adapt.c",
       ]
       deps = [
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_static",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     }
   } else {
@@ -42,13 +43,13 @@ if (defined(ohos_lite)) {
       sources = [ 
         "src/softbus_property.c",
         "src/softbus_feature_config.c",
-        "src/softbus_config_adapt.c",
       ]
       public_deps = [
         "$dsoftbus_core_path/common/json_utils:json_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_shared",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     }
   }
@@ -59,12 +60,12 @@ if (defined(ohos_lite)) {
     sources = [ 
         "src/softbus_property.c",
         "src/softbus_feature_config.c",
-        "src/softbus_config_adapt.c",
     ]
     include_dirs = [
       "$dsoftbus_core_path/common/include",
       "include",
       "//third_party/cJSON",
+      "$softbus_adapter_config/spec_config",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
@@ -72,6 +73,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       "$dsoftbus_core_path/common/json_utils",
       "//third_party/cJSON:cjson_static",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

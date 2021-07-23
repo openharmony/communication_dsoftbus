@@ -16,7 +16,7 @@
 #include <securec.h>
 
 #include "softbus_errcode.h"
-#include "softbus_config_adapt.h"
+#include "softbus_config_adapter.h"
 #include "softbus_log.h"
 
 typedef struct {
@@ -117,7 +117,7 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len)
     return SOFTBUS_OK;
 }
 
-int SoftbusGetConfig(ConfigType type, const unsigned char *val, int len)
+int SoftbusGetConfig(ConfigType type, unsigned char *val, int len)
 {
     if (len != g_configItems[type].len) {
         return SOFTBUS_ERR;
@@ -134,6 +134,6 @@ void SoftbusConfigInit(void)
     ConfigSetProc sets;
 
     sets.SetConfig = &SoftbusSetConfig;
-    SoftbusConfigAdaptInit(&sets);
+    SoftbusConfigAdapterInit(&sets);
     LOG_INFO("SoftbusConfigInit success");
 }
