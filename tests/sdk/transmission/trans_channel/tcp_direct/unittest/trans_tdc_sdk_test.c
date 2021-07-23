@@ -23,6 +23,10 @@
 
 #define TYPE_SEND_BYTE 15
 #define TYPE_SEND_MESSAGE 16
+#define SLEEP_TIME 15
+#define TRANS_SIZE_NUM 2
+#define TRANS_SIZE_NUM_DOUBLE 4
+#define LOOP_COUNT 10
 
 static int g_succTestCount = 0;
 static int g_failTestCount = 0;
@@ -50,14 +54,15 @@ static SessionAttribute g_sessionAttr = {
 void Wait();
 void Start();
 
-static void OnJoinLNNDone(ConnectionAddr *addr, const char *networkId, int retCode)
+static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int retCode)
 {
     if (addr == NULL) {
         LOG_INFO("[test]OnJoinLNNDone error\n");
         return;
     }
     if (retCode == 0) {
-        LOG_INFO("[test]OnJoinLNNDone enter networdid = %s, retCode = %d ip = %s port = %d\r\n", networkId, retCode, addr->info.ip.ip, addr->info.ip.port);
+        LOG_INFO("[test]OnJoinLNNDone enter networdid = %s, retCode = %d ip = %s port = %d\r\n",
+            networkId, retCode, addr->info.ip.ip, addr->info.ip.port);
     } else {
         LOG_INFO("[test]OnJoinLNNDone failed! networdid = %s, retCode = %d\r\n", networkId, retCode);
     }
@@ -73,12 +78,12 @@ static void OnLeaveLNNDone(const char *networkId, int retCode)
     }
 }
 
-static void OnNodeOnline(NodeBasicInfo *info)
+static void OnNodeOnline(const NodeBasicInfo *info)
 {
     return;
 }
 
-static void OnNodeOffline(NodeBasicInfo *info)
+static void OnNodeOffline(const NodeBasicInfo *info)
 {
     return;
 }
@@ -105,7 +110,7 @@ static int JoinNetwork()
         return -1;
     }
     g_testCount = 0;
-    sleep(15);
+    sleep(SLEEP_TIME);
     return 0;
 }
 
@@ -227,7 +232,7 @@ void Wait()
     LOG_INFO("[test]Wait enter");
 SLEEP:
     sleep(1);
-    if(g_state == false) {
+    if (g_state == false) {
         goto SLEEP;
     }
     LOG_INFO("[test]Wait end");
@@ -287,7 +292,7 @@ void TransFuncTest001(void)
 void TransFuncTest002(void)
 {
     int ret;
-    int size = 2 * 1024;
+    int size = TRANS_SIZE_NUM * 1024;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -307,7 +312,7 @@ void TransFuncTest002(void)
 void TransFuncTest003(void)
 {
     int ret;
-    int size = 4 * 1024;
+    int size = TRANS_SIZE_NUM_DOUBLE * 1024;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -368,11 +373,11 @@ void TransFuncTest006(void)
 {
     int ret;
     char sessionNames[8][65] = {"1", "2", "3", "4", "5", "6", "7", "8"};
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[]); i++) {
         ret = CreateSessionServer(g_pkgName, sessionNames[i], &g_sessionlistener);
         TEST_ASSERT_TRUE(ret == 0);
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[]; i++) {
         ret = RemoveSessionServer(g_pkgName, sessionNames[i]);
         TEST_ASSERT_TRUE(ret == 0);
     }
@@ -382,11 +387,12 @@ int main(void)
 {
     scanf("%s", g_networkId);
     LOG_INFO("g_networkId = %s", g_networkId);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < LOOP_COUNT; i++) {
         TransFuncTest001();
     }
 
     LOG_INFO("[test]------------------------------------------------------------");
-    LOG_INFO("[test]test number: %d, succ = %d. fail = %d", g_failTestCount + g_succTestCount, g_succTestCount, g_failTestCount);
+    LOG_INFO("[test]test number: %d, succ = %d. fail = %d",
+        g_failTestCount + g_succTestCount, g_succTestCount, g_failTestCount);
     LOG_INFO("[test]------------------------------------------------------------");
 }
