@@ -24,7 +24,7 @@ const int32_t MAX_RECEIVE_SEQUENCE = 5;
 }
 
 namespace OHOS {
-class SeqVerifyTest : public testing::Test {
+class SequenceVerificationTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}
     static void TearDownTestCase(void) {}
@@ -36,7 +36,7 @@ public:
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_001, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_001, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     for (int32_t recvSeq = 0; recvSeq < MAX_RECEIVE_SEQUENCE; recvSeq++) {
@@ -51,7 +51,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_002, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_002, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     /* 2: offset */
@@ -70,7 +70,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_003, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_003, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     /* 2: offset */
@@ -89,7 +89,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_003, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_004, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_004, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     /* -2: offset */
@@ -108,7 +108,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_NormalCase_004, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 4, 3, 2};
@@ -124,7 +124,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 61, 8, 7};
@@ -140,7 +140,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 1, 62, 8, 7};
@@ -162,7 +162,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -100;
@@ -180,7 +180,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -100;
@@ -205,7 +205,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = INT32_MAX - 2;
@@ -224,7 +224,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = INT32_MAX - 2;
@@ -249,7 +249,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -30;
@@ -268,7 +268,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -30;
@@ -292,7 +292,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {2, 10, 2, 3, 3};
@@ -312,7 +312,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {0, 10, 1, 5, 5};
@@ -332,7 +332,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = INT32_MAX - 2;
@@ -354,7 +354,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = INT32_MAX - 2;
@@ -376,7 +376,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -10;
@@ -398,7 +398,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -10;
@@ -420,7 +420,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = 0;
@@ -442,7 +442,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_001, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_001, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     int32_t recvSeq[MAX_RECEIVE_SEQUENCE] = {-10, -2, 10, 1, 3};
@@ -462,7 +462,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_002, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_002, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -10;
@@ -484,7 +484,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_002, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_003, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_003, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = -10;
@@ -506,7 +506,7 @@ HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_003, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SeqVerifyTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_004, TestSize.Level0)
+HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_004, TestSize.Level0)
 {
     SeqVerifyInfo seqInfo = {0};
     seqInfo.minSeq = INT32_MAX - 2;

@@ -112,6 +112,7 @@ static void UnregisterServerDeathCb(void)
 
 static void *DeathProcTask(void *arg)
 {
+    (void)arg;
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, NULL, 0);
 
     if (InnerRegisterService() != SOFTBUS_OK) {
