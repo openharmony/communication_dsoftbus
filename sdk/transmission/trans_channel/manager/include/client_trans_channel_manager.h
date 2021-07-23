@@ -35,6 +35,9 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
 
 int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data, const StreamData *ext,
     const FrameInfo *param);
+
+int32_t ClientTransCHannelSendFile(int32_t channelId, const char *sFileList[],
+    const char *dFileList[], uint32_t fileCnt);
 #ifdef __cplusplus
 }
 #endif
