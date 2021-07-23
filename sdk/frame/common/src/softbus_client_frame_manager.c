@@ -26,6 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_feature_config.h"
 
 static bool g_isInited = false;
 static pthread_mutex_t g_isInitedLock = PTHREAD_MUTEX_INITIALIZER;
@@ -41,6 +42,7 @@ static void ClientModuleDeinit(void)
 
 static int32_t ClientModuleInit()
 {
+    SoftbusConfigInit();
     if (EventClientInit() == SOFTBUS_ERR) {
         LOG_ERR("init event manager failed");
         goto ERR_EXIT;
