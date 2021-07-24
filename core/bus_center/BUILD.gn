@@ -33,15 +33,16 @@ if (defined(ohos_lite)) {
         "ipc/small_system/src/lnn_bus_center_ipc.c",
         "lnn//net_builder/sync_info/src/lnn_exchange_device_info.c",
         "lnn//net_builder/sync_info/src/lnn_sync_item_info.c",
-        "lnn/net_builder/src/lnn_coap_discovery_impl.c",
         "lnn/net_builder/src/lnn_connection_fsm.c",
         "lnn/net_builder/src/lnn_discovery_manager.c",
         "lnn/net_builder/src/lnn_net_builder.c",
         "lnn/net_builder/src/lnn_network_id.c",
         "lnn/net_builder/src/lnn_state_machine.c",
         "service/src/bus_center_event.c",
-        "service/src/bus_center_manager.c",
       ]
+      if (enable_auto_networking == true) {
+          sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+      }
       include_dirs = [
         "ipc/small_system/include",
         "lnn/net_builder/include",
@@ -104,15 +105,16 @@ if (defined(ohos_lite)) {
       "ipc/standard_system/src/lnn_bus_center_ipc.cpp",
       "lnn//net_builder/sync_info/src/lnn_exchange_device_info.c",
       "lnn//net_builder/sync_info/src/lnn_sync_item_info.c",
-      "lnn/net_builder/src/lnn_coap_discovery_impl.c",
       "lnn/net_builder/src/lnn_connection_fsm.c",
       "lnn/net_builder/src/lnn_discovery_manager.c",
       "lnn/net_builder/src/lnn_net_builder.c",
       "lnn/net_builder/src/lnn_network_id.c",
       "lnn/net_builder/src/lnn_state_machine.c",
       "service/src/bus_center_event.c",
-      "service/src/bus_center_manager.c",
     ]
+    if (enable_auto_networking == true) {
+        sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+    }
     include_dirs = [
       "ipc/standard_system/include",
       "lnn/net_builder/include",
