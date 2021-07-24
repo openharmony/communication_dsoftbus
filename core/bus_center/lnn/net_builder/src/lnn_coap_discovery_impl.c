@@ -44,6 +44,8 @@ static DiscInnerCallback g_discCb = {
 
 static void DeviceFound(const DeviceInfo *device)
 {
+    ConnectionAddr addr;
+
     if (device == NULL) {
         LOG_ERR("device para is null");
         return;
@@ -57,8 +59,18 @@ static void DeviceFound(const DeviceInfo *device)
         LOG_ERR("discovery get port is 0 !");
         return;
     }
+    addr.type = device->addr[0].type;
+    if (memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip, strlen(device->addr[0].info.ip.ip)) != 0) {
+        LOG_ERR("strncpy ip failed");
+        return;
+    }
+    addr.info.ip.port = device->addr[0].info.ip.port;
+    if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->hwAccountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
+        LOG_ERR("memcpy_s peer uid failed");
+        return;
+    }
     if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&device->addr[0]);
+        g_callback.OnDeviceFound(&addr);
     }
 }
 
