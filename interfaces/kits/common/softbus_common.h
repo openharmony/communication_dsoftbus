@@ -92,6 +92,13 @@ extern "C" {
  * @version 1.0
  */
 #define IP_STR_MAX_LEN 46
+
+/**
+ * @brief Indicates the maximum length of the account hash code in <b>IDiscoveryCallback</b>.
+ *
+ */
+#define MAX_ACCOUNT_HASH_LEN 96
+
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
  *
@@ -135,6 +142,7 @@ typedef struct {
             uint16_t port;            /**< Port number represented by the host byte order */
         } ip;
     } info;
+    char peerUid[MAX_ACCOUNT_HASH_LEN];
 } ConnectionAddr;
 #ifdef __cplusplus
 }

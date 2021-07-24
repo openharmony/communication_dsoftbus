@@ -325,6 +325,14 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
         cJSON_Delete(msg);
         return NULL;
     }
+#ifdef AUTH_ACCOUNT
+    LOG_INFO("in account auth mode");
+    if (!AddStringToJsonObject(msg, FIELD_UID_HASH, auth->peerUid)) {
+        LOG_ERR("AddStringToJsonObject Fail.");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+#endif
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
         LOG_ERR("cJSON_PrintUnformatted failed");
