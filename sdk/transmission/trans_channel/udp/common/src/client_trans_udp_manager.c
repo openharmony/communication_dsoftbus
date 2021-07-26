@@ -233,14 +233,14 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
             ret = TransOnstreamChannelOpened(channel, udpPort);
             if (ret != SOFTBUS_OK) {
                 (void)TransDeleteUdpChannel(newChannel->channelId);
-                LOG_ERR("on stream channel opened failed.");
+                LOG_ERR("on stream channel open failed.");
             }
             break;
         case BUSINESS_TYPE_FILE:
             ret = TransOnFileChannelOpened(channel, udpPort);
             if (ret < SOFTBUS_OK) {
                 (void)TransDeleteUdpChannel(newChannel->channelId);
-                LOG_ERR("on file channel opened failed.");
+                LOG_ERR("on file channel open failed.");
                 return SOFTBUS_ERR;
             }
             newChannel->dfileId = ret;
@@ -408,7 +408,7 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
         return SOFTBUS_ERR;
     }
     if (!channel.isEnable || channel.dfileId < 0) {
-        LOG_ERR("udp channel int not enable.");
+        LOG_ERR("udp channel is not enable.");
         return SOFTBUS_ERR;
     }
     return TransSendFile(channel.dfileId, sFileList, dFileList, fileCnt);
@@ -430,7 +430,7 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
     UdpChannel *channelNode = NULL;
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->dfileId == dfileId) {
-            if (memcpy_s(channel, sizeof(UdpChannel), channelNode, sizeof(UdpChannel)) != EOK) {
+            if (memcpy_s(udpChannel, sizeof(UdpChannel), channelNode, sizeof(UdpChannel)) != EOK) {
                 LOG_ERR("memcpy_s failed.");
                 (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;

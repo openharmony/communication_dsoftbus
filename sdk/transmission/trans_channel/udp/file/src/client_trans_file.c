@@ -19,7 +19,7 @@
 
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
-#include "nstack_dfile.h"
+#include "nstackx_dfile.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
@@ -85,7 +85,7 @@ static void FileReceiveListener(const UdpChannel *udpChannel, DFileMsgType msgTy
     const char *firstFile = msgData->fileList.files[0];
     uint32_t fileNum = msgData->fileList.fileNum;
     switch (msgType) {
-    case DFile_ON_FILE_LIST_RECEIVED:
+    case DFILE_ON_FILE_LIST_RECEIVED:
         if (fileListener.recvListener.OnReceiveFileStarted != NULL) {
             fileListener.recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
         }
@@ -124,29 +124,29 @@ static void DFileListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg 
     }
 
     bool isClient = false;
-    switch (expression) {
-    case DFILE_ON_CONNECT_SUCCESS:
-        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
-        isClient = true;
-        break;
-    case DFILE_ON_FILE_LIST_RECEIVED:
-    case DFILE_ON_FILE_RECEIVE_SUCCESS:
-    case DFILE_ON_FILE_RECEIVE_FAIL:
-        FileReceiveListener(&udpChannel, msgType, msgData);
-        break;
-    case DFILE_ON_FILE_SEND_SUCCESS:
-    case DFILE_ON_FILE_SEND_FAIL:
-        FileSendListener(&udpChannel, msgType, msgData);
-        break;
-    case DFILE_ON_TRANS_IN_PROGRESS:
-        if (isClient) {
-            FileSendListener(&udpChannel, msgType, msgData);
-        } else {
+    switch (msgType) {
+        case DFILE_ON_CONNECT_SUCCESS:
+            g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+            isClient = true;
+            break;
+        case DFILE_ON_FILE_LIST_RECEIVED:
+        case DFILE_ON_FILE_RECEIVE_SUCCESS:
+        case DFILE_ON_FILE_RECEIVE_FAIL:
             FileReceiveListener(&udpChannel, msgType, msgData);
-        }
-        break;
-    default:
-        break;
+            break;
+        case DFILE_ON_FILE_SEND_SUCCESS:
+        case DFILE_ON_FILE_SEND_FAIL:
+            FileSendListener(&udpChannel, msgType, msgData);
+            break;
+        case DFILE_ON_TRANS_IN_PROGRESS:
+            if (isClient) {
+                FileSendListener(&udpChannel, msgType, msgData);
+            } else {
+                FileReceiveListener(&udpChannel, msgType, msgData);
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -157,7 +157,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t fileSession;
-    (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, NSTACK_WLAN_CAT_TCP);
+    (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, NSTACKX_WLAN_CAT_TCP);
     if (channel->isServer) {
         FileListener fileListener = {0};
         if (TransGetFileListener(channel->peerSessionName, &fileListener) != SOFTBUS_OK) {
@@ -174,7 +174,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
             LOG_ERR("set storage path failed");
             return SOFTBUS_ERR;
         }
-        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+        g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             channel->sessionKey, DEFAULT_KEY_LENGTH, DFileListener);
@@ -212,7 +212,7 @@ void RegisterFileCb(const UdpChannelMgrCb *fileCb)
 int32_t TransSendFile(int32_t sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if (dFileList == NULL) {
-        return NSTACKX_DFILESendFiles(sessionId, sFileList, fileCnt, NULL);
+        return NSTACKX_DFileSendFiles(sessionId, sFileList, fileCnt, NULL);
     }
-    return NSTACKX_DFILESendFilesWithRemotePath(sessionId, sFileList, dFileList, fileCnt, NULL);
+    return NSTACKX_DFileSendFilesWithRemotePath(sessionId, sFileList, dFileList, fileCnt, NULL);
 }
