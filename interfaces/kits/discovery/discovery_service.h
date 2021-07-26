@@ -39,12 +39,6 @@ extern "C" {
 #define DISC_MAX_DEVICE_ID_LEN 96
 
 /**
- * @brief Indicates the maximum length of the account hash code in <b>IDiscoveryCallback</b>.
- *
- */
-#define DISC_MAX_ACCOUNT_HASH_LEN 96
-
-/**
  * @brief Indicates the maximum length of the device name in <b>IDiscoveryCallback</b>.
  *
  */
@@ -279,8 +273,8 @@ typedef enum {
 typedef struct {
     /** Device ID. Its maximum length is specified by {@link DISC_MAX_DEVICE_ID_LEN}. */
     char devId[DISC_MAX_DEVICE_ID_LEN];
-    /** Account hash code. Its maximum length is specified by {@link DISC_MAX_ACCOUNT_HASH_LEN}. */
-    char hwAccountHash[DISC_MAX_ACCOUNT_HASH_LEN];
+    /** Account hash code. Its maximum length is specified by {@link MAX_ACCOUNT_HASH_LEN}. */
+    char hwAccountHash[MAX_ACCOUNT_HASH_LEN];
     /** Device type. For details, see {@link DeviceType}. */
     DeviceType devType;
     /** Device name. Its maximum length is specified by {@link DISC_MAX_DEVICE_NAME_LEN}. */
