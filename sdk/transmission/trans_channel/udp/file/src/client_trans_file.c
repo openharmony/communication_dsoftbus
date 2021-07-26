@@ -85,30 +85,30 @@ static void FileReceiveListener(const UdpChannel *udpChannel, DFileMsgType msgTy
     const char *firstFile = msgData->fileList.files[0];
     uint32_t fileNum = msgData->fileList.fileNum;
     switch (msgType) {
-    case DFILE_ON_FILE_LIST_RECEIVED:
-        if (fileListener.recvListener.OnReceiveFileStarted != NULL) {
-            fileListener.recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
-        }
-        break;
-    case DFILE_ON_FILE_RECEIVE_SUCCESS:
-        if (fileListener.recvListener.OnReceiveFileFinished != NULL) {
-            fileListener.recvListener.OnReceiveFileFinished(sessionId, firstFile, fileNum);
-        }
-        break;
-    case DFILE_ON_FILE_RECEIVE_FAIL:
-        if (fileListener.recvListener.OnFileTransError != NULL) {
-            fileListener.recvListener.OnFileTransError(sessionId);
-        }
-        break;
-    case DFILE_ON_TRANS_IN_PROGRESS:
-        if (fileListener.recvListener.OnReceiveFileProcess != NULL) {
-            uint64_t bytesUpload = msgData->transferUpdate.bytesTransferred;
-            uint64_t bytesTotal = msgData->transferUpdate.totalBytes;
-            fileListener.recvListener.OnReceiveFileProcess(sessionId, firstFile, bytesUpload, bytesTotal);
-        }
-        break;
-    default:
-        break;
+        case DFILE_ON_FILE_LIST_RECEIVED:
+            if (fileListener.recvListener.OnReceiveFileStarted != NULL) {
+                fileListener.recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
+            }
+            break;
+        case DFILE_ON_FILE_RECEIVE_SUCCESS:
+            if (fileListener.recvListener.OnReceiveFileFinished != NULL) {
+                fileListener.recvListener.OnReceiveFileFinished(sessionId, firstFile, fileNum);
+            }
+            break;
+        case DFILE_ON_FILE_RECEIVE_FAIL:
+            if (fileListener.recvListener.OnFileTransError != NULL) {
+                fileListener.recvListener.OnFileTransError(sessionId);
+            }
+            break;
+        case DFILE_ON_TRANS_IN_PROGRESS:
+            if (fileListener.recvListener.OnReceiveFileProcess != NULL) {
+                uint64_t bytesUpload = msgData->transferUpdate.bytesTransferred;
+                uint64_t bytesTotal = msgData->transferUpdate.totalBytes;
+                fileListener.recvListener.OnReceiveFileProcess(sessionId, firstFile, bytesUpload, bytesTotal);
+            }
+            break;
+        default:
+            break;
     }
 }
 
