@@ -35,6 +35,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       deps = [
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$hilog_lite_deps_path",
       ]
@@ -58,6 +59,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       deps = [
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/connection/common:conn_common",
@@ -85,6 +87,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
     deps = [
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",

@@ -432,7 +432,8 @@ static void PackRequest(int32_t delta, int32_t connectionId)
 
 static void OnPackResponse(int32_t delta, int32_t peerRef, int32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
     ListNode *item = NULL;
     BrConnectionInfo *targetNode = NULL;
     int myRefCount;
@@ -581,7 +582,8 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
         return SOFTBUS_BRCONNECTION_CONNECTDEVICE_GETSOCKETIDFAIL;
     }
     newConnectionInfo->socketFd = socketFd;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[new connection %d,socket=%d", newConnectionInfo->connectionId, socketFd);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[new connection %d,socket=%d", newConnectionInfo->connectionId, socketFd);
     ListAdd(&g_conection_list, &newConnectionInfo->node);
     int32_t ret = g_sppDriver->Connect(socketFd, &g_sppSocketClientCallback);
     return ret;
@@ -612,7 +614,8 @@ int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const Con
     int32_t ret = SOFTBUS_OK;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDevice]");
     if (HasDiffMacDeviceExit(option) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[g_conection_list has diff mac device, mini system not support.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "[g_conection_list has diff mac device, mini system not support.]");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
@@ -632,7 +635,8 @@ int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const Con
                 RequestInfo *requestInfo = SoftBusMalloc(sizeof(RequestInfo));
                 if (requestInfo == NULL) {
                     (void)pthread_mutex_unlock(&g_connectionLock);
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDevice fail and state is BR_CONNECTION_STATE_CONNECTING.]");
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+                        "[ConnectDevice fail and state is BR_CONNECTION_STATE_CONNECTING.]");
                     return SOFTBUS_ERR;
                 }
                 (void)memset_s(requestInfo, sizeof(RequestInfo), 0, sizeof(RequestInfo));
@@ -848,7 +852,8 @@ static int32_t ReceivedHeadCheck(const ConnPktHead *head, BrConnectionInfo *conn
     }
 
     if (head->len > (g_brBuffSize - sizeof(ConnPktHead))) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ClientOnDataReceived]data too large . module=%d,seq=%lld, datalen=%d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "[ClientOnDataReceived]data too large . module=%d,seq=%lld, datalen=%d",
             head->module, head->seq, head->len);
         conn->recvPos = 0;
         return SOFTBUS_ERR;
@@ -954,7 +959,8 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
     }
 
     if (head->len > (bufLen - sizeof(ConnPktHead))) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ClientOnDataReceived] socket=%d , continue to recv", socketFd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "[ClientOnDataReceived] socket=%d , continue to recv", socketFd);
         if (!isCopy) {
             (void)memcpy_s(conn->recvBuf + conn->recvPos, g_brBuffSize - conn->recvPos, buf, len);
             conn->recvPos += len;
@@ -1185,7 +1191,8 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
 
 static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
     (void)pthread_mutex_lock(&g_connectionLock);
     if (CheckSendQueueLength() != SOFTBUS_OK) {
         SoftBusFree((void*)data);

@@ -357,7 +357,8 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, in
     data.flag = priority;
     data.len = len;
     data.buf = buf;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send buf connid %d len %d seq %llu pri %d", connectionId, len, data.seq, priority);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "send buf connid %d len %d seq %llu pri %d", connectionId, len, data.seq, priority);
     ret = ConnPostBytes(connectionId, &data);
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send buf fail %d", ret);
@@ -521,7 +522,8 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
 
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
     TransSetConnStateByReqId(requestId,  connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
     TransProxyChanProcessByReqId(requestId, connectionId);
 }
@@ -638,7 +640,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
 {
     ProxyMessage msg;
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "data recv connid :%u, moduleId %d, seq : %lld len %d", connectionId, moduleId, seq, len);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "data recv connid :%u, moduleId %d, seq : %lld len %d", connectionId, moduleId, seq, len);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return;

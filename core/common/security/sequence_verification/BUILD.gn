@@ -29,7 +29,10 @@ if (defined(ohos_lite)) {
         "-fPIC",
         "-std=c99",
       ]
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+      ]
     }
   } else {
     shared_library("softbus_seq_verification") {
@@ -44,7 +47,10 @@ if (defined(ohos_lite)) {
         "-fPIC",
         "-std=c99",
       ]
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+      ]
     }
   }
 } else {
@@ -59,6 +65,7 @@ if (defined(ohos_lite)) {
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
+    deps = [ "$dsoftbus_root_path/core/common/log:softbus_log" ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
   }

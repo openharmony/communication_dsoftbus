@@ -205,7 +205,8 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
 
     if (conn->serverSide == false) {
         int ret = TransTdcOnChannelOpenFailed(pkgName, channelId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -215,13 +216,15 @@ int32_t NotifyChannelClosed(int32_t channelId)
 {
     SessionConn *tdcInfo = GetTdcInfoByChannelId(channelId);
     if (tdcInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel closed failed(%d), get tdcInfo is null", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "notify channel closed failed(%d), get tdcInfo is null", channelId);
         return SOFTBUS_ERR;
     }
 
     if (tdcInfo->serverSide == false) {
         int ret = TransTdcOnChannelClosed(tdcInfo->appInfo.myData.pkgName, channelId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TCP direct channel close, channelId = %d, ret = %d", channelId, ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "TCP direct channel close, channelId = %d, ret = %d", channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -378,7 +381,8 @@ int32_t TransTdcProcessPacket(int32_t channelId)
     }
 
     if (bufLen < dataLen + DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "data not enough, recv next time.[%d][%d][%d]", bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
+            "data not enough, recv next time.[%d][%d][%d]", bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
 

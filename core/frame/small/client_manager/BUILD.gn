@@ -35,6 +35,7 @@ shared_library("client_manager") {
   deps = [
     "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
     "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
