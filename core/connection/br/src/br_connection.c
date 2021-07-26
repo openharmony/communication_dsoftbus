@@ -1346,7 +1346,6 @@ void *SendHandlerLoop(void *arg)
             continue;
         }
         ListNode *item = NULL;
-        int32_t sendPid = 0;
         LIST_FOR_EACH(item, &g_dataQueue.pidList) {
             DataPidQueueStruct *itemNode = LIST_ENTRY(item, DataPidQueueStruct, node);
             ListDelete(item);

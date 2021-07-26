@@ -19,7 +19,6 @@ config("stream_config") {
   cflags_cc = [ "-std=c++14" ]
   ldflags = [
     "-lstdc++",
-    "-lDstreamSo",
   ]
 }
 
@@ -29,7 +28,6 @@ shared_library("libsoftbus_stream") {
 
   include_dirs = [
     "include",
-    "$dsoftbus_root_path/components/dfinder/libs/L1/liteos_a",
     "$dsoftbus_root_path/core/adapter/kernel/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
@@ -61,7 +59,7 @@ shared_library("libsoftbus_stream") {
     "vtp_stream_socket.cpp",
   ]
   deps = [
-    "$dsoftbus_root_path/components/dfinder:dfinder",
+    "$dsoftbus_root_path/components/nstackx_enhanced/fillp:Dstream",
     "$dsoftbus_root_path/core/common:softbus_core_common",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

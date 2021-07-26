@@ -94,7 +94,8 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
 
     ret = ServerIpcCreateSessionServer(pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        LOG_ERR("SessionServer is already created");
+        LOG_INFO("SessionServer is already created");
+        ret = SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
         LOG_ERR("Server createSessionServer failed");
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
@@ -277,7 +278,11 @@ void CloseSession(int sessionId)
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
         LOG_INFO("close channel err: ret=%d, channelId=%d, channeType=%d", ret, channelId, type);
-        return;
+    }
+
+    ret = ClientDeleteSession(sessionId);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("CloseSession delete session err");
     }
     LOG_INFO("CloseSession ok");
     return;

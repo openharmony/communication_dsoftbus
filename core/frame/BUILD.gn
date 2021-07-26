@@ -22,6 +22,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/transmission/session/include",
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
       "$dsoftbus_root_path/sdk/bus_center/include",
@@ -30,7 +31,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
-      "$dsoftbus_root_path/core/common/softbus_property/include",
+      "$softbus_adapter_config/spec_config",
     ]
 
     sources = [
@@ -56,10 +57,12 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/connection/manager",
       "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "//base/security/deviceauth/interfaces/innerkits",
       "//utils/native/lite/include",
       "$hilog_lite_include_path",
+      "$softbus_adapter_config/spec_config",
     ]
 
     sources = [

@@ -34,6 +34,7 @@ int32_t IsServerSideInner(int32_t sessionId, int *data);
 int32_t GetMySessionNameInner(int32_t sessionId, char *data, uint16_t len);
 int32_t GetPeerSessionNameInner(int32_t sessionId, char *data, uint16_t len);
 int32_t GetPeerDeviceIdInner(int32_t sessionId, char *data, uint16_t len);
+int32_t GetPkgNameInner(int32_t sessionId, char *data, uint16_t len);
 #ifdef __cplusplus
 }
 #endif

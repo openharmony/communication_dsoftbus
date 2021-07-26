@@ -344,11 +344,9 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
         if (udpChannelNode->seq == seq) {
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
                 LOG_ERR("memcpy_s failed.");
-                (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
-                return;
             }
             (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
-            return SOFTBUS_OK;
+            return;
         }
     }
     (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
