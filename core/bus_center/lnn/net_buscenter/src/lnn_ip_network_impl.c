@@ -232,7 +232,7 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const void *para
     }
 }
 
-int32_t LnnInitIpNetwork()
+int32_t LnnInitIpNetwork(void)
 {
     char ipAddr[IP_LEN] = {0};
     char ifName[NET_IF_NAME_LEN] = {0};
