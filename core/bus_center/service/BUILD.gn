@@ -64,7 +64,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
     ]
 
-    public_configs = [ ":bus_center_center_interface" ]
     deps = [
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
