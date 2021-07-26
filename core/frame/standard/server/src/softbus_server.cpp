@@ -144,10 +144,10 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
 void SoftBusServer::OnStart()
 {
     LOG_INFO("SoftBusServer OnStart called!\n");
+    InitSoftBusServer();
     if (!Publish(this)) {
         LOG_ERR("SoftBusServer publish failed!\n");
     }
-    InitSoftBusServer();
 }
 
 void SoftBusServer::OnStop() {}
