@@ -16,6 +16,7 @@
 #include "lnn_network_manager.h"
 
 #include <securec.h>
+#include <string.h>
 
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
