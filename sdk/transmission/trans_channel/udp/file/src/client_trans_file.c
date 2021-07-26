@@ -179,7 +179,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             channel->sessionKey, DEFAULT_KEY_LENGTH, DFileListener);
         if (fileSession < 0) {
-             LOG_ERR("start file channel as client failed");
+            LOG_ERR("start file channel as client failed");
             return SOFTBUS_ERR;
         }
     }
