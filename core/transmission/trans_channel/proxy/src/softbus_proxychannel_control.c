@@ -39,7 +39,7 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, char *payLoad, int32_t pay
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack msg error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
 
@@ -58,15 +58,15 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
-    LOG_INFO("handshake myId %d", msgHead.myId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "handshake myId %d", msgHead.myId);
     payLoad = TransProxyPackHandshakeMsg(info);
     if (payLoad == NULL) {
-        LOG_ERR("pack handshake fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake fail");
         return SOFTBUS_ERR;
     }
     payLoadLen = strlen(payLoad) + 1;
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack handshake head fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
@@ -74,12 +74,12 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
 
     if ((msgHead.chiper & AUTH_SERVER_SIDE)) {
         if (TransProxySetChiperSide(info->channelId, SERVER_SIDE_FLAG) != SOFTBUS_OK) {
-            LOG_ERR("set chiper side fail");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set chiper side fail");
             return SOFTBUS_ERR;
         }
     }
     if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
-        LOG_ERR("send handshake buf fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshake buf fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -93,12 +93,12 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
 
-    LOG_INFO("send handshake ack msg myid %d peerid %d", chan->myId, chan->peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d", chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     payLoad = TransProxyPackHandshakeAckMsg(chan);
     if (payLoad == NULL) {
-        LOG_ERR("pack handshake ack fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack fail");
         return SOFTBUS_ERR;
     }
     payLoadLen = strlen(payLoad) + 1;
@@ -106,13 +106,13 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     msgHead.peerId = chan->peerId;
 
     if (TransProxyPackMessage(&msgHead, connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack handshake ack head fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
     if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
-        LOG_ERR("send handshakeack buf fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshakeack buf fail");
         return SOFTBUS_ERR;
     }
 
@@ -129,7 +129,7 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
-    LOG_ERR("pack keepalive fail");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive fail");
     if (payLoad == NULL) {
         return;
     }
@@ -139,13 +139,13 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
 
     if (TransProxyPackMessage(&msgHead, connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack keepalive head fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive head fail");
         cJSON_free(payLoad);
         return;
     }
     cJSON_free(payLoad);
     if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
-        LOG_ERR("send keepalive buf fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive buf fail");
         return;
     }
     return;
@@ -162,7 +162,7 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
-        LOG_ERR("pack keepalive ack fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive ack fail");
         return SOFTBUS_ERR;
     }
     payLoadLen = strlen(payLoad) + 1;
@@ -171,13 +171,13 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
 
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack keepalive ack head fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
     if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
-        LOG_ERR("send keepalive ack buf fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive ack buf fail");
         return SOFTBUS_ERR;
     }
 
@@ -192,11 +192,11 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
 
-    LOG_INFO("send reset msg myId %d peerid %d", info->myId, info->peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send reset msg myId %d peerid %d", info->myId, info->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
-        LOG_ERR("pack reset fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset fail");
         return SOFTBUS_ERR;
     }
     payLoadLen = strlen(payLoad) + 1;
@@ -205,13 +205,13 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
 
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
-        LOG_ERR("pack reset head fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
     if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_LOW) != SOFTBUS_OK) {
-        LOG_ERR("send reset buf fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reset buf fail");
         return SOFTBUS_ERR;
     }
 

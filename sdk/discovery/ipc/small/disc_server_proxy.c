@@ -30,14 +30,14 @@ static IClientProxy *g_serverProxy = NULL;
 int32_t DiscServerProxyInit(void)
 {
     if (g_serverProxy != NULL) {
-        LOG_INFO("server proxy has initialized.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "server proxy has initialized.");
         return SOFTBUS_OK;
     }
 
     IUnknown *iUnknown = NULL;
     int ret;
 
-    LOG_INFO("disc start get server proxy");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc start get server proxy");
     while (g_serverProxy == NULL) {
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
@@ -47,20 +47,20 @@ int32_t DiscServerProxyInit(void)
 
         ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
-            LOG_ERR("QueryInterface failed [%d]", ret);
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "QueryInterface failed [%d]", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
     }
-    LOG_INFO("disc get server proxy ok");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc get server proxy ok");
     return SOFTBUS_OK;
 }
 
 int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
-    LOG_INFO("publish service ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "publish service ipc client push.");
     if (pkgName == NULL || info == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -84,7 +84,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("publish service invoke failed[%d].", ans);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "publish service invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -92,9 +92,9 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 
 int ServerIpcUnPublishService(const char *pkgName, int publishId)
 {
-    LOG_INFO("unpublish service ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "unpublish service ipc client push.");
     if (pkgName == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -106,7 +106,7 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_UNPUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("unpublish service invoke failed[%d].", ans);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unpublish service invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -114,9 +114,9 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
 
 int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 {
-    LOG_INFO("start discovery ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "start discovery ipc client push.");
     if (pkgName == NULL || info == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -142,7 +142,7 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("start discovery invoke failed[%d].", ans);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start discovery invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -150,9 +150,9 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 
 int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
 {
-    LOG_INFO("stop discovery ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "stop discovery ipc client push.");
     if (pkgName == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -164,7 +164,7 @@ int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("stop discovery invoke failed[%d].", ans);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "stop discovery invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

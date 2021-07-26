@@ -33,19 +33,19 @@ int32_t TransServerInit(void)
         return SOFTBUS_OK;
     }
     if (TransPermissionInit() != SOFTBUS_OK) {
-        LOG_ERR("Init trans permission failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Init trans permission failed");
         return SOFTBUS_ERR;
     }
     if (TransSessionMgrInit() != SOFTBUS_OK) {
-        LOG_ERR("TransSessionMgrInit failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionMgrInit failed");
         return SOFTBUS_ERR;
     }
     if (TransChannelInit() != SOFTBUS_OK) {
-        LOG_ERR("TransChannelInit failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransChannelInit failed");
         return SOFTBUS_ERR;
     }
     g_transSessionInitFlag = true;
-    LOG_INFO("trans session server list init succ");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans session server list init succ");
     return SOFTBUS_OK;
 }
 
@@ -73,8 +73,8 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LOG_INFO("TransCreateSessionServer:pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
-    LOG_INFO("TransCreateSessionServer:uid=%{public}d, pid=%{public}d", uid, pid);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:uid=%{public}d, pid=%{public}d", uid, pid);
 
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     if (newNode == NULL) {
@@ -96,12 +96,12 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     if (ret != SOFTBUS_OK) {
         SoftBusFree(newNode);
         if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-            LOG_INFO("session server is already created");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server is already created");
             return SOFTBUS_SERVER_NAME_REPEATED;
         }
         return ret;
     }
-    LOG_INFO("CreateSessionServer ok");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer ok");
     return SOFTBUS_OK;
 }
 
@@ -117,7 +117,7 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName,
     const char *peerDeviceId, const char *groupId, int32_t flags)
 {
-    LOG_INFO("trans server opensession.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans server opensession.");
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX)) {
@@ -128,7 +128,7 @@ int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName,
     }
 
     if (!TransSessionServerIsExist(mySessionName)) {
-        LOG_ERR("session server invalid");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session server invalid");
         return INVALID_CHANNEL_ID;
     }
 

@@ -26,7 +26,7 @@ static int MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
 {
     if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
         (cipherTextLen < plainTextSize + OVERHEAD_LEN)) {
-        LOG_ERR("Encrypt invalid para\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Encrypt invalid para\n");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -68,7 +68,7 @@ static int MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
 {
     if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
         (plainLen < cipherTextSize - OVERHEAD_LEN)) {
-        LOG_ERR("Decrypt invalid para\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Decrypt invalid para\n");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -77,7 +77,7 @@ static int MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
     int ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherkey->key,
         cipherkey->keyLen * KEY_BITS_UNIT);
     if (ret != 0) {
-        LOG_ERR("Decrypt mbedtls_gcm_setkey fail\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Decrypt mbedtls_gcm_setkey fail\n");
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -86,7 +86,7 @@ static int MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
         GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
-        LOG_ERR("[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -98,7 +98,7 @@ static int MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned ch
 int GenerateSessionKey(char *key, int len)
 {
     if (GenerateRandomArray((unsigned char*)key, len) != SOFTBUS_OK) {
-        LOG_ERR("generate sessionKey error.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "generate sessionKey error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -112,7 +112,7 @@ int SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, u
     }
 
     if (GenerateRandomArray(cipherKey->iv, sizeof(cipherKey->iv)) != SOFTBUS_OK) {
-        LOG_ERR("generate random iv error.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "generate random iv error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     unsigned int outLen = inLen + OVERHEAD_LEN;
@@ -131,7 +131,7 @@ int SoftBusEncryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned char *i
         return SOFTBUS_INVALID_PARAM;
     }
     if (GenerateRandomArray(cipherKey->iv, sizeof(cipherKey->iv)) != SOFTBUS_OK) {
-        LOG_ERR("generate random iv error.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "generate random iv error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     if (memcpy_s(cipherKey->iv, sizeof(int32_t), &seqNum, sizeof(int32_t)) != EOK) {
@@ -154,7 +154,7 @@ int SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, u
     }
 
     if (memcpy_s(cipherKey->iv, sizeof(cipherKey->iv), input, GCM_IV_LEN) != EOK) {
-        LOG_ERR("copy iv failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "copy iv failed.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     unsigned int outLen = inLen - OVERHEAD_LEN;

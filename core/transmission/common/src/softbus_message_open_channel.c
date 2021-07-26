@@ -26,24 +26,24 @@
 char *PackError(int errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return NULL;
     }
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("Cannot create cJSON object");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
         !AddNumberToJsonObject(json, ERR_CODE, errCode) ||
         !AddStringToJsonObject(json, ERR_DESC, errDesc)) {
         cJSON_Delete(json);
-        LOG_ERR("add to cJSON object failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add to cJSON object failed");
         return NULL;
     }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
@@ -52,13 +52,13 @@ char *PackError(int errCode, const char *errDesc)
 char *PackRequest(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return NULL;
     }
 
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("Cannot create cJSON object");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
     unsigned char encodeSessionKey[BASE64KEY] = {0};
@@ -90,7 +90,7 @@ char *PackRequest(const AppInfo *appInfo)
     }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
@@ -99,7 +99,7 @@ char *PackRequest(const AppInfo *appInfo)
 int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
     int apiVersion = API_V1;
@@ -108,7 +108,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectStringItem(msg, BUS_NAME, (appInfo->myData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, GROUP_ID, (appInfo->groupId), GROUP_ID_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey))) {
-        LOG_ERR("Failed to get BUS_NAME");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get BUS_NAME");
         return SOFTBUS_ERR;
     }
     appInfo->peerData.apiVersion = apiVersion;
@@ -122,7 +122,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         &len, (unsigned char *)sessionKey, strlen(sessionKey));
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (len != SESSION_KEY_LENGTH) {
-        LOG_ERR("Failed to decode sessionKey %d, len %d", ret, len);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to decode sessionKey %d, len %d", ret, len);
         return SOFTBUS_ERR;
     }
     if (apiVersion == API_V1) {
@@ -132,7 +132,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, CLIENT_BUS_NAME, (appInfo->peerData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
-        LOG_ERR("Failed to get pkgName");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get pkgName");
         return SOFTBUS_ERR;
     }
 
@@ -142,12 +142,12 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return NULL;
     }
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("Cannot create cJSON object");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
@@ -155,7 +155,7 @@ char *PackReply(const AppInfo *appInfo)
         !AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId) ||
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid)) {
-        LOG_ERR("Failed to add items");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to add items");
         cJSON_Delete(json);
         return NULL;
     }
@@ -163,14 +163,14 @@ char *PackReply(const AppInfo *appInfo)
         char *authState = (char*)appInfo->myData.authState;
         if (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
             !AddStringToJsonObject(json, AUTH_STATE, authState)) {
-            LOG_ERR("Failed to add pkgName or authState");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to add pkgName or authState");
             cJSON_Delete(json);
             return NULL;
         }
     }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
@@ -179,17 +179,17 @@ char *PackReply(const AppInfo *appInfo)
 int UnpackReply(const cJSON *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_ERR;
     }
 
     char deviceId[DEVICE_ID_SIZE_MAX] = {0};
     if (!GetJsonObjectStringItem(msg, DEVICE_ID, deviceId, DEVICE_ID_SIZE_MAX)) {
-        LOG_ERR("Failed to get deviceId");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get deviceId");
         return SOFTBUS_ERR;
     }
     if (strcmp(deviceId, appInfo->peerData.deviceId) != 0) {
-        LOG_ERR("Invalid deviceId");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid deviceId");
         return SOFTBUS_ERR;
     }
 
@@ -204,7 +204,7 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo)
     if (apiVersion != API_V1) {
         if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
             !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
-            LOG_ERR("Failed to get pkgName or authState");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get pkgName or authState");
             return SOFTBUS_ERR;
         }
     }

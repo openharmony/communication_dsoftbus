@@ -40,7 +40,7 @@ static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
     if (!GetJsonObjectStringItem(data, JSON_WLAN_IP, device->addr[0].info.ip.ip,
         sizeof(device->addr[0].info.ip.ip))) {
-        LOG_ERR("parse wifi ip address failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse wifi ip address failed.");
         return;
     }
 }
@@ -48,7 +48,7 @@ static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 static void ParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 {
     if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, device->hwAccountHash, sizeof(device->hwAccountHash))) {
-        LOG_ERR("parse hw account hash value failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse hw account hash value failed.");
         return;
     }
 }
@@ -71,14 +71,14 @@ static void ParseItemDataFromServiceData(char *serviceData, const char *key, cha
         keyStr = itemStr;
         if (!strcmp(keyStr, key)) {
             if (strcpy_s(targetStr, len, valueStr) != EOK) {
-                LOG_ERR("strpcy_s failed.");
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strpcy_s failed.");
                 break;
             }
             return;
         }
         itemStr = strtok_s(NULL, itemDelimit, &saveItemPtr);
     }
-    LOG_INFO("not find key in service data.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "not find key in service data.");
     return;
 }
 
@@ -86,14 +86,14 @@ static void ParseServiceData(const cJSON *data, DeviceInfo *device)
 {
     char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
-        LOG_ERR("parse service data failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse service data failed.");
         return;
     }
     char port[AUTH_PORT_LEN] = {0};
     ParseItemDataFromServiceData(serviceData, SERVICE_DATA_PORT, port, sizeof(port));
     int authPort = atoi(port);
     if (authPort == 0) {
-        LOG_ERR("not find auth port.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "not find auth port.");
         return;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
@@ -103,7 +103,7 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 {
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
     if (reserveInfo == NULL) {
-        LOG_ERR("parse reserve data failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse reserve data failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
@@ -118,12 +118,12 @@ static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceIn
 {
     cJSON *deviceId = cJSON_Parse(nstackxDevice->deviceId);
     if (deviceId == NULL) {
-        LOG_ERR("parse device id failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device id failed.");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectStringItem(deviceId, DEVICE_UDID, device->devId, sizeof(device->devId))) {
         cJSON_Delete(deviceId);
-        LOG_ERR("parse udid from remote failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse udid from remote failed.");
         return SOFTBUS_ERR;
     }
     cJSON_Delete(deviceId);
@@ -142,7 +142,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             return;
         }
         if (((nstackxDeviceInfo->update) & 0x1) == 0) {
-            LOG_INFO("duplicate  device is not reported.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "duplicate  device is not reported.");
             continue;
         }
 
@@ -152,7 +152,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
                      nstackxDeviceInfo->deviceName, sizeof(nstackxDeviceInfo->deviceName)) != EOK ||
             memcpy_s(discDeviceInfo.capabilityBitmap, sizeof(discDeviceInfo.capabilityBitmap),
                      nstackxDeviceInfo->capabilityBitmap, sizeof(nstackxDeviceInfo->capabilityBitmap))) {
-            LOG_ERR("memcpy_s failed.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
             return;
         }
         discDeviceInfo.addrNum = 1;
@@ -164,11 +164,11 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             discDeviceInfo.addr[0].type = CONNECTION_ADDR_ETH;
         }
         if (ParseDeviceUdid(nstackxDeviceInfo, &discDeviceInfo) != SOFTBUS_OK) {
-            LOG_ERR("parse device udid failed.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device udid failed.");
             return;
         }
         if (ParseReservedInfo(nstackxDeviceInfo, &discDeviceInfo) != SOFTBUS_OK) {
-            LOG_ERR("parse reserve information failed.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse reserve information failed.");
             return;
         }
         if (g_discCoapInnerCb != NULL) {
@@ -190,7 +190,7 @@ int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
-        LOG_ERR("memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -228,7 +228,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
 
     int32_t authPort = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
-        LOG_ERR("get auth port from lnn failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get auth port from lnn failed.");
         return SOFTBUS_ERR;
     }
     (void)memset_s(g_capabilityData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
@@ -245,7 +245,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
 int32_t DiscCoapStartDiscovery(DiscCoapMode mode)
 {
     if (mode < ACTIVE_PUBLISH || mode > ACTIVE_DISCOVERY) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     switch (mode) {
@@ -260,7 +260,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapMode mode)
             }
             break;
         default:
-            LOG_ERR("unsupport coap mode.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unsupport coap mode.");
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -280,21 +280,21 @@ static char *GetDeviceId()
     char *formatString = NULL;
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, sizeof(udid)) != SOFTBUS_OK) {
-        LOG_ERR("get udid failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get udid failed.");
         return NULL;
     }
     cJSON *deviceId = cJSON_CreateObject();
     if (deviceId == NULL) {
-        LOG_ERR("crate json object failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "crate json object failed.");
         return NULL;
     }
     if (!AddStringToJsonObject(deviceId, DEVICE_UDID, udid)) {
-        LOG_ERR("add udid to device id json object failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add udid to device id json object failed.");
         goto GET_DEVICE_ID_END;
     }
     formatString = cJSON_PrintUnformatted(deviceId);
     if (formatString == NULL) {
-        LOG_ERR("format device id json object failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "format device id json object failed.");
     }
 
 GET_DEVICE_ID_END:
@@ -310,18 +310,18 @@ static int32_t SetLocalDeviceInfo()
 
     char *deviceIdStr = GetDeviceId();
     if (deviceIdStr == NULL) {
-        LOG_ERR("get device id string failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get device id string failed.");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr, strlen(deviceIdStr))) {
         cJSON_free(deviceIdStr);
-        LOG_ERR("memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
         return SOFTBUS_ERR;
     }
     cJSON_free(deviceIdStr);
     int32_t deviceType = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceType) != SOFTBUS_OK) {
-        LOG_ERR("get local device type failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device type failed.");
         return SOFTBUS_ERR;
     }
     g_localDeviceInfo->deviceType = (uint8_t)deviceType;
@@ -333,7 +333,7 @@ static int32_t SetLocalDeviceInfo()
                            sizeof(g_localDeviceInfo->version)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
                            sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK) {
-        LOG_ERR("get local device info from lnn failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -349,12 +349,12 @@ void DiscCoapUpdateLocalIp(void)
                            sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
                            sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK) {
-        LOG_ERR("get local device info from lnn failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return;
     }
 
     if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
-        LOG_ERR("register new ip to dfinder failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register new ip to dfinder failed.");
         return;
     }
 }

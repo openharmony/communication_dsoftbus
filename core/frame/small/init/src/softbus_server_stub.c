@@ -51,7 +51,7 @@ static const char *GetName(Service *service)
 static BOOL Initialize(Service *service, Identity identity)
 {
     if (service == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return TRUE;
     }
 
@@ -63,7 +63,7 @@ static BOOL Initialize(Service *service, Identity identity)
 static BOOL MessageHandle(Service *service, Request *msg)
 {
     if (service == NULL || msg == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return TRUE;
     }
     return FALSE;
@@ -79,12 +79,12 @@ static TaskConfig GetTaskConfig(Service *service)
 static void ClientDeathCallback(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
 {
     if (arg == NULL) {
-        LOG_ERR("package name is NULL.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
         return;
     }
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName((const char *)arg, &svcId) != SOFTBUS_OK) {
-        LOG_ERR("not found client by package name.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found client by package name.");
         SoftBusFree(arg);
         arg = NULL;
         return;
@@ -104,7 +104,7 @@ static void ClientDeathCallback(const IpcContext *context, void *ipcMsg, IpcIo *
 
 static int ServerRegisterService(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("register service ipc server pop.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "register service ipc server pop.");
     size_t len = 0;
     int ret = SOFTBUS_ERR;
     struct CommonScvId svcId = {0};
@@ -112,12 +112,12 @@ static int ServerRegisterService(void *origin, IpcIo *req, IpcIo *reply)
     uint8_t *name = IpcIoPopString(req, &len);
     SvcIdentity *svc = IpcIoPopSvc(req);
     if (name == NULL || svc == NULL || len == 0) {
-        LOG_ERR("get data fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get data fail");
         goto EXIT;
     }
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckBusCenterPermission(callingUid, name)) {
-        LOG_ERR("ServerRegisterService no permission.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRegisterService no permission.");
         goto EXIT;
     }
     svcId.handle = svc->handle;
@@ -132,11 +132,11 @@ static int ServerRegisterService(void *origin, IpcIo *req, IpcIo *reply)
 #endif
     char *pkgName = (char *)SoftBusMalloc(len + 1);
     if (pkgName == NULL) {
-        LOG_ERR("softbus malloc failed!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
         goto EXIT;
     }
     if (strcpy_s(pkgName, len + 1, (const char *)name) != EOK) {
-        LOG_ERR("softbus strcpy_s failed!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus strcpy_s failed!");
         SoftBusFree(pkgName);
         goto EXIT;
     }
@@ -175,14 +175,14 @@ ServerInvokeCmd g_serverInvokeCmdTbl[] = {
 static int32_t Invoke(const IServerProxy *iProxy, int funcId, const void *origin,
     const IpcIo *req, const IpcIo *reply)
 {
-    LOG_INFO("RECEIVE FUNCID:%d", funcId);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
     int tblSize = sizeof(g_serverInvokeCmdTbl) / sizeof(ServerInvokeCmd);
     for (int i = 0; i < tblSize; i++) {
         if (funcId == g_serverInvokeCmdTbl[i].id) {
             return g_serverInvokeCmdTbl[i].func(origin, req, reply);
         }
     }
-    LOG_ERR("not support func[%d]", funcId);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not support func[%d]", funcId);
     return SOFTBUS_ERR;
 }
 
@@ -206,7 +206,7 @@ int ServerStubInit(void)
 {
     HOS_SystemInit();
     if (SERVER_InitClient() != SOFTBUS_OK) {
-        LOG_ERR("client manager init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client manager init failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -216,6 +216,6 @@ static void Init(void)
 {
     SAMGR_GetInstance()->RegisterService((Service *)&g_samgrService);
     SAMGR_GetInstance()->RegisterDefaultFeatureApi(SOFTBUS_SERVICE, GET_IUNKNOWN(g_samgrService));
-    LOG_INFO("Init success %s", SOFTBUS_SERVICE);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "Init success %s", SOFTBUS_SERVICE);
 }
 SYSEX_SERVICE_INIT(Init);

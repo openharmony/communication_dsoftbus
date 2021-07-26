@@ -22,7 +22,7 @@
 void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -65,7 +65,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnChannelOpenfailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -78,7 +78,7 @@ void ClientOnChannelOpenfailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg
 void ClientOnChannelClosed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -91,7 +91,7 @@ void ClientOnChannelClosed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnChannelMsgreceived(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }

@@ -87,13 +87,13 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
     int result = vsprintf_s(debugInfo, DEBUG_BUFFER_LEN, static_cast<const char *>(format), vaList);
 #pragma clang diagnostic pop
     if (result < 0) {
-        LOG_ERR("**********fillDebugSend Fail!************");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "**********fillDebugSend Fail!************");
         va_end(vaList);
         return;
     }
     va_end(vaList);
 
-    LOG_DBG("%s", debugInfo);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "%s", debugInfo);
 }
 
 void VtpInstance::PreSetFillpCoreParams(void)
@@ -102,7 +102,7 @@ void VtpInstance::PreSetFillpCoreParams(void)
     logCallBack.debugCallbackFunc = static_cast<FillpDebugSendFunc>(PrintFillpLog);
     FILLP_INT32 err = FillpRegLMCallbackFn(&logCallBack);
     if (err != ERR_OK) {
-        LOG_ERR("failed to create the log, errno:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to create the log, errno:%d", FtGetErrno());
     }
 
     FillpSysLibCallbackFuncStruct adpLibSysFunc;
@@ -110,7 +110,7 @@ void VtpInstance::PreSetFillpCoreParams(void)
     adpLibSysFunc.sysLibBasicFunc.cryptoRand = CryptoRand;
     err = FillpApiRegLibSysFunc(&adpLibSysFunc, nullptr);
     if (err != FILLP_SUCCESS) {
-        LOG_ERR("failed to register fillp callback function, errno:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to register fillp callback function, errno:%d", FtGetErrno());
     }
 
     FillpApiSetDebugLogLevel(UpdateVtpLogLevel());
@@ -118,20 +118,20 @@ void VtpInstance::PreSetFillpCoreParams(void)
     FILLP_UINT16 maxSocketNums = MAX_DEFAULT_SOCKET_NUM;
     err = FtConfigSet(FT_CONF_MAX_SOCK_NUM, &maxSocketNums, nullptr);
     if (err != ERR_OK) {
-        LOG_ERR("failed to set MAX_SOCKET_NUM config, ret %d", static_cast<int>(err));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set MAX_SOCKET_NUM config, ret %d", static_cast<int>(err));
     }
 
     FILLP_UINT16 maxConnectionNums = MAX_DEFAULT_SOCKET_NUM; // keep same with the nums of socket.
     err = FtConfigSet(FT_CONF_MAX_CONNECTION_NUM, &maxConnectionNums, nullptr);
     if (err != ERR_OK) {
-        LOG_ERR("failed to set MAX_CONNECTION_NUM config, ret %d", static_cast<int>(err));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set MAX_CONNECTION_NUM config, ret %d", static_cast<int>(err));
     }
 
     FILLP_INT32 keepAlive = FILLP_KEEP_ALIVE_TIME;
     FILLP_INT confSock = FILLP_CONFIG_ALL_SOCKET;
     err = FtConfigSet(FT_CONF_TIMER_KEEP_ALIVE, &keepAlive, &confSock);
     if (err != ERR_OK) {
-        LOG_ERR("failed to set KA config, ret %d", static_cast<int>(err));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set KA config, ret %d", static_cast<int>(err));
     }
 }
 
@@ -142,10 +142,10 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     if (!isDestroyed_) {
         if (std::find(packetNameArray_.begin(), packetNameArray_.end(), pkgName) == packetNameArray_.end()) {
             packetNameArray_.push_back(pkgName);
-            LOG_INFO("vtp instance is already created, so increase to packetNameArray");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is already created, so increase to packetNameArray");
         }
         initVtpCount_++;
-        LOG_INFO("vtp instance is already created, return ture. PKG(%s)", pkgName.c_str());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is already created, return ture. PKG(%s)", pkgName.c_str());
         return true;
     }
 
@@ -154,13 +154,13 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
 
     int err = static_cast<int>(FtInit());
     if (err != ERR_OK) {
-        LOG_ERR("%s failed to init fillp, ret:%d", pkgName.c_str(), err);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s failed to init fillp, ret:%d", pkgName.c_str(), err);
         return false;
     }
     isDestroyed_ = false;
 
     packetNameArray_.push_back(pkgName);
-    LOG_INFO("%s success to init vtp instance", pkgName.c_str());
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s success to init vtp instance", pkgName.c_str());
     return true;
 }
 
@@ -169,7 +169,7 @@ void VtpInstance::WaitForDestroy(const int &delayTimes, const int &count)
     sleep(delayTimes);
     std::lock_guard<std::mutex> guard(vtpLock_);
     if (count == initVtpCount_ && !isDestroyed_) {
-        LOG_INFO("call WaitForDestroy");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "call WaitForDestroy");
         FtDestroyNonblock();
         isDestroyed_ = true;
         initVtpCount_ = 0;
@@ -178,11 +178,11 @@ void VtpInstance::WaitForDestroy(const int &delayTimes, const int &count)
 
 void VtpInstance::DestroyVtp(const std::string &pkgName)
 {
-    LOG_INFO("DestroyVtp start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyVtp start");
     std::lock_guard<std::mutex> guard(vtpLock_);
 
     if (isDestroyed_) {
-        LOG_INFO("vtp instance is already destroyed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is already destroyed");
         return;
     }
 
@@ -194,21 +194,21 @@ void VtpInstance::DestroyVtp(const std::string &pkgName)
     }
 
     if (!packetNameArray_.empty()) {
-        LOG_INFO("vtp instance is using by other app");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is using by other app");
         return;
     }
 
     if (socketStreamCount_) {
         // 起线程等待30s，调用FtDestroyNonblock()
-        LOG_WARN("some socket is not destroyed, wait 30s and destroy vtp.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "some socket is not destroyed, wait 30s and destroy vtp.");
         std::thread delay(WaitForDestroy, DESTROY_TIMEOUT_SECOND, initVtpCount_);
         delay.detach();
         return;
     }
 
-    LOG_INFO("begin to destroy vtp instance");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "begin to destroy vtp instance");
     FtDestroy();
-    LOG_INFO("success to destroy vtp instance");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "success to destroy vtp instance");
     isDestroyed_ = true;
     initVtpCount_ = 0;
 }
@@ -228,15 +228,15 @@ void VtpInstance::UpdateSocketStreamCount(bool add)
     }
 
     if (!socketStreamCount_) {
-        LOG_WARN("SocketStreamCount is already 0.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "SocketStreamCount is already 0.");
     } else {
         socketStreamCount_--;
     }
 
     if (!socketStreamCount_ && !packetNameArray_.size() && !isDestroyed_) {
-        LOG_INFO("start destroying vtp instance");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start destroying vtp instance");
         FtDestroy();
-        LOG_INFO("success to destroy vtp instance");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "success to destroy vtp instance");
         isDestroyed_ = true;
     }
 }

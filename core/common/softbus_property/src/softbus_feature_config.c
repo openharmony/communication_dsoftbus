@@ -135,5 +135,5 @@ void SoftbusConfigInit(void)
 
     sets.SetConfig = &SoftbusSetConfig;
     SoftbusConfigAdapterInit(&sets);
-    LOG_INFO("SoftbusConfigInit success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftbusConfigInit success");
 }

@@ -24,17 +24,17 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     int length = strlen(item->valuestring);
     if (length >= targetLen) {
-        LOG_ERR("the length [%d] is to long for [%s]", length, string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "the length [%d] is to long for [%s]", length, string);
         return false;
     }
     int ret = strcpy_s(target, targetLen, item->valuestring);
     if (ret != 0) {
-        LOG_ERR("strcpy error %d\n", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy error %d\n", ret);
         return false;
     }
     return true;
@@ -47,7 +47,7 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     *target = (int)item->valuedouble;
@@ -61,7 +61,7 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
     }
     cJSON* item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     *target = item->valuedouble;
@@ -75,7 +75,7 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     *target = (int64_t)item->valuedouble;
@@ -89,7 +89,7 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsBool(item)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     *target = (bool)item->valueint;
@@ -103,7 +103,7 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
     }
     cJSON *item = cJSON_CreateString(value);
     if (item == NULL) {
-        LOG_ERR("Cannot create cJSON string object [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON string object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
@@ -120,7 +120,7 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
     }
     cJSON *item = cJSON_CreateNumber(num);
     if (item == NULL) {
-        LOG_ERR("Cannot create cJSON number object [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
@@ -137,7 +137,7 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     }
     cJSON *item = cJSON_CreateNumber(num);
     if (item == NULL) {
-        LOG_ERR("Cannot create cJSON number object [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {

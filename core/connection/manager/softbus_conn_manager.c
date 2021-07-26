@@ -54,19 +54,19 @@ static int32_t ModuleCheck(ConnModule moduleId)
             return SOFTBUS_OK;
         }
     }
-    LOG_ERR("check module fail %d", moduleId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "check module fail %d", moduleId);
     return SOFTBUS_ERR;
 }
 
 static int32_t ConnTypeCheck(ConnectType type)
 {
     if (type >= CONNECT_TYPE_MAX) {
-        LOG_ERR("type is over max %d", type);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "type is over max %d", type);
         return SOFTBUS_ERR;
     }
 
     if (g_connManager[type] == NULL) {
-        LOG_ERR("type is %d", type);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "type is %d", type);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -78,17 +78,17 @@ static int32_t GetAllListener(ConnListenerNode **node)
     int32_t cnt = 0;
 
     if (g_listenerList == NULL) {
-        LOG_ERR("listener list is null");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener list is null");
         return cnt;
     }
 
     if (g_listenerList->cnt == 0) {
-        LOG_ERR("listener cnt is null");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener cnt is null");
         return cnt;
     }
 
     if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return 0;
     }
     *node = SoftBusCalloc(g_listenerList->cnt * sizeof(ConnListenerNode));
@@ -98,7 +98,7 @@ static int32_t GetAllListener(ConnListenerNode **node)
     }
     LIST_FOR_EACH_ENTRY(listenerNode, &g_listenerList->list, ConnListenerNode, node) {
         if (memcpy_s(*node + cnt, sizeof(ConnListenerNode), listenerNode, sizeof(ConnListenerNode)) != EOK) {
-            LOG_ERR("mem error");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mem error");
         }
         cnt++;
     }
@@ -115,7 +115,7 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
     }
     int ret = SOFTBUS_OK;
     if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(listenerNode, &g_listenerList->list, ConnListenerNode, node) {
@@ -141,7 +141,7 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
     }
 
     if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -154,7 +154,7 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
 
     item = (ConnListenerNode *)SoftBusCalloc(sizeof(ConnListenerNode));
     if (item == NULL) {
-        LOG_ERR("malloc fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc fail");
         (void)pthread_mutex_unlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
@@ -175,12 +175,12 @@ static void DelListener(ConnModule moduleId)
 {
     ConnListenerNode *removeNode = NULL;
     if (g_listenerList == NULL) {
-        LOG_ERR("listenerList is null");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listenerList is null");
         return;
     }
 
     if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
 
@@ -223,13 +223,13 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     }
 
     if (len <= (int32_t)sizeof(ConnPktHead)) {
-        LOG_ERR("len %d \r\n", len);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "len %d \r\n", len);
         return;
     }
 
     ret = GetListenerByModuleId(moduleId, &listener);
     if (ret == SOFTBUS_ERR) {
-        LOG_ERR("GetListenerByModuleId fail moduleId %d \r\n", moduleId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetListenerByModuleId fail moduleId %d \r\n", moduleId);
         return;
     }
 
@@ -247,7 +247,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
     num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        LOG_ERR("get node fail connId %u", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get node fail connId %u", connectionId);
         return;
     }
     for (i = 0; i < num; i++) {
@@ -312,7 +312,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     }
 
     if (ConnTypeCheck(info->type) != SOFTBUS_OK) {
-        LOG_ERR("connect type is err %d", info->type);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connect type is err %d", info->type);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
 
@@ -339,7 +339,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
 
     type = (connectionId >> CONNECT_TYPE_SHIFT);
     if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
-        LOG_ERR("connectionId type is err %d", type);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connectionId type is err %d", type);
         SoftBusFree(data->buf);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
@@ -453,31 +453,31 @@ int32_t ConnServerInit(void)
     connectObj = ConnInitTcp(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_TCP] = connectObj;
-        LOG_INFO("init tcp ok \r\n");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init tcp ok \r\n");
     }
 
     connectObj = ConnInitBr(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BR] = connectObj;
-        LOG_INFO("init br ok \r\n");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init br ok \r\n");
     }
 
     connectObj = ConnInitBle(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BLE] = connectObj;
-        LOG_INFO("init ble ok \r\n");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init ble ok \r\n");
     }
 
     if (g_listenerList == NULL) {
         g_listenerList = CreateSoftBusList();
         if (g_listenerList == NULL) {
-            LOG_ERR("create list fail \r\n");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create list fail \r\n");
             return SOFTBUS_ERR;
         }
     }
 
     g_isInited = true;
-    LOG_INFO("connect manager init success. \r\n");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connect manager init success. \r\n");
     return SOFTBUS_OK;
 }
 

@@ -26,12 +26,12 @@ static INetworkingListener g_netChanlistener = {0};
 int32_t NotifyNetworkingChannelOpened(int32_t chanId, const AppInfo *appInfo, unsigned char isServer)
 {
     if (g_netChanlistener.onChannelOpened == NULL) {
-        LOG_ERR("net onChannelOpened is null");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpened is null");
         return SOFTBUS_ERR;
     }
 
     if (g_netChanlistener.onChannelOpened(chanId, appInfo->peerData.deviceId, isServer) != SOFTBUS_OK) {
-        LOG_ERR("notify channel open fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open fail");
         return SOFTBUS_ERR;
     }
 
@@ -41,7 +41,7 @@ int32_t NotifyNetworkingChannelOpened(int32_t chanId, const AppInfo *appInfo, un
 void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
 {
     if (g_netChanlistener.onChannelOpenFailed == NULL) {
-        LOG_ERR("net onChannelOpenFailed is null");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpenFailed is null");
         return;
     }
     g_netChanlistener.onChannelOpenFailed(channelId, networkId);
@@ -50,7 +50,7 @@ void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
 void NotifyNetworkingChannelClosed(int32_t chanId)
 {
     if (g_netChanlistener.onChannelClosed == NULL) {
-        LOG_ERR("net onChannelClosed is null");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelClosed is null");
         return;
     }
     g_netChanlistener.onChannelClosed(chanId);
@@ -72,6 +72,6 @@ int32_t TransRegisterNetworkingChannelListener(const INetworkingListener *listen
         return SOFTBUS_ERR;
     }
 
-    LOG_INFO("register net listener ok");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "register net listener ok");
     return SOFTBUS_OK;
 }

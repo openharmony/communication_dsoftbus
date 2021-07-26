@@ -43,25 +43,25 @@ uint32_t g_getSystemAbilityId = 2;
 static int InnerRegisterService(void)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("g_serverProxy is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
     if (serverProxyFrame == nullptr) {
-        LOG_ERR("serverProxyFrame is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     char clientName[PKG_NAME_SIZE_MAX] = {0};
     if (GetSoftBusClientName(clientName, sizeof(clientName)) != SOFTBUS_OK) {
-        LOG_ERR("get client name failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
         return SOFTBUS_ERR;
     }
     int ret = serverProxyFrame->SoftbusRegisterService(clientName, nullptr);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("ServerIpcRegisterService failed!\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerIpcRegisterService failed!\n");
         return ret;
     }
-    LOG_INFO("softbus server register service success!\n");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 
@@ -74,7 +74,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LOG_ERR("Get GetSystemAbility failed!\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get GetSystemAbility failed!\n");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -87,16 +87,16 @@ static int32_t ServerProxyInit(void)
         if (g_serverProxy == nullptr) {
             g_serverProxy = GetSystemAbility();
             if (g_serverProxy == nullptr) {
-                LOG_ERR("Get remote softbus object failed!\n");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
                 return SOFTBUS_ERR;
             }
             g_clientDeath = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) SoftBusClientDeathRecipient());
             if (g_clientDeath == nullptr) {
-                LOG_ERR("DeathRecipient object is nullptr\n");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
                 return SOFTBUS_ERR;
             }
             if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-                LOG_ERR("AddDeathRecipient failed\n");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
                 return SOFTBUS_ERR;
             }
         }
@@ -127,11 +127,11 @@ void ClientDeathProcTask(void)
 int32_t ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        LOG_ERR("ServerProxyInit failed\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerProxyInit failed\n");
         return SOFTBUS_ERR;
     }
     if (InnerRegisterService() != SOFTBUS_OK) {
-        LOG_ERR("register service failed\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

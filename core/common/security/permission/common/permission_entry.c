@@ -100,7 +100,7 @@ static PeMap g_peMap[] = {
 static int32_t ReadConfigJson(const char* permissionFile)
 {
     if (SoftBusReadFile(permissionFile, g_permissonJson, PERMISSION_JSON_LEN) != SOFTBUS_OK) {
-        LOG_ERR("ReadConfigJson failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadConfigJson failed.");
         return SOFTBUS_FILE_ERR;
     }
     return SOFTBUS_OK;
@@ -163,7 +163,7 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
     char mapKey[TEMP_STR_MAX_LEN];
     char *actionStr = NULL;
     if (!GetJsonObjectStringItem(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX)) {
-        LOG_INFO("appInfo has no pkgname");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "appInfo has no pkgname");
     }
     if (GetJsonObjectStringItem(object, APP_INFO_TYPE_STR, mapKey, TEMP_STR_MAX_LEN)) {
         appInfo->type = GetPeMapValue(mapKey);
@@ -253,16 +253,16 @@ static int32_t CompareString(const char *src, const char *dest, bool regexp)
     if (regexp) {
         regex_t regComp;
         if (regcomp(&regComp, src, REG_EXTENDED | REG_NOSUB) != 0) {
-            LOG_ERR("regcomp failed");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "regcomp failed");
             return SOFTBUS_PERMISSION_DENIED;
         }
         if (regexec(&regComp, dest, 0, NULL, 0) == 0) {
-            LOG_INFO("src:%s dest:%s", src, dest);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "src:%s dest:%s", src, dest);
             return SOFTBUS_OK;
         }
     } else {
         if (strcmp(src, dest) == 0) {
-            LOG_INFO("src:%s dest:%s", src, dest);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "src:%s dest:%s", src, dest);
             return SOFTBUS_OK;
         }
     }
@@ -381,7 +381,7 @@ int32_t LoadPermissionJson(const char *fileName)
     }
     cJSON *jsonArray = cJSON_Parse(g_permissonJson);
     if (jsonArray == NULL) {
-        LOG_ERR("parse %s failed.", fileName);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "parse %s failed.", fileName);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int itemNum = cJSON_GetArraySize(jsonArray);

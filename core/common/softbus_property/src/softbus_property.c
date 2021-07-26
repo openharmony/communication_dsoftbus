@@ -24,7 +24,7 @@ static cJSON *GetConfigText()
 {
     cJSON *config = cJSON_Parse(SOFTBUS_CONFIG);
     if (config == NULL) {
-        LOG_ERR("json parse failed. %s\n", cJSON_GetErrorPtr());
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "json parse failed. %s\n", cJSON_GetErrorPtr());
         return NULL;
     }
     return config;
@@ -33,18 +33,18 @@ static cJSON *GetConfigText()
 int GetPropertyString(const char *string, char *target, size_t targetLen)
 {
     if (string == NULL || target == NULL || targetLen == 0) {
-        LOG_ERR("Invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     cJSON *config = GetConfigText();
     if (config == NULL) {
-        LOG_ERR("Get config text failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config text failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     bool res = GetJsonObjectStringItem(config, string, target, targetLen);
     cJSON_Delete(config);
     if (!res) {
-        LOG_ERR("Get config item with %s failed.", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config item with %s failed.", string);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
@@ -53,18 +53,18 @@ int GetPropertyString(const char *string, char *target, size_t targetLen)
 int GetPropertyInt(const char *string, int *target)
 {
     if (string == NULL || target == NULL) {
-        LOG_ERR("Invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     cJSON *config = GetConfigText();
     if (config == NULL) {
-        LOG_ERR("Get config text failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config text failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     bool res = GetJsonObjectNumberItem(config, string, target);
     cJSON_Delete(config);
     if (!res) {
-        LOG_ERR("Get config item with %s failed.", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config item with %s failed.", string);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
@@ -73,18 +73,18 @@ int GetPropertyInt(const char *string, int *target)
 int GetPropertyDouble(const char *string, double *target)
 {
     if (string == NULL || target == NULL) {
-        LOG_ERR("Invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     cJSON *config = GetConfigText();
     if (config == NULL) {
-        LOG_ERR("Get config text failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config text failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     bool res = GetJsonObjectDoubleItem(config, string, target);
     cJSON_Delete(config);
     if (!res) {
-        LOG_ERR("Get config item with %s failed.", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config item with %s failed.", string);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
@@ -93,18 +93,18 @@ int GetPropertyDouble(const char *string, double *target)
 int GetPropertyBool(const char *string, bool *target)
 {
     if (string == NULL || target == NULL) {
-        LOG_ERR("Invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     cJSON *config = GetConfigText();
     if (config == NULL) {
-        LOG_ERR("Get config text failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config text failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     bool res = GetJsonObjectBoolItem(config, string, target);
     cJSON_Delete(config);
     if (!res) {
-        LOG_ERR("Get config item with %s failed.", string);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get config item with %s failed.", string);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;

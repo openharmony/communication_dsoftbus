@@ -28,7 +28,7 @@ void StreamDepacketizer::DepacketizeHeader(const char *header)
         const char *ptr = header;
         header_.Depacketize(ptr);
 
-        LOG_DBG("streamPktHeader version = %d, subVersion = %d, extFlag = %d, streamType = %d, marker = %d, flag = %d"
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "streamPktHeader version = %d, subVersion = %d, extFlag = %d, streamType = %d, marker = %d, flag = %d"
             "streamId = %d (%x), timestamp = %u (%x), dataLen = %u (%x), seqNum = %d (%x), subSeqNum = %d (%x)",
             header_.GetVersion(), header_.GetSubVersion(), header_.GetExtFlag(), header_.GetStreamType(),
             header_.GetMarker(), header_.GetFlag(), header_.GetStreamId(), header_.GetStreamId(),
@@ -43,7 +43,7 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer)
     int tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
         tlvs_.Depacketize(ptr);
-        LOG_INFO("TLV version: %d, num = %d, extLen = %zd, checksum = %u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TLV version: %d, num = %d, extLen = %zd, checksum = %u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
             tlvs_.GetExtLen(), tlvs_.GetCheckSum());
 
         tlvTotalLen = tlvs_.GetCheckSum() + sizeof(tlvs_.GetCheckSum());
@@ -52,13 +52,13 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer)
 
     dataLength_ = header_.GetDataLen() - tlvTotalLen;
     if (dataLength_ <= 0) {
-        LOG_ERR("DepacketizeBuffer error, header_dataLen = %d, tlvTotalLen = %d", header_.GetDataLen(), tlvTotalLen);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DepacketizeBuffer error, header_dataLen = %d, tlvTotalLen = %d", header_.GetDataLen(), tlvTotalLen);
         return;
     }
     data_ = std::make_unique<char[]>(dataLength_);
     auto ret = memcpy_s(data_.get(), dataLength_, ptr, dataLength_);
     if (ret != 0) {
-        LOG_ERR("Failed to memcpy data_, ret:%d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data_, ret:%d", ret);
         dataLength_ = -1;
     }
 }
