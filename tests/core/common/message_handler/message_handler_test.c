@@ -28,7 +28,7 @@
 
 #define CASE_FOUR_OBJ_SIZE 100
 
-static void NetworkingHandleMessage(SoftBusMessage* msg)
+static void NetworkingHandleMessage(const SoftBusMessage* msg)
 {
     LOG_INFO("NetworkingHandleMessage msg what=%d", msg->what);
 }

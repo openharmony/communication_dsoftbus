@@ -83,3 +83,8 @@ int32_t GetPeerDeviceIdInner(int32_t sessionId, char *data, uint16_t len)
 {
     return ClientGetSessionDataById(sessionId, data, len, KEY_PEER_DEVICE_ID);
 }
+
+int32_t GetPkgNameInner(int32_t sessionId, char *data, uint16_t len)
+{
+    return ClientGetSessionDataById(sessionId, data, len, KEY_PKG_NAME);
+}

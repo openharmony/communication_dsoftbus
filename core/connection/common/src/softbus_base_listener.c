@@ -30,7 +30,7 @@
 #include "softbus_utils.h"
 
 #define MAX_LISTEN_EVENTS 1024
-#define TIMEOUT 500
+#define TIMEOUT 10000
 #define DEFAULT_BACKLOG 4
 
 #define CLIENT_THREADNUM 1

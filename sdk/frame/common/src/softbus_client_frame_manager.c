@@ -25,6 +25,7 @@
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
 static bool g_isInited = false;
@@ -41,6 +42,7 @@ static void ClientModuleDeinit(void)
 
 static int32_t ClientModuleInit()
 {
+    SoftbusConfigInit();
     if (EventClientInit() == SOFTBUS_ERR) {
         LOG_ERR("init event manager failed");
         goto ERR_EXIT;

@@ -38,11 +38,6 @@ void TransSessionTimer(void);
 
 int TransClientInit(void)
 {
-    if (g_clientSessionServerList != NULL) {
-        LOG_INFO("already init");
-        return SOFTBUS_OK;
-    }
-
     if (memset_s(g_idFlagBitmap, sizeof(g_idFlagBitmap), 0, sizeof(g_idFlagBitmap)) != EOK) {
         LOG_ERR("init id bitmap failed");
         return SOFTBUS_ERR;
@@ -538,6 +533,9 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
             break;
         case KEY_PEER_DEVICE_ID:
             ret = strcpy_s(data, len, sessionNode->info.peerDeviceId);
+            break;
+        case KEY_PKG_NAME:
+            ret = strcpy_s(data, len, serverNode->pkgName);
             break;
         default:
             (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
