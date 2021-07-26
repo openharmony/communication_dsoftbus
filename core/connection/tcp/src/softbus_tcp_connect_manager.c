@@ -465,17 +465,17 @@ static int32_t InitProperty()
     g_tcpMaxConnNum = INVALID_DATA;
     g_tcpTimeOut = INVALID_DATA;
     g_tcpMaxLen = INVALID_DATA;
-    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, 
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
         (unsigned char*)&g_tcpMaxConnNum,sizeof(g_tcpMaxConnNum)) != SOFTBUS_OK) {
         LOG_ERR("get tcp MaxConnNum fail");
     }
     LOG_INFO("tcp MaxConnNum is %u", g_tcpMaxConnNum);
-    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH, 
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
         (unsigned char*)&g_tcpMaxLen,sizeof(g_tcpMaxLen)) != SOFTBUS_OK) {
         LOG_ERR("get tcp MaxLen fail");
     }
     LOG_INFO("tcp MaxLen is %u", g_tcpMaxLen);
-    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT, 
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT,
         (unsigned char*)&g_tcpTimeOut,sizeof(g_tcpTimeOut)) != SOFTBUS_OK) {
         LOG_ERR("get tcp TimeOut fail");
     }

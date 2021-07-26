@@ -87,7 +87,7 @@ static NetBuilder g_netBuilder;
 
 static void NetBuilderConfigInit(void)
 {
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, 
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
         (unsigned char*)&g_netBuilder.maxConnCount,sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         LOG_ERR("get lnn max connection count fail, use default value");
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
