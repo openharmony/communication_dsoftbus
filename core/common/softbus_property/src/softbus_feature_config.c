@@ -17,27 +17,28 @@
 
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
 typedef struct {
-    int maxByteLen;
-    int maxMsgLen;
-    int authAbilityConn;
-    int connBrMaxDataLen;
-    int connRfcomSendMaxLen;
-    int connBrRecvMaxLen;
-    int connTcpMaxLen;
-    int connTcpMaxConnNum;
-    int connTcpTimeOut;
-    int maxNodeStateCbCnt;
-    int maxLnnConnCnt;
-    int maxLnnSupportCap;
+    int32_t maxByteLen;
+    int32_t maxMsgLen;
+    int32_t authAbilityConn;
+    int32_t connBrMaxDataLen;
+    int32_t connRfcomSendMaxLen;
+    int32_t connBrRecvMaxLen;
+    int32_t connTcpMaxLen;
+    int32_t connTcpMaxConnNum;
+    int32_t connTcpTimeOut;
+    int32_t maxNodeStateCbCnt;
+    int32_t maxLnnConnCnt;
+    int32_t maxLnnSupportCap;
 } ConfigItem;
 
 typedef struct {
     ConfigType type;
     unsigned char *val;
-    int len;
+    int32_t len;
 } ConfigVal;
 
 ConfigItem g_config = {0};
@@ -105,7 +106,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     },
 };
 
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len)
+int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
 {
     if (len > g_configItems[type].len) {
         return SOFTBUS_ERR;
@@ -117,7 +118,7 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len)
     return SOFTBUS_OK;
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int len)
+int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
 {
     if (len != g_configItems[type].len) {
         return SOFTBUS_ERR;

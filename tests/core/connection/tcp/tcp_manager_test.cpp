@@ -33,15 +33,13 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
+#include "softbus_feature_config.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
 
 static const int MAXLNE = 50;
-static const std::string GET_TCP_MAX_CONN_NUM = "CONN_TCP_MAX_CONN_NUM";
-static const std::string GET_TCP_MAX_LENGTH = "CONN_TCP_MAX_LENGTH";
 
 using namespace testing::ext;
 
@@ -351,7 +349,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
 
     int32_t maxConnNum;
     int32_t i = 0;
-    GetPropertyInt(GET_TCP_MAX_CONN_NUM.c_str(), &maxConnNum);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, 
+        (unsigned char *)&maxConnNum,sizeof(maxConnNum)) != SOFTBUS_OK) {
+        LOG_ERR("get maxConnNum fail");
+    }
     printf("maxConnNum: %d\n", maxConnNum);
     EXPECT_EQ(port, TcpStartListening(&info));
     while (TcpGetConnNum() < maxConnNum) {
@@ -388,7 +389,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
 
     int maxDataLen;
-    GetPropertyInt(GET_TCP_MAX_LENGTH.c_str(), &maxDataLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH, 
+        (unsigned char *)&maxDataLen,sizeof(maxDataLen)) != SOFTBUS_OK) {
+        LOG_ERR("get maxDataLen fail");
+    }
+    printf("maxDataLen: %d\n", maxDataLen);
     ConnPktHead head = {0};
     head.len = maxDataLen + 1;
     char data[sizeof(head) + maxDataLen];

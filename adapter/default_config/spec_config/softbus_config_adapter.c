@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <securec.h>
 #include "softbus_config_type.h"
 
 #define MAX_BYTES_LENGTH 4194304
@@ -30,7 +30,7 @@
 
 void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
-    int val;
+    int32_t val;
     val = MAX_BYTES_LENGTH;
     sets->SetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char*)&val, sizeof(val));
     val = MAX_MESSAGE_LENGTH;
