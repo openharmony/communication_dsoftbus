@@ -541,7 +541,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static void UdpModuleCb(int64_t authId, const ConnectOption *option, AuthTransDataInfo *info)
+static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
     LOG_INFO("udp module callback enter.");
     if (option == NULL || info == NULL) {
