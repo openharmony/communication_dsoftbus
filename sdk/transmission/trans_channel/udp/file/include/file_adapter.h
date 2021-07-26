@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NSTACK_DFILE_ADAPTER_H
-#define NSTACK_DFILE_ADAPTER_H
+#ifndef NSTACKX_DFILE_ADAPTER_H
+#define NSTACKX_DFILE_ADAPTER_H
 
 #include <stdint.h>
 #include "session.h"
@@ -28,9 +28,9 @@ extern "C" {
 int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort);
 
-int32_t StartNStackXDFileClient(const char *peerId, int32_t peerPort, const uint8_t *key,
+int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver);
 #ifdef __cplusplus
 }
 #endif
-#endif // NSTACK_DFILE_ADAPTER_H
+#endif // NSTACKX_DFILE_ADAPTER_H

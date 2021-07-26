@@ -38,7 +38,7 @@ void TransFileDeinit();
 int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir);
 
-int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListener *fileListener);
+int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListener *sendListener);
 
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener);
 

@@ -29,7 +29,7 @@
 
 static int SetReuseAddr(int fd, int on)
 {
-    int rc = setsocketopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
     if (rc != 0) {
         LOG_ERR("set SO_REUSEADDR : %{public}s.", strerror(errno));
         return SOFTBUS_ERR;
@@ -39,7 +39,7 @@ static int SetReuseAddr(int fd, int on)
 
 static int SetReusePort(int fd, int on)
 {
-    int rc = setsocketopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+    int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
         LOG_ERR("set SO_REUSEPORT : %{public}s.", strerror(errno));
         return SOFTBUS_ERR;
@@ -104,7 +104,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     localAddr.sin_addr.s_addr = ntohl(inet_addr(myIP));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
-    int sessionId = NSTACKX_DFILEServer(&localAddr, addrLen, key, keyLen, msgReceiver);
+    int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);
     TcpShutDown(fd);
     if (sessionId < 0) {
         LOG_ERR("failed to start dfile server.");
@@ -113,7 +113,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     return sessionId;
 }
 
-int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key
+int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver)
 {
     if (peerIp == NULL) {
@@ -128,7 +128,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     localAddr.sin_addr.s_addr = ntohl(inet_addr(peerIp));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
-    int32_t sessionId = NSTACKX_DFILEClient(&localAddr, addrLen, key, keyLen, msgReceiver);
+    int32_t sessionId = NSTACKX_DFileClient(&localAddr, addrLen, key, keyLen, msgReceiver);
     if (sessionId < 0) {
         LOG_ERR("failed to start dfile client");
         return SOFTBUS_ERR;
