@@ -52,7 +52,7 @@ if (defined(ohos_lite)) {
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_shared",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "//utils/native/base:utils",
+        # "//utils/native/base:utils",
       ]
     }
   }
