@@ -16,6 +16,8 @@
 #ifndef SOFTBUS_CONFIG_TYPE_H
 #define SOFTBUS_CONFIG_TYPE_H
 
+#include <securec.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -39,7 +41,7 @@ typedef enum {
 } ConfigType;
 
 typedef struct {
-    int (* SetConfig)(ConfigType type, const unsigned char *val, int len);
+    int32_t (* SetConfig)(ConfigType type, const unsigned char *val, int32_t len);
 } ConfigSetProc;
 
 #ifdef __cplusplus
