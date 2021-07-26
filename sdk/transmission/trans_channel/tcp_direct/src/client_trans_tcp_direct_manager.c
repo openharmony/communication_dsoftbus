@@ -112,9 +112,6 @@ int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
 void TransTdcCloseChannel(int32_t channelId)
 {
     LOG_INFO("TransCloseTcpDirectChannel, channelId [%d]", channelId);
-    if (ClientTransTdcOnSessionClosed(channelId) != SOFTBUS_OK) {
-        LOG_INFO("notify tdc close err");
-    }
 
     TcpDirectChannelInfo *item = NULL;
     (void)pthread_mutex_lock(&g_tcpDirectChannelInfoList->lock);

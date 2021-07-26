@@ -115,7 +115,7 @@ typedef struct {
 } VerifyCallback;
 
 typedef struct {
-    void (*onTransUdpDataRecv)(int64_t authId, ConnectOption *option, AuthTransDataInfo *info);
+    void (*onTransUdpDataRecv)(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info);
 } AuthTransCallback;
 
 uint32_t AuthGetEncryptHeadLen(void);
