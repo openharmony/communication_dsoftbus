@@ -41,7 +41,10 @@ if (ohos_kernel_type == "liteos_m") {
       "src/softbus_server_frame_weak.c",
     ]
 
-    deps = [ "$hilog_lite_deps_path" ]
+    deps = [
+      "$hilog_lite_deps_path",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+    ]
   }
 } else {
   shared_library("softbus_server_frame") {

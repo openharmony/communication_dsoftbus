@@ -110,7 +110,8 @@ void VtpInstance::PreSetFillpCoreParams(void)
     adpLibSysFunc.sysLibBasicFunc.cryptoRand = CryptoRand;
     err = FillpApiRegLibSysFunc(&adpLibSysFunc, nullptr);
     if (err != FILLP_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to register fillp callback function, errno:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "failed to register fillp callback function, errno:%d", FtGetErrno());
     }
 
     FillpApiSetDebugLogLevel(UpdateVtpLogLevel());
@@ -118,13 +119,15 @@ void VtpInstance::PreSetFillpCoreParams(void)
     FILLP_UINT16 maxSocketNums = MAX_DEFAULT_SOCKET_NUM;
     err = FtConfigSet(FT_CONF_MAX_SOCK_NUM, &maxSocketNums, nullptr);
     if (err != ERR_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set MAX_SOCKET_NUM config, ret %d", static_cast<int>(err));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "failed to set MAX_SOCKET_NUM config, ret %d", static_cast<int>(err));
     }
 
     FILLP_UINT16 maxConnectionNums = MAX_DEFAULT_SOCKET_NUM; // keep same with the nums of socket.
     err = FtConfigSet(FT_CONF_MAX_CONNECTION_NUM, &maxConnectionNums, nullptr);
     if (err != ERR_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set MAX_CONNECTION_NUM config, ret %d", static_cast<int>(err));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "failed to set MAX_CONNECTION_NUM config, ret %d", static_cast<int>(err));
     }
 
     FILLP_INT32 keepAlive = FILLP_KEEP_ALIVE_TIME;
@@ -142,10 +145,12 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     if (!isDestroyed_) {
         if (std::find(packetNameArray_.begin(), packetNameArray_.end(), pkgName) == packetNameArray_.end()) {
             packetNameArray_.push_back(pkgName);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is already created, so increase to packetNameArray");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "vtp instance is already created, so increase to packetNameArray");
         }
         initVtpCount_++;
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "vtp instance is already created, return ture. PKG(%s)", pkgName.c_str());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "vtp instance is already created, return ture. PKG(%s)", pkgName.c_str());
         return true;
     }
 

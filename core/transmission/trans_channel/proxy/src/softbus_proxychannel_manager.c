@@ -582,7 +582,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 
     info->myId = msg->msgHead.myId;
     info->peerId = msg->msgHead.peerId;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv Handshake ack myid %d peerid %d identity %s", info->myId, info->peerId, info->identity);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv Handshake ack myid %d peerid %d identity %s", info->myId, info->peerId, info->identity);
     if (TransProxyUpdateAckInfo(info) != SOFTBUS_OK) {
         SoftBusFree(info);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UpdateAckInfo fail");
@@ -594,7 +595,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         return;
@@ -652,7 +654,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv reset myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv reset myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reset identity fail");
         SoftBusFree(info);
@@ -663,7 +666,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     info->myId = msg->msgHead.myId;
 
     if (TransProxyResetChan(info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reset chan fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "reset chan fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
         return;
     }
@@ -684,7 +688,8 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv keepalive myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv keepalive myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "keep alive unpack identity fail");
         SoftBusFree(info);
@@ -694,7 +699,8 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
     info->myId = msg->msgHead.myId;
 
     if (TransProxyKeepAlvieChan(info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reset keep alive proc fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "reset keep alive proc fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
         return;
     }
@@ -710,7 +716,8 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv keepalive ack myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv keepalive ack myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
         SoftBusFree(info);
         return;
@@ -719,7 +726,8 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
     info->myId = msg->msgHead.myId;
 
     if (TransProxyKeepAlvieChan(info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reset keep alive ack proc fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "reset keep alive ack proc fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
         return;
     }
@@ -734,7 +742,8 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
     }
 
     if (TransProxyGetRecvMsgChanInfo(msg->msgHead.myId, msg->msgHead.peerId, info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data recv get info fail mid %d pid %d", msg->msgHead.myId, msg->msgHead.peerId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "data recv get info fail mid %d pid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
         return;
     }

@@ -41,7 +41,8 @@ public:
 
             int plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%d",
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%d",
                     buflen, adaptor_->GetEncryptOverhead());
                 return;
             }
@@ -49,7 +50,8 @@ public:
             ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
                 plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
                 return;
             }
 

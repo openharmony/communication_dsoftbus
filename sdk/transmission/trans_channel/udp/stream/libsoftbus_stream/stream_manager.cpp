@@ -42,7 +42,8 @@ void StreamManager::DestroyEnvironment(const std::string &pkgName)
 int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
     int streamType, const std::string &sessionKey)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Start to create client channel, local:%d, remote:%d, proto:%d", local.port, remote.port, protocol);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "Start to create client channel, local:%d, remote:%d, proto:%d", local.port, remote.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {
@@ -71,7 +72,8 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
 int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
     int streamType, const std::string &sessionKey)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Start to create server channel, local:%d, proto:%d", local.port, protocol);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "Start to create server channel, local:%d, proto:%d", local.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {

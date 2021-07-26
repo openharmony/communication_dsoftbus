@@ -52,11 +52,13 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
         ssize_t dataLen = indata->bufLen + adaptor->GetEncryptOverhead();
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "bufLen = %zd, GetEncryptOverhead() = %zd", indata->bufLen, adaptor->GetEncryptOverhead());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+            "bufLen = %zd, GetEncryptOverhead() = %zd", indata->bufLen, adaptor->GetEncryptOverhead());
         std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
         ssize_t encLen = adaptor->Encrypt(indata->buf, indata->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
         if (encLen != dataLen) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypted failed, dataLen = %zd, encryptLen = %zd", dataLen, encLen);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "encrypted failed, dataLen = %zd, encryptLen = %zd", dataLen, encLen);
             return SOFTBUS_ERR;
         }
 

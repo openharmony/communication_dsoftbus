@@ -47,7 +47,10 @@ if (defined(ohos_lite)) {
         "softbus_client_frame_manager_weak.c",
       ]
 
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [ 
+        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        ]
     }
   } else {
     shared_library("softbus_client_frame") {
@@ -78,6 +81,7 @@ if (defined(ohos_lite)) {
 
       deps = [
         "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
@@ -126,6 +130,7 @@ if (defined(ohos_lite)) {
         "hiviewdfx_hilog_native:libhilog",
       ]
       deps = [
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",

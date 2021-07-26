@@ -33,6 +33,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
     "$dsoftbus_sdk_path/frame:softbus_client_frame",
     "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",
@@ -86,6 +87,7 @@ if (defined(ohos_lite)) {
     sources += common_src
     deps = [
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_sdk_path/bus_center/service:dsoftbus_bus_center_service_sdk",
       "$dsoftbus_sdk_path/frame:softbus_client_frame",
       "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",

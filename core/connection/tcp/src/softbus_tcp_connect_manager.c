@@ -83,7 +83,8 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     }
     LIST_FOR_EACH_ENTRY(temp, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (temp->connectionId == item->connectionId) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectionId:%08x ready in ConnectionInfoList.", item->connectionId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "ConnectionId:%08x ready in ConnectionInfoList.", item->connectionId);
             (void)pthread_mutex_unlock(&g_tcpConnInfoList->lock);
             return SOFTBUS_ERR;
         }
@@ -124,7 +125,8 @@ int32_t DelTcpConnInfo(uint32_t connectionId, ConnectionInfo *info)
         }
     }
     (void)pthread_mutex_unlock(&g_tcpConnInfoList->lock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "DelTcpConnInfo failed. ConnectionId:%08x not found.", connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "DelTcpConnInfo failed. ConnectionId:%08x not found.", connectionId);
     return SOFTBUS_OK;
 }
 
@@ -380,7 +382,8 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
     }
     (void)pthread_mutex_unlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "TcpPostBytes failed, connectionId:%08x not found.", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "TcpPostBytes failed, connectionId:%08x not found.", connectionId);
         return SOFTBUS_ERR;
     }
     int32_t bytes = SendTcpData(fd, data, len, flag);

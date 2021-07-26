@@ -37,6 +37,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
     "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
     "$hilog_lite_deps_path",
@@ -78,6 +79,7 @@ if (defined(ohos_lite)) {
     sources = [ "src/client_disc_service.c" ]
     deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
       "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
     ]
