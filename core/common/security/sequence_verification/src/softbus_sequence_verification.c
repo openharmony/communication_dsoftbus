@@ -31,7 +31,7 @@ static bool IsPassDuplicateCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
     uint32_t offset = seqVerifyInfo->maxSeq - recvSeq;
     int32_t isRepeat = seqVerifyInfo->recvBitmap & (0x1UL << offset);
     if (isRepeat) {
-        LOG_INFO("duplicated package seq[%d].", recvSeq);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "duplicated package seq[%d].", recvSeq);
         return false;
     }
     seqVerifyInfo->recvBitmap |= (0x1UL << offset);
@@ -46,7 +46,7 @@ static bool IsPassOverMaxCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
     }
 
     if (recvSeq - seqVerifyInfo->minSeq >= MAX_SEQ_BIAS) {
-        LOG_ERR("seq bias reach max[%d].", MAX_SEQ_BIAS);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "seq bias reach max[%d].", MAX_SEQ_BIAS);
         return false;
     }
     uint32_t seqOffset = recvSeq - seqVerifyInfo->maxSeq + 1;
@@ -157,7 +157,7 @@ static bool IsPassFlipNegativeCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSe
 bool IsPassSeqCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
 {
     if (seqVerifyInfo == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         return false;
     }
     bool isDifferentSign = IsDifferentSign(seqVerifyInfo->minSeq, seqVerifyInfo->maxSeq);

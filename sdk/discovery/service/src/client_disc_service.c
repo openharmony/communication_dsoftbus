@@ -26,22 +26,22 @@
 static int32_t PublishInfoCheck(const PublishInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        LOG_ERR("mode is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        LOG_ERR("medium is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        LOG_ERR("freq is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        LOG_ERR("data is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -51,7 +51,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        LOG_ERR("data exceeds the maximum length");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -61,22 +61,22 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        LOG_ERR("mode is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        LOG_ERR("medium is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        LOG_ERR("freq is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        LOG_ERR("data is invalid");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -86,7 +86,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        LOG_ERR("data exceeds the maximum length");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -100,12 +100,12 @@ int32_t PublishService(const char *packageName, const PublishInfo *info, const I
     }
 
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
-        LOG_ERR("init softbus err");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        LOG_ERR("check packageName failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -119,12 +119,12 @@ int32_t PublishService(const char *packageName, const PublishInfo *info, const I
 int32_t UnPublishService(const char *packageName, int32_t publishId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
-        LOG_ERR("invalid packageName");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid packageName");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        LOG_ERR("check packageName failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -138,12 +138,12 @@ int32_t StartDiscovery(const char *packageName, const SubscribeInfo *info, const
     }
 
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
-        LOG_ERR("init softbus err");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        LOG_ERR("check packageName failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -157,12 +157,12 @@ int32_t StartDiscovery(const char *packageName, const SubscribeInfo *info, const
 int32_t StopDiscovery(const char *packageName, int32_t subscribeId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
-        LOG_ERR("invalid packageName");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid packageName");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        LOG_ERR("check packageName failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 

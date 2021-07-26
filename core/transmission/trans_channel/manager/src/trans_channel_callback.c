@@ -41,10 +41,10 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t channelId
     }
 
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
-        LOG_WARN("delete lane object failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
     if (ClientIpcOnChannelClosed(pkgName, channelId, channelType) != SOFTBUS_OK) {
-        LOG_ERR("notify fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -56,10 +56,10 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t chann
         return SOFTBUS_INVALID_PARAM;
     }
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
-        LOG_WARN("delete lane object failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
     if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType) != SOFTBUS_OK) {
-        LOG_ERR("notify fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -73,7 +73,7 @@ static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t channelId,
     }
 
     if (ClientIpcOnChannelMsgReceived(pkgName, channelId, data, len, type) != SOFTBUS_OK) {
-        LOG_ERR("get pkg name fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

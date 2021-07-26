@@ -41,7 +41,7 @@ SoftBusList *CreateSoftBusList(void)
     pthread_mutexattr_t attr;
     SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     if (list == NULL) {
-        LOG_ERR("malloc failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed");
         return NULL;
     }
     (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
@@ -49,7 +49,7 @@ SoftBusList *CreateSoftBusList(void)
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     if (pthread_mutex_init(&list->lock, &attr) != 0) {
-        LOG_ERR("init lock failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init lock failed");
         SoftBusFree(list);
         return NULL;
     }
@@ -98,7 +98,7 @@ int32_t SoftBusTimerInit(void)
     }
     g_timerId = SoftBusCreateTimer(&g_timerId, (void *)HandleTimeoutFun, TIMER_TYPE_PERIOD);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
-        LOG_ERR("start timer failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
         return SOFTBUS_ERR;
@@ -130,7 +130,7 @@ int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
     }
 
     if (pthread_mutex_lock(&g_randomLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock mutex failed");
         SoftBusFree(ctrDrbg);
         SoftBusFree(entropy);
         return SOFTBUS_ERR;
@@ -140,7 +140,7 @@ int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
     int ret = mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func, entropy, NULL, 0);
     if (ret != 0) {
         pthread_mutex_unlock(&g_randomLock);
-        LOG_ERR("gen random seed error, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random seed error, ret[%d]", ret);
         SoftBusFree(ctrDrbg);
         SoftBusFree(entropy);
         return SOFTBUS_ERR;
@@ -150,7 +150,7 @@ int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
         pthread_mutex_unlock(&g_randomLock);
         SoftBusFree(ctrDrbg);
         SoftBusFree(entropy);
-        LOG_ERR("gen random error, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random error, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
     pthread_mutex_unlock(&g_randomLock);
@@ -164,7 +164,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
     (void)outBufLen;
 
     if ((outBuf == NULL) || (inBuf == NULL) || (inLen % HEXIFY_UNIT_LEN != 0)) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
 
@@ -179,7 +179,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c >= 'A') && (c <= 'F')) {
             c -= 'A' - DEC_MAX_NUM;
         } else {
-            LOG_ERR("HexToString Error! %c", c);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c", c);
             return SOFTBUS_ERR;
         }
 
@@ -191,7 +191,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c2 >= 'A') && (c2 <= 'F')) {
             c2 -= 'A' - DEC_MAX_NUM;
         } else {
-            LOG_ERR("HexToString Error! %c2", c2);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c2", c2);
             return SOFTBUS_ERR;
         }
 

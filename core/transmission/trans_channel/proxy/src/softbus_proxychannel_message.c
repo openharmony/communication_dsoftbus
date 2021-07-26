@@ -47,7 +47,7 @@ int32_t TransProxyParseMessageHead(ProxyMessage *msg, char *data, int32_t len)
     int8_t version = (firstByte >> VERSION_SHIFT) & FOUR_BIT_MASK;
     msg->msgHead.type = firstByte & FOUR_BIT_MASK;
     if (version != VERSION || msg->msgHead.type >= PROXYCHANNEL_MSG_TYPE_MAX) {
-        LOG_ERR("parseMessage: unsupported message, version(%d), type(%d)", version, msg->msgHead.type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: unsupported message, version(%d), type(%d)", version, msg->msgHead.type);
         return SOFTBUS_ERR;
     }
 
@@ -69,7 +69,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     OutBuf deBuf = {0};
 
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
-        LOG_ERR("parseMessage: invalid message length(%d)", len);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: invalid message length(%d)", len);
         return SOFTBUS_ERR;
     }
     if (TransProxyParseMessageHead(msg, data, len) != SOFTBUS_OK) {
@@ -78,12 +78,12 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     isEncrypted = ((msg->msgHead.chiper & ENCRYPTED) != 0);
     if (isEncrypted) {
         if (ChiperSideProc(msg, &isServer) != SOFTBUS_OK) {
-            LOG_ERR("get side fail chanId[%d]", msg->msgHead.myId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get side fail chanId[%d]", msg->msgHead.myId);
             return SOFTBUS_ERR;
         }
         msg->chiperSide = isServer;
         if (TransProxyGetConnectOption(msg->connId, &option) != 0) {
-            LOG_ERR("parse msg GetConnectOption fail connId[%d]", msg->connId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse msg GetConnectOption fail connId[%d]", msg->connId);
             return SOFTBUS_ERR;
         }
 
@@ -95,7 +95,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
         if (AuthDecrypt(&option, (AuthSideFlag)isServer, (uint8_t *)(data + PROXY_CHANNEL_HEAD_LEN),
             len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != 0) {
             SoftBusFree(deBuf.buf);
-            LOG_ERR("pack msg decrypt fail isServer");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg decrypt fail isServer");
             return SOFTBUS_ERR;
         }
         msg->data = (char *)deBuf.buf;
@@ -131,7 +131,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
         int ret;
 
         if (TransProxyGetConnectOption(connId, &option) != SOFTBUS_OK) {
-            LOG_ERR("pack msg GetConnectOption fail connId[%u]", connId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg GetConnectOption fail connId[%u]", connId);
             return SOFTBUS_ERR;
         }
         bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen + AuthGetEncryptHeadLen();
@@ -144,7 +144,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
         ret = AuthEncrypt(&option, &isServer, (uint8_t *)payload, payloadLen, &enBuf);
         if (ret != SOFTBUS_OK) {
             SoftBusFree(buf);
-            LOG_ERR("pack msg encrypt fail %d", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg encrypt fail %d", ret);
             return SOFTBUS_ERR;
         }
 
@@ -168,10 +168,10 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
                                         sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
                                         (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
-        LOG_ERR("mbedtls_base64_encode FAIL %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
         return ret;
     }
-    LOG_INFO("mbedtls_base64_encode len %d", sessionBase64->len);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "mbedtls_base64_encode len %d", sessionBase64->len);
     if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(root, JSON_KEY_GROUP_ID, appInfo->groupId) ||
@@ -221,7 +221,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
                                     sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
                                     (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
-            LOG_ERR("mbedtls_base64_encode FAIL %d", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
             cJSON_Delete(root);
             return NULL;
         }
@@ -289,14 +289,14 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chanInfo->identity, sizeof(chanInfo->identity)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
                                  sizeof(appInfo->peerData.deviceId))) {
-        LOG_ERR("fail to get json item");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
                                  sizeof(appInfo->peerData.pkgName))) {
-        LOG_INFO("no item to get pkg name");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "no item to get pkg name");
     }
     cJSON_Delete(root);
     return SOFTBUS_OK;
@@ -309,14 +309,14 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
         !GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
                                  sizeof(appInfo->peerData.pkgName)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, sessionKeyLen)) {
-        LOG_ERR("Failed to get handshake msg APP_TYPE_NORMAL");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg APP_TYPE_NORMAL");
         return SOFTBUS_ERR;
     }
     size_t len = 0;
     int32_t ret = mbedtls_base64_decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        LOG_ERR("decode session fail %d ", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decode session fail %d ", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -340,7 +340,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
                                  sizeof(appInfo->peerData.sessionName)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, appInfo->myData.sessionName,
                                  sizeof(appInfo->myData.sessionName))) {
-        LOG_ERR("Failed to get handshake msg");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
@@ -355,13 +355,13 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME,
             appInfo->peerData.pkgName, sizeof(appInfo->peerData.pkgName))) {
-            LOG_ERR("Failed to get handshake msg");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
             cJSON_Delete(root);
             return SOFTBUS_ERR;
         }
     } else {
         if (!GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, sizeof(sessionKey))) {
-            LOG_ERR("Failed to get handshake msg");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
             cJSON_Delete(root);
             return SOFTBUS_ERR;
         }
@@ -369,7 +369,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
         int32_t ret = mbedtls_base64_decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
             &len, (uint8_t *)sessionKey, strlen(sessionKey));
         if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-            LOG_ERR("decode session fail %d ", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decode session fail %d ", ret);
             cJSON_Delete(root);
             return SOFTBUS_ERR;
         }
@@ -412,7 +412,7 @@ int32_t TransProxyUnpackIdentity(const char *msg, char *identity, int32_t identi
     }
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, identity, identitySize)) {
-        LOG_ERR("fail to get json item");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }

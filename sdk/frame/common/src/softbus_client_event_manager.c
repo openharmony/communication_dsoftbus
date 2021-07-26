@@ -42,7 +42,7 @@ int EventClientInit(void)
 
     g_observerList = CreateSoftBusList();
     if (g_observerList == NULL) {
-        LOG_ERR("create observer list failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create observer list failed");
         return SOFTBUS_ERR;
     }
 
@@ -53,7 +53,7 @@ int EventClientInit(void)
 void EventClientDeinit(void)
 {
     if (!g_isInited) {
-        LOG_ERR("event client not init");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event client not init");
         return;
     }
 
@@ -76,29 +76,29 @@ static bool IsEventValid(enum SoftBusEvent event)
 int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userData)
 {
     if (!IsEventValid(event) || cb == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (g_isInited != true) {
-        LOG_ERR("event manager not init");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event manager not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&g_observerList->lock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
     if (g_observerList->cnt >= MAX_OBSERVER_CNT) {
-        LOG_ERR("observer count over limit");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "observer count over limit");
         (void)pthread_mutex_unlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
 
     Observer *observer = SoftBusCalloc(sizeof(Observer));
     if (observer == NULL) {
-        LOG_ERR("malloc observer failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc observer failed");
         (void)pthread_mutex_unlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
@@ -118,18 +118,18 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
 void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argLen)
 {
     if (!IsEventValid(event)) {
-        LOG_ERR("invalid event [%d]", event);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid event [%d]", event);
         return;
     }
 
     if (g_isInited != true) {
-        LOG_ERR("event manager not init");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event manager not init");
         return;
     }
 
     Observer *observer = NULL;
     if (pthread_mutex_lock(&g_observerList->lock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
 
@@ -137,7 +137,7 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
         if ((observer->event == event) &&
             (observer->callback != NULL) &&
             (observer->callback(arg, argLen, observer->userData) != SOFTBUS_OK)) {
-            LOG_ERR("execute callback failed [%d]", event);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "execute callback failed [%d]", event);
         }
     }
 

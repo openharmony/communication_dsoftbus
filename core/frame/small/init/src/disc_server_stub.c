@@ -26,9 +26,9 @@
 
 int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("publish service ipc server pop.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "publish service ipc server pop.");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
@@ -36,7 +36,7 @@ int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
     PublishSerializer *info = (PublishSerializer*)IpcIoPopFlatObj(req, &size);
     if (info == NULL) {
-        LOG_ERR("ipc pop is null.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ipc pop is null.");
         return SOFTBUS_ERR;
     }
     char *capability = (char*)IpcIoPopString(req, &len);
@@ -52,12 +52,12 @@ int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
     };
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        LOG_ERR("publish service no permission.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "publish service no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcPublishService(pkgName, &publishInfo);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("publish service failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "publish service failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -65,18 +65,18 @@ int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerUnPublishService(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("unpublish service ipc server pop.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "unpublish service ipc server pop.");
     size_t len;
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
     int32_t publishId = IpcIoPopInt32(req);
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        LOG_ERR("publish service no permission.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "publish service no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcUnPublishService(pkgName, publishId);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("unpublish service failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "unpublish service failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -84,13 +84,13 @@ int32_t ServerUnPublishService(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerStartDiscovery(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("start discovery ipc server pop.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start discovery ipc server pop.");
     size_t len;
     uint32_t size;
     const char *pkgName = (const char *)IpcIoPopString(req, &len);
     SubscribeSerializer *info = (SubscribeSerializer *)IpcIoPopFlatObj(req, &size);
     if (info == NULL) {
-        LOG_ERR("ipc pop is null.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ipc pop is null.");
         return SOFTBUS_ERR;
     }
     char *capability = (char *)IpcIoPopString(req, &len);
@@ -108,12 +108,12 @@ int32_t ServerStartDiscovery(void *origin, IpcIo *req, IpcIo *reply)
     };
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        LOG_ERR("publish service no permission.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "publish service no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcStartDiscovery(pkgName, &subscribeInfo);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("start discovery failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start discovery failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -121,18 +121,18 @@ int32_t ServerStartDiscovery(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerStopDiscovery(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("stop discovery ipc server pop.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "stop discovery ipc server pop.");
     size_t len;
     const char *pkgName = (const char *)IpcIoPopString(req, &len);
     int32_t subscribeId = IpcIoPopInt32(req);
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        LOG_ERR("publish service no permission.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "publish service no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcStopDiscovery(pkgName, subscribeId);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("stop discovery failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "stop discovery failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

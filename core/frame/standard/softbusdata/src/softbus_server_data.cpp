@@ -29,7 +29,7 @@ int32_t SoftBusServerData::SoftbusAddService(const std::string &pkgName, const s
     const sptr<IRemoteObject::DeathRecipient> &abilityDeath)
 {
     if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
-        LOG_ERR("package name, object or abilityDeath is nullptr\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name, object or abilityDeath is nullptr\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
@@ -41,7 +41,7 @@ int32_t SoftBusServerData::SoftbusAddService(const std::string &pkgName, const s
 int32_t SoftBusServerData::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName)
 {
     if (object == nullptr) {
-        LOG_ERR("RemoveService object is nullptr\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveService object is nullptr\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
@@ -63,7 +63,7 @@ sptr<IRemoteObject> SoftBusServerData::GetSoftbusClientProxy(const std::string &
     if (iter != clientObjectMap_.end()) {
         return iter->second.first;
     }
-    LOG_ERR("GetSoftbusClientProxy client proxy is nullptr\n");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusClientProxy client proxy is nullptr\n");
     return nullptr;
 }
 

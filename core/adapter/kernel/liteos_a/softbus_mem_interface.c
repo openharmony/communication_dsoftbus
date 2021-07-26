@@ -35,7 +35,7 @@ void *SoftBusCalloc(unsigned int size)
 
     errno_t err = memset_s(tmp, size, 0, size);
     if (err != EOK) {
-        LOG_ERR("memset_s failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset_s failed");
         SoftBusFree(tmp);
         return NULL;
     }
@@ -64,7 +64,7 @@ void *SoftBusHighSpeedCalloc(unsigned int size)
 
     errno_t err = memset_s(tmp, size, 0, size);
     if (err != EOK) {
-        LOG_ERR("memset_s failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset_s failed");
         SoftBusHighSpeedFree(tmp);
         return NULL;
     }

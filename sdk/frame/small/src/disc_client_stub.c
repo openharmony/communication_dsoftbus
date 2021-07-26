@@ -21,7 +21,7 @@
 void ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -34,7 +34,7 @@ void ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnDiscoverFailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -48,7 +48,7 @@ void ClientOnDiscoverFailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -62,7 +62,7 @@ void ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnPublishSuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
@@ -75,7 +75,7 @@ void ClientOnPublishSuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 void ClientOnPublishFail(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 {
     if (reply == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
         FreeBuffer(ctx, ipcMsg);
         return;
     }
