@@ -89,7 +89,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
       "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "//utils/native/base:utils",
+      "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
