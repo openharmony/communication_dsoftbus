@@ -88,3 +88,25 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
+
+int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+{
+    if ((sFileList == NULL) || (fileCnt == 0)) {
+        LOG_ERR("Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("get channel failed");
+        return ret;
+    }
+    if (type != CHANNEL_TYPE_UDP) {
+        LOG_INFO("invalid channel type");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ClientTransChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+}

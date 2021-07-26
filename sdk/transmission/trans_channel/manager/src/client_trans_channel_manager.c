@@ -135,3 +135,9 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
     }
     return ret;
 }
+
+int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
+    const char *dFileList[], uint32_t fileCnt)
+{
+    return TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+}

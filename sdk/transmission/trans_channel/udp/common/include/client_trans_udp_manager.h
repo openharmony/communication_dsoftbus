@@ -28,11 +28,30 @@ extern "C" {
 
 typedef struct {
     void (*OnStreamReceived)(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
-    void (*OnFileReceived)(void);
+    int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
     void (*OnUdpChannelOpened)(int32_t channelId);
     void (*OnUdpChannelClosed)(int32_t channelId);
 } UdpChannelMgrCb;
+
+typedef struct {
+    bool isServer;
+    int32_t peerUid;
+    int32_t peerPid;
+    char mySessionName[SESSION_NAME_SIZE_MAX];
+    char peerSessionName[SESSION_NAME_SIZE_MAX];
+    char peerDeviceId[DEVICE_ID_SIZE_MAX];
+    char groupId[GROUP_ID_SIZE_MAX];
+} sessionNeed;
+
+typedef struct {
+    ListNode node;
+    int32_t channelId;
+    int32_t dfileId;
+    int32_t businessType;
+    bool isEnable;
+    sessionNeed info;
+} UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
 void ClientTransUdpMgrDeinit(void);
@@ -45,6 +64,10 @@ int32_t TransCloseUdpChannel(int32_t channelId);
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const FrameInfo *param);
+
+int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+
+int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel);
 #ifdef __cplusplus
 }
 #endif
