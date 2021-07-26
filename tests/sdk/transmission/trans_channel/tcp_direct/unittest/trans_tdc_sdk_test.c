@@ -24,6 +24,7 @@
 #define TYPE_SEND_BYTE 15
 #define TYPE_SEND_MESSAGE 16
 #define SLEEP_TIME 15
+#define TRANS_UINIT_SIZE 1024
 #define TRANS_SIZE_NUM 2
 #define TRANS_SIZE_NUM_DOUBLE 4
 #define LOOP_COUNT 10
@@ -292,7 +293,7 @@ void TransFuncTest001(void)
 void TransFuncTest002(void)
 {
     int ret;
-    int size = TRANS_SIZE_NUM * 1024;
+    int size = TRANS_SIZE_NUM * TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -312,7 +313,7 @@ void TransFuncTest002(void)
 void TransFuncTest003(void)
 {
     int ret;
-    int size = TRANS_SIZE_NUM_DOUBLE * 1024;
+    int size = TRANS_SIZE_NUM_DOUBLE * TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);
@@ -352,7 +353,7 @@ void TransFuncTest004(void)
 void TransFuncTest005(void)
 {
     int ret;
-    int size = 1024;
+    int size = TRANS_UINIT_SIZE;
 
     ret = CreateSsAndOpenSession();
     TEST_ASSERT_TRUE(ret == 0);

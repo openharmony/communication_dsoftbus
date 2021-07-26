@@ -70,6 +70,7 @@ typedef struct {
 
     char peerUdid[UDID_BUF_LEN];
     char peerUuid[UUID_BUF_LEN];
+    char peerUid[MAX_ACCOUNT_HASH_LEN];
     int32_t softbusVersion;
     SoftBusVersion peerVersion;
 
