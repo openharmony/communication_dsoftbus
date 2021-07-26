@@ -278,7 +278,11 @@ void CloseSession(int sessionId)
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
         LOG_INFO("close channel err: ret=%d, channelId=%d, channeType=%d", ret, channelId, type);
-        return;
+    }
+
+    ret = ClientDeleteSession(sessionId);
+    if (ret != SOFTBUS_OK) {
+        LOG_ERR("CloseSession delete session err");
     }
     LOG_INFO("CloseSession ok");
     return;
