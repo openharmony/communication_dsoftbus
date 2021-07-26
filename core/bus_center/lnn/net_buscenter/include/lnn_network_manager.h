@@ -15,10 +15,8 @@
 
 #include <stdint.h>
 
-#include "softbus_bus_center.h"
-
-#ifndef LNN_DISCOVERY_MANAGER_H
-#define LNN_DISCOVERY_MANAGER_H
+#ifndef LNN_NETWORK_MANAGER_H
+#define LNN_NETWORK_MANAGER_H
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -26,21 +24,9 @@ extern "C" {
 #endif
 #endif
 
-typedef struct {
-    void (*OnDeviceFound)(const ConnectionAddr *addr);
-} LnnDiscoveryImplCallback;
+int32_t LnnInitNetworkManager(void);
 
-int32_t LnnInitDiscoveryManager(void);
-
-int32_t LnnStartDiscovery(void);
-
-int32_t LnnStopDiscovery(void);
-
-int32_t __attribute__ ((weak)) LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
-
-int32_t __attribute__ ((weak)) LnnStartCoapDiscovery(void);
-
-int32_t __attribute__ ((weak)) LnnStopCoapDiscovery(void);
+int32_t __attribute__ ((weak)) LnnInitIpNetwork(void);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,4 +34,4 @@ int32_t __attribute__ ((weak)) LnnStopCoapDiscovery(void);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* LNN_DISCOVERY_MANAGER_H */
+#endif /* LNN_NETWORK_MANAGER_H */
