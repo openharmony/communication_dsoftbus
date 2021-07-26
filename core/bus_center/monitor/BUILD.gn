@@ -37,6 +37,15 @@ if (defined(ohos_lite)) {
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
       ]
+      if (ohos_kernel_type == "liteos_a") {
+        sources += [ "$dsoftbus_root_path/core/adapter/bus_center/platform/lnn_product_monitor.c" ]
+        include_dirs += [
+          "//drivers/adapter/uhdf/posix/include",
+          "//drivers/framework/include/utils",
+          "//drivers/framework/include/core",
+          "//drivers/framework/ability/sbuf/include",
+        ]
+      }
       cflags = [
         "-Wall",
         "-Werror",
@@ -51,6 +60,13 @@ if (defined(ohos_lite)) {
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
+      if (ohos_kernel_type == "liteos_a") {
+        deps += [
+          "//drivers/adapter/uhdf/manager:hdf_core",
+          "//drivers/adapter/uhdf/platform:hdf_platform",
+          "//drivers/adapter/uhdf/posix:hdf_posix_osal",
+        ]
+      }
     }
   }
 } else {
