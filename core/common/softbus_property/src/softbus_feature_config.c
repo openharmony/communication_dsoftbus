@@ -14,6 +14,7 @@
  */
 
 #include <securec.h>
+#include <stdint.h>
 
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"

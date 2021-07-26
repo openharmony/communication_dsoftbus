@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <securec.h>
+
 #include "softbus_config_type.h"
 
 #define MAX_BYTES_LENGTH 4194304

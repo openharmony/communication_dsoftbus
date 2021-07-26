@@ -17,6 +17,7 @@
 #define SOFTBUS_CONFIG_TYPE_H
 
 #include <securec.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
