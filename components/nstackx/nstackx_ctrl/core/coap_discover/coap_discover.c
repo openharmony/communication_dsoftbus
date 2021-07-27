@@ -178,8 +178,19 @@ coap_session_t *CoapGetSessionOnTargetServer(uint8_t serverType, const CoapServe
     return CoapGetSession(context, ipString, COAP_SRV_DEFAULT_PORT, coapServerParameter);
 }
 
-int32_t CoapSendRequest(const CoapRequest *coapRequest, coap_session_t **sessionPtr, uint8_t serverType)
+static void FillCoapRequest(CoapRequest *coapRequest, uint8_t coapType, const char *url, char *data, size_t dataLen)
 {
+    (void)memset_s(coapRequest, sizeof(CoapRequest), 0, sizeof(CoapRequest));
+    coapRequest->type = coapType;
+    coapRequest->code = COAP_REQUEST_POST;
+    coapRequest->remoteUrl = url;
+    coapRequest->data = data;
+    coapRequest->dataLength = dataLen;
+}
+
+int32_t CoapSendRequest(uint8_t coapType, const char *url, char *data, size_t dataLen, uint8_t serverType)
+{
+    CoapRequest coapRequest;
     coap_session_t *session = NULL;
     coap_address_t dst = {0};
     coap_str_const_t remote;
@@ -189,20 +200,19 @@ int32_t CoapSendRequest(const CoapRequest *coapRequest, coap_session_t **session
     coap_uri_t coapUri;
     CoapServerParameter coapServerParameter = {0};
 
+    FillCoapRequest(&coapRequest, coapType, url, data, dataLen);
+
     (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
     (void)memset_s(&coapUri, sizeof(coapUri), 0, sizeof(coapUri));
 
-    if (coapRequest == NULL || coapRequest->remoteUrl == NULL || sessionPtr == NULL) {
-        return NSTACKX_EFAILED;
-    }
-    if (CoapUriParse(coapRequest->remoteUrl, &coapUri) != NSTACKX_EOK) {
-        return NSTACKX_EFAILED;
+    if (CoapUriParse(coapRequest.remoteUrl, &coapUri) != NSTACKX_EOK) {
+        goto DATA_FREE;
     }
     remote = coapUri.host;
     res = CoapResolveAddress(&remote, &dst.addr.sa);
     if (res < 0) {
         LOGE(TAG, "fail to resolve address");
-        return NSTACKX_EFAILED;
+        goto DATA_FREE;
     }
 
     dst.size = res;
@@ -211,57 +221,41 @@ int32_t CoapSendRequest(const CoapRequest *coapRequest, coap_session_t **session
     coapServerParameter.proto = COAP_PROTO_UDP;
     coapServerParameter.dst = &dst;
 
-    if (*sessionPtr == NULL) {
-        session = CoapGetSessionOnTargetServer(serverType, &coapServerParameter);
-        if (session == NULL) {
-            LOGE(TAG, "coap_get_client_session failed");
-            return NSTACKX_EFAILED;
-        }
-        *sessionPtr = session;
-    } else {
-        session = *sessionPtr;
+    session = CoapGetSessionOnTargetServer(serverType, &coapServerParameter);
+    if (session == NULL) {
+        LOGE(TAG, "get client session failed");
+        goto DATA_FREE;
     }
 
-    pdu = CoapPackToPdu(coapRequest, &coapUri, session);
+    pdu = CoapPackToPdu(&coapRequest, &coapUri, session);
     if (pdu == NULL) {
-        return NSTACKX_EFAILED;
+        goto SESSION_RELEASE;
     }
 
     tid = coap_send(session, pdu);
     if (tid == COAP_INVALID_TID) {
-        return NSTACKX_EFAILED;
-    }
-    return NSTACKX_EOK;
-}
-
-
-static int32_t CoapResponseService(const char *remoteUrl)
-{
-    int32_t ret;
-    CoapRequest coapRequest;
-    coap_session_t *session = NULL;
-
-    (void)memset_s(&coapRequest, sizeof(coapRequest), 0, sizeof(coapRequest));
-
-    coapRequest.type = COAP_MESSAGE_CON;
-    coapRequest.code = COAP_REQUEST_POST;
-    coapRequest.remoteUrl = remoteUrl;
-    coapRequest.data = PrepareServiceDiscover(NSTACKX_FALSE);
-    if (coapRequest.data == NULL) {
-        LOGE(TAG, "failed to prepare coap data");
-        return NSTACKX_EFAILED;
-    } else {
-        coapRequest.dataLength = strlen(coapRequest.data) + 1;
-    }
-
-    ret = CoapSendRequest(&coapRequest, &session, SERVER_TYPE_WLANORETH);
-    if (ret != NSTACKX_EOK) {
-        LOGE(TAG, "failed to send coap request");
+        LOGE(TAG, "coap send failed");
+        goto SESSION_RELEASE;
     }
     free(coapRequest.data);
     coap_session_release(session);
+    return NSTACKX_EOK;
+SESSION_RELEASE:
+    coap_session_release(session);
+DATA_FREE:
+    free(coapRequest.data);
+    return NSTACKX_EFAILED;
+}
 
-    return ret;
+static int32_t CoapResponseService(const char *remoteUrl)
+{
+    char *data = PrepareServiceDiscover(NSTACKX_FALSE);
+    if (data == NULL) {
+        LOGE(TAG, "failed to prepare coap data");
+        return NSTACKX_EFAILED;
+    }
+
+    return CoapSendRequest(COAP_MESSAGE_CON, remoteUrl, data, strlen(data) + 1, SERVER_TYPE_WLANORETH);
 }
 
 static int32_t GetServiceDiscoverInfo(uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr)
@@ -596,13 +590,10 @@ static void HndPostServiceMsg(coap_context_t *ctx, struct coap_resource_t *resou
 
 static int32_t CoapPostServiceDiscover(void)
 {
-    int32_t ret;
-    coap_session_t *session = NULL;
     char ifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     char discoverUri[COAP_URI_BUFFER_LENGTH] = {0};
-    CoapRequest coapRequest = {0};
-    (void)memset_s(&coapRequest, sizeof(coapRequest), 0, sizeof(coapRequest));
+    char *data = NULL;
 
     if (GetLocalInterfaceName(ifName, sizeof(ifName)) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
@@ -615,25 +606,13 @@ static int32_t CoapPostServiceDiscover(void)
     if (sprintf_s(discoverUri, sizeof(discoverUri), "coap://%s/%s", ipString, COAP_DEVICE_DISCOVER_URI) < 0) {
         return NSTACKX_EFAILED;
     }
-    coapRequest.type = COAP_MESSAGE_NON;
-    coapRequest.code = COAP_REQUEST_POST;
-    coapRequest.remoteUrl = discoverUri;
-    coapRequest.data = PrepareServiceDiscover(NSTACKX_TRUE);
-    if (coapRequest.data == NULL) {
+    data = PrepareServiceDiscover(NSTACKX_TRUE);
+    if (data == NULL) {
         LOGE(TAG, "failed to prepare coap data");
         return NSTACKX_EFAILED;
-    } else {
-        coapRequest.dataLength = strlen(coapRequest.data) + 1;
     }
 
-    ret = CoapSendRequest(&coapRequest, &session, SERVER_TYPE_WLANORETH);
-    if (ret != NSTACKX_EOK) {
-        LOGE(TAG, "failed to send coap request");
-    }
-    free(coapRequest.data);
-    coap_session_release(session);
-
-    return ret;
+    return CoapSendRequest(COAP_MESSAGE_NON, discoverUri, data, strlen(data) + 1, SERVER_TYPE_WLANORETH);
 }
 
 static uint32_t GetDiscoverInterval(uint32_t discoverCount)
@@ -896,20 +875,13 @@ int32_t CoapSendServiceMsgWithDefiniteTargetIp(MsgCtx *msgCtx, DeviceInfo *devic
 {
     char ipString[INET_ADDRSTRLEN] = {0};
     char uriBuffer[COAP_URI_BUFFER_LENGTH] = {0};
-    int32_t ret;
-    CoapRequest coapRequest;
-    coap_session_t *session = NULL;
     uint16_t dataLen = 0;
     uint8_t actualType = GetActualType(msgCtx->type, msgCtx->p2pAddr);
+    char *data = NULL;
     LOGD(TAG, "actualType is %hhu", actualType);
     if (msgCtx->len == 0 || msgCtx->len > NSTACKX_MAX_SENDMSG_DATA_LEN) {
         return NSTACKX_EINVAL;
     }
-
-    (void)memset_s(&coapRequest, sizeof(coapRequest), 0, sizeof(coapRequest));
-
-    coapRequest.type = COAP_MESSAGE_CON;
-    coapRequest.code = COAP_REQUEST_POST;
 
     if (strlen(msgCtx->p2pAddr) == 0) {
         if (deviceInfo == NULL) {
@@ -929,22 +901,13 @@ int32_t CoapSendServiceMsgWithDefiniteTargetIp(MsgCtx *msgCtx, DeviceInfo *devic
     if (sprintf_s(uriBuffer, sizeof(uriBuffer), "coap://%s/" COAP_SERVICE_MSG_URI, ipString) < 0) {
         return NSTACKX_EFAILED;
     }
-    coapRequest.remoteUrl = uriBuffer;
-    coapRequest.data = (char *)CreateServiceMsgFrame(msgCtx->moduleName,
+    data = (char *)CreateServiceMsgFrame(msgCtx->moduleName,
         GetLocalDeviceInfoPtr()->deviceId, msgCtx->data, msgCtx->len, &dataLen);
-    if (coapRequest.data == NULL) {
+    if (data == NULL) {
         LOGE(TAG, "failed to prepare msg data");
         return NSTACKX_EFAILED;
     }
-    coapRequest.dataLength = dataLen;
-
-    ret = CoapSendRequest(&coapRequest, &session, actualType);
-    if (ret != NSTACKX_EOK) {
-        LOGE(TAG, "failed to send coap request");
-    }
-    free(coapRequest.data);
-    coap_session_release(session);
-    return ret;
+    return CoapSendRequest(COAP_MESSAGE_CON, uriBuffer, data, dataLen, actualType);
 }
 
 uint8_t GetActualType(const uint8_t type, const char *dstIp)
