@@ -218,7 +218,7 @@ int BusCenterClientInit(void)
 
     pthread_mutex_init(&g_busCenterClient.lock, NULL);
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_NODE_STATE_CB_CNT,
-        (unsigned char*)&g_maxNodeStateCbCount,sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
+        (unsigned char*)&g_maxNodeStateCbCount, sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
         LOG_ERR("Cannot get NodeStateCbCount from config file");
         g_maxNodeStateCbCount = DEFAULT_NODE_STATE_CB_CNT;
     }
