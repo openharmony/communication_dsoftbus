@@ -30,7 +30,7 @@
 
 void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
-    int val;
+    int32_t val;
     val = MAX_BYTES_LENGTH;
     sets->SetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char*)&val, sizeof(val));
     val = MAX_MESSAGE_LENGTH;
