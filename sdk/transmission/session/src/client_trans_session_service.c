@@ -124,6 +124,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete session server [%s] failed", sessionName);
     }
+    TransDeleteFileListener(sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer ok: ret=%d", ret);
     return ret;
 }
@@ -319,4 +320,33 @@ int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
     }
 
     return ClientGetSessionDataById(sessionId, devId, len, KEY_PEER_DEVICE_ID);
+}
+
+int SetFileReceiveListener(const char *pkgName, const char *sessionName,
+    const IFileReceiveListener *recvListener, const char *rootDir)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX) || recvListener == NULL) {
+        LOG_ERR("set file receive listener invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        LOG_ERR("set file receive listener init softbus client error");
+        return SOFTBUS_ERR;
+    }
+    return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
+}
+
+int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+        sendListener == NULL) {
+        LOG_ERR("set file send listener invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        LOG_ERR("set file send listener init softbus client error");
+        return SOFTBUS_ERR;
+    }
+    return TransSetFileSendListener(sessionName, sendListener);
 }

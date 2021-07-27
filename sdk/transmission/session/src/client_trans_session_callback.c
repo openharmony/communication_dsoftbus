@@ -213,6 +213,7 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnSessionOpenFailed = TransOnSessionOpenFailed;
     g_sessionCb.OnDataReceived = TransOnDataReceived;
     g_sessionCb.OnStreamReceived = TransOnOnStreamRecevied;
+    g_sessionCb.OnGetSessionId = ClientGetSessionIdByChannelId;
     return &g_sessionCb;
 }
 
