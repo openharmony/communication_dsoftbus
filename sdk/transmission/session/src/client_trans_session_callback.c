@@ -84,7 +84,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpened: sessionName=%{public}s, flag=%{public}d, isServer=%{public}d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d",
         sessionName, flag, channel->isServer);
 
     ISessionListener listener = {0};
@@ -117,7 +117,8 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
 
 int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%d, channelType=%d",
+        channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
     int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
@@ -137,7 +138,8 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
 
 int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionClosed: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionClosed: channelId=%d, channelType=%d",
+        channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
     int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);

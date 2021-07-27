@@ -209,7 +209,8 @@ static void DumpLooperLocked(const SoftBusLooperContext *context)
     LIST_FOR_EACH(item, &context->msgHead) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "DumpLooper. i=%d,handler=%s,what =%d,arg1=%llu arg2=%llu, time=%lld",
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
+            "DumpLooper. i=%d,handler=%s,what =%d,arg1=%llu arg2=%llu, time=%lld",
             i, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
         i++;
     }
@@ -231,10 +232,12 @@ void DumpLooper(const SoftBusLooper *looper)
 
 static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime what =%d time=%lld us", looper->context->name, msgPost->what, msgPost->time);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime what =%d time=%lld us",
+        looper->context->name, msgPost->what, msgPost->time);
     if (msgPost->handler == NULL) {
         FreeSoftBusMsg(msgPost);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. msg handler is null", looper->context->name);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. msg handler is null",
+            looper->context->name);
         return;
     }
     SoftBusMessageNode *newNode = (SoftBusMessageNode *)SoftBusMalloc(sizeof(SoftBusMessageNode));
@@ -255,7 +258,8 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
         SoftBusFree(newNode);
         FreeSoftBusMsg(msgPost);
         (void)pthread_mutex_unlock(&context->lock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. running=%d,stop=%d", context->name, context->running, context->stop);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. running=%d,stop=%d",
+            context->name, context->running, context->stop);
         return;
     }
     ListNode *item = NULL;

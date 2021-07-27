@@ -74,7 +74,8 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer: pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer: pkgName=%s, sessionName=%s",
+        pkgName, sessionName);
 
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init softbus err");
@@ -110,7 +111,8 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer: pkgName=%{public}s, sessionName=%{public}s", pkgName, sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer: pkgName=%s, sessionName=%s",
+        pkgName, sessionName);
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
@@ -153,7 +155,8 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param");
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%{public}s, peerSessionName=%{public}s", mySessionName, peerSessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
+        mySessionName, peerSessionName);
 
     SessionParam param = {
         .sessionName = mySessionName,
@@ -184,7 +187,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%{public}d, channelId=%{public}", sessionId, channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d", sessionId, channelId);
     return sessionId;
 }
 
@@ -204,7 +207,7 @@ static void CheckSessionIsOpened(int32_t sessionId)
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session is opening, i=%{public}d", i);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session is opening, i=%d", i);
         usleep(SESSION_CHECK_PERIOD);
         i++;
     }
@@ -221,7 +224,8 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionSync invalid param");
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%{public}s, peerSessionName=%{public}s", mySessionName, peerSessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%s, peerSessionName=%s",
+        mySessionName, peerSessionName);
 
     SessionParam param = {
         .sessionName = mySessionName,
@@ -249,13 +253,14 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         peerDeviceId, groupId, (int32_t)attr->dataType);
     ret = ClientSetChannelBySessionId(sessionId, channelId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server open session err: ret=%{public}d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server open session err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
 
     CheckSessionIsOpened(sessionId);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%{public}d, channelId=%{public}", sessionId, channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%d, channelId=%d",
+        sessionId, channelId);
     return sessionId;
 }
 
@@ -277,7 +282,8 @@ void CloseSession(int sessionId)
     }
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel err: ret=%d, channelId=%d, channeType=%d", ret, channelId, type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel err: ret=%d, channelId=%d, channeType=%d",
+            ret, channelId, type);
     }
 
     ret = ClientDeleteSession(sessionId);

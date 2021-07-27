@@ -129,7 +129,8 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channel->info.myData.channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %lld]", channel->info.myData.channelId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %lld]",
+                channel->info.myData.channelId);
             (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_ERR;
         }
@@ -139,7 +140,8 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     g_udpChannelMgr->cnt++;
 
     (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add udp channel success.[channelId = %lld].", channel->info.myData.channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add udp channel success.[channelId = %lld].",
+        channel->info.myData.channelId);
     return SOFTBUS_OK;
 }
 

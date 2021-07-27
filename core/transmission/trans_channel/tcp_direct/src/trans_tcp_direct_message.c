@@ -232,7 +232,7 @@ int32_t NotifyChannelClosed(int32_t channelId)
 
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusReply: channelId=%{public}d", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusReply: channelId=%d", channelId);
     SessionConn *conn = GetTdcInfoByChannelId(channelId);
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");

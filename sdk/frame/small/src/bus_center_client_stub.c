@@ -98,7 +98,8 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *reply, const IpcContext *ctx, void
     }
     int32_t retReply = LnnOnNodeOnlineStateChanged(isOnline, info);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeOnlineStateChanged LnnOnNodeOnlineStateChanged failed!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeOnlineStateChanged LnnOnNodeOnlineStateChanged failed!");
         FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
     }
@@ -119,7 +120,8 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *
     void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
     int32_t retReply = LnnOnNodeBasicInfoChanged(info, type);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeBasicInfoChanged LnnOnNodeBasicInfoChanged failed!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeBasicInfoChanged LnnOnNodeBasicInfoChanged failed!");
         FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
     }

@@ -72,7 +72,8 @@ int32_t TransAddUdpChannel(UdpChannel *channel)
     UdpChannel *channelNode = NULL;
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channel->channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %d]", channel->channelId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %d]",
+                channel->channelId);
             (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_ERR;
         }
@@ -213,7 +214,8 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(newChannel->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel add peer session name, device id, group id failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "udp channel add peer session name, device id, group id failed");
         SoftBusFree(newChannel);
         return NULL;
     }

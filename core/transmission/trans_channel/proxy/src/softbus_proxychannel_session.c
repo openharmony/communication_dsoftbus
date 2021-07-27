@@ -319,7 +319,8 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
     }
 
     if (TransProxySessionDataLenCheck(dataInfo.outLen, dataHead->flags) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data len is too large %d type %d", dataInfo.outLen, dataHead->flags);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data len is too large %d type %d",
+            dataInfo.outLen, dataHead->flags);
         SoftBusFree(dataInfo.outData);
         return SOFTBUS_ERR;
     }
@@ -373,7 +374,8 @@ void TransOnNormalMsgReceived(const char *pkgName, int32_t channelId, const char
     }
 
     if (head->sliceNum != 1 || head->sliceSeq >= head->sliceNum) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid sliceNum %d sliceSeq %d", head->sliceNum, head->sliceSeq);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid sliceNum %d sliceSeq %d",
+            head->sliceNum, head->sliceSeq);
         return;
     }
 
