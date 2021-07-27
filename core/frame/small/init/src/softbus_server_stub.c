@@ -31,7 +31,7 @@
 
 #define STACK_SIZE 0x800
 #define QUEUE_SIZE 20
-
+#define WAIT_FOR_SERVER 2
 typedef struct {
     INHERIT_SERVER_IPROXY;
 } DefaultFeatureApi;
@@ -214,6 +214,7 @@ int ServerStubInit(void)
 
 static void Init(void)
 {
+    sleep(WAIT_FOR_SERVER);
     SAMGR_GetInstance()->RegisterService((Service *)&g_samgrService);
     SAMGR_GetInstance()->RegisterDefaultFeatureApi(SOFTBUS_SERVICE, GET_IUNKNOWN(g_samgrService));
     LOG_INFO("Init success %s", SOFTBUS_SERVICE);
