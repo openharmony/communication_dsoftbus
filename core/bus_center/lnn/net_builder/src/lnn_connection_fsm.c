@@ -232,13 +232,6 @@ static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-    ConnectOption option;
-
-    if (!LnnConvertAddrToOption(&connInfo->addr, &option)) {
-        LOG_ERR("[id=%u]convert addr to option failed", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
-        return SOFTBUS_ERR;
-    }
 
     if ((connInfo->flag & (CONN_INFO_FLAG_JOINING_ACTIVE | CONN_INFO_FLAG_JOINING_PASSIVE)) != 0) {
         LOG_INFO("[id=%u]join LNN is ongoing, waiting...", connFsm->id);
@@ -246,7 +239,7 @@ static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
     }
     LOG_INFO("[id=%u]begin join request", connFsm->id);
     connInfo->flag |= CONN_INFO_FLAG_JOINING_ACTIVE;
-    connInfo->authId = AuthVerifyDevice(LNN, &option);
+    connInfo->authId = AuthVerifyDevice(LNN, &(connInfo->addr));
     if (connInfo->authId <= 0) {
         LOG_ERR("[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);

@@ -22,6 +22,7 @@
 #include "auth_connection.h"
 #include "auth_sessionkey.h"
 #include "auth_socket.h"
+#include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
@@ -258,7 +259,8 @@ static void HandleAuthFail(AuthManager *auth)
     auth->cb->onDeviceVerifyFail(auth->authId);
 }
 
-static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const ConnectOption *option)
+static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const ConnectOption *option,
+    const ConnectionAddr *addr)
 {
     auth->cb = GetAuthCallback(moduleId);
     if (auth->cb == NULL) {
@@ -271,12 +273,21 @@ static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const Co
     auth->softbusVersion = SOFT_BUS_NEW_V1;
     auth->option = *option;
     auth->hichain = g_hichainGaInstance;
+    if (memcpy_s(auth->peerUid, MAX_ACCOUNT_HASH_LEN, addr->peerUid, MAX_ACCOUNT_HASH_LEN) != 0) {
+        LOG_ERR("memcpy_s faield");
+        return SOFTBUS_ERR;
+    }
     ListNodeInsert(&g_authClientHead, &auth->node);
     return SOFTBUS_OK;
 }
 
-static int64_t HandleVerifyDevice(AuthModuleId moduleId, const ConnectOption *option)
+static int64_t HandleVerifyDevice(AuthModuleId moduleId, const ConnectionAddr *addr)
 {
+    ConnectOption option = {0};
+    if (!LnnConvertAddrToOption(addr, &option)) {
+        LOG_ERR("auth LnnConverAddrToOption failed");
+        return SOFTBUS_ERR;
+    }
     if (pthread_mutex_lock(&g_authLock) != 0) {
         LOG_ERR("lock mutex failed");
         return SOFTBUS_ERR;
@@ -288,7 +299,7 @@ static int64_t HandleVerifyDevice(AuthModuleId moduleId, const ConnectOption *op
         return SOFTBUS_ERR;
     }
     (void)memset_s(auth, sizeof(AuthManager), 0, sizeof(AuthManager));
-    if (InitNewAuthManager(auth, moduleId, option) != SOFTBUS_OK) {
+    if (InitNewAuthManager(auth, moduleId, &option, addr) != SOFTBUS_OK) {
         LOG_ERR("auth InitNewAuthManager failed");
         (void)pthread_mutex_unlock(&g_authLock);
         SoftBusFree(auth);
@@ -296,18 +307,18 @@ static int64_t HandleVerifyDevice(AuthModuleId moduleId, const ConnectOption *op
     }
     (void)pthread_mutex_unlock(&g_authLock);
 
-    if (option->type == CONNECT_TCP) {
-        if (HandleIpVerifyDevice(auth, option) != SOFTBUS_OK) {
+    if (option.type == CONNECT_TCP) {
+        if (HandleIpVerifyDevice(auth, &option) != SOFTBUS_OK) {
             LOG_ERR("HandleIpVerifyDevice failed");
             return SOFTBUS_ERR;
         }
-    } else if (option->type == CONNECT_BR) {
-        if (ConnConnectDevice(option, auth->requestId, &g_connResult) != SOFTBUS_OK) {
+    } else if (option.type == CONNECT_BR) {
+        if (ConnConnectDevice(&option, auth->requestId, &g_connResult) != SOFTBUS_OK) {
             LOG_ERR("auth ConnConnectDevice failed");
             return SOFTBUS_ERR;
         }
     } else {
-        LOG_ERR("auth conn type %d is not support", option->type);
+        LOG_ERR("auth conn type %d is not support", option.type);
         return SOFTBUS_ERR;
     }
     if (EventInLooper(auth->authId) != SOFTBUS_OK) {
@@ -318,11 +329,11 @@ static int64_t HandleVerifyDevice(AuthModuleId moduleId, const ConnectOption *op
     return auth->authId;
 }
 
-int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option)
+int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectionAddr *addr)
 {
     int64_t authId;
 
-    if (option == NULL) {
+    if (addr == NULL) {
         LOG_ERR("invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -330,7 +341,7 @@ int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option)
         LOG_ERR("need to call HichainServiceInit!");
         return SOFTBUS_ERR;
     }
-    authId = HandleVerifyDevice(moduleId, option);
+    authId = HandleVerifyDevice(moduleId, addr);
     if (authId <= 0) {
         LOG_ERR("auth HandleVerifyDevice failed");
         return SOFTBUS_ERR;

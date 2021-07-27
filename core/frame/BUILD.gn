@@ -97,6 +97,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$hilog_lite_deps_path",
       "//foundation/communication/ipc_lite:liteipc_adapter",
       "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
     ]
   }
   executable("softbus_server") {

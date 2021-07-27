@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "lnn_network_manager.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
@@ -53,6 +54,10 @@ int32_t BusCenterServerInit(void)
     }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
         LOG_ERR("init lnn discovery manager fail!");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitNetworkManager() != SOFTBUS_OK) {
+        LOG_ERR("init lnn network manager fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {

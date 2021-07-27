@@ -115,7 +115,7 @@ typedef struct {
 } VerifyCallback;
 
 typedef struct {
-    void (*onTransUdpDataRecv)(int64_t authId, ConnectOption *option, AuthTransDataInfo *info);
+    void (*onTransUdpDataRecv)(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info);
 } AuthTransCallback;
 
 uint32_t AuthGetEncryptHeadLen(void);
@@ -127,7 +127,7 @@ void CloseAuthServer(void);
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb);
 int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb);
 
-int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectOption *option);
+int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectionAddr *addr);
 
 int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len);
 int32_t AuthHandleLeaveLNN(int64_t authId);
