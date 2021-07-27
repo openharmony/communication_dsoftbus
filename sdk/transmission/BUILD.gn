@@ -45,6 +45,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel_sdk",
@@ -83,6 +84,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
       "$dsoftbus_sdk_path/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel_sdk",
       "$dsoftbus_sdk_path/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel_sdk",

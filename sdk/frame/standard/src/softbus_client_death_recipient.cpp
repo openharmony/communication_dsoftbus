@@ -21,7 +21,7 @@
 namespace OHOS {
 void SoftBusClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    LOG_INFO("server died, try to publish again");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "server died, try to publish again");
     ClientDeathProcTask();
 }
 }  // namespace OHOS

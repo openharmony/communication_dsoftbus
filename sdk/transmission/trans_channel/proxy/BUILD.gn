@@ -21,6 +21,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_deps = [
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     "$hilog_lite_deps_path",
   ]
@@ -63,8 +64,10 @@ if (defined(ohos_lite)) {
     ]
     sources = [ "src/client_trans_proxy_manager.c" ]
     public_configs = [ ":trans_proxy_channel_sdk_interface" ]
-    deps =
-        [ "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk" ]
+    deps = [
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
+    ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }

@@ -29,14 +29,14 @@
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t channelId)
 {
     int32_t ret = TransProxyOnChannelClosed(pkgName, channelId);
-    LOG_INFO("proxy channel close, channelId = %d, ret = %d", channelId, ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel close, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
 
 static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t channelId)
 {
     int32_t ret = TransProxyOnChannelOpenFailed(pkgName, channelId);
-    LOG_INFO("proxy channel open fail, channelId = %d, ret = %d", channelId, ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel open fail, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
 
@@ -54,13 +54,13 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get info networkId fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get info networkId fail.");
         return SOFTBUS_ERR;
     }
     info.peerDeviceId = buf;
 
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
-    LOG_INFO("proxy channel open, channelId = %d, ret = %d", channelId, ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel open, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
 
@@ -69,10 +69,10 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     int32_t ret;
 
     if (appInfo == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LOG_INFO("proxy channel opened: channeld=%d, appType=%d, isServer=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel opened: channeld=%d, appType=%d, isServer=%d",
         channelId, appInfo->appType, isServer);
 
     switch (appInfo->appType) {
@@ -89,7 +89,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
             ret = SOFTBUS_ERR;
             break;
     }
-    LOG_INFO("open ret %d", ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open ret %d", ret);
     return ret;
 }
 
@@ -100,7 +100,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo)
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LOG_INFO("param: channelId=%d, appType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param: channelId=%d, appType=%d",
         channelId, appInfo->appType);
 
     switch (appInfo->appType) {
@@ -125,7 +125,7 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LOG_INFO("param: channelId=%d, appType=%d", channelId, appInfo->appType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param: channelId=%d, appType=%d", channelId, appInfo->appType);
 
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->appType) {
@@ -178,7 +178,7 @@ static int32_t TransProxyGetConnectOptionBr(const char *peerNetworkId, ConnectOp
 
     ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_BT_MAC, brMac, sizeof(brMac));
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get momote node mac err %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get momote node mac err %d", ret);
         return SOFTBUS_ERR;
     }
 
@@ -199,7 +199,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
                              sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get local devid fail %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local devid fail %d", ret);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != 0) {
@@ -213,7 +213,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_UUID,
                               appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get remote node uuid err %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err %d", ret);
         return SOFTBUS_GET_REMOTE_UUID_ERR;
     }
 
@@ -232,17 +232,17 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
     }
 
     if (TransProxyGetConnectOptionBr(peerNetworkId, &connOpt) != SOFTBUS_OK) {
-        LOG_ERR("networking get conn opthon fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get conn opthon fail");
         return channelId;
     }
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     if (TransProxyGetAppInfo(sessionName, peerNetworkId, &appInfo) != SOFTBUS_OK) {
-        LOG_ERR("networking get app info fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get app info fail");
         return channelId;
     }
 
     if (TransProxyOpenProxyChannel(&appInfo, &connOpt, &channelId) != SOFTBUS_OK) {
-        LOG_ERR("networking open channel fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking open channel fail");
         channelId = INVALID_CHANNEL_ID;
     }
     return channelId;

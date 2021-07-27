@@ -28,7 +28,7 @@ static IClientProxy *g_serverProxy = NULL;
 static int ClientSimpleResultCb(IOwner owner, int code, IpcIo *reply)
 {
     *(int *)owner = IpcIoPopInt32(reply);
-    LOG_INFO("retvalue:%d", *(int *)owner);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "retvalue:%d", *(int *)owner);
     return EC_SUCCESS;
 }
 
@@ -38,7 +38,7 @@ static IClientProxy *GetServerProxy(void)
     IUnknown *iUnknown = NULL;
     int ret;
 
-    LOG_INFO("start get client proxy");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start get client proxy");
     while (clientProxy == NULL) {
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
@@ -48,21 +48,21 @@ static IClientProxy *GetServerProxy(void)
 
         ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&clientProxy);
         if (ret != EC_SUCCESS || clientProxy == NULL) {
-            LOG_ERR("QueryInterface failed [%d]", ret);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QueryInterface failed [%d]", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
     }
 
-    LOG_INFO("get client proxy ok");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get client proxy ok");
     return clientProxy;
 }
 
 int32_t RegisterService(const char *name, const struct CommonScvId *svcId)
 {
-    LOG_INFO("server register service client push.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "server register service client push.");
     if ((svcId == NULL) || (name == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
@@ -83,7 +83,7 @@ int32_t RegisterService(const char *name, const struct CommonScvId *svcId)
     int ret = SOFTBUS_ERR;
     if (g_serverProxy->Invoke(g_serverProxy, MANAGE_REGISTER_SERVICE, &request, &ret,
         ClientSimpleResultCb) != EC_SUCCESS) {
-        LOG_INFO("Call back ret(%d)", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "Call back ret(%d)", ret);
         return SOFTBUS_ERR;
     }
     return ret;
@@ -100,9 +100,9 @@ int32_t ServerProxyInit(void)
     HOS_SystemInit();
     g_serverProxy = GetServerProxy();
     if (g_serverProxy == NULL) {
-        LOG_ERR("get ipc client proxy failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get ipc client proxy failed");
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerProvideInterfaceInit ok");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerProvideInterfaceInit ok");
     return SOFTBUS_OK;
 }

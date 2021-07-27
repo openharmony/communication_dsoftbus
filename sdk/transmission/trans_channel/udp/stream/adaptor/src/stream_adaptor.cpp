@@ -105,20 +105,20 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        LOG_ERR("Encrypt invalid para.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
-        LOG_ERR("Encrypt Data fail. %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt Data fail. %d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
@@ -130,19 +130,19 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        LOG_ERR("Decrypt invalid para.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Decrypt Data fail. %d ", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt Data fail. %d ", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
 

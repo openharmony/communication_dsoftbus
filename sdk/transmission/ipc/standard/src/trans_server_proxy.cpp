@@ -42,7 +42,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LOG_ERR("Get GetSystemAbility failed!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get GetSystemAbility failed!\n");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -54,7 +54,7 @@ int32_t TransServerProxyInit(void)
     sptr<IRemoteObject> object = GetSystemAbility();
     g_serverProxy = new (std::nothrow) TransServerProxy(object);
     if (g_serverProxy == nullptr) {
-        LOG_ERR("Get remote softbus object failed!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -63,11 +63,11 @@ int32_t TransServerProxyInit(void)
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("softbus server g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
-        LOG_ERR("pkgName or sessionName is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or sessionName is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->CreateSessionServer(pkgName, sessionName);
@@ -76,11 +76,11 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("softbus server g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
-        LOG_ERR("pkgName or sessionName is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or sessionName is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->RemoveSessionServer(pkgName, sessionName);
@@ -90,17 +90,17 @@ int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionN
                              const char *peerDeviceId, const char *groupId, int32_t flags)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("softbus server g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     if ((mySessionName == nullptr) || (peerSessionName == nullptr) ||
         (peerDeviceId == nullptr) || (groupId == nullptr)) {
-        LOG_ERR("parameter is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int channelId = g_serverProxy->OpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
     if (channelId < SOFTBUS_OK) {
-        LOG_ERR("OpenSession failed!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession failed!\n");
         return SOFTBUS_ERR;
     }
     return channelId;
@@ -109,11 +109,11 @@ int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionN
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("softbus server g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     if (channelId < SOFTBUS_OK) {
-        LOG_ERR("invalid channel Id!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channel Id!\n");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->CloseChannel(channelId, channelType);
@@ -122,7 +122,7 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 int32_t ServerIpcSendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("softbus server g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
 

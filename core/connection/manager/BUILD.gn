@@ -47,6 +47,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/connection/ble:ble_connection",
         "$dsoftbus_root_path/core/connection/br:br_connection",
@@ -73,6 +74,7 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/ble:ble_connection",
       "$dsoftbus_root_path/core/connection/br:br_connection",

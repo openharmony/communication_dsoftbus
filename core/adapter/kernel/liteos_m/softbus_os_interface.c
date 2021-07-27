@@ -28,33 +28,33 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     void *id = osTimerNew((osTimerFunc_t)timerFunc, type, NULL, NULL);
     if (id != NULL) {
-        LOG_INFO("create timer success");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create timer success");
         return id;
     }
-    LOG_ERR("create timer failed");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create timer failed");
     return NULL;
 }
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
-        LOG_ERR("start timer failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed");
         (void)osTimerDelete(timerId);
         return SOFTBUS_ERR;
     }
 
-    LOG_INFO("start timer success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start timer success");
     return SOFTBUS_OK;
 }
 
 int SoftBusDeleteTimer(void *timerId)
 {
     if (osTimerDelete(timerId) != osOK) {
-        LOG_ERR("delete timer failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "delete timer failed");
         return SOFTBUS_ERR;
     }
 
-    LOG_INFO("delete timer success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "delete timer success");
     return SOFTBUS_OK;
 }
 
@@ -72,7 +72,7 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     uint32_t fileLen = 0;
     int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
     if (fd < 0) {
-        LOG_ERR("Read UtilsFileOpen fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     int ret = UtilsFileStat(fileName, &fileLen);
@@ -82,16 +82,16 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     }
     ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
     if (ret < 0) {
-        LOG_ERR("Read UtilsFileSeek fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileSeek fail");
         goto EXIT;
     }
     if (fileLen > maxLen) {
-        LOG_ERR("Read file len not legal, clear buf");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read file len not legal, clear buf");
         goto EXIT;
     }
     ret = UtilsFileRead(fd, readBuf, maxLen);
     if (ret < 0) {
-        LOG_ERR("Read UtilsFileRead, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileRead, ret=%d", ret);
         goto EXIT;
     }
     UtilsFileClose(fd);
@@ -108,12 +108,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
     int fd;
     fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
     if (fd < 0) {
-        LOG_ERR("WriteDeviceId UtilsFileOpen fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
     if (ret != len) {
-        LOG_ERR("UtilsFileOpen UtilsFileWrite fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "UtilsFileOpen UtilsFileWrite fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }

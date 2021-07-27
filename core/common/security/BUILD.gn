@@ -21,6 +21,7 @@ if (defined(ohos_lite)) {
     "$hilog_lite_include_path",
   ]
   common_deps = [
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
     "//third_party/mbedtls:mbedtls_shared",
@@ -51,6 +52,7 @@ if (defined(ohos_lite)) {
     sources = [ "mbedtls/softbus_crypto.c" ]
     public_deps = [
       "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "//utils/native/base:utilsecurec_shared",
     ]

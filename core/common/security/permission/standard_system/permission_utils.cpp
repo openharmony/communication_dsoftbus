@@ -31,7 +31,7 @@ extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
     auto bundleObj =
     OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
-        LOG_ERR("failed to get bundle manager service");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "failed to get bundle manager service");
         return SOFTBUS_ERR;
     }
     OHOS::sptr<IBundleMgr> bmgr = OHOS::iface_cast<IBundleMgr>(bundleObj);

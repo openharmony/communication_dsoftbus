@@ -37,6 +37,7 @@ ohos_shared_library("softbus_client") {
   ]
   public_configs = [ ":softbus_proxy_config" ]
   public_deps = [
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
     "$dsoftbus_root_path/sdk/bus_center/service:dsoftbus_bus_center_service_sdk",
     "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",

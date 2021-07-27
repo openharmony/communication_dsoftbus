@@ -29,6 +29,7 @@ if (defined(ohos_lite)) {
   common_deps = [
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -69,7 +70,10 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":config_adapter_kernel" ]
 
-    public_deps = [ "//utils/native/base:utilsecurec_shared" ]
+    public_deps = [
+      "//utils/native/base:utilsecurec_shared",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+    ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
