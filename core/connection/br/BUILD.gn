@@ -18,10 +18,11 @@ if (enable_connection_br == false) {
   deps_br = []
 } else {
   sources_br = [ "src/br_connection.c" ]
-  deps_br = [ 
-    "$dsoftbus_root_path/core/adapter/br/mock:br_adapter",
-    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+  deps_br = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/adapter/br/mock:br_adapter",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
   ]
 }
 

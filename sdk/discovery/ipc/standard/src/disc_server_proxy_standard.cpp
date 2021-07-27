@@ -26,7 +26,7 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -47,13 +47,13 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
     if (err != 0) {
-        LOG_ERR("StartDiscovery send request failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        LOG_ERR("StartDiscovery read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -63,7 +63,7 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -75,15 +75,15 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_STOP_DISCOVERY, data, reply, option);
-    LOG_ERR("StopDiscovery send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery send request ret = %d!", err);
     if (err != 0) {
-        LOG_ERR("StopDiscovery send request failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        LOG_ERR("StopDiscovery read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -93,7 +93,7 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -111,15 +111,15 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
-    LOG_ERR("PublishService send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService send request ret = %d!", err);
     if (err != 0) {
-        LOG_ERR("PublishService send request failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        LOG_ERR("PublishService read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -129,7 +129,7 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -141,15 +141,15 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_UNPUBLISH_SERVICE, data, reply, option);
-    LOG_ERR("UnPublishService send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService send request ret = %d!", err);
     if (err != 0) {
-        LOG_ERR("UnPublishService send request failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        LOG_ERR("UnPublishService read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;

@@ -41,7 +41,7 @@ int32_t TransChannelInit(void)
     }
 
     if (TransLaneMgrInit() != SOFTBUS_OK) {
-        LOG_ERR("trans lane manager init failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager init failed.");
         return SOFTBUS_ERR;
     }
 
@@ -71,7 +71,7 @@ void TransChannelDeinit(void)
 static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags)
 {
-    LOG_INFO("GetAppInfo");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -107,10 +107,10 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
     }
     if (LnnGetRemoteStrInfo(peerDeviceId, STRING_KEY_UUID,
         appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        LOG_ERR("get remote node uuid err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
         goto EXIT_ERR;
     }
-    LOG_INFO("GetAppInfo ok");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
     return appInfo;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -144,7 +144,7 @@ static int32_t TransGetLaneInfo(int32_t flags, const char *peerDeviceId,
     }
     LnnLanesObject *object = LnnRequestLanesObject(peerDeviceId, laneProperty, 1);
     if (object == NULL) {
-        LOG_ERR("get lne obj err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lne obj err");
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
     }
     int32_t laneIndex = 0;
@@ -157,7 +157,7 @@ static int32_t TransGetLaneInfo(int32_t flags, const char *peerDeviceId,
 
     *lanesObject = object;
     *laneInfo = info;
-    LOG_INFO("get lane info ok: flags=%d", flags);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get lane info ok: flags=%d", flags);
     return SOFTBUS_OK;
 }
 
@@ -179,7 +179,7 @@ static int32_t TransGetConnectOption(const ConnectionAddr *connAddr, ConnectOpti
         }
         return SOFTBUS_OK;
     } else {
-        LOG_INFO("get conn opt err: type=%d", type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get conn opt err: type=%d", type);
         return SOFTBUS_ERR;
     }
 }
@@ -200,17 +200,17 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 {
     if (type == CHANNEL_TYPE_UDP) {
         if (TransOpenUdpChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            LOG_INFO("open udp channel err");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel err");
             return SOFTBUS_ERR;
         }
     } else if (type == CHANNEL_TYPE_PROXY) {
         if (TransProxyOpenProxyChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            LOG_ERR("open proxy channel err");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open proxy channel err");
             return SOFTBUS_ERR;
         }
     } else {
         if (TransOpenTcpDirectChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            LOG_ERR("open direct channel err");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open direct channel err");
             return SOFTBUS_ERR;
         }
     }
@@ -220,7 +220,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags)
 {
-    LOG_INFO("server TransOpenChannel");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
     int32_t channelId = INVALID_CHANNEL_ID;
     LnnLanesObject *object = NULL;
     const LnnLaneInfo *info = NULL;
@@ -243,7 +243,7 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
     if (TransGetLaneInfo(flags, peerDeviceId, &object, &info) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    LOG_INFO("lane info: isSupportUdp=%d, isProxy=%d, connType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane info: isSupportUdp=%d, isProxy=%d, connType=%d",
         info->isSupportUdp, info->isProxy, info->conOption.type);
 
     if (TransGetConnectOption(&info->conOption, &connOpt) != SOFTBUS_OK) {
@@ -257,7 +257,8 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
 
     LnnReleaseLanesObject(object);
     SoftBusFree(appInfo);
-    LOG_INFO("server TransOpenChannel ok: channelId=%d, channelType=%d", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel ok: channelId=%d, channelType=%d",
+        channelId, channelType);
     return channelId;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -270,13 +271,13 @@ EXIT_ERR:
         (void)TransCloseChannel(channelId, channelType);
     }
 
-    LOG_INFO("server TransOpenChannel err");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel err");
     return INVALID_CHANNEL_ID;
 }
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("close channel: id=%d, type=%d", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
             (void)TransLaneMgrDelLane(channelId, channelType);

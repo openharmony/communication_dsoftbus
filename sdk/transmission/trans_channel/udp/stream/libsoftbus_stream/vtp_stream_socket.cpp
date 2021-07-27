@@ -41,16 +41,19 @@ void PrintOptionInfo(int type, const StreamAttr &value)
 {
     switch (value.GetType()) {
         case INT_TYPE:
-            LOG_INFO("Int option: type:%d, value:%d", type, value.GetIntValue());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "Int option: type:%d, value:%d", type, value.GetIntValue());
             break;
         case BOOL_TYPE:
-            LOG_INFO("Bool option: type:%d, value:%d", type, value.GetBoolValue());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "Bool option: type:%d, value:%d", type, value.GetBoolValue());
             break;
         case STRING_TYPE:
-            LOG_DBG("String option: type:%d, value:%s", type, value.GetStrValue().c_str());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+                "String option: type:%d, value:%s", type, value.GetStrValue().c_str());
             break;
         default:
-            LOG_ERR("Wrong StreamAttr!");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Wrong StreamAttr!");
             (void)type;
     }
 }
@@ -113,7 +116,7 @@ VtpStreamSocket::VtpStreamSocket()
 
 VtpStreamSocket::~VtpStreamSocket()
 {
-    LOG_INFO("~VtpStreamSocket");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "~VtpStreamSocket");
 }
 
 std::shared_ptr<VtpStreamSocket> VtpStreamSocket::GetSelf()
@@ -125,7 +128,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, const std::
 {
     int fd = CreateAndBindSocket(local);
     if (fd == -1) {
-        LOG_ERR("CreateAndBindSocket failed, errorcode:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateAndBindSocket failed, errorcode:%d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
@@ -137,7 +140,8 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, const std::
     configCv_.notify_all();
 
     SetDefaultConfig(fd);
-    LOG_INFO("Success to create a client socket(%d) of stream type(%d)", fd, streamType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "Success to create a client socket(%d) of stream type(%d)", fd, streamType);
     return true;
 }
 
@@ -153,24 +157,24 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
 
 bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey)
 {
-    LOG_INFO("CreateVtpServer start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateVtpServer start");
     listenFd_ = CreateAndBindSocket(local);
     if (listenFd_ == -1) {
-        LOG_ERR("create listenFd failed, errorcode %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create listenFd failed, errorcode %d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     bool ret = FtListen(listenFd_, MAX_CONNECTION_VALUE);
     if (ret != 0) {
-        LOG_ERR("FtListen failed, ret :%d errorcode %d", ret, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtListen failed, ret :%d errorcode %d", ret, FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     epollFd_ = FtEpollCreate();
     if (epollFd_ < 0) {
-        LOG_ERR("Failed to create epoll fd:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to create epoll fd:%d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
@@ -189,16 +193,17 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::
         self->DestroyStreamSocket();
     }).detach();
 
-    LOG_INFO("CreateServer end, listenFd:%d, epollFd:%d, streamType:%d", listenFd_, epollFd_, streamType_);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "CreateServer end, listenFd:%d, epollFd:%d, streamType:%d", listenFd_, epollFd_, streamType_);
     return true;
 }
 
 void VtpStreamSocket::DestroyStreamSocket()
 {
-    LOG_INFO("DestroyStreamSocket start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamSocket start");
     std::lock_guard<std::mutex> guard(streamSocketLock_);
     if (isDestoryed_) {
-        LOG_INFO("StreamSocket is already destoryed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamSocket is already destoryed");
         return;
     }
     if (listenFd_ != -1) {
@@ -217,7 +222,7 @@ void VtpStreamSocket::DestroyStreamSocket()
     }
 
     if (streamReceiver_ != nullptr) {
-        LOG_INFO("DestroyStreamSocket receiver delete");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamSocket receiver delete");
         streamReceiver_->OnStreamStatus(STREAM_CLOSED);
         streamReceiver_.reset();
     }
@@ -225,18 +230,19 @@ void VtpStreamSocket::DestroyStreamSocket()
     QuitStreamBuffer();
     vtpInstance_->UpdateSocketStreamCount(false);
     isDestoryed_ = true;
-    LOG_INFO("DestroyStreamSocket end");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamSocket end");
 }
 
 bool VtpStreamSocket::Connect(const IpAndPort &remote)
 {
     if (remote.ip.empty()) {
-        LOG_ERR("remote addr  error, ip is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote addr  error, ip is nullptr");
         DestroyStreamSocket();
         return false;
     }
 
-    LOG_DBG("Connect to server(addr:%s, server port:%d)", remote.ip.c_str(), remote.port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+        "Connect to server(addr:%s, server port:%d)", remote.ip.c_str(), remote.port);
     remoteIpPort_ = remote;
 
     struct sockaddr_in remoteSockAddr;
@@ -246,25 +252,25 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
 
     int ret = FtConnect(streamFd_, reinterpret_cast<struct sockaddr *>(&remoteSockAddr), sizeof(remoteSockAddr));
     if (ret != 0) {
-        LOG_ERR("FtConnect failed, ret :%d, errorno: %d", ret, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtConnect failed, ret :%d, errorno: %d", ret, FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     epollFd_ = FtEpollCreate();
     if (epollFd_ < 0) {
-        LOG_ERR("Failed to create epoll fd:%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to create epoll fd:%d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     if (SetSocketEpollMode(streamFd_) != ERR_OK) {
-        LOG_ERR("SetSocketEpollMode failed, fd = %d", streamFd_);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSocketEpollMode failed, fd = %d", streamFd_);
         DestroyStreamSocket();
         return false;
     }
     isStreamRecv_ = true;
-    LOG_INFO("Success to connect remote, and create a thread to recv data.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Success to connect remote, and create a thread to recv data.");
 
     auto self = this->GetSelf();
     std::thread([self]() { self->NotifyStreamListener(); }).detach();
@@ -277,7 +283,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
 
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
-    LOG_DBG("send in..., streamType:%d, data size:%zd, ext size:%zd", streamType_,
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "send in..., streamType:%d, data size:%zd, ext size:%zd", streamType_,
         stream->GetBufferLen(), stream->GetExtBufferLen());
 
     if (!isBlocked_) {
@@ -297,16 +303,18 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 
         auto plainData = packet.PacketizeStream();
         if (plainData == nullptr) {
-            LOG_ERR("PacketizeStream failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PacketizeStream failed");
             return false;
         }
         len = packet.GetPacketLen() + GetEncryptOverhead();
-        LOG_DBG("packet.GetPacketLen() = %zd, GetEncryptOverhead() = %zd", packet.GetPacketLen(), GetEncryptOverhead());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+            "packet.GetPacketLen() = %zd, GetEncryptOverhead() = %zd", packet.GetPacketLen(), GetEncryptOverhead());
         data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
         ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(),
             data.get() + FRAME_HEADER_LEN, len);
         if (encLen != len) {
-            LOG_ERR("encrypted failed, dataLen = %zd, encryptLen = %zd", len, encLen);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "encrypted failed, dataLen = %zd, encryptLen = %zd", len, encLen);
             return false;
         }
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
@@ -315,11 +323,11 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 
     int ret = FtSend(streamFd_, data.get(), len, 0);
     if (ret == -1) {
-        LOG_ERR("send failed, errorno: %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send failed, errorno: %d", FtGetErrno());
         return false;
     }
 
-    LOG_DBG("send out..., streamType:%d, data size:%zd", streamType_, len);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "send out..., streamType:%d, data size:%zd", streamType_, len);
     return true;
 }
 
@@ -328,18 +336,19 @@ bool VtpStreamSocket::SetOption(int type, const StreamAttr &value)
     PrintOptionInfo(type, value);
     auto it = optFuncMap_.find(type);
     if (it == optFuncMap_.end()) {
-        LOG_WARN("not found type = %d", type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "not found type = %d", type);
         return false;
     }
 
     if (value.GetType() != it->second.valueType) {
-        LOG_WARN("type = %d, value.type = %d", value.GetType(), it->second.valueType);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
+            "type = %d, value.type = %d", value.GetType(), it->second.valueType);
         return false;
     }
 
     MySetFunc set = it->second.set;
     if (set == nullptr) {
-        LOG_WARN("set is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "set is nullptr");
         return false;
     }
 
@@ -367,7 +376,7 @@ StreamAttr VtpStreamSocket::GetOption(int type) const
     if (it != optFuncMap_.end()) {
         MyGetFunc get = it->second.get;
         if (get == nullptr) {
-            LOG_ERR("Can not get option:%d", type);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Can not get option:%d", type);
             return std::move(StreamAttr());
         }
         if (type == NON_BLOCK) {
@@ -383,13 +392,13 @@ StreamAttr VtpStreamSocket::GetOption(int type) const
 bool VtpStreamSocket::SetStreamListener(std::shared_ptr<IStreamSocketListener> receiver)
 {
     if (receiver == nullptr) {
-        LOG_WARN("receiver is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "receiver is nullptr");
         return false;
     }
 
     std::lock_guard<std::mutex> guard(streamSocketLock_);
     streamReceiver_ = receiver;
-    LOG_INFO("set receiver success");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set receiver success");
     return true;
 }
 
@@ -400,9 +409,9 @@ bool VtpStreamSocket::InitVtpInstance(const std::string &pkgName)
 
 void VtpStreamSocket::DestroyVtpInstance(const std::string &pkgName)
 {
-    LOG_INFO("DestroyVtpInstance start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyVtpInstance start");
     vtpInstance_->DestroyVtp(pkgName);
-    LOG_INFO("DestroyVtpInstance end");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyVtpInstance end");
 }
 
 int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
@@ -410,13 +419,13 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     localIpPort_ = local;
     vtpInstance_->UpdateSocketStreamCount(true);
     if (local.ip.empty()) {
-        LOG_ERR("ip is empty");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ip is empty");
         return -1;
     }
 
     int sockFd = FtSocket(AF_INET, SOCK_STREAM, IPPROTO_FILLP);
     if (sockFd == -1) {
-        LOG_ERR("FtSocket failed, errorcode = %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtSocket failed, errorcode = %d", FtGetErrno());
         return -1;
     }
 
@@ -430,14 +439,14 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     int ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
     if (ret == -1) {
         FtClose(sockFd);
-        LOG_ERR("FtBind failed, errorcode %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtBind failed, errorcode %d", FtGetErrno());
         return -1;
     }
 
     // 获取port
     ret = FtGetSockName(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), &localAddrLen);
     if (ret != ERR_OK) {
-        LOG_ERR("getsockname error ret: %d, errorcode :%d", ret, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "getsockname error ret: %d, errorcode :%d", ret, FtGetErrno());
         FtClose(sockFd);
         return -1;
     }
@@ -448,19 +457,19 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     local.port = localIpPort_.port;
 
     if (SetSocketBoundInner(sockFd, localIpPort_.ip) == false) {
-        LOG_ERR("SetSocketBoundInner failed, errorcode :%d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSocketBoundInner failed, errorcode :%d", FtGetErrno());
     }
     return sockFd;
 }
 
 bool VtpStreamSocket::Accept()
 {
-    LOG_DBG("accept start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "accept start");
 
     auto fd = FtAccept(listenFd_, nullptr, nullptr);
-    LOG_INFO("accept streamFd:%d", fd);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "accept streamFd:%d", fd);
     if (fd == -1) {
-        LOG_ERR("errorcode = %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "errorcode = %d", FtGetErrno());
         return false;
     }
 
@@ -483,11 +492,12 @@ bool VtpStreamSocket::Accept()
         remoteIpPort_.port = v6Addr->sin6_port;
     }
 
-    LOG_DBG("Accept a client(addr:%s, server port:%d)", remoteIpPort_.ip.c_str(), remoteIpPort_.port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+        "Accept a client(addr:%s, server port:%d)", remoteIpPort_.ip.c_str(), remoteIpPort_.port);
     SetDefaultConfig(fd);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
-        LOG_ERR("SetSocketEpollMode failed, fd = %d", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSocketEpollMode failed, fd = %d", fd);
         FtClose(fd);
         return false;
     }
@@ -497,11 +507,11 @@ bool VtpStreamSocket::Accept()
     configCv_.notify_all();
 
     if (streamReceiver_ != nullptr) {
-        LOG_INFO("notify stream connected!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify stream connected!");
         streamReceiver_->OnStreamStatus(STREAM_CONNECTED);
     }
 
-    LOG_INFO("accept success!");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "accept success!");
     return true;
 }
 
@@ -511,7 +521,8 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
     while (true) {
         FILLP_INT fdNum = FtEpollWait(epollFd_, events, MAX_EPOLL_NUM, timeout);
         if (fdNum <= 0) {
-            LOG_ERR("FtEpollWait failed, ret = %d, errno = %d", fdNum, FtGetErrno());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "FtEpollWait failed, ret = %d, errno = %d", fdNum, FtGetErrno());
             return -FtGetErrno();
         }
 
@@ -521,7 +532,8 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
             }
 
             if (events[i].events & (SPUNGE_EPOLLHUP | SPUNGE_EPOLLERR)) {
-                LOG_ERR("EpollTimeout, something may be wrong in this socket, fd = %d, events = %u", fd,
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "EpollTimeout, something may be wrong in this socket, fd = %d, events = %u", fd,
                     (unsigned int)events[i].events);
                 return -1;
             }
@@ -536,7 +548,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
 int VtpStreamSocket::SetSocketEpollMode(int fd)
 {
     if (!SetNonBlockMode(fd, StreamAttr(true))) {
-        LOG_ERR("SetNonBlockMode failed, errno = %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetNonBlockMode failed, errno = %d", FtGetErrno());
         return -1;
     }
 
@@ -546,11 +558,11 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
 
     auto ret = FtEpollCtl(epollFd_, SPUNGE_EPOLL_CTL_ADD, fd, &event);
     if (ret != ERR_OK) {
-        LOG_ERR("FtEpollCtl failed, ret = %d, errno = %d", ret, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtEpollCtl failed, ret = %d, errno = %d", ret, FtGetErrno());
         return ret;
     }
 
-    LOG_INFO("SetNonBlockMode success");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SetNonBlockMode success");
     return 0;
 }
 
@@ -567,23 +579,24 @@ std::unique_ptr<IStream> VtpStreamSocket::MakeStreamData(StreamData &data, const
     std::unique_ptr<IStream> stream = nullptr;
     switch (streamType_) {
         case VIDEO_SLICE_STREAM:
-            LOG_DBG("do not support VIDEO_SLICE_STREAM type = %d", streamType_);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "do not support VIDEO_SLICE_STREAM type = %d", streamType_);
             break;
         case COMMON_VIDEO_STREAM:
         case COMMON_AUDIO_STREAM:
-            LOG_DBG("streamType = %d, seqnum=%d, streamid=%d", streamType_, info.seqNum, info.streamId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+                "streamType = %d, seqnum=%d, streamid=%d", streamType_, info.seqNum, info.streamId);
             stream = IStream::MakeCommonStream(data, info);
             break;
         case RAW_STREAM:
-            LOG_DBG("streamType = %d", streamType_);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "streamType = %d", streamType_);
             stream = IStream::MakeRawStream(data, info);
             break;
         default:
-            LOG_INFO("do not support type = %d", streamType_);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "do not support type = %d", streamType_);
             break;
     }
     if (stream == nullptr) {
-        LOG_ERR("IStream construct error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "IStream construct error");
         return nullptr;
     }
 
@@ -605,7 +618,7 @@ int VtpStreamSocket::RecvStreamLen()
             len = FtRecv(streamFd_, buffer.get(), hdrSize, 0);
         } while (len <= 0 && (FtGetErrno() == EINTR || FtGetErrno() == FILLP_EAGAIN));
     }
-    LOG_DBG("recv frame header, len = %d, scene:%d", len, scene_);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv frame header, len = %d, scene:%d", len, scene_);
 
     if (len <= 0) {
         return -1;
@@ -630,17 +643,18 @@ void VtpStreamSocket::DoStreamRecv()
         FrameInfo info = {};
         int dataLength = 0;
 
-        LOG_DBG("recv stream");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv stream");
         dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
-            LOG_ERR("read frame lenth error, dataLength = %d", dataLength);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame lenth error, dataLength = %d", dataLength);
             break;
         }
-        LOG_DBG("recv a new frame, dataLength = %d, stream type:%d", dataLength, streamType_);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+            "recv a new frame, dataLength = %d, stream type:%d", dataLength, streamType_);
         dataBuffer = VtpStreamSocket::RecvStream(dataLength);
 
         if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
-            LOG_DBG("recv common stream");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv common stream");
             int decryptedLength = dataLength;
             auto decryptedBuffer = std::move(dataBuffer);
 
@@ -648,7 +662,8 @@ void VtpStreamSocket::DoStreamRecv()
             std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
             ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
             if (decLen != plainDataLength) {
-                LOG_ERR("Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
                 break;
             }
             auto header = plainData.get();
@@ -665,7 +680,8 @@ void VtpStreamSocket::DoStreamRecv()
             dataBuffer = decode.GetData();
             dataLength = decode.GetDataLength();
             if (dataLength <= 0) {
-                LOG_ERR("common depacketize error, dataLength = %d", dataLength);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "common depacketize error, dataLength = %d", dataLength);
                 break;
             }
         }
@@ -673,11 +689,12 @@ void VtpStreamSocket::DoStreamRecv()
         StreamData data = { std::move(dataBuffer), dataLength, std::move(extBuffer), extLen };
         std::unique_ptr<IStream> stream = MakeStreamData(data, info);
         if (stream == nullptr) {
-            LOG_ERR("MakeStreamData failed, stream == nullptr");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "MakeStreamData failed, stream == nullptr");
             break;
         }
 
-        LOG_DBG("recv frame done, dataLength = %d, stream type:%d", dataLength, streamType_);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+            "recv frame done, dataLength = %d, stream type:%d", dataLength, streamType_);
 
         if (streamType_ == RAW_STREAM && scene_ == COMPATIBLE_SCENE) {
             std::lock_guard<std::mutex> guard(streamSocketLock_);
@@ -688,9 +705,10 @@ void VtpStreamSocket::DoStreamRecv()
         }
 
         PutStream(std::move(stream));
-        LOG_DBG("put frame done, dataLength = %d, stream type:%d", dataLength, streamType_);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
+            "put frame done, dataLength = %d, stream type:%d", dataLength, streamType_);
     }
-    LOG_INFO("recv thread exit");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv thread exit");
 }
 
 std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int dataLength)
@@ -708,7 +726,7 @@ std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int dataLength)
         }
 
         if (ret == -1) {
-            LOG_ERR("read frame failed, errno: %d", FtGetErrno());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame failed, errno: %d", FtGetErrno());
             return nullptr;
         }
 
@@ -720,19 +738,19 @@ std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int dataLength)
 void VtpStreamSocket::SetDefaultConfig(int fd)
 {
     if (!SetIpTos(fd, StreamAttr(static_cast<int>(IPTOS_LOWDELAY)))) {
-        LOG_WARN("SetIpTos failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "SetIpTos failed");
     }
 
     if (!SetOption(SEND_BUF_SIZE, StreamAttr(static_cast<int>(DEFAULT_UDP_BUFFER_SIZE)))) {
-        LOG_WARN("Set send buff failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Set send buff failed");
     }
 
     if (!SetOption(InnerStreamOptionType::RECV_CACHE, StreamAttr(static_cast<int>(FILLP_VTP_RECV_CACHE_SIZE)))) {
-        LOG_WARN("Set recv cache failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Set recv cache failed");
     }
 
     if (!SetOption(InnerStreamOptionType::SEND_CACHE, StreamAttr(static_cast<int>(FILLP_VTP_SEND_CACHE_SIZE)))) {
-        LOG_WARN("Set send cache failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Set send cache failed");
     }
 }
 
@@ -740,11 +758,11 @@ bool VtpStreamSocket::SetIpTos(int fd, const StreamAttr &tos)
 {
     auto tmp = tos.GetIntValue();
     if (FtSetSockOpt(fd, IPPROTO_IP, IP_TOS, &tmp, sizeof(tmp)) != ERR_OK) {
-        LOG_ERR("SetIpTos wrong! fd=%d, errorcode=%d", fd, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetIpTos wrong! fd=%d, errorcode=%d", fd, FtGetErrno());
         return false;
     }
 
-    LOG_INFO("Success to set ip tos: fd=%d, tos=%d", fd, tmp);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Success to set ip tos: fd=%d, tos=%d", fd, tmp);
     return true;
 }
 
@@ -755,7 +773,7 @@ StreamAttr VtpStreamSocket::GetIpTos(int type) const
     int size = sizeof(tos);
 
     if (FtGetSockOpt(streamFd_, IPPROTO_IP, IP_TOS, &tos, &size) != ERR_OK) {
-        LOG_ERR("FtGetSockOpt errorcode = %d", FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtGetSockOpt errorcode = %d", FtGetErrno());
         return std::move(StreamAttr());
     }
 
@@ -779,7 +797,8 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
     auto boundIp = (ip == "") ? localIpPort_.ip : ip;
     struct ifaddrs *ifList = nullptr;
     if (getifaddrs(&ifList) < 0) {
-        LOG_ERR("get interface address return error %d (%s)", errno, strerror(errno));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "get interface address return error %d (%s)", errno, strerror(errno));
         return false;
     }
 
@@ -791,10 +810,10 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
 
         std::string devName(ifa->ifa_name);
         if (strcmp(boundIp.c_str(), inet_ntoa(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr)) == 0) {
-            LOG_INFO("current use interface %s to bind to socket", ifa->ifa_name);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "current use interface %s to bind to socket", ifa->ifa_name);
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());
             if (err < 0) {
-                LOG_ERR("fail to set socket binding to device");
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to set socket binding to device");
                 return false;
             }
             break;
@@ -817,14 +836,14 @@ bool VtpStreamSocket::SetVtpStackConfigDelayed(int type, const StreamAttr &value
     if (streamFd_ == -1) {
         configCv_.wait(lock, [this] { return streamFd_ != -1; });
     }
-    LOG_INFO("set vtp stack config, streamFd = %d", streamFd_);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set vtp stack config, streamFd = %d", streamFd_);
     return SetVtpStackConfig(type, value);
 }
 
 bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
 {
     if (streamFd_ == -1) {
-        LOG_INFO("set vtp stack config when streamFd is legal");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set vtp stack config when streamFd is legal");
         auto self = GetSelf();
         std::thread([self, type, value]() { self->SetVtpStackConfigDelayed(type, value); }).detach();
         return true;
@@ -834,11 +853,13 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
         int intVal = value.GetIntValue();
         int ret = FtConfigSet(type, &intVal, &streamFd_);
         if (ret != 0) {
-            LOG_ERR("FtConfigSet failed, type = %d, errorcode = %d", type, FtGetErrno());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "FtConfigSet failed, type = %d, errorcode = %d", type, FtGetErrno());
             return false;
         }
 
-        LOG_INFO("setVtpConfig(%d) success, fd= %d, value= %d", type, streamFd_, intVal);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "setVtpConfig(%d) success, fd= %d, value= %d", type, streamFd_, intVal);
         return true;
     }
 
@@ -846,15 +867,17 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
         bool flag = value.GetBoolValue();
         int ret = FtConfigSet(type, &flag, &streamFd_);
         if (ret != 0) {
-            LOG_ERR("FtConfigSet failed, type = %d, errorcode = %d", type, FtGetErrno());
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "FtConfigSet failed, type = %d, errorcode = %d", type, FtGetErrno());
             return false;
         }
 
-        LOG_INFO("setVtpConfig(%d) success, fd= %d, value= %d", type, streamFd_, flag);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "setVtpConfig(%d) success, fd= %d, value= %d", type, streamFd_, flag);
         return true;
     }
 
-    LOG_ERR("UNKNOWN TYPE!");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UNKNOWN TYPE!");
     return false;
 }
 
@@ -864,7 +887,8 @@ StreamAttr VtpStreamSocket::GetVtpStackConfig(int type) const
     int configFd = (streamFd_ == -1) ? FILLP_CONFIG_ALL_SOCKET : streamFd_;
     int ret = FtConfigGet(type, &intVal, &configFd);
     if (ret != 0) {
-        LOG_ERR("FtConfigGet failed, type = %d, errorcode = %d", type, FtGetErrno());
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "FtConfigGet failed, type = %d, errorcode = %d", type, FtGetErrno());
         return std::move(StreamAttr());
     }
 
@@ -900,7 +924,7 @@ bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
 {
     FILLP_INT flags = FtFcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        LOG_ERR("failed to get FtFcntl, flags = %d", flags);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to get FtFcntl, flags = %d", flags);
         flags = 0;
     }
     bool nonBlock = value.GetBoolValue();
@@ -910,11 +934,11 @@ bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
 
     FILLP_INT res = FtFcntl(fd, F_SETFL, flags);
     if (res < 0) {
-        LOG_ERR("failed to set FtFcntl, res = %d", res);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to set FtFcntl, res = %d", res);
         return false;
     }
 
-    LOG_INFO("Successfully to set fd(%d) nonBlock mode = %d", fd, nonBlock);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Successfully to set fd(%d) nonBlock mode = %d", fd, nonBlock);
     return true;
 }
 
@@ -971,7 +995,7 @@ bool VtpStreamSocket::SetStreamScene(int type, const StreamAttr &value)
         return false;
     }
     scene_ = value.GetIntValue();
-    LOG_INFO("Set scene to %d", scene_);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Set scene to %d", scene_);
     return true;
 }
 
@@ -982,7 +1006,7 @@ bool VtpStreamSocket::SetStreamHeaderSize(int type, const StreamAttr &value)
         return false;
     }
     streamHdrSize_ = value.GetIntValue();
-    LOG_INFO("Set header size to %d", streamHdrSize_);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Set header size to %d", streamHdrSize_);
     return true;
 }
 
@@ -991,23 +1015,23 @@ void VtpStreamSocket::NotifyStreamListener()
     while (isStreamRecv_) {
         int streamNum = GetStreamNum();
         if (streamNum >= STREAM_BUFFER_THRESHOLD) {
-            LOG_WARN("Too many data in receiver, num = %d", streamNum);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Too many data in receiver, num = %d", streamNum);
         }
 
         auto stream = TakeStream();
         if (stream == nullptr) {
-            LOG_ERR("Pop stream failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Pop stream failed");
             break;
         }
 
         std::lock_guard<std::mutex> guard(streamSocketLock_);
         if (streamReceiver_ != nullptr) {
-            LOG_DBG("notify listener");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "notify listener");
             streamReceiver_->OnStreamReceived(std::move(stream));
-            LOG_DBG("notify listener done.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "notify listener done.");
         }
     }
-    LOG_INFO("notify thread exit");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify thread exit");
 }
 
 ssize_t VtpStreamSocket::GetEncryptOverhead() const
@@ -1020,20 +1044,20 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        LOG_ERR("Encrypt invalid para.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.c_str(), SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
-        LOG_ERR("Encrypt Data fail. %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt Data fail. %d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     return outLen;
@@ -1044,19 +1068,19 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        LOG_ERR("Decrypt invalid para.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.c_str(), SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Decrypt Data fail. %d ", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt Data fail. %d ", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
 
@@ -1065,7 +1089,7 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
 
 void VtpStreamSocket::GetCryptErrorReason(void) const
 {
-    LOG_DBG("Unsupport api");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "Unsupport api");
 }
 } // namespace SoftBus
 } // namespace Communication

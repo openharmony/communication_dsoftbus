@@ -23,9 +23,9 @@
 
 int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 {
-    LOG_INFO("SendBytes: sessionId=%{public}d", sessionId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendBytes: sessionId=%d", sessionId);
     if ((data == NULL) || (len == 0) || (len > TRANS_BYTES_LENGTH_MAX) || sessionId < 0) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -33,11 +33,11 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get channel failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
         return ret;
     }
     if (type == CHANNEL_TYPE_BUTT) {
-        LOG_INFO("channel opening");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
@@ -46,9 +46,9 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 
 int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 {
-    LOG_INFO("SendMessage: sessionId=%{public}d", sessionId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendMessage: sessionId=%d", sessionId);
     if ((data == NULL) || (len == 0) || (len > TRANS_MESSAGE_LENGTH_MAX)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -56,11 +56,11 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get channel failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
         return ret;
     }
     if (type == CHANNEL_TYPE_BUTT) {
-        LOG_INFO("channel opening");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
@@ -70,7 +70,7 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
     if ((data == NULL) || (ext == 0) || (param == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -78,11 +78,11 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("get channel failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
         return ret;
     }
     if (type == CHANNEL_TYPE_BUTT) {
-        LOG_INFO("channel opening");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 

@@ -35,6 +35,7 @@ if (defined(ohos_lite)) {
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_static",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "//utils/native/base:utils",
       ]
     }
@@ -52,6 +53,7 @@ if (defined(ohos_lite)) {
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_shared",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         # "//utils/native/base:utils",
       ]
     }
@@ -78,6 +80,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_core_path/common/json_utils",
       "//third_party/cJSON:cjson_static",
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utils",
     ]
     part_name = "dsoftbus_standard"

@@ -30,6 +30,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$hilog_lite_deps_path",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
@@ -94,6 +95,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
     ]
     configs = [ ":discovery_coap_config" ]
     if (is_standard_system) {

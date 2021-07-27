@@ -48,6 +48,7 @@ shared_library("dsoftbus_trans_dstream") {
   public_configs = [ ":stream_common_config" ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_core_common",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "../libsoftbus_stream:libsoftbus_stream",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

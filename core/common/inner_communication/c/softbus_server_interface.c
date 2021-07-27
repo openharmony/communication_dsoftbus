@@ -152,7 +152,7 @@ static struct ServerProvideInterface g_serverProvideInterface = {
 
 int ServerProvideInterfaceInit(void)
 {
-    LOG_INFO("ServerProvideInterfaceInit");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerProvideInterfaceInit");
     return SOFTBUS_OK;
 }
 

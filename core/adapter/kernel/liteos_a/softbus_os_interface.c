@@ -36,7 +36,7 @@ static unsigned int g_timerType;
 void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 {
     if (timerId == NULL) {
-        LOG_ERR("timerId is null");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
         return NULL;
     }
     struct sigevent envent;
@@ -47,7 +47,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {
-        LOG_ERR("timer create error, errno code: [%d]", errno);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer create error, errno code: [%d]", errno);
         return NULL;
     }
 
@@ -57,7 +57,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
     if (timerId < 0) {
-        LOG_ERR("timerId is null");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
         return SOFTBUS_ERR;
     }
     struct itimerspec value;
@@ -73,7 +73,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     }
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
-        LOG_ERR("timer start error, errno code: [%d]", errno);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer start error, errno code: [%d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -83,12 +83,12 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
-        LOG_ERR("timerId is null");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
         return SOFTBUS_ERR;
     }
 
     if (timer_delete(timerId) != 0) {
-        LOG_ERR("timer delete err, errno code: [%d]", errno);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer delete err, errno code: [%d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -117,24 +117,24 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
 
     int fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        LOG_ERR("ReadFile get deviceid open file fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid open file fail");
         return SOFTBUS_FILE_ERR;
     }
     int fileLen = lseek(fd, 0, SEEK_END);
     if (fileLen <= 0 || fileLen > maxLen) {
-        LOG_ERR("ReadFile maxLen failed or over maxLen");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile maxLen failed or over maxLen");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     int ret = lseek(fd, 0, SEEK_SET);
     if (ret < 0) {
-        LOG_ERR("ReadFile get deviceid lseek file fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid lseek file fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     ret = read(fd, readBuf, fileLen);
     if (ret < 0) {
-        LOG_ERR("ReadFile read deviceid fail, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile read deviceid fail, ret=%d", ret);
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -153,12 +153,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
 
     fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        LOG_ERR("WriteDeviceId open file fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId open file fail");
         return SOFTBUS_FILE_ERR;
     }
     ret = write(fd, writeBuf, len);
     if (ret != len) {
-        LOG_ERR("WriteDeviceId write fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }

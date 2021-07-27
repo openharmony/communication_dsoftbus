@@ -23,7 +23,10 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       sources = [ "platform/bus_center_adapter_weak.c" ]
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+      ]
     }
   } else {
     shared_library("softbus_adapter_bus_center") {
@@ -35,6 +38,7 @@ if (defined(ohos_lite)) {
       sources = [ "platform/bus_center_adapter_weak.c" ]
       deps = [
         "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
     }
@@ -53,6 +57,7 @@ if (defined(ohos_lite)) {
     deps = [
       "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     ]
     if (is_standard_system) {

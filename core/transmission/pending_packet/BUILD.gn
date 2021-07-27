@@ -27,6 +27,7 @@ if (defined(ohos_lite)) {
   common_deps = [
     "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
     "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
   ]
   if (ohos_kernel_type == "liteos_m") {
@@ -64,6 +65,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
