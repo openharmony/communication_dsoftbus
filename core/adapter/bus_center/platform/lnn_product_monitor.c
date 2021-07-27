@@ -39,7 +39,7 @@ static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 static struct HdfDevEventlistener g_listener = {
     .callBack = OnDevEventReceived,
     .priv = "Service0",
-}
+};
 
 int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler)
 {
