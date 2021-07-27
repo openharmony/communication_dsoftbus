@@ -47,13 +47,13 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     FileListener fileListener = {0};
-    if (TransGetFileListener(udpChannel->info.peerSessionName, &fileListener) != SOFTBUS_OK) {
+    if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
         LOG_ERR("get file listener failed.");
         return;
     }
 
     int32_t sessionId = -1;
-    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel->channelId, &sessionId) != SOFTBUS_OK) {
+    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
         LOG_ERR("get sessionId by channelId failed.");
         return;
     }
@@ -93,12 +93,12 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     FileListener fileListener = {0};
-    if (TransGetFileListener(udpChannel->info.peerSessionName, &fileListener) != SOFTBUS_OK) {
+    if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
         LOG_ERR("get file listener failed.");
         return;
     }
     int32_t sessionId = -1;
-    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel->channelId, &sessionId) != SOFTBUS_OK) {
+    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
         LOG_ERR("get sessionId by channelId failed.");
         return;
     }
