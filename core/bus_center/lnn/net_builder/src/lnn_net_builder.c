@@ -15,9 +15,8 @@
 
 #include "lnn_net_builder.h"
 
-#include <stdlib.h>
-
 #include <securec.h>
+#include <stdlib.h>
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
@@ -30,11 +29,11 @@
 #include "lnn_exchange_device_info.h"
 #include "lnn_network_id.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
 
-#define CONFIG_MAX_LNN_CONNECTION_COUNT_KEY "MAX_LNN_CONNECTION_CNT"
+
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 
 #define JOIN_DISCOVERY_TIMEOUT_LEN (60 * 1000UL)
@@ -88,10 +87,12 @@ static NetBuilder g_netBuilder;
 
 static void NetBuilderConfigInit(void)
 {
-    if (GetPropertyInt(CONFIG_MAX_LNN_CONNECTION_COUNT_KEY, &g_netBuilder.maxConnCount) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
+        (unsigned char*)&g_netBuilder.maxConnCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         LOG_ERR("get lnn max connection count fail, use default value");
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
+    LOG_INFO("lnn max connection count is %u", g_netBuilder.maxConnCount);
 }
 
 static SoftBusMessage *CreateNetBuilderMessage(int32_t msgType, void *para)

@@ -20,12 +20,11 @@
 
 #include "bus_center_server_proxy.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
 #include "softbus_utils.h"
 
-#define GET_MAX_NODE_STATE_CB_CNT "MAX_NODE_STATE_CB_CNT"
 #define DEFAULT_NODE_STATE_CB_CNT 10
 
 static int32_t g_maxNodeStateCbCount;
@@ -218,10 +217,12 @@ int BusCenterClientInit(void)
     int32_t rc = SOFTBUS_ERR;
 
     pthread_mutex_init(&g_busCenterClient.lock, NULL);
-    if (GetPropertyInt(GET_MAX_NODE_STATE_CB_CNT, &g_maxNodeStateCbCount) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_NODE_STATE_CB_CNT,
+        (unsigned char*)&g_maxNodeStateCbCount, sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
         LOG_ERR("Cannot get NodeStateCbCount from config file");
         g_maxNodeStateCbCount = DEFAULT_NODE_STATE_CB_CNT;
     }
+    LOG_INFO("NodeStateCbCount is %u", g_maxNodeStateCbCount);
     do {
         g_busCenterClient.joinLNNCbList = CreateSoftBusList();
         if (g_busCenterClient.joinLNNCbList == NULL) {
