@@ -24,9 +24,9 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
 #include "softbus_type_def.h"
 #include "stdbool.h"
 #include "string.h"
@@ -37,9 +37,6 @@
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
-#define GET_PROPERTY_LENGTH "CONN_BR_MAX_DATA_LENGTH"
-#define GET_SEND_MESSAGE_PEER_LEN "CONN_RFCOM_SEND_MAX_LEN"
-#define BR_SENDQUEQUE_MAXNUM "CONN_BR_RECEIVE_MAX_LEN"
 #define METHOD_NOTIFY_REQUEST 1
 #define METHOD_NOTIFY_RESPONSE 2
 #define METHOD_SHUT_DOWN 3
@@ -1600,9 +1597,21 @@ static int32_t InitProperty()
 {
     g_brBuffSize = INVALID_LENGTH;
     g_brSendPeerLen = INVALID_LENGTH;
-    GetPropertyInt(GET_PROPERTY_LENGTH, &g_brBuffSize);
-    GetPropertyInt(GET_SEND_MESSAGE_PEER_LEN, &g_brSendPeerLen);
-    GetPropertyInt(BR_SENDQUEQUE_MAXNUM, &g_brSendQueueMaxLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
+        (unsigned char*)&g_brBuffSize, sizeof(g_brBuffSize)) != SOFTBUS_OK) {
+        LOG_ERR("get br BuffSize fail");
+    }
+    LOG_INFO("br BuffSize is %u", g_brBuffSize);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN,
+        (unsigned char*)&g_brSendPeerLen, sizeof(g_brSendPeerLen)) != SOFTBUS_OK) {
+        LOG_ERR("get br SendPeerLen fail");
+    }
+    LOG_INFO("br SendPeerLen is %u", g_brSendPeerLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN,
+        (unsigned char*)&g_brSendQueueMaxLen, sizeof(g_brSendQueueMaxLen)) != SOFTBUS_OK) {
+        LOG_ERR("get br SendQueueMaxLen fail");
+    }
+    LOG_INFO("br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
     if (g_brBuffSize == INVALID_LENGTH || g_brBuffSize > MAX_BR_SIZE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
         return SOFTBUS_ERR;

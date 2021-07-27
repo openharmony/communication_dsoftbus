@@ -81,7 +81,7 @@ if (defined(ohos_lite)) {
     include_dirs = common_include
     sources = common_src
     public_configs = [ ":trans_session_manager_sdk_interface" ]
-    deps = [
+    public_deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",

@@ -21,6 +21,7 @@ if (defined(ohos_lite)) {
     "$libsec_include_path",
     "$hilog_lite_include_path",
     "$softbus_adapter_config/spec_config",
+    "//utils/native/base/include",
   ]
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_property") {
@@ -35,6 +36,7 @@ if (defined(ohos_lite)) {
         "//build/lite/config/component/cJSON:cjson_static",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        "//utils/native/base:utils",
       ]
     }
   } else {
@@ -52,6 +54,7 @@ if (defined(ohos_lite)) {
         "//build/lite/config/component/cJSON:cjson_shared",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        # "//utils/native/base:utils",
       ]
     }
   }
@@ -68,6 +71,7 @@ if (defined(ohos_lite)) {
       "include",
       "//third_party/cJSON",
       "$softbus_adapter_config/spec_config",
+      "//utils/native/base/include",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
@@ -77,6 +81,7 @@ if (defined(ohos_lite)) {
       "//third_party/cJSON:cjson_static",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//utils/native/base:utils",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

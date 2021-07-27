@@ -25,16 +25,13 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
-#define GET_TCP_MAX_CONN_NUM "CONN_TCP_MAX_CONN_NUM"
-#define GET_TCP_MAX_LENGTH "CONN_TCP_MAX_LENGTH"
-#define GET_TCP_TIME_OUT "CONN_TCP_TIME_OUT"
 #define INVALID_DATA (-1)
 
 static int32_t g_tcpMaxConnNum;
@@ -471,9 +468,21 @@ static int32_t InitProperty()
     g_tcpMaxConnNum = INVALID_DATA;
     g_tcpTimeOut = INVALID_DATA;
     g_tcpMaxLen = INVALID_DATA;
-    GetPropertyInt(GET_TCP_MAX_CONN_NUM, &g_tcpMaxConnNum);
-    GetPropertyInt(GET_TCP_MAX_LENGTH, &g_tcpMaxLen);
-    GetPropertyInt(GET_TCP_TIME_OUT, &g_tcpTimeOut);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
+        (unsigned char*)&g_tcpMaxConnNum, sizeof(g_tcpMaxConnNum)) != SOFTBUS_OK) {
+        LOG_ERR("get tcp MaxConnNum fail");
+    }
+    LOG_INFO("tcp MaxConnNum is %u", g_tcpMaxConnNum);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
+        (unsigned char*)&g_tcpMaxLen, sizeof(g_tcpMaxLen)) != SOFTBUS_OK) {
+        LOG_ERR("get tcp MaxLen fail");
+    }
+    LOG_INFO("tcp MaxLen is %u", g_tcpMaxLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT,
+        (unsigned char*)&g_tcpTimeOut, sizeof(g_tcpTimeOut)) != SOFTBUS_OK) {
+        LOG_ERR("get tcp TimeOut fail");
+    }
+    LOG_INFO("tcp TimeOut is %u", g_tcpTimeOut);
     if (g_tcpMaxConnNum == INVALID_DATA || g_tcpTimeOut == INVALID_DATA ||
         g_tcpMaxLen == INVALID_DATA) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");

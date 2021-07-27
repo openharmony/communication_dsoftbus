@@ -13,28 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_FEATURE_CONFIG_H
-#define SOFTBUS_FEATURE_CONFIG_H
+#ifndef NSTACKX_DFILE_ADAPTER_H
+#define NSTACKX_DFILE_ADAPTER_H
 
-#include <securec.h>
 #include <stdint.h>
+#include "session.h"
 
-#include "softbus_config_type.h"
+#include "nstackx_dfile.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif /* __cplusplus */
 
-void SoftbusConfigInit(void);
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len);
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len);
+int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
+    uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort);
 
+int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
+    uint32_t keyLen, DFileMsgReceiver msgReceiver);
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif
-#endif /* __cplusplus */
-
-#endif
+#endif // NSTACKX_DFILE_ADAPTER_H

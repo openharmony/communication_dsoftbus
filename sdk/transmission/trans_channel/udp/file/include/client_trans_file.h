@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_FEATURE_CONFIG_H
-#define SOFTBUS_FEATURE_CONFIG_H
+#ifndef CLIENT_TRANS_FILE_H
+#define CLIENT_TRANS_FILE_H
 
-#include <securec.h>
-#include <stdint.h>
-
-#include "softbus_config_type.h"
+#include "client_trans_udp_manager.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif /* __cplusplus */
 
-void SoftbusConfigInit(void);
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len);
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len);
+void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
+int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort);
+
+void TransCloseFileChannel(int32_t dfileId);
+
+int32_t TransDeleteFileNode(int32_t channelId);
+
+int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif
-#endif /* __cplusplus */
-
-#endif
+#endif // CLIENT_TRANS_FILE_H
