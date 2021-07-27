@@ -31,8 +31,21 @@ static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
 static const ChannelInfo *g_channel = NULL;
 
-static void FileSendListener(const UdpChannel *udpChannel, DFileMsgType msgType, const DFileMsg *msgData)
+static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
+    if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
+        msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        return;
+    }
+    UdpChannel udpChannel = {0};
+    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
+        LOG_ERR("get udp channel by fileId failed.");
+        return;
+    }
+    if (msgType == DFILE_ON_CONNECT_SUCCESS) {
+        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+        return;
+    }
     FileListener fileListener = {0};
     if (TransGetFileListener(udpChannel->info.peerSessionName, &fileListener) != SOFTBUS_OK) {
         LOG_ERR("get file listener failed.");
@@ -68,20 +81,27 @@ static void FileSendListener(const UdpChannel *udpChannel, DFileMsgType msgType,
     }
 }
 
-static void FileReceiveListener(const UdpChannel *udpChannel, DFileMsgType msgType, const DFileMsg *msgData)
+static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
+    if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
+        msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        return;
+    }
+    UdpChannel udpChannel = {0};
+    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
+        LOG_ERR("get udp channel by fileId failed.");
+        return;
+    }
     FileListener fileListener = {0};
     if (TransGetFileListener(udpChannel->info.peerSessionName, &fileListener) != SOFTBUS_OK) {
         LOG_ERR("get file listener failed.");
         return;
     }
-
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel->channelId, &sessionId) != SOFTBUS_OK) {
         LOG_ERR("get sessionId by channelId failed.");
         return;
     }
-
     const char *firstFile = msgData->fileList.files[0];
     uint32_t fileNum = msgData->fileList.fileNum;
     switch (msgType) {
@@ -112,44 +132,6 @@ static void FileReceiveListener(const UdpChannel *udpChannel, DFileMsgType msgTy
     }
 }
 
-static void DFileListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
-{
-    if (msgData == NULL) {
-        return;
-    }
-    UdpChannel udpChannel = {0};
-    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
-        LOG_ERR("get udp channel by fileId failed.");
-        return;
-    }
-
-    bool isClient = false;
-    switch (msgType) {
-        case DFILE_ON_CONNECT_SUCCESS:
-            g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
-            isClient = true;
-            break;
-        case DFILE_ON_FILE_LIST_RECEIVED:
-        case DFILE_ON_FILE_RECEIVE_SUCCESS:
-        case DFILE_ON_FILE_RECEIVE_FAIL:
-            FileReceiveListener(&udpChannel, msgType, msgData);
-            break;
-        case DFILE_ON_FILE_SEND_SUCCESS:
-        case DFILE_ON_FILE_SEND_FAIL:
-            FileSendListener(&udpChannel, msgType, msgData);
-            break;
-        case DFILE_ON_TRANS_IN_PROGRESS:
-            if (isClient) {
-                FileSendListener(&udpChannel, msgType, msgData);
-            } else {
-                FileReceiveListener(&udpChannel, msgType, msgData);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
 int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
 {
     if (channel == NULL || filePort == NULL) {
@@ -165,7 +147,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
             return SOFTBUS_ERR;
         }
         fileSession = StartNStackXDFileServer(channel->myIp, channel->sessionKey,
-            DEFAULT_KEY_LENGTH, DFileListener, filePort);
+            DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
         if (fileSession < 0) {
             LOG_ERR("start file channel as server failed");
             return SOFTBUS_ERR;
@@ -177,7 +159,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
-            channel->sessionKey, DEFAULT_KEY_LENGTH, DFileListener);
+            channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
         if (fileSession < 0) {
             LOG_ERR("start file channel as client failed");
             return SOFTBUS_ERR;
