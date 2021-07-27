@@ -47,7 +47,8 @@ int32_t TransProxyParseMessageHead(ProxyMessage *msg, char *data, int32_t len)
     int8_t version = (firstByte >> VERSION_SHIFT) & FOUR_BIT_MASK;
     msg->msgHead.type = firstByte & FOUR_BIT_MASK;
     if (version != VERSION || msg->msgHead.type >= PROXYCHANNEL_MSG_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: unsupported message, version(%d), type(%d)", version, msg->msgHead.type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: unsupported message, version(%d), type(%d)",
+            version, msg->msgHead.type);
         return SOFTBUS_ERR;
     }
 

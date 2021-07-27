@@ -39,7 +39,8 @@ static BtRfcomEventCallback g_rfcomEventcb = {
 
 static void OnEventServiceRfcom(uint8 type, uint8 handle, int value)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Client event call back form bt, and socketid = %u, tpye = %u]", handle, type);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+        "[Client event call back form bt, and socketid = %u, tpye = %u]", handle, type);
     if (g_connectServiceCallback == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[g_connectServiceCallback is NULL]");
         return;
@@ -49,7 +50,8 @@ static void OnEventServiceRfcom(uint8 type, uint8 handle, int value)
 
 static void OnDataReceivedServiceRfcom(uint8 handle, const uint8 *buf, uint16 len)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Client received call back form bt, and socketid = %u, len = %u]", handle, len);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+        "[Client received call back form bt, and socketid = %u, len = %u]", handle, len);
     if (g_connectServiceCallback == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[g_connectServiceCallback is NULL]");
         return;

@@ -251,7 +251,8 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     g_clientSessionServerList->cnt++;
 
     (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session name [%s], pkg name [%s]", server->sessionName, server->pkgName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session name [%s], pkg name [%s]",
+        server->sessionName, server->pkgName);
     return SOFTBUS_OK;
 }
 

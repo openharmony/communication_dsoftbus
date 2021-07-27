@@ -93,7 +93,8 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d", chan->myId, chan->peerId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d",
+        chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     payLoad = TransProxyPackHandshakeAckMsg(chan);

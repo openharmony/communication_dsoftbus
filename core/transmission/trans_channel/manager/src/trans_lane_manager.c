@@ -78,7 +78,8 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
 
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     if (newLane == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "new lane item failed.[channelId = %d, channelType = %d]", channelId, channelType);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "new lane item failed.[channelId = %d, channelType = %d]",
+            channelId, channelType);
         return SOFTBUS_ERR;
     }
     newLane->channelId = channelId;
@@ -100,7 +101,8 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans lane info has exited.[channelId = %d, channelType = %d]", channelId, channelType);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "trans lane info has exited.[channelId = %d, channelType = %d]", channelId, channelType);
             SoftBusFree(newLane);
             (void)pthread_mutex_unlock(&(g_channelLaneList->lock));
             return SOFTBUS_ERR;
@@ -136,7 +138,8 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
         }
     }
     (void)pthread_mutex_unlock(&(g_channelLaneList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]",
+        channelId, channelType);
     return SOFTBUS_ERR;
 }
 
@@ -159,6 +162,7 @@ LnnLanesObject *TransLaneMgrGetLane(int32_t channelId, int32_t channelType)
         }
     }
     (void)pthread_mutex_unlock(&(g_channelLaneList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]",
+        channelId, channelType);
     return NULL;
 }

@@ -61,7 +61,8 @@ static void TransTdcTimerProc(void)
                     TcpShutDown(fd);
                 }
 
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel[%d] handshake is timeout", removeNode->channelId);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel[%d] handshake is timeout",
+                    removeNode->channelId);
                 SoftBusFree(removeNode);
             }
         }

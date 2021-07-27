@@ -255,7 +255,8 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
 
     LnnReleaseLanesObject(object);
     SoftBusFree(appInfo);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel ok: channelId=%d, channelType=%d", channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel ok: channelId=%d, channelType=%d",
+        channelId, channelType);
     return channelId;
 EXIT_ERR:
     if (appInfo != NULL) {
