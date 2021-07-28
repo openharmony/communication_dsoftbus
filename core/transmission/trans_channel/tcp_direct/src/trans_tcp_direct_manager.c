@@ -28,6 +28,23 @@
 #define HANDSHAKE_TIMEOUT 19
 
 static SoftBusList *g_sessionConnList = NULL;
+static pthread_mutex_t g_tdcChannelLock = PTHREAD_MUTEX_INITIALIZER;
+static int32_t g_tdcChannelId = 0;
+
+int32_t GenerateTdcChannelId(void)
+{
+    int32_t channelId;
+    if (pthread_mutex_lock(&g_tdcChannelLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id lock failed");
+        return INVALID_CHANNEL_ID;
+    }
+    channelId = g_tdcChannelId++;
+    if (g_tdcChannelId < 0) {
+        g_tdcChannelId = 0;
+    }
+    pthread_mutex_unlock(&g_tdcChannelLock);
+    return channelId;
+}
 
 static void TransTdcTimerProc(void)
 {
@@ -154,9 +171,9 @@ void TransTdcDelSessionConnByChannelId(int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info is null");
 }
 
-int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int *fd)
+int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
-    if (appInfo == NULL || connInfo == NULL || fd == NULL) {
+    if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -186,14 +203,15 @@ int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInf
     newConn->status = TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING;
     newConn->timeout = 0;
 
-    *fd = OpenConnTcp(appInfo, connInfo);
-    if (*fd < 0) {
+    int32_t fd = OpenConnTcp(appInfo, connInfo);
+    if (fd < 0) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp connect fail.");
         return SOFTBUS_ERR;
     }
-    newConn->appInfo.fd = *fd;
-    newConn->channelId = *fd;
+    *channelId = GenerateTdcChannelId();
+    newConn->appInfo.fd = fd;
+    newConn->channelId = *channelId;
     newConn->dataBuffer.w = newConn->dataBuffer.data;
 
     if (TransTdcAddSessionConn(newConn) != SOFTBUS_OK) {
