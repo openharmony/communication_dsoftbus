@@ -20,8 +20,10 @@
 extern "C" {
 #endif
 
-void InitSoftBusServer();
+#include <stdbool.h>
 
+void InitSoftBusServer();
+bool GetServerIsInit();
 void ClientDeathCallback(const char *pkgName);
 
 #ifdef __cplusplus

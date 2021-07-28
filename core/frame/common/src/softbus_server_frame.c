@@ -25,6 +25,8 @@
 #include "softbus_log.h"
 #include "trans_session_manager.h"
 
+static bool g_isInit = false;
+
 static void ServerModuleDeinit(void)
 {
     DiscServerDeinit();
@@ -34,6 +36,11 @@ static void ServerModuleDeinit(void)
     AuthDeinit();
     SoftBusTimerDeInit();
     LooperDeinit();
+}
+
+bool GetServerIsInit()
+{
+    return g_isInit;
 }
 
 void InitSoftBusServer(void)
@@ -77,6 +84,7 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
+    g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;
 
