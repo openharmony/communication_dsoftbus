@@ -27,6 +27,7 @@
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 #include "softbus_permission.h"
+#include "softbus_server_frame.h"
 #include "trans_server_stub.h"
 
 #define STACK_SIZE 0x800
@@ -176,6 +177,10 @@ static int32_t Invoke(const IServerProxy *iProxy, int funcId, const void *origin
     const IpcIo *req, const IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
+    if (GetServerIsInit() == false) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
+        return SOFTBUS_ERR;
+    }
     int tblSize = sizeof(g_serverInvokeCmdTbl) / sizeof(ServerInvokeCmd);
     for (int i = 0; i < tblSize; i++) {
         if (funcId == g_serverInvokeCmdTbl[i].id) {
