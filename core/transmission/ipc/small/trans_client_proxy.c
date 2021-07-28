@@ -99,10 +99,6 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened SendRequest failed");
     }
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        DelTrigger(DIRECT_CHANNEL_SERVER, channel->fd, RW_TRIGGER);
-        CloseTcpFd(channel->fd);
-    }
     return ans;
 }
 

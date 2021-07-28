@@ -161,7 +161,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.channelType = CHANNEL_TYPE_TCP_DIRECT;
     info.isServer = conn->serverSide;
     info.isEnabled = true;
-    info.fd = channelId;
+    info.fd = conn->appInfo.fd;
     info.sessionKey = conn->appInfo.sessionKey;
 
     info.peerSessionName = conn->appInfo.peerData.sessionName;

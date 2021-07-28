@@ -103,7 +103,7 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
     item->appInfo.myData.apiVersion = API_V2;
     item->appInfo.fd = cfd;
     item->serverSide = true;
-    item->channelId = cfd;
+    item->channelId = GenerateTdcChannelId();
     item->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
     item->timeout = 0;
     item->dataBuffer.w = item->dataBuffer.data;
@@ -156,6 +156,7 @@ static int32_t OnDataEvent(int events, int fd)
         ret = TransTdcProcessPacket(conn->channelId);
         if (ret != SOFTBUS_DATA_NOT_ENOUGH) {
             DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+            CloseTcpFd(fd);
             if (ret != SOFTBUS_OK) {
                 NotifyChannelOpenFailed(conn->channelId);
             }
