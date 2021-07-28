@@ -77,7 +77,7 @@ static TaskConfig GetTaskConfig(Service *service)
     return config;
 }
 
-static void ClientDeathCallback(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
+static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
 {
     if (arg == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
@@ -142,7 +142,7 @@ static int ServerRegisterService(void *origin, IpcIo *req, IpcIo *reply)
         goto EXIT;
     }
     uint32_t cbId = 0;
-    RegisterDeathCallback(NULL, sid, ClientDeathCallback, pkgName, &cbId);
+    RegisterDeathCallback(NULL, sid, ClientDeathCb, pkgName, &cbId);
     svcId.cbId = cbId;
     ret = SERVER_RegisterService((const char *)name, &svcId);
 EXIT:
