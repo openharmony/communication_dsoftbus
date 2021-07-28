@@ -251,7 +251,7 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum)
     return SOFTBUS_OK;
 }
 
-static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo **info, int32_t infoNum)
+static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum)
 {
     NodeInfo *nodeInfo = NULL;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -270,7 +270,8 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo **info, int32_t infoNum)
         }
         nodeInfo = (NodeInfo *)it->node->value;
         if (LnnIsNodeOnline(nodeInfo)) {
-            ConvertNodeInfoToBasicInfo(nodeInfo, info[i++]);
+            ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
+            ++i;
         }
     }
     LnnMapDeinitIterator(it);
@@ -843,7 +844,7 @@ int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
             LOG_ERR("malloc node info buffer failed");
             break;
         }
-        if (FillDLOnlineNodeInfoLocked(info, *infoNum) != SOFTBUS_OK) {
+        if (FillDLOnlineNodeInfoLocked(*info, *infoNum) != SOFTBUS_OK) {
             LOG_ERR("fill online node num failed");
             break;
         }
