@@ -199,6 +199,7 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
     }
     ClientDataBuf *node = (ClientDataBuf *)SoftBusCalloc(sizeof(ClientDataBuf));
     if (node == NULL) {
+        SoftBusFree(node);
         return SOFTBUS_ERR;
     }
     node->channelId = channelId;
@@ -215,7 +216,7 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
     ListAdd(&g_tcpDataList->list, &node->node);
     g_tcpDataList->cnt++;
     pthread_mutex_unlock(&g_tcpDataList->lock);
-
+    SoftBusFree(node);
     return SOFTBUS_OK;
 }
 
@@ -306,6 +307,9 @@ static int32_t TransTdcProcessData(int32_t channelId)
 
     pthread_mutex_unlock(&g_tcpDataList->lock);
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "node is null.");
+    }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
     int32_t seqNum = pktHead->seq;
     int32_t flag = pktHead->flags;
