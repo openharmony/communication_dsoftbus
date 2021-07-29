@@ -283,7 +283,6 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
 
     pthread_cond_broadcast(&context->cond);
     (void)pthread_mutex_unlock(&context->lock);
-    SoftBusFree(newNode);
 }
 
 static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)

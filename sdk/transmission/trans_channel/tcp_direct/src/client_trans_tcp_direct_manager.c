@@ -194,10 +194,8 @@ int32_t TransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *chan
 
     if (ClientTransTdcOnSessionOpened(sessionName, channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify on session opened err.");
-        SoftBusFree(item);
         return SOFTBUS_ERR;
     }
-    SoftBusFree(item);
     return SOFTBUS_OK;
 EXIT_ERR:
     (void)pthread_mutex_unlock(&g_tcpDirectChannelInfoList->lock);

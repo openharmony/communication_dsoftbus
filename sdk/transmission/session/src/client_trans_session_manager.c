@@ -425,7 +425,6 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
 
     *sessionId = session->sessionId;
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    SoftBusFree(session);
     return SOFTBUS_OK;
 }
 
