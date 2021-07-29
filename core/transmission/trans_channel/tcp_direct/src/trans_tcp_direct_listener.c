@@ -171,12 +171,15 @@ static int32_t OnDataEvent(int events, int fd)
         ret = StartVerifySession(conn);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
+            DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+            CloseTcpFd(fd);
             NotifyChannelOpenFailed(conn->channelId);
             TransTdcDelSessionConn(conn);
         }
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
+        CloseTcpFd(fd);
         TransTdcDelSessionConn(conn);
     }
     return ret;
