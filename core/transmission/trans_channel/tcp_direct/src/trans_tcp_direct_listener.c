@@ -179,6 +179,7 @@ static int32_t OnDataEvent(int events, int fd)
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
+        CloseTcpFd(fd);
         TransTdcDelSessionConn(conn);
     }
     return ret;
