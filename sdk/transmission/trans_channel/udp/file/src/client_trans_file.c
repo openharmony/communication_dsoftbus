@@ -153,6 +153,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
             return SOFTBUS_ERR;
         }
         if (NSTACKX_DFileSetStoragePath(fileSession, fileListener.rootDir) != SOFTBUS_OK) {
+            NSTACKX_DFileClose(fileSession);
             LOG_ERR("set storage path failed");
             return SOFTBUS_ERR;
         }
