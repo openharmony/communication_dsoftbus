@@ -61,7 +61,7 @@ SoftBusClientStub::SoftBusClientStub()
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub::OnReceived, code = %u", code);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub::OnReceived, code = %{public}u", code);
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
@@ -220,7 +220,14 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
-
+    if (channel.channelType == CHANNEL_TYPE_UDP) {
+        data.ReadInt32(channel.businessType);
+        channel.myIp = (char *)data.ReadCString();
+        if (!channel.isServer) {
+            data.ReadInt32(channel.peerPort);
+            channel.peerIp = (char *)data.ReadCString();
+        }
+    }
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {
