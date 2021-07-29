@@ -18,7 +18,6 @@ if (defined(ohos_lite)) {
 
   common_include = [
     "$softbus_adapter_config/spec_config",
-    "//utils/native/base/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -43,7 +42,6 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_adapter") {
     include_dirs = [
       "$softbus_adapter_config/spec_config",
-      "//utils/native/base/include",
     ]
     sources = [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
     part_name = "dsoftbus_standard"
