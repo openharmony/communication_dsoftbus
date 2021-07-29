@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_config_type.h"
+#include "softbus_config_adapter.h"
 
 #define MAX_BYTES_LENGTH 4194304
 
