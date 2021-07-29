@@ -201,7 +201,10 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session callback failed");
         return ret;
     }
-
+    if (listener.OnStreamReceived == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "listener OnStreamReceived is NULL");
+        return SOFTBUS_ERR;
+    }
     listener.OnStreamReceived(sessionId, data, ext, param);
     return SOFTBUS_OK;
 }
@@ -216,4 +219,3 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnGetSessionId = ClientGetSessionIdByChannelId;
     return &g_sessionCb;
 }
-
