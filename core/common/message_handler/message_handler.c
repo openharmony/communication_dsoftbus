@@ -197,8 +197,8 @@ static int StartNewLooperThread(SoftBusLooper *looper)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
         return -1;
     }
-
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "loop thread creating %s id %d", looper->context->name, (int)tid);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "loop thread creating %s id %d", looper->context->name,
+        (int)(uintptr_t)tid);
     return 0;
 }
 
@@ -283,6 +283,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
 
     pthread_cond_broadcast(&context->cond);
     (void)pthread_mutex_unlock(&context->lock);
+    SoftBusFree(newNode);
 }
 
 static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)

@@ -58,7 +58,11 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
         channel.peerPort = IpcIoPopInt32(reply);
         channel.peerIp = IpcIoPopString(reply, &size);
     }
-    (void)TransOnChannelOpened(sessionName, &channel);
+    int ret = TransOnChannelOpened(sessionName, &channel);
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransOnChannelOpened fail, error code: %d.", ret);
+    }
+
     FreeBuffer(ctx, ipcMsg);
 }
 

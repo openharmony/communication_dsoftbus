@@ -38,7 +38,13 @@ int32_t DiscServerProxyInit(void)
     int ret;
 
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc start get server proxy");
+    int proxyInitTime = 0;
     while (g_serverProxy == NULL) {
+        proxyInitTime++;
+        if (proxyInitTime == 25){
+            break;
+        }
+
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
@@ -51,6 +57,7 @@ int32_t DiscServerProxyInit(void)
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
+        
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc get server proxy ok");
     return SOFTBUS_OK;

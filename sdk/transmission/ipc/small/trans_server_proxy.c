@@ -50,7 +50,13 @@ int32_t TransServerProxyInit(void)
     int ret;
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans start get server proxy");
+    int proxyInitTime = 0;
     while (g_serverProxy == NULL) {
+        proxyInitTime++;
+        if (proxyInitTime == 25) {
+            break;
+        }
+
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
