@@ -240,8 +240,8 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
             listener->onConnectEvent(events, cfd, ip);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
+            close(cfd);
         }
-        close(cfd);
     } else {
         if (listener->onDataEvent != NULL) {
             listener->onDataEvent(events, fd);
@@ -693,7 +693,6 @@ static int32_t AddNewFdNode(SoftbusBaseListenerInfo *info, int32_t fd)
     ListInit(&newNode->node);
     ListNodeInsert(&info->node, &newNode->node);
     info->fdCount++;
-    SoftBusFree(newNode);
     return SOFTBUS_OK;
 }
 

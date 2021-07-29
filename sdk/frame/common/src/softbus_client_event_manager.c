@@ -111,7 +111,6 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
     ListAdd(&g_observerList->list, &observer->node);
     g_observerList->cnt++;
     (void)pthread_mutex_unlock(&g_observerList->lock);
-    SoftBusFree(observer);
     return SOFTBUS_OK;
 }
 

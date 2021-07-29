@@ -55,7 +55,6 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     }
     *sessionId = session->sessionId;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "AcceptSessionAsServer ok");
-    SoftBusFree(session);
     return SOFTBUS_OK;
 }
 
