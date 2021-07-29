@@ -24,7 +24,6 @@
 namespace OHOS {
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    // 需要区分udp channel，返回监听port，待补充
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
@@ -83,7 +82,14 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
-
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
+        data.WriteInt32(channel->businessType);
+        data.WriteCString(channel->myIp);
+        if (!channel->isServer) {
+            data.WriteInt32(channel->peerPort);
+            data.WriteCString(channel->peerIp);
+        }
+    }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {
