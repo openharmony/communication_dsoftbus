@@ -148,15 +148,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
         return SOFTBUS_FILE_ERR;
     }
 
-    int ret;
-    int fd;
-
-    fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    int fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId open file fail");
         return SOFTBUS_FILE_ERR;
     }
-    ret = write(fd, writeBuf, len);
+    int ret = write(fd, writeBuf, len);
     if (ret != len) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId write fail");
         close(fd);

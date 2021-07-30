@@ -233,6 +233,7 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
         pthread_mutex_unlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
+    pthread_mutex_unlock(&(pool->mutex));
     return SOFTBUS_OK;
 }
 

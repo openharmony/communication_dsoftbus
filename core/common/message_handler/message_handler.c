@@ -197,8 +197,8 @@ static int StartNewLooperThread(SoftBusLooper *looper)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
         return -1;
     }
-
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "loop thread creating %s id %d", looper->context->name, (int)tid);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "loop thread creating %s id %d", looper->context->name,
+        (int)(uintptr_t)tid);
     return 0;
 }
 
