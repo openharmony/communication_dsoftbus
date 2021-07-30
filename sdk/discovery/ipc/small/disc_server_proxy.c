@@ -25,6 +25,8 @@
 #include "softbus_log.h"
 #include "softbus_os_interface.h"
 
+#define WAIT_SERVER_READY_INTERVAL_COUNT 50
+
 static IClientProxy *g_serverProxy = NULL;
 
 int32_t DiscServerProxyInit(void)
@@ -35,10 +37,16 @@ int32_t DiscServerProxyInit(void)
     }
 
     IUnknown *iUnknown = NULL;
-    int ret;
+    int32_t ret;
 
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc start get server proxy");
+    int32_t proxyInitCount = 0;
     while (g_serverProxy == NULL) {
+        proxyInitCount++;
+        if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
+            proxyInitCount = 0;
+            break;
+        }
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);

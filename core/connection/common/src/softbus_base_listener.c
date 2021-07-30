@@ -240,6 +240,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
             listener->onConnectEvent(events, cfd, ip);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
+            close(cfd);
         }
     } else {
         if (listener->onDataEvent != NULL) {
