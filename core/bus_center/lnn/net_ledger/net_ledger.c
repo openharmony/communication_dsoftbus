@@ -25,7 +25,8 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
+int32_t LnnGetRemoteStrInfo(const char *networkId,
+InfoKey key, char *info, uint32_t len)
 {
     if (!IsValidString(networkId, ID_MAX_LEN)) {
         return SOFTBUS_INVALID_PARAM;
