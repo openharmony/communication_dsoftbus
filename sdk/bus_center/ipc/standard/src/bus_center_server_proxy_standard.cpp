@@ -16,6 +16,7 @@
 #include "bus_center_server_proxy_standard.h"
 
 #include <securec.h>
+#include "bus_center_server_proxy.h"
 #include "discovery_service.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
@@ -23,7 +24,29 @@
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
 
+#include "ipc_skeleton.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
+#include "iremote_proxy.h"
+#include "system_ability_definition.h"
+
 namespace OHOS {
+static uint32_t g_getSystemAbilityId = 2;
+static sptr<IRemoteObject> GetSystemAbility()
+{
+    MessageParcel data;
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
+    int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
+    if (err != 0) {
+        LOG_ERR("Get GetSystemAbility failed!\n");
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
 int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
 {
     return SOFTBUS_OK;
@@ -251,7 +274,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         LOG_ERR("params are nullptr!");
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LOG_ERR("remote is nullptr!");
         return SOFTBUS_ERR;
