@@ -15,14 +15,11 @@
 
 #include "client_trans_file.h"
 
-#include <securec.h>
-
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
 #define DEFAULT_KEY_LENGTH 16
