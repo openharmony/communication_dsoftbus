@@ -57,6 +57,7 @@ Note:If the text contains special characters, please escape them according to th
         <filefilterlist>
             <filefilter name="licenseFileNamePolicyFilter" desc="Filters for LICENSE file policies" >
                 <filteritem type="filepath" name="core/adapter/.*" desc="Not contains 3rd code, license file is not required in this subdirectory."/>
+                <filteritem type="filepath" name="adapter/.*" desc="Not contains 3rd code, license file is not required in this subdirectory."/>                
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="core/frame/standard/server/src/softbus_server.cfg" desc="cfg文件为json格式,无法添加版权头"/>
