@@ -20,7 +20,6 @@
 #include <unistd.h>
 #include "client_disc_manager.h"
 #include "softbus_common.h"
-#include "softbus_interface.h"
 #include "softbus_log.h"
 
 using namespace testing::ext;
