@@ -38,6 +38,7 @@ if (defined(ohos_lite)) {
         "lnn/net_builder/src/lnn_connection_fsm.c",
         "lnn/net_builder/src/lnn_discovery_manager.c",
         "lnn/net_builder/src/lnn_net_builder.c",
+        "lnn/net_builder/src/lnn_node_weight.c",
         "lnn/net_builder/src/lnn_network_id.c",
         "lnn/net_builder/src/lnn_state_machine.c",
         "service/src/bus_center_event.c",
@@ -78,9 +79,11 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_server_interface" ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
         "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
         "$dsoftbus_root_path/core/common/message_handler:message_handler",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
@@ -89,7 +92,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
         "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$hilog_lite_deps_path",
         "lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
         "lnn/net_ledger:dsoftbus_bus_center_ledger",
@@ -114,6 +116,7 @@ if (defined(ohos_lite)) {
       "lnn/net_builder/src/lnn_discovery_manager.c",
       "lnn/net_builder/src/lnn_net_builder.c",
       "lnn/net_builder/src/lnn_network_id.c",
+      "lnn/net_builder/src/lnn_node_weight.c",
       "lnn/net_builder/src/lnn_state_machine.c",
       "service/src/bus_center_event.c",
     ]
@@ -147,9 +150,11 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":bus_center_server_interface" ]
     deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
@@ -165,7 +170,6 @@ if (defined(ohos_lite)) {
       "monitor:dsoftbus_bus_center_monitor",
       "utils:dsoftbus_bus_center_utils",
       "//utils/native/base:utils",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     if (is_standard_system) {
       external_deps = [
