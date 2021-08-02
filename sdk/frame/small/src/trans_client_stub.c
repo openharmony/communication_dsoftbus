@@ -62,7 +62,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransOnChannelOpened fail, error code: %d.", ret);
     }
-
+    
     FreeBuffer(ctx, ipcMsg);
 }
 
