@@ -100,7 +100,10 @@ int32_t LnnInitDiscoveryManager(void)
 int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
-    RestartPublish();
+    if (RestartPublish() != SOFTBUS_OK) {
+        LOG_ERR("RestartPublish fail!");
+        return SOFTBUS_ERR;
+    }
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StartDiscoveryImpl == NULL) {
             LOG_ERR("not support discovery");
@@ -119,6 +122,7 @@ int32_t LnnStopDiscovery(void)
     uint32_t i;
     if (DiscUnpublish(MODULE_LNN, LNN_PUBLISH_ID) != SOFTBUS_OK) {
         LOG_ERR("DiscUnpublish fail!");
+        return SOFTBUS_ERR;
     }
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StopDiscoveryImpl == NULL) {

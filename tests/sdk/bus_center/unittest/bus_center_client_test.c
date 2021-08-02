@@ -33,12 +33,10 @@ static bool g_leaveLnnDone = false;
 static bool g_joinOnLine = false;
 static bool g_discfound = false;
 static int index = 0;
-//static int times = 0;
 static int g_subscribeId = 0;
 static char g_networkId[INDEX_NUM][NETWORK_ID_BUF_LEN];
 static ConnectionAddr addr = {
     .type = CONNECTION_ADDR_ETH,
-     //.type = CONNECTION_ADDR_WLAN,
 };
 
 static void DeviceFound(const DeviceInfo *device)
@@ -429,56 +427,8 @@ static int32_t BUS_CENTER_SDK_JOIN_AND_LEAVE_LNN_Test_001()
     }
 }
 
-/*static int32_t BUS_CENTER_SDK_JOIN_AND_LEAVE_LNN_Test_002()
-{
-    if (RegNodeDeviceStateCb(BUS_CENTER_TEST, &g_nodeStateCallback) != 0) {
-        printf("RegNodeDeviceStateCb error!\n");
-        return -1;
-    }
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_ETH,
-        // .type = CONNECTION_ADDR_WLAN,
-    };
-    for (int i = 0; i < times; i++) {
-        printf("==============test index = %d begin===============\n", i);
-        g_joinLnnDone = false;
-        if (JoinLNN(BUS_CENTER_TEST, &addr, OnJoinLNNDone) != 0) {
-            printf("JoinLNN error!\n");
-            continue;
-        }
-        while (g_joinLnnDone == false) {
-            printf("wait Join LNN Done.........\n");
-            sleep(5);
-        }
-        TestGetNodeInfo();
-
-        for (int i = 0; i < index; i++) {
-            g_leaveLnnDone = false;
-            if (LeaveLNN(g_networkId[i], OnLeaveLNNDone) != 0) {
-                printf("LeaveLNN error!\n");
-                continue;
-            }
-            while (g_leaveLnnDone == false) {
-                printf("IpHookTest wait Leave Lnn Done.........\n");
-                sleep(3);
-            }
-        }
-        index = 0;
-        printf("==============test index = %d end===============\n", i);
-    }
-    if (UnregNodeDeviceStateCb(&g_nodeStateCallback) != 0) {
-        printf("UnregNodeDeviceStateCb error!\n");
-        return -1;
-    }
-    return 0;
-}*/
-
 int main(void)
 {
-    //printf("input test times=");
-    //char input = getchar();
-    //getchar();
-    //times = input - '0';
     BUS_CENTER_SDK_Join_Lnn_Test_001();
     BUS_CENTER_SDK_Leave_Lnn_Test_001();
     BUS_CENTER_SDK_STATE_CB_Test_001();
