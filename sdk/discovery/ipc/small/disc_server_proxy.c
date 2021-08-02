@@ -44,8 +44,8 @@ int32_t DiscServerProxyInit(void)
     while (g_serverProxy == NULL) {
         proxyInitCount++;
         if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
-            proxyInitCount = 0;
-            break;
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc get server proxy error");
+            return SOFTBUS_ERR;
         }
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {

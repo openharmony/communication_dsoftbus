@@ -56,8 +56,8 @@ int32_t TransServerProxyInit(void)
     while (g_serverProxy == NULL) {
         proxyInitCount++;
         if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
-            proxyInitCount = 0;
-            break;
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans get server proxy error");
+            return SOFTBUS_OK;
         }
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
