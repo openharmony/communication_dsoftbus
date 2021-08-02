@@ -138,7 +138,6 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
 int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send stream.[channelId = %d]", channelId);
     return SendVtpStream(channelId, data, ext, param);
 }
 
