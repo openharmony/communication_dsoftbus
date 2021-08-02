@@ -135,5 +135,6 @@ int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWrit
             break;
         }
     }
+    fsync(fd);
     return pos;
 }

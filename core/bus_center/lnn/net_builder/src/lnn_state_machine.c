@@ -109,7 +109,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState != NULL || (fsm->flag & FSM_FLAG_RUNNING) != 0) {
-        LOG_ERR("unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
         return;
     }
     if (IsDuplicateState(fsm, state) == true) {
@@ -137,7 +137,7 @@ static void ProcessChangeStateMessage(SoftBusMessage *msg)
     }
 
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        LOG_ERR("unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
         return;
     }
 
@@ -165,7 +165,7 @@ static void ProcessDataMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        LOG_ERR("unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
         return;
     }
     if (fsm->curState->process != NULL) {
@@ -186,7 +186,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        LOG_ERR("unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
         return;
     }
     fsm->curState = NULL;
@@ -217,7 +217,7 @@ static void FsmStateMsgHandler(SoftBusMessage *msg)
     }
 
     if (msg->what != FSM_CTRL_MSG_DATA) {
-        LOG_INFO("process fsm ctrl msg: %d", msg->what);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "process fsm ctrl msg: %d", msg->what);
     }
     switch (msg->what) {
         case FSM_CTRL_MSG_START:
@@ -246,7 +246,7 @@ static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg
 
     msg = CreateFsmHandleMsg(fsm, what, arg1, arg2, obj);
     if (msg == NULL) {
-        LOG_ERR("create fsm handle msg fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create fsm handle msg fail");
         return SOFTBUS_ERR;
     }
     fsm->looper->PostMessage(fsm->looper, msg);
@@ -263,7 +263,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     }
     msgType = (int32_t)para;
     if (msg->what == FSM_CTRL_MSG_DATA && (int32_t)msg->arg1 == msgType) {
-        LOG_INFO("remove fsm data message: %d", msgType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove fsm data message: %d", msgType);
         FreeFsmHandleMsgObj((FsmCtrlMsgObj *)msg->obj);
         return 0;
     }
@@ -280,7 +280,7 @@ int32_t LnnFsmInit(FsmStateMachine *fsm, char *name, FsmDinitCallback cb)
     ListInit(&fsm->stateList);
     fsm->looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (fsm->looper == NULL) {
-        LOG_ERR("get looper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get looper fail");
         return SOFTBUS_ERR;
     }
     fsm->handler.name = name;
@@ -305,7 +305,7 @@ int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
     }
 
     if (IsDuplicateState(fsm, state)) {
-        LOG_ERR("already exist state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "already exist state");
         return SOFTBUS_ERR;
     }
     ListInit(&state->list);
@@ -347,7 +347,7 @@ int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, int32_t msgType,
     }
     msg = CreateFsmHandleMsg(fsm, FSM_CTRL_MSG_DATA, msgType, 0, data);
     if (msg == NULL) {
-        LOG_ERR("create fsm handle msg fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create fsm handle msg fail");
         return SOFTBUS_ERR;
     }
     fsm->looper->PostMessageDelay(fsm->looper, msg, delayMillis);
