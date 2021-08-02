@@ -266,7 +266,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
         char *errDesc = "notifyChannelOpened";
         reply = PackError(errCode, errDesc);
     } else {
-        reply = PackReply(appInfo)
+        reply = PackReply(appInfo);
     }
     if (reply == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestReply get pack reply err");
@@ -274,7 +274,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
     }
 
     packetHead.dataLen = strlen(reply) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
-    int32_t ret = TransTdcPostBytes(channelId, &packetHead, reply)=
+    int32_t ret = TransTdcPostBytes(channelId, &packetHead, reply);
     SoftBusFree(reply);
     return ret;
 }
