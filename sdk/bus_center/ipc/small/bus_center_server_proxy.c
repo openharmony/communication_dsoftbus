@@ -27,6 +27,8 @@
 #include "softbus_mem_interface.h"
 #include "softbus_os_interface.h"
 
+#define WAIT_SERVER_READY_INTERVAL_COUNT 50
+
 typedef enum {
     GET_ALL_ONLINE_NODE_INFO = 0,
     GET_LOCAL_DEVICE_INFO,
@@ -73,7 +75,14 @@ int32_t BusCenterServerProxyInit(void)
     int ret;
 
     LOG_INFO("bus center start get server proxy");
+    int32_t proxyInitCount = 0;
     while (g_serverProxy == NULL) {
+        proxyInitCount++;
+        if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
+            LOG_ERR("bus center get server proxy error");
+            return SOFTBUS_ERR;
+        }
+
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);

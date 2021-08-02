@@ -23,6 +23,8 @@
 #include "softbus_os_interface.h"
 #include "softbus_server_proxy.h"
 
+#define WAIT_SERVER_READY_INTERVAL_COUNT 50
+
 static IClientProxy *g_serverProxy = NULL;
 
 static int ClientSimpleResultCb(IOwner owner, int code, IpcIo *reply)
@@ -39,7 +41,13 @@ static IClientProxy *GetServerProxy(void)
     int ret;
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start get client proxy");
+    int32_t proxyInitCount = 0;
     while (clientProxy == NULL) {
+        proxyInitCount++;
+        if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "frame get server proxy error");
+            return SOFTBUS_ERR;
+        }
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
@@ -54,7 +62,7 @@ static IClientProxy *GetServerProxy(void)
         }
     }
 
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get client proxy ok");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "frame get client proxy ok");
     return clientProxy;
 }
 
