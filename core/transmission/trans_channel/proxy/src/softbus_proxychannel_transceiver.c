@@ -460,7 +460,11 @@ void TransCreateConnByConnId(uint32_t connId)
     item->state = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create conn ref = %d", item->ref);
     item->connId = connId;
-    (void)memcpy_s(&(item->connInfo), sizeof(ConnectOption), &info, sizeof(ConnectOption));
+    if (memcpy_s(&(item->connInfo), sizeof(ConnectOption), &info, sizeof(ConnectOption)) != EOK) {
+            SoftBusFree(item);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+            return;
+    }
     ListAdd(&(g_proxyConnectionList->list), &(item->node));
     g_proxyConnectionList->cnt++;
     (void)pthread_mutex_unlock(&g_proxyConnectionList->lock);

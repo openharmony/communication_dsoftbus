@@ -103,7 +103,7 @@ static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, 
     UnregisterDeathCallback(sid, svcId.cbId);
 }
 
-static int ServerRegisterService(void *origin, IpcIo *req, IpcIo *reply)
+static int ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "register service ipc server pop.");
     size_t len = 0;

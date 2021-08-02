@@ -163,6 +163,7 @@ void TransTdcDelSessionConnByChannelId(int32_t channelId)
             ListDelete(&item->node);
             SoftBusFree(item);
             g_sessionConnList->cnt--;
+            pthread_mutex_unlock(&g_sessionConnList->lock);
             return;
         }
     }

@@ -156,7 +156,7 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
         return SOFTBUS_ERR;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
-	    return SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
