@@ -23,7 +23,7 @@
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 
-int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerCreateSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create session server ipc server pop");
     if (req == NULL || reply == NULL) {
@@ -45,7 +45,7 @@ int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
-int32_t ServerRemoveSessionServer(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerRemoveSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "remove session server ipc server pop");
     if (req == NULL || reply == NULL) {
@@ -67,7 +67,7 @@ int32_t ServerRemoveSessionServer(void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
-int32_t ServerOpenSession(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
     if (req == NULL || reply == NULL) {
@@ -98,7 +98,7 @@ int32_t ServerOpenSession(void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
-int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerCloseChannel(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "close channel ipc server pop");
     if (req == NULL || reply == NULL) {
@@ -146,7 +146,7 @@ int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
-int32_t ServerSendSessionMsg(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerSendSessionMsg(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "close channel ipc server pop");
     if (req == NULL || reply == NULL) {
