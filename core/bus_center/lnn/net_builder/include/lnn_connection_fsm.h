@@ -73,7 +73,7 @@ int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCall
 int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendAuthKeyGenMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, bool isSuccess);
-int32_t LnnSendPeerDevInfoToConnFsm(LnnConnectionFsm *connFsm, LnnRecvDeviceInfoMsgPara *para);
+int32_t LnnSendPeerDevInfoToConnFsm(LnnConnectionFsm *connFsm, const LnnRecvDeviceInfoMsgPara *para);
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);

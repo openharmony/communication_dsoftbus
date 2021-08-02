@@ -27,13 +27,18 @@
 static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version)
 {
     if (json == NULL || info == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (version >= SOFT_BUS_NEW_V1) {
         if (!AddStringToJsonObject(json, SW_VERSION, info->softBusVersion)) {
-            LOG_ERR("AddStringToJsonObject Fail.");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
+            return SOFTBUS_ERR;
+        }
+        if (!AddStringToJsonObject(json, MASTER_UDID, info->masterUdid) ||
+            !AddNumberToJsonObject(json, MASTER_WEIGHT, info->masterWeight)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack master node info Fail.");
             return SOFTBUS_ERR;
         }
     }
@@ -44,7 +49,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddStringToJsonObject(json, NETWORK_ID, info->networkId) ||
         !AddStringToJsonObject(json, VERSION_TYPE, info->versionType) ||
         !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity)) {
-        LOG_ERR("AddStringToJsonObject Fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -55,12 +60,17 @@ static void UnPackCommon(const cJSON* json, NodeInfo *info, SoftBusVersion versi
     char deviceType[DEVICE_TYPE_BUF_LEN] = {0};
     uint8_t typeId;
     if (json == NULL || info == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return;
     }
 
     if (version >= SOFT_BUS_NEW_V1) {
         (void)GetJsonObjectStringItem(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
+        if (!GetJsonObjectStringItem(json, MASTER_UDID, info->masterUdid, UDID_BUF_LEN) ||
+            !GetJsonObjectNumberItem(json, MASTER_WEIGHT, &info->masterWeight)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack master node info fail");
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "unpack master weight: %d", info->masterWeight);
     }
 
     (void)GetJsonObjectStringItem(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
@@ -79,32 +89,32 @@ static void UnPackCommon(const cJSON* json, NodeInfo *info, SoftBusVersion versi
 static char *PackBt(const NodeInfo *info, SoftBusVersion version)
 {
     if (info == NULL) {
-        LOG_ERR("info para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info para error!");
         return NULL;
     }
-    LOG_INFO("PackBt enter!");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "PackBt enter!");
     cJSON* json = cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("create cjson object error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create cjson object error!");
         return NULL;
     }
 
     if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT) ||
         !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info))) {
-        LOG_ERR("AddToJsonObject error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddToJsonObject error!");
         cJSON_Delete(json);
         return NULL;
     }
 
     if (PackCommon(json, info, version) != SOFTBUS_OK) {
-        LOG_ERR("PackCommon error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PackCommon error!");
         cJSON_Delete(json);
         return NULL;
     }
 
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
@@ -113,7 +123,7 @@ static char *PackBt(const NodeInfo *info, SoftBusVersion version)
 static int32_t UnPackBt(const cJSON *json, NodeInfo *info, SoftBusVersion version)
 {
     if (info == NULL || json == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     (void)GetJsonObjectStringItem(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN);
@@ -124,7 +134,7 @@ static int32_t UnPackBt(const cJSON *json, NodeInfo *info, SoftBusVersion versio
 static int32_t UnPackWifi(const cJSON* json, NodeInfo *info, SoftBusVersion version)
 {
     if (info == NULL || json == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     (void)GetJsonObjectNumberItem(json, AUTH_PORT, &info->connectInfo.authPort);
@@ -137,13 +147,13 @@ static int32_t UnPackWifi(const cJSON* json, NodeInfo *info, SoftBusVersion vers
 static char *PackWifi(const NodeInfo *info, SoftBusVersion version)
 {
     if (info == NULL) {
-        LOG_ERR("info para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info para error!");
         return NULL;
     }
-    LOG_INFO("PackWifi enter!");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "PackWifi enter!");
     cJSON* json = cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("create cjson object error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create cjson object error!");
         return NULL;
     }
 
@@ -153,20 +163,20 @@ static char *PackWifi(const NodeInfo *info, SoftBusVersion version)
         !AddNumberToJsonObject(json, AUTH_PORT, LnnGetAuthPort(info)) ||
         !AddNumberToJsonObject(json, SESSION_PORT, LnnGetSessionPort(info)) ||
         !AddNumberToJsonObject(json, PROXY_PORT, LnnGetProxyPort(info))) {
-        LOG_ERR("AddStringToJsonObject Fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         cJSON_Delete(json);
         return NULL;
     }
 
     if (PackCommon(json, info, version) != SOFTBUS_OK) {
-        LOG_ERR("PackCommon error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PackCommon error!");
         cJSON_Delete(json);
         return NULL;
     }
 
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted Failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted Failed!");
     }
     cJSON_Delete(json);
     return data;
@@ -182,7 +192,7 @@ char *PackLedgerInfo(SoftBusVersion version, AuthType type)
     uint32_t i;
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
-        LOG_ERR("info = null.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info = null.");
         return NULL;
     }
     for (i = 0; i < sizeof(g_processFuncs) / sizeof(ProcessLedgerInfo); i++) {
@@ -198,7 +208,7 @@ static int32_t UnPackLedgerInfo(const cJSON *json, NodeInfo *info,
 {
     uint32_t i;
     if (info == NULL || json == NULL) {
-        LOG_ERR("para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     for (i = 0; i < sizeof(g_processFuncs) / sizeof(ProcessLedgerInfo); i++) {
@@ -240,26 +250,26 @@ uint8_t *LnnGetExchangeNodeInfo(ConnectOption *option, SoftBusVersion version,
     authType = ConvertCnnTypeToAuthType(option->type);
     data = PackLedgerInfo(version, authType);
     if (data == NULL) {
-        LOG_ERR("pack ledger info error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack ledger info error!");
         return NULL;
     }
     len = strlen(data) + 1 + AuthGetEncryptHeadLen();
     encryptData = (uint8_t *)SoftBusCalloc(len);
     if (encryptData == NULL) {
-        LOG_ERR("malloc error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc error!");
         cJSON_free(data);
         return NULL;
     }
     buf.buf = encryptData;
     buf.bufLen = len;
     if (AuthEncrypt(option, (AuthSideFlag *)side, (uint8_t *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
-        LOG_ERR("AuthEncrypt error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AuthEncrypt error.");
         cJSON_free(data);
         SoftBusFree(encryptData);
         return NULL;
     }
     if (buf.outLen != len) {
-        LOG_ERR("outLen not right.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "outLen not right.");
     }
     *outSize = buf.outLen;
     cJSON_free(data);
@@ -275,7 +285,7 @@ int32_t LnnParsePeerNodeInfo(ConnectOption *option, NodeInfo *info,
     OutBuf buf = {0};
     AuthType authType;
     if ((option == NULL) || (info == NULL) || (bufInfo == NULL) || (bufInfo->buf == NULL)) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     authType = ConvertCnnTypeToAuthType(option->type);
@@ -295,11 +305,11 @@ int32_t LnnParsePeerNodeInfo(ConnectOption *option, NodeInfo *info,
     SoftBusFree(decryptData);
     decryptData = NULL;
     if (json == NULL) {
-        LOG_ERR("CJSON PARSE error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CJSON PARSE error!");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (UnPackLedgerInfo(json, info, version, authType) != SOFTBUS_OK) {
-        LOG_ERR("UnPackLedgerInfo error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UnPackLedgerInfo error!");
         ret = SOFTBUS_ERR;
     }
     cJSON_Delete(json);

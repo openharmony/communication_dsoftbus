@@ -35,6 +35,8 @@ void LnnDeinitNetBuilder(void);
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
 int32_t LnnNotifySyncOfflineFinish(const char *networkId);
 int32_t LnnRequestCleanConnectionFsm(const ConnectionAddr *addr);
+int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
+int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t masterWeight);
 
 #ifdef __cplusplus
 }
