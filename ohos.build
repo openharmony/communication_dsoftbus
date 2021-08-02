@@ -6,6 +6,9 @@
                 "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
                 "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
             ],
+            "test_list": [
+                "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest"
+            ],
             "inner_kits": [
                 {
                     "type": "so",
