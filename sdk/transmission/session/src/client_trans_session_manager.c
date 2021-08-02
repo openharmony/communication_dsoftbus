@@ -302,11 +302,11 @@ static SessionInfo *GetExistSession(const SessionParam *param)
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if ((strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
+            if (sessionNode->isServer ||
+                (strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
                 (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
                 (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
-                (sessionNode->info.flag != param->attr->dataType) ||
-                (param->attr->unique && sessionNode->isServer)) {
+                (sessionNode->info.flag != param->attr->dataType)) {
                 continue;
             }
             return sessionNode;
