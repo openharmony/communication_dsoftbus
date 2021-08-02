@@ -71,9 +71,6 @@ int32_t BusCenterServerProxyInit(void)
         return SOFTBUS_OK;
     }
 
-    IUnknown *iUnknown = NULL;
-    int ret;
-
     LOG_INFO("bus center start get server proxy");
     int32_t proxyInitCount = 0;
     while (g_serverProxy == NULL) {
@@ -83,13 +80,13 @@ int32_t BusCenterServerProxyInit(void)
             return SOFTBUS_ERR;
         }
 
-        iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
+        IUnknown *iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
 
-        ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
+        int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
             LOG_ERR("QueryInterface failed [%d]", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);

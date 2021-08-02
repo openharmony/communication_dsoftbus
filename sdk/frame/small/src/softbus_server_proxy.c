@@ -37,8 +37,6 @@ static int ClientSimpleResultCb(IOwner owner, int code, IpcIo *reply)
 static IClientProxy *GetServerProxy(void)
 {
     IClientProxy *clientProxy = NULL;
-    IUnknown *iUnknown = NULL;
-    int ret;
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start get client proxy");
     int32_t proxyInitCount = 0;
@@ -48,13 +46,13 @@ static IClientProxy *GetServerProxy(void)
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "frame get server proxy error");
             return SOFTBUS_ERR;
         }
-        iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
+        IUnknown *iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
 
-        ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&clientProxy);
+        int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&clientProxy);
         if (ret != EC_SUCCESS || clientProxy == NULL) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QueryInterface failed [%d]", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
