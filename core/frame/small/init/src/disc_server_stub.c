@@ -24,7 +24,7 @@
 #include "softbus_log.h"
 #include "softbus_permission.h"
 
-int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerPublishService(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "publish service ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -63,7 +63,7 @@ int32_t ServerPublishService(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerUnPublishService(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerUnPublishService(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "unpublish service ipc server pop.");
     size_t len;
@@ -82,7 +82,7 @@ int32_t ServerUnPublishService(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStartDiscovery(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStartDiscovery(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start discovery ipc server pop.");
     size_t len;
@@ -119,7 +119,7 @@ int32_t ServerStartDiscovery(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStopDiscovery(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStopDiscovery(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "stop discovery ipc server pop.");
     size_t len;
