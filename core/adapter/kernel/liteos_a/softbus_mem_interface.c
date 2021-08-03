@@ -49,32 +49,3 @@ void SoftBusFree(void *pt)
     }
     free(pt);
 }
-
-void *SoftBusHighSpeedMalloc(unsigned int size)
-{
-    return SoftBusMalloc(size);
-}
-
-void *SoftBusHighSpeedCalloc(unsigned int size)
-{
-    void *tmp = SoftBusHighSpeedMalloc(size);
-    if (tmp == NULL) {
-        return NULL;
-    }
-
-    errno_t err = memset_s(tmp, size, 0, size);
-    if (err != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset_s failed");
-        SoftBusHighSpeedFree(tmp);
-        return NULL;
-    }
-    return tmp;
-}
-
-void SoftBusHighSpeedFree(void *pt)
-{
-    if (pt == NULL) {
-        return;
-    }
-    free(pt);
-}
