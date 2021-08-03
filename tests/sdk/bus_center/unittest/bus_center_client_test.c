@@ -31,44 +31,10 @@
 static bool g_joinLnnDone = false;
 static bool g_leaveLnnDone = false;
 static bool g_joinOnLine = false;
-static bool g_discfound = false;
 static int index = 0;
-static int g_subscribeId = 0;
 static char g_networkId[INDEX_NUM][NETWORK_ID_BUF_LEN];
 static ConnectionAddr addr = {
     .type = CONNECTION_ADDR_ETH,
-};
-
-static void DeviceFound(const DeviceInfo *device)
-{
-    if (device == NULL) {
-        printf("device para is null");
-        return;
-    }
-    printf("DeviceFound enter, type = %d, %s", device->addr[0].type, device->addr[0].info.ip.ip);
-    if (device->addr[0].info.ip.port == 0) {
-        printf("disc get port is 0 !");
-    }
-    if (memcpy_s(&addr, sizeof(addr), device->addr, sizeof(addr)) != 0) {
-        printf("memcpy key error.");
-        return;
-    }
-    g_discfound = true;
-}
-static void DiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
-{
-    printf("[client]TestDiscoverFailed\n");
-}
-
-static void DiscoverySuccess(int subscribeId)
-{
-    printf("[client]TestDiscoverySuccess\n");
-}
-
-static IDiscoveryCallback g_discCb = {
-    .OnDeviceFound = DeviceFound,
-    .OnDiscoverFailed = DiscoverFailed,
-    .OnDiscoverySuccess = DiscoverySuccess,
 };
 
 static void OnJoinLNNDone(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -121,63 +87,6 @@ static INodeStateCb g_nodeStateCallback = {
     .onNodeOnline = OnNodeOnline,
     .onNodeOffline = OnNodeOffline,
 };
-    
-static int32_t TestGetNodeInfo()
-{
-    NodeBasicInfo *info = NULL;
-    NodeBasicInfo *info1 = NULL;
-    int32_t infoNum = 0;
-    int32_t ret = GetAllNodeDeviceInfo(BUS_CENTER_TEST, &info, &infoNum);
-    printf("GetAllNodeDeviceInfo ret = %d, infoNum = %d\n", ret, infoNum);
-    if (ret != 0) {
-        printf("GetAllNodeDeviceInfo error!\n");
-        return -1;
-    }
-    info1 = info;
-    for (int32_t i = 0; i < infoNum; i++) {
-        printf("GetAllNodeDeviceInfo networkId = %s, typeId = %d, name = %s\n", info->networkId, info->deviceTypeId,
-            info->deviceName);
-        info++;
-    }
-    char uuid[UUID_BUF_LEN] = {0};
-    ret = GetNodeKeyInfo(BUS_CENTER_TEST, info1->networkId, NODE_KEY_UUID, (uint8_t *)uuid, UUID_BUF_LEN);
-    if (ret != 0) {
-        printf("GetNodeKeyInfo error!\n");
-        return -1;
-    }
-    printf("GetNodeKeyInfo uuid = %s\n", uuid);
-    char udid[UDID_BUF_LEN] = {0};
-    ret = GetNodeKeyInfo(BUS_CENTER_TEST, info1->networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN);
-    if (ret != 0) {
-        printf("GetNodeKeyInfo error!\n");
-        return -1;
-    }
-    printf("GetNodeKeyInfo udid = %s\n", udid);
-    FreeNodeInfo(info1);
-
-    NodeBasicInfo info2;
-    ret = GetLocalNodeDeviceInfo(BUS_CENTER_TEST, &info2);
-    if (ret != 0) {
-        printf("GetLocalNodeDeviceInfo error!\n");
-        return -1;
-    }
-    printf("GetLocalNodeDeviceInfo networkId = %s, typeId = %d, name = %s\n", info2.networkId, info2.deviceTypeId,
-        info2.deviceName);
-
-    ret = GetNodeKeyInfo(BUS_CENTER_TEST, info2.networkId, NODE_KEY_UUID, (uint8_t *)uuid, UUID_BUF_LEN);
-    if (ret != 0) {
-        printf("GetNodeKeyInfo error!\n");
-        return -1;
-    }
-    printf("GetNodeKeyInfo uuid = %s\n", uuid);
-    ret = GetNodeKeyInfo(BUS_CENTER_TEST, info2.networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN);
-    if (ret != 0) {
-        printf("GetNodeKeyInfo error!\n");
-        return -1;
-    }
-    printf("GetNodeKeyInfo udid = %s\n", udid);
-    return 0;
-}
 
 /*
 * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
@@ -185,7 +94,7 @@ static int32_t TestGetNodeInfo()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_Join_Lnn_Test_001()
+void BUS_CENTER_SDK_Join_Lnn_Test_001(void)
 {
     ConnectionAddr addr;
 
@@ -210,7 +119,7 @@ void BUS_CENTER_SDK_Join_Lnn_Test_001()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_Leave_Lnn_Test_001()
+void BUS_CENTER_SDK_Leave_Lnn_Test_001(void)
 {
     char errNetIdLenMore[] = "012345678998765432100123456789987654321001234567899876543210abcde";
     char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
@@ -236,7 +145,7 @@ void BUS_CENTER_SDK_Leave_Lnn_Test_001()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_STATE_CB_Test_001()
+void BUS_CENTER_SDK_STATE_CB_Test_001(void)
 {
     if (RegNodeDeviceStateCb(BUS_CENTER_TEST, &g_nodeStateCallback) != 0) {
         printf("BUS_CENTER_SDK_STATE_CB_Test_001 error!\n");
@@ -255,7 +164,7 @@ void BUS_CENTER_SDK_STATE_CB_Test_001()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_STATE_CB_Test_002()
+void BUS_CENTER_SDK_STATE_CB_Test_002(void)
 {
     int i;
 
@@ -287,7 +196,7 @@ void BUS_CENTER_SDK_STATE_CB_Test_002()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001()
+void BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001(void)
 {
     NodeBasicInfo *info = NULL;
     int infoNum;
@@ -316,7 +225,7 @@ void BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001()
+void BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001(void)
 {
     NodeBasicInfo info;
 
@@ -341,7 +250,7 @@ void BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001()
 * @tc.type: FUNC
 * @tc.require: AR000FK6J4
 */
-void BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001()
+void BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001(void)
 {
     NodeBasicInfo info;
     char uuid[UUID_BUF_LEN] = {0};
@@ -369,64 +278,6 @@ void BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001()
     printf("BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001 passed!\n");
 }
 
-static int32_t BUS_CENTER_SDK_JOIN_AND_LEAVE_LNN_Test_001()
-{
-    SubscribeInfo testInfo = {
-        .subscribeId = g_subscribeId,
-        .medium = COAP,
-        .mode = DISCOVER_MODE_ACTIVE,
-        .freq = MID,
-        .capability = "ddmpCapability",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .isSameAccount = true,
-        .isWakeRemote = false,
-    };
-    if (RegNodeDeviceStateCb(BUS_CENTER_TEST, &g_nodeStateCallback) != 0) {
-        printf("RegNodeDeviceStateCb error!\n");
-        return -1;
-    }
-    printf("StartDiscovery...........\n");
-
-    g_discfound = false;
-    if (StartDiscovery(BUS_CENTER_TEST, &testInfo, &g_discCb) != 0) {
-        printf("StartDiscovery error!\n");
-        return -1;        
-    }
-    while (g_discfound == false) {
-        printf("wait disc device Done.........\n");
-        sleep(5);
-    }
-    
-    g_joinLnnDone = false;
-    if (JoinLNN(BUS_CENTER_TEST, &addr, OnJoinLNNDone) != 0) {
-        printf("JoinLNN error!\n");
-        return -1;
-    }
-    while (g_joinLnnDone == false) {
-        printf("wait Join LNN Done.........\n");
-        sleep(5);
-    }
-    TestGetNodeInfo();
-
-    for (int i = 0; i < index; i++) {
-        g_leaveLnnDone = false;
-        if (LeaveLNN(g_networkId[i], OnLeaveLNNDone) != 0) {
-            printf("LeaveLNN error!\n");
-            return -1;
-        }
-        while (g_leaveLnnDone == false) {
-            printf("wait Leave Lnn Done.........\n");
-            sleep(3);
-        }
-    }
-    index = 0;
-    if (UnregNodeDeviceStateCb(&g_nodeStateCallback) != 0) {
-        printf("UnregNodeDeviceStateCb error!\n");
-        return -1;
-    }
-}
-
 int main(void)
 {
     BUS_CENTER_SDK_Join_Lnn_Test_001();
@@ -436,6 +287,5 @@ int main(void)
     BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001();
     BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001();
     BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001();
-    BUS_CENTER_SDK_JOIN_AND_LEAVE_LNN_Test_001();
     return 0;
 }
