@@ -24,7 +24,7 @@ static LnnMonitorEventHandler g_eventHandler;
 #define HISYSLINK_SERVICE_NAME "hisyslink_sevice"
 #define IP_READY 124
 
-struct HdfIoService *serv = NULL;
+static struct HdfIoService *g_serv = NULL;
 
 static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 {
@@ -47,13 +47,13 @@ int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler)
         LOG_ERR("hisyslink event handler is null");
         return SOFTBUS_ERR;
     }
-    serv = HdfIoServiceBind(HISYSLINK_SERVICE_NAME);
-    if (serv == NULL) {
+    g_serv = HdfIoServiceBind(HISYSLINK_SERVICE_NAME);
+    if (g_serv == NULL) {
         LOG_WARN("[%s] fail to get service %s\n", __FUNCTION__, HISYSLINK_SERVICE_NAME);
         return SOFTBUS_OK;
     }
 
-    if (HdfDeviceRegisterEventListener(serv, &g_listener) != HDF_SUCCESS) {
+    if (HdfDeviceRegisterEventListener(g_serv, &g_listener) != HDF_SUCCESS) {
         LOG_WARN("[%s] fail to register event listener\n", __FUNCTION__);
         return SOFTBUS_OK;
     }

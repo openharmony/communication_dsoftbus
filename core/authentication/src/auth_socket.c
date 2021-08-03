@@ -79,7 +79,9 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         return;
     }
     if (auth->authId != head->seq && auth->authId != 0 && head->module != MODULE_UDP_INFO) {
-        return;
+        if (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION) {
+            return;
+        }
     }
     LOG_INFO("auth ip data module is %d", head->module);
     switch (head->module) {
@@ -119,7 +121,6 @@ static void AuthNotifyLnnDisconn(int32_t fd)
         return;
     }
     LOG_INFO("auth disconnect");
-    auth->fd = 0;
     AuthNotifyLnnDisconnByIp(auth->option.info.ipOption.ip);
 }
 
