@@ -37,10 +37,7 @@ static bool IsValidListener(const ISessionListener *listener)
 {
     if ((listener != NULL) &&
         (listener->OnSessionOpened != NULL) &&
-        (listener->OnSessionClosed != NULL) &&
-        (listener->OnBytesReceived != NULL) &&
-        (listener->OnMessageReceived != NULL) &&
-        (listener->OnStreamReceived != NULL)) {
+        (listener->OnSessionClosed != NULL)) {
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid ISessionListener");
