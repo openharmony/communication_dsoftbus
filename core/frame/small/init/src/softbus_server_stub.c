@@ -146,6 +146,12 @@ static int ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
     svcId.cbId = cbId;
     ret = SERVER_RegisterService((const char *)name, &svcId);
 EXIT:
+#ifdef __LINUX__
+    if (svc != NULL) {
+        SoftBusFree(svc);
+        svc = NULL;
+    }
+#endif
     IpcIoPushInt32(reply, ret);
     return SOFTBUS_OK;
 }
