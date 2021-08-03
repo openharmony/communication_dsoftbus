@@ -122,10 +122,12 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             return SOFTBUS_ERR;
         }
         if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+            SoftBusFree(buf);
             return SOFTBUS_ERR;
         }
         if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
             payload, payloadLen) != EOK) {
+            SoftBusFree(buf);
             return SOFTBUS_ERR;
         }
         *data = buf;
@@ -159,13 +161,11 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 
         if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
             SoftBusFree(buf);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
             return SOFTBUS_ERR;
         }
         if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
             enBuf.buf, enBuf.outLen) != EOK) {
             SoftBusFree(buf);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
             return SOFTBUS_ERR;
         }
         *data = buf;
