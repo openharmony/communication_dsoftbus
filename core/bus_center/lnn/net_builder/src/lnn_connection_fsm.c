@@ -813,6 +813,10 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, bool isSuccess)
         return SOFTBUS_ERR;
     }
     para = (bool *)SoftBusMalloc(sizeof(bool));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth result msg para fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
     *para = isSuccess;
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para);
 }
