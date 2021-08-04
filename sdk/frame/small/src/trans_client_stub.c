@@ -38,12 +38,13 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     channel.groupId = (char *)IpcIoPopString(reply, &size);
     channel.keyLen = IpcIoPopUint32(reply);
     channel.sessionKey = (char *)IpcIoPopFlatObj(reply, &size);
-    if (channel.sessionKey == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pointer NULL.");
-        return;
-    }
     channel.peerSessionName = (char *)IpcIoPopString(reply, &size);
     channel.peerDeviceId = (char *)IpcIoPopString(reply, &size);
+    if (channel.groupId == NULL || channel.sessionKey == NULL || channel.peerSessionName == NULL ||
+        channel.peerDeviceId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pointer null error.");
+        return;
+    }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = IpcIoPopFd(reply);
     }
