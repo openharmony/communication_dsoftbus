@@ -66,14 +66,8 @@ static int OpenTcpServer(const char *ip, int port)
         LOG_ERR("%s", strerror(errno));
         return SOFTBUS_ERR;
     }
-    if (SetReuseAddr(fd, 1) != SOFTBUS_OK) {
-        LOG_ERR("SetReuseAddr fail.");
-        return SOFTBUS_ERR;
-    }
-    if (SetReusePort(fd, 1) != SOFTBUS_OK) {
-        LOG_ERR("SetReusePort fail.");
-        return SOFTBUS_ERR;
-    }
+    (void)SetReuseAddr(fd, 1);
+    (void)SetReusePort(fd, 1);
     errno = 0;
     rc = TEMP_FAILURE_RETRY(bind(fd, (struct sockaddr *)&addr, sizeof(addr)));
     if (rc < 0) {
