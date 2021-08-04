@@ -31,20 +31,22 @@ typedef enum {
     INFO_TYPE_SCREEN_STATUS,
     INFO_TYPE_OFFLINE,
     INFO_TYPE_P2P_INFO,
+    INFO_TYPE_MASTER_ELECT,
     INFO_TYPE_COUNT,
 } SyncItemType;
 
 typedef struct {
-    SyncItemType type;
-    uint8_t *(*get)(const char* networkId, DiscoveryType type, uint32_t *bufLen);
-    uint8_t *(*convert)(const uint8_t *msg, uint32_t len, uint32_t *outLen);
-} ItemFunc;
-
-typedef struct {
+    char udid[UDID_BUF_LEN];
     SyncItemType type;
     uint8_t *buf;
     uint32_t bufLen;
 } SyncItemInfo;
+
+typedef struct {
+    SyncItemType type;
+    SyncItemInfo *(*get)(const char* networkId, DiscoveryType type);
+    int32_t (*receive)(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
+} ItemFunc;
 
 int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType);
 int32_t LnnInitSyncLedgerItem(void);

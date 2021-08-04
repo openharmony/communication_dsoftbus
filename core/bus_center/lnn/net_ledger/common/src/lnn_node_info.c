@@ -145,6 +145,28 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
     return;
 }
 
+const char *LnnGetMasterUdid(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LOG_ERR("PARA ERROR!");
+        return NULL;
+    }
+    return info->masterUdid;
+}
+
+int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
+{
+    if (info == NULL || udid == NULL) {
+        LOG_ERR("PARA ERROR!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strncpy_s(info->masterUdid, UDID_BUF_LEN, udid, strlen(udid)) != EOK) {
+        LOG_ERR("STR COPY ERROR!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnGetAuthPort(const NodeInfo *info)
 {
     if (info == NULL) {

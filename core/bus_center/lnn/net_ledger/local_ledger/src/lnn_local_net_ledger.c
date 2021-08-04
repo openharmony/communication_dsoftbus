@@ -217,6 +217,27 @@ static int32_t LlGetNetIfName(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t L1GetMasterNodeUdid(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    const char *udid = NULL;
+
+    if (buf == NULL || len < UDID_BUF_LEN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid get master node udid arguments");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    udid = LnnGetMasterUdid(info);
+    if (udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get master udid fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy master udid failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetAuthPort(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -291,6 +312,17 @@ static int32_t LlGetDeviceTypeId(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->deviceInfo.deviceTypeId;
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetMasterNodeWeight(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+
+    if (buf == NULL || len != NUM_BUF_SIZE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->masterWeight;
     return SOFTBUS_OK;
 }
 
@@ -404,6 +436,15 @@ static int32_t UpdateLocalNetCapability(const void *capability)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateMasgerNodeWeight(const void *weight)
+{
+    if (weight == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.masterWeight = *(int32_t *)weight;
+    return SOFTBUS_OK;
+}
+
 int32_t UpdateLocalStatus(ConnectStatus status)
 {
     g_localNetLedger.localInfo.status = status;
@@ -412,7 +453,7 @@ int32_t UpdateLocalStatus(ConnectStatus status)
 
 int32_t UpdateLocalWeight(uint32_t weight)
 {
-    g_localNetLedger.localInfo.weight = weight;
+    g_localNetLedger.localInfo.masterWeight = weight;
     return SOFTBUS_OK;
 }
 
@@ -446,6 +487,26 @@ static int32_t UpdateLocalNetIfName(const void *netIfName)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateMasterNodeUdid(const void *udid)
+{
+    char localUdid[UDID_BUF_LEN];
+    ConnectRole role;
+
+    if (LlGetDeviceUdid(localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid fail");
+    } else {
+        role = g_localNetLedger.localInfo.role;
+        if (strcmp(localUdid, udid) == 0) {
+            g_localNetLedger.localInfo.role = ROLE_CONTROLLER;
+        } else {
+            g_localNetLedger.localInfo.role = ROLE_LEAF;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local role from %d to %d",
+            role, g_localNetLedger.localInfo.role);
+    }
+    return LnnSetMasterUdid(&g_localNetLedger.localInfo, (const char *)udid);
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -456,11 +517,13 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_BT_MAC, MAC_LEN, LlGetBtMac, UpdateLocalBtMac},
     {STRING_KEY_WLAN_IP, IP_MAX_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
     {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
+    {STRING_KEY_MASTER_NODE_UDID, UDID_BUF_LEN, L1GetMasterNodeUdid, UpdateMasterNodeUdid},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
+    {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
 };
 
 int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)

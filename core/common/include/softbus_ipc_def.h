@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 #define MAX_SOFT_BUS_IPC_LEN 512
-#define MAX_SOFT_BUS_IPC_LEN_EX 1024
+#define MAX_SOFT_BUS_IPC_LEN_EX 2048
 #define SOFTBUS_SERVICE "softbus_service"
 
 struct CommonScvId {
