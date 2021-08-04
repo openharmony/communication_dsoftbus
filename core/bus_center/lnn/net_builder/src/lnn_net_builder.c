@@ -486,7 +486,7 @@ static int32_t ProcessAuthDisconnect(const void *para)
 static int32_t ProcessLeaveLNNRequest(const void *para)
 {
     const char *networkId = (const char *)para;
-    LnnConnectionFsm *connFsm = NULL;
+    LnnConnectionFsm *item = NULL;
     int rc = SOFTBUS_ERR;
 
     if (networkId == NULL) {
@@ -494,16 +494,19 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    do {
-        connFsm = FindConnectionFsmByNetworkId(networkId);
-        if (connFsm == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "no target networkId exist");
-            break;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(networkId, item->connInfo.peerNetworkId) != 0) {
+            continue;
         }
-        rc = LnnSendLeaveRequestToConnFsm(connFsm);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]send leave LNN msg to connection fsm result: %d",
-            connFsm->id, rc);
-    } while (true);
+        if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send leave LNN msg to connection fsm[id=%u] failed",
+                item->id);
+        } else {
+            rc = SOFTBUS_OK;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send leave LNN msg to connection fsm[id=%u] success",
+                item->id);
+        }
+    }
     if (rc != SOFTBUS_OK) {
         LnnNotifyLeaveResult(networkId, SOFTBUS_ERR);
     }
