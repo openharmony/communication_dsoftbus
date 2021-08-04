@@ -142,12 +142,14 @@ int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckBusCenterPermission(callingUid, pkgName)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo no permission.");
+        SoftBusFree(nodeInfo);
         return SOFTBUS_PERMISSION_DENIED;
     }
 
     int32_t ret = LnnIpcGetLocalDeviceInfo(pkgName, nodeInfo, infoTypeLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo get local info failed.");
+        SoftBusFree(nodeInfo);
         return SOFTBUS_ERR;
     }
     IpcIoPushFlatObj(reply, nodeInfo, infoTypeLen);
@@ -179,12 +181,14 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckBusCenterPermission(callingUid, pkgName)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo no permission.");
+        SoftBusFree(buf);
         return SOFTBUS_PERMISSION_DENIED;
     }
 
     int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, len);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo get local info failed.");
+        SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
     IpcIoPushFlatObj(reply, buf, len);
