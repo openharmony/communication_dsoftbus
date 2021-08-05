@@ -60,9 +60,10 @@ typedef struct {
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t discoveryType;
-    int64_t authSeqNum;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
+    int64_t authSeqNum;
+    int32_t authChannelId;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
