@@ -121,9 +121,15 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
         if (buf == NULL) {
             return SOFTBUS_ERR;
         }
-        (void)memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead));
-        (void)memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN,
-                       bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN, payload, payloadLen);
+        if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+            SoftBusFree(buf);
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
+            payload, payloadLen) != EOK) {
+            SoftBusFree(buf);
+            return SOFTBUS_ERR;
+        }
         *data = buf;
         *dataLen = bufLen;
     } else {
@@ -153,9 +159,15 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             msg->chiper = msg->chiper | AUTH_SERVER_SIDE;
         }
 
-        (void)memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead));
-        (void)memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN,
-                       bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN, enBuf.buf, enBuf.outLen);
+        if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+            SoftBusFree(buf);
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, bufLen - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
+            enBuf.buf, enBuf.outLen) != EOK) {
+            SoftBusFree(buf);
+            return SOFTBUS_ERR;
+        }
         *data = buf;
         *dataLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + enBuf.outLen;
     }

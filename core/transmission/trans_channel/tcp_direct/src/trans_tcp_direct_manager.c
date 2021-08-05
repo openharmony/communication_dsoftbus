@@ -157,7 +157,10 @@ void TransTdcDelSessionConnByChannelId(int32_t channelId)
 
     SessionConn *item = NULL;
     SessionConn *next = NULL;
-    pthread_mutex_lock(&g_sessionConnList->lock);
+    if (pthread_mutex_lock(&g_sessionConnList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
