@@ -121,7 +121,7 @@ static void AuthNotifyLnnDisconn(int32_t fd)
         return;
     }
     LOG_INFO("auth disconnect");
-    AuthNotifyLnnDisconnByIp(auth->option.info.ipOption.ip);
+    AuthNotifyLnnDisconnByIp(auth);
 }
 
 static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)

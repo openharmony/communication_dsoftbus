@@ -259,6 +259,31 @@ static void HandleAuthFail(AuthManager *auth)
     auth->cb->onDeviceVerifyFail(auth->authId);
 }
 
+int32_t AuthHandleLeaveLNN(int64_t authId)
+{
+    AuthManager *auth = NULL;
+    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
+    if (auth == NULL) {
+        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
+        if (auth == NULL) {
+            LOG_ERR("no match auth found, AuthHandleLeaveLNN failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    LOG_INFO("auth handle leave LNN, authId is %lld", authId);
+    if (pthread_mutex_lock(&g_authLock) != 0) {
+        LOG_ERR("lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+    AuthClearSessionKeyBySeq((int32_t)authId);
+    (void)pthread_mutex_unlock(&g_authLock);
+    if (auth->option.type == CONNECT_TCP) {
+        AuthCloseTcpFd(auth->fd);
+    }
+    DeleteAuth(auth);
+    return SOFTBUS_OK;
+}
+
 static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const ConnectOption *option,
     const ConnectionAddr *addr)
 {
@@ -908,37 +933,6 @@ static void AuthLooperInit(void)
     g_authHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
 }
 
-int32_t AuthHandleLeaveLNN(int64_t authId)
-{
-    AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
-    if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
-        if (auth == NULL) {
-            LOG_ERR("no match auth found, AuthHandleLeaveLNN failed");
-            return SOFTBUS_ERR;
-        }
-    }
-    LOG_INFO("auth handle leave LNN, authId is %lld", authId);
-    char deviceKey[MAX_DEVICE_KEY_LEN] = {0};
-    uint32_t deviceKeyLen = 0;
-    if (AuthGetDeviceKey(deviceKey, MAX_DEVICE_KEY_LEN, &deviceKeyLen, &auth->option) != SOFTBUS_OK) {
-        LOG_ERR("get device key failed");
-        return SOFTBUS_ERR;
-    }
-    if (pthread_mutex_lock(&g_authLock) != 0) {
-        LOG_ERR("lock mutex failed");
-        return SOFTBUS_ERR;
-    }
-    AuthClearSessionKeyByDeviceInfo(auth->option.type, deviceKey, deviceKeyLen);
-    (void)pthread_mutex_unlock(&g_authLock);
-    if (auth->option.type == CONNECT_TCP) {
-        AuthCloseTcpFd(auth->fd);
-    }
-    DeleteAuth(auth);
-    return SOFTBUS_OK;
-}
-
 static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peerIp, int32_t port)
 {
     auth->cb = GetDefaultAuthCallback();
@@ -995,41 +989,14 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     return SOFTBUS_OK;
 }
 
-void AuthNotifyLnnDisconnByIp(const char *ip)
+void AuthNotifyLnnDisconnByIp(const AuthManager *auth)
 {
-    AuthManager *auth = NULL;
-    ListNode *item = NULL;
-    ListNode *tmp = NULL;
-    if (ip == NULL) {
-        LOG_ERR("invalid parameter");
-        return;
+    EventRemove(auth->authId);
+    if (auth->side == SERVER_SIDE_FLAG && auth->status < IN_SYNC_PROGRESS) {
+        (void)AuthHandleLeaveLNN(auth->authId);
+    } else {
+        auth->cb->onDisconnect(auth->authId);
     }
-    if (pthread_mutex_lock(&g_authLock) != 0) {
-        LOG_ERR("lock mutex failed");
-        return;
-    }
-    LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
-        auth = LIST_ENTRY(item, AuthManager, node);
-        if (strncmp(auth->option.info.ipOption.ip, ip, strlen(ip)) == 0) {
-            EventRemove(auth->authId);
-            auth->cb->onDisconnect(auth->authId);
-        }
-    }
-    LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
-        auth = LIST_ENTRY(item, AuthManager, node);
-        if (strncmp(auth->option.info.ipOption.ip, ip, strlen(ip)) == 0) {
-            EventRemove(auth->authId);
-            if (auth->status < IN_SYNC_PROGRESS) {
-                LOG_INFO("auth no need to notify lnn");
-                (void)pthread_mutex_unlock(&g_authLock);
-                (void)AuthHandleLeaveLNN(auth->authId);
-                (void)pthread_mutex_lock(&g_authLock);
-            } else {
-                auth->cb->onDisconnect(auth->authId);
-            }
-        }
-    }
-    (void)pthread_mutex_unlock(&g_authLock);
 }
 
 void AuthIpChanged(ConnectType type)
