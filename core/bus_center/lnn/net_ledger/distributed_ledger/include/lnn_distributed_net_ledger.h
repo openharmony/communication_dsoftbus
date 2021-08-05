@@ -44,12 +44,13 @@ typedef enum {
     REPORT_NONE,
     REPORT_CHANGE,
     REPORT_ONLINE,
+    REPORT_OFFLINE,
 } ReportCategory;
 
 int32_t LnnInitDistributedLedger(void);
 void LnnDeinitDistributedLedger(void);
 ReportCategory LnnAddOnlineNode(NodeInfo *info);
-void LnnSetNodeOffline(const char *udid);
+ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);

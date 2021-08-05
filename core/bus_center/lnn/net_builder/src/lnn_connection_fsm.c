@@ -192,22 +192,22 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     NodeInfo *info = NULL;
     const char *udid = NULL;
     ConnectOption option;
-    NodeBasicInfo basic;
 
     if (retCode == SOFTBUS_OK) {
         info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
         if (info != NULL) {
             udid = LnnGetDeviceUdid(info);
-            LnnSetNodeOffline(udid);
-            (void)LnnNotifyNodeStateChanged(&connInfo->addr);
-            (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-            if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
-                LnnNotifyOnlineState(false, &basic);
-            }
-            // just remove node when peer device is not trusted
-            if ((connInfo->flag & CONN_INFO_FLAG_LEAVING_PASSIVE) != 0) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]remove node", connFsm->id);
-                LnnRemoveNode(udid);
+            if (LnnSetNodeOffline(udid, (int32_t)connInfo->authId) == REPORT_OFFLINE) {
+                NodeBasicInfo basic;
+                (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+                if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
+                    LnnNotifyOnlineState(false, &basic);
+                }
+                // just remove node when peer device is not trusted
+                if ((connInfo->flag & CONN_INFO_FLAG_LEAVING_PASSIVE) != 0) {
+                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]remove node", connFsm->id);
+                    LnnRemoveNode(udid);
+                }
             }
         }
     }
@@ -220,9 +220,9 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     connInfo->flag &= ~CONN_INFO_FLAG_LEAVING_ACTIVE;
     connInfo->flag &= ~CONN_INFO_FLAG_LEAVING_PASSIVE;
     (void)AuthHandleLeaveLNN(connInfo->authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
     connFsm->isDead = true;
     LnnRequestCleanConnectionFsm(&connInfo->addr);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
 }
 
 static void OnJoinLNNTimeout(LnnConnectionFsm *connFsm)
@@ -426,6 +426,7 @@ static bool ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *c
         }
         connInfo->nodeInfo->discoveryType = 1 << (uint32_t)GetDiscoveryType(connInfo->addr.type);
         connInfo->nodeInfo->authSeqNum = connInfo->authId;
+        connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
         if (strncpy_s(connInfo->nodeInfo->uuid, UUID_BUF_LEN, para->uuid, strlen(para->uuid)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s uuid failed");
             rc = SOFTBUS_ERR;

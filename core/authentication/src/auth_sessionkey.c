@@ -271,7 +271,7 @@ uint32_t AuthGetEncryptHeadLen(void)
     return ENCRYPT_OVER_HEAD_LEN;
 }
 
-void AuthClearSessionKeyByDeviceInfo(uint32_t type, const char *deviceKey, uint32_t deviceKeyLen)
+void AuthClearSessionKeyBySeq(int32_t seq)
 {
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
@@ -281,7 +281,7 @@ void AuthClearSessionKeyByDeviceInfo(uint32_t type, const char *deviceKey, uint3
     ListNode *tmp = NULL;
     LIST_FOR_EACH_SAFE(item, tmp, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        if (sessionKeyList->type == type && strncmp(sessionKeyList->deviceKey, deviceKey, deviceKeyLen) == 0) {
+        if (sessionKeyList->seq == seq) {
             (void)memset_s(sessionKeyList->sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
             ListDelete(&sessionKeyList->node);
             SoftBusFree(sessionKeyList);
