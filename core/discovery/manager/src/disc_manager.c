@@ -658,7 +658,7 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
 static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
     int32_t ret;
-
+    
     ret = AddInfoToList(g_publishInfoList, packageName, NULL, info, type);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add list fail");
