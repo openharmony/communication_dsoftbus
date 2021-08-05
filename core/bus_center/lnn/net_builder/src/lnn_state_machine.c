@@ -109,7 +109,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState != NULL || (fsm->flag & FSM_FLAG_RUNNING) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in start msg process");
         return;
     }
     if (IsDuplicateState(fsm, state) == true) {
@@ -137,7 +137,7 @@ static void ProcessChangeStateMessage(SoftBusMessage *msg)
     }
 
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in change state msg process");
         return;
     }
 
@@ -165,7 +165,8 @@ static void ProcessDataMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in data msg(%d) process, flag=0x%x",
+            (int32_t)msg->arg1, fsm->flag);
         return;
     }
     if (fsm->curState->process != NULL) {
@@ -186,7 +187,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in stop msg process");
         return;
     }
     fsm->curState = NULL;
@@ -359,8 +360,7 @@ int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
-        RemoveMessageFunc, (void *)msgType);
+    fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler, RemoveMessageFunc, (void *)msgType);
     return SOFTBUS_OK;
 }
 

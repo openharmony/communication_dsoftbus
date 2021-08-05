@@ -235,7 +235,7 @@ static AuthType ConvertCnnTypeToAuthType(ConnectType type)
     return AUTH_MAX;
 }
 
-uint8_t *LnnGetExchangeNodeInfo(ConnectOption *option, SoftBusVersion version,
+uint8_t *LnnGetExchangeNodeInfo(int32_t seq, ConnectOption *option, SoftBusVersion version,
     uint32_t *outSize, int32_t *side)
 {
     char *data = NULL;
@@ -262,7 +262,7 @@ uint8_t *LnnGetExchangeNodeInfo(ConnectOption *option, SoftBusVersion version,
     }
     buf.buf = encryptData;
     buf.bufLen = len;
-    if (AuthEncrypt(option, (AuthSideFlag *)side, (uint8_t *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
+    if (AuthEncryptBySeq(seq, (AuthSideFlag *)side, (uint8_t *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AuthEncrypt error.");
         cJSON_free(data);
         SoftBusFree(encryptData);
