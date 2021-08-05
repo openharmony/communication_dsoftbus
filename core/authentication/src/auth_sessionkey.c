@@ -207,8 +207,6 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
         LOG_ERR("AuthGetLastSessionKey failed");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    LOG_INFO("000 auth AuthEncryptBySeq. type=%{public}d, deviceKey=%{public}s", devInfo.type, devInfo.deviceKey);
-    LOG_INFO("000 auth AuthEncryptBySeq.  seq=%{public}d", sessionKeyList->seq);
     *side = sessionKeyList->side;
     // add seq first
     if (memcpy_s(outBuf->buf, sizeof(int32_t), &sessionKeyList->seq, sizeof(int32_t)) != EOK) {

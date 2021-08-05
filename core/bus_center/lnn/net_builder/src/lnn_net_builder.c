@@ -314,7 +314,7 @@ static int32_t ProcessDevDiscoveryRequest(const void *para)
     return TrySendJoinLNNRequest((const ConnectionAddr *)para, false);
 }
 
-static void tryInitiateNewNetworkOnline(LnnConnectionFsm *connFsm)
+static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
 {
     LnnConnectionFsm *item = NULL;
     int32_t rc;
@@ -339,6 +339,35 @@ static void tryInitiateNewNetworkOnline(LnnConnectionFsm *connFsm)
         rc = LnnSendNewNetworkOnlineToConnFsm(item);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "[id=%u]initiate new network online to connection fsm[id=%u], rc=%d", connFsm->id, item->id, rc);
+    }
+}
+
+static void tryCleanAllConnection(const LnnConnectionFsm *connFsm)
+{
+    LnnConnectionFsm *item = NULL;
+    const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
+    const ConnectionAddr *addr2 = NULL;
+    ConnectOption option;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        addr2 = &item->connInfo.addr;
+        if (addr1->type != addr2->type) {
+            continue;
+        }
+        if (addr1->type == CONNECTION_ADDR_BR || addr1->type == CONNECTION_ADDR_BLE) {
+            if (strncmp(item->connInfo.addr.info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0) {
+                return;
+            }
+        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+            if (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0) {
+                return;
+            }
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]disconnect all connection for type=%d",
+        connFsm->id, addr1->type);
+    if (LnnConvertAddrToOption(addr1, &option)) {
+        ConnDisconnectDeviceAllConn(&option);
     }
 }
 
@@ -380,6 +409,7 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
         }
         StopConnectionFsm(connFsm);
         tryInitiateNewNetworkOnline(connFsm);
+        tryCleanAllConnection(connFsm);
         rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)para);

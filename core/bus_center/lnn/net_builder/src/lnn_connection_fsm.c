@@ -204,7 +204,6 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeInfo *info = NULL;
     const char *udid = NULL;
-    ConnectOption option;
     NodeBasicInfo basic;
 
     if (retCode == SOFTBUS_OK) {
@@ -223,9 +222,6 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
                 }
             }
         }
-    }
-    if (LnnConvertAddrToOption(&connInfo->addr, &option) == true) {
-        ConnDisconnectDeviceAllConn(&option);
     }
     NotifyLeaveResult(connFsm, networkId, retCode);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
@@ -759,7 +755,7 @@ static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     return true;
 }
 
-static uint16_t GetNextConnectionFsmId()
+static uint16_t GetNextConnectionFsmId(void)
 {
     static uint16_t connFsmId = 0;
     return ++connFsmId;
