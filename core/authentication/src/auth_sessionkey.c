@@ -135,17 +135,9 @@ static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        if (sessionKeyList->type == devInfo->type && sessionKeyList->side == CLIENT_SIDE_FLAG &&
+        if (sessionKeyList->type == devInfo->type &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            LOG_INFO("get client last session key succ");
-            return sessionKeyList;
-        }
-    }
-    LIST_FOR_EACH(item, &g_sessionKeyListHead) {
-        sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        if (sessionKeyList->type == devInfo->type && sessionKeyList->side == SERVER_SIDE_FLAG &&
-            strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            LOG_INFO("get server last session key succ");
+            LOG_INFO("auth get last session key succ");
             return sessionKeyList;
         }
     }
@@ -167,15 +159,75 @@ static SessionKeyList *GetSessionKeyByDevinfo(const NecessaryDevInfo *devInfo)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
+        LOG_INFO("auth GetSessionKeyByDevinfo. type=%{public}d, seq=%{public}d, deviceKey=%{public}s",
+            devInfo->type, devInfo->seq, devInfo->deviceKey);
         if (sessionKeyList->type == devInfo->type &&
             sessionKeyList->seq == devInfo->seq &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            LOG_INFO("get session key seccessfully.");
+            LOG_INFO("auth get session key by dev info succ");
             return sessionKeyList;
         }
     }
-    LOG_ERR("auth cannot find session key by seq");
+    LOG_ERR("auth cannot find session key by dev info");
     return NULL;
+}
+
+static SessionKeyList *AuthGetSessionKeyBySeq(int32_t seq)
+{
+    SessionKeyList *sessionKeyList = NULL;
+    if (IsListEmpty(&g_sessionKeyListHead) == true) {
+        LOG_ERR("no session key in memory");
+        return NULL;
+    }
+    ListNode *item = NULL;
+    ListNode *tmp = NULL;
+    LIST_FOR_EACH_SAFE(item, tmp, &g_sessionKeyListHead) {
+        sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
+        if (sessionKeyList->seq == seq) {
+            LOG_INFO("get session key by seq seccessfully.");
+            return sessionKeyList;
+        }
+    }
+    LOG_ERR("auth get session key by seq failed");
+    return NULL;
+}
+
+int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf)
+{
+    if (data == NULL || outBuf == NULL || outBuf->bufLen < (len + ENCRYPT_OVER_HEAD_LEN)) {
+        LOG_ERR("invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SessionKeyList *sessionKeyList = NULL;
+    NecessaryDevInfo devInfo = {0};
+    uint32_t outLen;
+
+    sessionKeyList = AuthGetSessionKeyBySeq(seq);
+    if (sessionKeyList == NULL) {
+        LOG_ERR("AuthGetLastSessionKey failed");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    LOG_INFO("000 auth AuthEncryptBySeq. type=%{public}d, deviceKey=%{public}s", devInfo.type, devInfo.deviceKey);
+    LOG_INFO("000 auth AuthEncryptBySeq.  seq=%{public}d", sessionKeyList->seq);
+    *side = sessionKeyList->side;
+    // add seq first
+    if (memcpy_s(outBuf->buf, sizeof(int32_t), &sessionKeyList->seq, sizeof(int32_t)) != EOK) {
+        LOG_ERR("memcpy_s failed");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    AesGcmCipherKey cipherKey = {0};
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
+        LOG_ERR("memcpy_s failed");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    if (SoftBusEncryptDataWithSeq(&cipherKey, data, len, outBuf->buf + MESSAGE_INDEX_LEN,
+        &outLen, sessionKeyList->seq) != SOFTBUS_OK) {
+        LOG_ERR("SoftBusEncryptDataWithSeq failed");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    outBuf->outLen = outLen + MESSAGE_INDEX_LEN;
+    return SOFTBUS_OK;
 }
 
 int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf)
@@ -275,6 +327,7 @@ void AuthClearSessionKeyBySeq(int32_t seq)
 {
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
+        LOG_ERR("no session key in memory");
         return;
     }
     ListNode *item = NULL;
