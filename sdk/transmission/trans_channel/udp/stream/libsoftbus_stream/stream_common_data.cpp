@@ -38,7 +38,7 @@ int StreamCommonData::InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t b
     std::unique_ptr<char[]> inputExt, ssize_t extSize)
 {
     if (inputBuf == nullptr) {
-        LOG_ERR("InitStreamData: Stream MUST not be null");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "InitStreamData: Stream MUST not be null");
         return -1;
     }
     streamData_ = std::move(inputBuf);

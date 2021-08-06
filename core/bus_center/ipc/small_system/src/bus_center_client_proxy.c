@@ -55,6 +55,7 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
     }
     (void)memset_s(svcId, sizeof(struct CommonScvId) * num, 0, sizeof(struct CommonScvId) * num);
     if (SERVER_GetAllClientIdentity(svcId, num) != SOFTBUS_OK) {
+        SoftBusFree(svcId);
         LOG_ERR("bus center callback failed.");
         return SOFTBUS_ERR;
     }
@@ -153,6 +154,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LOG_ERR("ClinetOnNodeBasicInfoChanged callback get svc num failed.");
+        SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
     for (i = 0; i < num; i++) {
@@ -160,6 +162,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
             LITEIPC_FLAG_ONEWAY, NULL);
         if (ans != SOFTBUS_OK) {
             LOG_ERR("ClinetOnNodeOnlineStateChanged callback SendRequest failed.");
+            SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
     }
@@ -196,6 +199,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LOG_ERR("ClinetOnNodeBasicInfoChanged callback get svc num failed.");
+        SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
     for (i = 0; i < num; i++) {
@@ -203,6 +207,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
             LITEIPC_FLAG_ONEWAY, NULL);
         if (ans != SOFTBUS_OK) {
             LOG_ERR("ClinetOnNodeBasicInfoChanged callback SendRequest failed.");
+            SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
     }

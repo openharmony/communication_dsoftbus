@@ -44,29 +44,29 @@ static int32_t ClientModuleInit()
 {
     SoftbusConfigInit();
     if (EventClientInit() == SOFTBUS_ERR) {
-        LOG_ERR("init event manager failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init event manager failed");
         goto ERR_EXIT;
     }
 
     if (BusCenterClientInit() == SOFTBUS_ERR) {
-        LOG_ERR("init bus center failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init bus center failed");
         goto ERR_EXIT;
     }
 
     if (DiscClientInit() == SOFTBUS_ERR) {
-        LOG_ERR("init service manager failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init service manager failed");
         goto ERR_EXIT;
     }
 
     if (TransClientInit() == SOFTBUS_ERR) {
-        LOG_ERR("init connect manager failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init connect manager failed");
         goto ERR_EXIT;
     }
 
     return SOFTBUS_OK;
 
 ERR_EXIT:
-    LOG_ERR("softbus sdk frame init failed.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus sdk frame init failed.");
     ClientModuleDeinit();
     return SOFTBUS_ERR;
 }
@@ -74,7 +74,7 @@ ERR_EXIT:
 int32_t InitSoftBus(const char *pkgName)
 {
     if (pkgName == NULL || strlen(pkgName) >= PKG_NAME_SIZE_MAX) {
-        LOG_ERR("init softbus sdk fail.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init softbus sdk fail.");
         return SOFTBUS_ERR;
     }
 
@@ -83,7 +83,7 @@ int32_t InitSoftBus(const char *pkgName)
     }
 
     if (pthread_mutex_lock(&g_isInitedLock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_isInited == true) {
@@ -93,37 +93,37 @@ int32_t InitSoftBus(const char *pkgName)
 
     if (strcpy_s(g_pkgName, sizeof(g_pkgName), pkgName) != EOK) {
         pthread_mutex_unlock(&g_isInitedLock);
-        LOG_ERR("strcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_MEM_ERR;
     }
 
     if (ClientModuleInit() != SOFTBUS_OK) {
-        LOG_ERR("ctx init fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
         pthread_mutex_unlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     if (ClientStubInit() != SOFTBUS_OK) {
-        LOG_ERR("service init fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
         pthread_mutex_unlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     g_isInited = true;
     pthread_mutex_unlock(&g_isInitedLock);
-    LOG_INFO("softbus sdk frame init success.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 }
 
 int32_t GetSoftBusClientName(char *name, uint32_t len)
 {
     if (name == NULL || len < PKG_NAME_SIZE_MAX) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (strncpy_s(name, len, g_pkgName, strlen(g_pkgName)) != EOK) {
-        LOG_ERR("strcpy fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy fail");
         return SOFTBUS_ERR;
     }
 
@@ -134,7 +134,7 @@ int32_t CheckPackageName(const char *pkgName)
 {
     char clientPkgName[PKG_NAME_SIZE_MAX] = {0};
     if (GetSoftBusClientName(clientPkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        LOG_ERR("GetSoftBusClientName err");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftBusClientName err");
         return SOFTBUS_INVALID_PKGNAME;
     }
     if (strcmp(clientPkgName, pkgName) != 0) {

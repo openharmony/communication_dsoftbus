@@ -80,7 +80,7 @@ typedef struct {
     uint32_t dataLen;
 } TdcPacketHead;
 
-int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int *fd);
+int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
 uint64_t TransTdcGetNewSeqId(bool serverSide);
 SessionConn *GetTdcInfoByChannelId(int32_t channelId);
@@ -97,6 +97,7 @@ void SetTdcInfoList(SoftBusList *sessionConnList);
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 void TransTcpDirectDeinit(void);
 void TransTdcDeathCallback(const char *pkgName);
+int32_t GenerateTdcChannelId(void);
 #ifdef __cplusplus
 }
 #endif

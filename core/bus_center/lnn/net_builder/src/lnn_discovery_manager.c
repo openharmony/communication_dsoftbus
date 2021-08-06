@@ -18,11 +18,16 @@
 #include <securec.h>
 #include <string.h>
 
+#include "disc_interface.h"
+#include "discovery_service.h"
 #include "lnn_net_builder.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
+
+#define LNN_DISC_CAPABILITY "ddmpCapability"
+#define LNN_PUBLISH_ID 0
 
 static void DeviceFound(const ConnectionAddr *addr);
 
@@ -33,11 +38,15 @@ typedef enum {
 
 typedef struct {
     int32_t (*InitDiscoveryImpl)(LnnDiscoveryImplCallback *callback);
+    int32_t (*StartDiscoveryImpl)(void);
+    int32_t (*StopDiscoveryImpl)(void);
 } DiscoveryImpl;
 
 static DiscoveryImpl g_discoveryImpl[LNN_DISC_IMPL_TYPE_MAX] = {
     [LNN_DISC_IMPL_TYPE_COAP] = {
         .InitDiscoveryImpl = LnnInitCoapDiscovery,
+        .StartDiscoveryImpl = LnnStartCoapDiscovery,
+        .StopDiscoveryImpl = LnnStopCoapDiscovery,
     },
 };
 
@@ -56,6 +65,22 @@ static void DeviceFound(const ConnectionAddr *addr)
     }
 }
 
+static int32_t RestartPublish(void)
+{
+    PublishInnerInfo publishInfo = {
+        .publishId = LNN_PUBLISH_ID,
+        .medium = COAP,
+        .freq = HIGH,
+        .capability = LNN_DISC_CAPABILITY,
+        .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
+        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
+    };
+    if (DiscStartScan(MODULE_LNN, &publishInfo) != SOFTBUS_OK) {
+        LOG_ERR("DiscStartScan failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 int32_t LnnInitDiscoveryManager(void)
 {
     uint32_t i;
@@ -65,6 +90,46 @@ int32_t LnnInitDiscoveryManager(void)
             continue;
         }
         if (g_discoveryImpl[i].InitDiscoveryImpl(&g_discoveryCallback) != SOFTBUS_OK) {
+            LOG_ERR("init discovery impl(%d) failed", i);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnStartDiscovery(void)
+{
+    uint32_t i;
+    if (RestartPublish() != SOFTBUS_OK) {
+        LOG_ERR("RestartPublish fail!");
+        return SOFTBUS_ERR;
+    }
+    for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
+        if (g_discoveryImpl[i].StartDiscoveryImpl == NULL) {
+            LOG_ERR("not support discovery");
+            continue;
+        }
+        if (g_discoveryImpl[i].StartDiscoveryImpl() != SOFTBUS_OK) {
+            LOG_ERR("init discovery impl(%d) failed", i);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnStopDiscovery(void)
+{
+    uint32_t i;
+    if (DiscUnpublish(MODULE_LNN, LNN_PUBLISH_ID) != SOFTBUS_OK) {
+        LOG_ERR("DiscUnpublish fail!");
+        return SOFTBUS_ERR;
+    }
+    for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
+        if (g_discoveryImpl[i].StopDiscoveryImpl == NULL) {
+            LOG_ERR("not support discovery");
+            continue;
+        }
+        if (g_discoveryImpl[i].StopDiscoveryImpl() != SOFTBUS_OK) {
             LOG_ERR("init discovery impl(%d) failed", i);
             return SOFTBUS_ERR;
         }

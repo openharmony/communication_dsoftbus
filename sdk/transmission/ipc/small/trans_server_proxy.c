@@ -25,32 +25,40 @@
 #include "softbus_mem_interface.h"
 #include "softbus_os_interface.h"
 
+#define WAIT_SERVER_READY_INTERVAL_COUNT 50
+
 static IClientProxy *g_serverProxy = NULL;
 
 static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
     if (code != 0) {
-        LOG_ERR("publish service callback error[%d].", code);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "publish service callback error[%d].", code);
         return SOFTBUS_ERR;
     }
 
     *(int32_t*)owner = IpcIoPopInt32(reply);
-    LOG_INFO("publish service return[%d].", *(int32_t*)owner);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "publish service return[%d].", *(int32_t*)owner);
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxyInit(void)
 {
     if (g_serverProxy != NULL) {
-        LOG_INFO("server proxy has initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server proxy has initialized.");
         return SOFTBUS_OK;
     }
 
     IUnknown *iUnknown = NULL;
-    int ret;
+    int32_t ret;
 
-    LOG_INFO("trans start get server proxy");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans start get server proxy");
+    int32_t proxyInitCount = 0;
     while (g_serverProxy == NULL) {
+        proxyInitCount++;
+        if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
+            proxyInitCount = 0;
+            break;
+        }
         iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
@@ -59,20 +67,20 @@ int32_t TransServerProxyInit(void)
 
         ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
-            LOG_ERR("QueryInterface failed [%d]", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QueryInterface failed [%d]", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
     }
-    LOG_INFO("trans get server proxy ok");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans get server proxy ok");
     return SOFTBUS_OK;
 }
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
-    LOG_INFO("ServerIpcCreateSessionServer");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCreateSessionServer");
     if ((pkgName == NULL) || (sessionName == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -85,23 +93,23 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
-        LOG_ERR("server proxy not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CREATE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        LOG_ERR("ServerIpcCreateSessionServer callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcCreateSessionServer callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerIpcCreateSessionServer succ");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCreateSessionServer succ");
     return ret;
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
-    LOG_INFO("ServerIpcRemoveSessionServer");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcRemoveSessionServer");
     if ((pkgName == NULL) || (sessionName == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -114,22 +122,22 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
-        LOG_ERR("server proxy not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REMOVE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        LOG_ERR("ServerIpcRemoveSessionServer callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcRemoveSessionServer callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerIpcRemoveSessionServer");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcRemoveSessionServer");
     return ret;
 }
 
 int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionName,
                              const char *peerDeviceId, const char *groupId, int32_t flags)
 {
-    LOG_INFO("ServerIpcOpenSession");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -143,21 +151,21 @@ int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionN
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
-        LOG_ERR("server proxy not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        LOG_ERR("ServerIpcOpenSession callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerIpcOpenSession");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
     return ret;
 }
 
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("ServerIpcCloseSession");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCloseSession");
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
@@ -167,21 +175,21 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
-        LOG_ERR("server proxy not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CLOSE_CHANNEL, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        LOG_ERR("ServerIpcCloseSession callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcCloseSession callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerIpcCloseSession");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCloseSession");
     return ret;
 }
 
 int32_t ServerIpcSendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
 {
-    LOG_INFO("ServerIpcSendMessage");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSendMessage");
 
     uint32_t ipcDataLen = len + MAX_SOFT_BUS_IPC_LEN;
     uint8_t *ipcData = (uint8_t *)SoftBusCalloc(ipcDataLen);
@@ -194,15 +202,15 @@ int32_t ServerIpcSendMessage(int32_t channelId, const void *data, uint32_t len, 
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
-        LOG_ERR("server proxy not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SESSION_SENDMSG, &request, &ret, ProxyCallback);
     SoftBusFree(ipcData);
     if (ans != EC_SUCCESS) {
-        LOG_ERR("ServerIpcSendMessage callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSendMessage callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("ServerIpcSendMessage");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSendMessage");
     return ret;
 }

@@ -62,28 +62,28 @@ int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     if (clientPkgName == nullptr || object == nullptr) {
-        LOG_ERR("package name or object is nullptr\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name or object is nullptr\n");
         return SOFTBUS_ERR;
     }
     if (SoftBusServerData::GetInstance().SoftbusClientIsExist(clientPkgName)) {
-        LOG_ERR("softbus client is exist.\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus client is exist.\n");
         return SOFTBUS_OK;
     }
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
-        LOG_ERR("DeathRecipient object is nullptr\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
         return SOFTBUS_ERR;
     }
     bool ret = object->AddDeathRecipient(abilityDeath);
     if (!ret) {
-        LOG_ERR("AddDeathRecipient failed\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
         return SOFTBUS_ERR;
     }
     if (SoftBusServerData::GetInstance().SoftbusAddService(clientPkgName, object, abilityDeath) != SOFTBUS_OK) {
-        LOG_ERR("softbus add client service failed\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus add client service failed\n");
         return SOFTBUS_ERR;
     }
-    LOG_INFO("softbus register service success %{public}s\n", clientPkgName);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus register service success %s\n", clientPkgName);
     return SOFTBUS_OK;
 }
 
@@ -143,10 +143,10 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
 
 void SoftBusServer::OnStart()
 {
-    LOG_INFO("SoftBusServer OnStart called!\n");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServer OnStart called!\n");
     InitSoftBusServer();
     if (!Publish(this)) {
-        LOG_ERR("SoftBusServer publish failed!\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusServer publish failed!\n");
     }
 }
 

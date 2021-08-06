@@ -48,5 +48,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "ohos.distributedschedule.dms.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "dms",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]

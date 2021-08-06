@@ -37,7 +37,10 @@ if (defined(ohos_lite)) {
         "src/softbus_tcp_socket.c",
         "src/softbus_thread_pool.c",
       ]
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+      ]
     }
   } else {
     shared_library("conn_common") {
@@ -62,6 +65,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
@@ -85,6 +89,7 @@ if (defined(ohos_lite)) {
     ]
     public_deps = [
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {

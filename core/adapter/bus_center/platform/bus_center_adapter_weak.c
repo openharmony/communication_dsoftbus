@@ -28,7 +28,7 @@
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        LOG_ERR("fail: para error!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {

@@ -17,22 +17,13 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
-#include "bus_center_info_key.h"
-#include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "discovery_service.h"
-#include "lnn_event_monitor.h"
-#include "lnn_ip_utils.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "trans_tcp_direct_listener.h"
 
 #define LNN_DISC_CAPABILITY "ddmpCapability"
-#define LNN_PUBLISH_ID 0
 #define LNN_SUBSCRIBE_ID 0
-#define IP_DEFAULT_PORT 0
 
 static LnnDiscoveryImplCallback g_callback;
 
@@ -44,6 +35,8 @@ static DiscInnerCallback g_discCb = {
 
 static void DeviceFound(const DeviceInfo *device)
 {
+    ConnectionAddr addr;
+
     if (device == NULL) {
         LOG_ERR("device para is null");
         return;
@@ -57,125 +50,32 @@ static void DeviceFound(const DeviceInfo *device)
         LOG_ERR("discovery get port is 0 !");
         return;
     }
+    addr.type = device->addr[0].type;
+    if (memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
+        strlen(device->addr[0].info.ip.ip)) != 0) {
+        LOG_ERR("strncpy ip failed");
+        return;
+    }
+    addr.info.ip.port = device->addr[0].info.ip.port;
+    if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->hwAccountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
+        LOG_ERR("memcpy_s peer uid failed");
+        return;
+    }
     if (g_callback.OnDeviceFound) {
-        g_callback.OnDeviceFound(&device->addr[0]);
+        g_callback.OnDeviceFound(&addr);
     }
 }
 
-static int32_t OpenAuthPort(void)
+int32_t LnnStopCoapDiscovery(void)
 {
-    int32_t port = OpenAuthServer();
-    if (port < 0) {
-        LOG_ERR("open auth server failed");
-        return SOFTBUS_ERR;
-    }
-    return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
-}
-
-static void CloseAuthPort(void)
-{
-    CloseAuthServer();
-    (void)LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, IP_DEFAULT_PORT);
-}
-
-static int32_t OpenSessionPort(void)
-{
-    char ipAddr[IP_LEN] = {0};
-    int32_t port;
-
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get local ip failed");
-        return SOFTBUS_ERR;
-    }
-    port = TransTdcStartSessionListener(ipAddr, 0);
-    if (port < 0) {
-        LOG_ERR("open session server failed");
-        return SOFTBUS_ERR;
-    }
-    return LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, port);
-}
-
-static void CloseSessionPort(void)
-{
-    TransTdcStopSessionListener();
-    (void)LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, IP_DEFAULT_PORT);
-}
-
-static int32_t OpenProxyPort(void)
-{
-    LocalListenerInfo listenerInfo = {0};
-    char ipAddr[IP_LEN] = {0};
-    int32_t port;
-
-    listenerInfo.type = CONNECT_TCP;
-    listenerInfo.info.ipListenerInfo.port = 0;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get local ip failed");
-        return SOFTBUS_ERR;
-    }
-    if (strncpy_s(listenerInfo.info.ipListenerInfo.ip, IP_LEN, ipAddr, strlen(ipAddr)) != EOK) {
-        LOG_ERR("copy ip failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    port = ConnStartLocalListening(&listenerInfo);
-    if (port < 0) {
-        LOG_ERR("open proxy server failed");
-        return SOFTBUS_ERR;
-    }
-    return LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, port);
-}
-
-static void CloseProxyPort(void)
-{
-    LocalListenerInfo listenerInfo = {0};
-    listenerInfo.type = CONNECT_TCP;
-    if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
-        LOG_ERR("ConnStopLocalListening fail!");
-    }
-    (void)LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, IP_DEFAULT_PORT);
-}
-
-static int32_t OpenIpLink(void)
-{
-    int32_t ret = OpenAuthPort();
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("OpenAuthPort fail!");
-        return SOFTBUS_ERR;
-    }
-    ret = OpenSessionPort();
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("OpenSessionPort fail!");
-        CloseAuthPort();
-        return SOFTBUS_ERR;
-    }
-    ret = OpenProxyPort();
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("OpenProxyPort fail!");
-        CloseAuthPort();
-        CloseSessionPort();
+    if (DiscStopAdvertise(MODULE_LNN, LNN_SUBSCRIBE_ID) != SOFTBUS_OK) {
+        LOG_ERR("DiscStopAdvertise fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static void CloseIpLink(void)
-{
-    CloseAuthPort();
-    CloseSessionPort();
-    CloseProxyPort();
-}
-
-static void StopCoapDiscovery(void)
-{
-    if (DiscUnpublish(MODULE_LNN, LNN_PUBLISH_ID) != SOFTBUS_OK) {
-        LOG_ERR("DiscUnpublish fail!");
-    }
-    if (DiscStopAdvertise(MODULE_LNN, LNN_SUBSCRIBE_ID) != SOFTBUS_OK) {
-        LOG_ERR("DiscStopAdvertise fail!");
-    }
-}
-
-static int32_t StartCoapDiscovery(void)
+int32_t LnnStartCoapDiscovery(void)
 {
     SubscribeInnerInfo subscribeInfo = {
         .subscribeId = LNN_SUBSCRIBE_ID,
@@ -187,18 +87,6 @@ static int32_t StartCoapDiscovery(void)
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
         .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
     };
-    PublishInnerInfo publishInfo = {
-        .publishId = LNN_PUBLISH_ID,
-        .medium = COAP,
-        .freq = HIGH,
-        .capability = LNN_DISC_CAPABILITY,
-        .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
-        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
-    };
-    if (DiscStartScan(MODULE_LNN, &publishInfo) != SOFTBUS_OK) {
-        LOG_ERR("DiscStartScan failed");
-        return SOFTBUS_ERR;
-    }
     if (DiscSetDiscoverCallback(MODULE_LNN, &g_discCb) != SOFTBUS_OK) {
         LOG_ERR("DiscSetDiscoverCallback failed");
         return SOFTBUS_ERR;
@@ -206,125 +94,12 @@ static int32_t StartCoapDiscovery(void)
     return DiscStartAdvertise(MODULE_LNN, &subscribeInfo);
 }
 
-static int32_t SetLocalIpInfo(char *ipAddr, char *ifName)
-{
-    if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr) != SOFTBUS_OK) {
-        LOG_ERR("set local ip error!");
-        return SOFTBUS_ERR;
-    }
-    if (LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName) != SOFTBUS_OK) {
-        LOG_ERR("set local ifname error!");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
-{
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, ipAddrLen) != SOFTBUS_OK) {
-        LOG_ERR("get local ip error!");
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, ifNameLen) != SOFTBUS_OK) {
-        LOG_ERR("get local ifname error!");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t GetUpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
-{
-    if (LnnGetLocalIp(ipAddr, ipAddrLen, ifName, ifNameLen, CONNECTION_ADDR_ETH) == SOFTBUS_OK) {
-        LOG_INFO("get eth ip success");
-        return SOFTBUS_OK;
-    }
-    if (LnnGetLocalIp(ipAddr, ipAddrLen, ifName, ifNameLen, CONNECTION_ADDR_WLAN) == SOFTBUS_OK) {
-        LOG_INFO("get wlan ip success");
-        return SOFTBUS_OK;
-    }
-    if (strncpy_s(ipAddr, ipAddrLen, LNN_LOOPBACK_IP, strlen(LNN_LOOPBACK_IP)) != EOK) {
-        LOG_ERR("copy loopback ip addr failed");
-        return SOFTBUS_ERR;
-    }
-    if (strncpy_s(ifName, ifNameLen, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != EOK) {
-        LOG_ERR("copy loopback ifname failed");
-        return SOFTBUS_ERR;
-    }
-    LOG_INFO("set loopback ip as default");
-    return SOFTBUS_OK;
-}
-
-static void IpAddrChangeEventHandler(LnnMonitorEventType event, const void *para)
-{
-    char ipCurrentAddr[IP_LEN] = {0};
-    char ifCurrentName[NET_IF_NAME_LEN] = {0};
-    char ipNewAddr[IP_LEN] = {0};
-    char ifNewName[NET_IF_NAME_LEN] = {0};
-
-    (void)para;
-    if (event != LNN_MONITOR_EVENT_IP_ADDR_CHANGED) {
-        LOG_ERR("not interest event: %d", event);
-        return;
-    }
-    if (GetLocalIpInfo(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get current ip info failed");
-        return;
-    }
-    if (GetUpdateLocalIp(ipNewAddr, IP_LEN, ifNewName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get new ip info failed");
-        return;
-    }
-    if (strcmp(ipCurrentAddr, ipNewAddr) == 0 && strcmp(ifCurrentName, ifNewName) == 0) {
-        LOG_INFO("ip info not changed");
-        return;
-    }
-    LOG_INFO("ip info changed, update local ledger");
-    if (SetLocalIpInfo(ipNewAddr, ifNewName) != SOFTBUS_OK) {
-        LOG_ERR("set local ip info failed");
-        return;
-    }
-    if (strncmp(ifCurrentName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        LOG_INFO("close previous ip link and stop previous discovery");
-        CloseIpLink();
-        StopCoapDiscovery();
-    }
-    if (strncmp(ifNewName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        LOG_INFO("open ip link and start discovery");
-        DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
-        if (OpenIpLink() != SOFTBUS_OK) {
-            LOG_ERR("open ip link failed");
-        }
-        if (StartCoapDiscovery() != SOFTBUS_OK) {
-            LOG_ERR("start discovery failed");
-        }
-        SetCallLnnStatus(true);
-    } else {
-        DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
-        AuthIpChanged(CONNECT_TCP);
-    }
-}
-
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
 {
-    char ipAddr[IP_LEN] = {0};
-    char ifName[NET_IF_NAME_LEN] = {0};
-
     if (callback == NULL) {
         LOG_ERR("coap discovery callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     g_callback.OnDeviceFound = callback->OnDeviceFound;
-    if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
-        LOG_ERR("register ip addr change event handler failed");
-        return SOFTBUS_ERR;
-    }
-    if (GetUpdateLocalIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get new ip info failed");
-        return SOFTBUS_ERR;
-    }
-    if (SetLocalIpInfo(ipAddr, ifName) != SOFTBUS_OK) {
-        LOG_ERR("set local ip info failed");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }

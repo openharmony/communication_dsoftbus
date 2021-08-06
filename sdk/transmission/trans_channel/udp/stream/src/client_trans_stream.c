@@ -26,7 +26,7 @@ void RegisterStreamCb(const UdpChannelMgrCb *cb)
 {
     if (cb == NULL || cb->OnUdpChannelOpened == NULL ||
         cb->OnUdpChannelClosed == NULL || cb->OnStreamReceived == NULL) {
-        LOG_ERR("udp channel callback is invalid");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback is invalid");
         return;
     }
 
@@ -41,33 +41,33 @@ void UnregisterStreamCb(void)
 static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 {
     if (g_udpChannelMgrCb == NULL) {
-        LOG_ERR("udp channel callback is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback is null.");
         return;
     }
 
     switch (status) {
         case STREAM_CONNECTED:
-            LOG_INFO("dstream connected.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream connected.");
             g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
             break;
         case STREAM_CLOSED:
-            LOG_INFO("dstream closed.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream closed.");
             g_udpChannelMgrCb->OnUdpChannelClosed(channelId);
             break;
         case STREAM_INIT:
-            LOG_INFO("dstream init.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream init.");
             break;
         case STREAM_OPENING:
-            LOG_INFO("dstream opening.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream opening.");
             break;
         case STREAM_CONNECTING:
-            LOG_INFO("dstream connecting.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream connecting.");
             break;
         case STREAM_CLOSING:
-            LOG_INFO("dstream closing.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream closing.");
             break;
         default:
-            LOG_ERR("unsupport stream status.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport stream status.");
             break;
     }
 }
@@ -75,7 +75,7 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
     if (g_udpChannelMgrCb == NULL) {
-        LOG_ERR("udp channel callback is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback is null.");
         return;
     }
 
@@ -89,9 +89,9 @@ static IStreamListener g_streamCallcb = {
 
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)
 {
-    LOG_INFO("OnstreamChannelOpened enter.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnstreamChannelOpened enter.");
     if (channel == NULL || streamPort == NULL) {
-        LOG_ERR("invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -107,11 +107,11 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
         int32_t port = StartVtpStreamChannelServer(channel->channelId, &p1, &g_streamCallcb);
         if (port <= 0) {
-            LOG_ERR("start stream channel as server failed.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start stream channel as server failed.");
             return SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED;
         }
         *streamPort = port;
-        LOG_INFO("stream server success, listen port = %d.", port);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "stream server success, listen port = %d.", port);
     } else {
         VtpStreamOpenParam p1 = {
             "DSOFTBUS_STREAM",
@@ -124,12 +124,12 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
         int ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);
         if (ret <= 0) {
-            LOG_ERR("start stream channel as client failed.ret:%d", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start stream channel as client failed.ret:%d", ret);
             return SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED;
         }
-        LOG_INFO("stream start client success.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "stream start client success.");
         if (g_udpChannelMgrCb == NULL) {
-            LOG_ERR("g_udpChannelMgrCb is NULL.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "g_udpChannelMgrCb is NULL.");
         }
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     }
@@ -138,15 +138,14 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
 int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
-    LOG_INFO("send stream.[channelId = %d]", channelId);
     return SendVtpStream(channelId, data, ext, param);
 }
 
 int32_t TransCloseStreamChannel(int32_t channelId)
 {
-    LOG_INFO("close stream channel.[channelId = %d]", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close stream channel.[channelId = %d]", channelId);
     if (CloseVtpStreamChannel(channelId, "DSOFTBUS_STREAM") != SOFTBUS_OK) {
-        LOG_ERR("close stream channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close stream channel failed.");
         return SOFTBUS_ERR;
     }
 

@@ -33,7 +33,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnDeviceFound(device);
@@ -44,7 +44,7 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnDiscoverFailed(subscribeId, failReason);
@@ -55,7 +55,7 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnDiscoverySuccess(subscribeId);
@@ -66,7 +66,7 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnPublishSuccess(publishId);
@@ -77,7 +77,7 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnPublishFail(publishId, reason);

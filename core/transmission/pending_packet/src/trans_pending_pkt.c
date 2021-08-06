@@ -51,7 +51,7 @@ void PendingDeinit(int type)
         DestroySoftBusList(g_pendingList[type]);
         g_pendingList[type] = NULL;
     }
-    LOG_INFO("PendigPackManagerDeinit init ok");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "PendigPackManagerDeinit init ok");
 }
 
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
@@ -69,7 +69,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     pthread_mutex_lock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
-            LOG_ERR("PendingPacket already Created");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
             pthread_mutex_unlock(&pendingList->lock);
             return SOFTBUS_ERR;
         }
@@ -119,13 +119,13 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
-        LOG_ERR("type[%d] illegal.", type);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "type[%d] illegal.", type);
         return SOFTBUS_ERR;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        LOG_ERR("pendind list not exist");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pendind list not exist");
         return SOFTBUS_ERR;
     }
 

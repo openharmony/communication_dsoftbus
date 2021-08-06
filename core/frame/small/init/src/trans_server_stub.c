@@ -25,9 +25,9 @@
 
 int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("create session server ipc server pop");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create session server ipc server pop");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
@@ -36,7 +36,7 @@ int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid(origin);
     int32_t callingPid = GetCallingPid(origin);
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        LOG_ERR("ServerCreateSessionServer no permission");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCreateSessionServer no permission");
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -47,9 +47,9 @@ int32_t ServerCreateSessionServer(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerRemoveSessionServer(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("remove session server ipc server pop");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "remove session server ipc server pop");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
@@ -58,7 +58,7 @@ int32_t ServerRemoveSessionServer(void *origin, IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid(origin);
     int32_t callingPid = GetCallingPid(origin);
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        LOG_ERR("ServerRemoveSessionServer no permission");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRemoveSessionServer no permission");
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -69,9 +69,9 @@ int32_t ServerRemoveSessionServer(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerOpenSession(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("open session ipc server pop");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
@@ -84,12 +84,12 @@ int32_t ServerOpenSession(void *origin, IpcIo *req, IpcIo *reply)
     int32_t callingPid = GetCallingPid(origin);
     char pkgName[PKG_NAME_SIZE_MAX];
     if (TransGetPkgNameBySessionName(mySessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        LOG_ERR("TransGetPkgNameBySessionName failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName failed");
         IpcIoPushInt32(reply, SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
     if (CheckTransPermission(callingUid, callingPid, pkgName, mySessionName, ACTION_OPEN) != SOFTBUS_OK) {
-        LOG_ERR("ServerOpenSession no permission");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerOpenSession no permission");
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -100,9 +100,9 @@ int32_t ServerOpenSession(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("close channel ipc server pop");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "close channel ipc server pop");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -117,7 +117,7 @@ int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
         case CHANNEL_TYPE_PROXY:
             if (TransProxyGetNameByChanId(channelId, pkgName, sessionName,
                 PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-                LOG_ERR("get session name fail");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get session name fail");
                 IpcIoPushInt32(reply, SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID);
                 return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
             }
@@ -125,7 +125,7 @@ int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
         case CHANNEL_TYPE_UDP:
             if (TransUdpGetNameByChanId(channelId, pkgName, sessionName,
                 PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-                LOG_ERR("get session name fail");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get session name fail");
                 IpcIoPushInt32(reply, SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID);
                 return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
             }
@@ -136,7 +136,7 @@ int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
     }
 
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
-        LOG_ERR("ServerCloseChannel no permission");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -148,9 +148,9 @@ int32_t ServerCloseChannel(void *origin, IpcIo *req, IpcIo *reply)
 
 int32_t ServerSendSessionMsg(void *origin, IpcIo *req, IpcIo *reply)
 {
-    LOG_INFO("close channel ipc server pop");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "close channel ipc server pop");
     if (req == NULL || reply == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = IpcIoPopInt32(req);
@@ -163,12 +163,12 @@ int32_t ServerSendSessionMsg(void *origin, IpcIo *req, IpcIo *reply)
     char sessionName[SESSION_NAME_SIZE_MAX];
     if (TransProxyGetNameByChanId(channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        LOG_ERR("Trans close channel get pkgName by chanId failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Trans close channel get pkgName by chanId failed");
         IpcIoPushInt32(reply, SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, 0) != SOFTBUS_OK) {
-        LOG_ERR("ServerSendSessionMsg no permission");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerSendSessionMsg no permission");
         IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }

@@ -28,6 +28,8 @@ typedef int32_t (*LnnInitEventMonitorImpl)(LnnMonitorEventHandler handler);
 
 int32_t __attribute__ ((weak)) LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler);
 
+int32_t __attribute__ ((weak)) LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
+
 #ifdef __cplusplus
 }
 #endif

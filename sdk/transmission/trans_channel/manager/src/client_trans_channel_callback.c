@@ -26,7 +26,7 @@
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -43,7 +43,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
             break;
         default:
-            LOG_ERR("invalid type");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid type");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
@@ -56,7 +56,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 
 int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
@@ -72,7 +72,7 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("[client] TransOnChannelClosed: channelId=%d, channelType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelClosed: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
@@ -88,7 +88,7 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
-    LOG_INFO("[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:

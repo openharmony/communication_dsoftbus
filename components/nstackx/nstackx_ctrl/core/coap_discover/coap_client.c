@@ -267,6 +267,13 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
         return NULL;
     }
 
+    /* reuse the existed session */
+    session = coap_session_get_by_peer(ctx, dst, 0);
+    if (session != NULL) {
+        (void)coap_session_reference(session);
+        return session;
+    }
+
     if (localAddr != NULL) {
         int s;
         struct addrinfo hints;

@@ -61,12 +61,12 @@ static int ClientIpcInterfaceMsgHandle(const IpcContext *ctx, void *ipcMsg, IpcI
     (void)arg;
 
     if (ipcMsg == NULL || io == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
 
     GetCode(ipcMsg, &code);
-    LOG_INFO("receive ipc transact code(%u)", code);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "receive ipc transact code(%u)", code);
     unsigned int num = sizeof(g_softBusIpcClientCmdTbl) / sizeof(struct SoftBusIpcClientCmd);
     for (unsigned int i = 0; i < num; i++) {
         if (code == g_softBusIpcClientCmdTbl[i].code) {
@@ -74,7 +74,7 @@ static int ClientIpcInterfaceMsgHandle(const IpcContext *ctx, void *ipcMsg, IpcI
             return SOFTBUS_OK;
         }
     }
-    LOG_ERR("not support code(%u)", code);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not support code(%u)", code);
     return SOFTBUS_ERR;
 }
 
@@ -82,13 +82,13 @@ static int InnerRegisterService(void)
 {
     char clientName[PKG_NAME_SIZE_MAX] = {0};
     if (GetSoftBusClientName(clientName, sizeof(clientName)) != SOFTBUS_OK) {
-        LOG_ERR("get client name failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
         return SOFTBUS_ERR;
     }
 
     struct CommonScvId svcId = {0};
     if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie, &svcId.ipcCtx) != SOFTBUS_OK) {
-        LOG_ERR("get client identity failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client identity failed");
         return SOFTBUS_ERR;
     }
 
@@ -97,7 +97,7 @@ static int InnerRegisterService(void)
         continue;
     }
 
-    LOG_INFO("success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "success");
     return SOFTBUS_OK;
 }
 
@@ -116,16 +116,16 @@ static void *DeathProcTask(void *arg)
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, NULL, 0);
 
     if (InnerRegisterService() != SOFTBUS_OK) {
-        LOG_ERR("register service failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed");
         return NULL;
     }
 
-    LOG_INFO("\n<< !!! SERVICE (%s) RECOVER !!! >>\n", SOFTBUS_SERVICE);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "\n<< !!! SERVICE (%s) RECOVER !!! >>\n", SOFTBUS_SERVICE);
     CLIENT_NotifyObserver(EVENT_SERVER_RECOVERY, NULL, 0);
     UnregisterServerDeathCb();
 
     if (RegisterServerDeathCb() != SOFTBUS_OK) {
-        LOG_ERR("reg server death cb failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "reg server death cb failed");
         return NULL;
     }
 
@@ -140,34 +140,34 @@ static int StartDeathProcTask(void)
 
     ret = pthread_attr_init(&attr);
     if (ret != 0) {
-        LOG_ERR("pthread_attr_init failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread_attr_init failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
     ret = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     if (ret != 0) {
-        LOG_ERR("pthread set detached attr failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread set detached attr failed, ret[%d]", ret);
         ret = SOFTBUS_ERR;
         goto EXIT;
     }
 
     ret = pthread_attr_setschedpolicy(&attr, SCHED_RR);
     if (ret != 0) {
-        LOG_ERR("pthread set sched failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread set sched failed, ret[%d]", ret);
         ret = SOFTBUS_ERR;
         goto EXIT;
     }
 
     ret = pthread_create(&tid, &attr, DeathProcTask, NULL);
     if (ret != 0) {
-        LOG_ERR("create DeathProcTask failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create DeathProcTask failed, ret[%d]", ret);
         ret = SOFTBUS_ERR;
     }
 
     ret = SOFTBUS_OK;
 EXIT:
     if (pthread_attr_destroy(&attr) != 0) {
-        LOG_ERR("destroy pthread attr failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "destroy pthread attr failed, ret[%d]", ret);
         ret = SOFTBUS_ERR;
     }
 
@@ -181,13 +181,13 @@ static int32_t DeathCallback(const IpcContext *ctx, void *ipcMsg, IpcIo *data, v
     (void)data;
     (void)arg;
 
-    LOG_WARN("\n<< ATTENTION !!! >> SERVICE (%s) DEAD !!!\n", SOFTBUS_SERVICE);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "\n<< ATTENTION !!! >> SERVICE (%s) DEAD !!!\n", SOFTBUS_SERVICE);
 
     if (StartDeathProcTask() != SOFTBUS_OK) {
-        LOG_ERR("start death proc task failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start death proc task failed");
         return SOFTBUS_ERR;
     } else {
-        LOG_INFO("client start check softbus server...");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "client start check softbus server...");
     }
 
     return SOFTBUS_OK;
@@ -198,7 +198,7 @@ static int RegisterServerDeathCb(void)
     g_svcIdentity = SAMGR_GetRemoteIdentity(SOFTBUS_SERVICE, NULL);
     g_deathCbId = INVALID_CB_ID;
     if (RegisterDeathCallback(NULL, g_svcIdentity, DeathCallback, NULL, &g_deathCbId) != EC_SUCCESS) {
-        LOG_ERR("reg death callback failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "reg death callback failed");
         return SOFTBUS_ERR;
     }
 
@@ -208,18 +208,18 @@ static int RegisterServerDeathCb(void)
 int ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        LOG_ERR("server proxy init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server proxy init failed.");
         return SOFTBUS_ERR;
     }
     SvcIdentity clientIdentity = {0};
     int ret = RegisterIpcCallback(ClientIpcInterfaceMsgHandle, 0, IPC_WAIT_FOREVER, &clientIdentity, NULL);
     if (ret != 0) {
-        LOG_ERR("register ipc cb failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register ipc cb failed");
         return SOFTBUS_ERR;
     }
     ret = ClientContextInit();
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("client context init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client context init failed.");
         return SOFTBUS_ERR;
     }
 #ifdef __LINUX__
@@ -230,13 +230,13 @@ int ClientStubInit(void)
 
     if (InnerRegisterService() != SOFTBUS_OK) {
         ClientContextDeinit();
-        LOG_ERR("register service failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed");
         return SOFTBUS_ERR;
     }
 
     if (RegisterServerDeathCb() != SOFTBUS_OK) {
         ClientContextDeinit();
-        LOG_ERR("reg server death cb failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "reg server death cb failed");
         return SOFTBUS_ERR;
     }
 

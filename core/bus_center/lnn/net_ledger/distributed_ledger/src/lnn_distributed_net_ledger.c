@@ -251,7 +251,7 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum)
     return SOFTBUS_OK;
 }
 
-static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo **info, int32_t infoNum)
+static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum)
 {
     NodeInfo *nodeInfo = NULL;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -270,7 +270,8 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo **info, int32_t infoNum)
         }
         nodeInfo = (NodeInfo *)it->node->value;
         if (LnnIsNodeOnline(nodeInfo)) {
-            ConvertNodeInfoToBasicInfo(nodeInfo, info[i++]);
+            ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
+            ++i;
         }
     }
     LnnMapDeinitIterator(it);
@@ -468,6 +469,27 @@ static int32_t DlGetWlanIp(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *masterUdid = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        return SOFTBUS_ERR;
+    }
+    masterUdid = LnnGetMasterUdid(info);
+    if (masterUdid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get master uiid fail");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, masterUdid, strlen(masterUdid)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy master udid to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -512,6 +534,18 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetMasterWeight(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (len != NUM_BUF_SIZE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((int32_t *)buf) = info->masterWeight;
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -520,10 +554,12 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_DEV_NAME, DlGetDeviceName},
     {STRING_KEY_BT_MAC, DlGetBtMac},
     {STRING_KEY_WLAN_IP, DlGetWlanIp},
+    {STRING_KEY_MASTER_NODE_UDID, DlGetMasterUdid},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
     {NUM_KEY_PROXY_PORT, DlGetProxyPort},
     {NUM_KEY_NET_CAP, DlGetNetCap},
+    {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
 };
 
 static char *CreateCnnCodeKey(const char *uuid, DiscoveryType type)
@@ -843,7 +879,7 @@ int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
             LOG_ERR("malloc node info buffer failed");
             break;
         }
-        if (FillDLOnlineNodeInfoLocked(info, *infoNum) != SOFTBUS_OK) {
+        if (FillDLOnlineNodeInfoLocked(*info, *infoNum) != SOFTBUS_OK) {
             LOG_ERR("fill online node num failed");
             break;
         }

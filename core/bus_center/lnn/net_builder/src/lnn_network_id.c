@@ -20,38 +20,11 @@
 
 #include <securec.h>
 
-#include "bus_center_info_key.h"
 #include "lnn_file_utils.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
-
-static int32_t GenerateRandomId(char *id, uint32_t len)
-{
-    uint32_t hexLen = len / HEXIFY_UNIT_LEN;
-    uint8_t *hexId = NULL;
-
-    hexId = (uint8_t *)SoftBusMalloc(hexLen);
-    if (hexId == NULL) {
-        LOG_ERR("malloc fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (GenerateRandomArray(hexId, hexLen) != SOFTBUS_OK) {
-        // HUKS will ensure the id is global uniq
-        LOG_ERR("generate random array fail");
-        SoftBusFree(hexId);
-        return SOFTBUS_ERR;
-    }
-    if (ConvertBytesToHexString(id, len, hexId, hexLen) != SOFTBUS_OK) {
-        LOG_ERR("convert bytes to hex string fail");
-        SoftBusFree(hexId);
-        return SOFTBUS_ERR;
-    }
-    SoftBusFree(hexId);
-    return SOFTBUS_OK;
-}
 
 static int32_t GetUuidFromFile(char *id, uint32_t len)
 {
@@ -60,37 +33,37 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
 
     fd = LnnFileOpen(LNN_FILE_ID_UUID);
     if (fd < 0) {
-        LOG_INFO("create uuid file");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create uuid file");
         if (LnnFileCreate(LNN_FILE_ID_UUID) != SOFTBUS_OK) {
-            LOG_ERR("create file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create file failed");
             return SOFTBUS_ERR;
         }
         fd = LnnFileOpen(LNN_FILE_ID_UUID);
         if (fd < 0) {
-            LOG_ERR("open uuid file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open uuid file failed");
             return SOFTBUS_ERR;
         }
         needWrite = true;
     }
     if (needWrite) {
-        if (GenerateRandomId(id, len) != SOFTBUS_OK) {
-            LOG_ERR("generate uuid id fail");
+        if (GenerateRandomStr(id, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid id fail");
             LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
         if (LnnFileWrite(fd, (uint8_t *)id, len, true) != (int32_t)len) {
-            LOG_ERR("write uuid to file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write uuid to file failed");
             LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
     } else {
         if (LnnFileRead(fd, (uint8_t *)id, len, true) != (int32_t)len) {
-            LOG_ERR("read uuid from file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read uuid from file failed");
             LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
         if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
-            LOG_ERR("uuid is invalid format from file");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid is invalid format from file");
             LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
@@ -105,8 +78,8 @@ int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (GenerateRandomId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("generate network id fail");
+    if (GenerateRandomStr(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate network id fail");
         return SOFTBUS_ERR;
     }
     networkId[len - 1] = '\0';
@@ -124,13 +97,13 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
 
     if (isGenerated == false) {
         if (GetUuidFromFile(localUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-            LOG_ERR("get uuid from file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get uuid from file failed");
             return SOFTBUS_ERR;
         }
         isGenerated = true;
     }
     if (strncpy_s(uuid, len, localUuid, UUID_BUF_LEN) != EOK) {
-        LOG_ERR("copy uuid id fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy uuid id fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

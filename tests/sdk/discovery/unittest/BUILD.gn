@@ -34,6 +34,7 @@ ohos_unittest("DiscSdkTest") {
 
   deps = [
     "$dsoftbus_root_path/core/frame/standard/client:softbus_client",
+    "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
     "$dsoftbus_root_path/sdk/discovery/service:dsoftbus_disc_service_sdk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",

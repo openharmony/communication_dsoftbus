@@ -196,6 +196,19 @@ typedef struct {
     void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
 } ISessionListener;
 
+typedef struct {
+    int (*OnReceiveFileStarted)(int sessionId, const char *files, int fileCnt);
+    int (*OnReceiveFileProcess)(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal);
+    void (*OnReceiveFileFinished)(int sessionId, const char *files, int fileCnt);
+    void (*OnFileTransError)(int sessionId);
+} IFileReceiveListener;
+
+typedef struct {
+    int (*OnSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
+    int (*OnSendFileFinished)(int sessionId, const char *firstFile);
+    void (*OnFileTransError)(int sessionId);
+} IFileSendListener;
+
 /**
  * @brief Creates a session server based on a package name and session name.
  *
@@ -318,6 +331,12 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len);
  */
 int GetPeerDeviceId(int sessionId, char *devId, unsigned int len);
 
+int SetFileReceiveListener(const char *pkgName, const char *sessionName,
+    const IFileReceiveListener *recvListener, const char *rootDir);
+
+int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
+
+int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 #ifdef __cplusplus
 }
 #endif

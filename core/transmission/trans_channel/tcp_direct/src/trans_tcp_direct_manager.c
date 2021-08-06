@@ -28,6 +28,23 @@
 #define HANDSHAKE_TIMEOUT 19
 
 static SoftBusList *g_sessionConnList = NULL;
+static pthread_mutex_t g_tdcChannelLock = PTHREAD_MUTEX_INITIALIZER;
+static int32_t g_tdcChannelId = 0;
+
+int32_t GenerateTdcChannelId(void)
+{
+    int32_t channelId;
+    if (pthread_mutex_lock(&g_tdcChannelLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id lock failed");
+        return INVALID_CHANNEL_ID;
+    }
+    channelId = g_tdcChannelId++;
+    if (g_tdcChannelId < 0) {
+        g_tdcChannelId = 0;
+    }
+    pthread_mutex_unlock(&g_tdcChannelLock);
+    return channelId;
+}
 
 static void TransTdcTimerProc(void)
 {
@@ -38,7 +55,7 @@ static void TransTdcTimerProc(void)
         return;
     }
     if (pthread_mutex_lock(&g_sessionConnList->lock) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
 
@@ -56,12 +73,13 @@ static void TransTdcTimerProc(void)
                 g_sessionConnList->cnt--;
                 int fd = removeNode->appInfo.fd;
                 if (fd >= 0) {
-                    LOG_INFO("fd[%d] is shutdown", fd);
+                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
                     DelTrigger(DIRECT_CHANNEL_SERVER, fd, RW_TRIGGER);
                     TcpShutDown(fd);
                 }
 
-                LOG_ERR("channel[%d] handshake is timeout", removeNode->channelId);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel[%d] handshake is timeout",
+                    removeNode->channelId);
                 SoftBusFree(removeNode);
             }
         }
@@ -72,7 +90,7 @@ static void TransTdcTimerProc(void)
 static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
 {
     if (appInfo == NULL || connInfo == NULL) {
-        LOG_ERR("Invalid para.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
         return SOFTBUS_ERR;
     }
     char *ip = (char*)connInfo->info.ipOption.ip;
@@ -80,7 +98,7 @@ static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
     int sessionPort = connInfo->info.ipOption.port;
     int fd = OpenTcpClientSocket(ip, myIp, sessionPort);
     if (fd < 0) {
-        LOG_ERR("Open socket err.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Open socket err.");
         return SOFTBUS_ERR;
     }
 
@@ -90,7 +108,7 @@ static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
 int32_t TransTdcAddSessionConn(SessionConn *conn)
 {
     if (conn == NULL || g_sessionConnList == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -109,7 +127,7 @@ void TransTdcStopListen(int32_t channelId)
 {
     SessionConn *conn = GetTdcInfoByChannelId(channelId);
     if (conn == NULL) {
-        LOG_ERR("get tdc intfo err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc intfo err");
         return;
     }
     DelTrigger(DIRECT_CHANNEL_SERVER, conn->appInfo.fd, conn->triggerType);
@@ -119,7 +137,7 @@ void TransTdcStopListen(int32_t channelId)
 void TransTdcDelSessionConn(SessionConn *conn)
 {
     if (conn == NULL || g_sessionConnList == NULL) {
-        LOG_ERR("input illegal or session conn list illegal.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "input illegal or session conn list illegal.");
         return;
     }
 
@@ -133,7 +151,7 @@ void TransTdcDelSessionConn(SessionConn *conn)
 void TransTdcDelSessionConnByChannelId(int32_t channelId)
 {
     if (g_sessionConnList == NULL) {
-        LOG_ERR("get tdc info fail, info list is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info fail, info list is null.");
         return;
     }
 
@@ -150,13 +168,13 @@ void TransTdcDelSessionConnByChannelId(int32_t channelId)
     }
     pthread_mutex_unlock(&g_sessionConnList->lock);
 
-    LOG_ERR("get tdc info is null");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info is null");
 }
 
-int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int *fd)
+int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
-    if (appInfo == NULL || connInfo == NULL || fd == NULL) {
-        LOG_ERR("param is invalid.");
+    if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -165,12 +183,12 @@ int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInf
     appInfo->routeType = WIFI_STA;
     SessionConn *newConn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
     if (newConn == NULL) {
-        LOG_ERR("malloc fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail.");
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
         SoftBusFree(newConn);
-        LOG_ERR("memcpy_s ip fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s ip fail.");
         return SOFTBUS_MEM_ERR;
     }
     newConn->appInfo.fd = -1;
@@ -178,31 +196,32 @@ int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInf
     newConn->channelId = INVALID_CHANNEL_ID;
     if (strcpy_s(newConn->appInfo.peerData.ip, IP_LEN, ip) != EOK) {
         SoftBusFree(newConn);
-        LOG_ERR("strcpy_s fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s fail.");
         return SOFTBUS_MEM_ERR;
     }
     newConn->appInfo.peerData.port = sessionPort;
     newConn->status = TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING;
     newConn->timeout = 0;
 
-    *fd = OpenConnTcp(appInfo, connInfo);
-    if (*fd < 0) {
+    int32_t fd = OpenConnTcp(appInfo, connInfo);
+    if (fd < 0) {
         SoftBusFree(newConn);
-        LOG_ERR("tcp connect fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp connect fail.");
         return SOFTBUS_ERR;
     }
-    newConn->appInfo.fd = *fd;
-    newConn->channelId = *fd;
+    *channelId = GenerateTdcChannelId();
+    newConn->appInfo.fd = fd;
+    newConn->channelId = *channelId;
     newConn->dataBuffer.w = newConn->dataBuffer.data;
 
     if (TransTdcAddSessionConn(newConn) != SOFTBUS_OK) {
         SoftBusFree(newConn);
-        LOG_ERR("add session conn fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session conn fail.");
         return SOFTBUS_ERR;
     }
     if (AddTrigger(DIRECT_CHANNEL_SERVER, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         TransTdcDelSessionConn(newConn);
-        LOG_ERR("add trigger fail, delete session conn.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add trigger fail, delete session conn.");
         return SOFTBUS_ERR;
     }
 
@@ -212,7 +231,7 @@ int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInf
 SessionConn *GetTdcInfoByChannelId(int32_t channelId)
 {
     if (g_sessionConnList == NULL) {
-        LOG_ERR("get tdc intfo err, infoList is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc intfo err, infoList is null.");
         return NULL;
     }
     SessionConn *connInfo = NULL;
@@ -225,14 +244,14 @@ SessionConn *GetTdcInfoByChannelId(int32_t channelId)
     }
     pthread_mutex_unlock(&g_sessionConnList->lock);
 
-    LOG_ERR("get tdc info is null");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info is null");
     return NULL;
 }
 
 SessionConn *GetTdcInfoByFd(int fd)
 {
     if (g_sessionConnList == NULL) {
-        LOG_ERR("get tdc intfo err, infoList is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc intfo err, infoList is null.");
         return NULL;
     }
     SessionConn *connInfo = NULL;
@@ -276,7 +295,7 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
     if (RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc) != SOFTBUS_OK) {
-        LOG_ERR("RegisterTimeoutCallback failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RegisterTimeoutCallback failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -290,7 +309,7 @@ void TransTcpDirectDeinit(void)
 void TransTdcDeathCallback(const char *pkgName)
 {
     if (g_sessionConnList == NULL) {
-        LOG_ERR("get tdc info error, info list is null.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info error, info list is null.");
         return;
     }
 
@@ -298,7 +317,7 @@ void TransTdcDeathCallback(const char *pkgName)
     SessionConn *next = NULL;
 
     if (pthread_mutex_lock(&(g_sessionConnList->lock)) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(conn, next, &g_sessionConnList->list, SessionConn, node) {
