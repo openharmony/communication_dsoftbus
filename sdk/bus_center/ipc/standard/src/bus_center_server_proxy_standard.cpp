@@ -31,6 +31,7 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
+
 static uint32_t g_getSystemAbilityId = 2;
 static sptr<IRemoteObject> GetSystemAbility()
 {
