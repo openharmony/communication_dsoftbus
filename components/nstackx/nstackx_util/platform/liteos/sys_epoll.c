@@ -383,6 +383,7 @@ static int32_t EpollEventRecordAdd(EpollSet *epollSetPtr)
     struct EpollEventPtr *ptr = (struct EpollEventPtr *)malloc(sizeof(struct EpollEventPtr));
     if (ptr == NULL) {
         LOGE(TAG, "EpollEventPtr alloc failed");
+        (void)pthread_mutex_unlock(&g_epollEventPtrMutex);
         return NSTACKX_ENOMEM;
     }
     (void)memset_s(ptr, sizeof(struct EpollEventPtr), 0, sizeof(struct EpollEventPtr));
@@ -460,7 +461,7 @@ static int32_t RearZeroBitNum(unsigned long x)
             n = n + bitNum;
             x = x >> bitNum;
         }
-        bitNum = bitNum >> 1;
+        bitNum = (int)(((uint32_t)bitNum) >> 1);
         bitMov += bitNum;
     }
 
@@ -480,7 +481,7 @@ static int32_t PreZeroBitNum(unsigned long x)
             n = n + bitNum;
             x = x << bitNum;
         }
-        bitNum = bitNum >> 1;
+        bitNum = (int)(((uint32_t)bitNum) >> 1);
         bitMov += bitNum;
     }
 
