@@ -36,10 +36,10 @@
 static int32_t CheckSoftBusSysPermission(int32_t callingUid)
 {
     if (CheckPermission(callingUid, SOFTBUS_PERMISSION_NAME) != GRANTED) {
-        LOG_ERR("softbus CheckPermission fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus CheckPermission fail");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    LOG_INFO("CheckSoftBusSysPermission uid:%d success", callingUid);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CheckSoftBusSysPermission uid:%d success", callingUid);
     return SOFTBUS_OK;
 }
 
@@ -47,15 +47,15 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
 {
     (void)pkgName;
     if (callingUid == getuid() && callingPid == getpid()) {
-        LOG_INFO("self app");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "self app");
         return SELF_APP;
     }
     if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {
-        LOG_INFO("system app");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "system app");
         return SYSTEM_APP;
     }
     if (callingUid > INVALID_UID && callingUid < FIRST_APPLICATION_UID && callingUid != SHELL_UID) {
-        LOG_INFO("native app");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "native app");
         return NATIVE_APP;
     }
     return SOFTBUS_PERMISSION_DENIED;

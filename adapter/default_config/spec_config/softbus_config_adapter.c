@@ -13,46 +13,13 @@
  * limitations under the License.
  */
 
-#include "softbus_config_type.h"
+#include "softbus_config_adapter.h"
 
 #define MAX_BYTES_LENGTH 4194304
-#define MAX_MESSAGE_LENGTH 4096
-#define CONN_BR_MAX_DATA_LENGTH 4096
-#define CONN_RFCOM_SEND_MAX_LEN  990
-#define CONN_BR_RECEIVE_MAX_LEN 10
-#define CONN_TCP_MAX_LENGTH 3072
-#define CONN_TCP_MAX_CONN_NUM 30
-#define CONN_TCP_TIME_OUT 100
-#define MAX_NODE_STATE_CB_CNT 10
-#define MAX_LNN_CONNECTION_CNT 10
-#define LNN_SUPPORT_CAPBILITY 22
-#define AUTH_ABILITY_COLLECTION 0
 
 void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
-    int val;
+    int32_t val;
     val = MAX_BYTES_LENGTH;
     sets->SetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char*)&val, sizeof(val));
-    val = MAX_MESSAGE_LENGTH;
-    sets->SetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char*)&val, sizeof(val));
-    val = CONN_BR_MAX_DATA_LENGTH;
-    sets->SetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, (unsigned char*)&val, sizeof(val));
-    val = CONN_RFCOM_SEND_MAX_LEN;
-    sets->SetConfig(SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN, (unsigned char*)&val, sizeof(val));
-    val = CONN_BR_RECEIVE_MAX_LEN;
-    sets->SetConfig(SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN, (unsigned char*)&val, sizeof(val));
-    val = CONN_TCP_MAX_LENGTH;
-    sets->SetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH, (unsigned char*)&val, sizeof(val));
-    val = CONN_TCP_MAX_CONN_NUM;
-    sets->SetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, (unsigned char*)&val, sizeof(val));
-    val = CONN_TCP_TIME_OUT;
-    sets->SetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT, (unsigned char*)&val, sizeof(val));
-    val = MAX_NODE_STATE_CB_CNT;
-    sets->SetConfig(SOFTBUS_INT_MAX_NODE_STATE_CB_CNT, (unsigned char*)&val, sizeof(val));
-    val = MAX_LNN_CONNECTION_CNT;
-    sets->SetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char*)&val, sizeof(val));
-    val = LNN_SUPPORT_CAPBILITY;
-    sets->SetConfig(SOFTBUS_INT_LNN_SUPPORT_CAPBILITY, (unsigned char*)&val, sizeof(val));
-    val = AUTH_ABILITY_COLLECTION;
-    sets->SetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (unsigned char*)&val, sizeof(val));
 }

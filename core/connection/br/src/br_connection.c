@@ -24,9 +24,9 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_mem_interface.h"
-#include "softbus_property.h"
 #include "softbus_type_def.h"
 #include "stdbool.h"
 #include "string.h"
@@ -37,9 +37,6 @@
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
-#define GET_PROPERTY_LENGTH "CONN_BR_MAX_DATA_LENGTH"
-#define GET_SEND_MESSAGE_PEER_LEN "CONN_RFCOM_SEND_MAX_LEN"
-#define BR_SENDQUEQUE_MAXNUM "CONN_BR_RECEIVE_MAX_LEN"
 #define METHOD_NOTIFY_REQUEST 1
 #define METHOD_NOTIFY_RESPONSE 2
 #define METHOD_SHUT_DOWN 3
@@ -267,7 +264,7 @@ static int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     int32_t result = SOFTBUS_ERR;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
@@ -279,7 +276,7 @@ static int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
             info->type = CONNECT_BR;
             if (strncpy_s(info->info.brInfo.brMac, BT_MAC_LEN,
                 itemNode->mac, sizeof(itemNode->mac)) != EOK) {
-                LOG_ERR("GetConnInfo scpy error");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetConnInfo scpy error");
                 (void)pthread_mutex_unlock(&g_connectionLock);
                 return SOFTBUS_BRCONNECTION_GETCONNINFO_ERROR;
             }
@@ -307,7 +304,7 @@ static BrConnectionInfo *GetConnectionRef(uint32_t connID)
 
 static void ReleaseConnection(BrConnectionInfo *conn)
 {
-    LOG_INFO("ReleaseConnection node + u%", conn->connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReleaseConnection node + u%", conn->connectionId);
     ListNode *item = NULL;
     ListNode *nextItem = NULL;
     LIST_FOR_EACH_SAFE(item, nextItem, &conn->requestList) {
@@ -324,7 +321,7 @@ static void ReleaseConnection(BrConnectionInfo *conn)
 static void ReleaseConnectionRef(BrConnectionInfo *conn)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     ListDelete(&conn->node);
@@ -353,19 +350,19 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
 {
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
-        LOG_ERR("Cannot create cJSON object");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return;
     }
     if (AddNumToJson(json, requestOrResponse, delta, count) != SOFTBUS_OK) {
         cJSON_Delete(json);
-        LOG_ERR("Cannot AddNumToJson");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot AddNumToJson");
         return;
     }
 
     char *data = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         return;
     }
 
@@ -385,14 +382,14 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
 
     if (memcpy_s(buf, dataLen, (void *)&head, headSize)) {
         cJSON_free(data);
-        LOG_ERR("memcpy_s head error");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);
         SoftBusFree(buf);
         return;
     }
     if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1)) {
         cJSON_free(data);
-        LOG_ERR("memcpy_s data error");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);
         return;
@@ -404,12 +401,12 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
 
 static void PackRequest(int32_t delta, int32_t connectionId)
 {
-    LOG_INFO("[onNotifyRequest: delta=%d, connectionIds=%u", delta, connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onNotifyRequest: delta=%d, connectionIds=%u", delta, connectionId);
     ListNode *item = NULL;
     BrConnectionInfo *targetNode = NULL;
     int refCount;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     LIST_FOR_EACH(item, &g_conection_list) {
@@ -432,13 +429,14 @@ static void PackRequest(int32_t delta, int32_t connectionId)
 
 static void OnPackResponse(int32_t delta, int32_t peerRef, int32_t connectionId)
 {
-    LOG_INFO("[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
     ListNode *item = NULL;
     BrConnectionInfo *targetNode = NULL;
     int myRefCount;
     int mySocketFd;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     LIST_FOR_EACH(item, &g_conection_list) {
@@ -452,18 +450,18 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, int32_t connectionId)
         }
     }
     if (targetNode == NULL) {
-        LOG_INFO("Not find OnPackResponse device");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Not find OnPackResponse device");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return;
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    LOG_INFO("[onPackRequest: myRefCount=%d]", myRefCount);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
     if (peerRef > 0) {
-        LOG_INFO("[remote device Ref is > 0, do not reply]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[remote device Ref is > 0, do not reply]");
         return;
     }
     if (myRefCount <= 0) {
-        LOG_INFO("[local device Ref <= 0, close connection now]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[local device Ref <= 0, close connection now]");
         g_sppDriver->CloseClient(mySocketFd);
         return;
     }
@@ -473,7 +471,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, int32_t connectionId)
 static int32_t HasDiffMacDeviceExit(const ConnectOption *option)
 {
     if (IsListEmpty(&g_conection_list)) {
-        LOG_INFO("[g_conection_list is empty, allow to connect device.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[g_conection_list is empty, allow to connect device.]");
         return 0;
     }
     ListNode *item = NULL;
@@ -488,7 +486,7 @@ static int32_t HasDiffMacDeviceExit(const ConnectOption *option)
             break;
         }
     }
-    LOG_INFO("[check HasDiffMacDeviceExit, return value is %d", res);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[check HasDiffMacDeviceExit, return value is %d", res);
     return res;
 }
 
@@ -498,7 +496,7 @@ static void ReleaseBrconnectionNode(BrConnectionInfo *newConnectionInfo)
         return;
     }
 
-    LOG_ERR("[ReleaseBrconnectionNode");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReleaseBrconnectionNode");
     pthread_cond_destroy(&newConnectionInfo->congestCond);
     pthread_mutex_destroy(&newConnectionInfo->lock);
     pthread_mutex_destroy(&newConnectionInfo->lock);
@@ -523,12 +521,12 @@ static BrConnectionInfo* CreateBrconnectionNode(int clientFlag)
 {
     BrConnectionInfo *newConnectionInfo = SoftBusCalloc(sizeof(BrConnectionInfo));
     if (newConnectionInfo == NULL) {
-        LOG_ERR("[ConnectDeviceFristTime malloc fail.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnectDeviceFristTime malloc fail.]");
         return NULL;
     }
     newConnectionInfo->recvBuf = SoftBusCalloc(g_brBuffSize);
     if (newConnectionInfo->recvBuf == NULL) {
-        LOG_ERR("[SoftBusMalloc recvBuf fail]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[SoftBusMalloc recvBuf fail]");
         SoftBusFree(newConnectionInfo);
         return NULL;
     }
@@ -547,7 +545,7 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
 {
     BrConnectionInfo *newConnectionInfo = CreateBrconnectionNode(true);
     if (newConnectionInfo == NULL) {
-        LOG_ERR("[client node create fail]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[client node create fail]");
         return SOFTBUS_ERR;
     }
     RequestInfo *requestInfo = SoftBusCalloc(sizeof(RequestInfo));
@@ -569,7 +567,7 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
     uint8_t btAddr[BT_ADDR_LEN];
 
     if (ConvertBtMacToBinary(newConnectionInfo->mac, BT_MAC_LEN, btAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
-        LOG_ERR("convert bt mac to binary fail.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "convert bt mac to binary fail.]");
         ReleaseBrconnectionNode(newConnectionInfo);
         return SOFTBUS_ERR;
     }
@@ -581,7 +579,8 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
         return SOFTBUS_BRCONNECTION_CONNECTDEVICE_GETSOCKETIDFAIL;
     }
     newConnectionInfo->socketFd = socketFd;
-    LOG_INFO("[new connection %d,socket=%d", newConnectionInfo->connectionId, socketFd);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[new connection %d,socket=%d", newConnectionInfo->connectionId, socketFd);
     ListAdd(&g_conection_list, &newConnectionInfo->node);
     int32_t ret = g_sppDriver->Connect(socketFd, &g_sppSocketClientCallback);
     return ret;
@@ -589,7 +588,7 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
 
 static void ConnectDeviceExit(const BrConnectionInfo *itemNode, uint32_t requestId, const ConnectResult *result)
 {
-    LOG_INFO("[already find mac in g_conection_list]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[already find mac in g_conection_list]");
     ConnectionInfo connectionInfo;
     connectionInfo.isAvailable = 1;
     connectionInfo.isServer = itemNode->sideType;
@@ -610,13 +609,14 @@ static void ConnectDeviceExit(const BrConnectionInfo *itemNode, uint32_t request
 int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     int32_t ret = SOFTBUS_OK;
-    LOG_INFO("[ConnectDevice]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDevice]");
     if (HasDiffMacDeviceExit(option) != SOFTBUS_OK) {
-        LOG_INFO("[g_conection_list has diff mac device, mini system not support.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "[g_conection_list has diff mac device, mini system not support.]");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
@@ -632,7 +632,8 @@ int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const Con
                 RequestInfo *requestInfo = SoftBusMalloc(sizeof(RequestInfo));
                 if (requestInfo == NULL) {
                     (void)pthread_mutex_unlock(&g_connectionLock);
-                    LOG_INFO("[ConnectDevice fail and state is BR_CONNECTION_STATE_CONNECTING.]");
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+                        "[ConnectDevice fail and state is BR_CONNECTION_STATE_CONNECTING.]");
                     return SOFTBUS_ERR;
                 }
                 (void)memset_s(requestInfo, sizeof(RequestInfo), 0, sizeof(RequestInfo));
@@ -648,7 +649,7 @@ int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const Con
         }
     }
     if (targetConnectionInfo == NULL) {
-        LOG_INFO("[targetConnectionInfo == NULL]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[targetConnectionInfo == NULL]");
         ret = ConnectDeviceFristTime(option, requestId, result);
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
@@ -668,7 +669,7 @@ void RfcomCongestEvent(int32_t socketFd, int32_t value)
     BrConnectionInfo *itemNode = NULL;
 
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     LIST_FOR_EACH(item, &g_conection_list) {
@@ -678,7 +679,7 @@ void RfcomCongestEvent(int32_t socketFd, int32_t value)
             if (value == BT_RFCOM_CONGEST_OFF) {
                 if (pthread_mutex_lock(&itemNode->lock) != 0) {
                     (void)pthread_mutex_unlock(&g_connectionLock);
-                    LOG_ERR("lock itemNode failed");
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock itemNode failed");
                     return;
                 }
                 pthread_cond_broadcast(&itemNode->congestCond);
@@ -714,7 +715,7 @@ static void ClientOnBrConnect(int32_t socketFd)
             itemNode->state = BR_CONNECTION_STATE_CONNECTED;
             LIST_FOR_EACH_SAFE(item, itemNext, &itemNode->requestList) {
                 requestInfo = LIST_ENTRY(item, RequestInfo, node);
-                LOG_INFO("[ClientOnEvent] requestId=%d, connectionId=%u",
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] requestId=%d, connectionId=%u",
                     requestInfo->requestId, itemNode->connectionId);
                 ListDelete(&requestInfo->node);
                 ListAdd(&notifyList, &requestInfo->node);
@@ -740,7 +741,7 @@ static void ClientOnBrConnect(int32_t socketFd)
 
 static void ClientOnEvent(int32_t type, int32_t socketFd, int32_t value)
 {
-    LOG_INFO("[ClientOnEvent] type=%d, socketFd=%d", type, socketFd);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] type=%d, socketFd=%d", type, socketFd);
     if (type == SPP_EVENT_TYPE_CONNECTED) {
         ClientOnBrConnect(socketFd);
     } else if (type == SPP_EVENT_TYPE_DISCONNECTED) {
@@ -757,7 +758,7 @@ static int32_t InitConnectionInfo(ConnectionInfo *connectionInfo, const BrConnec
     (*connectionInfo).type = CONNECT_BR;
     if (strncpy_s((*connectionInfo).info.brInfo.brMac, BT_MAC_LEN,
         itemNode->mac, sizeof(itemNode->mac)) != EOK) {
-            LOG_ERR("InitConnInfo scpy error");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitConnInfo scpy error");
             return SOFTBUS_BRCONNECTION_STRNCPY_ERROR;
     }
     return SOFTBUS_OK;
@@ -767,7 +768,7 @@ static void FreeCongestEvent(BrConnectionInfo *itemNode)
 {
     itemNode->conGestState = BT_RFCOM_CONGEST_OFF;
     if (pthread_mutex_lock(&itemNode->lock) != 0) {
-        LOG_ERR("FreeCongestEvent mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "FreeCongestEvent mutex failed");
         return;
     }
     pthread_cond_broadcast(&itemNode->congestCond);
@@ -783,7 +784,7 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
         LIST_FOR_EACH_SAFE(item, itemNext, notifyList) {
             RequestInfo *requestInfo = LIST_ENTRY(item, RequestInfo, node);
             if (requestInfo->callback.OnConnectFailed != NULL) {
-                LOG_INFO("[ClientOnEvent] disconn connectionId=%d", connectionId);
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] disconn connectionId=%d", connectionId);
                 requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
             }
             ListDelete(&requestInfo->node);
@@ -792,7 +793,7 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
     }
 
     if (g_connectCallback != NULL) {
-        LOG_INFO("[ClientOnEvent] disconn connectionId=%d", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] disconn connectionId=%d", connectionId);
         g_connectCallback->OnDisconnected(connectionId, &connectionInfo);
     }
 }
@@ -808,7 +809,7 @@ static void ClientOnBrDisconnect(int32_t socketFd, int32_t value)
     ConnectionInfo connectionInfo;
     BrConnectionInfo *brNode = NULL;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("ClientOnBrDisconnect mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ClientOnBrDisconnect mutex failed");
         return;
     }
     LIST_FOR_EACH(britem, &g_conection_list) {
@@ -842,13 +843,14 @@ static void ClientOnBrDisconnect(int32_t socketFd, int32_t value)
 static int32_t ReceivedHeadCheck(const ConnPktHead *head, BrConnectionInfo *conn)
 {
     if (head->magic != 0xBABEFACE) {
-        LOG_ERR("[ClientOnDataReceived] magic error 0x%x", head->magic);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ClientOnDataReceived] magic error 0x%x", head->magic);
         conn->recvPos = 0;
         return SOFTBUS_ERR;
     }
 
     if (head->len > (g_brBuffSize - sizeof(ConnPktHead))) {
-        LOG_ERR("[ClientOnDataReceived]data too large . module=%d,seq=%lld, datalen=%d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "[ClientOnDataReceived]data too large . module=%d,seq=%lld, datalen=%d",
             head->module, head->seq, head->len);
         conn->recvPos = 0;
         return SOFTBUS_ERR;
@@ -860,20 +862,20 @@ static int32_t ReceivedError(ReceiveItemStruct *recvItem, char *dataCopy,
     const char *bufHead, const ConnPktHead  *head, int32_t sendToManagerLen)
 {
     if (recvItem == NULL) {
-        LOG_ERR("malloc recvItem fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc recvItem fail");
         if (dataCopy != NULL) {
             SoftBusFree(dataCopy);
         }
         return SOFTBUS_ERR;
     }
     if (dataCopy == NULL) {
-        LOG_ERR("malloc dataCopy fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc dataCopy fail");
         SoftBusFree(recvItem);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(dataCopy, sendToManagerLen,
         bufHead, head->len + sizeof(ConnPktHead)) != EOK) {
-        LOG_ERR("ReceivedError memcpy_s failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReceivedError memcpy_s failed");
         SoftBusFree(dataCopy);
         SoftBusFree(recvItem);
         return SOFTBUS_ERR;
@@ -892,7 +894,7 @@ static void InitRecvItemAndInsert(ReceiveItemStruct *recvItem, int32_t connectio
     recvItem->dataLen = sendToManagerLen;
     recvItem->data = (uint8_t*)dataCopy;
     if (pthread_mutex_lock(&g_recvQueue.lock) != 0) {
-        LOG_ERR("InitRecvItemAndInsert mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitRecvItemAndInsert mutex failed");
         return;
     }
     if (recvItem->module == MODULE_DEVICE_AUTH) {
@@ -900,14 +902,14 @@ static void InitRecvItemAndInsert(ReceiveItemStruct *recvItem, int32_t connectio
     } else {
         ListTailInsert(&g_recvQueue.recvList, &recvItem->node);
     }
-    LOG_INFO("[ClientOnDataReceived] connectionId=%d", connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnDataReceived] connectionId=%d", connectionId);
     pthread_cond_signal(&g_recvQueue.cond);
     (void)pthread_mutex_unlock(&g_recvQueue.lock);
 }
 
 static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
 {
-    LOG_INFO("[ClientOnDataReceived] socketFd=%d,len=%d", socketFd, len);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnDataReceived] socketFd=%d,len=%d", socketFd, len);
     BrConnectionInfo *conn = NULL;
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
@@ -921,7 +923,7 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
 
     if (conn == NULL) {
         (void)pthread_mutex_unlock(&g_connectionLock);
-        LOG_ERR("[ClientOnDataReceived] not found socket=%d", socketFd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ClientOnDataReceived] not found socket=%d", socketFd);
         return;
     }
 
@@ -929,7 +931,7 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
     int32_t bufLen = len;
     bool isCopy = false;
     if (conn->recvPos != 0) {
-        LOG_DBG("[ClientOnDataReceived] recvPos=%d", conn->recvPos);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "[ClientOnDataReceived] recvPos=%d", conn->recvPos);
         (void)memcpy_s(conn->recvBuf + conn->recvPos, g_brBuffSize - conn->recvPos, buf, len);
         conn->recvPos += len;
         isCopy = true;
@@ -954,7 +956,8 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
     }
 
     if (head->len > (bufLen - sizeof(ConnPktHead))) {
-        LOG_ERR("[ClientOnDataReceived] socket=%d , continue to recv", socketFd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "[ClientOnDataReceived] socket=%d , continue to recv", socketFd);
         if (!isCopy) {
             (void)memcpy_s(conn->recvBuf + conn->recvPos, g_brBuffSize - conn->recvPos, buf, len);
             conn->recvPos += len;
@@ -970,16 +973,16 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
         sendToManagerLen = head->len + sizeof(ConnPktHead);
     }
     if (g_connectCallback != NULL) {
-        LOG_ERR("[ClientOnDataReceived] socket=%d , ready to insert", socketFd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ClientOnDataReceived] socket=%d , ready to insert", socketFd);
         ReceiveItemStruct *recvItem = SoftBusMalloc(sizeof(ReceiveItemStruct));
         if (recvItem == NULL) {
-            LOG_ERR("malloc failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc failed");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
         char *dataCopy = SoftBusMalloc(sendToManagerLen);
         if (dataCopy == NULL) {
-            LOG_ERR("malloc failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc failed");
             SoftBusFree(recvItem);
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
@@ -996,7 +999,7 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
     } else {
         if (memmove_s(conn->recvBuf, g_brBuffSize,
             conn->recvBuf + sendToManagerLen, bufLen - sendToManagerLen) != EOK) {
-                LOG_ERR("memmove_s failed");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memmove_s failed");
                 (void)pthread_mutex_unlock(&g_connectionLock);
                 return;
             }
@@ -1008,7 +1011,7 @@ static void ClientOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
 static int32_t NotifyServerConn(int connectionId, const BrConnectionInfo *conn)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     ConnectionInfo connectionInfo;
@@ -1017,7 +1020,7 @@ static int32_t NotifyServerConn(int connectionId, const BrConnectionInfo *conn)
     connectionInfo.type = CONNECT_BR;
     if (strncpy_s(connectionInfo.info.brInfo.brMac,
         BT_MAC_LEN, conn->mac, sizeof(conn->mac)) != EOK) {
-        LOG_ERR("NotifyServerConn scpy error");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NotifyServerConn scpy error");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -1028,13 +1031,13 @@ static int32_t NotifyServerConn(int connectionId, const BrConnectionInfo *conn)
 
 static void ServerOnBrConnect(int32_t type, int32_t socketFd, int32_t value)
 {
-    LOG_INFO("[new connection, socket = %d", value);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[new connection, socket = %d", value);
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_conection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (value == itemNode->socketFd) {
-            LOG_INFO("Serviceconnection exit, socketFd=%d", socketFd);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Serviceconnection exit, socketFd=%d", socketFd);
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -1042,7 +1045,7 @@ static void ServerOnBrConnect(int32_t type, int32_t socketFd, int32_t value)
     (void)pthread_mutex_unlock(&g_connectionLock);
     BrConnectionInfo *newConnectionInfo = CreateBrconnectionNode(false);
     if (newConnectionInfo == NULL) {
-        LOG_ERR("[service node create fail]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[service node create fail]");
         g_sppDriver->CloseClient(value);
         return;
     }
@@ -1057,7 +1060,7 @@ static void ServerOnBrConnect(int32_t type, int32_t socketFd, int32_t value)
     BluetoothRemoteDevice* info  = NULL;
     g_sppDriver->GetRemoteDeviceInfo(value, info);
     if (ConvertBtMacToStr(newConnectionInfo->mac, BT_MAC_LEN, (uint8_t *)info->mac, BT_ADDR_LEN_RFCOM) != SOFTBUS_OK) {
-        LOG_ERR("convert bt mac to str fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "convert bt mac to str fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->CloseClient(value);
         return;
@@ -1086,7 +1089,7 @@ static void ServerOnDataReceived(int32_t socketFd, const char *buf, int32_t len)
 
 static void ServerOnEvent(int32_t type, int32_t socketFd, int32_t value)
 {
-    LOG_INFO("[ClientOnEvent] socketFd=%d", socketFd);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] socketFd=%d", socketFd);
     if (type == SPP_EVENT_TYPE_CONNECTED) {
         ServerOnBrConnect(type, socketFd, value);
     } else if (type == SPP_EVENT_TYPE_DISCONNECTED) {
@@ -1122,7 +1125,7 @@ static int32_t CheckSendQueueLength(void)
     int totalSendNum = 0;
     ListNode *sendItemNode = NULL;
     if (pthread_mutex_lock(&g_dataQueue.lock) != 0) {
-        LOG_ERR("CheckSendQueueLength mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CheckSendQueueLength mutex failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH(sendItemNode, &g_dataQueue.sendList) {
@@ -1139,7 +1142,7 @@ static DataPidQueueStruct *CreatNewPidNode(int pid)
 {
     DataPidQueueStruct *pidQueue = SoftBusCalloc(sizeof(DataPidQueueStruct));
     if (pidQueue == NULL) {
-        LOG_ERR("PostBytes CreatNewPidNode fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostBytes CreatNewPidNode fail");
         return NULL;
     }
     ListInit(&pidQueue->node);
@@ -1152,7 +1155,7 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
 {
     SendItemStruct *sendItem = SoftBusCalloc(sizeof(SendItemStruct));
     if (sendItem == NULL) {
-        LOG_ERR("PostBytes CreateNewSendItem fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostBytes CreateNewSendItem fail");
         return SOFTBUS_ERR;
     }
     ListInit(&sendItem->node);
@@ -1169,7 +1172,7 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
     LIST_FOR_EACH_SAFE(item, nextItem, &g_dataQueue.sendList) {
         sendItemInsert = LIST_ENTRY(item, SendItemStruct, node);
         if (sendItemInsert->pid == pid && sendItemInsert->priority < sendItem->priority) {
-            LOG_INFO("SendItem ListAdd");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendItem ListAdd");
             ListNode *sendItemNode = item->prev;
             ListAdd(sendItemNode, &sendItem->node);
             lastInsertFlag = true;
@@ -1177,7 +1180,7 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
         }
     }
     if (lastInsertFlag != true) {
-        LOG_INFO("SendItem ListTailInsert");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendItem ListTailInsert");
         ListTailInsert(&g_dataQueue.sendList, &sendItem->node);
     }
     return SOFTBUS_OK;
@@ -1185,7 +1188,8 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
 
 static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
 {
-    LOG_INFO("PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
     (void)pthread_mutex_lock(&g_connectionLock);
     if (CheckSendQueueLength() != SOFTBUS_OK) {
         SoftBusFree((void*)data);
@@ -1194,7 +1198,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     }
     BrConnectionInfo *conn = GetConnectionRef(connectionId);
     if (conn == NULL) {
-        LOG_INFO("PostBytes connectionId=%u not found", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "PostBytes connectionId=%u not found", connectionId);
         SoftBusFree((void*)data);
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
@@ -1221,7 +1225,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     }
 
     pidQueue->itemCount++;
-    LOG_INFO("PostBytes pidQueue count=%d", pidQueue->itemCount);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "PostBytes pidQueue count=%d", pidQueue->itemCount);
     if (CreateNewSendItem(pid, flag, connectionId, len, data) != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&g_connectionLock);
         SoftBusFree((void*)data);
@@ -1239,7 +1243,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
 
 static void FreeSendItem(SendItemStruct *sendItem)
 {
-    LOG_INFO("FreeSendItem");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "FreeSendItem");
     if (sendItem == NULL) {
         return;
     }
@@ -1266,7 +1270,7 @@ static void ClearDataPidByPid(int32_t pid)
 static void ClearSendItemByConnId(uint32_t connectionId)
 {
     if (pthread_mutex_lock(&g_dataQueue.lock) != 0) {
-        LOG_ERR("ClearSendItemByConnId mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ClearSendItemByConnId mutex failed");
         return;
     }
     ListNode *sendItemNode = NULL;
@@ -1286,7 +1290,7 @@ static void ClearSendItemByConnId(uint32_t connectionId)
 static int32_t SendData(SendItemStruct *sendItem)
 {
     BrConnectionInfo *brConnInfo = NULL;
-    LOG_INFO("SendData");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendData");
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
     int32_t socketFd = -1;
@@ -1310,11 +1314,11 @@ static int32_t SendData(SendItemStruct *sendItem)
         (void)pthread_mutex_lock(&brConnInfo->lock);
         while (brConnInfo->conGestState == BT_RFCOM_CONGEST_ON &&
             brConnInfo->state == BR_CONNECTION_STATE_CONNECTED) {
-            LOG_INFO("wait congest");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait congest");
             (void)pthread_mutex_unlock(&g_connectionLock);
             freeLock = true;
             pthread_cond_wait(&brConnInfo->congestCond, &brConnInfo->lock);
-            LOG_INFO("free congest");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "free congest");
             break;
         }
         (void)pthread_mutex_unlock(&brConnInfo->lock);
@@ -1339,9 +1343,9 @@ void *SendHandlerLoop(void *arg)
     while (1) {
         (void)pthread_mutex_lock(&g_dataQueue.lock);
         if (IsListEmpty(&g_dataQueue.sendList)) {
-            LOG_INFO("SendHandlerLoop empty");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendHandlerLoop empty");
             pthread_cond_wait(&g_dataQueue.cond, &g_dataQueue.lock);
-            LOG_INFO("start SendHandlerLoop");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "start SendHandlerLoop");
             (void)pthread_mutex_unlock(&g_dataQueue.lock);
             continue;
         }
@@ -1369,12 +1373,12 @@ void *SendHandlerLoop(void *arg)
             }
         }
         if (sendItem == NULL) {
-            LOG_ERR("SendItem fail");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendItem fail");
             continue;
         }
         (void)pthread_mutex_unlock(&g_dataQueue.lock);
         if (SendData(sendItem) != SOFTBUS_OK) {
-            LOG_INFO("SendItem fail");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendItem fail");
         }
         FreeSendItem(sendItem);
     }
@@ -1385,7 +1389,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
     int32_t keyMethod = 0;
     int32_t keyDelta = 0;
     int32_t keyRefernceNum = 0;
-    LOG_INFO("RecvConnectedComd ID=%u", connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RecvConnectedComd ID=%u", connectionId);
 
     if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod)) {
         return;
@@ -1394,16 +1398,16 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
             !GetJsonObjectNumberItem(data, KEY_DELTA, &keyDelta) ||
             !GetJsonObjectNumberItem(data, KEY_REFERENCE_NUM, &keyRefernceNum)) {
-            LOG_INFO("REQUEST fail");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "REQUEST fail");
             return;
         }
         OnPackResponse(keyDelta, keyRefernceNum, connectionId);
     }
     if (keyMethod == METHOD_NOTIFY_RESPONSE) {
-        LOG_INFO("NOTIFY_RESPONSE");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_RESPONSE");
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
             !GetJsonObjectNumberItem(data, KEY_REFERENCE_NUM, &keyRefernceNum)) {
-            LOG_INFO("RESPONSE fail");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
             return;
         }
         (void)pthread_mutex_lock(&g_connectionLock);
@@ -1412,7 +1416,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
             BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
             if (itemNode->connectionId == connectionId) {
                 if (itemNode->state == BR_CONNECTION_STATE_CLOSING) {
-                    LOG_INFO("NOTIFY_CHANGE");
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_CHANGE");
                     itemNode->state = BR_CONNECTION_STATE_CONNECTED;
                 }
                 break;
@@ -1427,9 +1431,9 @@ void *RecvHandlerLoop(void *arg)
     while (1) {
         (void)pthread_mutex_lock(&g_recvQueue.lock);
         if (IsListEmpty(&g_recvQueue.recvList)) {
-            LOG_INFO("RecvHandlerLoop empty");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RecvHandlerLoop empty");
             pthread_cond_wait(&g_recvQueue.cond, &g_recvQueue.lock);
-            LOG_INFO("Recv recvQueueCond");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Recv recvQueueCond");
             (void)pthread_mutex_unlock(&g_recvQueue.lock);
             continue;
         }
@@ -1442,14 +1446,14 @@ void *RecvHandlerLoop(void *arg)
             break;
         }
         (void)pthread_mutex_unlock(&g_recvQueue.lock);
-        LOG_INFO("RecvHandlerLoop OnDataReceived");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RecvHandlerLoop OnDataReceived");
         if (recvItem->module == MODULE_CONNECTION) {
             cJSON *data = NULL;
             data = cJSON_Parse((char *)(recvItem->data + sizeof(ConnPktHead)));
             if (data == NULL) {
                 SoftBusFree(recvItem->data);
                 SoftBusFree(recvItem);
-                LOG_ERR("[receive data invalid]");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[receive data invalid]");
                 continue;
             }
             RecvConnectedComd(recvItem->connectionId, (const cJSON*)data);
@@ -1468,7 +1472,7 @@ void *RecvHandlerLoop(void *arg)
 static void ClearReceiveQueueByConnId(uint32_t connectionId)
 {
     if (pthread_mutex_lock(&g_recvQueue.lock) != 0) {
-        LOG_ERR("ClearReceiveQueueByConnId mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ClearReceiveQueueByConnId mutex failed");
         return;
     }
     ListNode *recvItemNode = NULL;
@@ -1487,9 +1491,9 @@ static void ClearReceiveQueueByConnId(uint32_t connectionId)
 
 static int32_t DisconnectDevice(uint32_t connectionId)
 {
-    LOG_INFO("[DisconnectDevice]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDevice]");
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("DisconnectDevice mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "DisconnectDevice mutex failed");
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
@@ -1507,20 +1511,20 @@ static int32_t DisconnectDevice(uint32_t connectionId)
         return SOFTBUS_BRCONNECTION_DISCONNECT_NOTFIND;
     }
     (void)PackRequest(CONNECT_REF_DECRESE, getConnectionId);
-    LOG_INFO("[DisconnectDevice over]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDevice over]");
     return SOFTBUS_OK;
 }
 
 static int32_t DisconnectDeviceNow(const ConnectOption *option)
 {
     int32_t ret = (int32_t)SOFTBUS_ERR;
-    LOG_INFO("[DisconnectDeviceByOption]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDeviceByOption]");
     if (option == NULL || option->type != CONNECT_BR) {
-        LOG_ERR("option check fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "option check fail");
         return ret;
     }
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        LOG_ERR("DisconnectDevice mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "DisconnectDevice mutex failed");
         return ret;
     }
     ListNode *item = NULL;
@@ -1551,7 +1555,7 @@ static void InitDataQueue(DataQueueStruct *dataQueue)
     pthread_attr_init(&threadAttr);
     pthread_attr_setstacksize(&threadAttr, BR_SEND_THREAD_STACK);
     if (pthread_create(&tid, &threadAttr, SendHandlerLoop, NULL) != 0) {
-        LOG_ERR("create DeathProcTask failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
     }
 }
 
@@ -1566,7 +1570,7 @@ static void InitRecvQueue(RecvQueueStruct *recvQueue)
     pthread_attr_init(&threadAttr);
     pthread_attr_setstacksize(&threadAttr, BR_RECE_THREAD_STACK);
     if (pthread_create(&tid, &threadAttr, RecvHandlerLoop, NULL) != 0) {
-        LOG_ERR("create DeathProcTask failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
     }
 }
 
@@ -1593,19 +1597,31 @@ static int32_t InitProperty()
 {
     g_brBuffSize = INVALID_LENGTH;
     g_brSendPeerLen = INVALID_LENGTH;
-    GetPropertyInt(GET_PROPERTY_LENGTH, &g_brBuffSize);
-    GetPropertyInt(GET_SEND_MESSAGE_PEER_LEN, &g_brSendPeerLen);
-    GetPropertyInt(BR_SENDQUEQUE_MAXNUM, &g_brSendQueueMaxLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
+        (unsigned char*)&g_brBuffSize, sizeof(g_brBuffSize)) != SOFTBUS_OK) {
+        LOG_ERR("get br BuffSize fail");
+    }
+    LOG_INFO("br BuffSize is %u", g_brBuffSize);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN,
+        (unsigned char*)&g_brSendPeerLen, sizeof(g_brSendPeerLen)) != SOFTBUS_OK) {
+        LOG_ERR("get br SendPeerLen fail");
+    }
+    LOG_INFO("br SendPeerLen is %u", g_brSendPeerLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN,
+        (unsigned char*)&g_brSendQueueMaxLen, sizeof(g_brSendQueueMaxLen)) != SOFTBUS_OK) {
+        LOG_ERR("get br SendQueueMaxLen fail");
+    }
+    LOG_INFO("br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
     if (g_brBuffSize == INVALID_LENGTH || g_brBuffSize > MAX_BR_SIZE) {
-        LOG_ERR("Cannot get brBuffSize");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
         return SOFTBUS_ERR;
     }
     if (g_brSendPeerLen == INVALID_LENGTH || g_brSendPeerLen > MAX_BR_PEER_SIZE) {
-        LOG_ERR("Cannot get brSendPeerLen");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendPeerLen");
         return SOFTBUS_ERR;
     }
     if (g_brSendQueueMaxLen == SOFTBUS_ERR || g_brSendQueueMaxLen > MAX_BR_PEER_SIZE) {
-        LOG_ERR("Cannot get brSendQueueMaxLen");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendQueueMaxLen");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1613,7 +1629,7 @@ static int32_t InitProperty()
 
 ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
-    LOG_INFO("[InitBR]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBR]");
     if (InitProperty() != SOFTBUS_OK) {
         return NULL;
     }
@@ -1632,7 +1648,7 @@ static bool GetJsonObjectNumberItem(const cJSON *json, const char * const string
 {
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        LOG_ERR("Cannot find or invalid [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
     *target = (int)item->valuedouble;
@@ -1642,12 +1658,12 @@ static bool GetJsonObjectNumberItem(const cJSON *json, const char * const string
 static bool AddNumberToJsonObject(cJSON *obj, const char * const string, int32_t num)
 {
     if (obj == NULL || string == NULL) {
-        LOG_ERR("AddNumberToJsonObject fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddNumberToJsonObject fail");
         return false;
     }
     cJSON *item = cJSON_CreateNumber(num);
     if (item == NULL) {
-        LOG_ERR("Cannot create cJSON number object [%s]", string);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(obj, string, item)) {

@@ -16,7 +16,11 @@
 #ifndef SOFTBUS_FEATURE_CONFIG_H
 #define SOFTBUS_FEATURE_CONFIG_H
 
+#include <securec.h>
+#include <stdint.h>
+
 #include "softbus_config_type.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -24,8 +28,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 void SoftbusConfigInit(void);
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int len);
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len);
+int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len);
+int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

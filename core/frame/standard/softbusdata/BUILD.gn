@@ -32,7 +32,10 @@ ohos_shared_library("softbus_server_data") {
       "hiviewdfx_hilog_native:libhilog",
     ]
 
-    deps = [ "//utils/native/base:utils" ]
+    deps = [
+      "//utils/native/base:utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+    ]
     part_name = "dsoftbus_standard"
   }
   subsystem_name = "communication"

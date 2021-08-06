@@ -32,7 +32,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
     g_discInfo->publishCb = *cb;
     int32_t ret = ServerIpcPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Server PublishService failed, ret = %d", ret);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server PublishService failed, ret = %d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -42,7 +42,7 @@ int32_t UnPublishServiceInner(const char *packageName, int32_t publishId)
 {
     int32_t ret = ServerIpcUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Server UnPublishService failed, ret = %d", ret);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server UnPublishService failed, ret = %d", ret);
         return ret;
     }
 
@@ -54,7 +54,7 @@ int32_t StartDiscoveryInner(const char *packageName, const SubscribeInfo *info, 
     g_discInfo->subscribeCb = *cb;
     int32_t ret = ServerIpcStartDiscovery(packageName, info);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Server StartDiscovery failed, ret = %d", ret);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StartDiscovery failed, ret = %d", ret);
         return ret;
     }
 
@@ -65,7 +65,7 @@ int32_t StopDiscoveryInner(const char *packageName, int32_t subscribeId)
 {
     int32_t ret = ServerIpcStopDiscovery(packageName, subscribeId);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("Server StopDiscovery failed, ret = %d", ret);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StopDiscovery failed, ret = %d", ret);
         return ret;
     }
 
@@ -76,14 +76,14 @@ int32_t DiscClientInit(void)
 {
     g_discInfo = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     if (g_discInfo == NULL) {
-        LOG_ERR("Calloc failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
     if (DiscServerProxyInit() != SOFTBUS_OK) {
-        LOG_ERR("disc server proxy init failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc server proxy init failed.");
         return SOFTBUS_ERR;
     }
-    LOG_INFO("Init success");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Init success");
     return SOFTBUS_OK;
 }
 
@@ -94,7 +94,7 @@ void DiscClientDeinit(void)
     }
     SoftBusFree(g_discInfo);
     g_discInfo = NULL;
-    LOG_INFO("DeInit success");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DeInit success");
 }
 
 void DiscClientOnDeviceFound(const DeviceInfo *device)

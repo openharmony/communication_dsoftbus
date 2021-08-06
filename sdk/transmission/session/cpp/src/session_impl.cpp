@@ -112,7 +112,7 @@ bool SessionImpl::IsServerSide() const
 int SessionImpl::SendBytes(const void *buf, ssize_t len) const
 {
     if (buf == nullptr || len <= 0 || len > MAX_BYTES_LENGTH) {
-        LOG_ERR("Invalid params");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid params");
         return SOFTBUS_ERR;
     }
     return SendBytesInner(sessionId_, buf, len);

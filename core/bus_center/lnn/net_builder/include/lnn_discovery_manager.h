@@ -32,7 +32,15 @@ typedef struct {
 
 int32_t LnnInitDiscoveryManager(void);
 
+int32_t LnnStartDiscovery(void);
+
+int32_t LnnStopDiscovery(void);
+
 int32_t __attribute__ ((weak)) LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
+
+int32_t __attribute__ ((weak)) LnnStartCoapDiscovery(void);
+
+int32_t __attribute__ ((weak)) LnnStopCoapDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus

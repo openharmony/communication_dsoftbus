@@ -40,6 +40,8 @@ extern "C" {
 #define PROXY_PORT "PROXY_PORT"
 #define CONN_CAP "CONN_CAP"
 #define SW_VERSION "SW_VERSION"
+#define MASTER_UDID "MASTER_UDID"
+#define MASTER_WEIGHT "MASTER_WEIGHT"
 
 #define CODE_VERIFY_IP 1
 #define CODE_VERIFY_BT 5

@@ -54,7 +54,8 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];
-    uint32_t weight;
+    char masterUdid[UDID_BUF_LEN];
+    int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
@@ -76,6 +77,8 @@ const char *LnnGetWiFiIp(const NodeInfo *info);
 void LnnSetWiFiIp(NodeInfo *info, const char *ip);
 const char *LnnGetNetIfName(const NodeInfo *info);
 void LnnSetNetIfName(NodeInfo *info, const char *netIfName);
+const char *LnnGetMasterUdid(const NodeInfo *info);
+int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid);
 int32_t LnnGetAuthPort(const NodeInfo *info);
 int32_t LnnSetAuthPort(NodeInfo *info, int32_t port);
 int32_t LnnGetSessionPort(const NodeInfo *info);

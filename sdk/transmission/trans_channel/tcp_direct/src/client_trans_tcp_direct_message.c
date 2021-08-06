@@ -48,7 +48,7 @@ static int32_t TransTdcDecrypt(const char *sessionKey, const char *in, uint32_t 
     AesGcmCipherKey cipherKey = {0};
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
     return SoftBusDecryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
@@ -60,12 +60,12 @@ static int32_t TransTdcEncryptWithSeq(const char *sessionKey, int32_t seqNum, co
     AesGcmCipherKey cipherKey = {0};
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        LOG_ERR("memcpy key error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
     int ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen, seqNum);
     if (ret != SOFTBUS_OK || *outLen != inLen + OVERHEAD_LEN) {
-        LOG_ERR("encrypt error.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypt error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -74,13 +74,13 @@ static int32_t TransTdcEncryptWithSeq(const char *sessionKey, int32_t seqNum, co
 static int32_t TransTdcSetPendingPacket(int32_t channelId, const char *data, uint32_t len)
 {
     if (len != ACK_SIZE) {
-        LOG_ERR("recv invalid seq.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv invalid seq.");
         return SOFTBUS_ERR;
     }
 
     int32_t seq = (int32_t)ntohl(*(uint32_t *)data);
     if (SetPendingPacket(channelId, seq, PENDING_TYPE_DIRECT) != SOFTBUS_OK) {
-        LOG_ERR("can not match seq.[%d]", seq);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not match seq.[%d]", seq);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -92,7 +92,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     uint32_t dataLen = len + OVERHEAD_LEN;
     char *buf = (char *)SoftBusMalloc(dataLen + DC_DATA_HEAD_SIZE);
     if (buf == NULL) {
-        LOG_ERR("malloc failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc failed.");
         return NULL;
     }
 
@@ -113,12 +113,12 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     };
     if (memcpy_s(buf, DC_DATA_HEAD_SIZE, &pktHead, sizeof(TcpDataPacketHead)) != EOK) {
         SoftBusFree(buf);
-        LOG_ERR("memcpy_s error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s error");
         return NULL;
     }
     if (TransTdcEncryptWithSeq(channel->detail.sessionKey, finalSeq, finalData, len,
         buf + DC_DATA_HEAD_SIZE, outLen) != SOFTBUS_OK) {
-        LOG_ERR("encrypt error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypt error");
         SoftBusFree(buf);
         return NULL;
     }
@@ -131,12 +131,12 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     uint32_t outLen;
     char *buf = TransTdcPackData(channel, data, len, flags, &outLen);
     if (buf == NULL || outLen != len + OVERHEAD_LEN) {
-        LOG_ERR("failed to pack bytes.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     uint32_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != outLen + DC_DATA_HEAD_SIZE) {
-        LOG_ERR("failed to send tcp data.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to send tcp data.");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
@@ -154,7 +154,7 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
 
     int ret = TransTdcProcessPostData(&channel, data, len, FLAG_BYTES);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("postBytes failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "postBytes failed");
         return ret;
     }
 
@@ -171,7 +171,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
 
     int32_t ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("postBytes failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "postBytes failed.");
         return ret;
     }
 
@@ -215,7 +215,6 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
     ListAdd(&g_tcpDataList->list, &node->node);
     g_tcpDataList->cnt++;
     pthread_mutex_unlock(&g_tcpDataList->lock);
-
     return SOFTBUS_OK;
 }
 
@@ -274,7 +273,7 @@ static ClientDataBuf *TransGetDataBufNodeById(int32_t channelId)
             return item;
         }
     }
-    LOG_ERR("tcp direct channel id not exist.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp direct channel id not exist.");
     return NULL;
 }
 
@@ -291,7 +290,7 @@ static int32_t TransTdcProcessDataByFlag(int32_t flag, int32_t seqNum, const Tcp
             TransTdcSendAck(channel, seqNum);
             return ClientTransTdcOnDataReceived(channel->channelId, plain, plainLen, TRANS_SESSION_MESSAGE);
         default:
-            LOG_ERR("unknown flag");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unknown flag");
             return SOFTBUS_ERR;
     }
 }
@@ -300,19 +299,23 @@ static int32_t TransTdcProcessData(int32_t channelId)
 {
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
-        LOG_ERR("get key fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get key fail.");
         return SOFTBUS_ERR;
     }
 
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    pthread_mutex_lock(&g_tcpDataList->lock);
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "node is null.");
+        return SOFTBUS_ERR;
+    }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
     int32_t seqNum = pktHead->seq;
     int32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
-        LOG_ERR("malloc fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail.");
         pthread_mutex_unlock(&g_tcpDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -321,14 +324,14 @@ static int32_t TransTdcProcessData(int32_t channelId)
     int ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE,
         dataLen, plain, &plainLen);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("decrypt fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt fail.");
         SoftBusFree(plain);
         pthread_mutex_unlock(&g_tcpDataList->lock);
         return SOFTBUS_DECRYPT_ERR;
     }
     char *end = node->data + DC_DATA_HEAD_SIZE + dataLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
-        LOG_ERR("memmove fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
         pthread_mutex_unlock(&g_tcpDataList->lock);
         return SOFTBUS_MEM_ERR;
     }
@@ -337,7 +340,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
 
     ret = TransTdcProcessDataByFlag(flag, seqNum, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("process data fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data fail");
     }
     SoftBusFree(plain);
     return ret;
@@ -350,38 +353,38 @@ static int32_t TransTdcProcAllData(int32_t channelId)
         ClientDataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {
             pthread_mutex_unlock(&g_tcpDataList->lock);
-            LOG_ERR("can not find data buf node.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find data buf node.");
             return SOFTBUS_ERR;
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen < DC_DATA_HEAD_SIZE) {
-            LOG_WARN("head not enough, recv biz head next time.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head not enough, recv biz head next time.");
             pthread_mutex_unlock(&g_tcpDataList->lock);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
 
         TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
         if (pktHead->magicNumber != MAGIC_NUMBER) {
-            LOG_ERR("invalid data packet head");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid data packet head");
             pthread_mutex_unlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
 
         uint32_t dataLen = pktHead->dataLen;
         if (dataLen > node->size - DC_DATA_HEAD_SIZE) {
-            LOG_ERR("out of recv data buf size[%d]", dataLen);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv data buf size[%d]", dataLen);
             pthread_mutex_unlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
         pthread_mutex_unlock(&g_tcpDataList->lock);
 
         if (bufLen < dataLen + DC_DATA_HEAD_SIZE) {
-            LOG_WARN("data not enough, recv biz data next time.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "data not enough, recv biz data next time.");
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
 
         if (TransTdcProcessData(channelId) != SOFTBUS_OK) {
-            LOG_ERR("data received failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data received failed");
             return SOFTBUS_ERR;
         }
     }
@@ -393,13 +396,13 @@ int32_t TransTdcRecvData(int32_t channelId)
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
         pthread_mutex_unlock(&g_tcpDataList->lock);
-        LOG_ERR("can not find data buf node.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find data buf node.");
         return SOFTBUS_ERR;
     }
     int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
     if (ret <= 0) {
         pthread_mutex_unlock(&g_tcpDataList->lock);
-        LOG_ERR("recv tcp data fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
         return SOFTBUS_ERR;
     }
     node->w += ret;

@@ -14,33 +14,61 @@
  */
 
 #include <securec.h>
+#include <stdint.h>
 
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
+#define MAX_BYTES_LENGTH 4194304
+#define MAX_MESSAGE_LENGTH 4096
+#define CONN_BR_MAX_DATA_LENGTH 4096
+#define CONN_RFCOM_SEND_MAX_LEN 990
+#define CONN_BR_RECEIVE_MAX_LEN 10
+#define CONN_TCP_MAX_LENGTH 3072
+#define CONN_TCP_MAX_CONN_NUM 30
+#define CONN_TCP_TIME_OUT 100
+#define MAX_NODE_STATE_CB_CNT 10
+#define MAX_LNN_CONNECTION_CNT 10
+#define LNN_SUPPORT_CAPBILITY 22
+#define AUTH_ABILITY_COLLECTION 0        
+
 typedef struct {
-    int maxByteLen;
-    int maxMsgLen;
-    int authAbilityConn;
-    int connBrMaxDataLen;
-    int connRfcomSendMaxLen;
-    int connBrRecvMaxLen;
-    int connTcpMaxLen;
-    int connTcpMaxConnNum;
-    int connTcpTimeOut;
-    int maxNodeStateCbCnt;
-    int maxLnnConnCnt;
-    int maxLnnSupportCap;
+    int32_t maxByteLen;
+    int32_t maxMsgLen;
+    int32_t authAbilityConn;
+    int32_t connBrMaxDataLen;
+    int32_t connRfcomSendMaxLen;
+    int32_t connBrRecvMaxLen;
+    int32_t connTcpMaxLen;
+    int32_t connTcpMaxConnNum;
+    int32_t connTcpTimeOut;
+    int32_t maxNodeStateCbCnt;
+    int32_t maxLnnConnCnt;
+    int32_t maxLnnSupportCap;
 } ConfigItem;
 
 typedef struct {
     ConfigType type;
     unsigned char *val;
-    int len;
+    int32_t len;
 } ConfigVal;
 
-ConfigItem g_config = {0};
+ConfigItem g_config = {
+    MAX_BYTES_LENGTH,
+    MAX_MESSAGE_LENGTH,
+    AUTH_ABILITY_COLLECTION,
+    CONN_BR_MAX_DATA_LENGTH,
+    CONN_RFCOM_SEND_MAX_LEN,
+    CONN_BR_RECEIVE_MAX_LEN,
+    CONN_TCP_MAX_LENGTH,
+    CONN_TCP_MAX_CONN_NUM,
+    CONN_TCP_TIME_OUT,
+    MAX_NODE_STATE_CB_CNT,
+    MAX_LNN_CONNECTION_CNT,
+    LNN_SUPPORT_CAPBILITY,
+};
 
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
@@ -105,7 +133,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     },
 };
 
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len)
+int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
 {
     if (len > g_configItems[type].len) {
         return SOFTBUS_ERR;
@@ -113,11 +141,13 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, int len)
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
-    (void)memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len);
+    if (memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len) != EOK) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int len)
+int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
 {
     if (len != g_configItems[type].len) {
         return SOFTBUS_ERR;
@@ -125,7 +155,9 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int len)
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
-    (void)memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len);
+    if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
+	    return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -135,5 +167,5 @@ void SoftbusConfigInit(void)
 
     sets.SetConfig = &SoftbusSetConfig;
     SoftbusConfigAdapterInit(&sets);
-    LOG_INFO("SoftbusConfigInit success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftbusConfigInit success");
 }

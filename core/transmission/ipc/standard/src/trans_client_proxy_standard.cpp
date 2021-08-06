@@ -24,75 +24,81 @@
 namespace OHOS {
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
-    // 需要区分udp channel，返回监听port，待补充
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteCString(sessionName)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channel->channelId)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channel->channelType)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteFileDescriptor(channel->fd)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteBool(channel->isServer)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteBool(channel->isEnabled)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channel->peerUid)) {
-        LOG_ERR("write peerUid failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write peerUid failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channel->peerPid)) {
-        LOG_ERR("write peerPid failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write peerPid failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->groupId)) {
-        LOG_ERR("write addr failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(channel->keyLen)) {
-        LOG_ERR("write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
-        LOG_ERR("write addr failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->peerSessionName)) {
-        LOG_ERR("write addr failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->peerDeviceId)) {
-        LOG_ERR("write addr failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
-
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
+        data.WriteInt32(channel->businessType);
+        data.WriteCString(channel->myIp);
+        if (!channel->isServer) {
+            data.WriteInt32(channel->peerPort);
+            data.WriteCString(channel->peerIp);
+        }
+    }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {
-        LOG_ERR("OnChannelOpened send request failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("OnChannelOpened read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -102,28 +108,28 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
-        LOG_ERR("write channel id failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel id failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        LOG_ERR("write channel type failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option) != 0) {
-        LOG_ERR("OnChannelOpenFailed send request failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("OnChannelOpenFailed read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -133,28 +139,28 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
-        LOG_ERR("write channel id failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel id failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        LOG_ERR("write channel type failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option) != 0) {
-        LOG_ERR("OnChannelClosed send request failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelClosed send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("OnChannelClosed read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelClosed read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -165,37 +171,37 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, const void *da
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
-        LOG_ERR("write channel id failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel id failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(len)) {
-        LOG_ERR("write data len failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write data len failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(dataInfo, len)) {
-        LOG_ERR("write (dataInfo, len) failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write (dataInfo, len) failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(type)) {
-        LOG_ERR("write data type failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write data type failed");
         return SOFTBUS_ERR;
     }
 
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option) != 0) {
-        LOG_ERR("OnChannelMsgReceived send request failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("OnChannelMsgReceived read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;

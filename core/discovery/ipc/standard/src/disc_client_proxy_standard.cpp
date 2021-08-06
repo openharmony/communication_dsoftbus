@@ -48,7 +48,7 @@ void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
 
@@ -59,7 +59,7 @@ void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
     MessageOption option;
     int32_t err = remote->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option);
     if (err != 0) {
-        LOG_ERR("OnDeviceFound send request failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound send request failed");
         return;
     }
 }
@@ -68,7 +68,7 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
 
@@ -80,7 +80,7 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
     MessageOption option;
     int32_t err = remote->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option);
     if (err != 0) {
-        LOG_ERR("OnDiscoverFailed send request failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed send request failed");
         return;
     }
 }
@@ -89,7 +89,7 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
 
@@ -100,7 +100,7 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
     MessageOption option;
     int32_t err = remote->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option);
     if (err != 0) {
-        LOG_ERR("OnDiscoverySuccess send request failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess send request failed");
         return;
     }
 }
@@ -109,7 +109,7 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
 
@@ -120,7 +120,7 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
     MessageOption option;
     int32_t err = remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option);
     if (err != 0) {
-        LOG_ERR("OnPublishSuccess send request failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess send request failed");
         return;
     }
 }
@@ -129,7 +129,7 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
 
@@ -141,7 +141,7 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
     MessageOption option;
     int32_t err = remote->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option);
     if (err != 0) {
-        LOG_ERR("OnPublishFail send request failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail send request failed");
         return;
     }
 }

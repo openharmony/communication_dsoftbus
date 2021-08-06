@@ -60,6 +60,7 @@ ohos_shared_library("softbus_server") {
     "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
     "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
     "//utils/native/base:utils",
+    "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
   ]
   if (is_standard_system) {
     external_deps = [

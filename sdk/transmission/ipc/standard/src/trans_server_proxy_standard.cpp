@@ -53,28 +53,28 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteCString(pkgName)) {
-        LOG_ERR("CreateSessionServer write pkg name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        LOG_ERR("CreateSessionServer write session name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write session name failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_CREATE_SESSION_SERVER, data, reply, option) != 0) {
-        LOG_ERR("CreateSessionServer send request failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("CreateSessionServer read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -87,28 +87,28 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteCString(pkgName)) {
-        LOG_ERR("RemoveSessionServer write pkg name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        LOG_ERR("RemoveSessionServer session name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer session name failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_REMOVE_SESSION_SERVER, data, reply, option) != 0) {
-        LOG_ERR("RemoveSessionServer send request failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("RemoveSessionServer read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -122,40 +122,40 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteCString(mySessionName)) {
-        LOG_ERR("OpenSession write my session name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(peerSessionName)) {
-        LOG_ERR("OpenSession write peer session name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write peer session name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(peerDeviceId)) {
-        LOG_ERR("OpenSession write addr type length failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(groupId)) {
-        LOG_ERR("OpenSession write addr type length failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(flags)) {
-        LOG_ERR("OpenSession write addr type length failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option) != 0) {
-        LOG_ERR("OpenSession send request failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t channelId = 0;
     if (!reply.ReadInt32(channelId)) {
-        LOG_ERR("OpenSession read channelId failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession read channelId failed!");
         return SOFTBUS_ERR;
     }
     return channelId;
@@ -165,28 +165,28 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
-        LOG_ERR("CloseChannel write channel id failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel id failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        LOG_ERR("CloseChannel write channel type failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel type failed!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option) != 0) {
-        LOG_ERR("CloseChannel send request failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("CloseChannel read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -196,36 +196,36 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, const void *dataInfo, u
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
-        LOG_ERR("SendMessage write channel id failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel id failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(len)) {
-        LOG_ERR("SendMessage write dataInfo len failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write dataInfo len failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(dataInfo, len)) {
-        LOG_ERR("SendMessage write dataInfo failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write dataInfo failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(msgType)) {
-        LOG_ERR("SendMessage msgType failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage msgType failed!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_SESSION_SENDMSG, data, reply, option) != 0) {
-        LOG_ERR("SendMessage send request failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("SendMessage read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;

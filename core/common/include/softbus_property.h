@@ -30,14 +30,6 @@ extern "C" {
 #define MAX_MESSAGE_LENGTH (4 * 1024)   // Message max size 4K
 #define MAX_BUF_LENGTH (MAX_MESSAGE_LENGTH + 64)
 
-int GetPropertyString(const char *string, char *target, size_t targetLen);
-
-int GetPropertyInt(const char *string, int *target);
-
-int GetPropertyDouble(const char *string, double *target);
-
-int GetPropertyBool(const char *string, bool *target);
-
 #ifdef __cplusplus
 #if __cplusplus
 }

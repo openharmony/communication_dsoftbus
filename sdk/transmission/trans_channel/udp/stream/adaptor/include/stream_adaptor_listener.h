@@ -41,7 +41,8 @@ public:
 
             int plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
-                LOG_ERR("StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%d",
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%d",
                     buflen, adaptor_->GetEncryptOverhead());
                 return;
             }
@@ -49,7 +50,8 @@ public:
             ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
                 plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
-                LOG_ERR("Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
                 return;
             }
 
@@ -71,10 +73,10 @@ public:
 
     void OnStreamStatus(int status)
     {
-        LOG_INFO("StreamAdaptorListener: OnStreamStatus(%d) in.", status);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnStreamStatus(%d) in.", status);
 
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnStatusChange != nullptr) {
-            LOG_DBG("OnStreamStatus OnStatusChange :%d", status);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "OnStreamStatus OnStatusChange :%d", status);
             adaptor_->GetListenerCallback()->OnStatusChange(adaptor_->GetChannelId(), status);
         }
     }

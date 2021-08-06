@@ -33,19 +33,18 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    // 需要区分udp channel，返回监听port，待补充
-    clientProxy->OnChannelOpened(sessionName, channel);
-    return SOFTBUS_OK;
+    int ret = clientProxy->OnChannelOpened(sessionName, channel);
+    return ret;
 }
 
 int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnChannelOpenFailed(channelId, channelType);
@@ -56,7 +55,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnChannelClosed(channelId, channelType);
@@ -68,7 +67,7 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, co
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("softbus client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     clientProxy->OnChannelMsgReceived(channelId, data, len, type);

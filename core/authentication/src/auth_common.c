@@ -19,14 +19,14 @@
 #include <sys/time.h>
 
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_property.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define GET_AUTH_ABILITY_COLLECTION "AUTH_ABILITY_COLLECTION"
 #define DEFAULT_AUTH_ABILITY_COLLECTION 0
 #define AUTH_SUPPORT_SERVER_SIDE_MASK 0x01
 #define INTERVAL_VALUE 2
@@ -60,7 +60,8 @@ AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq)
 
 void AuthGetAbility(void)
 {
-    if (GetPropertyInt(GET_AUTH_ABILITY_COLLECTION, (int32_t *)&g_authAbility) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, 
+        (unsigned char*)&g_authAbility, sizeof(g_authAbility)) != SOFTBUS_OK) {
         LOG_ERR("Cannot get auth ability from config file");
         g_authAbility = DEFAULT_AUTH_ABILITY_COLLECTION;
     }

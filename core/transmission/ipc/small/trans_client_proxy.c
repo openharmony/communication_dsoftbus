@@ -29,7 +29,7 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName(pkgName, &svcId) != SOFTBUS_OK) {
-        LOG_ERR("ger identity failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ger identity failed");
         return SOFTBUS_ERR;
     }
     svc->handle = svcId.handle;
@@ -47,7 +47,7 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
     uintptr_t ptr;
     int32_t ans = SendRequest(NULL, *svc, CLIENT_ON_CHANNEL_OPENED, io, &reply, LITEIPC_FLAG_DEFAULT, &ptr);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpened SendRequest failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened SendRequest failed");
         FreeBuffer(NULL, (void *)ptr);
         return SOFTBUS_ERR;
     }
@@ -58,7 +58,7 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
 
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
 {
-    LOG_INFO("on channel opened ipc server push");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel opened ipc server push");
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
@@ -83,7 +83,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpened get svc failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened get svc failed.");
         return SOFTBUS_ERR;
     }
     if (channel->channelType == CHANNEL_TYPE_UDP) {
@@ -97,18 +97,14 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_OPENED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpened SendRequest failed");
-    }
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        DelTrigger(DIRECT_CHANNEL_SERVER, channel->fd, RW_TRIGGER);
-        CloseTcpFd(channel->fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened SendRequest failed");
     }
     return ans;
 }
 
 int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("on channel open failed ipc server push");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel open failed ipc server push");
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
@@ -116,19 +112,19 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     IpcIoPushInt32(&io, channelType);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenFailed get svc failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed get svc failed.");
         return SOFTBUS_ERR;
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_OPENFAILED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenFailed SendRequest failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed SendRequest failed");
     }
     return ans;
 }
 
 int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
-    LOG_INFO("on channel closed ipc server push");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
@@ -136,12 +132,12 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     IpcIoPushInt32(&io, channelType);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenClosed get svc failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed get svc failed.");
         return SOFTBUS_ERR;
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_CLOSED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenClosed SendRequest failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed SendRequest failed");
     }
     return ans;
 }
@@ -149,7 +145,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data,
                                       unsigned int len, int32_t type)
 {
-    LOG_INFO("on channel closed ipc server push");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     IpcIo io;
     uint8_t *tmpData = (uint8_t *)SoftBusCalloc(len + MAX_SOFT_BUS_IPC_LEN);
     IpcIoInit(&io, tmpData, len + MAX_SOFT_BUS_IPC_LEN, 0);
@@ -158,12 +154,12 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, co
     IpcIoPushFlatObj(&io, data, len);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenClosed get svc failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed get svc failed.");
         return SOFTBUS_ERR;
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_MSGRECEIVED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
     if (ans != SOFTBUS_OK) {
-        LOG_ERR("OnChannelOpenClosed SendRequest failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed SendRequest failed");
     }
     SoftBusFree(tmpData);
     return ans;

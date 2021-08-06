@@ -39,32 +39,32 @@ void TransSessionTimer(void);
 int TransClientInit(void)
 {
     if (memset_s(g_idFlagBitmap, sizeof(g_idFlagBitmap), 0, sizeof(g_idFlagBitmap)) != EOK) {
-        LOG_ERR("init id bitmap failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init id bitmap failed");
         return SOFTBUS_ERR;
     }
 
     g_clientSessionServerList = CreateSoftBusList();
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("init list failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init list failed");
         return SOFTBUS_ERR;
     }
 
     if (RegisterTimeoutCallback(SOFTBUS_SESSION_TIMER_FUN, TransSessionTimer) != SOFTBUS_OK) {
-        LOG_ERR("init trans timer failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init trans timer failed");
         return SOFTBUS_ERR;
     }
 
     if (TransServerProxyInit() != SOFTBUS_OK) {
-        LOG_ERR("init trans ipc proxy failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init trans ipc proxy failed");
         return SOFTBUS_ERR;
     }
 
     if (ClientTransChannelInit() != SOFTBUS_OK) {
-        LOG_ERR("init trans channel failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init trans channel failed");
         return SOFTBUS_ERR;
     }
 
-    LOG_INFO("init succ");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init succ");
     return SOFTBUS_OK;
 }
 
@@ -90,7 +90,7 @@ static void DestroySessionId(int32_t sessionId)
 static void DestroyClientSessionServer(ClientSessionServer *server)
 {
     if (server == NULL) {
-        LOG_ERR("invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return;
     }
 
@@ -99,12 +99,12 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
             int32_t ret = ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-            LOG_INFO("trans close channel ret = %d", ret);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans close channel ret = %d", ret);
         }
     }
 
     ListDelete(&(server->node));
-    LOG_INFO("destroy session server [%s]", server->sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destroy session server [%s]", server->sessionName);
     SoftBusFree(server);
 }
 
@@ -114,7 +114,7 @@ void TransClientDeinit(void)
         return;
     }
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     ClientSessionServer *serverNode = NULL;
@@ -142,12 +142,12 @@ void TransSessionTimer(void)
     count = 0;
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
 
@@ -224,11 +224,11 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (SessionServerIsExist(sessionName)) {
@@ -238,7 +238,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("server num reach max");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
 
@@ -251,7 +251,8 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     g_clientSessionServerList->cnt++;
 
     (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
-    LOG_INFO("session name [%s], pkg name [%s]", server->sessionName, server->pkgName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session name [%s], pkg name [%s]",
+        server->sessionName, server->pkgName);
     return SOFTBUS_OK;
 }
 
@@ -272,14 +273,14 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
-        LOG_ERR("calloc failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc failed");
         return NULL;
     }
 
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK) {
-        LOG_ERR("strcpy failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy failed");
         SoftBusFree(session);
         return NULL;
     }
@@ -287,6 +288,7 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
     session->sessionId = INVALID_SESSION_ID;
     session->channelId = INVALID_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
+    session->isServer = false;
     session->info.flag = param->attr->dataType;
 
     return session;
@@ -358,24 +360,24 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session)
 {
     if (session == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
     int32_t ret = AddSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("add session failed, ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session failed, ret [%d]", ret);
         return ret;
     }
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
@@ -385,17 +387,17 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session)
 int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled)
 {
     if (!IsValidSessionParam(param) || (sessionId == NULL) || (isEnabled == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -410,7 +412,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     session = CreateNewSession(param);
     if (session == NULL) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("create session failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session failed");
         return SOFTBUS_ERR;
     }
 
@@ -418,7 +420,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("Add Session failed, ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Add Session failed, ret [%d]", ret);
         return ret;
     }
 
@@ -430,17 +432,17 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
 int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 {
     if ((type == SEC_TYPE_UNKNOWN) || (sessionName == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_NO_INIT;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -454,7 +456,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
         }
     }
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    LOG_ERR("not found [%s]", sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found [%s]", sessionName);
     return SOFTBUS_ERR;
 }
 
@@ -465,12 +467,12 @@ int32_t ClientDeleteSession(int32_t sessionId)
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -494,24 +496,24 @@ int32_t ClientDeleteSession(int32_t sessionId)
     }
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    LOG_ERR("not found");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
     return SOFTBUS_ERR;
 }
 
 int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key)
 {
     if ((sessionId < 0) || (data == NULL) || (len == 0)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -520,7 +522,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("not found");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
 
@@ -544,7 +546,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     if (ret != EOK) {
-        LOG_ERR("copy data failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy data failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -553,17 +555,17 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
 int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key)
 {
     if ((sessionId < 0) || (data == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -572,7 +574,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("not found");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
     switch (key) {
@@ -592,7 +594,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     if (ret != EOK) {
-        LOG_ERR("copy data failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy data failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -601,17 +603,17 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type)
 {
     if ((sessionId < 0) || (channelId == NULL) || (type == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -621,7 +623,7 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("not found");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
 
@@ -634,17 +636,17 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
 int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
 {
     if ((sessionId < 0) || (channelId < 0)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -654,7 +656,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("not found");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
     sessionNode->channelId = channelId;
@@ -666,12 +668,12 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId)
 {
     if ((channelId < 0) || (sessionId == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
@@ -679,7 +681,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     SessionInfo *sessionNode = NULL;
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -698,19 +700,19 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     }
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    LOG_ERR("not found session with channelId [%d]", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d]", channelId);
     return SOFTBUS_ERR;
 }
 
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId)
 {
     if ((channel == NULL) || (sessionId == NULL)) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
@@ -718,7 +720,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
     SessionInfo *sessionNode = NULL;
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -741,24 +743,24 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
     }
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    LOG_ERR("not found session with channelId [%d]", channel->channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d]", channel->channelId);
     return SOFTBUS_ERR;
 }
 
 int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callback)
 {
     if (sessionId < 0 || callback == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -767,7 +769,7 @@ int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callba
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-        LOG_ERR("not found");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
 
@@ -783,19 +785,19 @@ int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callba
 int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener *callback)
 {
     if (sessionName == NULL || callback == NULL) {
-        LOG_ERR("Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_clientSessionServerList == NULL) {
-        LOG_ERR("not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
 
     ClientSessionServer *serverNode = NULL;
 
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -814,6 +816,6 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     }
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    LOG_ERR("not found");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
     return SOFTBUS_ERR;
 }

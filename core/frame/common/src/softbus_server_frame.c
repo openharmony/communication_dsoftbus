@@ -25,6 +25,8 @@
 #include "softbus_log.h"
 #include "trans_session_manager.h"
 
+static bool g_isInit = false;
+
 static void ServerModuleDeinit(void)
 {
     DiscServerDeinit();
@@ -36,12 +38,17 @@ static void ServerModuleDeinit(void)
     LooperDeinit();
 }
 
+bool GetServerIsInit()
+{
+    return g_isInit;
+}
+
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
     
     if (ServerStubInit() != SOFTBUS_OK) {
-        LOG_ERR("server stub init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server stub init failed.");
         return;
     }
 
@@ -53,36 +60,37 @@ void InitSoftBusServer(void)
         return;
     }
     if (ConnServerInit() == SOFTBUS_ERR) {
-        LOG_ERR("softbus conn server init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus conn server init failed.");
         goto ERR_EXIT;
     }
 
     if (TransServerInit() == SOFTBUS_ERR) {
-        LOG_ERR("softbus trans server init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus trans server init failed.");
         goto ERR_EXIT;
     }
 
     if (AuthInit() == SOFTBUS_ERR) {
-        LOG_ERR("softbus auth init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus auth init failed.");
         goto ERR_EXIT;
     }
 
     if (BusCenterServerInit() == SOFTBUS_ERR) {
-        LOG_ERR("softbus buscenter server init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
 
     if (DiscServerInit() == SOFTBUS_ERR) {
-        LOG_ERR("softbus disc server init failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus disc server init failed.");
         goto ERR_EXIT;
     }
 
-    LOG_INFO("softbus framework init success.");
+    g_isInit = true;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;
 
 ERR_EXIT:
     ServerModuleDeinit();
-    LOG_ERR("softbus framework init failed.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus framework init failed.");
     return;
 }
 

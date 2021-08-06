@@ -42,7 +42,7 @@ static int32_t OnDataEvent(int events, int32_t fd)
 {
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
-        LOG_WARN("can not match fd.[%d]", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "can not match fd.[%d]", fd);
         return SOFTBUS_ERR;
     }
 
@@ -53,7 +53,7 @@ static int32_t OnDataEvent(int events, int32_t fd)
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
-            LOG_ERR("client process data fail");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client process data fail");
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             ClientTransTdcOnSessionClosed(channelId);
@@ -76,16 +76,16 @@ int32_t TransTdcCreateListener(int32_t fd)
         isInitedFlag = true;
 
         if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &g_listener) != SOFTBUS_OK) {
-            LOG_ERR("start sdk base listener failed.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
             pthread_mutex_unlock(&g_lock);
             return SOFTBUS_ERR;
         }
         if (StartBaseClient(DIRECT_CHANNEL_CLIENT) < SOFTBUS_OK) {
-            LOG_ERR("client start base listener failed.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client start base listener failed.");
             pthread_mutex_unlock(&g_lock);
             return SOFTBUS_ERR;
         }
-        LOG_INFO("create sdk listener success.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create sdk listener success.");
     }
     pthread_mutex_unlock(&g_lock);
 
