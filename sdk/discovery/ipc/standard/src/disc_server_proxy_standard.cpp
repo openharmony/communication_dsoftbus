@@ -15,6 +15,9 @@
 
 #include "disc_server_proxy_standard.h"
 
+#include "ipc_skeleton.h"
+#include "system_ability_definition.h"
+
 #include "discovery_service.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
@@ -22,9 +25,25 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+static uint32_t g_getSystemAbilityId = 2;
+static sptr<IRemoteObject> GetSystemAbility()
+{
+    MessageParcel data;
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
+    int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
+    if (err != 0) {
+        LOG_ERR("Get GetSystemAbility failed!\n");
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
 int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -61,7 +80,7 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
 
 int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -91,7 +110,7 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 
 int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -127,7 +146,7 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
 
 int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;

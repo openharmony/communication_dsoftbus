@@ -15,12 +15,31 @@
 
 #include "trans_server_proxy_standard.h"
 
+#include "ipc_skeleton.h"
+#include "system_ability_definition.h"
+
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
 namespace OHOS {
+static uint32_t g_getSystemAbilityId = 2;
+static sptr<IRemoteObject> GetSystemAbility()
+{
+    MessageParcel data;
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
+    int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
+    if (err != 0) {
+        LOG_ERR("Get GetSystemAbility failed!\n");
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
 int32_t TransServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
 {
     return SOFTBUS_OK;
@@ -51,7 +70,7 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -85,7 +104,7 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -120,7 +139,7 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
     if (mySessionName == nullptr || peerSessionName == nullptr || peerDeviceId == nullptr || groupId == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -163,7 +182,7 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
 
 int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
@@ -194,7 +213,7 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 
 int32_t TransServerProxy::SendMessage(int32_t channelId, const void *dataInfo, uint32_t len, int32_t msgType)
 {
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
