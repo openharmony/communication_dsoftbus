@@ -161,6 +161,10 @@ static void AddInfoToCapability(DiscInfo *info, const ServiceType type)
         }
     }
 
+    if (tmp >= CAPABILITY_MAX_BITNUM) {
+        return;
+    }
+
     if (type == SUBSCRIBE_INNER_SERVICE) {
         ListNodeInsert(&(g_capabilityList[tmp]), &(info->capNode));
     }
