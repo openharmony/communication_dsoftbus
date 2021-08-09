@@ -601,7 +601,7 @@ static int32_t ProcessSyncOfflineFinish(const void *para)
 {
     const char *networkId = (const char *)para;
     LnnConnectionFsm *item = NULL;
-    int rc;
+    int rc = SOFTBUS_OK;
 
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync offline finish networkId is null");
