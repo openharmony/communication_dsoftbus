@@ -55,7 +55,7 @@ static int32_t PostDataByConn(const PostDataInfo *info, char *buf, uint32_t post
     } else if (info->connModule == MODULE_AUTH_CONNECTION) {
         seq = GetSeq(info->side);
     } else {
-        LOG_ERR("invalid conn module.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid conn module.");
         SoftBusFree(buf);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -88,7 +88,7 @@ static int32_t SetBufData(char *buf, const AuthManager *auth, const AuthDataHead
         buf += sizeof(int32_t);
     }
     if (memcpy_s(buf, len, data, len) != EOK) {
-        LOG_ERR("memcpy_s failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -109,7 +109,7 @@ static void HandlePeerSyncDeviceInfo(AuthManager *auth, const AuthDataHead *head
 int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     if (head == NULL || data == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *auth = NULL;
@@ -117,14 +117,14 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(head->authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            LOG_ERR("no match auth found, AuthPostData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found, AuthPostData failed");
             return SOFTBUS_ERR;
         }
     }
 
     if (auth->option.type == CONNECT_TCP) {
         if (AuthSocketSendData(auth, head, data, len) != SOFTBUS_OK) {
-            LOG_ERR("AuthSocketSendData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSocketSendData failed");
             return SOFTBUS_ERR;
         }
     } else {
@@ -138,19 +138,19 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
         char *connPostData = NULL;
         char *buf = (char *)SoftBusMalloc(ConnGetHeadSize() + postDataLen);
         if (buf == NULL) {
-            LOG_ERR("SoftBusMalloc failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
             return SOFTBUS_ERR;
         }
         connPostData = buf;
         if (SetBufData(buf, auth, head, data, len) != SOFTBUS_OK) {
-            LOG_ERR("SetBufData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SetBufData failed");
             SoftBusFree(connPostData);
             return SOFTBUS_ERR;
         }
-        LOG_INFO("auth start post data, authId is %lld, connectionId is %u, moduleId is %d, seq is %lld",
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth start post data, authId is %lld, connectionId is %u, moduleId is %d, seq is %lld",
             auth->authId, info.connectionId, info.connModule, info.seq);
         if (PostDataByConn(&info, connPostData, postDataLen) != SOFTBUS_OK) {
-            LOG_ERR("PostDataByConn failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PostDataByConn failed");
             return SOFTBUS_ERR;
         }
     }
@@ -169,25 +169,25 @@ static cJSON *AuthPackDeviceInfo(const AuthManager *auth)
     }
     char uuid[UUID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("auth get uuid failed!");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get uuid failed!");
         cJSON_Delete(msg);
         return NULL;
     }
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("auth get device udid failed!");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get device udid failed!");
         cJSON_Delete(msg);
         return NULL;
     }
     if (auth->option.type == CONNECT_TCP && auth->side == CLIENT_SIDE_FLAG) {
         if (AddStringToJsonObject(msg, CMD_TAG, CMD_GET_AUTH_INFO) == false) {
-            LOG_ERR("AddStringToJsonObject failed!");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject failed!");
             cJSON_Delete(msg);
             return NULL;
         }
     } else {
         if (AddStringToJsonObject(msg, CMD_TAG, CMD_RET_AUTH_INFO) == false) {
-            LOG_ERR("AddStringToJsonObject failed!");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject failed!");
             cJSON_Delete(msg);
             return NULL;
         }
@@ -196,7 +196,7 @@ static cJSON *AuthPackDeviceInfo(const AuthManager *auth)
         !AddStringToJsonObject(msg, TE_DEVICE_ID_TAG, udid) ||
         !AddNumberToJsonObject(msg, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !AddNumberToJsonObject(msg, SOFTBUS_VERSION_INFO, auth->softbusVersion)) {
-        LOG_ERR("AddStringToJsonObject Fail.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         cJSON_Delete(msg);
         return NULL;
     }
@@ -206,19 +206,19 @@ static cJSON *AuthPackDeviceInfo(const AuthManager *auth)
 int32_t AuthSyncDeviceUuid(AuthManager *auth)
 {
     if (auth == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthDataHead head;
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     cJSON *obj = AuthPackDeviceInfo(auth);
     if (obj == NULL) {
-        LOG_ERR("AuthPackDeviceInfo failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthPackDeviceInfo failed");
         return SOFTBUS_ERR;
     }
     char *msgStr = cJSON_PrintUnformatted(obj);
     if (msgStr == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         cJSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -232,7 +232,7 @@ int32_t AuthSyncDeviceUuid(AuthManager *auth)
     head.authId = auth->authId;
     head.flag = auth->side;
     if (AuthPostData(&head, (uint8_t *)msgStr, strlen(msgStr) + 1) != SOFTBUS_OK) {
-        LOG_ERR("AuthPostData failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthPostData failed");
         cJSON_free(msgStr);
         cJSON_Delete(obj);
         return SOFTBUS_ERR;
@@ -245,11 +245,11 @@ int32_t AuthSyncDeviceUuid(AuthManager *auth)
 static int32_t UnpackDeviceId(cJSON *msg, AuthManager *auth)
 {
     if (!GetJsonObjectStringItem(msg, DATA_TAG, auth->peerUuid, UUID_BUF_LEN)) {
-        LOG_ERR("auth get peer uuid failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get peer uuid failed");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectStringItem(msg, TE_DEVICE_ID_TAG, auth->peerUdid, UDID_BUF_LEN)) {
-        LOG_ERR("auth get peer udid failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get peer udid failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -258,41 +258,41 @@ static int32_t UnpackDeviceId(cJSON *msg, AuthManager *auth)
 int32_t AuthUnpackDeviceInfo(AuthManager *auth, uint8_t *data)
 {
     if (auth == NULL || data == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     cJSON *msg = cJSON_Parse((char*)data);
     if (msg == NULL) {
-        LOG_ERR("json parse failed.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "json parse failed.");
         return SOFTBUS_ERR;
     }
     char cmd[CMD_TAG_LEN] = {0};
     if (!GetJsonObjectStringItem(msg, CMD_TAG, cmd, CMD_TAG_LEN)) {
-        LOG_ERR("auth get cmd tag failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get cmd tag failed");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
     if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG) {
         if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
-            LOG_ERR("auth cmd tag error");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth cmd tag error");
             cJSON_Delete(msg);
             return SOFTBUS_ERR;
         }
     } else {
         if (strncmp(cmd, CMD_RET_AUTH_INFO, strlen(CMD_RET_AUTH_INFO)) != 0) {
-            LOG_ERR("auth cmd tag error");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth cmd tag error");
             cJSON_Delete(msg);
             return SOFTBUS_ERR;
         }
     }
     if (UnpackDeviceId(msg, auth) != SOFTBUS_OK) {
-        LOG_ERR("UnpackDeviceId failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "UnpackDeviceId failed");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
     int32_t packetSize;
     if (!GetJsonObjectNumberItem(msg, DATA_BUF_SIZE_TAG, &packetSize)) {
-        LOG_ERR("auth get packet size failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get packet size failed");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
@@ -310,7 +310,7 @@ int32_t AuthUnpackDeviceInfo(AuthManager *auth, uint8_t *data)
 char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
 {
     if (auth == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return NULL;
     }
     cJSON *msg = cJSON_CreateObject();
@@ -321,21 +321,21 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         cJSON_AddBoolToObject(msg, FIELD_IS_CLIENT, isClient) == NULL ||
         !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, SESSION_KEY_LENGTH)) {
-        LOG_ERR("AddStringToJsonObject Fail.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         cJSON_Delete(msg);
         return NULL;
     }
 #ifdef AUTH_ACCOUNT
-    LOG_INFO("in account auth mode");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "in account auth mode");
     if (!AddStringToJsonObject(msg, FIELD_UID_HASH, auth->peerUid)) {
-        LOG_ERR("AddStringToJsonObject Fail.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         cJSON_Delete(msg);
         return NULL;
     }
 #endif
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
-        LOG_ERR("cJSON_PrintUnformatted failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(msg);
     return data;
@@ -343,7 +343,7 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
 
 void AuthSendCloseAck(uint32_t connectionId)
 {
-    LOG_INFO("auth finished, send close ack");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth finished, send close ack");
     const char *closeData = "close ack";
     uint32_t closeDataLen = strlen(closeData) + 1;
 
@@ -352,7 +352,7 @@ void AuthSendCloseAck(uint32_t connectionId)
     char *connPostData = NULL;
     char *buf = (char *)SoftBusMalloc(ConnGetHeadSize() + postDataLen);
     if (buf == NULL) {
-        LOG_ERR("SoftBusMalloc failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return;
     }
     connPostData = buf;
@@ -368,7 +368,7 @@ void AuthSendCloseAck(uint32_t connectionId)
     *(int32_t *)buf = closeDataLen;
     buf += sizeof(int32_t);
     if (memcpy_s(buf, closeDataLen, closeData, closeDataLen) != EOK) {
-        LOG_ERR("memcpy_s failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         SoftBusFree(connPostData);
         return;
     }
@@ -377,7 +377,7 @@ void AuthSendCloseAck(uint32_t connectionId)
     info.connectionId = connectionId;
     info.connModule = MODULE_DEVICE_AUTH;
     if (PostDataByConn(&info, connPostData, postDataLen) != SOFTBUS_OK) {
-        LOG_ERR("PostDataByConn failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PostDataByConn failed");
         return;
     }
 }
@@ -396,7 +396,7 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            LOG_ERR("no match auth found");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found");
             return false;
         }
     }

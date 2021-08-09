@@ -70,7 +70,7 @@ typedef struct {
     int32_t (*unpack)(const cJSON* json, NodeInfo *info, SoftBusVersion version);
 } ProcessLedgerInfo;
 
-uint8_t *LnnGetExchangeNodeInfo(ConnectOption *option, SoftBusVersion version,
+uint8_t *LnnGetExchangeNodeInfo(int32_t seq, ConnectOption *option, SoftBusVersion version,
     uint32_t *outSize, int32_t *side);
 int32_t LnnParsePeerNodeInfo(ConnectOption *option, NodeInfo *info,
     const ParseBuf *bufInfo, AuthSideFlag side, SoftBusVersion version);

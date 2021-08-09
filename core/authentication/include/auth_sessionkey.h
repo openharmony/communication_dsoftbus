@@ -55,7 +55,7 @@ void AuthSetLocalSessionKey(const NecessaryDevInfo *devInfo, const char *peerUdi
 bool AuthIsDeviceVerified(uint32_t type, const char *deviceKey, uint32_t deviceKeyLen);
 bool AuthIsSeqInKeyList(int32_t seq);
 void AuthSessionKeyListInit(void);
-void AuthClearSessionKeyByDeviceInfo(uint32_t type, const char *deviceKey, uint32_t deviceKeyLen);
+void AuthClearSessionKeyBySeq(int32_t seq);
 void AuthClearAllSessionKey(void);
 
 #ifdef __cplusplus
