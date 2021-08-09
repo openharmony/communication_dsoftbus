@@ -37,30 +37,30 @@ static SoftbusBaseListener g_ethListener = {0};
 int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
 {
     if (auth == NULL || option == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
     char localIp[IP_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_MAX_LEN) != SOFTBUS_OK) {
-        LOG_ERR("auth get local ip failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get local ip failed");
         return SOFTBUS_ERR;
     }
     int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port);
     if (fd < 0) {
-        LOG_ERR("auth OpenTcpClientSocket failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpClientSocket failed");
         return SOFTBUS_ERR;
     }
     auth->fd = fd;
     if (AddTrigger(AUTH, fd, RW_TRIGGER) != SOFTBUS_OK) {
-        LOG_ERR("auth AddTrigger failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         return SOFTBUS_ERR;
     }
     if (SetTcpKeepAlive(fd, AUTH_HEART_TIME) != SOFTBUS_OK) {
-        LOG_ERR("auth set tcp keep alive failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth set tcp keep alive failed");
         return SOFTBUS_ERR;
     }
     if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
-        LOG_ERR("AuthSyncDeviceUuid failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSyncDeviceUuid failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -69,13 +69,13 @@ int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
 static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data, int len)
 {
     if (head == NULL || data == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
     AuthManager *auth = NULL;
     auth = AuthGetManagerByFd(fd);
     if (auth == NULL) {
-        LOG_ERR("ip get auth failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ip get auth failed");
         return;
     }
     if (auth->authId != head->seq && auth->authId != 0 && head->module != MODULE_UDP_INFO) {
@@ -83,12 +83,12 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             return;
         }
     }
-    LOG_INFO("auth ip data module is %d", head->module);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d", head->module);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
             if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == 0) {
                 auth->authId = head->seq;
-                LOG_INFO("server ip authId is %lld", auth->authId);
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %lld", auth->authId);
             }
             HandleReceiveDeviceId(auth, (uint8_t *)data);
             break;
@@ -106,22 +106,22 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             break;
         }
         default: {
-            LOG_ERR("unknown data type");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown data type");
             break;
         }
     }
 }
 
-static void AuthNotifyLnnDisconn(int32_t fd)
+static void AuthNotifyDisconn(int32_t fd)
 {
     AuthManager *auth = NULL;
     auth = AuthGetManagerByFd(fd);
     if (auth == NULL) {
-        LOG_ERR("ip get auth failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ip get auth failed");
         return;
     }
-    LOG_INFO("auth disconnect");
-    AuthNotifyLnnDisconnByIp(auth->option.info.ipOption.ip);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth disconnect");
+    AuthNotifyLnnDisconn(auth);
 }
 
 static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
@@ -132,7 +132,7 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
 
     char *ipData = (char *)SoftBusMalloc(head->len);
     if (ipData == NULL) {
-        LOG_ERR("SoftBusMalloc failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return;
     }
     data = ipData;
@@ -140,7 +140,7 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
     do {
         len = RecvTcpData(fd, data, remainLen, 0);
         if (len <= 0) {
-            LOG_ERR("auth recv data len not correct, len %d", len);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv data len not correct, len %d", len);
             break;
         } else if (len < remainLen) {
             data = data + len;
@@ -165,18 +165,18 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
     len = RecvTcpData(fd, (void *)&head, headSize, 0);
     if (len < (int32_t)headSize) {
         if (len < 0) {
-            LOG_ERR("auth RecvTcpData failed, DelTrigger");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth RecvTcpData failed, DelTrigger");
             (void)DelTrigger(AUTH, fd, RW_TRIGGER);
-            AuthNotifyLnnDisconn(fd);
+            AuthNotifyDisconn(fd);
         }
-        LOG_ERR("auth recv data head len not correct, len is %d", len);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv data head len not correct, len is %d", len);
         return SOFTBUS_ERR;
     }
 
-    LOG_INFO("auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
         head.len, head.module, head.flag, head.seq);
     if (head.len > AUTH_MAX_DATA_LEN) {
-        LOG_ERR("auth head len is out of size");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
         return SOFTBUS_ERR;
     }
     AuthIpDataProcess(fd, &head);
@@ -187,7 +187,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
 int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     if (auth == NULL || head == NULL || data == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
     ConnPktHead ethHead;
@@ -206,26 +206,26 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
     postDataLen = sizeof(ConnPktHead) + len;
     char *buf = (char *)SoftBusMalloc(postDataLen);
     if (buf == NULL) {
-        LOG_ERR("SoftBusMalloc failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return SOFTBUS_ERR;
     }
     connPostData = buf;
     if (memcpy_s(buf, sizeof(ConnPktHead), &ethHead, sizeof(ConnPktHead)) != EOK) {
-        LOG_ERR("memcpy_s failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         SoftBusFree(connPostData);
         return SOFTBUS_ERR;
     }
     buf += sizeof(ConnPktHead);
     if (memcpy_s(buf, len, data, len) != EOK) {
-        LOG_ERR("memcpy_s failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         SoftBusFree(connPostData);
         return SOFTBUS_ERR;
     }
-    LOG_INFO("auth start post eth data, authId is %lld, moduleId is %d, len is %u",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth start post eth data, authId is %lld, moduleId is %d, len is %u",
         auth->authId, head->module, len);
     ssize_t byte = SendTcpData(auth->fd, connPostData, postDataLen, 0);
     if (byte != (ssize_t)postDataLen) {
-        LOG_ERR("SendTcpData failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SendTcpData failed");
         SoftBusFree(connPostData);
         return SOFTBUS_ERR;
     }
@@ -236,24 +236,24 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
 static int32_t AuthOnConnectEvent(int32_t events, int32_t cfd, const char *ip)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        LOG_ERR("auth Exception occurred");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth Exception occurred");
         return SOFTBUS_ERR;
     }
     if (cfd < 0 || ip == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t port = GetTcpSockPort(cfd);
     if (port <= 0) {
-        LOG_ERR("auth GetTcpSockPort failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth GetTcpSockPort failed");
         return SOFTBUS_ERR;
     }
     if (AddTrigger(AUTH, cfd, RW_TRIGGER) != SOFTBUS_OK) {
-        LOG_ERR("auth AddTrigger failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         return SOFTBUS_ERR;
     }
     if (CreateServerIpAuth(cfd, ip, port) != SOFTBUS_OK) {
-        LOG_ERR("auth CreateServerIpAuth failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth CreateServerIpAuth failed");
         AuthCloseTcpFd(cfd);
         return SOFTBUS_ERR;
     }
@@ -265,18 +265,19 @@ int32_t OpenAuthServer(void)
     int32_t localPort;
     g_ethListener.onConnectEvent = AuthOnConnectEvent;
     g_ethListener.onDataEvent = AuthOnDataEvent;
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth open base listener");
     if (SetSoftbusBaseListener(AUTH, &g_ethListener) != SOFTBUS_OK) {
-        LOG_ERR("auth SetSoftbusBaseListener failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth SetSoftbusBaseListener failed");
         return AUTH_ERROR_CODE;
     }
     char localIp[IP_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_MAX_LEN) != SOFTBUS_OK) {
-        LOG_ERR("auth LnnGetLocalStrInfo failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth LnnGetLocalStrInfo failed");
         return AUTH_ERROR_CODE;
     }
     localPort = StartBaseListener(AUTH, localIp, 0, SERVER_MODE);
     if (localPort <= 0) {
-        LOG_ERR("auth StartBaseListener failed!");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth StartBaseListener failed!");
         return AUTH_ERROR_CODE;
     }
     return localPort;
@@ -290,9 +291,9 @@ void AuthCloseTcpFd(int32_t fd)
 
 void CloseAuthServer(void)
 {
-    LOG_INFO("close auth listener");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "close auth listener");
     if (StopBaseListener(AUTH) != SOFTBUS_OK) {
-        LOG_ERR("auth StopBaseListener failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth StopBaseListener failed");
     }
     DestroyBaseListener(AUTH);
 }

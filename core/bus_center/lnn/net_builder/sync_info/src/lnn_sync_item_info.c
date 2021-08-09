@@ -401,6 +401,7 @@ static int32_t SendChannelEventMsg(int32_t channelId, TransChannelEvent event,
     para->isServer = isServer ? true : false;
     if (peerUuid != NULL && strncpy_s(para->peerUuid, UUID_BUF_LEN, peerUuid, strlen(peerUuid)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy peer uuid to msg para fail");
+        SoftBusFree(para);
         return SOFTBUS_ERR;
     }
     if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ChannelEventHandler, para) != SOFTBUS_OK) {
