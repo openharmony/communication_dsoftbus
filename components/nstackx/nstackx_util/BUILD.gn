@@ -30,7 +30,7 @@ if (defined(ohos_lite)) {
       ]
     }
   }
-  shared_library("nstackx_util") {
+  shared_library("nstackx_util.open") {
     sources = [
       "core/nstackx_dev.c",
       "core/nstackx_event.c",
@@ -67,7 +67,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("nstackx_util") {
+  ohos_shared_library("nstackx_util.open") {
     sources = [
       "core/nstackx_dev.c",
       "core/nstackx_event.c",

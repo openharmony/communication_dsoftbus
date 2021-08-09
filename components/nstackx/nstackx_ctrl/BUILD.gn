@@ -35,7 +35,7 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":dfinder_interface" ]
     deps = [
-      "../nstackx_util:nstackx_util",
+      "../nstackx_util:nstackx_util.open",
       "//build/lite/config/component/cJSON:cjson_shared",
       "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/libcoap:libcoap",
@@ -82,7 +82,7 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":dfinder_interface" ]
     deps = [
-      "../nstackx_util:nstackx_util",
+      "../nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/cJSON:cjson_static",
       "//third_party/libcoap:libcoap",
