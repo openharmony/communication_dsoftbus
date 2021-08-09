@@ -44,7 +44,7 @@ static IClientProxy *GetServerProxy(void)
         proxyInitCount++;
         if (proxyInitCount == WAIT_SERVER_READY_INTERVAL_COUNT) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "frame get server proxy error");
-            return SOFTBUS_ERR;
+            return NULL;
         }
         IUnknown *iUnknown = SAMGR_GetInstance()->GetDefaultFeatureApi(SOFTBUS_SERVICE);
         if (iUnknown == NULL) {
