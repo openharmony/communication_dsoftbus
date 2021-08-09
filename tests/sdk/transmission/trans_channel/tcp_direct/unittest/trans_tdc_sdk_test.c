@@ -17,8 +17,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
+#include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #define TYPE_SEND_BYTE 15
@@ -28,12 +30,13 @@
 #define TRANS_SIZE_NUM 2
 #define TRANS_SIZE_NUM_DOUBLE 4
 #define LOOP_COUNT 10
+#define NETWORKIDSIZE 100
 
 static int g_succTestCount = 0;
 static int g_failTestCount = 0;
 
 static char const *g_pkgName = "com.huawei.communication.demo";
-static char g_networkId[100];
+static char g_networkId[NETWORKIDSIZE];
 static int g_sessionId = 0;
 static char *g_contcx = NULL;
 static int g_testCount = 0;
@@ -212,7 +215,9 @@ static int DataSend(int size, int type)
 {
     int ret;
     g_contcx = (char *)calloc(1, size * sizeof(char));
-    memset(g_contcx, "h", size);
+    if (memset_s(g_contcx, size, "h", size) != EOK) {
+        return SOFTBUS_ERR;
+    }
     Wait();
     TEST_ASSERT_TRUE(g_testCount == 1);
     g_testCount++;
@@ -386,7 +391,9 @@ void TransFuncTest006(void)
 
 int main(void)
 {
-    scanf("%s", g_networkId);
+    if (scanf_s("%s", g_networkId, NETWORKIDSIZE) < 0) {
+        return SOFTBUS_ERR;
+    }
     LOG_INFO("g_networkId = %s", g_networkId);
     for (int i = 0; i < LOOP_COUNT; i++) {
         TransFuncTest001();
