@@ -24,14 +24,9 @@ extern "C" {
 
 #define MAX_MALLOC_SIZE (512 * 1024 * 1024) // 512M
 
-/* Low speed memory pool */
 void *SoftBusMalloc(unsigned int size);
 void *SoftBusCalloc(unsigned int size);
 void SoftBusFree(void *pt);
-/* High speed memory pool */
-void *SoftBusHighSpeedMalloc(unsigned int size);
-void *SoftBusHighSpeedCalloc(unsigned int size);
-void SoftBusHighSpeedFree(void *pt);
 
 #ifdef __cplusplus
 #if __cplusplus
