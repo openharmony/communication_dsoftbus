@@ -694,25 +694,36 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     return REPORT_NONE;
 }
 
-void LnnSetNodeOffline(const char *udid)
+ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId)
 {
     NodeInfo *info = NULL;
+
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (pthread_mutex_lock(&g_distributedNetLedger.lock) != 0) {
         LOG_ERR("lock mutex fail!");
-        return;
+        return REPORT_NONE;
     }
     info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (info == NULL) {
         LOG_ERR("PARA ERROR!");
         pthread_mutex_unlock(&g_distributedNetLedger.lock);
-        return;
+        return REPORT_NONE;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
+
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
+        if (info->authChannelId != authId) {
+            LOG_INFO("not need to report offline.");
+            pthread_mutex_unlock(&g_distributedNetLedger.lock);
+            return REPORT_NONE;
+        }
+    }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     pthread_mutex_unlock(&g_distributedNetLedger.lock);
+    LOG_INFO("need to report offline.");
+    return REPORT_OFFLINE;
 }
 
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo)

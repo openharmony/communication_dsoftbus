@@ -47,7 +47,7 @@ int64_t GetSeq(AuthSideFlag flag)
     temp = ((g_uniqueId << OFFSET_BITS) | (temp & LOW_24_BITS));
     int64_t seq = 0;
     if (memcpy_s(&seq, sizeof(int64_t), &temp, sizeof(uint64_t)) != EOK) {
-        LOG_ERR("memcpy_s seq error");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s seq error");
     }
     return seq;
 }
@@ -62,10 +62,10 @@ void AuthGetAbility(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, 
         (unsigned char*)&g_authAbility, sizeof(g_authAbility)) != SOFTBUS_OK) {
-        LOG_ERR("Cannot get auth ability from config file");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Cannot get auth ability from config file");
         g_authAbility = DEFAULT_AUTH_ABILITY_COLLECTION;
     }
-    LOG_INFO("auth ability is %u", g_authAbility);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ability is %u", g_authAbility);
 }
 
 bool AuthIsSupportServerSide(void)
@@ -83,13 +83,13 @@ void UniqueIdInit(void)
 int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectOption *option)
 {
     if (key == NULL || len == NULL || option == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
     switch (option->type) {
         case CONNECT_BR: {
             if (strncpy_s(key, size, option->info.brOption.brMac, BT_MAC_LEN) != EOK) {
-                LOG_ERR("strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = BT_MAC_LEN;
@@ -97,14 +97,14 @@ int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectO
         }
         case CONNECT_TCP: {
             if (strncpy_s(key, size, option->info.ipOption.ip, IP_LEN) != EOK) {
-                LOG_ERR("strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = IP_LEN;
             break;
         }
         default: {
-            LOG_ERR("unknown type");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type");
             return SOFTBUS_ERR;
         }
     }
@@ -114,28 +114,28 @@ int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectO
 int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInfo)
 {
     if (option == NULL || connInfo == NULL) {
-        LOG_ERR("invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
     option->type = connInfo->type;
     switch (connInfo->type) {
         case CONNECT_BR: {
             if (strncpy_s(option->info.brOption.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac, BT_MAC_LEN) != EOK) {
-                LOG_ERR("strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             break;
         }
         case CONNECT_TCP: {
             if (strncpy_s(option->info.ipOption.ip, IP_LEN, connInfo->info.ipInfo.ip, IP_LEN) != EOK) {
-                LOG_ERR("strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             option->info.ipOption.port = connInfo->info.ipInfo.port;
             break;
         }
         default: {
-            LOG_ERR("unknown type");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type");
             return SOFTBUS_ERR;
         }
     }

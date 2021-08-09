@@ -45,7 +45,7 @@ typedef enum {
 } LnnMsgType;
 
 typedef enum {
-    MSG_TYPE_JOIN_LNN,
+    MSG_TYPE_JOIN_LNN = 0,
     MSG_TYPE_DISCOVERY_DEVICE,
     MSG_TYPE_CLEAN_CONN_FSM,
     MSG_TYPE_AUTH_KEY_GENERATED,
@@ -57,6 +57,7 @@ typedef enum {
     MSG_TYPE_SYNC_OFFLINE_FINISH,
     MSG_TYPE_NODE_STATE_CHANGED = 10,
     MSG_TYPE_MASTER_ELECT,
+    MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -93,6 +94,11 @@ typedef struct {
     char masterUdid[UDID_BUF_LEN];
     int32_t masterWeight;
 } ElectMsgPara;
+
+typedef struct {
+    char oldNetworkId[NETWORK_ID_BUF_LEN];
+    char newNetworkId[NETWORK_ID_BUF_LEN];
+} LeaveInvalidConnMsgPara;
 
 static NetBuilder g_netBuilder;
 
@@ -189,6 +195,18 @@ static LnnConnectionFsm *FindConnectionFsmByUdid(const char *targetUdid)
     return NULL;
 }
 
+static LnnConnectionFsm *FindConnectionFsmByConnFsmId(uint16_t connFsmId)
+{
+    LnnConnectionFsm *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (connFsmId == item->id) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
 static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -278,6 +296,10 @@ static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReport
         }
         rc = SOFTBUS_ERR;
     }
+    if (rc == SOFTBUS_OK) {
+        connFsm->connInfo.flag |=
+            (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+    }
     SoftBusFree((void *)addr);
     return rc;
 }
@@ -290,6 +312,63 @@ static int32_t ProcessJoinLNNRequest(const void *para)
 static int32_t ProcessDevDiscoveryRequest(const void *para)
 {
     return TrySendJoinLNNRequest((const ConnectionAddr *)para, false);
+}
+
+static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
+{
+    LnnConnectionFsm *item = NULL;
+    int32_t rc;
+
+    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]no need initiate new network online", connFsm->id);
+        return;
+    }
+    // let last invalid connfsm notify new network online after it clean
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(connFsm->connInfo.peerNetworkId, item->connInfo.peerNetworkId) == 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "[id=%u]wait last connfsm clean, then initiate new network online", connFsm->id);
+            return;
+        }
+    }
+    // find target connfsm, then notify it online
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(connFsm->connInfo.newNetworkId, item->connInfo.peerNetworkId) != 0 && !item->isDead) {
+            continue;
+        }
+        rc = LnnSendNewNetworkOnlineToConnFsm(item);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]initiate new network online to connection fsm[id=%u], rc=%d", connFsm->id, item->id, rc);
+    }
+}
+
+static void tryCleanAllConnection(const LnnConnectionFsm *connFsm)
+{
+    LnnConnectionFsm *item = NULL;
+    const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
+    const ConnectionAddr *addr2 = NULL;
+    ConnectOption option;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        addr2 = &item->connInfo.addr;
+        if (addr1->type != addr2->type) {
+            continue;
+        }
+        if (addr1->type == CONNECTION_ADDR_BR || addr1->type == CONNECTION_ADDR_BLE) {
+            if (strncmp(item->connInfo.addr.info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0) {
+                return;
+            }
+        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+            if (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0) {
+                return;
+            }
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]disconnect all connection for type=%d",
+        connFsm->id, addr1->type);
+    if (LnnConvertAddrToOption(addr1, &option)) {
+        ConnDisconnectDeviceAllConn(&option);
+    }
 }
 
 static void CleanConnectionFsm(LnnConnectionFsm *connFsm)
@@ -313,25 +392,27 @@ static void StopConnectionFsm(LnnConnectionFsm *connFsm)
 
 static int32_t ProcessCleanConnectionFsm(const void *para)
 {
-    const ConnectionAddr *addr = (const ConnectionAddr *)para;
+    uint16_t connFsmId;
     LnnConnectionFsm *connFsm = NULL;
     int32_t rc = SOFTBUS_ERR;
 
-    if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is null");
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connFsmId is null");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    connFsmId = *(uint16_t *)para;
     do {
-        connFsm = FindConnectionFsmByAddr(addr);
+        connFsm = FindConnectionFsmByConnFsmId(connFsmId);
         if (connFsm == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "can not find connection fsm");
             break;
         }
         StopConnectionFsm(connFsm);
+        tryInitiateNewNetworkOnline(connFsm);
+        tryCleanAllConnection(connFsm);
         rc = SOFTBUS_OK;
     } while (false);
-    SoftBusFree((void *)addr);
+    SoftBusFree((void *)para);
     return rc;
 }
 
@@ -347,7 +428,7 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
     connFsm = FindConnectionFsmByAuthId(msgPara->authId);
-    if (connFsm == NULL) {
+    if (connFsm == NULL || connFsm->isDead) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create and start a new connection fsm as server side");
         connFsm = StartNewConnectionFsm(&msgPara->addr);
         if (connFsm == NULL) {
@@ -358,6 +439,7 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         }
         isCreate = true;
         connFsm->connInfo.authId = msgPara->authId;
+        connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     }
     connFsm->connInfo.peerVersion = msgPara->peerVersion;
     if (LnnSendAuthKeyGenMsgToConnFsm(connFsm) != SOFTBUS_OK) {
@@ -384,7 +466,7 @@ static int32_t ProcessAuthDone(const void *para)
     }
     do {
         connFsm = FindConnectionFsmByAuthId(msgPara->authId);
-        if (connFsm == NULL) {
+        if (connFsm == NULL || connFsm->isDead) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld",
                 msgPara->authId);
             break;
@@ -413,7 +495,7 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
     connFsm = FindConnectionFsmByAuthId(msgPara->authId);
-    if (connFsm == NULL) {
+    if (connFsm == NULL || connFsm->isDead) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld",
             msgPara->authId);
         SoftBusFree((void *)msgPara);
@@ -442,7 +524,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
 
     do {
         connFsm = FindConnectionFsmByUdid(peerUdid);
-        if (connFsm == NULL) {
+        if (connFsm == NULL || connFsm->isDead) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ignore not trusted peer udid");
             break;
         }
@@ -467,7 +549,7 @@ static int32_t ProcessAuthDisconnect(const void *para)
 
     do {
         connFsm = FindConnectionFsmByAuthId(*authId);
-        if (connFsm == NULL) {
+        if (connFsm == NULL || connFsm->isDead) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld", *authId);
             break;
         }
@@ -486,7 +568,7 @@ static int32_t ProcessAuthDisconnect(const void *para)
 static int32_t ProcessLeaveLNNRequest(const void *para)
 {
     const char *networkId = (const char *)para;
-    LnnConnectionFsm *connFsm = NULL;
+    LnnConnectionFsm *item = NULL;
     int rc = SOFTBUS_ERR;
 
     if (networkId == NULL) {
@@ -494,16 +576,20 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    do {
-        connFsm = FindConnectionFsmByNetworkId(networkId);
-        if (connFsm == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "no target networkId exist");
-            break;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(networkId, item->connInfo.peerNetworkId) != 0 || item->isDead) {
+            continue;
         }
-        rc = LnnSendLeaveRequestToConnFsm(connFsm);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]send leave LNN msg to connection fsm result: %d",
-            connFsm->id, rc);
-    } while (true);
+        if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send leave LNN msg to connection fsm[id=%u] failed",
+                item->id);
+        } else {
+            rc = SOFTBUS_OK;
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_REQUEST;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send leave LNN msg to connection fsm[id=%u] success",
+                item->id);
+        }
+    }
     if (rc != SOFTBUS_OK) {
         LnnNotifyLeaveResult(networkId, SOFTBUS_ERR);
     }
@@ -514,23 +600,58 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
 static int32_t ProcessSyncOfflineFinish(const void *para)
 {
     const char *networkId = (const char *)para;
-    LnnConnectionFsm *connFsm = NULL;
+    LnnConnectionFsm *item = NULL;
     int rc;
 
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync offline finish networkId is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    connFsm = FindConnectionFsmByNetworkId(networkId);
-    if (connFsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "no connection fsm");
-        SoftBusFree((void *)networkId);
-        return SOFTBUS_OK;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(networkId, item->connInfo.peerNetworkId) != 0 || item->isDead) {
+            continue;
+        }
+        rc = LnnSendSyncOfflineFinishToConnFsm(item);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync offline msg to connection fsm[id=%u] result: %d",
+            item->id, rc);
     }
-    rc = LnnSendSyncOfflineFinishToConnFsm(connFsm);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]send sync offline msg to connection fsm result: %d",
-        connFsm->id, rc);
     SoftBusFree((void *)networkId);
+    return rc;
+}
+
+static int32_t ProcessLeaveInvalidConn(const void *para)
+{
+    LnnConnectionFsm *item = NULL;
+    int32_t rc = SOFTBUS_OK;
+    const LeaveInvalidConnMsgPara *msgPara = (const LeaveInvalidConnMsgPara *)para;
+
+    if (msgPara == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave invalid connection msg para is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(msgPara->oldNetworkId, item->connInfo.peerNetworkId) != 0 || item->isDead) {
+            continue;
+        }
+        if ((item->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection is already in leaving", item->id);
+            continue;
+        }
+        if (strncpy_s(item->connInfo.newNetworkId, NETWORK_ID_BUF_LEN,
+            msgPara->newNetworkId, strlen(msgPara->newNetworkId)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]copy new networkId failed", item->id);
+            rc = SOFTBUS_ERR;
+            continue;
+        }
+        item->connInfo.flag |= LNN_CONN_INFO_FLAG_INITIATE_ONLINE;
+        rc = LnnSendLeaveRequestToConnFsm(item);
+        if (rc == SOFTBUS_OK) {
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "send leave LNN msg to invalid connection fsm[id=%u] result: %d", item->id, rc);
+    }
+    SoftBusFree((void *)msgPara);
     return rc;
 }
 
@@ -539,7 +660,7 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
     char peerMasterUdid[UDID_BUF_LEN] = {0};
     char localMasterUdid[UDID_BUF_LEN] = {0};
     int32_t peerMasterWeight, localMasterWeight;
-    int32_t ret;
+    int32_t rc;
 
     // get local master node info
     if (LnnGetLocalLedgerStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
@@ -556,11 +677,11 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer master(%u) weight=%d", connFsm->id, peerMasterWeight);
-    ret = LnnCompareNodeWeight(localMasterWeight, localMasterUdid, peerMasterWeight, peerMasterUdid);
-    if (ret >= 0) {
+    rc = LnnCompareNodeWeight(localMasterWeight, localMasterUdid, peerMasterWeight, peerMasterUdid);
+    if (rc >= 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "online node(%u) weight less than current(compare result: %d), no need elect again",
-            connFsm->id, ret);
+            connFsm->id, rc);
         return SOFTBUS_OK;
     }
     UpdateLocalMasterNode(peerMasterUdid, peerMasterWeight);
@@ -632,7 +753,7 @@ static int32_t ProcessMasterElect(const void *para)
     }
     do {
         connFsm = FindConnectionFsmByUdid(msgPara->udid);
-        if (connFsm == NULL) {
+        if (connFsm == NULL || connFsm->isDead) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can't find connection fsm when receive elect node");
             break;
         }
@@ -677,6 +798,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessSyncOfflineFinish,
     ProcessNodeStateChanged,
     ProcessMasterElect,
+    ProcessLeaveInvalidConn,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -1015,15 +1137,47 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestCleanConnectionFsm(const ConnectionAddr *addr)
+int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, const char *newNetworkId)
 {
-    ConnectionAddr *para = NULL;
+    LeaveInvalidConnMsgPara *para = NULL;
 
-    para = CreateConnectionAddrMsgPara(addr);
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_ERR;
+    }
+    para = SoftBusMalloc(sizeof(LeaveInvalidConnMsgPara));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare leave invalid connection message fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strncpy_s(para->oldNetworkId, NETWORK_ID_BUF_LEN, oldNetworkId, strlen(oldNetworkId)) != EOK ||
+        strncpy_s(para->newNetworkId, NETWORK_ID_BUF_LEN, newNetworkId, strlen(newNetworkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy old networkId or new networkId fail");
+        SoftBusFree(para);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (PostMessageToHandler(MSG_TYPE_LEAVE_INVALID_CONN, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave invalid connection message failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
+{
+    uint16_t *para = NULL;
+
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_ERR;
+    }
+    para = SoftBusMalloc(sizeof(uint16_t));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc clean connection fsm msg failed");
         return SOFTBUS_MALLOC_ERR;
     }
+    *para = connFsmId;
     if (PostMessageToHandler(MSG_TYPE_CLEAN_CONN_FSM, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post request clean connectionlnn message failed");
         SoftBusFree(para);
