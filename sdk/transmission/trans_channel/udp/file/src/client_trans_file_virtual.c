@@ -27,32 +27,53 @@ void TransFileDeinit(void) {}
 int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
+    (void)sessionName;
+    (void)recvListener;
+    (void)rootDir;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListener *sendListener)
 {
+    (void)sessionName;
+    (void)sendListener;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener)
 {
+    (void)sessionName;
+    (void)fileListener;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-void TransDeleteFileListener(const char *sessionName) {}
+void TransDeleteFileListener(const char *sessionName)
+{
+    (void)sessionName;
+}
 
-void RegisterFileCb(const UdpChannelMgrCb *fileCb) {}
+void RegisterFileCb(const UdpChannelMgrCb *fileCb)
+{
+    (void)fileCb;
+}
 
 int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
 {
+    (void)channel;
+    (void)filePort;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-void TransCloseFileChannel(int32_t dfileId) {}
+void TransCloseFileChannel(int32_t dfileId)
+{
+    (void)dfileId;
+}
 
 int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     (void)channelId;
+    (void)sFileList;
+    (void)dFileList;
+    (void)fileCnt;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
