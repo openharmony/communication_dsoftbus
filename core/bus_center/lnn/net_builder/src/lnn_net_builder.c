@@ -29,6 +29,7 @@
 #include "lnn_exchange_device_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
+#include "lnn_network_manager.h"
 #include "lnn_node_weight.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_errcode.h"
@@ -58,6 +59,7 @@ typedef enum {
     MSG_TYPE_NODE_STATE_CHANGED = 10,
     MSG_TYPE_MASTER_ELECT,
     MSG_TYPE_LEAVE_INVALID_CONN,
+    MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -342,7 +344,7 @@ static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
     }
 }
 
-static void tryCleanAllConnection(const LnnConnectionFsm *connFsm)
+static void tryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
 {
     LnnConnectionFsm *item = NULL;
     const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
@@ -369,6 +371,23 @@ static void tryCleanAllConnection(const LnnConnectionFsm *connFsm)
     if (LnnConvertAddrToOption(addr1, &option)) {
         ConnDisconnectDeviceAllConn(&option);
     }
+}
+
+static void tryNotifyAllTypeOffline(const LnnConnectionFsm *connFsm)
+{
+    LnnConnectionFsm *item = NULL;
+    const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
+    const ConnectionAddr *addr2 = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        addr2 = &item->connInfo.addr;
+        if (addr1->type == addr2->type) {
+            return;
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]notify all connection offline for type=%d",
+        connFsm->id, addr1->type);
+    (void)LnnNotifyAllTypeOffline(addr1->type);
 }
 
 static void CleanConnectionFsm(LnnConnectionFsm *connFsm)
@@ -409,7 +428,8 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
         }
         StopConnectionFsm(connFsm);
         tryInitiateNewNetworkOnline(connFsm);
-        tryCleanAllConnection(connFsm);
+        tryDisconnectAllConnection(connFsm);
+        tryNotifyAllTypeOffline(connFsm);
         rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)para);
@@ -515,7 +535,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
 {
     const char *peerUdid = (const char *)para;
     LnnConnectionFsm *connFsm = NULL;
-    int rc = SOFTBUS_OK;
+    int32_t rc = SOFTBUS_OK;
 
     if (peerUdid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is null");
@@ -785,6 +805,39 @@ static int32_t ProcessMasterElect(const void *para)
     return rc;
 }
 
+static int32_t ProcessLeaveByAddrType(const void *para)
+{
+    ConnectionAddrType type;
+    LnnConnectionFsm *item = NULL;
+    int32_t rc;
+    bool notify = true;
+
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave by addr type msg para is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    type = *(ConnectionAddrType *)para;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (item->connInfo.addr.type != type) {
+            continue;
+        }
+        rc = LnnSendLeaveRequestToConnFsm(item);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
+        if (rc == SOFTBUS_OK) {
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
+            if (notify) {
+                notify = false;
+            }
+        }
+    }
+    if (notify) {
+        (void)LnnNotifyAllTypeOffline(type);
+    }
+    SoftBusFree((void *)para);
+    return SOFTBUS_OK;
+}
+
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -799,6 +852,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessNodeStateChanged,
     ProcessMasterElect,
     ProcessLeaveInvalidConn,
+    ProcessLeaveByAddrType,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -1254,6 +1308,28 @@ int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t m
     para->masterWeight = masterWeight;
     if (PostMessageToHandler(MSG_TYPE_MASTER_ELECT, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post elect message failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnRequestLeaveByAddrType(ConnectionAddrType type)
+{
+    ConnectionAddrType *para = NULL;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnRequestLeaveByAddrType");
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_ERR;
+    }
+    para = SoftBusMalloc(sizeof(ConnectionAddrType));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc leave by addr type msg para failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    *para = type;
+    if (PostMessageToHandler(MSG_TYPE_LEAVE_BY_ADDR_TYPE, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave by addr type message failed");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }

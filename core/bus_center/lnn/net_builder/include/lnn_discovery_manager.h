@@ -34,7 +34,7 @@ int32_t LnnInitDiscoveryManager(void);
 
 int32_t LnnStartDiscovery(void);
 
-int32_t LnnStopDiscovery(void);
+void LnnStopDiscovery(void);
 
 int32_t __attribute__ ((weak)) LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
 

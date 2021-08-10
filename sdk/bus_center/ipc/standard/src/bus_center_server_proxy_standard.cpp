@@ -104,7 +104,7 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     if (pkgName == nullptr || addr == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LOG_ERR("remote is nullptr!");
         return SOFTBUS_ERR;
@@ -142,7 +142,7 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     if (pkgName == nullptr || networkId == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LOG_ERR("remote is nullptr!");
         return SOFTBUS_ERR;
@@ -181,7 +181,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     if (info == nullptr || infoNum == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LOG_ERR("remote is nullptr!");
         return SOFTBUS_ERR;
@@ -234,7 +234,7 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     if (info == nullptr) {
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remote = Remote();
+    sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LOG_ERR("remote is nullptr!");
         return SOFTBUS_ERR;
