@@ -21,8 +21,8 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_mem_interface.h"
 
 static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version)
 {

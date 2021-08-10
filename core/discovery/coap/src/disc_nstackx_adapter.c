@@ -19,10 +19,10 @@
 #include "bus_center_manager.h"
 #include "nstackx.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #define JSON_WLAN_IP "wifiIpAddr"
 #define JSON_HW_ACCOUNT "hwAccountHashVal"

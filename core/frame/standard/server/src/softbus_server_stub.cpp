@@ -18,10 +18,10 @@
 #include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_server.h"
 
 namespace OHOS {

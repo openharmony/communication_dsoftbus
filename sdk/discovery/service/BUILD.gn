@@ -27,7 +27,7 @@ if (defined(ohos_lite)) {
   common_include = [
     "include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/sdk/discovery/manager/include",
@@ -36,7 +36,7 @@ if (defined(ohos_lite)) {
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
     "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
@@ -69,7 +69,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
@@ -78,7 +78,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":disc_client_service_interface" ]
     sources = [ "src/client_disc_service.c" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
       "$dsoftbus_root_path/sdk/frame:softbus_client_frame",

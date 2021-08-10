@@ -19,11 +19,11 @@
 #include "auth_common.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

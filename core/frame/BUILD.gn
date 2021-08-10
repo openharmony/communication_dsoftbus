@@ -18,7 +18,7 @@ if (ohos_kernel_type == "liteos_m") {
   static_library("softbus_server_frame") {
     include_dirs = [
       "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
@@ -42,8 +42,8 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     deps = [
-      "$hilog_lite_deps_path",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$hilog_lite_deps_path",
     ]
   }
 } else {
@@ -52,7 +52,7 @@ if (ohos_kernel_type == "liteos_m") {
       "common/include",
       "small/init/include",
       "small/client_manager/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
@@ -83,13 +83,14 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
+      "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
       "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/connection:softbus_connection",
       "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
       "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
@@ -97,7 +98,6 @@ if (ohos_kernel_type == "liteos_m") {
       "$hilog_lite_deps_path",
       "//foundation/communication/ipc_lite:liteipc_adapter",
       "//foundation/distributedschedule/samgr_lite/samgr:samgr",
-      "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
     ]
   }
   executable("softbus_server") {

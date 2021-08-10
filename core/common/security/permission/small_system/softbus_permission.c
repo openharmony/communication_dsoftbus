@@ -21,9 +21,9 @@
 #include "permission_entry.h"
 #include "pms_interface.h"
 #include "pms_types.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #define SOFTBUS_PERMISSION_NAME "ohos.permission.DISTRIBUTED_DATASYNC"
 
