@@ -36,7 +36,6 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
     UdpChannel udpChannel = {0};
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by fileId failed.");
         return;
     }
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
@@ -51,13 +50,11 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
     FileListener fileListener = {0};
     if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed.");
         return;
     }
 
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get sessionId by channelId failed.");
         return;
     }
 
@@ -92,7 +89,6 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
     }
     UdpChannel udpChannel = {0};
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by fileId failed.");
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
@@ -103,12 +99,10 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
     }
     FileListener fileListener = {0};
     if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed.");
         return;
     }
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get sessionId by channelId failed.");
         return;
     }
     const char *firstFile = msgData->fileList.files[0];
