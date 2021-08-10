@@ -110,7 +110,6 @@ int32_t LnnStartDiscovery(void)
             continue;
         }
         if (g_discoveryImpl[i].StartDiscoveryImpl() != SOFTBUS_OK) {
-            LOG_ERR("init discovery impl(%d) failed", i);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
