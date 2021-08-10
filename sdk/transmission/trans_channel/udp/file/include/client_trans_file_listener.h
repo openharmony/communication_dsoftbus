@@ -31,9 +31,9 @@ typedef struct {
     char rootDir[FILE_RECV_ROOT_DIR_SIZE_MAX];
 } FileListener;
 
-int TransFileInit();
+int TransFileInit(void);
 
-void TransFileDeinit();
+void TransFileDeinit(void);
 
 int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir);

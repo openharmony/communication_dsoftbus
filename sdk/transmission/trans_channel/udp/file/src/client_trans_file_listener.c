@@ -25,7 +25,7 @@
 
 static SoftBusList *g_fileListener = NULL;
 
-int TransFileInit()
+int TransFileInit(void)
 {
     if (g_fileListener != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "file listener has initialized.");

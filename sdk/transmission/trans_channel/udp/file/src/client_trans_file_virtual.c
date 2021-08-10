@@ -17,12 +17,12 @@
 #include "client_trans_udp_manager.h"
 #include "softbus_errcode.h"
 
-int TransFileInit()
+int TransFileInit(void)
 {
     return SOFTBUS_OK;
 }
 
-void TransFileDeinit() {}
+void TransFileDeinit(void) {}
 
 int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
