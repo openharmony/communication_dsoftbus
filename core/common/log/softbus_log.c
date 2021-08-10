@@ -36,10 +36,10 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
 
 void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
 {
-    #ifdef SOFTBUS_PRINTF
-        printf("%s\n", buf);
-        return;
-    #endif
+#ifdef SOFTBUS_PRINTF
+    printf("%s\n", buf);
+    return;
+#endif
     switch (level) {
         case SOFTBUS_LOG_DBG:
             HILOG_DEBUG(LOG_CORE, "%{public}s", buf);
