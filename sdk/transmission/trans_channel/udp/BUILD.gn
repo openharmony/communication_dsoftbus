@@ -33,7 +33,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (enable_trans_udp == true) {
     common_deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
@@ -79,6 +79,7 @@ if (defined(ohos_lite)) {
 
       if (enable_trans_udp == true) {
         deps = [
+          "$dsoftbus_root_path/core/connection/common:conn_common",
           "stream/adaptor:dsoftbus_trans_dstream",
           "//third_party/bounds_checking_function:libsec_shared",
           "$dsoftbus_root_path/core/connection/common:conn_common",
@@ -99,7 +100,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_core_path/common/include",
       "$dsoftbus_root_path/sdk/transmission/session/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "file/include",
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface",
@@ -109,8 +110,10 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_udp_channel_sdk_interface" ]
     if (enable_trans_udp == true) {
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/connection/common:conn_common",
         "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
         "//utils/native/base:utilsecurec_shared",
         "$dsoftbus_root_path/core/connection/common:conn_common",

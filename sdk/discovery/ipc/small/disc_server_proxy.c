@@ -19,11 +19,12 @@
 #include "iproxy_client.h"
 #include "samgr_lite.h"
 #include "serializer.h"
+#include "softbus_adapter_file.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_os_interface.h"
 
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50
 

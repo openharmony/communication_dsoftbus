@@ -22,7 +22,7 @@ if (defined(ohos_lite)) {
   }
 
   common_include = [
-    "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_core_path/common/security/permission/include",
     "//foundation/communication/ipc_lite/interfaces/kits",
@@ -49,8 +49,8 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         ":permission_json",
-        "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
         "$dsoftbus_core_path/common/utils:softbus_utils",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
@@ -95,8 +95,8 @@ if (defined(ohos_lite)) {
     external_deps = [
       "aafwk_standard:want",
       "appexecfwk_standard:appexecfwk_core",
-      "ipc:ipc_core",
       "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
       "permission_standard:libpermissionsdk_standard",
       "samgr_L2:samgr_proxy",
     ]

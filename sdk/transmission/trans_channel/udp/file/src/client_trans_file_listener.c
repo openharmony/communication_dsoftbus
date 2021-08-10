@@ -17,10 +17,10 @@
 
 #include <securec.h>
 
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
 static SoftBusList *g_fileListener = NULL;

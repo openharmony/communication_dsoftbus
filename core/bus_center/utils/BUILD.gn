@@ -30,13 +30,13 @@ if (defined(ohos_lite)) {
       sources = [
         "src/lnn_async_callback_utils.c",
         "src/lnn_connection_addr_utils.c",
-        "src/lnn_ip_utils.c",
         "src/lnn_file_utils.c",
+        "src/lnn_ip_utils.c",
       ]
       include_dirs = [
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/common/message_handler/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
@@ -50,7 +50,7 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_utils_interface" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/message_handler:message_handler",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
@@ -64,18 +64,19 @@ if (defined(ohos_lite)) {
     sources = [
       "src/lnn_async_callback_utils.c",
       "src/lnn_connection_addr_utils.c",
-      "src/lnn_ip_utils.c",
       "src/lnn_file_utils.c",
+      "src/lnn_ip_utils.c",
     ]
     include_dirs = [
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/common/message_handler/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
+      "//utils/native/base/include",
     ]
     public_configs = [ ":bus_center_utils_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
       "//utils/native/base:utils",
     ]

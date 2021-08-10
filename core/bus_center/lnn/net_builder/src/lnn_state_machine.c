@@ -19,9 +19,9 @@
 
 #include <securec.h>
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #define FSM_CTRL_MSG_START 0
 #define FSM_CTRL_MSG_CHANGE_STATE 1
