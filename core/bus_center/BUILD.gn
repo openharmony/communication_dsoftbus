@@ -33,18 +33,21 @@ if (defined(ohos_lite)) {
       sources = [
         "ipc/small_system/src/bus_center_client_proxy.c",
         "ipc/small_system/src/lnn_bus_center_ipc.c",
-        "lnn//net_builder/sync_info/src/lnn_exchange_device_info.c",
-        "lnn//net_builder/sync_info/src/lnn_sync_item_info.c",
         "lnn/net_builder/src/lnn_connection_fsm.c",
         "lnn/net_builder/src/lnn_discovery_manager.c",
         "lnn/net_builder/src/lnn_net_builder.c",
-        "lnn/net_builder/src/lnn_node_weight.c",
         "lnn/net_builder/src/lnn_network_id.c",
+        "lnn/net_builder/src/lnn_node_weight.c",
         "lnn/net_builder/src/lnn_state_machine.c",
+        "lnn/net_builder/sync_info/src/lnn_exchange_device_info.c",
+        "lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
+        "lnn/net_buscenter/src/lnn_ip_network_impl.c",
+        "lnn/net_buscenter/src/lnn_network_manager.c",
         "service/src/bus_center_event.c",
+        "service/src/bus_center_manager.c",
       ]
       if (enable_auto_networking == true) {
-          sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+        sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
       }
       include_dirs = [
         "ipc/small_system/include",
@@ -69,6 +72,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_config/spec_config",
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
+        "lnn/net_buscenter/include",
       ]
       cflags = [
         "-Wall",
@@ -83,8 +87,8 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
         "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/message_handler:message_handler",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
@@ -110,18 +114,21 @@ if (defined(ohos_lite)) {
       "ipc/standard_system/src/bus_center_client_proxy.cpp",
       "ipc/standard_system/src/bus_center_client_proxy_standard.cpp",
       "ipc/standard_system/src/lnn_bus_center_ipc.cpp",
-      "lnn//net_builder/sync_info/src/lnn_exchange_device_info.c",
-      "lnn//net_builder/sync_info/src/lnn_sync_item_info.c",
       "lnn/net_builder/src/lnn_connection_fsm.c",
       "lnn/net_builder/src/lnn_discovery_manager.c",
       "lnn/net_builder/src/lnn_net_builder.c",
       "lnn/net_builder/src/lnn_network_id.c",
       "lnn/net_builder/src/lnn_node_weight.c",
       "lnn/net_builder/src/lnn_state_machine.c",
+      "lnn/net_builder/sync_info/src/lnn_exchange_device_info.c",
+      "lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
+      "lnn/net_buscenter/src/lnn_ip_network_impl.c",
+      "lnn/net_buscenter/src/lnn_network_manager.c",
       "service/src/bus_center_event.c",
+      "service/src/bus_center_manager.c",
     ]
     if (enable_auto_networking == true) {
-        sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+      sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
     }
     include_dirs = [
       "ipc/standard_system/include",
@@ -146,6 +153,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/softbus_property/include",
       "$softbus_adapter_config/spec_config",
       "//utils/system/safwk/native/include",
+      "lnn/net_buscenter/include",
     ]
 
     public_configs = [ ":bus_center_server_interface" ]
@@ -154,8 +162,8 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
@@ -173,8 +181,8 @@ if (defined(ohos_lite)) {
     ]
     if (is_standard_system) {
       external_deps = [
-        "ipc:ipc_core",
         "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_core",
       ]
     }
     part_name = "dsoftbus_standard"

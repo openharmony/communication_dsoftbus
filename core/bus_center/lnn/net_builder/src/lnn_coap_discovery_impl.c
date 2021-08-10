@@ -38,27 +38,27 @@ static void DeviceFound(const DeviceInfo *device)
     ConnectionAddr addr;
 
     if (device == NULL) {
-        LOG_ERR("device para is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null\n");
         return;
     }
-    LOG_INFO("DeviceFound enter, type = %d", device->addr[0].type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound enter, type = %d\n", device->addr[0].type);
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
-        LOG_ERR("discovery get invalid addr type: %d", device->addr[0].type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get invalid addrtype: %d\n", device->addr[0].type);
         return;
     }
     if (device->addr[0].info.ip.port == 0) {
-        LOG_ERR("discovery get port is 0 !");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get port is 0 !\n");
         return;
     }
     addr.type = device->addr[0].type;
     if (memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
         strlen(device->addr[0].info.ip.ip)) != 0) {
-        LOG_ERR("strncpy ip failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy ip failed\n");
         return;
     }
     addr.info.ip.port = device->addr[0].info.ip.port;
     if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->hwAccountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
-        LOG_ERR("memcpy_s peer uid failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s peer uid failed\n");
         return;
     }
     if (g_callback.OnDeviceFound) {
@@ -69,7 +69,7 @@ static void DeviceFound(const DeviceInfo *device)
 int32_t LnnStopCoapDiscovery(void)
 {
     if (DiscStopAdvertise(MODULE_LNN, LNN_SUBSCRIBE_ID) != SOFTBUS_OK) {
-        LOG_ERR("DiscStopAdvertise fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStopAdvertise fail!\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -88,7 +88,7 @@ int32_t LnnStartCoapDiscovery(void)
         .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
     };
     if (DiscSetDiscoverCallback(MODULE_LNN, &g_discCb) != SOFTBUS_OK) {
-        LOG_ERR("DiscSetDiscoverCallback failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscSetDiscoverCallback failed\n");
         return SOFTBUS_ERR;
     }
     return DiscStartAdvertise(MODULE_LNN, &subscribeInfo);
@@ -97,7 +97,7 @@ int32_t LnnStartCoapDiscovery(void)
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
 {
     if (callback == NULL) {
-        LOG_ERR("coap discovery callback is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coap discovery callback is null\n");
         return SOFTBUS_INVALID_PARAM;
     }
     g_callback.OnDeviceFound = callback->OnDeviceFound;
