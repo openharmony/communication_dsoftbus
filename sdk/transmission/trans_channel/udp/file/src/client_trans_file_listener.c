@@ -28,12 +28,12 @@ static SoftBusList *g_fileListener = NULL;
 int TransFileInit()
 {
     if (g_fileListener != NULL) {
-        LOG_INFO("file listener has initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "file listener has initialized.");
         return SOFTBUS_OK;
     }
     g_fileListener = CreateSoftBusList();
     if (g_fileListener == NULL) {
-        LOG_ERR("create file listener list failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create file listener list failed.");
         return SOFTBUS_MALLOC_ERR;
     }
     return SOFTBUS_OK;
@@ -45,7 +45,7 @@ void TransFileDeinit(void)
         return;
     }
     if (pthread_mutex_lock(&(g_fileListener->lock)) != 0) {
-        LOG_ERR("file listener deinit lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener deinit lock failed");
         return;
     }
     FileListener *fileNode = NULL;
@@ -62,11 +62,11 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
     if (g_fileListener == NULL) {
-        LOG_ERR("file listener hasn't initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&(g_fileListener->lock)) != 0) {
-        LOG_ERR("file receive listener lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file receive listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     FileListener *fileNode = NULL;
@@ -82,24 +82,24 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
             memcpy_s(&(fileNode->recvListener), sizeof(IFileReceiveListener),
                 recvListener, sizeof(IFileReceiveListener)) != EOK) {
             (void)pthread_mutex_unlock(&(g_fileListener->lock));
-            LOG_ERR("update file receive listener failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update file receive listener failed");
             return SOFTBUS_ERR;
         }
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
-        LOG_INFO("update file receive listener success");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "update file receive listener success");
         return SOFTBUS_OK;
     }
     fileNode = (FileListener *)SoftBusCalloc(sizeof(FileListener));
     if (fileNode == NULL) {
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
-        LOG_ERR("file receive listener calloc failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file receive listener calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(fileNode->mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(fileNode->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, rootDir) != EOK ||
         memcpy_s(&(fileNode->recvListener), sizeof(IFileReceiveListener),
             recvListener, sizeof(IFileReceiveListener)) != EOK) {
-        LOG_ERR("file node copy failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file node copy failed.");
         SoftBusFree(fileNode);
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
         return SOFTBUS_ERR;
@@ -112,11 +112,11 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
 int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListener *sendListener)
 {
     if (g_fileListener == NULL) {
-        LOG_ERR("file listener hasn't initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&(g_fileListener->lock)) != 0) {
-        LOG_ERR("file send listener lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file send listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     FileListener *fileNode = NULL;
@@ -131,23 +131,23 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         if (memcpy_s(&(fileNode->sendListener), sizeof(IFileSendListener),
                 sendListener, sizeof(IFileSendListener)) != EOK) {
             (void)pthread_mutex_unlock(&(g_fileListener->lock));
-            LOG_ERR("update file send listener failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update file send listener failed");
             return SOFTBUS_ERR;
         }
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
-        LOG_INFO("update file send listener success");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "update file send listener success");
         return SOFTBUS_OK;
     }
     fileNode = (FileListener *)SoftBusCalloc(sizeof(FileListener));
     if (fileNode == NULL) {
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
-        LOG_ERR("file send listener calloc failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file send listener calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(fileNode->mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         memcpy_s(&(fileNode->sendListener), sizeof(IFileSendListener),
             sendListener, sizeof(IFileSendListener)) != EOK) {
-        LOG_ERR("file node copy failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file node copy failed.");
         SoftBusFree(fileNode);
         (void)pthread_mutex_unlock(&(g_fileListener->lock));
         return SOFTBUS_ERR;
@@ -160,11 +160,11 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener)
 {
     if (g_fileListener == NULL) {
-        LOG_ERR("file listener hasn't initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&(g_fileListener->lock)) != 0) {
-        LOG_ERR("file get listener lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file get listener lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -172,7 +172,7 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
     LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
         if (strcmp(fileNode->mySessionName, sessionName) == 0) {
             if (memcpy_s(fileListener, sizeof(FileListener), fileNode, sizeof(FileListener)) != EOK) {
-                LOG_ERR("memcpy_s failed.");
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
                 (void)pthread_mutex_unlock(&(g_fileListener->lock));
                 return SOFTBUS_ERR;
             }
@@ -187,11 +187,11 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
 void TransDeleteFileListener(const char *sessionName)
 {
     if (g_fileListener == NULL) {
-        LOG_ERR("file listener hasn't initialized.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
         return;
     }
     if (pthread_mutex_lock(&(g_fileListener->lock)) != 0) {
-        LOG_ERR("file delete lock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file delete lock failed");
         return;
     }
 
