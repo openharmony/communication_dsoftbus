@@ -22,10 +22,10 @@
 #include <securec.h>
 
 #include "lnn_map.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
 #define NUM_BUF_SIZE 4

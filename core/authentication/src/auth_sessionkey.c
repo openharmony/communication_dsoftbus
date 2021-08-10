@@ -18,9 +18,9 @@
 #include <securec.h>
 
 #include "auth_common.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

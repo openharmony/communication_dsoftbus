@@ -31,7 +31,7 @@ if (defined(ohos_lite)) {
     shared_library("dsoftbus_bus_center_manager_sdk") {
       include_dirs = [
         "ipc/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/common/inner_communication",
         "$dsoftbus_root_path/core/bus_center/interface",
@@ -46,11 +46,10 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_client_interface" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
       ]
@@ -63,7 +62,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "ipc/include",
       "ipc/standard/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/frame/standard/server/include",
@@ -79,16 +78,15 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":bus_center_client_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {
       external_deps = [
-        "ipc:ipc_single",
         "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_single",
       ]
     }
     part_name = "dsoftbus_standard"

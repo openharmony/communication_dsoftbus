@@ -27,7 +27,7 @@ if (defined(ohos_lite)) {
         "include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/connection/manager",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -37,11 +37,11 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$hilog_lite_deps_path",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     }
   } else {
@@ -55,7 +55,7 @@ if (defined(ohos_lite)) {
         "include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/connection/manager",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -65,13 +65,13 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     }
   }
@@ -88,7 +88,7 @@ if (defined(ohos_lite)) {
       "include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/connection/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/connection/manager",
       "$dsoftbus_root_path/interfaces/kits/common",
@@ -96,11 +96,11 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config",
     ]
     deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

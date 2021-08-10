@@ -32,7 +32,7 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "include",
         "$dsoftbus_root_path/core/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/interfaces/kits/bus_center",
         "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_root_path/interfaces/kits",
@@ -42,7 +42,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "src/client_bus_center.c" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
@@ -57,7 +57,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits",
@@ -66,7 +66,7 @@ if (defined(ohos_lite)) {
     ]
     sources = [ "src/client_bus_center.c" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
       "$dsoftbus_root_path/sdk/frame:softbus_client_frame",

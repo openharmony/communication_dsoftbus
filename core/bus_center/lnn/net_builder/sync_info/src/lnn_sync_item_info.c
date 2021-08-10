@@ -27,11 +27,11 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_transmission_interface.h"
 
 #define MSG_HEAD_LEN 4

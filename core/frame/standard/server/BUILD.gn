@@ -18,10 +18,10 @@ ohos_prebuilt_etc("softbus_server.rc") {
   relative_install_dir = "init"
   if (use_musl) {
     source =
-      "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.cfg"
+        "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.cfg"
   } else {
     source =
-      "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.rc"
+        "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.rc"
   }
   part_name = "dsoftbus_standard"
   subsystem_name = "communication"
@@ -48,24 +48,24 @@ ohos_shared_library("softbus_server") {
   ]
   deps = [
     ":softbus_server.rc",
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
     "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
-    "$dsoftbus_root_path/core/common/message_handler:message_handler",
-    "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common/message_handler:message_handler",
+    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+    "$dsoftbus_root_path/core/common/utils:softbus_utils",
     "$dsoftbus_root_path/core/connection/manager:conn_manager",
     "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
     "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
     "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
-    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
     "//utils/native/base:utils",
-    "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
   ]
   if (is_standard_system) {
     external_deps = [
-      "ipc:ipc_core",
       "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
       "safwk:system_ability_fwk",
     ]
   }

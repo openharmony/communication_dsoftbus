@@ -15,9 +15,9 @@
 
 #include "softbus_client_context_manager.h"
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 typedef struct {
     unsigned int handle;

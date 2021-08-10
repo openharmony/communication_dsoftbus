@@ -21,11 +21,11 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_tcp_socket.h"
 #include "trans_tcp_direct_message.h"
