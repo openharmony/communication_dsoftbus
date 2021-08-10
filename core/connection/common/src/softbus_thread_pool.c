@@ -15,9 +15,9 @@
 
 #include "softbus_thread_pool.h"
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #ifndef MIN_STACK_SIZE
 #define MIN_STACK_SIZE 0x2000

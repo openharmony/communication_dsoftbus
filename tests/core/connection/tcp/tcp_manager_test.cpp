@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "common_list.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
@@ -33,7 +34,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_thread_pool.h"

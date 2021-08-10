@@ -23,9 +23,9 @@
 #include "permission/permission.h"
 #include "permission/permission_kit.h"
 #include "permission_entry.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 

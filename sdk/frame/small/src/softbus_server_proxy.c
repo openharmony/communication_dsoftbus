@@ -16,11 +16,12 @@
 #include "iproxy_client.h"
 #include "liteipc_adapter.h"
 #include "samgr_lite.h"
+#include "softbus_adapter_file.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_os_interface.h"
 #include "softbus_server_proxy.h"
 
 static IClientProxy *g_serverProxy = NULL;

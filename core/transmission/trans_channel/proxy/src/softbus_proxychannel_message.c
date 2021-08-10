@@ -19,10 +19,10 @@
 
 #include "auth_interface.h"
 #include "base64.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"

@@ -20,6 +20,7 @@
 #include <sys/socket.h>
 
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
@@ -27,7 +28,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"

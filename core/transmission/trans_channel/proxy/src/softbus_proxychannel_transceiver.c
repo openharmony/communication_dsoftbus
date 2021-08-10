@@ -18,10 +18,10 @@
 #include <securec.h>
 
 #include "message_handler.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_manager.h"

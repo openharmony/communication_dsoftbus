@@ -21,7 +21,7 @@ ohos_unittest("TransTcpDirectSdkTest") {
   sources = [ "unittest/trans_tcp_direct_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
