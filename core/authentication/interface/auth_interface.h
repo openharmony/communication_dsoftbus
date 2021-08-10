@@ -80,7 +80,8 @@ typedef enum {
 
 typedef enum {
     LNN = 0,
-    TRANS,
+    TRANS_UDP_DATA,
+    TRANS_AUTH_CHANNEL,
     MODULE_NUM,
 } AuthModuleId;
 
@@ -99,6 +100,7 @@ typedef struct {
 } AuthDataHead;
 
 typedef struct {
+    int32_t module;
     int32_t flags;
     int64_t seq;
     char *data;
@@ -116,6 +118,7 @@ typedef struct {
 
 typedef struct {
     void (*onTransUdpDataRecv)(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info);
+    void (*onAuthChannelClose)(int64_t authId);
 } AuthTransCallback;
 
 uint32_t AuthGetEncryptHeadLen(void);
@@ -130,7 +133,9 @@ int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb);
 
 int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectionAddr *addr);
 
+int64_t AuthOpenChannel(const ConnectOption *option);
 int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len);
+int32_t AuthCloseChannel(int64_t authId);
 int32_t AuthHandleLeaveLNN(int64_t authId);
 
 void AuthIpChanged(ConnectType type);

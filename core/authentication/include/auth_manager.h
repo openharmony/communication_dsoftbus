@@ -88,7 +88,8 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data);
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen);
-void AuthNotifyLnnDisconnByIp(const AuthManager *auth);
+void AuthNotifyLnnDisconn(const AuthManager *auth);
+void AuthNotifyTransDisconn(int64_t authId);
 void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len);
 
 #ifdef __cplusplus

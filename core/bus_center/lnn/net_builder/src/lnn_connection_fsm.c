@@ -644,7 +644,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    CompleteJoinLNN(connFsm, connFsm->connInfo.nodeInfo->networkId, SOFTBUS_OK);
+    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
 }
 
 static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)
