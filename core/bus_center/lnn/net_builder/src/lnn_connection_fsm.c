@@ -199,29 +199,37 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete join LNN done", connFsm->id);
 }
 
-static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
+static void UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId)
 {
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
+    const LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeInfo *info = NULL;
     const char *udid = NULL;
     NodeBasicInfo basic;
 
-    if (retCode == SOFTBUS_OK) {
-        info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-        if (info != NULL) {
-            udid = LnnGetDeviceUdid(info);
-            if (LnnSetNodeOffline(udid, (int32_t)connInfo->authId) == REPORT_OFFLINE) {
-                (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-                if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
-                    LnnNotifyOnlineState(false, &basic);
-                }
-                // just remove node when peer device is not trusted
-                if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0) {
-                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]remove node", connFsm->id);
-                    LnnRemoveNode(udid);
-                }
-            }
+    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        return;
+    }
+    udid = LnnGetDeviceUdid(info);
+    if (LnnSetNodeOffline(udid, (int32_t)connInfo->authId) == REPORT_OFFLINE) {
+        (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+        if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
+            LnnNotifyOnlineState(false, &basic);
         }
+        // just remove node when peer device is not trusted
+        if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]remove node", connFsm->id);
+            LnnRemoveNode(udid);
+        }
+    }
+}
+
+static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
+{
+    LnnConntionInfo *connInfo = &connFsm->connInfo;
+
+    if (retCode == SOFTBUS_OK) {
+        UpdateLeaveToLedger(connFsm, networkId);
     }
     NotifyLeaveResult(connFsm, networkId, retCode);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
@@ -636,7 +644,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    CompleteJoinLNN(connFsm, connFsm->connInfo.nodeInfo->networkId, SOFTBUS_OK);
+    CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
 }
 
 static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)

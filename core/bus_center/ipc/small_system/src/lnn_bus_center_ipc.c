@@ -169,11 +169,13 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
         g_lnnRequestInfo.joinLNNRequestInfo = CreateSoftBusList();
         if (g_lnnRequestInfo.joinLNNRequestInfo == NULL) {
             LOG_ERR("init fail : joinLNNRequestInfo = null!");
+            (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
             return false;
         }
     }
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
         LOG_ERR("repeat join lnn request from: %s", pkgName);
+        (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerJoin(connAddr);
@@ -199,11 +201,13 @@ int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
         g_lnnRequestInfo.leaveLNNRequestInfo = CreateSoftBusList();
         if (g_lnnRequestInfo.leaveLNNRequestInfo == NULL) {
             LOG_ERR("init fail : leaveLNNRequestInfo = null!");
+            (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
             return false;
         }
     }
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
         LOG_ERR("repeat leave lnn request from: %s", pkgName);
+        (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerLeave(networkId);
