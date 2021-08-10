@@ -201,7 +201,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
 
 static void UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId)
 {
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
+    const LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeInfo *info = NULL;
     const char *udid = NULL;
     NodeBasicInfo basic;
