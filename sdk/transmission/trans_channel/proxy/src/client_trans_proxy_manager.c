@@ -45,8 +45,8 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
 
     return SOFTBUS_OK;
 }
-
 int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
+
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
@@ -85,9 +85,6 @@ void ClientTransProxyCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseProxyChannel, channelId [%d]", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
-    }
-    if (ClientTransProxyOnChannelClosed(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
     }
 }
