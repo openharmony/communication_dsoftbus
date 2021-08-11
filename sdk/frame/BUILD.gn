@@ -20,7 +20,7 @@ if (defined(ohos_lite)) {
     static_library("softbus_client_frame") {
       include_dirs = [
         "include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/sdk/include",
         "$dsoftbus_root_path/sdk/discovery/include",
         "$dsoftbus_root_path/sdk/transmission/common/include",
@@ -47,10 +47,10 @@ if (defined(ohos_lite)) {
         "softbus_client_frame_manager_weak.c",
       ]
 
-      deps = [ 
-        "$hilog_lite_deps_path",
+      deps = [
         "$dsoftbus_root_path/core/common/log:softbus_log",
-        ]
+        "$hilog_lite_deps_path",
+      ]
     }
   } else {
     shared_library("softbus_client_frame") {
@@ -58,7 +58,7 @@ if (defined(ohos_lite)) {
         "common/include",
         "small/include",
         "$dsoftbus_root_path/core/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/inner_communication",
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
@@ -80,8 +80,9 @@ if (defined(ohos_lite)) {
       defines = [ "SOFTBUS_WATCH" ]
 
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
@@ -90,7 +91,6 @@ if (defined(ohos_lite)) {
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
         "//third_party/bounds_checking_function:libsec_shared",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       ]
     }
   }
@@ -102,7 +102,7 @@ if (defined(ohos_lite)) {
       "common/include",
       "standard/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "//utils/system/safwk/native/include",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
       "$dsoftbus_root_path/core/frame/standard/server/include",
@@ -126,13 +126,13 @@ if (defined(ohos_lite)) {
 
     if (is_standard_system) {
       external_deps = [
-        "ipc:ipc_single",
         "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_single",
       ]
       deps = [
         "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
         "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",

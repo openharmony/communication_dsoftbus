@@ -32,7 +32,7 @@ if (defined(ohos_lite)) {
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/json_utils:json_utils",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
@@ -74,7 +74,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "//third_party/cJSON",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "//third_party/mbedtls/include/mbedtls/",
     ]
     sources = [ "src/softbus_message_open_channel.c" ]

@@ -21,7 +21,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_include = [
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$libsec_include_path",
@@ -29,9 +29,9 @@ if (defined(ohos_lite)) {
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
-    "$dsoftbus_root_path/core/connection/common:conn_common",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/connection/common:conn_common",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
@@ -81,13 +81,13 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_ipc_proxy_interface" ]
     if (is_standard_system) {
       external_deps = [
-        "ipc:ipc_core",
         "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_core",
       ]
     }
     deps = [
-      "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
       "//utils/native/base:utils",
     ]
     part_name = "dsoftbus_standard"
