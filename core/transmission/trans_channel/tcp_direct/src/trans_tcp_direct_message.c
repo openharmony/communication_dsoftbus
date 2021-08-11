@@ -32,14 +32,111 @@
 
 #define MAX_PACKET_SIZE (64 * 1024)
 
+typedef struct {
+    ListNode node;
+    int32_t channelId;
+    int32_t fd;
+    uint32_t size;
+    char *data;
+    char *w;
+} ServerDataBuf;
+
+static SoftBusList *g_tcpSrvDataList = NULL;
+
+int32_t TransSrvDataListInit(void)
+{
+    if (g_tcpSrvDataList != NULL) {
+        return SOFTBUS_OK;
+    }
+    g_tcpSrvDataList = CreateSoftBusList();
+    if (g_tcpSrvDataList == NULL) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void TransSrvDestroyDataBuf(void)
+{
+    if (g_tcpSrvDataList ==  NULL) {
+        return;
+    }
+
+    ServerDataBuf *item = NULL;
+    ServerDataBuf *next = NULL;
+    pthread_mutex_lock(&g_tcpSrvDataList->lock);
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item->data);
+        SoftBusFree(item);
+        g_tcpSrvDataList->cnt--;
+    }
+    pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+
+    return;
+}
+
+void TransSrvDataListDeinit(void)
+{
+    if (g_tcpSrvDataList == NULL) {
+        return;
+    }
+    TransSrvDestroyDataBuf();
+    DestroySoftBusList(g_tcpSrvDataList);
+    g_tcpSrvDataList = NULL;
+}
+
+int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
+{
+#define MAX_DATA_BUF 4096
+    ServerDataBuf *node = (ServerDataBuf *)SoftBusCalloc(sizeof(ServerDataBuf));
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create server data buf node fail.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    node->channelId = channelId;
+    node->fd = fd;
+    node->size = MAX_DATA_BUF;
+    node->data = (char*)SoftBusCalloc(MAX_DATA_BUF);
+    if (node->data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create server data buf fail.");
+        SoftBusFree(node);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    node->w = node->data;
+
+    pthread_mutex_lock(&(g_tcpSrvDataList->lock));
+    ListInit(&node->node);
+    ListTailInsert(&g_tcpSrvDataList->list, &node->node);
+    g_tcpSrvDataList->cnt++;
+    pthread_mutex_unlock(&(g_tcpSrvDataList->lock));
+
+    return SOFTBUS_OK;
+}
+
+void TransSrvDelDataBufNode(int channelId)
+{
+    if (g_tcpSrvDataList ==  NULL) {
+        return;
+    }
+
+    ServerDataBuf *item = NULL;
+    ServerDataBuf *next = NULL;
+    pthread_mutex_lock(&g_tcpSrvDataList->lock);
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
+        if (item->channelId == channelId) {
+            ListDelete(&item->node);
+            SoftBusFree(item->data);
+            SoftBusFree(item);
+            g_tcpSrvDataList->cnt--;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+}
+
 static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *packetHead, uint8_t *buffer,
     uint32_t bufLen)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL || data == NULL || buffer == NULL || packetHead == NULL || bufLen == 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
         return SOFTBUS_ERR;
@@ -47,12 +144,24 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
 
     ConnectOption option = {0};
     option.type = CONNECT_TCP;
+    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (GetSessionConnById(channelId, conn) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+    }
     if (strcpy_s(option.info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
+        SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
     option.info.ipOption.port = conn->appInfo.peerData.port;
-
+    SoftBusFree(conn);
     AuthSideFlag side;
     uint32_t len = packetHead->dataLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN;
     OutBuf outbuf = {0};
@@ -69,8 +178,7 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
 
 int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL || data == NULL || packetHead == NULL) {
+    if (data == NULL || packetHead == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -89,7 +197,20 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(buffer);
         return SOFTBUS_ENCRYPT_ERR;
     }
-    if (SendTcpData(conn->appInfo.fd, buffer, bufferLen, 0) != (int)bufferLen) {
+    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (GetSessionConnById(channelId, conn) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+	}
+    int fd = conn->appInfo.fd;
+    SoftBusFree(conn);
+    if (SendTcpData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
         SoftBusFree(buffer);
         return SOFTBUS_ERR;
     }
@@ -97,50 +218,27 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     return SOFTBUS_OK;
 }
 
-static int32_t RecvPacket(int32_t channelId)
+static int32_t DecryptMessage(int32_t channelId, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get conn infoby id.");
-        return SOFTBUS_ERR;
-    }
-
-    int32_t rc = RecvTcpData(conn->appInfo.fd, conn->dataBuffer.w,
-        MAX_BUF_LENGTH - (conn->dataBuffer.w - conn->dataBuffer.data), 0);
-    if (rc > 0) {
-        conn->dataBuffer.w += rc;
-    }
-    return rc;
-}
-
-static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, char *out, uint32_t *outLen)
-{
-    if (channelId < 0 || pktHead == NULL || out == NULL || outLen == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid.");
-        return SOFTBUS_ERR;
-    }
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelId[%d] is not exist.", channelId);
         return SOFTBUS_ERR;
     }
 
     ConnectOption option = {0};
     option.type = CONNECT_TCP;
-    if (strcpy_s(option.info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
+    if (strcpy_s(option.info.ipOption.ip, sizeof(option.info.ipOption.ip), conn.appInfo.peerData.ip) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
         return SOFTBUS_ERR;
     }
-    option.info.ipOption.port = conn->appInfo.peerData.port;
+    option.info.ipOption.port = conn.appInfo.peerData.port;
 
     AuthSideFlag side = CLIENT_SIDE_FLAG;
-    char *data = conn->dataBuffer.data + DC_MSG_PACKET_HEAD_SIZE;
-    uint32_t len = pktHead->dataLen;
-
     OutBuf outbuf = {0};
-    outbuf.bufLen = pktHead->dataLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1;
+    outbuf.bufLen = inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1;
     outbuf.buf = (uint8_t *)out;
-    int32_t ret = AuthDecrypt(&option, side, (uint8_t *)data, len, &outbuf);
+    int32_t ret = AuthDecrypt(&option, side, (uint8_t *)in, inLen, &outbuf);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthDecrypt err.");
         return SOFTBUS_ERR;
@@ -151,27 +249,27 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
 
 static int32_t NotifyChannelOpened(int32_t channelId)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
     ChannelInfo info = {0};
     info.channelId = channelId;
     info.channelType = CHANNEL_TYPE_TCP_DIRECT;
-    info.isServer = conn->serverSide;
+    info.isServer = conn.serverSide;
     info.isEnabled = true;
-    info.fd = conn->appInfo.fd;
-    info.sessionKey = conn->appInfo.sessionKey;
+    info.fd = conn.appInfo.fd;
+    info.sessionKey = conn.appInfo.sessionKey;
 
-    info.peerSessionName = conn->appInfo.peerData.sessionName;
-    info.groupId = conn->appInfo.groupId;
+    info.peerSessionName = conn.appInfo.peerData.sessionName;
+    info.groupId = conn.appInfo.groupId;
     info.keyLen = SESSION_KEY_LENGTH;
-    info.peerUid = conn->appInfo.peerData.uid;
-    info.peerPid = conn->appInfo.peerData.pid;
+    info.peerUid = conn.appInfo.peerData.uid;
+    info.peerPid = conn.appInfo.peerData.pid;
 
     char buf[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
+    int32_t ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get info networkId fail.");
         return SOFTBUS_ERR;
@@ -179,31 +277,32 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerDeviceId = buf;
 
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if (TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
 
-    ret = TransTdcOnChannelOpened(pkgName, conn->appInfo.myData.sessionName, &info);
-    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
+    ret = TransTdcOnChannelOpened(pkgName, conn.appInfo.myData.sessionName, &info);
+    conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
+    SetSessionConnStatusById(channelId, conn.status);
     return ret;
 }
 
 int32_t NotifyChannelOpenFailed(int32_t channelId)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
 
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if (TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
 
-    if (conn->serverSide == false) {
+    if (conn.serverSide == false) {
         int ret = TransTdcOnChannelOpenFailed(pkgName, channelId);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
             "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
@@ -212,34 +311,21 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t NotifyChannelClosed(int32_t channelId)
-{
-    SessionConn *tdcInfo = GetTdcInfoByChannelId(channelId);
-    if (tdcInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "notify channel closed failed(%d), get tdcInfo is null", channelId);
-        return SOFTBUS_ERR;
-    }
-
-    if (tdcInfo->serverSide == false) {
-        int ret = TransTdcOnChannelClosed(tdcInfo->appInfo.myData.pkgName, channelId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "TCP direct channel close, channelId = %d, ret = %d", channelId, ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusReply: channelId=%d", channelId);
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
+    SessionConn conn;
+    if (GetSessionConnById(channelId, &conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
-    if (UnpackReply(reply, &conn->appInfo) != SOFTBUS_OK) {
+    if (UnpackReply(reply, &conn.appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackReply failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (SetAppInfoById(channelId, &conn.appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
         return SOFTBUS_ERR;
     }
 
@@ -275,32 +361,38 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
 
     packetHead.dataLen = strlen(reply) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, reply);
-    SoftBusFree(reply);
+    cJSON_free(reply);
     return ret;
 }
 
 static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *request)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL || request == NULL) {
+    SessionConn conn;
+    if (request == NULL || GetSessionConnById(channelId, &conn) == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (UnpackRequest(request, &conn->appInfo) != SOFTBUS_OK) {
+    if (UnpackRequest(request, &conn.appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackRequest error");
         return SOFTBUS_ERR;
     }
-    if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
-        &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
+
+    if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName,
+        &conn.appInfo.myData.uid, &conn.appInfo.myData.pid) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SetAppInfoById(channelId, &conn.appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: mySessionName=%s, peerSessionName=%s",
-        conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
+        conn.appInfo.myData.sessionName, conn.appInfo.peerData.sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: myPid=%d, peerPid=%d",
-        conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
+        conn.appInfo.myData.pid, conn.appInfo.peerData.pid);
 
     int32_t ret = NotifyChannelOpened(channelId);
-    if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, ret) != SOFTBUS_OK) {
+    if (OpenDataBusRequestReply(&conn.appInfo, channelId, seq, ret) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequest reply err");
         return SOFTBUS_ERR;
     }
@@ -320,82 +412,149 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     return OpenDataBusRequest(channelId, seq, packet);
 }
 
-static int32_t ProcessReceivedData(int32_t channelId, const TdcPacketHead *pktHead)
+static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
 {
-    switch (pktHead->module) {
-        case MODULE_SESSION: {
-            char *out = (char *)SoftBusCalloc(pktHead->dataLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1);
-            if (out == NULL) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "malloc fail.");
-                return SOFTBUS_MALLOC_ERR;
-            }
-            uint32_t outLen;
-            if (DecryptMessage(channelId, pktHead, out, &outLen) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt message err.");
-                SoftBusFree(out);
-                return SOFTBUS_ERR;
-            }
-            out[outLen] = 0;
-            cJSON *packet = cJSON_Parse(out);
-            if (packet == NULL) {
-                SoftBusFree(out);
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "json parse failed.");
-                return SOFTBUS_ERR;
-            }
-            int32_t ret = ProcessMessage(channelId, pktHead->flags, pktHead->seq, packet);
-            SoftBusFree(out);
-            cJSON_Delete(packet);
-            return ret;
-        }
-        default: {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "illegal package head module.");
-            return SOFTBUS_ERR;
+    if (g_tcpSrvDataList ==  NULL) {
+        return NULL;
+    }
+
+    ServerDataBuf *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
+        if (item->channelId == channelId) {
+            return item;
         }
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv tcp direct channel id not exist.");
+    return NULL;
 }
 
-int32_t TransTdcProcessPacket(int32_t channelId)
+static int GetPktHeadInfoByDatabuf(const ServerDataBuf *node, uint32_t *inLen, uint64_t *seq, uint32_t *flags)
 {
-    SessionConn *conn = GetTdcInfoByChannelId(channelId);
-    if (conn == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t rc = RecvPacket(channelId);
-    if (rc <= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv failed.");
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "node is null.");
         return SOFTBUS_ERR;
     }
 
-    uint32_t bufLen = conn->dataBuffer.w - conn->dataBuffer.data;
+    TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
+    if (pktHead->module != MODULE_SESSION) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: illegal package head module.");
+        return SOFTBUS_ERR;
+    }
+    *inLen = pktHead->dataLen;
+    *seq = pktHead->seq;
+    *flags = pktHead->flags;
+    return SOFTBUS_OK;
+}
+
+static int32_t ProcessReceivedData(int32_t channelId)
+{
+    uint32_t inLen, flags, outLen;
+    uint64_t seq;
+
+    pthread_mutex_lock(&g_tcpSrvDataList->lock);
+    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    if (GetPktHeadInfoByDatabuf(node, &inLen, &seq, &flags) != SOFTBUS_OK) {
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_ERR;
+    }
+
+    char *in = node->data + sizeof(TdcPacketHead);
+    char *out = (char *)SoftBusCalloc(inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1);
+    if (out == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: malloc fail.");
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (DecryptMessage(channelId, in, inLen, out, &outLen) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: decrypt message err.");
+        SoftBusFree(out);
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_ERR;
+    }
+    char *end = node->data + sizeof(TdcPacketHead) + inLen;
+    if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
+        SoftBusFree(out);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    node->w = node->w - sizeof(TdcPacketHead) - inLen;
+    pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+    out[outLen] = 0;
+    cJSON *packet = cJSON_Parse(out);
+    if (packet == NULL) {
+        SoftBusFree(out);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: json parse failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = ProcessMessage(channelId, flags, seq, packet);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process message fail.[%d]", ret);
+    }
+    SoftBusFree(out);
+    cJSON_Delete(packet);
+    return ret;
+}
+
+static int32_t TransTdcSrvProcData(int32_t channelId)
+{
+    pthread_mutex_lock(&g_tcpSrvDataList->lock);
+    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    if (node == NULL) {
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv can not get buf node.");
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t bufLen = node->w - node->data;
     if (bufLen < DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head not enough, recv next time.");
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srv head not enough, recv next time.");
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
 
-    TdcPacketHead *pktHead = (TdcPacketHead *)(conn->dataBuffer.data);
+    TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
     if (pktHead->magicNumber != MAGIC_NUMBER) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid packet head");
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv recv invalid packet head");
         return SOFTBUS_ERR;
     }
 
     uint32_t dataLen = pktHead->dataLen;
-    if (dataLen > MAX_BUF_LENGTH - DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv buf size[%d]", dataLen);
+    if (dataLen > node->size - DC_MSG_PACKET_HEAD_SIZE) {
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv out of recv buf size[%d]", dataLen);
         return SOFTBUS_ERR;
     }
 
     if (bufLen < dataLen + DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
-            "data not enough, recv next time.[%d][%d][%d]", bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srv data not enough, recv next time.[%d][%d][%d]",
+            bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
+    pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+    return ProcessReceivedData(channelId);
+}
 
-    if (ProcessReceivedData(channelId, pktHead) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data received failed");
+int32_t TransTdcSrvRecvData(int32_t channelId)
+{
+    pthread_mutex_lock(&g_tcpSrvDataList->lock);
+    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    if (node == NULL) {
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv can not find data buf node.");
         return SOFTBUS_ERR;
     }
+    int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
+    if (ret <= 0) {
+        pthread_mutex_unlock(&g_tcpSrvDataList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
+        return SOFTBUS_ERR;
+    }
+    node->w += ret;
+    pthread_mutex_unlock(&g_tcpSrvDataList->lock);
 
-    return SOFTBUS_OK;
+    return TransTdcSrvProcData(channelId);
 }

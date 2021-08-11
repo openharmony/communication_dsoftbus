@@ -40,6 +40,7 @@ static int32_t StartVerifySession(SessionConn *conn)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Generate SessionKey failed");
         return SOFTBUS_ERR;
     }
+    SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Pack Request failed");
@@ -57,10 +58,10 @@ static int32_t StartVerifySession(SessionConn *conn)
 
     if (TransTdcPostBytes(conn->channelId, &packetHead, bytes) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdc post bytes failed");
-        SoftBusFree(bytes);
+        cJSON_free(bytes);
         return SOFTBUS_ERR;
     }
-    SoftBusFree(bytes);
+    cJSON_free(bytes);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartVerifySession ok");
 
     return SOFTBUS_OK;
@@ -85,6 +86,61 @@ static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const char *ip)
+{
+    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail in create session conn node.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    conn->appInfo.myData.apiVersion = API_V2;
+    conn->appInfo.fd = fd;
+    conn->serverSide = true;
+    conn->channelId = chanId;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    conn->timeout = 0;
+
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId,
+        sizeof(conn->appInfo.myData.deviceId)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local deviceId failed.");
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+    }
+
+    if (GetUuidFromAuth(ip, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusFree(conn);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid from from auth failed.");
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(conn->appInfo.peerData.ip, sizeof(conn->appInfo.peerData.ip), ip) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip to app info failed.");
+        SoftBusFree(conn);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    char *authState = "";
+    if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy auth state to app info failed.");
+        SoftBusFree(conn);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    if (TransTdcAddSessionConn(conn) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session conn node failed.");
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+    }
+
+    if (AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add trigger failed, delete session conn.");
+        TransDelSessionConnById(chanId);
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
@@ -95,92 +151,63 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param, cfd = %d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
-    SessionConn *item = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
-    if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Malloc error occurred");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    item->appInfo.myData.apiVersion = API_V2;
-    item->appInfo.fd = cfd;
-    item->serverSide = true;
-    item->channelId = GenerateTdcChannelId();
-    item->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
-    item->timeout = 0;
-    item->dataBuffer.w = item->dataBuffer.data;
 
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, item->appInfo.myData.deviceId,
-        sizeof(item->appInfo.myData.deviceId)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local deviceId failed");
-        SoftBusFree(item);
-        return SOFTBUS_ERR;
+    int32_t channelId = GenerateTdcChannelId();
+    int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create srv data buf node failed.");
+        return ret;
     }
 
-    if (GetUuidFromAuth(ip, item->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusFree(item);
-        return SOFTBUS_ERR;
-    }
-
-    if (memcpy_s(item->appInfo.peerData.ip, IP_LEN, ip, strlen(ip) + 1) != EOK) {
-        SoftBusFree(item);
-        return SOFTBUS_MEM_ERR;
-    }
-
-    char *authState = "";
-    if (memcpy_s(item->appInfo.myData.authState, AUTH_STATE_SIZE_MAX, "", strlen(authState) + 1) != EOK) {
-        SoftBusFree(item);
-        return SOFTBUS_MEM_ERR;
-    }
-
-    if (TransTdcAddSessionConn(item) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcAddSessionConn failed");
-        SoftBusFree(item);
-        return SOFTBUS_ERR;
-    }
-    if (AddTrigger(DIRECT_CHANNEL_SERVER, cfd, READ_TRIGGER) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add trigger failed, delete session conn.");
-        TransTdcDelSessionConn(item);
-        return SOFTBUS_ERR;
+    ret = CreateSessionConnNode(events, cfd, channelId, ip);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session conn node fail, delete data buf node.");
+        TransSrvDelDataBufNode(channelId);
+        return ret;
     }
     return SOFTBUS_OK;
 }
 
 static int32_t OnDataEvent(int events, int fd)
 {
-    SessionConn *conn = GetTdcInfoByFd(fd);
-    if (conn == NULL || conn->appInfo.fd != fd) {
+    SessionConn conn;
+    if (GetSessionConnByFd(fd, &conn) == NULL || conn.appInfo.fd != fd) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info.", fd);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
-        ret = TransTdcProcessPacket(conn->channelId);
+        ret = TransTdcSrvRecvData(conn.channelId);
         if (ret != SOFTBUS_DATA_NOT_ENOUGH) {
             DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
             CloseTcpFd(fd);
             if (ret != SOFTBUS_OK) {
-                NotifyChannelOpenFailed(conn->channelId);
+                NotifyChannelOpenFailed(conn.channelId);
             }
-            TransTdcDelSessionConn(conn);
+            TransDelSessionConnById(conn.channelId);
+            TransSrvDelDataBufNode(conn.channelId);
         }
     } else if (events == SOFTBUS_SOCKET_OUT) {
-        if (conn->serverSide == true) {
+        if (conn.serverSide == true) {
             return ret;
         }
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
         AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
-        ret = StartVerifySession(conn);
+        ret = StartVerifySession(&conn);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
             DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
             CloseTcpFd(fd);
-            NotifyChannelOpenFailed(conn->channelId);
-            TransTdcDelSessionConn(conn);
+            NotifyChannelOpenFailed(conn.channelId);
+            TransDelSessionConnById(conn.channelId);
+            TransSrvDelDataBufNode(conn.channelId);
         }
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
         CloseTcpFd(fd);
-        TransTdcDelSessionConn(conn);
+        TransDelSessionConnById(conn.channelId);
+        TransSrvDelDataBufNode(conn.channelId);
     }
     return ret;
 }

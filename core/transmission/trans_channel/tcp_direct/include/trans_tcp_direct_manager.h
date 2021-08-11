@@ -58,16 +58,9 @@ typedef struct {
 
 typedef struct {
     ListNode node;
-    DataBuffer dataBuffer;
     bool serverSide;
-    bool authStarted;
-    bool openChannelFinished;
     int32_t channelId;
-    TriggerType triggerType;
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
     AppInfo appInfo;
-    IAuthConnection authConn;
     uint32_t status;
     uint32_t timeout;
 } SessionConn;
@@ -83,14 +76,15 @@ typedef struct {
 int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
 uint64_t TransTdcGetNewSeqId(bool serverSide);
-SessionConn *GetTdcInfoByChannelId(int32_t channelId);
-SessionConn *GetTdcInfoByFd(int fd);
+SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
+SessionConn *GetSessionConnByFd(int fd, SessionConn *conn);
+
+int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo);
+int32_t SetSessionConnStatusById(int32_t channelId, int32_t status);
 
 int32_t TransTdcAddSessionConn(SessionConn *conn);
-void TransTdcStopListen(int32_t channelId);
 
-void TransTdcDelSessionConn(SessionConn *conn);
-void TransTdcDelSessionConnByChannelId(int32_t channelId);
+void TransDelSessionConnById(int32_t channelId);
 
 SoftBusList *GetTdcInfoList(void);
 void SetTdcInfoList(SoftBusList *sessionConnList);
@@ -98,6 +92,7 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 void TransTcpDirectDeinit(void);
 void TransTdcDeathCallback(const char *pkgName);
 int32_t GenerateTdcChannelId(void);
+void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen);
 #ifdef __cplusplus
 }
 #endif
