@@ -57,11 +57,6 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
         return sessionId;
     }
 
-    if (listener.OnSessionOpened == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnSessionOpened is NULL");
-        return INVALID_SESSION_ID;
-    }
-
     if (listener.OnSessionOpened(sessionId, SOFTBUS_OK) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session callback OnSessionOpened failed");
         CloseSession(sessionId);
