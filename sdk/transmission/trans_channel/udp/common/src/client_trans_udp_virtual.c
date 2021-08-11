@@ -15,7 +15,6 @@
 
 #include "client_trans_udp_manager.h"
 
-#include "client_trans_file_listener.h"
 #include "softbus_errcode.h"
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
@@ -67,24 +66,6 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
 }
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
-{
-    return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
-void TransDeleteFileListener(const char *sessionName) {}
-
-int32_t TransSetFileReceiveListener(const char *sessionName,
-    const IFileReceiveListener *recvListener, const char *rootDir)
-{
-    return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
-int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListener *sendListener)
-{
-    return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
-int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener)
 {
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
