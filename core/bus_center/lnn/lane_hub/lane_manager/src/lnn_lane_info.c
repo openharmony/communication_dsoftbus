@@ -181,6 +181,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_AUTH_PORT, &port);
         if (ret < 0) {
             LOG_ERR("LnnGetRemoteNumInfo error, ret = %d.", ret);
+            (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
             return;
         }
         g_lanes[laneId].laneInfo.conOption.info.ip.port = (uint16_t)port;

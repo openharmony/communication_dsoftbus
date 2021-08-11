@@ -42,9 +42,17 @@ int32_t LnnInitNetworkManager(void)
             continue;
         }
         if (g_networkImpl[i].InitNetworkImpl() != SOFTBUS_OK) {
-            LOG_ERR("init network impl(%d) failed", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
+}
+
+void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+{
+    (void)type;
+    if (LnnCallIpDiscovery != NULL) {
+        LnnCallIpDiscovery();
+    }
 }
