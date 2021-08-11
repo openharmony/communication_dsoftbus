@@ -48,11 +48,11 @@ common_src = [
 ]
 
 common_deps = [
-  "$dsoftbus_core_path/adapter/kernel:softbus_adapter_kernel",
   "$dsoftbus_core_path/common/json_utils:json_utils",
   "$dsoftbus_core_path/common/message_handler:message_handler",
   "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
   "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
+  "$dsoftbus_root_path/adapter:softbus_adapter",
 ]
 
 if (defined(ohos_lite)) {

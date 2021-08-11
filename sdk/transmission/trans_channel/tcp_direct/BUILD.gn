@@ -32,9 +32,9 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/common/security/sequence_verification:softbus_seq_verification",
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_core_common",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/connection/common:conn_common",
     "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
     "$hilog_lite_deps_path",
@@ -43,7 +43,7 @@ if (defined(ohos_lite)) {
 
   common_include = [
     "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -78,7 +78,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("dsoftbus_trans_direct_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/security/sequence_verification/include",
       "$dsoftbus_root_path/core/common/wifi_common/tcp_socket/include",

@@ -17,9 +17,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("stream_config") {
   defines = [ "FILLP_LINUX" ]
   cflags_cc = [ "-std=c++14" ]
-  ldflags = [
-    "-lstdc++",
-  ]
+  ldflags = [ "-lstdc++" ]
 }
 
 shared_library("libsoftbus_stream") {
@@ -28,7 +26,7 @@ shared_library("libsoftbus_stream") {
 
   include_dirs = [
     "include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/interfaces/kits/common",

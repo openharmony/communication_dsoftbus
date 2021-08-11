@@ -20,9 +20,9 @@
 
 #include "common_list.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_type_def.h"
 #include "unistd.h"
 

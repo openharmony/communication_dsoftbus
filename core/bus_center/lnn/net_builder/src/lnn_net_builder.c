@@ -31,11 +31,10 @@
 #include "lnn_network_id.h"
 #include "lnn_node_weight.h"
 #include "lnn_sync_item_info.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
-
 
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 

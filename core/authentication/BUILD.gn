@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
   shared_library("dsoftbus_auth_server") {
     sources = common_src
     include_dirs = [
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
       "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -61,12 +61,11 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":auth_server_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
       "$hilog_lite_deps_path",
@@ -80,7 +79,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("dsoftbus_auth_server") {
     sources = common_src
     include_dirs = [
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
       "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -97,22 +96,21 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":auth_server_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/message_handler",
       "$dsoftbus_root_path/core/common/security:softbus_crypto",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
       "$dsoftbus_root_path/core/connection/manager:conn_manager",
     ]
     if (is_standard_system) {
       external_deps = [
-        "hiviewdfx_hilog_native:libhilog",
         "deviceauth_standard:deviceauth_sdk",
+        "hiviewdfx_hilog_native:libhilog",
       ]
     }
     part_name = "dsoftbus_standard"
