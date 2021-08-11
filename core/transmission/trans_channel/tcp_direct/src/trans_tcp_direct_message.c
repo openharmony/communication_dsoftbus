@@ -207,7 +207,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
-	}
+    }
     int fd = conn->appInfo.fd;
     SoftBusFree(conn);
     if (SendTcpData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
@@ -383,7 +383,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
     }
 
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
-         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
+        &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
