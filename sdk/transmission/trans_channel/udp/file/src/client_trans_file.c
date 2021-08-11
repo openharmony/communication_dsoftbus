@@ -44,8 +44,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fatal error occurred.");
-        NSTACKX_DFileClose(dfileId);
-        g_udpChannelMgrCb->OnUdpChannelClosed(udpChannel.channelId);
+        TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
     FileListener fileListener = {0};
@@ -93,8 +92,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fatal error occurred.");
-        NSTACKX_DFileClose(dfileId);
-        g_udpChannelMgrCb->OnUdpChannelClosed(udpChannel.channelId);
+        TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
     FileListener fileListener = {0};
@@ -175,12 +173,6 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
 void TransCloseFileChannel(int32_t dfileId)
 {
     NSTACKX_DFileClose(dfileId);
-    UdpChannel udpChannel = {0};
-    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by fileId failed.");
-        return;
-    }
-    g_udpChannelMgrCb->OnUdpChannelClosed(udpChannel.channelId);
 }
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb)
