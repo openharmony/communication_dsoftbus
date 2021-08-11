@@ -170,45 +170,52 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 
 static int32_t OnDataEvent(int events, int fd)
 {
-    SessionConn conn;
-    if (GetSessionConnByFd(fd, &conn) == NULL || conn.appInfo.fd != fd) {
+    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnDataEvent malloc fail.");
+        return SOFTBUS_ERR;
+    }
+    if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info.", fd);
+        SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
-        ret = TransTdcSrvRecvData(conn.channelId);
+        ret = TransTdcSrvRecvData(conn->channelId);
         if (ret != SOFTBUS_DATA_NOT_ENOUGH) {
             DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
             CloseTcpFd(fd);
             if (ret != SOFTBUS_OK) {
-                NotifyChannelOpenFailed(conn.channelId);
+                NotifyChannelOpenFailed(conn->channelId);
             }
-            TransDelSessionConnById(conn.channelId);
-            TransSrvDelDataBufNode(conn.channelId);
+            TransDelSessionConnById(conn->channelId);
+            TransSrvDelDataBufNode(conn->channelId);
         }
     } else if (events == SOFTBUS_SOCKET_OUT) {
-        if (conn.serverSide == true) {
+        if (conn->serverSide == true) {
+            SoftBusFree(conn);
             return ret;
         }
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
         AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
-        ret = StartVerifySession(&conn);
+        ret = StartVerifySession(conn);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
             DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
             CloseTcpFd(fd);
-            NotifyChannelOpenFailed(conn.channelId);
-            TransDelSessionConnById(conn.channelId);
-            TransSrvDelDataBufNode(conn.channelId);
+            NotifyChannelOpenFailed(conn->channelId);
+            TransDelSessionConnById(conn->channelId);
+            TransSrvDelDataBufNode(conn->channelId);
         }
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
         DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
         CloseTcpFd(fd);
-        TransDelSessionConnById(conn.channelId);
-        TransSrvDelDataBufNode(conn.channelId);
+        TransDelSessionConnById(conn->channelId);
+        TransSrvDelDataBufNode(conn->channelId);
     }
+    SoftBusFree(conn);
     return ret;
 }
 
