@@ -48,11 +48,14 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
     switch (status) {
         case STREAM_CONNECTED:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream connected.");
+            if (g_udpChannelMgrCb->OnUdpChannelOpened == NULL) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback on udp channel opened is null.");
+                return;
+            }
             g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
             break;
         case STREAM_CLOSED:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream closed.");
-            g_udpChannelMgrCb->OnUdpChannelClosed(channelId);
             break;
         case STREAM_INIT:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream init.");
@@ -74,8 +77,8 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 
 static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
-    if (g_udpChannelMgrCb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback is null.");
+    if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnStreamReceived == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback on stream received is null.");
         return;
     }
 
@@ -128,8 +131,9 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             return SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "stream start client success.");
-        if (g_udpChannelMgrCb == NULL) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "g_udpChannelMgrCb is NULL.");
+        if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnUdpChannelOpened == NULL)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback on udp channel opened is null.");
+            return SOFTBUS_ERR;
         }
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     }
@@ -148,6 +152,5 @@ int32_t TransCloseStreamChannel(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close stream channel failed.");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
