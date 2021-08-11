@@ -286,7 +286,7 @@ int32_t OpenAuthServer(void)
 void AuthCloseTcpFd(int32_t fd)
 {
     (void)DelTrigger(AUTH, fd, RW_TRIGGER);
-    CloseTcpFd(fd);
+    TcpShutDown(fd);
 }
 
 void CloseAuthServer(void)
