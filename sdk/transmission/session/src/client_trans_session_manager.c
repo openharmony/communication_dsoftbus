@@ -18,10 +18,10 @@
 #include <securec.h>
 
 #include "client_trans_channel_manager.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
@@ -98,8 +98,11 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         SessionInfo *sessionNode = NULL;
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-            int32_t ret = ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans close channel ret = %d", ret);
+            server->listener.session.OnSessionClosed(sessionNode->sessionId);
+            (void) ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+            DestroySessionId(sessionNode->sessionId);
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
         }
     }
 
@@ -161,10 +164,10 @@ void TransSessionTimer(void)
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(serverNode->sessionList), SessionInfo, node) {
             sessionNode->timeout++;
             if (sessionNode->timeout >= TRANS_SESSION_TIMEOUT) {
-                (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-                ListDelete(&(sessionNode->node));
-                DestroySessionId(sessionNode->sessionId);
                 serverNode->listener.session.OnSessionClosed(sessionNode->sessionId);
+                (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+                DestroySessionId(sessionNode->sessionId);
+                ListDelete(&(sessionNode->node));
                 SoftBusFree(sessionNode);
             }
         }

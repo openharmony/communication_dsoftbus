@@ -19,10 +19,10 @@
 #include <securec.h>
 
 #include "bus_center_server_proxy.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
 #define DEFAULT_NODE_STATE_CB_CNT 10

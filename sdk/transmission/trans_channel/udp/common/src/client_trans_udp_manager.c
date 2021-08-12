@@ -19,13 +19,11 @@
 #include "client_trans_file.h"
 #include "client_trans_stream.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
-
-#define MAX_UDP_CHANNEL 10
 
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
@@ -44,12 +42,6 @@ int32_t TransAddUdpChannel(UdpChannel *channel)
     if (pthread_mutex_lock(&(g_udpChannelMgr->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
-    }
-
-    if (g_udpChannelMgr->cnt >= MAX_UDP_CHANNEL) {
-        (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel num reach max");
-        return SOFTBUS_ERR;
     }
 
     UdpChannel *channelNode = NULL;
@@ -180,7 +172,9 @@ static void OnUdpChannelOpened(int32_t channelId)
     info.groupId = channel.info.groupId;
     info.peerDeviceId = channel.info.peerDeviceId;
     info.peerSessionName = channel.info.peerSessionName;
-    g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
+    if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
+        g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
+    }
 }
 
 static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const ChannelInfo *channel)
@@ -260,7 +254,7 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId)
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "tans delete udp channel failed.");
     }
-    if (g_sessionCb == NULL) {
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionOpenFailed == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client trans udp manager seesion callback is null");
         return SOFTBUS_ERR;
     }
@@ -280,18 +274,12 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
         return SOFTBUS_ERR;
     }
 
-    if (TransSetUdpChannelEnable(channelId, false) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel enable failed.");
-        return SOFTBUS_ERR;
+    if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans delete udp channel failed.");
     }
-    if (isActive) {
-        if (ClosePeerUdpChannel(channelId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close peer udp channel failed.");
-            (void)TransCloseStreamChannel(channelId);
-            TransCloseFileChannel(channel.dfileId);
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
+
+    if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close peer udp channel failed.");
     }
     switch (channel.businessType) {
         case BUSINESS_TYPE_STREAM:
@@ -306,6 +294,10 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type.");
             return SOFTBUS_ERR;
+    }
+
+    if (!isActive && (g_sessionCb != NULL) && (g_sessionCb->OnSessionClosed != NULL)) {
+        g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
     }
     return SOFTBUS_OK;
 }
@@ -336,6 +328,9 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
 
 static void OnUdpChannelClosed(int32_t channelId)
 {
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionClosed == NULL)) {
+        return;
+    }
     g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans delete udp channel failed.");
@@ -344,11 +339,17 @@ static void OnUdpChannelClosed(int32_t channelId)
 
 static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnStreamReceived == NULL)) {
+        return;
+    }
     g_sessionCb->OnStreamReceived(channelId, CHANNEL_TYPE_UDP, data, ext, param);
 }
 
 static int32_t OnFileGetSessionId(int32_t channelId, int32_t *sessionId)
 {
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnGetSessionId == NULL)) {
+        return SOFTBUS_ERR;
+    }
     return g_sessionCb->OnGetSessionId(channelId, CHANNEL_TYPE_UDP, sessionId);
 }
 
@@ -365,6 +366,10 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     if (g_udpChannelMgr != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel info manager has initialized.");
         return SOFTBUS_OK;
+    }
+    if (callback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel info manager init failed, calback is null.");
+        return SOFTBUS_ERR;
     }
     g_sessionCb = callback;
     RegisterStreamCb(&g_udpChannelCb);

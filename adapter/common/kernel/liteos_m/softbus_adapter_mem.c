@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-#include "softbus_mem_interface.h"
+#include "softbus_adapter_mem.h"
+
 #include <securec.h>
 
-#include "softbus_log.h"
+#if defined(OHOS_MEM)
+#include "ohos_mem_pool.h"
+#endif
 
 void *SoftBusMalloc(unsigned int size)
 {
     if (size > MAX_MALLOC_SIZE) {
         return NULL;
     }
-    return malloc(size);
+
+#if defined(OHOS_MEM)
+    void *tmp = OhosMalloc(MEM_TYPE_SOFTBUS_LSRAM, size);
+#else
+    void *tmp = malloc(size);
+#endif
+    return tmp;
 }
 
 void *SoftBusCalloc(unsigned int size)
@@ -35,7 +44,6 @@ void *SoftBusCalloc(unsigned int size)
 
     errno_t err = memset_s(tmp, size, 0, size);
     if (err != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset_s failed");
         SoftBusFree(tmp);
         return NULL;
     }
@@ -47,5 +55,9 @@ void SoftBusFree(void *pt)
     if (pt == NULL) {
         return;
     }
+#if defined(OHOS_MEM)
+    OhosFree(pt);
+#else
     free(pt);
+#endif
 }
