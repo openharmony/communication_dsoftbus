@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/interfaces/innerkits/discovery",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "//third_party/bounds_checking_function/include",
       "$hilog_lite_include_path",
     ]
@@ -48,7 +48,7 @@ if (defined(ohos_lite)) {
     ]
     public_configs = [ ":disc_server_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
@@ -67,7 +67,7 @@ if (defined(ohos_lite)) {
       "ipc/include",
       "ipc/standard/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/frame/standard/client/include",
       "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
       "//utils/system/safwk/native/include",
@@ -83,12 +83,12 @@ if (defined(ohos_lite)) {
     public_configs = [ ":disc_server_interface" ]
     if (is_standard_system) {
       external_deps = [
-        "ipc:ipc_core",
         "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_core",
       ]
     }
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",

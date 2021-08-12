@@ -17,15 +17,14 @@
 
 #include "common_list.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 #include "trans_udp_negotiation.h"
 
-#define MAX_UDP_CHANNEL_NUM 20
 #define MAX_WAIT_CONNECT_TIME 5
 
 static SoftBusList *g_udpChannelMgr = NULL;
@@ -118,12 +117,6 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     if (pthread_mutex_lock(&(g_udpChannelMgr->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
-    }
-
-    if (g_udpChannelMgr->cnt >= MAX_UDP_CHANNEL_NUM) {
-        (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel num reach max");
-        return SOFTBUS_ERR;
     }
 
     UdpChannelInfo *udpChannelNode = NULL;

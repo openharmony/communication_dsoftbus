@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_os_interface.h"
+#include "softbus_adapter_timer.h"
 
 #include "cmsis_os2.h"
 #include "softbus_errcode.h"
@@ -61,62 +61,5 @@ int SoftBusDeleteTimer(void *timerId)
 int SoftBusSleepMs(unsigned int ms)
 {
     osDelay(ms * osKernelGetTickFreq() / MS_PER_SECOND);
-    return SOFTBUS_OK;
-}
-
-int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
-{
-    if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t fileLen = 0;
-    int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileOpen fail");
-        return SOFTBUS_FILE_ERR;
-    }
-    int ret = UtilsFileStat(fileName, &fileLen);
-    if (ret < 0) {
-        UtilsFileClose(fd);
-        goto EXIT;
-    }
-    ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileSeek fail");
-        goto EXIT;
-    }
-    if (fileLen > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read file len not legal, clear buf");
-        goto EXIT;
-    }
-    ret = UtilsFileRead(fd, readBuf, maxLen);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileRead, ret=%d", ret);
-        goto EXIT;
-    }
-    UtilsFileClose(fd);
-    return SOFTBUS_OK;
-
-EXIT:
-    UtilsFileClose(fd);
-    return SOFTBUS_FILE_ERR;
-}
-
-int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
-{
-    int ret;
-    int fd;
-    fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId UtilsFileOpen fail");
-        return SOFTBUS_FILE_ERR;
-    }
-    ret = UtilsFileWrite(fd, writeBuf, len);
-    if (ret != len) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "UtilsFileOpen UtilsFileWrite fail");
-        UtilsFileClose(fd);
-        return SOFTBUS_FILE_ERR;
-    }
-    UtilsFileClose(fd);
     return SOFTBUS_OK;
 }

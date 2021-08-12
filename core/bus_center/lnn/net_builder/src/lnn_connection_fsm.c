@@ -24,9 +24,9 @@
 #include "lnn_exchange_device_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #define STATE_AUTH_INDEX 0
 #define STATE_SYNC_DEVICE_INFO_INDEX 1

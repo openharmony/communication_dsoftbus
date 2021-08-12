@@ -24,11 +24,11 @@
 #include "auth_socket.h"
 #include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

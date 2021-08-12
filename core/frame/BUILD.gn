@@ -18,7 +18,7 @@ if (ohos_kernel_type == "liteos_m") {
   static_library("softbus_server_frame") {
     include_dirs = [
       "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
@@ -52,7 +52,7 @@ if (ohos_kernel_type == "liteos_m") {
       "common/include",
       "small/init/include",
       "small/client_manager/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",
@@ -83,7 +83,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
       "$dsoftbus_root_path/core/common/log:softbus_log",

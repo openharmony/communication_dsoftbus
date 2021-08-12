@@ -20,11 +20,11 @@
 #include "ble_connection.h"
 #include "br_connection.h"
 #include "common_list.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
 

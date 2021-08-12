@@ -19,10 +19,10 @@
 
 #include "auth_connection.h"
 #include "bus_center_manager.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_tcp_socket.h"
 
 #define AUTH_DEFAULT_PORT (-1)
