@@ -86,7 +86,6 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
-      "$dsoftbus_root_path/core/bus_center/service:dsoftbus_bus_center_service",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
       "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
