@@ -32,7 +32,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "trans_tcp_direct_listener.h"
 
 #define IP_DEFAULT_PORT 0
