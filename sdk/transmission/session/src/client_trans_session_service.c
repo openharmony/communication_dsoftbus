@@ -229,10 +229,9 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     return SOFTBUS_ERR;
 }
 
-int OpenAuthSession(const char *sessionName, const void *addrInfo, AddrType type)
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
-        addrInfo == NULL || type >= ADDR_TYPE_MAX) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || addrInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -245,21 +244,15 @@ int OpenAuthSession(const char *sessionName, const void *addrInfo, AddrType type
         return ret;
     }
     int32_t channelId = INVALID_CHANNEL_ID;
-    ConnectionAddr addr;
-    switch (type) {
-        case ADDR_TYPE_STRUCT:
-            channelId = ServerIpcOpenAuthSession(sessionName, addrInfo);
-            break;
-        case ADDR_TYPE_JSON_STR:
-            ret = ConvertAddrStr((const char *)addrInfo, &addr);
-            if (ret != SOFTBUS_OK) {
-                return ret;
-            }
-            channelId = ServerIpcOpenAuthSession(sessionName, &addr);
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open auth session err addr type=%d", type);
-            return SOFTBUS_INVALID_PARAM;
+    if (addrInfo->type == CONNECTION_ADDR_MIX) {
+        ConnectionAddr addr;
+        ret = ConvertAddrStr((const char *)addrInfo->info.mixAddr.addr, &addr);
+        if (ret != SOFTBUS_OK) {
+            return ret;
+        }
+        channelId = ServerIpcOpenAuthSession(sessionName, &addr);
+    } else {
+        channelId = ServerIpcOpenAuthSession(sessionName, addrInfo);
     }
     ret = ClientSetChannelBySessionId(sessionId, channelId);
     if (ret != SOFTBUS_OK) {
