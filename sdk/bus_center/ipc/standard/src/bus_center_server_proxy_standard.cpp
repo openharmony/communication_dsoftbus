@@ -88,12 +88,18 @@ int32_t BusCenterServerProxy::OpenSession(const char *mySessionName, const char 
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t BusCenterServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
     return SOFTBUS_OK;
 }

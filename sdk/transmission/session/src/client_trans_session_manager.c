@@ -432,6 +432,46 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     return SOFTBUS_OK;
 }
 
+static SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return NULL;
+    }
+    SessionInfo *session = SoftBusCalloc(sizeof(SessionInfo));
+    if (session == NULL) {
+        return NULL;
+    }
+    session->channelType = CHANNEL_TYPE_AUTH;
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        SoftBusFree(session);
+        return NULL;
+    }
+    return session;
+}
+
+int32_t ClientAddNonEncryptSession(const char *sessionName, int32_t *sessionId)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || (sessionId == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+    SessionInfo *session = CreateNonEncryptSessionInfo(sessionName);
+    if (session == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (ClientAddNewSession(sessionName, session) != SOFTBUS_OK) {
+        SoftBusFree(session);
+        return SOFTBUS_ERR;
+    }
+    *sessionId = session->sessionId;
+    return SOFTBUS_OK;
+}
+
 int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 {
     if ((type == SEC_TYPE_UNKNOWN) || (sessionName == NULL)) {

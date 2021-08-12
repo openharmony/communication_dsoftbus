@@ -1055,6 +1055,27 @@ void AuthNotifyLnnDisconn(const AuthManager *auth)
         (void)AuthHandleLeaveLNN(auth->authId);
     } else {
         auth->cb->onDisconnect(auth->authId);
+    } else {
+        if (auth->status < IN_SYNC_PROGRESS) {
+            LOG_INFO("auth no need to notify lnn");
+            (void)AuthHandleLeaveLNN(auth->authId);
+        } else {
+            auth->cb->onDisconnect(auth->authId);
+        }
+    }
+}
+
+void AuthNotifyTransDisconn(int64_t authId)
+{
+    int32_t i;
+    if (g_transCallback == NULL) {
+        LOG_ERR("auth trans callback is null");
+        return;
+    }
+    for (i = 0; i < MODULE_NUM; i++) {
+        if (g_transCallback[i].onAuthChannelClose != NULL) {
+            g_transCallback[i].onAuthChannelClose(authId);
+        }
     }
 }
 
