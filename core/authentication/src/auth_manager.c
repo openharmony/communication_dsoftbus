@@ -1055,13 +1055,6 @@ void AuthNotifyLnnDisconn(const AuthManager *auth)
         (void)AuthHandleLeaveLNN(auth->authId);
     } else {
         auth->cb->onDisconnect(auth->authId);
-    } else {
-        if (auth->status < IN_SYNC_PROGRESS) {
-            LOG_INFO("auth no need to notify lnn");
-            (void)AuthHandleLeaveLNN(auth->authId);
-        } else {
-            auth->cb->onDisconnect(auth->authId);
-        }
     }
 }
 
