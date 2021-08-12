@@ -168,14 +168,15 @@ static int TestOpenAuthSession1(const char *ip, int port)
     addr.type = CONNECTION_ADDR_ETH;
     addr.info.ip.port = port;
     (void)memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, ip, IP_STR_MAX_LEN);
-    return OpenAuthSession(g_authSessionName, &addr, ADDR_TYPE_STRUCT);
+    return OpenAuthSession(g_authSessionName, &addr);
 }
 
 static int TestOpenAuthSession2(const char *ip, int port)
 {
-    char authInfo[AUTH_INFO_LEN];
-    sprintf(authInfo, "{\"WIFI_IP\":\"%s\",\"WIFI_PORT\":%d}", ip, port);
-    return OpenAuthSession(g_authSessionName, authInfo, ADDR_TYPE_JSON_STR);
+    ConnectionAddr addr;
+    addr.type = CONNECTION_ADDR_MIX;
+    sprintf(addr.info.mixAddr.addr, "{\"WIFI_IP\":\"%s\",\"WIFI_PORT\":%d}", ip, port);
+    return OpenAuthSession(g_authSessionName, authInfo);
 }
 
 int main(int argc, char **argv)
