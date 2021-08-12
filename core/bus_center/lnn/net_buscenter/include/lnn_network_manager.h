@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
-
 #ifndef LNN_NETWORK_MANAGER_H
 #define LNN_NETWORK_MANAGER_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -26,7 +29,11 @@ extern "C" {
 
 int32_t LnnInitNetworkManager(void);
 
+void LnnNotifyAllTypeOffline(ConnectionAddrType type);
+
 int32_t __attribute__ ((weak)) LnnInitIpNetwork(void);
+
+void __attribute__ ((weak)) LnnCallIpDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus

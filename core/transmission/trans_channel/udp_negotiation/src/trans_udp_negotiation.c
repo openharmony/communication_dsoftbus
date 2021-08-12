@@ -543,11 +543,11 @@ int32_t TransCloseUdpChannel(int32_t channelId)
 
 static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp module callback enter.");
-    if (option == NULL || info == NULL) {
+    if (option == NULL || info == NULL ||  || info->module != MODULE_UDP_INFO) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp module callback enter.");
 
     cJSON *json = NULL;
     uint8_t *decryptData = NULL;
@@ -587,7 +587,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
     AuthTransCallback transUdpCb = {
         .onTransUdpDataRecv = UdpModuleCb
     };
-    if (AuthTransDataRegCallback(TRANS, &transUdpCb) != SOFTBUS_OK) {
+    if (AuthTransDataRegCallback(TRANS_UDP_DATA, &transUdpCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register udp callback to auth failed.");
         return SOFTBUS_ERR;
     }
