@@ -20,6 +20,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "softbus_common.h"
 
 namespace OHOS {
 class ISoftBusServer : public IRemoteBroker {
@@ -36,9 +37,10 @@ public:
     virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
     virtual int32_t OpenSession(const char *mySessionName, const char *peerSessionName,
         const char *peerDeviceId, const char *groupId, int32_t flags) = 0;
+    virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t CloseChannel(int32_t channelId, int32_t channelType) = 0;
-    virtual int32_t SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType) = 0;
-
+    virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
+        const void *data, uint32_t len, int32_t msgType) = 0;
     virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) = 0;
     virtual int32_t LeaveLNN(const char *pkgName, const char *networkId) = 0;
     virtual int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) = 0;

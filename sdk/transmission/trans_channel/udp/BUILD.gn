@@ -14,7 +14,10 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("trans_udp_channel_sdk_interface") {
-  include_dirs = [ "common/include" ]
+  include_dirs = [
+    "common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
 }
 
 if (enable_trans_udp == true) {

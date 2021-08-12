@@ -18,6 +18,7 @@ config("disc_client_interface") {
     "manager/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
   ]
 }
 

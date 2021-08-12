@@ -26,12 +26,15 @@ if (defined(ohos_lite)) {
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_sdk_path/frame/common/include",
     "$libsec_include_path",
     "$hilog_lite_include_path",
+    "//third_party/cJSON",
   ]
 
   common_deps = [
+    "$dsoftbus_root_path/core/common/json_utils:json_utils",
     "$dsoftbus_core_path/common/utils:softbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
@@ -88,6 +91,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_sdk_path/bus_center/service:dsoftbus_bus_center_service_sdk",
       "$dsoftbus_sdk_path/frame:softbus_client_frame",
       "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",

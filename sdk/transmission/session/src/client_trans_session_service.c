@@ -17,9 +17,11 @@
 
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
+#include "securec.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
@@ -190,6 +192,82 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return INVALID_SESSION_ID;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d", sessionId, channelId);
+    return sessionId;
+}
+
+
+static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
+{
+    if (addrStr == NULL || addrInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *obj = cJSON_Parse(addrStr);
+    if (obj == NULL) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (memset_s(addrInfo, sizeof(addrInfo), 0x0, sizeof(addrInfo)) != EOK) {
+        cJSON_Delete(obj);
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t port;
+    if (GetJsonObjectStringItem(obj, "WIFI_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
+        GetJsonObjectNumberItem(obj, "WIFI_PORT", &port)) {
+        addrInfo->info.ip.port = (uint16_t)port;
+        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
+            cJSON_Delete(obj);
+            addrInfo->type = CONNECTION_ADDR_WLAN;
+            return SOFTBUS_OK;
+        }
+    }
+    if (GetJsonObjectStringItem(obj, "BR_MAC", addrInfo->info.br.brMac, BT_MAC_LEN)) {
+        cJSON_Delete(obj);
+        addrInfo->type = CONNECTION_ADDR_BR;
+        return SOFTBUS_OK;
+    }
+    cJSON_Delete(obj);
+    return SOFTBUS_ERR;
+}
+
+int OpenAuthSession(const char *sessionName, const void *addrInfo, AddrType type)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+        addrInfo == NULL || type >= ADDR_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
+
+    int32_t sessionId;
+    int32_t ret = ClientAddNonEncryptSession(sessionName, &sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add non encrypt session err: ret=%d", ret);
+        return ret;
+    }
+    int32_t channelId = INVALID_CHANNEL_ID;
+    ConnectionAddr addr;
+    switch (type) {
+        case ADDR_TYPE_STRUCT:
+            channelId = ServerIpcOpenAuthSession(sessionName, addrInfo);
+            break;
+        case ADDR_TYPE_JSON_STR:
+            ret = ConvertAddrStr((const char *)addrInfo, &addr);
+            if (ret != SOFTBUS_OK) {
+                return ret;
+            }
+            channelId = ServerIpcOpenAuthSession(sessionName, &addr);
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open auth session err addr type=%d", type);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    ret = ClientSetChannelBySessionId(sessionId, channelId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
+        (void)ClientDeleteSession(sessionId);
+        return INVALID_SESSION_ID;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d", sessionId);
     return sessionId;
 }
 

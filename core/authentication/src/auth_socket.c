@@ -47,12 +47,20 @@ int32_t OpenTcpChannel(const ConnectOption *option)
         return SOFTBUS_ERR;
     }
     if (AddTrigger(AUTH, fd, RW_TRIGGER) != SOFTBUS_OK) {
+<<<<<<< Updated upstream
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
+=======
+        LOG_ERR("auth AddTrigger failed");
+>>>>>>> Stashed changes
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
     }
     if (SetTcpKeepAlive(fd, AUTH_HEART_TIME) != SOFTBUS_OK) {
+<<<<<<< Updated upstream
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth set tcp keep alive failed");
+=======
+        LOG_ERR("auth set tcp keep alive failed");
+>>>>>>> Stashed changes
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
     }
@@ -62,12 +70,20 @@ int32_t OpenTcpChannel(const ConnectOption *option)
 int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
 {
     if (auth == NULL || option == NULL) {
+<<<<<<< Updated upstream
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
+=======
+        LOG_ERR("invalid parameter");
+>>>>>>> Stashed changes
         return SOFTBUS_ERR;
     }
     int fd = OpenTcpChannel(option);
     if (fd < 0) {
+<<<<<<< Updated upstream
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
+=======
+        LOG_ERR("auth OpenTcpChannel failed");
+>>>>>>> Stashed changes
         return SOFTBUS_ERR;
     }
     auth->fd = fd;

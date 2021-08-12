@@ -106,6 +106,24 @@ int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionN
     return channelId;
 }
 
+int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    if ((sessionName == nullptr) || (addrInfo == nullptr)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    int channelId = g_serverProxy->OpenAuthSession(sessionName, addrInfo);
+    if (channelId < SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed!\n");
+        return SOFTBUS_ERR;
+    }
+    return channelId;
+}
+
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     if (g_serverProxy == nullptr) {
@@ -119,12 +137,12 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
     return g_serverProxy->CloseChannel(channelId, channelType);
 }
 
-int32_t ServerIpcSendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
 
-    return g_serverProxy->SendMessage(channelId, data, len, msgType);
+    return g_serverProxy->SendMessage(channelId, channelType, data, len, msgType);
 }

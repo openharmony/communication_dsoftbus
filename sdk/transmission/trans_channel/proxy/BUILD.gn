@@ -30,6 +30,7 @@ if (defined(ohos_lite)) {
     static_library("dsoftbus_trans_proxy_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_core_path/common/include",
         "$dsoftbus_root_path/sdk/transmission/session/include",
       ]
@@ -41,6 +42,7 @@ if (defined(ohos_lite)) {
     shared_library("dsoftbus_trans_proxy_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_core_path/common/include",
         "$dsoftbus_root_path/sdk/transmission/session/include",
       ]
@@ -59,6 +61,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("dsoftbus_trans_proxy_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_core_path/common/include",
       "$dsoftbus_root_path/sdk/transmission/session/include",
     ]

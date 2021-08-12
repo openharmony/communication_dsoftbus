@@ -28,7 +28,7 @@ extern int TransOpenSession(const char *mySessionName,
 
 extern int TransCloseChannel(int32_t channelId);
 
-extern int TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType);
+extern int TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
 extern int LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen);
 
@@ -75,9 +75,10 @@ int __attribute__ ((weak)) TransCloseChannel(int32_t channelId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int __attribute__ ((weak)) TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int __attribute__ ((weak)) TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     (void)channelId;
+    (void)channelType;
     (void)data;
     (void)len;
     (void)msgType;

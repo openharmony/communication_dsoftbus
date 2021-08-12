@@ -259,6 +259,14 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, const SessionAttribute* attr);
 
+typedef enum {
+    ADDR_TYPE_STRUCT = 0,
+    ADDR_TYPE_JSON_STR = 1,
+    ADDR_TYPE_MAX
+} AddrType;
+
+int OpenAuthSession(const char *sessionName, const void *addrInfo, AddrType type);
+
 /**
  * @brief Closes a connected session based on a session ID.
  *

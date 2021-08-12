@@ -113,12 +113,18 @@ int32_t SoftBusServerProxyFrame::OpenSession(const char *mySessionName, const ch
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
     return SOFTBUS_OK;
 }
