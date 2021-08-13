@@ -29,15 +29,12 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_ip_utils.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_tcp_direct_listener.h"
 
 #define IP_DEFAULT_PORT 0
-
-static bool g_isIpTrigger = false;
 
 static int32_t OpenAuthPort(void)
 {
@@ -203,11 +200,7 @@ static void LeaveOldIpNetwork(const char *ifCurrentName, const char *ifNewName)
     }
     
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN start leave ip network\n");
-    if (strncmp(ifNewName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        g_isIpTrigger = true;
-    }
     if (LnnRequestLeaveByAddrType(type) != SOFTBUS_OK) {
-        g_isIpTrigger = false;
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave ip network fail\n");
     }
 }
@@ -236,11 +229,12 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const void *para
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip info not changed\n");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip info changed, start leave old ip network\n");
-    if (g_isIpTrigger) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN leaving now\n");
-        return;
+    if (strncmp(ifCurrentName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "close previous ip link and stop previous discovery\n");
+        CloseIpLink();
+        LnnStopDiscovery();
     }
+
     LeaveOldIpNetwork(ifCurrentName, ifNewName);
 }
 
@@ -271,7 +265,6 @@ void LnnCallIpDiscovery(void)
     char ipNewAddr[IP_LEN] = {0};
     char ifNewName[NET_IF_NAME_LEN] = {0};
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local ledger\n");
     if (GetLocalIpInfo(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get current ip info failed\n");
         return;
@@ -280,30 +273,25 @@ void LnnCallIpDiscovery(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
         return;
     }
+    if (strcmp(ipCurrentAddr, ipNewAddr) == 0 && strcmp(ifCurrentName, ifNewName) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip info not changed\n");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local ledger\n");
     if (SetLocalIpInfo(ipNewAddr, ifNewName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed\n");
         return;
     }
-    if (strncmp(ifCurrentName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        if (g_isIpTrigger) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "close previous ip link and stop previous discovery\n");
-            CloseIpLink();
-            LnnStopDiscovery();
-        }
-    }
     if (strncmp(ifNewName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
         DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
-        if (g_isIpTrigger) {
-            g_isIpTrigger = false;
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open ip link and start discovery\n");           
-            if (OpenIpLink() != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
-            }
-            if (LnnStartDiscovery() != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
-            }
-            SetCallLnnStatus(true);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open ip link and start discovery\n");           
+        if (OpenIpLink() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
         }
+        if (LnnStartDiscovery() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
+        }
+        SetCallLnnStatus(true);
     } else {
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
