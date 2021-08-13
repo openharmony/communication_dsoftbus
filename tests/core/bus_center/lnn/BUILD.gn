@@ -21,6 +21,7 @@ ohos_unittest("LNNTest") {
   sources = [
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/net_builder_test.cpp",
+    "unittest/net_buscenter_test.cpp",
   ]
 
   include_dirs = [
@@ -41,15 +42,19 @@ ohos_unittest("LNNTest") {
     "//utils/native/base/include",
     "//third_party/cJSON",
     "unittest/common/",
+    "$dsoftbus_root_path/core/connection/manager",
   ]
 
   deps = [
+    "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
     "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
     "$dsoftbus_root_path/core/bus_center/monitor:dsoftbus_bus_center_monitor",
     "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+    "$dsoftbus_root_path/core/connection/manager:conn_manager",
     "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
+    "//base/security/deviceauth/services:deviceauth_sdk",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
