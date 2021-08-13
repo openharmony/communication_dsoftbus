@@ -148,13 +148,13 @@ static int CreateAuthInfo(char *authInfo)
 
 static int Init()
 {
-    // (void)pthread_mutex_init(&g_lock, NULL);
-    // (void)pthread_cond_init(&g_cond, NULL);
-    // pthread_mutex_lock(&g_lock);
-    // int ret = StartDiscovery(g_pkgName, &g_discInfo, &g_discCb);
-    // if (ret < 0) {
-    //     return ret;
-    // }
+    (void)pthread_mutex_init(&g_lock, NULL);
+    (void)pthread_cond_init(&g_cond, NULL);
+    pthread_mutex_lock(&g_lock);
+    int ret = StartDiscovery(g_pkgName, &g_discInfo, &g_discCb);
+    if (ret < 0) {
+        return ret;
+    }
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_dcSessionListener);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -176,7 +176,7 @@ static int TestOpenAuthSession2(const char *ip, int port)
     ConnectionAddr addr;
     addr.type = CONNECTION_ADDR_MIX;
     sprintf(addr.info.mixAddr.addr, "{\"WIFI_IP\":\"%s\",\"WIFI_PORT\":%d}", ip, port);
-    return OpenAuthSession(g_authSessionName, authInfo);
+    return OpenAuthSession(g_authSessionName, &addr);
 }
 
 int main(int argc, char **argv)
@@ -186,8 +186,8 @@ int main(int argc, char **argv)
         return 0;
     }
     
-    // pthread_cond_wait(&g_cond, &g_lock);
-    // pthread_mutex_unlock(&g_lock);
+    pthread_cond_wait(&g_cond, &g_lock);
+    pthread_mutex_unlock(&g_lock);
     int cmd;
     int authSessionId;
     int sessionId;
@@ -200,10 +200,12 @@ int main(int argc, char **argv)
         scanf("%d %d", &cmd, &authSessionId);
         switch (cmd) {
             case 1:
-                TestOpenAuthSession1(argv[1], atoi(argv[2]));
+                // TestOpenAuthSession1(argv[1], atoi(argv[2]));
+                TestOpenAuthSession1(g_ip, g_port);
                 break;
             case 2:
-                TestOpenAuthSession2(argv[1], atoi(argv[2]));
+                // TestOpenAuthSession1(argv[1], atoi(argv[2]));
+                TestOpenAuthSession2(g_ip, g_port);
                 break;
             case 3:
                 SendMessage(authSessionId, authTestMsg, strlen(authTestMsg));
@@ -213,6 +215,18 @@ int main(int argc, char **argv)
                 break;
             case 5:
                 SendMessage(g_dcSessionId, authInfo, strlen(authInfo));
+                break;
+            case 6:
+                int side = GetSessionSide(authSessionId);
+                printf("GetSessionSide: %d\n", side);
+                break;
+            case 7:
+                char deviceId[DEVICE_ID_SIZE_MAX];
+                if (GetPeerDeviceId(authSessionId, deviceId) != SOFTBUS_OK) {
+                    printf("GetPeerDeviceId failed\n");
+                } else {
+                    printf("GetPeerDeviceId: %s\n", deviceId);
+                }
                 break;
             default:
                 break;
