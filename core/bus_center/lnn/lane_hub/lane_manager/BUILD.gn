@@ -35,9 +35,10 @@ if (defined(ohos_lite)) {
       ]
       include_dirs = [
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "//third_party/bounds_checking_function/include",
+        "//utils/native/base/include",
         "$hilog_lite_include_path",
       ]
       cflags = [
@@ -49,7 +50,7 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_hub_interface" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
@@ -67,12 +68,13 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = [
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
+      "//utils/native/base/include",
     ]
     public_configs = [ ":bus_center_hub_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "//utils/native/base:utils",
     ]

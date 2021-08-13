@@ -20,12 +20,13 @@
 #include "iproxy_client.h"
 #include "samgr_lite.h"
 #include "serializer.h"
+#include "softbus_adapter_file.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
-#include "softbus_os_interface.h"
 
 typedef enum {
     GET_ALL_ONLINE_NODE_INFO = 0,

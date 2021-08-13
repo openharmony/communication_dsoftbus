@@ -18,7 +18,7 @@ if (defined(ohos_lite)) {
     static_library("conn_manager") {
       sources = [ "softbus_conn_manager.c" ]
       include_dirs = [
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/ble/include",
         "$dsoftbus_root_path/core/connection/br/include",
@@ -34,7 +34,7 @@ if (defined(ohos_lite)) {
     shared_library("conn_manager") {
       sources = [ "softbus_conn_manager.c" ]
       include_dirs = [
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/ble/include",
         "$dsoftbus_root_path/core/connection/br/include",
@@ -46,7 +46,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/connection/ble:ble_connection",
@@ -63,7 +63,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("conn_manager") {
     sources = [ "softbus_conn_manager.c" ]
     include_dirs = [
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/connection/ble/include",
       "$dsoftbus_root_path/core/connection/br/include",
@@ -73,7 +73,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
     deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/ble:ble_connection",

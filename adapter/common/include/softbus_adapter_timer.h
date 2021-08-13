@@ -30,10 +30,6 @@ int SoftBusDeleteTimer(void *timerId);
 /* Sleep */
 int SoftBusSleepMs(unsigned int ms);
 
-/* File operation */
-int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen);
-int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len);
-
 #ifdef __cplusplus
 #if __cplusplus
 }

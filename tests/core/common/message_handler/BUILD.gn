@@ -19,7 +19,7 @@ static_library("softbus_test_message_handler") {
   include_dirs = [
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
   ]
 }

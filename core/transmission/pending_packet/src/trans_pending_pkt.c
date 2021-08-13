@@ -18,9 +18,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_utils.h"
 
 #define TIME_OUT 2

@@ -22,7 +22,7 @@ shared_library("client_manager") {
   sources = [ "src/softbus_client_info_manager.c" ]
   include_dirs = [
     "include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "//third_party/bounds_checking_function/include",
     "$hilog_lite_include_path",
@@ -33,9 +33,9 @@ shared_library("client_manager") {
     "-fPIC",
   ]
   deps = [
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
-    "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common/utils:softbus_utils",
     "$hilog_lite_deps_path",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
