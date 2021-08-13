@@ -16,34 +16,86 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
+  config("dsoftbus_adapter_common_interface") {
+    include_dirs = [
+      "$softbus_adapter_common/include",
+      "$softbus_adapter_config/spec_config",
+    ]
+  }
+
   common_include = [
-    "$softbus_adapter_config/spec_config",
+    "$dsoftbus_root_path/core/common/include",
+    "$hilog_lite_include_path",
+    "$libsec_include_path",
+    "//utils/native/base/include",
+  ]
+
+  common_deps = [
+    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$hilog_lite_deps_path",
+    "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include
+      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
       cflags = [ "-Wall" ]
-      sources = [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      sources = [
+        "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
+        "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
+        "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
+        "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
+      ]
+      deps = common_deps
+      public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
     shared_library("softbus_adapter") {
       include_dirs = common_include
       cflags = [
-          "-Wall",
-          "-fPIC",
+        "-Wall",
+        "-fPIC",
       ]
-      sources = [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      sources = [
+        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
+        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
+        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+        "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
+      ]
+      deps = common_deps
+      public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("softbus_adapter") {
+  config("config_adapter_common") {
     include_dirs = [
+      "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
     ]
-    sources = [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+  }
+
+  ohos_shared_library("softbus_adapter") {
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "//utils/native/base/include",
+    ]
+    sources = [
+      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
+      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
+      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+      "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//utils/native/base:utils",
+    ]
+    public_configs = [ ":config_adapter_common" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
   }

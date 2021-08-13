@@ -17,12 +17,12 @@
 
 #include "liteipc_adapter.h"
 #include "serializer.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 #include "softbus_tcp_socket.h"
 
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)

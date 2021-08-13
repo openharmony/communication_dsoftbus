@@ -18,9 +18,9 @@
 #include <securec.h>
 
 #include "lnn_smart_communication.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_mem_interface.h"
 
 struct LnnLanesObject {
     LnnLaneProperty prop;

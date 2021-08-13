@@ -46,7 +46,7 @@ if (defined(ohos_lite)) {
         "utils/include",
         "$dsoftbus_root_path/core/adapter/bus_center/include",
         "$dsoftbus_root_path/core/common/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/softbus_property/include",
         "$softbus_adapter_config/spec_config",
         "//third_party/bounds_checking_function/include",
@@ -61,14 +61,13 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_ledger_interface" ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     }
   }
@@ -93,18 +92,17 @@ if (defined(ohos_lite)) {
       "utils/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/softbus_property/include",
       "$softbus_adapter_config/spec_config",
     ]
     public_configs = [ ":bus_center_ledger_interface" ]
     deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/adapter:softbus_adapter",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_os_interface.h"
+#include "softbus_adapter_timer.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -107,58 +107,4 @@ int SoftBusSleepMs(unsigned int ms)
     } while ((ret == -1) && (errno == EINTR));
 
     return SOFTBUS_ERR;
-}
-
-int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
-{
-    if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
-        return SOFTBUS_FILE_ERR;
-    }
-
-    int fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid open file fail");
-        return SOFTBUS_FILE_ERR;
-    }
-    int fileLen = lseek(fd, 0, SEEK_END);
-    if (fileLen <= 0 || fileLen > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile maxLen failed or over maxLen");
-        close(fd);
-        return SOFTBUS_FILE_ERR;
-    }
-    int ret = lseek(fd, 0, SEEK_SET);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid lseek file fail");
-        close(fd);
-        return SOFTBUS_FILE_ERR;
-    }
-    ret = read(fd, readBuf, fileLen);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile read deviceid fail, ret=%d", ret);
-        close(fd);
-        return SOFTBUS_FILE_ERR;
-    }
-    close(fd);
-    return SOFTBUS_OK;
-}
-
-int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
-{
-    if (fileName == NULL || writeBuf == NULL || len <= 0) {
-        return SOFTBUS_FILE_ERR;
-    }
-
-    int fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId open file fail");
-        return SOFTBUS_FILE_ERR;
-    }
-    int ret = write(fd, writeBuf, len);
-    if (ret != len) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId write fail");
-        close(fd);
-        return SOFTBUS_FILE_ERR;
-    }
-    close(fd);
-    return SOFTBUS_OK;
 }

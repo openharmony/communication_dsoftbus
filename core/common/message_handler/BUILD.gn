@@ -22,12 +22,12 @@ if (defined(ohos_lite)) {
 
   common_include = [
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$libsec_include_path",
     "$hilog_lite_include_path",
   ]
   common_deps = [
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
@@ -59,12 +59,14 @@ if (defined(ohos_lite)) {
   ohos_shared_library("message_handler") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
+      "//utils/native/base/include",
     ]
     sources = [ "message_handler.c" ]
     public_deps = [
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//utils/native/base:utils",
     ]
     public_configs = [ ":message_handler_interface" ]
     if (is_standard_system) {

@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   common_include = [
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$libsec_include_path",
     "//third_party/mbedtls/include",
     "$hilog_lite_include_path",
@@ -42,7 +42,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "softbus_utils.c" ]
       public_deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
@@ -56,13 +56,13 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_utils") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "//third_party/mbedtls/include",
     ]
     sources = [ "softbus_utils.c" ]
     public_deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
-      "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utilsecurec_shared",
     ]

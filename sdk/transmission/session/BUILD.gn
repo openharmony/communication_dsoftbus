@@ -23,7 +23,7 @@ if (defined(ohos_lite)) {
 
   common_include = [
     "include",
-    "$dsoftbus_root_path/core/adapter/kernel/include",
+    "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_sdk_path/frame/common/include",
@@ -33,8 +33,8 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/common/utils:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
-    "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
     "$dsoftbus_sdk_path/frame:softbus_client_frame",
     "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
@@ -73,7 +73,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("dsoftbus_trans_session_sdk") {
     include_dirs = [
       "include",
-      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$softbus_adapter_common/include",
       "$dsoftbus_core_path/common/include",
       "$dsoftbus_sdk_path/frame/common/include",
     ]
@@ -86,8 +86,8 @@ if (defined(ohos_lite)) {
     ]
     sources += common_src
     deps = [
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_sdk_path/bus_center/service:dsoftbus_bus_center_service_sdk",
       "$dsoftbus_sdk_path/frame:softbus_client_frame",
       "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",

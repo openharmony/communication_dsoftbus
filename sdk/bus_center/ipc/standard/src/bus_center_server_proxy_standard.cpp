@@ -16,18 +16,18 @@
 #include "bus_center_server_proxy_standard.h"
 
 #include <securec.h>
+
 #include "bus_center_server_proxy.h"
 #include "discovery_service.h"
-#include "message_parcel.h"
-#include "softbus_errcode.h"
-#include "softbus_ipc_def.h"
-#include "softbus_log.h"
-#include "softbus_mem_interface.h"
-
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "message_parcel.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_errcode.h"
+#include "softbus_ipc_def.h"
+#include "softbus_log.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
