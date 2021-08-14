@@ -42,7 +42,7 @@ typedef struct {
     TcpDirectChannelDetail detail;
 } TcpDirectChannelInfo;
 
-int32_t TransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId);
 
 int32_t TransTdcCheckSeq(int32_t fd, int32_t seq);
