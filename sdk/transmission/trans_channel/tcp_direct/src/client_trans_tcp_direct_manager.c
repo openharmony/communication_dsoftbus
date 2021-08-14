@@ -148,7 +148,7 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
     return item;
 }
 
-int32_t TransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
         return SOFTBUS_ERR;
