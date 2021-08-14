@@ -37,7 +37,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             ret = ClientTransProxyOnChannelOpened(sessionName, channel);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransTdcOnChannelOpened(sessionName, channel);
+            ret = ClientTransTdcOnChannelOpened(sessionName, channel);
             break;
         case CHANNEL_TYPE_UDP:
             ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
