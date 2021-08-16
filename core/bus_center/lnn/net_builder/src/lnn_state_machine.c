@@ -24,10 +24,9 @@
 #include "softbus_log.h"
 
 #define FSM_CTRL_MSG_START 0
-#define FSM_CTRL_MSG_CHANGE_STATE 1
-#define FSM_CTRL_MSG_DATA 2
-#define FSM_CTRL_MSG_STOP 3
-#define FSM_CTRL_MSG_DEINIT 4
+#define FSM_CTRL_MSG_DATA 1
+#define FSM_CTRL_MSG_STOP 2
+#define FSM_CTRL_MSG_DEINIT 3
 
 typedef struct {
     FsmStateMachine *fsm;
@@ -121,37 +120,6 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     }
 }
 
-static void ProcessChangeStateMessage(SoftBusMessage *msg)
-{
-    FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
-    FsmStateMachine *fsm = NULL;
-    FsmState *state = NULL;
-
-    if (ctrlMsgObj == NULL) {
-        return;
-    }
-    fsm = ctrlMsgObj->fsm;
-    state = (FsmState *)ctrlMsgObj->obj;
-    if (fsm == NULL || state == NULL) {
-        return;
-    }
-
-    if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in change state msg process");
-        return;
-    }
-
-    if (IsDuplicateState(fsm, state)) {
-        if (fsm->curState->exit != NULL) {
-            fsm->curState->exit(fsm);
-        }
-        fsm->curState = state;
-        if (fsm->curState->enter != NULL) {
-            fsm->curState->enter(fsm);
-        }
-    }
-}
-
 static void ProcessDataMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
@@ -223,9 +191,6 @@ static void FsmStateMsgHandler(SoftBusMessage *msg)
     switch (msg->what) {
         case FSM_CTRL_MSG_START:
             ProcessStartMessage(msg);
-            break;
-        case FSM_CTRL_MSG_CHANGE_STATE:
-            ProcessChangeStateMessage(msg);
             break;
         case FSM_CTRL_MSG_DATA:
             ProcessDataMessage(msg);
@@ -364,10 +329,26 @@ int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
     return SOFTBUS_OK;
 }
 
+/* we must change state of state machine during its procedure, otherwise it will introduce concurrency */
 int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
-    if (fsm == NULL || fsm->looper == NULL || state == NULL) {
+    if (fsm == NULL || state == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return PostMessageToFsm(fsm, FSM_CTRL_MSG_CHANGE_STATE, 0, 0, state);
+
+    if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in change state process");
+        return SOFTBUS_ERR;
+    }
+
+    if (IsDuplicateState(fsm, state)) {
+        if (fsm->curState->exit != NULL) {
+            fsm->curState->exit(fsm);
+        }
+        fsm->curState = state;
+        if (fsm->curState->enter != NULL) {
+            fsm->curState->enter(fsm);
+        }
+    }
+    return SOFTBUS_OK;
 }
