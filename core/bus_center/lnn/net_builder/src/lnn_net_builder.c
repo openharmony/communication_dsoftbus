@@ -98,6 +98,7 @@ typedef struct {
 
 typedef struct {
     char oldNetworkId[NETWORK_ID_BUF_LEN];
+    ConnectionAddrType addrType;
     char newNetworkId[NETWORK_ID_BUF_LEN];
 } LeaveInvalidConnMsgPara;
 
@@ -319,6 +320,7 @@ static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
 {
     LnnConnectionFsm *item = NULL;
     int32_t rc;
+    LnnInvalidCleanInfo *cleanInfo = connFsm->connInfo.cleanInfo;
 
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]no need initiate new network online", connFsm->id);
@@ -326,15 +328,25 @@ static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
     }
     // let last invalid connfsm notify new network online after it clean
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (strcmp(connFsm->connInfo.peerNetworkId, item->connInfo.peerNetworkId) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                "[id=%u]wait last connfsm clean, then initiate new network online", connFsm->id);
-            return;
+        if (strcmp(connFsm->connInfo.peerNetworkId, item->connInfo.peerNetworkId) != 0) {
+            continue;
         }
+        if ((item->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
+            continue;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]wait last connfsm clean, then initiate new network online", connFsm->id);
+        return;
     }
     // find target connfsm, then notify it online
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (strcmp(connFsm->connInfo.newNetworkId, item->connInfo.peerNetworkId) != 0 && !item->isDead) {
+        if (strcmp(cleanInfo->networkId, item->connInfo.peerNetworkId) != 0) {
+            continue;
+        }
+        if (item->isDead) {
+            continue;
+        }
+        if (cleanInfo->addrType != CONNECTION_ADDR_MAX && cleanInfo->addrType != item->connInfo.addr.type) {
             continue;
         }
         rc = LnnSendNewNetworkOnlineToConnFsm(item);
@@ -638,6 +650,25 @@ static int32_t ProcessSyncOfflineFinish(const void *para)
     return rc;
 }
 
+static bool IsInvalidConnectionFsm(const LnnConnectionFsm *connFsm, const LeaveInvalidConnMsgPara *msgPara)
+{
+    if (strcmp(msgPara->oldNetworkId, connFsm->connInfo.peerNetworkId) != 0 || connFsm->isDead) {
+        return false;
+    }
+    if (msgPara->addrType != CONNECTION_ADDR_MAX && msgPara->addrType != connFsm->connInfo.addr.type) {
+        return false;
+    }
+    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection is not online", connFsm->id);
+        return false;
+    }
+    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection is already in leaving", connFsm->id);
+        return false;
+    }
+    return true;
+}
+
 static int32_t ProcessLeaveInvalidConn(const void *para)
 {
     LnnConnectionFsm *item = NULL;
@@ -649,23 +680,30 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (strcmp(msgPara->oldNetworkId, item->connInfo.peerNetworkId) != 0 || item->isDead) {
+        if (!IsInvalidConnectionFsm(item, msgPara)) {
             continue;
         }
-        if ((item->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection is already in leaving", item->id);
+        item->connInfo.cleanInfo = SoftBusMalloc(sizeof(LnnInvalidCleanInfo));
+        if (item->connInfo.cleanInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]malloc invalid clena info failed", item->id);
             continue;
         }
-        if (strncpy_s(item->connInfo.newNetworkId, NETWORK_ID_BUF_LEN,
+        item->connInfo.cleanInfo->addrType = msgPara->addrType;
+        if (strncpy_s(item->connInfo.cleanInfo->networkId, NETWORK_ID_BUF_LEN,
             msgPara->newNetworkId, strlen(msgPara->newNetworkId)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]copy new networkId failed", item->id);
             rc = SOFTBUS_ERR;
+            SoftBusFree(item->connInfo.cleanInfo);
+            item->connInfo.cleanInfo = NULL;
             continue;
         }
-        item->connInfo.flag |= LNN_CONN_INFO_FLAG_INITIATE_ONLINE;
         rc = LnnSendLeaveRequestToConnFsm(item);
         if (rc == SOFTBUS_OK) {
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_INITIATE_ONLINE;
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
+        } else {
+            SoftBusFree(item->connInfo.cleanInfo);
+            item->connInfo.cleanInfo = NULL;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "send leave LNN msg to invalid connection fsm[id=%u] result: %d", item->id, rc);
@@ -821,13 +859,15 @@ static int32_t ProcessLeaveByAddrType(const void *para)
         if (item->connInfo.addr.type != type) {
             continue;
         }
+        // if there are any same addr type, let last one send notify
+        notify = false;
+        if (item->isDead) {
+            continue;
+        }
         rc = LnnSendLeaveRequestToConnFsm(item);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
-            if (notify) {
-                notify = false;
-            }
         }
     }
     if (notify) {
@@ -1190,7 +1230,7 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, const char *newNetworkId)
+int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId)
 {
     LeaveInvalidConnMsgPara *para = NULL;
 
@@ -1209,6 +1249,7 @@ int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, const char *newNetw
         SoftBusFree(para);
         return SOFTBUS_MALLOC_ERR;
     }
+    para->addrType = addrType;
     if (PostMessageToHandler(MSG_TYPE_LEAVE_INVALID_CONN, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave invalid connection message failed");
         SoftBusFree(para);
