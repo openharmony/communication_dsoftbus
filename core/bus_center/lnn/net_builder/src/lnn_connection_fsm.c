@@ -182,6 +182,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     if (retCode == SOFTBUS_OK) {
         ReportCategory report = LnnAddOnlineNode(connInfo->nodeInfo);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
+        connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
     } else {
         (void)AuthHandleLeaveLNN(connInfo->authId);
     }
@@ -228,6 +229,10 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
+    if (CheckDeadFlag(connFsm, true)) {
+        return;
+    }
+    LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
     if (retCode == SOFTBUS_OK) {
         UpdateLeaveToLedger(connFsm, networkId);
     }
@@ -235,17 +240,18 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     (void)AuthHandleLeaveLNN(connInfo->authId);
     connFsm->isDead = true;
+    connInfo->flag &= ~LNN_CONN_INFO_FLAG_ONLINE;
     LnnRequestCleanConnFsm(connFsm->id);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
 }
 
-static void OnJoinLNNTimeout(LnnConnectionFsm *connFsm)
+static int32_t OnJoinFail(LnnConnectionFsm *connFsm)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]join LNN timeout", connFsm->id);
     if (CheckDeadFlag(connFsm, true)) {
-        return;
+        return SOFTBUS_ERR;
     }
     CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
+    return SOFTBUS_OK;
 }
 
 static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
@@ -322,19 +328,6 @@ static int32_t OnAuthDoneInAuth(LnnConnectionFsm *connFsm, bool *isSuccess)
     return SOFTBUS_OK;
 }
 
-static int32_t OnAuthDisconnect(LnnConnectionFsm *connFsm)
-{
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth disconnect, authId=%lld",
-        connFsm->id, connInfo->authId);
-    if (CheckDeadFlag(connFsm, true)) {
-        return SOFTBUS_ERR;
-    }
-    CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
-    return SOFTBUS_OK;
-}
-
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -357,13 +350,11 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
             OnAuthDoneInAuth(connFsm, (bool *)para);
             break;
         case FSM_MSG_TYPE_DISCONNECT:
-            OnAuthDisconnect(connFsm);
+        case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
+            OnJoinFail(connFsm);
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
             NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
-            break;
-        case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
-            OnJoinLNNTimeout(connFsm);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -524,15 +515,6 @@ static int32_t OnAuthDoneInSyncInfo(LnnConnectionFsm *connFsm, bool *isSuccess)
     return SOFTBUS_OK;
 }
 
-static int32_t OnDeviceNotTrustedInJoin(LnnConnectionFsm *connFsm)
-{
-    if (CheckDeadFlag(connFsm, true)) {
-        return SOFTBUS_ERR;
-    }
-    CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
-    return SOFTBUS_OK;
-}
-
 static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -559,13 +541,9 @@ static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, vo
             NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
             break;
         case FSM_MSG_TYPE_NOT_TRUSTED:
-            OnDeviceNotTrustedInJoin(connFsm);
-            break;
         case FSM_MSG_TYPE_DISCONNECT:
-            OnAuthDisconnect(connFsm);
-            break;
         case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
-            OnJoinLNNTimeout(connFsm);
+            OnJoinFail(connFsm);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -574,19 +552,52 @@ static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, vo
     return true;
 }
 
+static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *oldNodeInfo,
+    const NodeInfo *newNodeInfo, ConnectionAddrType *type)
+{
+    if (strcmp(newNodeInfo->networkId, oldNodeInfo->networkId) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]networkId changed", connFsm->id);
+        *type = CONNECTION_ADDR_MAX;
+        return true;
+    }
+    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer IP changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer auth port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer proxy port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer session port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    return false;
+}
+
 static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeInfo *oldNodeInfo = LnnGetNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID);
     NodeInfo *newNodeInfo = connInfo->nodeInfo;
+    ConnectionAddrType addrType;
 
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    if (oldNodeInfo != NULL) {
-        if (LnnIsNodeOnline(oldNodeInfo) && strcmp(newNodeInfo->networkId, oldNodeInfo->networkId) != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]ready clean invalid connection fsm", connFsm->id);
-            LnnRequestLeaveInvalidConn(oldNodeInfo->networkId, newNodeInfo->networkId);
+    if (oldNodeInfo != NULL && LnnIsNodeOnline(oldNodeInfo)) {
+        if (IsNodeInfoChanged(connFsm, oldNodeInfo, newNodeInfo, &addrType)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]node info changed, ready clean invalid connection",
+                connFsm->id);
+            LnnRequestLeaveInvalidConn(oldNodeInfo->networkId, addrType, newNodeInfo->networkId);
             return;
         }
     }
@@ -610,14 +621,9 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
         case FSM_MSG_TYPE_LEAVE_LNN:
             NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
             break;
-        case FSM_MSG_TYPE_DISCONNECT:
-            OnAuthDisconnect(connFsm);
-            break;
-        case FSM_MSG_TYPE_JOIN_LNN:
-            NotifyJoinResult(connFsm, NULL, SOFTBUS_ERR);
-            break;
         case FSM_MSG_TYPE_NOT_TRUSTED:
-            OnDeviceNotTrustedInJoin(connFsm);
+        case FSM_MSG_TYPE_DISCONNECT:
+            OnJoinFail(connFsm);
             break;
         case FSM_MSG_TYPE_LEAVE_INVALID_CONN:
             OnLeaveInvalidConn(connFsm);
@@ -655,19 +661,9 @@ static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)
     NotifyJoinResult(connFsm, connInfo->peerNetworkId, SOFTBUS_OK);
 }
 
-static void OnLeaveLNNInOnline(LnnConnectionFsm *connFsm)
+static void LeaveLNNInOnline(LnnConnectionFsm *connFsm)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]transact to leaving state", connFsm->id);
-    if (CheckDeadFlag(connFsm, true)) {
-        return;
-    }
-    LnnFsmTransactState(&connFsm->fsm, g_states + STATE_LEAVING_INDEX);
-}
-
-static void OnDeviceNotTrustedInOnline(LnnConnectionFsm *connFsm)
-{
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]device not trusted, transact to leaving state",
-        connFsm->id);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -690,13 +686,9 @@ static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para
             OnJoinLNNInOnline(connFsm);
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
-            OnLeaveLNNInOnline(connFsm);
-            break;
-        case FSM_MSG_TYPE_DISCONNECT:
-            OnLeaveLNNInOnline(connFsm);
-            break;
         case FSM_MSG_TYPE_NOT_TRUSTED:
-            OnDeviceNotTrustedInOnline(connFsm);
+        case FSM_MSG_TYPE_DISCONNECT:
+            LeaveLNNInOnline(connFsm);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -745,16 +737,9 @@ static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *par
         case FSM_MSG_TYPE_JOIN_LNN:
             NotifyJoinResult(connFsm, NULL, SOFTBUS_ERR);
             break;
-        case FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT:
-            if (CheckDeadFlag(connFsm, false)) {
-                CompleteLeaveLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
-            }
-            break;
         case FSM_MSG_TYPE_SYNC_OFFLINE_DONE:
-            if (CheckDeadFlag(connFsm, false)) {
-                LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
-                CompleteLeaveLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
-            }
+        case FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT:
+            CompleteLeaveLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -828,10 +813,14 @@ LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
 
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
 {
-    if (connFsm != NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "destroy a connection fsm[id=%u]", connFsm->id);
-        SoftBusFree(connFsm);
+    if (connFsm == NULL) {
+        return;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "destroy a connection fsm[id=%u]", connFsm->id);
+    if (connFsm->connInfo.cleanInfo != NULL) {
+        SoftBusFree(connFsm->connInfo.cleanInfo);
+    }
+    SoftBusFree(connFsm);
 }
 
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
