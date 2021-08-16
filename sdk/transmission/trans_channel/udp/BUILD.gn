@@ -21,12 +21,12 @@ if (enable_trans_udp == true) {
   common_src = [
     "common/src/client_trans_udp_manager.c",
     "stream/src/client_trans_stream.c",
-    "file/src/client_trans_file_listener.c",
-    "file/src/client_trans_file.c",
-    "file/src/file_adapter.c",
   ]
 } else {
-  common_src = [ "common/src/client_trans_udp_virtual.c" ]
+  common_src = [
+    "common/src/client_trans_udp_virtual.c",
+    "file/src/client_trans_file_virtual.c",
+  ]
 }
 
 if (defined(ohos_lite)) {
@@ -82,12 +82,21 @@ if (defined(ohos_lite)) {
           "$dsoftbus_root_path/core/connection/common:conn_common",
           "stream/adaptor:dsoftbus_trans_dstream",
           "//third_party/bounds_checking_function:libsec_shared",
-          "$dsoftbus_root_path/core/connection/common:conn_common",
         ]
         deps += common_deps
-        public_deps = [
-          "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
-        ]
+        if (enable_trans_udp_file == true) {
+          sources += [
+            "file/src/client_trans_file.c",
+            "file/src/client_trans_file_listener.c",
+            "file/src/file_adapter.c",
+          ]
+          deps += [
+            "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
+            "$dsoftbus_root_path/core/connection/common:conn_common",
+          ]
+        } else {
+          sources += [ "file/src/client_trans_file_virtual.c" ]
+        }
       }
     }
   }
@@ -116,9 +125,20 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
         "//utils/native/base:utilsecurec_shared",
-        "$dsoftbus_root_path/core/connection/common:conn_common",
-        "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
       ]
+      if (enable_trans_udp_file == true) {
+        sources += [
+          "file/src/client_trans_file.c",
+          "file/src/client_trans_file_listener.c",
+          "file/src/file_adapter.c",
+        ]
+        deps += [
+          "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
+          "$dsoftbus_root_path/core/connection/common:conn_common",
+        ]
+      } else {
+        sources += [ "file/src/client_trans_file_virtual.c" ]
+      }
     }
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
