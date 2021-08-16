@@ -102,7 +102,8 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
             (void) ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
             DestroySessionId(sessionNode->sessionId);
             ListDelete(&sessionNode->node);
-            SoftBusFree(sessionNode);        }
+            SoftBusFree(sessionNode);        
+        }
     }
 
     ListDelete(&(server->node));
