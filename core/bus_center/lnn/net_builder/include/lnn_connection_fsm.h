@@ -39,6 +39,7 @@ extern "C" {
 #define LNN_CONN_INFO_FLAG_LEAVE_AUTO 0x10
 #define LNN_CONN_INFO_FLAG_LEAVE_PASSIVE 0x20
 #define LNN_CONN_INFO_FLAG_INITIATE_ONLINE 0x40
+#define LNN_CONN_INFO_FLAG_ONLINE 0x80
 
 #define LNN_CONN_INFO_FLAG_JOIN_ACTIVE (LNN_CONN_INFO_FLAG_JOIN_REQUEST | LNN_CONN_INFO_FLAG_JOIN_AUTO)
 #define LNN_CONN_INFO_FLAG_JOIN (LNN_CONN_INFO_FLAG_JOIN_ACTIVE | LNN_CONN_INFO_FLAG_JOIN_PASSIVE)
@@ -47,11 +48,17 @@ extern "C" {
 #define LNN_CONN_INFO_FLAG_LEAVE (LNN_CONN_INFO_FLAG_LEAVE_ACTIVE | LNN_CONN_INFO_FLAG_LEAVE_PASSIVE)
 
 typedef struct {
+    /* clean invalid addr type */
+    ConnectionAddrType addrType;
+    /* record newer connection networkId */
+    char networkId[NETWORK_ID_BUF_LEN];
+} LnnInvalidCleanInfo;
+
+typedef struct {
     ConnectionAddr addr;
     NodeInfo *nodeInfo;
     char peerNetworkId[NETWORK_ID_BUF_LEN];
-    /* record newer connection networkId */
-    char newNetworkId[NETWORK_ID_BUF_LEN];
+    LnnInvalidCleanInfo *cleanInfo;
     int64_t authId;
     SoftBusVersion peerVersion;
     uint32_t flag;
