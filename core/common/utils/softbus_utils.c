@@ -121,43 +121,35 @@ int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
     if (randStr == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    mbedtls_entropy_context *entropy = (mbedtls_entropy_context *)SoftBusCalloc(sizeof(mbedtls_entropy_context));
-    if (entropy == NULL) {
-        return SOFTBUS_MALLOC_ERR;
-    }
-    mbedtls_ctr_drbg_context *ctrDrbg = (mbedtls_ctr_drbg_context *)SoftBusCalloc(sizeof(mbedtls_ctr_drbg_context));
-    if (ctrDrbg == NULL) {
-        SoftBusFree(entropy);
-        return SOFTBUS_MALLOC_ERR;
-    }
+
+    static mbedtls_entropy_context entropy;
+    static mbedtls_ctr_drbg_context ctrDrbg;
+    static bool initFlag = false;
+    int ret;
 
     if (pthread_mutex_lock(&g_randomLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        SoftBusFree(ctrDrbg);
-        SoftBusFree(entropy);
         return SOFTBUS_ERR;
     }
-    mbedtls_ctr_drbg_init(ctrDrbg);
-    mbedtls_entropy_init(entropy);
-    int ret = mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func, entropy, NULL, 0);
-    if (ret != 0) {
-        pthread_mutex_unlock(&g_randomLock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random seed error, ret[%d]", ret);
-        SoftBusFree(ctrDrbg);
-        SoftBusFree(entropy);
-        return SOFTBUS_ERR;
+
+    if (initFlag == false) {
+        mbedtls_ctr_drbg_init(&ctrDrbg);
+        mbedtls_entropy_init(&entropy);
+        ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
+        if (ret != 0) {
+            pthread_mutex_unlock(&g_randomLock);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random seed error, ret[%d]", ret);
+            return SOFTBUS_ERR;
+        }
+        initFlag = true;
     }
-    ret = mbedtls_ctr_drbg_random(ctrDrbg, randStr, len);
+
+    ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
+    pthread_mutex_unlock(&g_randomLock);
     if (ret != 0) {
-        pthread_mutex_unlock(&g_randomLock);
-        SoftBusFree(ctrDrbg);
-        SoftBusFree(entropy);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random error, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
-    pthread_mutex_unlock(&g_randomLock);
-    SoftBusFree(ctrDrbg);
-    SoftBusFree(entropy);
     return SOFTBUS_OK;
 }
 
