@@ -199,7 +199,6 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
         return SOFTBUS_INVALID_PARAM;
     }
     SessionKeyList *sessionKeyList = NULL;
-    NecessaryDevInfo devInfo = {0};
     uint32_t outLen;
 
     sessionKeyList = AuthGetSessionKeyBySeq(seq);
