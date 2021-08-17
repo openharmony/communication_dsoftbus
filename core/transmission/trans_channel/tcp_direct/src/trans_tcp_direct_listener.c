@@ -88,7 +88,7 @@ static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
 
 static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const char *ip)
 {
-    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail in create session conn node.");
         return SOFTBUS_MALLOC_ERR;
