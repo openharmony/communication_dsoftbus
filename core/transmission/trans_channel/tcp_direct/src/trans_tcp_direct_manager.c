@@ -318,7 +318,12 @@ void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen)
     pthread_mutex_lock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == chanId) {
-            (void)memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey, keyLen);
+            if (memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey,
+                keyLen) != EOK) {
+                pthread_mutex_unlock(&g_sessionConnList->lock);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy error.");
+                return;
+            }
             pthread_mutex_unlock(&g_sessionConnList->lock);
             return;
         }
