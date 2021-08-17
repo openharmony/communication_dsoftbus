@@ -120,8 +120,8 @@ static SubscribeInfo g_discInfo = {
     .medium = COAP,
     .freq = HIGH,
     .capability = TEST_CAP,
-    .capabilityData = NULL,
-    .dataLen = 0,
+    .capabilityData = "12345",
+    .dataLen = sizeof("12345"),
 };
 
 static int CreateAuthInfo(char *authInfo)
@@ -155,7 +155,7 @@ static int Init()
     if (ret < 0) {
         return ret;
     }
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_dcSessionListener);
+    ret = CreateSessionServer(g_pkgName, g_sessionName, &g_dcSessionListener);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -191,6 +191,8 @@ int main(int argc, char **argv)
     int cmd;
     int authSessionId;
     int sessionId;
+    int side;
+    char deviceId[DEVICE_ID_SIZE_MAX];
     const char *authTestMsg = "Hello";
     char authInfo[AUTH_INFO_LEN] = {0};
     if (CreateAuthInfo(authInfo) != SOFTBUS_OK) {
@@ -217,12 +219,11 @@ int main(int argc, char **argv)
                 SendMessage(g_dcSessionId, authInfo, strlen(authInfo));
                 break;
             case 6:
-                int side = GetSessionSide(authSessionId);
+                side = GetSessionSide(authSessionId);
                 printf("GetSessionSide: %d\n", side);
                 break;
             case 7:
-                char deviceId[DEVICE_ID_SIZE_MAX];
-                if (GetPeerDeviceId(authSessionId, deviceId) != SOFTBUS_OK) {
+                if (GetPeerDeviceId(authSessionId, deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
                     printf("GetPeerDeviceId failed\n");
                 } else {
                     printf("GetPeerDeviceId: %s\n", deviceId);

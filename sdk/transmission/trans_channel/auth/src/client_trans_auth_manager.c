@@ -100,7 +100,7 @@ int32_t TransAuthChannelSendBytes(int32_t channelId, const void *data, uint32_t 
 
 int32_t TransAuthChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
 {
-    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_AUTH, data, len, TRANS_SESSION_MESSAGE);
+    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_AUTH, data, len, TRANS_SESSION_BYTES);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }

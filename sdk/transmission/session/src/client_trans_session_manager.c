@@ -779,6 +779,13 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
                 *sessionId = sessionNode->sessionId;
+                if (channel->channelType == CHANNEL_TYPE_AUTH) {
+                    if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
+                                channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
+                        (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
+                        return SOFTBUS_MEM_ERR;
+                    }   
+                }
                 (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;
             }
@@ -863,7 +870,7 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     return SOFTBUS_ERR;
 }
 
-int32_t GetSessionSide(int32_t sessionId)
+int32_t ClientGetSessionSide(int32_t sessionId)
 {
     if (g_clientSessionServerList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
