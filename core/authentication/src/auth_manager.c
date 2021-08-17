@@ -1153,7 +1153,7 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
         if ((option->type == CONNECT_TCP && strncmp(auth->option.info.ipOption.ip, option->info.ipOption.ip,
             strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
             strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
-            if (memcpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
+            if (strncpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
                 (void)pthread_mutex_unlock(&g_authLock);
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
                 return SOFTBUS_ERR;
@@ -1167,7 +1167,7 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
         if ((option->type == CONNECT_TCP && strncmp(auth->option.info.ipOption.ip, option->info.ipOption.ip,
             strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
             strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
-            if (memcpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
+            if (strncpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
                 (void)pthread_mutex_unlock(&g_authLock);
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
                 return SOFTBUS_ERR;
