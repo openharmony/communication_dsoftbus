@@ -104,6 +104,8 @@ int32_t ClientGetSessionCallbackByName(const char* sessionName, ISessionListener
 int32_t ClientAddSessionServer(SoftBusSecType type, const char* pkgName, const char* sessionName,
     const ISessionListener* listener);
 
+int32_t ClientGetSessionSide(int32_t sessionId);
+
 int TransClientInit(void);
 void TransClientDeinit(void);
 

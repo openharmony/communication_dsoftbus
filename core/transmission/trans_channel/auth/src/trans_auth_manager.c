@@ -160,22 +160,24 @@ static int32_t NotifyOnDataReceived(int64_t authId, const ConnectOption *option,
         return SOFTBUS_ERR;
     }
     return g_cb->OnDataReceived(channel.appInfo.myData.pkgName, channel.appInfo.myData.channelId, CHANNEL_TYPE_AUTH,
-                                info->data, info->len, TYPE_MESSAGE);
+                                info->data, info->len, TRANS_SESSION_BYTES);
 }
 
-static int32_t CopyPeerAppInfo(AppInfo *srcInfo, AppInfo *dstInfo)
+static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
 {
-    if (srcInfo == NULL || dstInfo == NULL) {
+    if (recvAppInfo == NULL || channelAppInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memcpy_s(dstInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX,
-            srcInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
-        memcpy_s(dstInfo->peerData.pkgName, PKG_NAME_SIZE_MAX,
-            srcInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        memcpy_s(srcInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
-            dstInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        memcpy_s(dstInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX, 
-            srcInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
+    if (memcpy_s(channelAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX,
+            recvAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
+        memcpy_s(recvAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX,
+            channelAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
+        memcpy_s(channelAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX,
+            recvAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+        memcpy_s(recvAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
+            channelAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+        memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX, 
+            recvAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
