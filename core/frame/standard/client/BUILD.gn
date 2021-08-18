@@ -50,8 +50,8 @@ ohos_shared_library("softbus_client") {
 
   if (is_standard_system) {
     external_deps = [
-      "ipc:ipc_single",
       "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_single",
     ]
   }
   part_name = "dsoftbus_standard"

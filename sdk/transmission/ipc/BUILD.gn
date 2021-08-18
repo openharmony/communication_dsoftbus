@@ -14,7 +14,11 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("trans_ipc_proxy_sdk_interface") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
+  ]
 }
 
 if (defined(ohos_lite)) {

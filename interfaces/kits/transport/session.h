@@ -46,6 +46,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "softbus_common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,6 +64,9 @@ typedef enum {
     TYPE_STREAM,
     TYPE_BUTT,
 } SessionType;
+
+#define IS_SERVER 0
+#define IS_CLIENT 1
 
 typedef enum  {
     INVALID = -1,
@@ -259,6 +264,8 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, const SessionAttribute* attr);
 
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
+
 /**
  * @brief Closes a connected session based on a session ID.
  *
@@ -330,6 +337,8 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len);
  * @version 1.0
  */
 int GetPeerDeviceId(int sessionId, char *devId, unsigned int len);
+
+int GetSessionSide(int sessionId);
 
 int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir);

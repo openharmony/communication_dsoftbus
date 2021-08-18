@@ -105,9 +105,10 @@ void ClientOnChannelMsgreceived(IpcIo *reply, const IpcContext *ctx, void *ipcMs
         return;
     }
     int32_t channelId = IpcIoPopInt32(reply);
+    int32_t channelType = IpcIoPopInt32(reply);
     int32_t type = IpcIoPopInt32(reply);
     uint32_t dataLen = 0;
     void *data = IpcIoPopFlatObj(reply, &dataLen);
-    (void)TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, dataLen, type);
+    (void)TransOnChannelMsgReceived(channelId, channelType, data, dataLen, type);
     FreeBuffer(ctx, ipcMsg);
 }

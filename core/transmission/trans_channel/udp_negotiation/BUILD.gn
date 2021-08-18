@@ -21,6 +21,7 @@ config("trans_udp_channel_interface") {
     "$dsoftbus_root_path/core/transmission/common",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 }
 

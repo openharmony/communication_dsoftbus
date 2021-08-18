@@ -21,6 +21,7 @@ config("bus_center_server_interface") {
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/softbus_property/include",
     "$softbus_adapter_config/spec_config",
   ]

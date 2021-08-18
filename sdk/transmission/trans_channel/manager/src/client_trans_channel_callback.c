@@ -15,6 +15,7 @@
 
 #include "client_trans_channel_callback.h"
 
+#include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
 #include "client_trans_tcp_direct_manager.h"
@@ -33,6 +34,9 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     int32_t ret = SOFTBUS_ERR;
     int32_t udpPort = 0;
     switch (channel->channelType) {
+        case CHANNEL_TYPE_AUTH:
+            ret = ClientTransAuthOnChannelOpened(sessionName, channel);
+            break;
         case CHANNEL_TYPE_PROXY:
             ret = ClientTransProxyOnChannelOpened(sessionName, channel);
             break;
@@ -59,6 +63,8 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
+        case CHANNEL_TYPE_AUTH:
+            return ClientTransAuthOnChannelOpenFailed(channelId);
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnChannelOpenFailed(channelId);
         case CHANNEL_TYPE_TCP_DIRECT:
@@ -75,6 +81,8 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelClosed: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
+        case CHANNEL_TYPE_AUTH:
+            return ClientTransAuthOnChannelClosed(channelId);
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnChannelClosed(channelId);
         case CHANNEL_TYPE_UDP:
@@ -91,6 +99,8 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
+        case CHANNEL_TYPE_AUTH:
+            return ClientTransAuthOnDataReceived(channelId, data, len, type);
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnDataReceived(channelId, data, len, type);
         default:
