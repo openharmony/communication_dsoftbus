@@ -75,7 +75,8 @@ int __attribute__ ((weak)) TransCloseChannel(int32_t channelId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int __attribute__ ((weak)) TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
+int __attribute__ ((weak)) TransSendMsg(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
     (void)channelId;
     (void)channelType;
