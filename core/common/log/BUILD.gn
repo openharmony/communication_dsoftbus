@@ -36,8 +36,8 @@ if (defined(ohos_lite)) {
     shared_library("softbus_log") {
       include_dirs = common_include
       cflags = [
-          "-Wall",
-          "-fPIC",
+        "-Wall",
+        "-fPIC",
       ]
       sources = [ "softbus_log.c" ]
       public_deps = [
@@ -55,9 +55,7 @@ if (defined(ohos_lite)) {
       "//utils/native/base/include",
       "include",
     ]
-    deps = [
-      "//utils/native/base:utils",
-    ]
+    deps = [ "//utils/native/base:utils" ]
     sources = [ "softbus_log.c" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

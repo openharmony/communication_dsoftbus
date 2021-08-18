@@ -47,10 +47,10 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/transmission/ipc:dsoftbus_trans_ipc_proxy",
-    "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation:dsoftbus_trans_udp_channel",
@@ -61,20 +61,18 @@ if (defined(ohos_lite)) {
     static_library("dsoftbus_trans_session") {
       include_dirs = common_include
       sources = [
+        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
-        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
-        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
         "src/trans_session_manager.c",
         "src/trans_session_service.c",
       ]
 
       public_configs = [ ":trans_session_interface" ]
       deps = common_deps
-      deps += [
-        "//build/lite/config/component/cJSON:cjson_static"
-      ]
+      deps += [ "//build/lite/config/component/cJSON:cjson_static" ]
     }
   } else {
     shared_library("dsoftbus_trans_session") {
@@ -84,11 +82,11 @@ if (defined(ohos_lite)) {
         "-fPIC",
       ]
       sources = [
+        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
+        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
-        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
-        "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
         "src/trans_session_manager.c",
         "src/trans_session_service.c",
       ]
@@ -96,8 +94,8 @@ if (defined(ohos_lite)) {
       public_configs = [ ":trans_session_interface" ]
       deps = common_deps
       deps += [
-        "//third_party/bounds_checking_function:libsec_shared",
         "//build/lite/config/component/cJSON:cjson_shared",
+        "//third_party/bounds_checking_function:libsec_shared",
       ]
     }
   }
@@ -119,11 +117,11 @@ if (defined(ohos_lite)) {
       "//third_party/cJSON",
     ]
     sources = [
+      "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
+      "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
-      "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
-      "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_message.c",
       "src/trans_session_manager.c",
       "src/trans_session_service.c",
     ]
@@ -132,14 +130,14 @@ if (defined(ohos_lite)) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
     deps = [
-      "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_core_path/common/security/permission:softbus_permission",
       "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/transmission/ipc:dsoftbus_trans_ipc_proxy",
       "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
