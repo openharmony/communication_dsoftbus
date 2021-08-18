@@ -87,9 +87,6 @@ void ClientTransProxyCloseChannel(int32_t channelId)
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
     }
-    if (ClientTransProxyOnChannelClosed(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
-    }
 }
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
