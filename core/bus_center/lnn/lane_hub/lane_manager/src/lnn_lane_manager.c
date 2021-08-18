@@ -32,13 +32,13 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty pro
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL ||
         laneNum == 0 || laneNum > LNN_REQUEST_MAX_LANE_NUM) {
-        LOG_ERR("param error, prop = %d, laneNum = %u", prop, laneNum);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error, prop = %d, laneNum = %u", prop, laneNum);
         return NULL;
     }
     uint32_t memLen = sizeof(LnnLanesObject) + sizeof(int32_t) * laneNum;
     LnnLanesObject *lanesObject = (LnnLanesObject *)SoftBusMalloc(memLen);
     if (lanesObject == NULL) {
-        LOG_ERR("SoftBusMalloc error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftBusMalloc error.");
         return NULL;
     }
     (void)memset_s(lanesObject, memLen, 0, memLen);
@@ -48,7 +48,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty pro
     for (uint32_t i = 0; i < laneNum; i++) {
         int32_t laneId = LnnGetRightLane(netWorkId, prop);
         if (laneId < 0) {
-            LOG_ERR("LnnGetRightLane error. laneId = %d", laneId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRightLane error. laneId = %d", laneId);
             SoftBusFree(lanesObject);
             return NULL;
         }
@@ -71,7 +71,7 @@ void LnnReleaseLanesObject(LnnLanesObject *lanesObject)
 int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
 {
     if (lanesObject == NULL || num >= lanesObject->laneNum) {
-        LOG_ERR("param error. num = %u", num);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. num = %u", num);
         return SOFTBUS_ERR;
     }
     return lanesObject->laneId[num];
@@ -80,7 +80,7 @@ int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
 uint32_t LnnGetLaneNum(LnnLanesObject *lanesObject)
 {
     if (lanesObject == NULL) {
-        LOG_ERR("param error");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
         return SOFTBUS_ERR;
     }
     return lanesObject->laneNum;

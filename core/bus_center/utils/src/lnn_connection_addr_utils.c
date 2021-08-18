@@ -41,14 +41,14 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
 {
     if (addr == NULL || option == NULL) {
-        LOG_ERR("addr or option is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
         return false;
     }
     if (addr->type == CONNECTION_ADDR_BR) {
         option->type = CONNECT_BR;
         if (strncpy_s(option->info.brOption.brMac, BT_MAC_LEN, addr->info.br.brMac,
             strlen(addr->info.br.brMac)) != EOK) {
-            LOG_ERR("copy br mac to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
             return false;
         }
         return true;
@@ -57,7 +57,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         option->type = CONNECT_BLE;
         if (strncpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, addr->info.ble.bleMac,
             strlen(addr->info.ble.bleMac)) != EOK) {
-            LOG_ERR("copy ble mac to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
             return false;
         }
         return true;
@@ -66,27 +66,27 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         option->type = CONNECT_TCP;
         if (strncpy_s(option->info.ipOption.ip, IP_LEN, addr->info.ip.ip,
             strlen(addr->info.ip.ip)) != EOK) {
-            LOG_ERR("copy ip  to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip  to addr fail");
             return false;
         }
         option->info.ipOption.port = addr->info.ip.port;
         return true;
     }
-    LOG_ERR("not supported type: %d", addr->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", addr->type);
     return false;
 }
 
 bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType)
 {
     if (addr == NULL || option == NULL) {
-        LOG_ERR("addr or option is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
         return false;
     }
     if (option->type == CONNECT_BR) {
         addr->type = CONNECTION_ADDR_BR;
         if (strncpy_s(addr->info.br.brMac, BT_MAC_LEN, option->info.brOption.brMac,
             strlen(option->info.brOption.brMac)) != EOK) {
-            LOG_ERR("copy br mac to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
             return false;
         }
         return true;
@@ -95,7 +95,7 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
         addr->type = CONNECTION_ADDR_BLE;
         if (strncpy_s(addr->info.ble.bleMac, BT_MAC_LEN, option->info.bleOption.bleMac,
             strlen(option->info.bleOption.bleMac)) != EOK) {
-            LOG_ERR("copy ble mac to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
             return false;
         }
         return true;
@@ -104,12 +104,12 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
         addr->type = hintType;
         if (strncpy_s(addr->info.ip.ip, IP_LEN, option->info.ipOption.ip,
             strlen(option->info.ipOption.ip)) != EOK) {
-            LOG_ERR("copy ip to addr fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to addr fail");
             return false;
         }
         addr->info.ip.port = (uint16_t)option->info.ipOption.port;
         return true;
     }
-    LOG_ERR("not supported type: %d", option->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", option->type);
     return false;
 }

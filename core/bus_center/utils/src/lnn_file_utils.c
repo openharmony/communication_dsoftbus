@@ -36,7 +36,7 @@ int32_t LnnFileCreate(LnnFileId id)
     int32_t fd = -1;
 
     if (id >= LNN_FILE_ID_MAX) {
-        LOG_ERR("invalid create file id: %d", id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid create file id: %d", id);
         return SOFTBUS_ERR;
     }
     dir = (char *)g_filePath[id].filePath;
@@ -47,14 +47,14 @@ int32_t LnnFileCreate(LnnFileId id)
             continue;
         }
         if (memcpy_s(dirPath, sizeof(dirPath), g_filePath[id].filePath, len) != EOK) {
-            LOG_ERR("memory copy dir name failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memory copy dir name failed");
             return SOFTBUS_ERR;
         }
         dirPath[len] = 0;
         if (access(dirPath, F_OK) != 0) {
             ret = mkdir(dirPath, S_IRWXU);
             if (ret != 0) {
-                LOG_ERR("make dir failed, err code %d", ret);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "make dir failed, err code %d", ret);
                 return SOFTBUS_ERR;
             }
         }
@@ -62,7 +62,7 @@ int32_t LnnFileCreate(LnnFileId id)
     }
     fd = open(g_filePath[id].filePath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        LOG_ERR("crate file failed, errno = %d", errno);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "crate file failed, errno = %d", errno);
         return SOFTBUS_ERR;
     }
     close(fd);
@@ -72,7 +72,7 @@ int32_t LnnFileCreate(LnnFileId id)
 int32_t LnnFileOpen(LnnFileId id)
 {
     if (id >= LNN_FILE_ID_MAX) {
-        LOG_ERR("invalid open file id: %d", id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid open file id: %d", id);
         return SOFTBUS_ERR;
     }
     return open(g_filePath[id].filePath, O_RDWR);
@@ -89,7 +89,7 @@ int32_t LnnFileRead(int32_t fd, uint8_t *dst, uint32_t len, bool needReadAll)
     uint32_t pos = 0;
 
     if (fd < 0 || dst == NULL) {
-        LOG_ERR("invalid file read arguments");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid file read arguments");
         return SOFTBUS_INVALID_PARAM;
     }
     while (pos < len) {
@@ -98,7 +98,7 @@ int32_t LnnFileRead(int32_t fd, uint8_t *dst, uint32_t len, bool needReadAll)
             continue;
         }
         if (ret < 0) {
-            LOG_ERR("read file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read file failed");
             return SOFTBUS_ERR;
         }
         if (ret == 0) {
@@ -118,7 +118,7 @@ int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWrit
     uint32_t pos = 0;
 
     if (fd < 0 || src == NULL) {
-        LOG_ERR("invalid file read arguments");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid file read arguments");
         return SOFTBUS_INVALID_PARAM;
     }
     while (pos < len) {
@@ -127,7 +127,7 @@ int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWrit
             continue;
         }
         if (ret < 0) {
-            LOG_ERR("write file failed, errno=%d", errno);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write file failed, errno=%d", errno);
             return SOFTBUS_ERR;
         }
         pos += ret;

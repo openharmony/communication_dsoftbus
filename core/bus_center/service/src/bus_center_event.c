@@ -23,21 +23,21 @@
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
     if (info == NULL) {
-        LOG_ERR("para : info = null!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
         return;
     }
-    LOG_INFO("notify node %s", (isOnline == true) ? "online" : "offline");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s", (isOnline == true) ? "online" : "offline");
     LnnIpcNotifyOnlineState(isOnline, info, sizeof(NodeBasicInfo));
 }
 
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
 {
     if (info == NULL) {
-        LOG_ERR("para : info = null!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
         return;
     }
     if (type == TYPE_DEVICE_NAME) {
-        LOG_INFO("notify peer device name changed %s", info->deviceName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify peer device name changed %s", info->deviceName);
     }
     LnnIpcNotifyBasicInfoChanged(info, sizeof(NodeBasicInfo), type);
 }
@@ -45,19 +45,19 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {
-        LOG_ERR("para : addr or networkId = null!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : addr or networkId = null!");
         return;
     }
-    LOG_INFO("notify join LNN result :%d", retCode);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify join LNN result :%d", retCode);
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
-        LOG_ERR("para : networkId = null!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : networkId = null!");
         return;
     }
-    LOG_INFO("notify leave LNN result %d", retCode);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify leave LNN result %d", retCode);
     LnnIpcNotifyLeaveResult(networkId, retCode);
 }

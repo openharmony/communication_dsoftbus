@@ -43,15 +43,15 @@ void LnnLanesInit(void)
 static bool IsValidLaneId(int32_t laneId)
 {
     if (laneId < LNN_LINK_TYPE_WLAN_5G || laneId >= LNN_LINK_TYPE_BUTT) {
-        LOG_ERR("param error. laneId = %d", laneId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. laneId = %d", laneId);
         return false;
     }
     if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return false;
     }
     if (!g_lanes[laneId].isUse) {
-        LOG_ERR("The laneId cannot be used. laneId: %d.", laneId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "The laneId cannot be used. laneId: %d.", laneId);
         (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
         return false;
     }
@@ -65,7 +65,7 @@ void LnnReleaseLane(int32_t laneId)
         return;
     }
     if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     g_lanes[laneId].isUse = false;
@@ -94,11 +94,11 @@ const LnnLaneInfo *LnnGetConnection(int32_t laneId)
 static bool SetPeerIPInfo(const char *netWorkId, LnnLaneLinkType type, bool mode)
 {
     int32_t ret;
-    int32_t port;
+    int32_t port = 0;
     ret = LnnGetRemoteStrInfo(netWorkId, STRING_KEY_WLAN_IP,
         g_lanes[type].laneInfo.conOption.info.ip.ip, IP_STR_MAX_LEN);
     if (ret < 0 || strncmp(g_lanes[type].laneInfo.conOption.info.ip.ip, "127.0.0.1", strlen("127.0.0.1")) == 0) {
-        LOG_ERR("LnnGetRemoteStrInfo error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo error.");
         return false;
     }
     if (mode) {
@@ -107,7 +107,7 @@ static bool SetPeerIPInfo(const char *netWorkId, LnnLaneLinkType type, bool mode
         ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_SESSION_PORT, &port);
     }
     if (ret < 0) {
-        LOG_ERR("LnnGetRemoteNumInfo error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo error.");
         return false;
     }
     g_lanes[type].laneInfo.conOption.type = CONNECTION_ADDR_WLAN;
@@ -121,7 +121,7 @@ static bool SetPeerMacInfo(const char *netWorkId, LnnLaneLinkType type, bool mod
     int32_t ret;
     ret = LnnGetRemoteStrInfo(netWorkId, STRING_KEY_BT_MAC, g_lanes[type].laneInfo.conOption.info.br.brMac, BT_MAC_LEN);
     if (ret < 0) {
-        LOG_ERR("LnnGetRemoteStrInfo error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo error.");
         return false;
     }
     if (type == LNN_LINK_TYPE_BR) {
@@ -134,12 +134,12 @@ static bool SetPeerMacInfo(const char *netWorkId, LnnLaneLinkType type, bool mod
 bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool mode)
 {
     if (netWorkId == NULL || type >= LNN_LINK_TYPE_BUTT || type < LNN_LINK_TYPE_WLAN_5G) {
-        LOG_ERR("param error. type = %d", type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. type = %d", type);
         return false;
     }
     if (!g_lanes[type].isUse) {
         if (pthread_mutex_lock(&g_lanes[type].lock) != 0) {
-            LOG_ERR("lock failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
             return false;
         }
         if (g_lanes[type].isUse) {
@@ -170,17 +170,17 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
     int32_t ret;
     int32_t port;
     if (laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
-        LOG_ERR("param error. laneId = %d", laneId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. laneId = %d", laneId);
         return;
     }
     if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
-        LOG_ERR("lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (isSupport) {
         ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_AUTH_PORT, &port);
         if (ret < 0) {
-            LOG_ERR("LnnGetRemoteNumInfo error, ret = %d.", ret);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo error, ret = %d.", ret);
             (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
             return;
         }

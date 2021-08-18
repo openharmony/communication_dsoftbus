@@ -161,6 +161,7 @@ static int32_t SaveMsgToMap(int32_t channelId, SyncItemInfo *itemInfo)
 
 static int32_t ServerProccess(const char *key, const char *udid)
 {
+    int32_t rc;
     SyncItemInfo *info = (SyncItemInfo *)LnnMapGet(&g_syncLedgerItem.idMap, key);
     if (info != NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "server element should be null!");
@@ -176,7 +177,9 @@ static int32_t ServerProccess(const char *key, const char *udid)
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
-    return LnnMapSet(&g_syncLedgerItem.idMap, key, info, sizeof(SyncItemInfo));
+    rc = LnnMapSet(&g_syncLedgerItem.idMap, key, info, sizeof(SyncItemInfo));
+    SoftBusFree(info);
+    return rc;
 }
 
 static int32_t SendMessageToPeer(int32_t channelId)
