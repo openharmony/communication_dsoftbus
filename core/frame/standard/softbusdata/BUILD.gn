@@ -28,13 +28,13 @@ ohos_shared_library("softbus_server_data") {
   public_configs = [ ":softbus_data_interface" ]
   if (is_standard_system) {
     external_deps = [
-      "ipc:ipc_core",
       "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
     ]
 
     deps = [
-      "//utils/native/base:utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//utils/native/base:utils",
     ]
     part_name = "dsoftbus_standard"
   }

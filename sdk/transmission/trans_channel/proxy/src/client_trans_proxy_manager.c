@@ -90,14 +90,14 @@ void ClientTransProxyCloseChannel(int32_t channelId)
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
 {
-    int ret = ServerIpcSendMessage(channelId, data, len, TRANS_SESSION_BYTES);
+    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_BYTES);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send bytes: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
 
 int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
 {
-    int ret = ServerIpcSendMessage(channelId, data, len, TRANS_SESSION_MESSAGE);
+    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_MESSAGE);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }

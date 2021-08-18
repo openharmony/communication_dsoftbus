@@ -18,6 +18,7 @@ config("trans_direct_channel_interface") {
     "include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 }
 
