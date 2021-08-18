@@ -72,22 +72,22 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     char type[DEVICE_TYPE_BUF_LEN] = {0};
 
     if (info == NULL) {
-        LOG_ERR("info is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info is null");
         return SOFTBUS_INVALID_PARAM;
     }
     rc = LnnGetLocalLedgerStrInfo(STRING_KEY_DEV_NAME, info->deviceName, DEVICE_NAME_BUF_LEN);
     if (rc != SOFTBUS_OK) {
-        LOG_ERR("get local device info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local device info failed");
         return SOFTBUS_ERR;
     }
     rc = LnnGetLocalLedgerStrInfo(STRING_KEY_NETWORKID, info->networkId, NETWORK_ID_BUF_LEN);
     if (rc != SOFTBUS_OK) {
-        LOG_ERR("get local network id info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id info failed");
         return SOFTBUS_ERR;
     }
     rc = LnnGetLocalLedgerStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN);
     if (rc != SOFTBUS_OK) {
-        LOG_ERR("get local device type failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local device type failed");
         return SOFTBUS_ERR;
     }
     return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
@@ -98,11 +98,11 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, int32_t
     bool isLocalNetowrkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
     if (networkId == NULL || info == NULL) {
-        LOG_ERR("params are null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
         return SOFTBUS_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("get local network id fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id fail");
         return SOFTBUS_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
@@ -122,7 +122,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, int32_t
                 return LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, (char *)info, infoLen);
             }
         default:
-            LOG_ERR("invalid node key type: %d", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
     }
 }
