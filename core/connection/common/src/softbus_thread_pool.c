@@ -166,7 +166,9 @@ static void JobCheck(ThreadPool *pool, Job *job)
 
 static void ThreadPoolWorker(void *arg)
 {
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Start");
     if (arg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ThreadPoolWorker arg is NULL");
         return;
     }
     ThreadPool *pool = (ThreadPool *)arg;
