@@ -22,47 +22,103 @@
 #include <unistd.h>
 
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
+#define DEFAULT_STORAGE_PATH "/data/data"
+
+static char g_storagePath[LNN_MAX_DIR_PATH_LEN] = {0};
+
 static LnnFilePath g_filePath[LNN_FILE_ID_MAX] = {
-    { LNN_FILE_ID_UUID, "/data/data/dsoftbus/uuid" }
+    { LNN_FILE_ID_UUID, "/dsoftbus/uuid" }
 };
+
+static int32_t InitStorageConfigPath(void)
+{
+    char *path = NULL;
+
+    if (SoftbusGetConfig(SOFTBUS_STR_STORAGE_DIRECTORY, (uint8_t *)g_storagePath,
+        LNN_MAX_DIR_PATH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read storage path fail");
+        if (strncpy_s(g_storagePath, LNN_MAX_DIR_PATH_LEN, DEFAULT_STORAGE_PATH,
+            strlen(DEFAULT_STORAGE_PATH)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy default storage path fail");
+            g_storagePath[0] = '\0';
+            return SOFTBUS_ERR;
+        }
+    }
+    path = realpath(g_storagePath, NULL);
+    if (path == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "realpath %s fail", g_storagePath);
+        g_storagePath[0] = '\0';
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(g_storagePath, LNN_MAX_DIR_PATH_LEN, path, strlen(path)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy canonicalized storage path fail");
+        g_storagePath[0] = '\0';
+        free(path);
+        return SOFTBUS_ERR;
+    }
+    free(path);
+    return SOFTBUS_OK;
+}
+
+static int32_t GetFullStoragePath(LnnFileId id, char *path, int32_t len)
+{
+    if (strlen(g_storagePath) == 0) {
+        if (InitStorageConfigPath() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init storage config path fail");
+            return SOFTBUS_ERR;
+        }
+    }
+    if (strncpy_s(path, len, g_storagePath, strlen(g_storagePath)) != EOK ||
+        strncat_s(path, len, g_filePath[id].filePath, strlen(g_filePath[id].filePath)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "splice full path for %d fail", id);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "full path for %d is %s", id, path);
+    return SOFTBUS_OK;
+}
 
 int32_t LnnFileCreate(LnnFileId id)
 {
     int32_t ret;
     char *dir = NULL;
     char dirPath[LNN_MAX_DIR_PATH_LEN];
+    char fullPath[LNN_MAX_DIR_PATH_LEN];
     int32_t fd = -1;
 
     if (id >= LNN_FILE_ID_MAX) {
-        LOG_ERR("invalid create file id: %d", id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid create file id: %d", id);
         return SOFTBUS_ERR;
     }
-    dir = (char *)g_filePath[id].filePath;
+    if (GetFullStoragePath(id, fullPath, LNN_MAX_DIR_PATH_LEN) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    dir = (char *)fullPath;
     while ((dir = strchr(dir, LNN_PATH_SEPRATOR)) != NULL) {
-        uint32_t len = (uint32_t)(dir - g_filePath[id].filePath);
+        uint32_t len = (uint32_t)(dir - fullPath);
         if (len == 0) { // skip root
             dir++;
             continue;
         }
-        if (memcpy_s(dirPath, sizeof(dirPath), g_filePath[id].filePath, len) != EOK) {
-            LOG_ERR("memory copy dir name failed");
+        if (memcpy_s(dirPath, sizeof(dirPath), fullPath, len) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memory copy dir name failed");
             return SOFTBUS_ERR;
         }
         dirPath[len] = 0;
         if (access(dirPath, F_OK) != 0) {
             ret = mkdir(dirPath, S_IRWXU);
             if (ret != 0) {
-                LOG_ERR("make dir failed, err code %d", ret);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "make dir failed, err code %d", ret);
                 return SOFTBUS_ERR;
             }
         }
         dir++;
     }
-    fd = open(g_filePath[id].filePath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    fd = open(fullPath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        LOG_ERR("crate file failed, errno = %d", errno);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "crate file failed, errno = %d", errno);
         return SOFTBUS_ERR;
     }
     close(fd);
@@ -71,11 +127,16 @@ int32_t LnnFileCreate(LnnFileId id)
 
 int32_t LnnFileOpen(LnnFileId id)
 {
+    char path[LNN_MAX_DIR_PATH_LEN] = {0};
+
     if (id >= LNN_FILE_ID_MAX) {
-        LOG_ERR("invalid open file id: %d", id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid open file id: %d", id);
         return SOFTBUS_ERR;
     }
-    return open(g_filePath[id].filePath, O_RDWR);
+    if (GetFullStoragePath(id, path, LNN_MAX_DIR_PATH_LEN) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return open(path, O_RDWR);
 }
 
 int32_t LnnFileClose(int32_t fd)
@@ -89,7 +150,7 @@ int32_t LnnFileRead(int32_t fd, uint8_t *dst, uint32_t len, bool needReadAll)
     uint32_t pos = 0;
 
     if (fd < 0 || dst == NULL) {
-        LOG_ERR("invalid file read arguments");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid file read arguments");
         return SOFTBUS_INVALID_PARAM;
     }
     while (pos < len) {
@@ -98,7 +159,7 @@ int32_t LnnFileRead(int32_t fd, uint8_t *dst, uint32_t len, bool needReadAll)
             continue;
         }
         if (ret < 0) {
-            LOG_ERR("read file failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read file failed");
             return SOFTBUS_ERR;
         }
         if (ret == 0) {
@@ -118,7 +179,7 @@ int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWrit
     uint32_t pos = 0;
 
     if (fd < 0 || src == NULL) {
-        LOG_ERR("invalid file read arguments");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid file read arguments");
         return SOFTBUS_INVALID_PARAM;
     }
     while (pos < len) {
@@ -127,7 +188,7 @@ int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWrit
             continue;
         }
         if (ret < 0) {
-            LOG_ERR("write file failed, errno=%d", errno);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write file failed, errno=%d", errno);
             return SOFTBUS_ERR;
         }
         pos += ret;

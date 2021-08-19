@@ -37,6 +37,7 @@ typedef enum {
     SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, /* the default val is 10 */
     SOFTBUS_INT_LNN_SUPPORT_CAPBILITY, /* the default val is 22 */
     SOFTBUS_INT_AUTH_ABILITY_COLLECTION, /* the default val is 0 */
+    SOFTBUS_STR_STORAGE_DIRECTORY, /* the default val is /data/data/dsoftbus/ */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

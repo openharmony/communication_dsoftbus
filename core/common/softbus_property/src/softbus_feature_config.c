@@ -21,6 +21,8 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
+#define MAX_STORAGE_PATH_LEN 256
+
 #define MAX_BYTES_LENGTH 4194304
 #define MAX_MESSAGE_LENGTH 4096
 #define CONN_BR_MAX_DATA_LENGTH 4096
@@ -33,6 +35,7 @@
 #define MAX_LNN_CONNECTION_CNT 10
 #define LNN_SUPPORT_CAPBILITY 22
 #define AUTH_ABILITY_COLLECTION 0        
+#define DEFAULT_STORAGE_PATH "/data/data"
 
 typedef struct {
     int32_t maxByteLen;
@@ -47,6 +50,7 @@ typedef struct {
     int32_t maxNodeStateCbCnt;
     int32_t maxLnnConnCnt;
     int32_t maxLnnSupportCap;
+    char storageDir[MAX_STORAGE_PATH_LEN];
 } ConfigItem;
 
 typedef struct {
@@ -68,6 +72,7 @@ ConfigItem g_config = {
     MAX_NODE_STATE_CB_CNT,
     MAX_LNN_CONNECTION_CNT,
     LNN_SUPPORT_CAPBILITY,
+    DEFAULT_STORAGE_PATH,
 };
 
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
@@ -131,6 +136,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         (unsigned char*)&(g_config.authAbilityConn), 
         sizeof(g_config.authAbilityConn)
     },
+    {
+        SOFTBUS_STR_STORAGE_DIRECTORY, 
+        (unsigned char*)(g_config.storageDir), 
+        sizeof(g_config.storageDir)
+    },
 };
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
@@ -156,7 +166,7 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
         return SOFTBUS_ERR;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
-	    return SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
