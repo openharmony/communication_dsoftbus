@@ -29,11 +29,13 @@ if (defined(ohos_lite)) {
   } else {
     shared_library("dsoftbus_bus_center_hub") {
       sources = [
-        "src/lnn_lane_info.c",
-        "src/lnn_lane_manager.c",
-        "src/lnn_smart_communication.c",
+        "lane_manager/src/lnn_lane_info.c",
+        "lane_manager/src/lnn_lane_manager.c",
+        "lane_manager/src/lnn_smart_communication.c",
       ]
       include_dirs = [
+        "lane_manager/include",
+        "time_sync/include",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
@@ -52,10 +54,25 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
+      if (enable_time_sync == true) {
+        sources += [
+          "time_sync/src/lnn_time_sync_manager.c",
+          "time_sync/src/lnn_time_sync_impl_stub.c",
+        ]
+        include_dirs += [
+          "$dsoftbus_root_path/core/adapter/bus_center/include/",
+          "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+          "$dsoftbus_root_path/core/common/message_handler/include",
+        ]
+        deps += [
+          "$dsoftbus_root_path/core/common/message_handler:message_handler",
+        ]
+      } else {
+        sources += [ "time_sync/src/lnn_time_sync_manager_stub.c" ]
+      }
     }
   }
 } else {
@@ -63,11 +80,13 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("dsoftbus_bus_center_hub") {
     sources = [
-      "src/lnn_lane_info.c",
-      "src/lnn_lane_manager.c",
-      "src/lnn_smart_communication.c",
+      "lane_manager/src/lnn_lane_info.c",
+      "lane_manager/src/lnn_lane_manager.c",
+      "lane_manager/src/lnn_smart_communication.c",
     ]
     include_dirs = [
+      "lane_manager/include",
+      "time_sync/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
@@ -77,9 +96,24 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utils",
     ]
+    if (enable_time_sync == true) {
+      sources += [
+        "time_sync/src/lnn_time_sync_manager.c",
+        "time_sync/src/lnn_time_sync_impl_stub.c",
+      ]
+      include_dirs += [
+        "$dsoftbus_root_path/core/adapter/bus_center/include/",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+      ]
+      deps += [
+        "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      ]
+    } else {
+      sources += [ "time_sync/src/lnn_time_sync_manager_stub.c" ]
+    }
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }

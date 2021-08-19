@@ -24,4 +24,5 @@ declare_args() {
   enable_auth_account = false
 
   enable_auto_networking = true
+  enable_time_sync = true
 }
