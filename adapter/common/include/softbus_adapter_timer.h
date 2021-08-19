@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_OS_INTERFACE_H
-#define SOFTBUS_OS_INTERFACE_H
+#ifndef SOFTBUS_ADAPTER_TIMER_H
+#define SOFTBUS_ADAPTER_TIMER_H
 
 #ifdef __cplusplus
 #if __cplusplus

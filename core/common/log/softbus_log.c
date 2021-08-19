@@ -17,8 +17,12 @@
 
 #include <securec.h>
 
+#include "softbus_feature_config.h"
+
 #define LOG_NAME_MAX_LEN 5
 #define LOG_PRINT_MAX_LEN 256
+
+static int32_t g_logLevel;
 
 typedef struct {
     SoftBusLogModule mod;
@@ -34,39 +38,20 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
     {SOFTBUS_LOG_COMM, "COMM"},
 };
 
-void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
-{
-    #ifdef SOFTBUS_PRINTF
-        printf("%s\n", buf);
-        return;
-    #endif
-    switch (level) {
-        case SOFTBUS_LOG_DBG:
-            HILOG_DEBUG(LOG_CORE, "%{public}s", buf);
-            break;
-        case SOFTBUS_LOG_INFO:
-            HILOG_INFO(LOG_CORE, "%{public}s", buf);
-            break;
-        case SOFTBUS_LOG_WARN:
-            HILOG_WARN(LOG_CORE, "%{public}s", buf);
-            break;
-        case SOFTBUS_LOG_ERROR:
-            HILOG_ERROR(LOG_CORE, "%{public}s", buf);
-            break;
-        default:
-            break;
-    }
-}
-
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...)
 {
-    int ulPos;
+    int32_t ulPos;
     char szStr[LOG_PRINT_MAX_LEN] = {0};
     va_list arg;
-    int ret;
+    int32_t ret;
 
     if (module >= SOFTBUS_LOG_MODULE_MAX || level >= SOFTBUS_LOG_LEVEL_MAX) {
         HILOG_ERROR(LOG_CORE, "[COMM]softbus log type or module error");
+        return;
+    }
+
+    SoftbusGetConfig(SOFTBUS_INT_ADAPTER_LOG_LEVEL, (unsigned char*)&g_logLevel, sizeof(g_logLevel));
+    if ((int32_t)level < g_logLevel) {
         return;
     }
 
