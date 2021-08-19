@@ -26,6 +26,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
+#include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -65,7 +66,9 @@ int32_t BusCenterServerInit(void)
         return SOFTBUS_ERR;
     }
     LnnLanesInit();
+    LnnTimeSyncInit();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
+
     return SOFTBUS_OK;
 }
 
@@ -76,5 +79,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetBuilder();
     LnnDeinitSyncLedgerItem();
     LnnDeinitEventMonitor();
+    LnnTimeSyncDeinit();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

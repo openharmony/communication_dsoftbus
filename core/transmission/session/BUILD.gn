@@ -48,7 +48,7 @@ if (defined(ohos_lite)) {
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub:dsoftbus_bus_center_hub",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/transmission/ipc:dsoftbus_trans_ipc_proxy",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
@@ -134,7 +134,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager:dsoftbus_bus_center_hub",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub:dsoftbus_bus_center_hub",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
