@@ -19,8 +19,6 @@
 #include <ifaddrs.h>
 #include <memory>
 #include <netinet/in.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
 #include <securec.h>
 #include <sys/socket.h>
 #include <thread>
