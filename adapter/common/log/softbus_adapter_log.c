@@ -13,33 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_LOG_H
-#define SOFTBUS_LOG_H
-
 #include "softbus_adapter_log.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
+void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
+{
+#ifdef SOFTBUS_PRINTF
+    printf("%s\n", buf);
+    return;
 #endif
-#endif
-
-typedef enum {
-    SOFTBUS_LOG_AUTH,
-    SOFTBUS_LOG_TRAN,
-    SOFTBUS_LOG_CONN,
-    SOFTBUS_LOG_LNN,
-    SOFTBUS_LOG_DISC,
-    SOFTBUS_LOG_COMM,
-    SOFTBUS_LOG_MODULE_MAX,
-} SoftBusLogModule;
-
-void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
-
-#ifdef __cplusplus
-#if __cplusplus
+    switch (level) {
+        case SOFTBUS_LOG_DBG:
+            HILOG_DEBUG(LOG_CORE, "%{public}s", buf);
+            break;
+        case SOFTBUS_LOG_INFO:
+            HILOG_INFO(LOG_CORE, "%{public}s", buf);
+            break;
+        case SOFTBUS_LOG_WARN:
+            HILOG_WARN(LOG_CORE, "%{public}s", buf);
+            break;
+        case SOFTBUS_LOG_ERROR:
+            HILOG_ERROR(LOG_CORE, "%{public}s", buf);
+            break;
+        default:
+            break;
+    }
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* SOFTBUS_LOG_H */
