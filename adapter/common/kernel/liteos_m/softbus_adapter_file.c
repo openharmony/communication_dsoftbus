@@ -16,8 +16,8 @@
 #include "softbus_adapter_file.h"
 
 #include "cmsis_os2.h"
+#include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "utils_file.h"
 
 int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
@@ -28,7 +28,7 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     uint32_t fileLen = 0;
     int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileOpen fail");
+        HILOG_ERROR(LOG_CORE, "Read UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     int ret = UtilsFileStat(fileName, &fileLen);
@@ -38,16 +38,16 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     }
     ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileSeek fail");
+        HILOG_ERROR(LOG_CORE, "Read UtilsFileSeek fail");
         goto EXIT;
     }
     if (fileLen > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read file len not legal, clear buf");
+        HILOG_ERROR(LOG_CORE, "Read file len not legal, clear buf");
         goto EXIT;
     }
     ret = UtilsFileRead(fd, readBuf, maxLen);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Read UtilsFileRead, ret=%d", ret);
+        HILOG_ERROR(LOG_CORE, "Read UtilsFileRead, ret=%{public}d", ret);
         goto EXIT;
     }
     UtilsFileClose(fd);
@@ -64,12 +64,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
     int fd;
     fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId UtilsFileOpen fail");
+        HILOG_ERROR(LOG_CORE, "WriteDeviceId UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
     if (ret != len) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "UtilsFileOpen UtilsFileWrite fail");
+        HILOG_ERROR(LOG_CORE, "UtilsFileOpen UtilsFileWrite fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
