@@ -13,11 +13,18 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+config("dsoftbus_log_interface") {
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
+}
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_include = [
-    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
     "$libsec_include_path",
     "$hilog_lite_include_path",
   ]
@@ -28,22 +35,28 @@ if (defined(ohos_lite)) {
       cflags = [ "-Wall" ]
       sources = [ "softbus_log.c" ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
       ]
+      public_configs = [ ":dsoftbus_log_interface" ]
     }
   } else {
     shared_library("softbus_log") {
       include_dirs = common_include
       cflags = [
-          "-Wall",
-          "-fPIC",
+        "-Wall",
+        "-fPIC",
       ]
       sources = [ "softbus_log.c" ]
       public_deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
       ]
+      public_configs = [ ":dsoftbus_log_interface" ]
     }
   }
 } else {
@@ -51,13 +64,16 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("softbus_log") {
     include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "//utils/native/base/include",
       "include",
     ]
     deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "//utils/native/base:utils",
     ]
+    public_configs = [ ":dsoftbus_log_interface" ]
     sources = [ "softbus_log.c" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

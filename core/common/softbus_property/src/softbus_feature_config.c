@@ -19,7 +19,6 @@
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 
 #define MAX_STORAGE_PATH_LEN 256
 
@@ -35,6 +34,7 @@
 #define MAX_LNN_CONNECTION_CNT 10
 #define LNN_SUPPORT_CAPBILITY 22
 #define AUTH_ABILITY_COLLECTION 0        
+#define ADAPTER_LOG_LEVEL 0
 #define DEFAULT_STORAGE_PATH "/data/data"
 
 typedef struct {
@@ -50,6 +50,7 @@ typedef struct {
     int32_t maxNodeStateCbCnt;
     int32_t maxLnnConnCnt;
     int32_t maxLnnSupportCap;
+    int32_t adapterLogLevel;
     char storageDir[MAX_STORAGE_PATH_LEN];
 } ConfigItem;
 
@@ -72,6 +73,7 @@ ConfigItem g_config = {
     MAX_NODE_STATE_CB_CNT,
     MAX_LNN_CONNECTION_CNT,
     LNN_SUPPORT_CAPBILITY,
+    ADAPTER_LOG_LEVEL,
     DEFAULT_STORAGE_PATH,
 };
 
@@ -137,6 +139,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_config.authAbilityConn)
     },
     {
+        SOFTBUS_INT_ADAPTER_LOG_LEVEL, 
+        (unsigned char*)&(g_config.adapterLogLevel), 
+        sizeof(g_config.adapterLogLevel)
+    },
+    {
         SOFTBUS_STR_STORAGE_DIRECTORY, 
         (unsigned char*)(g_config.storageDir), 
         sizeof(g_config.storageDir)
@@ -177,5 +184,4 @@ void SoftbusConfigInit(void)
 
     sets.SetConfig = &SoftbusSetConfig;
     SoftbusConfigAdapterInit(&sets);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftbusConfigInit success");
 }
