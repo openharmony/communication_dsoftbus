@@ -23,10 +23,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "securec.h"
+#include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
 {
@@ -36,24 +35,24 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
 
     int fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid open file fail");
+        HILOG_ERROR(LOG_CORE, "ReadFile get deviceid open file fail");
         return SOFTBUS_FILE_ERR;
     }
     int fileLen = lseek(fd, 0, SEEK_END);
     if (fileLen <= 0 || fileLen > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile maxLen failed or over maxLen");
+        HILOG_ERROR(LOG_CORE, "ReadFile maxLen failed or over maxLen");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     int ret = lseek(fd, 0, SEEK_SET);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile get deviceid lseek file fail");
+        HILOG_ERROR(LOG_CORE, "ReadFile get deviceid lseek file fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     ret = read(fd, readBuf, fileLen);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadFile read deviceid fail, ret=%d", ret);
+        HILOG_ERROR(LOG_CORE, "ReadFile read deviceid fail, ret=%{public}d", ret);
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -69,12 +68,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
 
     int fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId open file fail");
+        HILOG_ERROR(LOG_CORE, "WriteDeviceId open file fail");
         return SOFTBUS_FILE_ERR;
     }
     int ret = write(fd, writeBuf, len);
     if (ret != len) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "WriteDeviceId write fail");
+        HILOG_ERROR(LOG_CORE, "WriteDeviceId write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }

@@ -16,9 +16,8 @@
 #include "softbus_adapter_timer.h"
 
 #include "cmsis_os2.h"
+#include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
-#include "utils_file.h"
 
 #define MS_PER_SECOND 1000
 
@@ -28,33 +27,31 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     void *id = osTimerNew((osTimerFunc_t)timerFunc, type, NULL, NULL);
     if (id != NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create timer success");
+        HILOG_INFO(LOG_CORE, "create timer success");
         return id;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create timer failed");
+    HILOG_ERROR(LOG_CORE, "create timer failed");
     return NULL;
 }
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed");
+        HILOG_ERROR(LOG_CORE, "start timer failed");
         (void)osTimerDelete(timerId);
         return SOFTBUS_ERR;
     }
-
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start timer success");
+    HILOG_INFO(LOG_CORE, "start timer success");
     return SOFTBUS_OK;
 }
 
 int SoftBusDeleteTimer(void *timerId)
 {
     if (osTimerDelete(timerId) != osOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "delete timer failed");
+        HILOG_ERROR(LOG_CORE, "delete timer failed");
         return SOFTBUS_ERR;
     }
-
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "delete timer success");
+    HILOG_INFO(LOG_CORE, "delete timer success");
     return SOFTBUS_OK;
 }
 
