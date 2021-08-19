@@ -33,7 +33,8 @@ public:
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType) override;
     int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
-    int32_t OnChannelMsgReceived(int32_t channelId, const void *data, uint32_t len, int32_t type) override;
+    int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
+        uint32_t len, int32_t type) override;
 
     int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
