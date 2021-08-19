@@ -99,7 +99,7 @@ extern "C" {
  */
 #define MAX_ACCOUNT_HASH_LEN 96
 
-#define MIX_ADDR_MAX_LEN 256
+#define MIX_ADDR_MAX_LEN 46
 
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
