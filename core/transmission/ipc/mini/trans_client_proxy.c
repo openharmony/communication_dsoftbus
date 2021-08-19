@@ -40,5 +40,5 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
                                       unsigned int len, int32_t type)
 {
     (void)pkgName;
-    return TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, len, type);
+    return TransOnChannelMsgReceived(channelId, channelType, data, len, type);
 }

@@ -157,9 +157,10 @@ int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelTyp
     return TransOnChannelClosed(channelId, channelType);
 }
 
-int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, const void *data, uint32_t len, int32_t type)
+int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t type)
 {
-    return TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, len, static_cast<SessionPktType>(type));
+    return TransOnChannelMsgReceived(channelId, channelType, data, len, static_cast<SessionPktType>(type));
 }
 
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
@@ -290,6 +291,11 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
     uint32_t len;
     if (!data.ReadUint32(len)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read data len failed!");
@@ -305,7 +311,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    int ret = OnChannelMsgReceived(channelId, dataInfo, len, type);
+    int ret = OnChannelMsgReceived(channelId, channelType, dataInfo, len, type);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner write reply failed!");

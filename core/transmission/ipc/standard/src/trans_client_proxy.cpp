@@ -70,6 +70,6 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelMsgReceived(channelId, data, len, type);
+    clientProxy->OnChannelMsgReceived(channelId, channelType, data, len, type);
     return SOFTBUS_OK;
 }
