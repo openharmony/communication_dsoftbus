@@ -17,8 +17,6 @@
 
 #include <securec.h>
 
-#include "softbus_log.h"
-
 void *SoftBusMalloc(unsigned int size)
 {
     if (size > MAX_MALLOC_SIZE) {
@@ -36,7 +34,6 @@ void *SoftBusCalloc(unsigned int size)
 
     errno_t err = memset_s(tmp, size, 0, size);
     if (err != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset_s failed");
         SoftBusFree(tmp);
         return NULL;
     }

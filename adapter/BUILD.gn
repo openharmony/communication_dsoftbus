@@ -31,7 +31,6 @@ if (defined(ohos_lite)) {
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
@@ -45,6 +44,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
+        "$softbus_adapter_common/log/softbus_adapter_log.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
@@ -61,6 +61,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+        "$softbus_adapter_common/log/softbus_adapter_log.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
@@ -74,24 +75,20 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
+      "$dsoftbus_root_path/core/common/include",
     ]
   }
 
   ohos_shared_library("softbus_adapter") {
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "//utils/native/base/include",
-    ]
+    include_dirs = [ "//utils/native/base/include" ]
     sources = [
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+      "$softbus_adapter_common/log/softbus_adapter_log.c",
       "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
-    deps = [
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "//utils/native/base:utils",
-    ]
+    deps = [ "//utils/native/base:utils" ]
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
