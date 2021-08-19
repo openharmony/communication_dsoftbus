@@ -16,6 +16,7 @@
 #include "lnn_file_utils.h"
 
 #include <fcntl.h>
+#include <limits.h>
 #include <securec.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -36,6 +37,7 @@ static LnnFilePath g_filePath[LNN_FILE_ID_MAX] = {
 static int32_t InitStorageConfigPath(void)
 {
     char *path = NULL;
+    char canonicalizedPath[PATH_MAX];
 
     if (SoftbusGetConfig(SOFTBUS_STR_STORAGE_DIRECTORY, (uint8_t *)g_storagePath,
         LNN_MAX_DIR_PATH_LEN) != SOFTBUS_OK) {
@@ -47,19 +49,17 @@ static int32_t InitStorageConfigPath(void)
             return SOFTBUS_ERR;
         }
     }
-    path = realpath(g_storagePath, NULL);
+    path = realpath(g_storagePath, canonicalizedPath);
     if (path == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "realpath %s fail", g_storagePath);
         g_storagePath[0] = '\0';
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(g_storagePath, LNN_MAX_DIR_PATH_LEN, path, strlen(path)) != EOK) {
+    if (strncpy_s(g_storagePath, LNN_MAX_DIR_PATH_LEN, canonicalizedPath, strlen(canonicalizedPath)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy canonicalized storage path fail");
         g_storagePath[0] = '\0';
-        free(path);
         return SOFTBUS_ERR;
     }
-    free(path);
     return SOFTBUS_OK;
 }
 
