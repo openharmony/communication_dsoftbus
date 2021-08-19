@@ -61,17 +61,17 @@ static void EventMonitorHandler(LnnMonitorEventType event, const void *para)
     EventHandler *item = NULL;
 
     if (event == LNN_MONITOR_EVENT_TYPE_MAX) {
-        LOG_ERR("invalid event");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event");
         return;
     }
     if (pthread_mutex_lock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("hold lock failed in event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in event handler");
     }
     LIST_FOR_EACH_ENTRY(item, &g_eventMonitorCtrl.eventList[event], EventHandler, node) {
         item->handler(event, para);
     }
     if (pthread_mutex_unlock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("release lock failed in event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "release lock failed in event handler");
     }
 }
 
@@ -111,7 +111,7 @@ int32_t LnnInitEventMonitor(void)
             continue;
         }
         if (g_eventMonitorCtrl.monitorImpl[i].implInit(EventMonitorHandler) != SOFTBUS_OK) {
-            LOG_ERR("init event monitor impl(%u) failed", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor impl(%u) failed", i);
             return SOFTBUS_ERR;
         }
     }
@@ -128,24 +128,24 @@ int32_t LnnRegisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandle
     EventHandler *eventHandler = NULL;
 
     if (event == LNN_MONITOR_EVENT_TYPE_MAX || handler == NULL) {
-        LOG_ERR("invalid event handler params");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event handler params");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("hold lock failed in register event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in register event handler");
     }
     if (IsRepeatEventHandler(event, handler)) {
-        LOG_ERR("event(%u) handler is already exist", event);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "event(%u) handler is already exist", event);
         return SOFTBUS_INVALID_PARAM;
     }
     eventHandler = CreateEventHandler(handler);
     if (eventHandler == NULL) {
-        LOG_ERR("create event handler failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create event handler failed");
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&g_eventMonitorCtrl.eventList[event], &eventHandler->node);
     if (pthread_mutex_unlock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("release lock failed in register event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "release lock failed in register event handler");
     }
     return SOFTBUS_OK;
 }
@@ -155,19 +155,20 @@ void LnnUnregisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler
     EventHandler *item = NULL;
 
     if (event == LNN_MONITOR_EVENT_TYPE_MAX || handler == NULL) {
-        LOG_ERR("invalid event handler params");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event handler params");
         return;
     }
     if (pthread_mutex_lock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("hold lock failed in unregister event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in unregister event handler");
     }
     LIST_FOR_EACH_ENTRY(item, &g_eventMonitorCtrl.eventList[event], EventHandler, node) {
         if (item->handler == handler) {
             ListDelete(&item->node);
+            SoftBusFree(item);
             break;
         }
     }
     if (pthread_mutex_unlock(&g_eventMonitorCtrl.lock) != 0) {
-        LOG_ERR("release lock failed in unregister event handler");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "release lock failed in unregister event handler");
     }
 }

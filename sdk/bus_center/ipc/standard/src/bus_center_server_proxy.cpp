@@ -42,7 +42,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LOG_ERR("Get GetSystemAbility failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get GetSystemAbility failed!\n");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -54,7 +54,7 @@ int32_t BusCenterServerProxyInit(void)
     sptr<IRemoteObject> object = GetSystemAbility();
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
-        LOG_ERR("Get remote softbus object failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -63,12 +63,12 @@ int32_t BusCenterServerProxyInit(void)
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("ServerIpcGetAllOnlineNodeInfo g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllOnlineNodeInfo g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->GetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("ServerIpcGetAllOnlineNodeInfo get all online info failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllOnlineNodeInfo get all online info failed!\n");
         return ret;
     }
     return SOFTBUS_OK;
@@ -77,12 +77,12 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("ServerIpcGetLocalDeviceInfo g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetLocalDeviceInfo g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->GetLocalDeviceInfo(pkgName, info, infoTypeLen);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("ServerIpcGetLocalDeviceInfo get local device info failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetLocalDeviceInfo get local device info failed!\n");
         return ret;
     }
     return SOFTBUS_OK;
@@ -91,12 +91,12 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("ServerIpcGetNodeKeyInfo g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetNodeKeyInfo g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->GetNodeKeyInfo(pkgName, networkId, key, buf, len);
     if (ret != SOFTBUS_OK) {
-        LOG_ERR("ServerIpcGetNodeKeyInfo get node key info failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetNodeKeyInfo get node key info failed!\n");
         return ret;
     }
     return SOFTBUS_OK;
@@ -105,12 +105,12 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("ServerIpcJoinLNN g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinLNN g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen);
     if (ret != 0) {
-        LOG_ERR("ServerIpcJoinLNN failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinLNN failed!\n");
         return ret;
     }
     return SOFTBUS_OK;
@@ -119,12 +119,12 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     if (g_serverProxy == nullptr) {
-        LOG_ERR("ServerIpcLeaveLNN g_serverProxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->LeaveLNN(pkgName, networkId);
     if (ret != 0) {
-        LOG_ERR("ServerIpcLeaveLNN failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN failed!\n");
         return ret;
     }
     return SOFTBUS_OK;

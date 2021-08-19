@@ -60,7 +60,7 @@ static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
 {
     JoinLnnRequestInfo *info = new JoinLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LOG_ERR("copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
         return SOFTBUS_ERR;
     }
@@ -87,12 +87,12 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 {
     LeaveLnnRequestInfo *info = new LeaveLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LOG_ERR("copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
         return SOFTBUS_ERR;
     }
     if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
-        LOG_ERR("copy networkId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         delete info;
         return SOFTBUS_ERR;
     }
@@ -106,12 +106,12 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 
     (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
-        LOG_ERR("parameters are nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
-        LOG_ERR("repeat join lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerJoin(connAddr);
@@ -124,12 +124,12 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
-        LOG_ERR("parameters are nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
-        LOG_ERR("repeat leave lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerLeave(networkId);

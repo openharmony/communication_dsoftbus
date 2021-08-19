@@ -101,7 +101,7 @@ int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
     if (RestartPublish() != SOFTBUS_OK) {
-        LOG_ERR("RestartPublish fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RestartPublish fail!");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
