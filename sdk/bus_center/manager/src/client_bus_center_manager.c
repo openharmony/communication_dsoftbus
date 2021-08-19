@@ -222,7 +222,7 @@ int BusCenterClientInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get NodeStateCbCount from config file");
         g_maxNodeStateCbCount = DEFAULT_NODE_STATE_CB_CNT;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "NodeStateCbCount is %u", g_maxNodeStateCbCount);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "NodeStateCbCount is %u", g_maxNodeStateCbCount);
     do {
         g_busCenterClient.joinLNNCbList = CreateSoftBusList();
         if (g_busCenterClient.joinLNNCbList == NULL) {
@@ -250,7 +250,7 @@ int BusCenterClientInit(void)
         BusCenterClientDeinit();
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BusCenterClientInit init OK!");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BusCenterClientInit init OK!");
     return SOFTBUS_OK;
 }
 

@@ -36,6 +36,7 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "//third_party/bounds_checking_function/include",
@@ -52,6 +53,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/message_handler:message_handler",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -70,6 +72,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/common/message_handler/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "//utils/native/base/include",
@@ -78,6 +81,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

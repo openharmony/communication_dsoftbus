@@ -51,7 +51,7 @@ static void DeviceFound(const DeviceInfo *device)
         return;
     }
     addr.type = device->addr[0].type;
-    if (memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
+    if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
         strlen(device->addr[0].info.ip.ip)) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy ip failed\n");
         return;
