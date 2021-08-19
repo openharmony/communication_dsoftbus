@@ -52,6 +52,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -76,6 +77,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

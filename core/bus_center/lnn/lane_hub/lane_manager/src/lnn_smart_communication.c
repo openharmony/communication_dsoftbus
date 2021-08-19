@@ -51,7 +51,7 @@ static bool IsSupportUdp(LnnLaneProperty prop)
 int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL) {
-        LOG_ERR("param error. prop = %d", prop);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. prop = %d", prop);
         return SOFTBUS_ERR;
     }
     int32_t lane = SOFTBUS_ERR;
@@ -79,12 +79,12 @@ static bool GetNumInfo(const char *netWorkId, int32_t *local, int32_t *remote)
     int32_t ret;
     ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
     if (ret < 0 || *local < 0) {
-        LOG_ERR("LnnGetLocalNumInfo error. ret = %d, local = %d", ret, *local);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo error. ret = %d, local = %d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_NET_CAP, remote);
     if (ret < 0 || *remote < 0) {
-        LOG_ERR("LnnGetRemoteNumInfo error. ret = %d, remote = %d", ret, *remote);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo error. ret = %d, remote = %d", ret, *remote);
         return false;
     }
     return true;
@@ -94,7 +94,7 @@ static int32_t GetLaneOf5GWlan(const char* netWorkId, LnnLaneProperty prop)
 {
     int32_t local, remote;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
-        LOG_ERR("GetNumInfo error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNumInfo error.");
         return SOFTBUS_ERR;
     }
 
@@ -104,7 +104,7 @@ static int32_t GetLaneOf5GWlan(const char* netWorkId, LnnLaneProperty prop)
             return LNN_LINK_TYPE_WLAN_5G; // the LNN_LINK_TYPE_WLAN_5G is laneID.
         }
     }
-    LOG_INFO("Can't support WIFI WLAN 5G.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Can't support WIFI WLAN 5G.");
     return SOFTBUS_ERR;
 }
 
@@ -112,7 +112,7 @@ static int32_t GetLaneOf2P4GWlan(const char* netWorkId, LnnLaneProperty prop)
 {
     int32_t local, remote;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
-        LOG_ERR("GetLaneOf2P4GWlan error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLaneOf2P4GWlan error.");
         return SOFTBUS_ERR;
     }
 
@@ -122,7 +122,7 @@ static int32_t GetLaneOf2P4GWlan(const char* netWorkId, LnnLaneProperty prop)
             return LNN_LINK_TYPE_WLAN_2P4G;
         }
     }
-    LOG_INFO("Can't support WIFI WLAN 2P4G.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Can't support WIFI WLAN 2P4G.");
     return SOFTBUS_ERR;
 }
 
@@ -131,7 +131,7 @@ static int32_t GetLaneOfBR(const char *netWorkId, LnnLaneProperty prop)
     int32_t local, remote;
 
     if (!GetNumInfo(netWorkId, &local, &remote)) {
-        LOG_ERR("GetLaneOfBR error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLaneOfBR error.");
         return SOFTBUS_ERR;
     }
 
@@ -140,6 +140,6 @@ static int32_t GetLaneOfBR(const char *netWorkId, LnnLaneProperty prop)
             return LNN_LINK_TYPE_BR;
         }
     }
-    LOG_INFO("Can't support BR.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Can't support BR.");
     return SOFTBUS_ERR;
 }
