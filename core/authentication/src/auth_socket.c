@@ -98,7 +98,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d", head->module);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
-            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == 0) {
+            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId != head->seq) {
                 auth->authId = head->seq;
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %lld", auth->authId);
             }
