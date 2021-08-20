@@ -115,6 +115,8 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             break;
         }
         case MODULE_UDP_INFO:
+            AuthHandleTransInfo(auth, head, data, head->len);
+            break;
         case MODULE_AUTH_CHANNEL:
         case MODULE_AUTH_MSG: {
             if (auth->authId == 0) {
