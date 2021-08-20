@@ -201,6 +201,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     }
     if (!exists) {
         item = CreateAuthChannelInfo(appInfo->myData.sessionName);
+        item->authId = authId;
         appInfo->myData.channelId = item->appInfo.myData.channelId;
         if (item == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateAuthChannelInfo failed");
