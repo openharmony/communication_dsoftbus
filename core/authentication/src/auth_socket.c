@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "auth_common.h"
 #include "auth_connection.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
@@ -114,8 +115,13 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             break;
         }
         case MODULE_UDP_INFO:
+            AuthHandleTransInfo(auth, head, data, head->len);
+            break;
         case MODULE_AUTH_CHANNEL:
         case MODULE_AUTH_MSG: {
+            if (auth->authId == 0) {
+                auth->authId = GetSeq(SERVER_SIDE_FLAG);
+            }
             AuthHandleTransInfo(auth, head, data, head->len);
             break;
         }
