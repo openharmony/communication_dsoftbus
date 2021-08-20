@@ -969,7 +969,7 @@ static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peer
     }
     auth->hichain = g_hichainGaInstance;
     auth->fd = cfd;
-    auth->authId = GetSeq(SERVER_SIDE_FLAG);
+    auth->authId = 0;
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_TCP;

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "auth_common.h"
 #include "auth_connection.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
@@ -98,7 +99,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d", head->module);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
-            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId != head->seq) {
+            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == 0) {
                 auth->authId = head->seq;
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %lld", auth->authId);
             }
@@ -116,6 +117,9 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         case MODULE_UDP_INFO:
         case MODULE_AUTH_CHANNEL:
         case MODULE_AUTH_MSG: {
+            if (auth->authId == 0) {
+                auth->authId = GetSeq(SERVER_SIDE_FLAG);
+            }
             AuthHandleTransInfo(auth, head, data, head->len);
             break;
         }
