@@ -19,9 +19,9 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "securec.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
-#include "softbus_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_udp_channel_manager.h"
@@ -449,7 +449,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local ip from lnn failed.");
         return SOFTBUS_ERR;
     }
-    if (GenerateSessionKey(appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
+    if (SoftBusGenerateSessionKey(appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate session key failed.");
         return SOFTBUS_ERR;
     }
