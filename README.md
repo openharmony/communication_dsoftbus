@@ -63,6 +63,8 @@ The main code directory structure of DSoftBus is as follows:
 >**NOTICE:** 
 >To use RPC across devices, you must have the  **ohos.permission.DISTRIBUTED\_DATASYNC**  permission \(which is a dangerous one\).
 
+>When the device actively discovers the mobile phone, the mobile phone needs to turn on the discovered switch of the HyperTerminal before it can be discovered by the device.
+
 **1. Discovery**
 
 -   **Publishing process**
