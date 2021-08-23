@@ -17,14 +17,16 @@
 #
 
 import os
+import sys
+from subprocess import run
 from PyInquirer import prompt
 
 
 def enable_option(file_name):
     option_list = []
     try:
-        with open('.config', 'r') as f:
-            for line in f:
+        with open('.config', 'r') as config_file:
+            for line in config_file:
                 if line.startswith('CONFIG_'):
                     str1 = line.split('=')
                     option_list.append(str1[0][7:])
@@ -33,11 +35,11 @@ def enable_option(file_name):
         return
 
     if os.path.exists('.config'):
-        os.system('rm .config')
+        run(['rm', '.config'])
 
     file_data = ''
-    with open(file_name, 'r') as f:
-        for line in f:
+    with open(file_name, 'r') as gni_file:
+        for line in gni_file:
             if '=' in line:
                 str1 = line.split('=')
                 if str1[0].strip() in option_list:
@@ -46,8 +48,9 @@ def enable_option(file_name):
                     line = str1[0] + '= false\n'
             file_data += line
 
-    with open(file_name, 'w') as f:
-        f.write(file_data)
+    with open(file_name, 'w') as gni_file:
+        gni_file.write(file_data)
+
 
 def ask_option():
     options_prompt = {
@@ -60,16 +63,20 @@ def ask_option():
     answers = prompt(options_prompt)
     return answers['option']
 
-def update_config_file():
+
+def main():
+    print('##### Welcome to Dsoftbus #####')
     option = ask_option()
-    os.system('menuconfig')
+    run(['menuconfig'])
+    file_gni = './adapter/default_config/feature_config/platform/config.gni'
     if (option == 'standard'):
-        enable_option('./adapter/default_config/feature_config/standard/config.gni')
+        file_gni = file_gni.replace('platform', 'standard')
     elif (option == 'small'):
-        enable_option('./adapter/default_config/feature_config/small/config.gni')
+        file_gni = file_gni.replace('platform', 'small')
     else:
-        enable_option('./adapter/default_config/feature_config/mini/config.gni')
+        file_gni = file_gni.replace('platform', 'mini')
+    enable_option(file_gni)
+
 
 if __name__ == '__main__':
-    print('##### Welcome to Dsoftbus #####')
-    update_config_file()
+    sys.exit(main())
