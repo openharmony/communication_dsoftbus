@@ -32,8 +32,8 @@ common_include = [
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/core/bus_center/interface",
+  "$softbus_adapter_common/include",
   "//third_party/cJSON",
-  "//third_party/mbedtls/include/mbedtls",
 ]
 
 common_src = [
@@ -86,10 +86,7 @@ if (defined(ohos_lite)) {
       sources = common_src
       public_configs = [ ":trans_proxy_channel_interface" ]
       deps = common_deps
-      deps += [
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//third_party/mbedtls:mbedtls_shared",
-      ]
+      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
     }
   }
 } else {
@@ -105,11 +102,9 @@ if (defined(ohos_lite)) {
     deps = common_deps
     deps += [
       "$dsoftbus_core_path/common/utils:softbus_utils",
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/common/message_handler",
-      "$dsoftbus_root_path/core/common/security:softbus_crypto",
       "$dsoftbus_root_path/core/connection/manager:conn_manager",
     ]
     if (is_standard_system) {

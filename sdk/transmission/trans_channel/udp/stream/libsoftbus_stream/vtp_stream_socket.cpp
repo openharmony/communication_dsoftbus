@@ -25,7 +25,7 @@
 
 #include "fillpinc.h"
 #include "raw_stream_data.h"
-#include "softbus_crypto.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "stream_depacketizer.h"

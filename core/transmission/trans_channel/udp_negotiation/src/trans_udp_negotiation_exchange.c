@@ -15,14 +15,13 @@
 
 #include "trans_udp_negotiation_exchange.h"
 
-#include "base64.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
 #define BASE64_SESSION_KEY_LEN 45
-
 typedef enum {
     CODE_EXCHANGE_UDP_INFO = 6,
 } CodeType;
@@ -65,7 +64,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;
     (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char*)encodeSessionKey, BASE64_SESSION_KEY_LEN);
-    int32_t ret = mbedtls_base64_decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
+    int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls base64 decode failed.");
@@ -122,7 +121,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     }
     char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;
-    int32_t ret = mbedtls_base64_encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
+    int32_t ret = SoftBusBase64Encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
         (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls base64 encode failed.");

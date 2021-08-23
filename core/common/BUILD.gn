@@ -19,7 +19,6 @@ lite_component("softbus_core_common") {
     "utils:softbus_utils",
     "softbus_property:softbus_property",
     "message_handler:message_handler",
-    "security:softbus_crypto",
     "log:softbus_log",
   ]
 }
