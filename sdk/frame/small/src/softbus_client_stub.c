@@ -17,7 +17,6 @@
 #include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "liteipc_adapter.h"
-#include "softbus_adapter_file.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_client_context_manager.h"
 #include "softbus_client_event_manager.h"
