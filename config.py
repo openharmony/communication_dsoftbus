@@ -18,7 +18,7 @@
 
 import os
 import sys
-from subprocess import run
+import subprocess
 from PyInquirer import prompt
 
 
@@ -35,7 +35,7 @@ def enable_option(file_name):
         return
 
     if os.path.exists('.config'):
-        run(['rm', '.config'])
+        os.remove('.config')
 
     file_data = ''
     with open(file_name, 'r') as gni_file:
@@ -67,7 +67,7 @@ def ask_option():
 def main():
     print('##### Welcome to Dsoftbus #####')
     option = ask_option()
-    run(['menuconfig'])
+    subprocess.call(['menuconfig'])
     file_gni = './adapter/default_config/feature_config/platform/config.gni'
     if (option == 'standard'):
         file_gni = file_gni.replace('platform', 'standard')
