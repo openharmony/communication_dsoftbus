@@ -17,7 +17,7 @@
 
 #include <securec.h>
 
-#include "base64.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 
@@ -63,7 +63,7 @@ char *PackRequest(const AppInfo *appInfo)
     }
     unsigned char encodeSessionKey[BASE64KEY] = {0};
     size_t keyLen = 0;
-    int ret = mbedtls_base64_encode(encodeSessionKey, BASE64KEY, &keyLen, (unsigned char*)appInfo->sessionKey,
+    int32_t ret = SoftBusBase64Encode(encodeSessionKey, BASE64KEY, &keyLen, (unsigned char*)appInfo->sessionKey,
         SESSION_KEY_LENGTH);
     if (ret != 0) {
         cJSON_Delete(json);
@@ -118,7 +118,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
 
     size_t len = 0;
-    int ret = mbedtls_base64_decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH,
+    int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH,
         &len, (unsigned char *)sessionKey, strlen(sessionKey));
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (len != SESSION_KEY_LENGTH) {

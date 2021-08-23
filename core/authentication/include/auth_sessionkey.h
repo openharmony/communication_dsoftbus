@@ -18,7 +18,7 @@
 
 #include "auth_manager.h"
 #include "common_list.h"
-#include "softbus_crypto.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
