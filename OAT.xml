@@ -61,9 +61,11 @@ Note:If the text contains special characters, please escape them according to th
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="core/frame/standard/server/src/softbus_server.cfg" desc="cfg文件为json格式,无法添加版权头"/>
+                <filteritem type="filepath" name="Kconfig" desc="配置文件无法添加版权头"/>
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="根目录LICENSE文件校验策略的过滤条件xxx" >
                 <filteritem type="filepath" name="core/frame/standard/server/src/softbus_server.cfg" desc="cfg文件为json格式,无法添加License"/>
+                <filteritem type="filepath" name="Kconfig" desc="配置文件无法添加版权头"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
