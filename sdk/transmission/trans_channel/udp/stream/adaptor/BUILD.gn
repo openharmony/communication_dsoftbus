@@ -41,12 +41,14 @@ shared_library("dsoftbus_trans_dstream") {
     "../libsoftbus_stream/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$softbus_adapter_common/include",
   ]
   include_dirs += [ "$hilog_lite_include_path" ]
   include_dirs += [ "$libsec_include_path" ]
 
   public_configs = [ ":stream_common_config" ]
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_core_common",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "../libsoftbus_stream:libsoftbus_stream",
