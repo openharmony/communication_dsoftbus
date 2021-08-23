@@ -28,11 +28,10 @@ if (defined(ohos_lite)) {
       include_dirs = common_include
       sources = ["src/softbus_feature_config.c"]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_static",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
         "//utils/native/base:utils",
       ]
     }
@@ -42,12 +41,10 @@ if (defined(ohos_lite)) {
       cflags = [ "-Wall" ]
       sources = ["src/softbus_feature_config.c"]
       public_deps = [
-        "$dsoftbus_core_path/common/json_utils:json_utils",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_shared",
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
       ]
     }
   }
@@ -67,10 +64,8 @@ if (defined(ohos_lite)) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
     public_deps = [
-      "$dsoftbus_core_path/common/json_utils",
-      "//third_party/cJSON:cjson_static",
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",
     ]
     part_name = "dsoftbus_standard"
