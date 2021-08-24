@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       if (ohos_kernel_type == "liteos_a") {
-        sources += [ "$dsoftbus_root_path/core/adapter/bus_center/platform/lnn_product_monitor.c" ]
+        sources += [ "$dsoftbus_root_path/adapter/common/bus_center/platform/lnn_product_monitor.c" ]
         include_dirs += [
           "//drivers/adapter/uhdf/posix/include",
           "//drivers/framework/include/utils",
