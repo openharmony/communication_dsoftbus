@@ -253,6 +253,18 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     return sessionId;
 }
 
+int SetAuthResult(int sessionId)
+{
+    int32_t channelId;
+    int32_t type;
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
+        return;
+    }
+    return ServerIpcSetAuthResult(channelId);
+}
+
 static void CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100

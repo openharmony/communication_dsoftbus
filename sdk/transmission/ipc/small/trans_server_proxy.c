@@ -202,6 +202,28 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     return ret;
 }
 
+int32_t ServerIpcSetAuthResult(int channelId)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSetAuthResult begin");
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushInt32(&request, channelId);
+    int32_t ret = SOFTBUS_ERR;
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_AUTH_RESULT, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult callback ret [%d]", ret);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSetAuthResult end");
+    return ret;
+}
+
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCloseSession");
