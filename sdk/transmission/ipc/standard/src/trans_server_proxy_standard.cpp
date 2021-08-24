@@ -243,7 +243,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     return channelId;
 }
 
-int32_t ServerIpcSetAuthResult(int channelId)
+int32_t TransServerProxy::SetAuthResult(int channelId)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
