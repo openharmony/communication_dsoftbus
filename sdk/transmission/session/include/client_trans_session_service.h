@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_SESSION_SERVICE_H
 #define CLIENT_TRANS_SESSION_SERVICE_H
 
+#include "inner_session.h"
 #include "session.h"
 
 #ifdef __cplusplus

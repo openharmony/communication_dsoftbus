@@ -195,44 +195,45 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     return sessionId;
 }
 
-
-static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
+static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 {
-    if (addrStr == NULL || addrInfo == NULL) {
+    int32_t addrIndex = -1;
+    if (addrInfo == NULL || num <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-
-    cJSON *obj = cJSON_Parse(addrStr);
-    if (obj == NULL) {
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    if (memset_s(addrInfo, sizeof(addrInfo), 0x0, sizeof(addrInfo)) != EOK) {
-        cJSON_Delete(obj);
-        return SOFTBUS_MEM_ERR;
-    }
-    int32_t port;
-    if (GetJsonObjectStringItem(obj, "WIFI_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
-        GetJsonObjectNumberItem(obj, "WIFI_PORT", &port)) {
-        addrInfo->info.ip.port = (uint16_t)port;
-        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
-            cJSON_Delete(obj);
-            addrInfo->type = CONNECTION_ADDR_WLAN;
-            return SOFTBUS_OK;
+    int32_t wifiIndex = -1;
+    int32_t brIndex = -1;
+    int32_t bleIndex = -1;
+    for (int32_t index = 0; index < num; index ++) {
+        if ((addrInfo[index].type == CONNECTION_ADDR_ETH || addrInfo[index].type == CONNECTION_ADDR_WLAN) && wifiIndex < 0) {
+            wifiIndex = index;
+        }
+        if (addrInfo[index].type == CONNECTION_ADDR_BR && brIndex < 0) {
+            brIndex = index;
+        }
+        if (addrInfo[index].type == CONNECTION_ADDR_BLE && bleAddr < 0) {
+            bleIndex = index;
         }
     }
-    if (GetJsonObjectStringItem(obj, "BR_MAC", addrInfo->info.br.brMac, BT_MAC_LEN)) {
-        cJSON_Delete(obj);
-        addrInfo->type = CONNECTION_ADDR_BR;
-        return SOFTBUS_OK;
+
+    addrIndex = (wifiIndex > 0) ? wifiIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
+    if (addrIndex < 0) {
+        return SOFTBUS_INVALID_PARAM;
     }
-    cJSON_Delete(obj);
-    return SOFTBUS_ERR;
+    return addrIndex;
 }
 
-int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || addrInfo == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
+    if (addrIndex < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
@@ -243,17 +244,8 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add non encrypt session err: ret=%d", ret);
         return ret;
     }
-    int32_t channelId = INVALID_CHANNEL_ID;
-    if (addrInfo->type == CONNECTION_ADDR_MIX) {
-        ConnectionAddr addr;
-        ret = ConvertAddrStr((const char *)addrInfo->info.mixAddr.addr, &addr);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
-        channelId = ServerIpcOpenAuthSession(sessionName, &addr);
-    } else {
-        channelId = ServerIpcOpenAuthSession(sessionName, addrInfo);
-    }
+
+    int32_t channelId = ServerIpcOpenAuthSession(sessionName, &addrInfo[addrIndex]);
     ret = ClientSetChannelBySessionId(sessionId, channelId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
