@@ -47,6 +47,8 @@ public:
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
     int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
         uint32_t len) override;
+    int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period) override;
+    int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };

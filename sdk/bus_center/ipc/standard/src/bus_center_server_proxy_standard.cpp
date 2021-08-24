@@ -321,4 +321,83 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     }
     return SOFTBUS_OK;
 }
+
+int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy,
+    int period)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write client name failed!");
+        return SOFTBUS_ERR;
+    }
+
+    if (!data.WriteCString(targetNetworkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(accuracy)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write accuracy failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(period)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write period failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_START_TIME_SYNC, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write client name failed!");
+        return SOFTBUS_ERR;
+    }
+
+    if (!data.WriteCString(targetNetworkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_STOP_TIME_SYNC, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
 }

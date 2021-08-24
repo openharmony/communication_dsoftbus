@@ -25,12 +25,16 @@
 extern "C" {
 #endif
 
+typedef void (*LnnOnTimeSyncResult)(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
+
 void LnnNotifyJoinResult(ConnectionAddr *addr,
     const char *networkId, int32_t retCode);
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
+
+void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
 
 #ifdef __cplusplus
 }

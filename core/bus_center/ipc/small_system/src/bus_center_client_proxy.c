@@ -214,3 +214,28 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     SoftBusFree(svc);
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback ipc server push.");
+    if (pkgName == NULL || info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushFlatObj(&io, info, infoTypeLen);
+    IpcIoPushInt32(&io, retCode);
+    SvcIdentity svc = {0};
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback get svc failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback SendRequest failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}

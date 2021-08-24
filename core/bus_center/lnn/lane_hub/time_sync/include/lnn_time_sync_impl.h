@@ -26,6 +26,9 @@ typedef struct {
     void (*onTimeSyncImplComplete)(const char *networkId, double offset, int retCode);
 } TimeSyncImplCallback;
 
+int32_t LnnTimeSyncImplInit(void);
+void LnnTimeSyncImplDeinit(void);
+
 int32_t LnnStartTimeSyncImpl(const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, const TimeSyncImplCallback *callback);
 int32_t LnnStopTimeSyncImpl(const char *targetNetworkId);

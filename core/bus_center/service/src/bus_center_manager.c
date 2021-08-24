@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "bus_center_event.h"
 #include "lnn_network_manager.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -66,7 +67,7 @@ int32_t BusCenterServerInit(void)
         return SOFTBUS_ERR;
     }
     LnnLanesInit();
-    LnnTimeSyncInit();
+    LnnTimeSyncInit(LnnNotifyTimeSyncResult);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
 
     return SOFTBUS_OK;

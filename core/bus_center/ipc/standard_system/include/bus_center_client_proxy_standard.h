@@ -40,6 +40,7 @@ public:
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;
     int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) override;
+    int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
 
 private:
     static inline BrokerDelegator<BusCenterClientProxy> delegator_;

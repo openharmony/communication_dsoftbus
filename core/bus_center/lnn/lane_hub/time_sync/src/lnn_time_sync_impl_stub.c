@@ -18,6 +18,17 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+int32_t LnnTimeSyncImplInit(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync impl stub init success");
+    return SOFTBUS_OK;
+}
+
+void LnnTimeSyncImplDeinit(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync impl stub deinit");
+}
+
 int32_t LnnStartTimeSyncImpl(const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, const TimeSyncImplCallback *callback)
 {

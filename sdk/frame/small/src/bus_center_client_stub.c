@@ -128,3 +128,30 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *
     FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+{
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        FreeBuffer(ctx, ipcMsg);
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t infoSize;
+    void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read info failed!");
+        FreeBuffer(ctx, ipcMsg);
+        return SOFTBUS_ERR;
+    }
+    int32_t retCode = IpcIoPopInt32(reply);
+
+    int32_t retReply = LnnOnTimeSyncResult(info, retCode);
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult LnnOnTimeSyncResult failed!");
+        FreeBuffer(ctx, ipcMsg);
+        return SOFTBUS_ERR;
+    }
+    FreeBuffer(ctx, ipcMsg);
+    return SOFTBUS_OK;
+}

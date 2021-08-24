@@ -267,3 +267,57 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     }
     return SOFTBUS_OK;
 }
+
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "start time sync ipc client push.");
+    if (targetNetworkId == NULL || pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushString(&request, pkgName);
+    IpcIoPushString(&request, targetNetworkId);
+    IpcIoPushInt32(&request, accuracy);
+    IpcIoPushInt32(&request, period);
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_TIME_SYNC, &request, NULL, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync invoke failed[%d].", ans);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop time sync ipc client push.");
+    if (targetNetworkId == NULL || pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushString(&request, pkgName);
+    IpcIoPushString(&request, targetNetworkId);
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_TIME_SYNC, &request, NULL, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync invoke failed[%d].", ans);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
