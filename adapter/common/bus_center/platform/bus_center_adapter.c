@@ -20,14 +20,14 @@
 
 #include "bus_center_adapter.h"
 #include "parameter.h"
+#include "softbus_adapter_log.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "fail: para error!");
+        HILOG_ERROR(LOG_CORE, "fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
@@ -36,7 +36,7 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
         case COMM_DEVICE_KEY_DEVNAME:
             sn = GetSerial();
             if (sn == NULL) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSerial failed!");
+                HILOG_ERROR(LOG_CORE, "GetSerial failed!");
             }
             if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
                 return SOFTBUS_ERR;
@@ -44,7 +44,7 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
             break;
         case COMM_DEVICE_KEY_UDID:
             if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetDevUdid failed!");
+                HILOG_ERROR(LOG_CORE, "GetDevUdid failed!");
                 return SOFTBUS_ERR;
             }
             if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {

@@ -15,8 +15,8 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "hdf_io_service_if.h"
 
 static LnnMonitorEventHandler g_eventHandler;
@@ -30,8 +30,8 @@ static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 {
     if (id == IP_READY) {
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-        LOG_INFO("[%s] enter,%s: dev event received: %u, send LNN_MONITOR_EVENT_IP_ADDR_CHANGED to Softbus\n",
-            __FUNCTION__, (char*)priv, id);
+        HILOG_INFO(LOG_CORE,
+            "enter,%{public}s: dev event received: %{public}u, send LNN_MONITOR_EVENT_IP_ADDR_CHANGED to Softbus", (char*)priv, id);
     }
     return HDF_SUCCESS;
 }
@@ -44,20 +44,20 @@ static struct HdfDevEventlistener g_listener = {
 int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler)
 {
     if (handler == NULL) {
-        LOG_ERR("hisyslink event handler is null");
+        HILOG_ERROR(LOG_CORE, "hisyslink event handler is null");
         return SOFTBUS_ERR;
     }
     g_serv = HdfIoServiceBind(HISYSLINK_SERVICE_NAME);
     if (g_serv == NULL) {
-        LOG_WARN("[%s] fail to get service %s\n", __FUNCTION__, HISYSLINK_SERVICE_NAME);
+        HILOG_WARN(LOG_CORE, "fail to get service %{public}s", HISYSLINK_SERVICE_NAME);
         return SOFTBUS_OK;
     }
 
     if (HdfDeviceRegisterEventListener(g_serv, &g_listener) != HDF_SUCCESS) {
-        LOG_WARN("[%s] fail to register event listener\n", __FUNCTION__);
+        HILOG_WARN(LOG_CORE, "fail to register event listener");
         return SOFTBUS_OK;
     }
     g_eventHandler = handler;
-    LOG_INFO("[%s] start success...\n", __FUNCTION__);
+    HILOG_ERROR(LOG_CORE, "start success...");
     return SOFTBUS_OK;
 }
