@@ -877,7 +877,7 @@ int32_t ClientGetSessionSide(int32_t sessionId)
         return SOFTBUS_ERR;
     }
 
-    int32_t side;
+    int32_t side = -1;
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
 
