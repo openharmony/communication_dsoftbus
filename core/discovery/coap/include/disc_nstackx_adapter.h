@@ -40,7 +40,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
 int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen);
 int32_t DiscCoapStartDiscovery(DiscCoapMode);
 int32_t DiscCoapStopDiscovery(void);
-void DiscCoapUpdateLocalIp(void);
+void DiscCoapUpdateLocalIp(LinkStatus status);
 
 #ifdef __cplusplus
 #if __cplusplus
