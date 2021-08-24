@@ -243,6 +243,33 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     return channelId;
 }
 
+int32_t ServerIpcSetAuthResult(int channelId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult write channel id failed!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_SET_AUTH_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
 int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();

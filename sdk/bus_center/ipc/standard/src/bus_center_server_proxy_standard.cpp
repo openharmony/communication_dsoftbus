@@ -93,6 +93,11 @@ int32_t BusCenterServerProxy::OpenAuthSession(const char *sessionName, const Con
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterServerProxy::SetAuthResult(int channelId)
+{
+    return SOFTBUS_OK;    
+}
+
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;

@@ -124,6 +124,11 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     return channelId;
 }
 
+int32_t ServerIpcSetAuthResult(int channelId)
+{
+    return g_serverProxy->SetAuthResult(channelId);
+}
+
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     if (g_serverProxy == nullptr) {
