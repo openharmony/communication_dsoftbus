@@ -60,6 +60,10 @@ enum SoftBusErrNo {
     SOFTBUS_AUTH_VERIFYING,
 
     SOFTBUS_NETWORK_ERR_BASE = (-7000),
+    SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR, // time sync channel pipe broken
+    SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_TIMEOUT, // timeout during handshake
+    SOFTBUS_NETWORK_TIME_SYNC_TIMEOUT, // timeout during sync
+    SOFTBUS_NETWORK_TIME_SYNC_INTERFERENCE, // interference
 
     SOFTBUS_CONN_ERR_BASE = (-5000),
     SOFTBUS_CONN_FAIL,

@@ -30,6 +30,8 @@ int32_t ServerLeaveLNN(void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerGetAllOnlineNodeInfo(void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStartTimeSync(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

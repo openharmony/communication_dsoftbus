@@ -155,4 +155,14 @@ int32_t SoftBusServerProxyFrame::GetNodeKeyInfo(const char *pkgName, const char 
 {
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::StartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return SOFTBUS_OK;
+}
 }

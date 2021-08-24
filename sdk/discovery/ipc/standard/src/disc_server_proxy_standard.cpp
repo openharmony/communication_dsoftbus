@@ -235,4 +235,14 @@ int32_t DiscServerProxy::GetNodeKeyInfo(const char *pkgName, const char *network
 {
     return SOFTBUS_OK;
 }
+
+int32_t DiscServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return SOFTBUS_OK;
+}
 }

@@ -30,6 +30,8 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period);
+int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
 
 #ifdef __cplusplus
 #if __cplusplus
