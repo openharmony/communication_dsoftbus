@@ -17,6 +17,7 @@
 
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
+#include "inner_session.h"
 #include "securec.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -199,7 +200,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 {
     int32_t addrIndex = -1;
     if (addrInfo == NULL || num <= 0) {
-        return SOFTBUS_INVALID_PARAM;
+        return addrIndex;
     }
     int32_t wifiIndex = -1;
     int32_t brIndex = -1;
@@ -211,17 +212,13 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
         if (addrInfo[index].type == CONNECTION_ADDR_BR && brIndex < 0) {
             brIndex = index;
         }
-        if (addrInfo[index].type == CONNECTION_ADDR_BLE && bleAddr < 0) {
+        if (addrInfo[index].type == CONNECTION_ADDR_BLE && bleIndex < 0) {
             bleIndex = index;
         }
     }
-
     addrIndex = (wifiIndex > 0) ? wifiIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
-    if (addrIndex < 0) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     return addrIndex;
 }
 
