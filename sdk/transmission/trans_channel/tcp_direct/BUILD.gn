@@ -92,8 +92,8 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_direct_channel_sdk_interface" ]
     deps = [
       "$dsoftbus_core_path/common/security/sequence_verification:softbus_seq_verification",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/security:softbus_crypto",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
       "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",

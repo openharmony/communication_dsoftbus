@@ -55,8 +55,6 @@ SoftBusList *CreateSoftBusList(void);
 
 void DestroySoftBusList(SoftBusList *list);
 
-int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len);
-
 int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, int32_t inLen);
 
 int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, int32_t inLen);

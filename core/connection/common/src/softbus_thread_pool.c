@@ -116,6 +116,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
     int32_t countSuccess = 0;
     for (int32_t i = 0; i < pool->threadNum; ++i) {
         ThreadAttr attr = {"ThreadPoolWorker", 0, THREAD_PRIORITY};
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "create pthread now.");
         if (CreateThread((Runnable)ThreadPoolWorker, (void *)pool, &attr, (uint32_t *)&(pool->pthreads[i])) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create pthreads no. [%d] failed\n", i);
             pool->pthreads[i] = (pthread_t)0;

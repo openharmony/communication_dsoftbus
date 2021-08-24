@@ -19,7 +19,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
     "$libsec_include_path",
-    "//third_party/mbedtls/include",
     "$hilog_lite_include_path",
   ]
   if (ohos_kernel_type == "liteos_m") {
@@ -28,6 +27,7 @@ if (defined(ohos_lite)) {
       cflags = [ "-Wall" ]
       sources = [ "softbus_utils.c" ]
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
@@ -46,7 +46,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
-        "//third_party/mbedtls:mbedtls_shared",
       ]
     }
   }
@@ -57,12 +56,10 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
-      "//third_party/mbedtls/include",
     ]
     sources = [ "softbus_utils.c" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utilsecurec_shared",
     ]
