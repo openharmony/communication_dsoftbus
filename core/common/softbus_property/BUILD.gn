@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_property") {
       include_dirs = common_include
-      sources = ["src/softbus_feature_config.c"]
+      sources = [ "src/softbus_feature_config.c" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$hilog_lite_deps_path",
@@ -40,7 +40,7 @@ if (defined(ohos_lite)) {
       include_dirs = common_include
       cflags = [
         "-Wall",
-        "-DDEFAULT_STORAGE_PATH=\"/usr\""
+        "-DDEFAULT_STORAGE_PATH=\"/usr\"",
       ]
       sources = [ "src/softbus_feature_config.c" ]
       public_deps = [
@@ -55,7 +55,7 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_shared_library("softbus_property") {
-    sources = ["src/softbus_feature_config.c"]
+    sources = [ "src/softbus_feature_config.c" ]
     include_dirs = [
       "$dsoftbus_core_path/common/include",
       "include",
