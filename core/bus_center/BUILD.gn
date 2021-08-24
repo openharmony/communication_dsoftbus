@@ -87,7 +87,6 @@ if (defined(ohos_lite)) {
       public_configs = [ ":bus_center_server_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
         "$dsoftbus_root_path/core/common/log:softbus_log",
@@ -163,7 +162,6 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_server_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
