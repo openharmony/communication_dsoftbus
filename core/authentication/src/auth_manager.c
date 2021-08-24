@@ -132,7 +132,8 @@ AuthManager *AuthGetManagerByAuthId(int64_t authId, AuthSideFlag side)
         }
     }
     (void)pthread_mutex_unlock(&g_authLock);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "cannot find auth by authId, authId is %lld, side is %d", authId, side);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
+        "cannot find auth by authId, authId is %lld, side is %d", authId, side);
     return NULL;
 }
 
@@ -306,7 +307,8 @@ static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const Co
     return SOFTBUS_OK;
 }
 
-static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOption *option, const ConnectionAddr *addr)
+static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOption *option,
+    const ConnectionAddr *addr)
 {
     if (pthread_mutex_lock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -699,7 +701,8 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
     AuthDataInfo authDataInfo = {0};
     uint8_t *recvData = NULL;
     AuthSideFlag side;
@@ -1032,7 +1035,7 @@ int64_t AuthOpenChannel(const ConnectOption *option)
     auth->softbusVersion = SOFT_BUS_NEW_V1;
     auth->option = *option;
     auth->fd = fd;
-	auth->hichain = g_hichainGaInstance;
+    auth->hichain = g_hichainGaInstance;
     ListNodeInsert(&g_authClientHead, &auth->node);
     (void)pthread_mutex_unlock(&g_authLock);
     return auth->authId;

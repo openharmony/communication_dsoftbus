@@ -92,7 +92,8 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         return;
     }
     if (head->module != MODULE_UDP_INFO && head->module != MODULE_AUTH_CHANNEL && head->module != MODULE_AUTH_MSG) {
-        if (auth->authId != head->seq && auth->authId != 0 && (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION)) {
+        if (auth->authId != head->seq && auth->authId != 0 &&
+            (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION)) {
             return;
         }
     }
@@ -194,7 +195,8 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
         head.len, head.module, head.flag, head.seq);
     if (head.len > AUTH_MAX_DATA_LEN) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
@@ -242,7 +244,8 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
         SoftBusFree(connPostData);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth start post eth data, authId is %lld, moduleId is %d, len is %u",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth start post eth data, authId is %lld, moduleId is %d, len is %u",
         auth->authId, head->module, len);
     ssize_t byte = SendTcpData(auth->fd, connPostData, postDataLen, 0);
     if (byte != (ssize_t)postDataLen) {
