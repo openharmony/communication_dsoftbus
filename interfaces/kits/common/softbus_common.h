@@ -99,8 +99,6 @@ extern "C" {
  */
 #define MAX_ACCOUNT_HASH_LEN 96
 
-#define MIX_ADDR_MAX_LEN 46
-
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
  *
@@ -144,9 +142,6 @@ typedef struct {
             char ip[IP_STR_MAX_LEN];
             uint16_t port;            /**< Port number represented by the host byte order */
         } ip;
-        struct MixAddr {
-            char addr[MIX_ADDR_MAX_LEN];
-        } mixAddr;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } ConnectionAddr;
