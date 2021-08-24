@@ -38,8 +38,11 @@ if (defined(ohos_lite)) {
   } else {
     shared_library("softbus_property") {
       include_dirs = common_include
-      cflags = [ "-Wall" ]
-      sources = ["src/softbus_feature_config.c"]
+      cflags = [
+        "-Wall",
+        "-DDEFAULT_STORAGE_PATH=\"/usr\""
+      ]
+      sources = [ "src/softbus_feature_config.c" ]
       public_deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$hilog_lite_deps_path",
@@ -60,6 +63,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config",
       "//utils/native/base/include",
     ]
+    cflags = [ "-DDEFAULT_STORAGE_PATH=\"/data/data\"" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
