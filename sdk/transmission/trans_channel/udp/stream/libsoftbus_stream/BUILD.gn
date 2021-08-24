@@ -57,6 +57,7 @@ shared_library("libsoftbus_stream") {
     "vtp_stream_socket.cpp",
   ]
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx_enhanced/fillp:Dstream",
     "$dsoftbus_root_path/core/common:softbus_core_common",
     "$dsoftbus_root_path/core/common/log:softbus_log",
