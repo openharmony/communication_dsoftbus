@@ -147,7 +147,8 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
             SoftBusFree(connPostData);
             return SOFTBUS_ERR;
         }
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth start post data, authId is %lld, connectionId is %u, moduleId is %d, seq is %lld",
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+            "auth start post data, authId is %lld, connectionId is %u, moduleId is %d, seq is %lld",
             auth->authId, info.connectionId, info.connModule, info.seq);
         if (PostDataByConn(&info, connPostData, postDataLen) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PostDataByConn failed");
