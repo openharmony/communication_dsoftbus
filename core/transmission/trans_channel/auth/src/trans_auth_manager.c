@@ -62,8 +62,6 @@ static int32_t GenerateAuthChannelId()
     return g_channelId;
 }
 
-static int32_t ConvertAddr
-
 static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *dstInfo)
 {
     if (dstInfo == NULL || g_authChannelList == NULL) {
@@ -559,7 +557,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     if (channel == NULL) {
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
+    if (memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
         SoftBusFree(channel);
         return SOFTBUS_MEM_ERR;
     }
@@ -642,7 +640,7 @@ int32_t TransSetAuthDataResult(int32_t channelId)
         return SOFTBUS_ERR;
     }
     ConnectionAddr addr;
-    if (!LnnNotifyDiscoveryDevice(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
         return SOFTBUS_ERR;
     }
     return LnnNotifyDiscoveryDevice(&addr);
