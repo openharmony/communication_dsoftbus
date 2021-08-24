@@ -41,7 +41,7 @@ if (defined(ohos_lite)) {
       include_dirs = common_include
       cflags = [
         "-Wall",
-        "-DDEFAULT_STORAGE_PATH=\"/usr\""
+        "-DDEFAULT_STORAGE_PATH=\"/usr\"",
       ]
       sources = [ "src/softbus_feature_config.c" ]
       public_deps = [
