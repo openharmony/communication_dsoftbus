@@ -268,7 +268,7 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "start time sync ipc client push.");
     if (targetNetworkId == NULL || pkgName == NULL) {
