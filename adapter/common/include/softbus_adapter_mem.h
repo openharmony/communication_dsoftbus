@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_MEM_INTERFACE_H
-#define SOFTBUS_MEM_INTERFACE_H
+#ifndef SOFTBUS_ADAPTER_MEM_H
+#define SOFTBUS_ADAPTER_MEM_H
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -62,7 +62,6 @@ if (defined(ohos_lite)) {
       public_configs = [ ":bus_center_ledger_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
@@ -99,7 +98,6 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_ledger_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",

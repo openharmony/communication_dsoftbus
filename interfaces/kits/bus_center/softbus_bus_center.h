@@ -109,6 +109,44 @@ typedef enum {
 } NodeDeivceInfoKey;
 
 /**
+ * @brief Enumerates accuracy for time synchronize among device.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    LOW_ACCURACY = 10,
+    NORMAL_ACCURACY,
+    HIGH_ACCURACY,
+    SUPER_HIGH_ACCURACY,
+    UNAVAIL_ACCURACY = 0xFFFF,
+} TimeSyncAccuracy;
+
+/**
+ * @brief Enumerates time synchronize period among device.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    SHORT_PERIOD = 0,
+    NORMAL_PERIOD,
+    LONG_PERIOD,
+} TimeSyncPeriod;
+
+/**
+ * @brief Enumerates time synchronize flag.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    NODE_SPECIFIC = 0,
+    ALL_LNN,
+    WRITE_RTC,
+} TimeSyncFlag;
+
+/**
  * @brief Defines the basic information about a device.
  *
  * @since 1.0
@@ -130,6 +168,33 @@ typedef enum {
     TYPE_NETWORK_ID = 0,  /**< Network ID change */
     TYPE_DEVICE_NAME,     /**< Device name change */
 } NodeBasicInfoType;
+
+/**
+ * @brief time synchronize result.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    int32_t millisecond;
+    int32_t microsecond;
+    TimeSyncAccuracy accuracy;
+} TimeSyncResult;
+
+/**
+ * @brief time synchronize result info.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    TimeSyncResult result;
+    TimeSyncFlag flag;
+    union {
+        char targetNetworkId[NETWORK_ID_BUF_LEN];
+        char masterNetworkId[NETWORK_ID_BUF_LEN];
+    } target;
+} TimeSyncResultInfo;
 
 /**
  * @brief Defines a callback that is invoked when the device state or information changes.
@@ -176,6 +241,26 @@ typedef struct {
      */
     void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info);
 } INodeStateCb;
+
+/**
+ * @brief Defines a callback that is invoked when the time synchronize has result.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    /**
+     * @brief Called when the time synchronize has result.
+     *
+     * @param info Contains the time synchronize result info, see {@link TimeSyncResultInfo}.
+     * @param retCode Indicates the result code. Value <b>0</b> indicates that the time synchronize is successful and
+     * result is valid, and any other value indicates the opposite.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onTimeSyncResult)(const TimeSyncResultInfo *info, int32_t retCode);
+} ITimeSyncCb;
 
 /**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
@@ -322,6 +407,40 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
  */
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
     NodeDeivceInfoKey key, uint8_t *info, int32_t infoLen);
+
+/**
+ * @brief Start the time synchronize with specific target node.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param targetNetworkId Indicates the pointer to the address of the specified device.
+ * @param accuracy Time synchronize accuracy.
+ * @param period Time synchronize period
+ * @param cb Indicates the callback for the result.
+ *
+ * @return Returns <b>0</b> if the request is accepted, and the result can be obtained from the
+ * callback; returns any other value if the request fails, in which case you will not receive
+ * the result.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
+    TimeSyncPeriod period, ITimeSyncCb *cb);
+
+/**
+ * @brief Stop the time synchronize with specific target node.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param targetNetworkId Indicates the pointer to the address of the specified device.
+ *
+ * @return Returns <b>0</b> if the request is removed; returns any other value if the request fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId);
 
 #ifdef __cplusplus
 }

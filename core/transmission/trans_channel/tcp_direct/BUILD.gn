@@ -36,11 +36,9 @@ if (defined(ohos_lite)) {
     "$dsoftbus_core_path/authentication:dsoftbus_auth_server",
     "$dsoftbus_core_path/common:softbus_core_common",
     "$dsoftbus_core_path/connection/common:conn_common",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-
-    # "$dsoftbus_root_path/core/bus_center:bus_center_server",
     "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
     "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$libsec_deps_path",
   ]
 
@@ -77,10 +75,7 @@ if (defined(ohos_lite)) {
       sources = common_src
       public_configs = [ ":trans_direct_channel_interface" ]
       deps = common_deps
-      deps += [
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//third_party/mbedtls:mbedtls_shared",
-      ]
+      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
     }
   }
 } else {
@@ -105,12 +100,11 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_direct_channel_interface" ]
 
     deps = [
-      "$dsoftbus_core_path/common/security:softbus_crypto",
       "$dsoftbus_core_path/common/utils:softbus_utils",
       "$dsoftbus_core_path/connection/common:conn_common",
       "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
       "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "//third_party/cJSON:cjson_static",

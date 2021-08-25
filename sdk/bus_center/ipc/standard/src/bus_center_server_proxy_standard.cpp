@@ -41,7 +41,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LOG_ERR("Get GetSystemAbility failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get GetSystemAbility failed!\n");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -116,32 +116,32 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteCString(pkgName)) {
-        LOG_ERR("JoinLNN write client name failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN write client name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(addrTypeLen)) {
-        LOG_ERR("JoinLNN write addr type length failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN write addr type length failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(addr, addrTypeLen)) {
-        LOG_ERR("JoinLNN write addr failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN write addr failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_JOIN_LNN, data, reply, option) != 0) {
-        LOG_ERR("JoinLNN send request failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        LOG_ERR("JoinLNN read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -154,19 +154,19 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
-        LOG_ERR("LeaveLNN write client name failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN write client name failed!");
         return SOFTBUS_ERR;
     }
     ret = data.WriteCString(networkId);
     if (!ret) {
-        LOG_ERR("LeaveLNN write networkId failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN write networkId failed!");
         return SOFTBUS_ERR;
     }
 
@@ -174,13 +174,13 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_LEAVE_LNN, data, reply, option);
     if (err != 0) {
-        LOG_ERR("LeaveLNN send request failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        LOG_ERR("LeaveLNN read serverRet failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -193,28 +193,28 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
-        LOG_ERR("GetAllOnlineNodeInfo write client name failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo write client name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
-        LOG_ERR("GetAllOnlineNodeInfo write info type length failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo write info type length failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option) != 0) {
-        LOG_ERR("GetAllOnlineNodeInfo send request failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo send request failed!");
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(*infoNum)) {
-        LOG_ERR("GetAllOnlineNodeInfo read infoNum failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read infoNum failed!");
         return SOFTBUS_ERR;
     }
     int32_t infoSize = (*infoNum) * (int32_t)infoTypeLen;
@@ -222,16 +222,16 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     if (infoSize > 0) {
         void *nodeInfo = (void *)reply.ReadRawData(infoSize);
         if (nodeInfo == nullptr) {
-            LOG_ERR("GetAllOnlineNodeInfo read node info failed!");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read node info failed!");
             return SOFTBUS_ERR;
         }
         *info = SoftBusMalloc(infoSize);
         if (*info == nullptr) {
-            LOG_ERR("GetAllOnlineNodeInfo malloc failed!");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo malloc failed!");
             return SOFTBUS_ERR;
         }
         if (memcpy_s(*info, infoSize, nodeInfo, infoSize) != EOK) {
-            LOG_ERR("GetAllOnlineNodeInfo copy node info failed!");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo copy node info failed!");
             SoftBusFree(*info);
             return SOFTBUS_ERR;
         }
@@ -246,33 +246,33 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
-        LOG_ERR("GetLocalDeviceInfo write client name failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo write client name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
-        LOG_ERR("GetLocalDeviceInfo write info type length failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo write info type length failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, data, reply, option) != 0) {
-        LOG_ERR("GetLocalDeviceInfo send request failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo send request failed!");
         return SOFTBUS_ERR;
     }
     void *nodeInfo = (void *)reply.ReadRawData(infoTypeLen);
     if (nodeInfo == nullptr) {
-        LOG_ERR("GetLocalDeviceInfo read node info failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo read node info failed!");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(info, infoTypeLen, nodeInfo, infoTypeLen) != EOK) {
-        LOG_ERR("GetLocalDeviceInfo copy node info failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo copy node info failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -282,48 +282,127 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     uint32_t len)
 {
     if (networkId == nullptr || buf == nullptr) {
-        LOG_ERR("params are nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are nullptr!");
         return SOFTBUS_ERR;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        LOG_ERR("remote is nullptr!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
-        LOG_ERR("GetNodeKeyInfo write client name failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write client name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(networkId)) {
-        LOG_ERR("GetNodeKeyInfo write networkId failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write networkId failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(key)) {
-        LOG_ERR("GetNodeKeyInfo write key failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write key failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(len)) {
-        LOG_ERR("GetNodeKeyInfo write buf len failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write buf len failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_GET_NODE_KEY_INFO, data, reply, option) != 0) {
-        LOG_ERR("GetNodeKeyInfo send request failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo send request failed!");
         return SOFTBUS_ERR;
     }
     void *retBuf = (void *)reply.ReadRawData(len);
     if (retBuf == nullptr) {
-        LOG_ERR("GetNodeKeyInfo read retBuf failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(buf, len, retBuf, len) != EOK) {
-        LOG_ERR("GetNodeKeyInfo copy node key info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo copy node key info failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+    int32_t period)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write client name failed!");
+        return SOFTBUS_ERR;
+    }
+
+    if (!data.WriteCString(targetNetworkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(accuracy)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write accuracy failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(period)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write period failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_START_TIME_SYNC, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write client name failed!");
+        return SOFTBUS_ERR;
+    }
+
+    if (!data.WriteCString(targetNetworkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_STOP_TIME_SYNC, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
 }
 }

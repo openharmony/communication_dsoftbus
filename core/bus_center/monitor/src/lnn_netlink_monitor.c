@@ -54,12 +54,12 @@ static int32_t CreateNetlinkSocket(void)
 
     sockFd = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_ROUTE);
     if (sockFd < 0) {
-        LOG_ERR("open netlink socket failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open netlink socket failed");
         return SOFTBUS_ERR;
     }
     if (setsockopt(sockFd, SOL_SOCKET, SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0 &&
         setsockopt(sockFd, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz)) < 0) {
-        LOG_ERR("set uevent socket SO_RCVBUF option failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set uevent socket SO_RCVBUF option failed");
         close(sockFd);
         return SOFTBUS_ERR;
     }
@@ -69,7 +69,7 @@ static int32_t CreateNetlinkSocket(void)
     nladdr.nl_pid = 0;
     nladdr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
     if (bind(sockFd, (struct sockaddr *) &nladdr, sizeof(nladdr)) < 0) {
-        LOG_ERR("bind netlink socket failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind netlink socket failed");
         close(sockFd);
         return SOFTBUS_ERR;
     }
@@ -91,16 +91,16 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
     char name[IFNAMSIZ];
 
     if (if_indextoname(ifa->ifa_index, name) == 0) {
-        LOG_ERR("invalid iface index");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid iface index");
         return;
     }
     if (strncmp(name, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
-        LOG_ERR("eth network addr changed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
         return;
     }
     if (strncmp(name, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
-        LOG_ERR("wlan network addr changed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
@@ -116,16 +116,16 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     ParseRtAttr(tb, IFLA_MAX, IFLA_RTA (ifinfo), len);
 
     if (tb[IFLA_IFNAME] == NULL) {
-        LOG_ERR("netlink msg is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
         return;
     }
     if (strncmp(RTA_DATA(tb[IFLA_IFNAME]), LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
-        LOG_ERR("eth link status changed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth link status changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
         return;
     }
     if (strncmp(RTA_DATA(tb[IFLA_IFNAME]), LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
-        LOG_ERR("wlan link status changed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan link status changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
@@ -138,10 +138,10 @@ static void *NetlinkMonitorThread(void *para)
     struct nlmsghdr *nlh = NULL;
 
     (void)para;
-    LOG_INFO("netlink monitor thread start");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread start");
     sockFd = CreateNetlinkSocket();
     if (sockFd < 0) {
-        LOG_ERR("create netlink socket failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create netlink socket failed");
         return NULL;
     }
     while (true) {
@@ -150,11 +150,11 @@ static void *NetlinkMonitorThread(void *para)
             continue;
         }
         if (len < 0) {
-            LOG_ERR("recv netlink socket error");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv netlink socket error");
             break;
         }
         if (len < (int32_t)sizeof(struct nlmsghdr)) {
-            LOG_ERR("recv buffer not enough");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv buffer not enough");
             continue;
         }
         nlh = (struct nlmsghdr *)buffer;
@@ -175,7 +175,7 @@ static void *NetlinkMonitorThread(void *para)
         }
     }
     close(sockFd);
-    LOG_ERR("netlink monitor thread exit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink monitor thread exit");
     return NULL;
 }
 
@@ -184,11 +184,11 @@ int32_t LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler)
     pthread_t tid;
 
     if (handler == NULL) {
-        LOG_ERR("netlink event handler is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink event handler is null");
         return SOFTBUS_ERR;
     }
     if (pthread_create(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
-        LOG_ERR("create ip change monitor thread failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
     g_eventHandler = handler;

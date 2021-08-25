@@ -19,10 +19,10 @@
 #include <atomic>
 #include <sys/types.h>
 
-#include "i_stream_manager.h"
-#include "stream_common.h"
 #include "client_trans_udp_stream_interface.h"
-#include "softbus_crypto.h"
+#include "i_stream_manager.h"
+#include "softbus_adapter_crypto.h"
+#include "stream_common.h"
 
 namespace OHOS {
 class StreamAdaptor : public std::enable_shared_from_this<StreamAdaptor> {

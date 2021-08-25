@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       if (ohos_kernel_type == "liteos_a") {
-        sources += [ "$dsoftbus_root_path/core/adapter/bus_center/platform/lnn_product_monitor.c" ]
+        sources += [ "$dsoftbus_root_path/adapter/common/bus_center/platform/lnn_product_monitor.c" ]
         include_dirs += [
           "//drivers/adapter/uhdf/posix/include",
           "//drivers/framework/include/utils",
@@ -57,6 +57,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -86,6 +87,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

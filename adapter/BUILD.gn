@@ -27,13 +27,14 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/include",
     "$hilog_lite_include_path",
     "$libsec_include_path",
+    "//third_party/mbedtls/include",
     "//utils/native/base/include",
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -42,9 +43,12 @@ if (defined(ohos_lite)) {
       include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
       cflags = [ "-Wall" ]
       sources = [
+        "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
+        "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
@@ -58,12 +62,16 @@ if (defined(ohos_lite)) {
         "-fPIC",
       ]
       sources = [
+        "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+        "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
+      deps += [ "//third_party/mbedtls:mbedtls_shared" ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
@@ -74,22 +82,31 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
+      "$dsoftbus_root_path/core/common/include",
     ]
   }
 
   ohos_shared_library("softbus_adapter") {
     include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
+      "//third_party/mbedtls/include",
       "//utils/native/base/include",
     ]
     sources = [
+      "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+      "$softbus_adapter_common/log/softbus_adapter_log.c",
+      "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
       "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
-    deps = [
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+    public_deps = [
+      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
+      "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",
     ]
     public_configs = [ ":config_adapter_common" ]

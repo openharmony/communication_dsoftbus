@@ -34,12 +34,12 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
-        LOG_ERR("pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("bus center client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
@@ -48,12 +48,12 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
-        LOG_ERR("pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
-        LOG_ERR("bus center client proxy is nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
@@ -79,4 +79,18 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
         clientProxy->OnNodeBasicInfoChanged(info, infoTypeLen, type);
     }
     return SOFTBUS_OK;
+}
+
+int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
+        return SOFTBUS_ERR;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
 }

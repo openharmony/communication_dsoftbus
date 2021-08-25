@@ -15,10 +15,8 @@
 
 #include "softbus_utils.h"
 
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/entropy.h"
 #include "securec.h"
-#include "softbus_adapter_file.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
@@ -26,15 +24,6 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
-
-#ifndef MBEDTLS_CTR_DRBG_C
-#define MBEDTLS_CTR_DRBG_C
-#endif
-
-#ifndef MBEDTLS_ENTROPY_C
-#define MBEDTLS_ENTROPY_C
-#endif
-static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 
@@ -114,43 +103,6 @@ void SoftBusTimerDeInit(void)
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
     }
-}
-
-int32_t GenerateRandomArray(unsigned char *randStr, uint32_t len)
-{
-    if (randStr == NULL || len == 0) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    static mbedtls_entropy_context entropy;
-    static mbedtls_ctr_drbg_context ctrDrbg;
-    static bool initFlag = false;
-    int ret;
-
-    if (pthread_mutex_lock(&g_randomLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        return SOFTBUS_ERR;
-    }
-
-    if (initFlag == false) {
-        mbedtls_ctr_drbg_init(&ctrDrbg);
-        mbedtls_entropy_init(&entropy);
-        ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
-        if (ret != 0) {
-            pthread_mutex_unlock(&g_randomLock);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random seed error, ret[%d]", ret);
-            return SOFTBUS_ERR;
-        }
-        initFlag = true;
-    }
-
-    ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
-    pthread_mutex_unlock(&g_randomLock);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "gen random error, ret[%d]", ret);
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, int32_t inLen)
@@ -236,7 +188,7 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
     }
     (void)memset_s(hexAuthId, hexLen, 0, hexLen);
 
-    if (GenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
+    if (SoftBusGenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
         SoftBusFree(hexAuthId);
         return SOFTBUS_ERR;
     }

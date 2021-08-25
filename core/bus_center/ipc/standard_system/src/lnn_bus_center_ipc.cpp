@@ -23,6 +23,7 @@
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -60,7 +61,7 @@ static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
 {
     JoinLnnRequestInfo *info = new JoinLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LOG_ERR("copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
         return SOFTBUS_ERR;
     }
@@ -87,12 +88,12 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 {
     LeaveLnnRequestInfo *info = new LeaveLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LOG_ERR("copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
         return SOFTBUS_ERR;
     }
     if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
-        LOG_ERR("copy networkId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         delete info;
         return SOFTBUS_ERR;
     }
@@ -106,12 +107,12 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 
     (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
-        LOG_ERR("parameters are nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
-        LOG_ERR("repeat join lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerJoin(connAddr);
@@ -124,12 +125,12 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
-        LOG_ERR("parameters are nullptr!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_ERR;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
-        LOG_ERR("repeat leave lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnServerLeave(networkId);
@@ -154,6 +155,35 @@ int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoT
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
 {
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
+}
+
+int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+
+    TimeSyncAccuracy acc = (TimeSyncAccuracy)accuracy;
+    TimeSyncPeriod per = (TimeSyncPeriod)period;
+    int32_t ret = LnnStartTimeSync(pkgName, targetNetworkId, acc, per);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStartTimeSync fail from: %s", pkgName);
+    }
+    return ret;
+}
+
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = LnnStopTimeSync(pkgName, targetNetworkId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStopTimeSync fail from %s", pkgName);
+    }
+    return ret;
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
@@ -205,6 +235,18 @@ int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
+}
+
+int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    if (pkgName == nullptr || info == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult fail from %s", pkgName);
+    }
+    return SOFTBUS_OK;
 }
 
 void RemoveJoinRequestInfoByPkgName(const char *pkgName)

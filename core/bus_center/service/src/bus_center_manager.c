@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "bus_center_event.h"
 #include "lnn_network_manager.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -26,6 +27,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
+#include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -37,35 +39,37 @@ void __attribute__ ((weak)) LnnLanesInit(void)
 int32_t BusCenterServerInit(void)
 {
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
-        LOG_ERR("init local net ledger fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local net ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitDistributedLedger() != SOFTBUS_OK) {
-        LOG_ERR("init distributed net ledger fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init distributed net ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitSyncLedgerItem() != SOFTBUS_OK) {
-        LOG_ERR("init sync ledger item fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync ledger item fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        LOG_ERR("init event monitor failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor failed");
         return SOFTBUS_ERR;
     }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
-        LOG_ERR("init lnn discovery manager fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn discovery manager fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitNetworkManager() != SOFTBUS_OK) {
-        LOG_ERR("init lnn network manager fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn network manager fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {
-        LOG_ERR("init net builder fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init net builder fail!");
         return SOFTBUS_ERR;
     }
     LnnLanesInit();
-    LOG_INFO("bus center server init ok");
+    LnnTimeSyncInit(LnnNotifyTimeSyncResult);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
+
     return SOFTBUS_OK;
 }
 
@@ -76,5 +80,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetBuilder();
     LnnDeinitSyncLedgerItem();
     LnnDeinitEventMonitor();
-    LOG_INFO("bus center server deinit");
+    LnnTimeSyncDeinit();
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

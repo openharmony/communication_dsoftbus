@@ -42,7 +42,7 @@ static TypeToId g_typeToIdMap[] = {
 const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {
     if (info == NULL) {
-        LOG_ERR("LnnGetDeviceName para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceName para error.");
         return NULL;
     }
     return info->deviceName;
@@ -51,11 +51,11 @@ const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 {
     if (info == NULL || name == NULL || strlen(name) > DEVICE_NAME_BUF_LEN - 1) {
-        LOG_ERR("LnnSetDeviceName para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSetDeviceName para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(info->deviceName, DEVICE_NAME_BUF_LEN, name, strlen(name)) != EOK) {
-        LOG_ERR("%s fail:strncpy_s fail!", __func__);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s fail:strncpy_s fail!", __func__);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -64,7 +64,7 @@ int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId)
 {
     if (info == NULL || typeId == NULL) {
-        LOG_ERR("LnnGetDeviceTypeId para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceTypeId para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     *typeId = info->deviceTypeId;
@@ -74,7 +74,7 @@ int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId)
 int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint8_t *typeId)
 {
     if (deviceType == NULL || typeId == NULL) {
-        LOG_ERR("LnnConvertDeviceTypeToId para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
@@ -96,6 +96,6 @@ char *LnnConvertIdToDeviceType(uint8_t typeId)
             return g_typeToIdMap[i].type;
         }
     }
-    LOG_ERR("typeId not exist");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "typeId not exist");
     return NULL;
 }

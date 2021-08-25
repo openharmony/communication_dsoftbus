@@ -165,4 +165,9 @@ int32_t DiscClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen
 {
     return SOFTBUS_OK;
 }
+
+int32_t DiscClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    return SOFTBUS_OK;
+}
 } // namespace OHOS
