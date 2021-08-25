@@ -354,7 +354,6 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "[nStackXDFinder]register name = %s,ip = %s",g_localDeviceInfo->networkName,g_localDeviceInfo->networkIpAddr);
     if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register new ip to dfinder failed.");
         return;
