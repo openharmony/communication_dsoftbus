@@ -35,7 +35,9 @@
 #define LNN_SUPPORT_CAPBILITY 22
 #define AUTH_ABILITY_COLLECTION 0        
 #define ADAPTER_LOG_LEVEL 0
+#ifndef DEFAULT_STORAGE_PATH
 #define DEFAULT_STORAGE_PATH "/data/data"
+#endif
 
 typedef struct {
     int32_t maxByteLen;
