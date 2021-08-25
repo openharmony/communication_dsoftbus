@@ -170,23 +170,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     IpcIoPushString(&request, sessionName);
-    IpcIoPushInt32(&request, addrInfo->type);
-    switch (addrInfo->type) {
-        case CONNECTION_ADDR_WLAN:
-        case CONNECTION_ADDR_ETH:
-            IpcIoPushString(&request, addrInfo->info.ip.ip);
-            IpcIoPushUint16(&request, addrInfo->info.ip.port);
-            break;
-        case CONNECTION_ADDR_BR:
-            IpcIoPushString(&request, addrInfo->info.br.brMac);
-            break;
-        case CONNECTION_ADDR_BLE:
-            IpcIoPushString(&request, addrInfo->info.ble.bleMac);
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "addrInfo type error");
-            return SOFTBUS_ERR;
-    }
+    IpcIoPushFlatObj(&request, (void*)addrInfo, sizeof(ConnectionAddr));
 
     int32_t ret = SOFTBUS_ERR;
     if (g_serverProxy == NULL) {

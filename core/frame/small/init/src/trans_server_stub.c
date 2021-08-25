@@ -16,6 +16,7 @@
 #include "trans_server_stub.h"
 
 #include "liteipc_adapter.h"
+#include "lnn_connection_addr_utils.h"
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
@@ -129,25 +130,9 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
     uint32_t size;
     ConnectOption connOpt;
     const char *sessionName = (const char*)IpcIoPopString(req, &size);
-    connOpt.type = ConvertConnectType(IpcIoPopInt32(req));
-    const char *addr = (const char*)IpcIoPopString(req, &size);
-    if (connOpt.type == CONNECT_TCP) {
-        if (memcpy_s(connOpt.info.ipOption.ip, IP_LEN, addr, IP_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-        connOpt.info.ipOption.port = (int32_t)IpcIoPopUint16(req);
-    } else if (connOpt.type == CONNECT_BLE) {
-        if (memcpy_s(connOpt.info.bleOption.bleMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (connOpt.type == CONNECT_BR) {
-        if (memcpy_s(connOpt.info.brOption.brMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
+    ConnectionAddr *addr = (ConnectionAddr *)IpcIoPopFlatObj(reg, &size);
+    if (!LnnConvertAddrToOption(addr, &option)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LnnConvertAddrToOption fail");
         IpcIoPushInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
