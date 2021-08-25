@@ -62,8 +62,10 @@ if (defined(ohos_lite)) {
         sources += [ "time_sync/src/lnn_time_sync_manager.c" ]
         native_source_path = rebase_path("$dsoftbus_root_path")
         dep_file = "enhanced/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
-        enhanced = exec_script("//build/lite/run_shell_cmd.py",
-          [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ], "value")
+        enhanced = exec_script(
+                "//build/lite/run_shell_cmd.py",
+                [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
+                "value")
         if (enhanced) {
           deps += [ "$dsoftbus_root_path/enhanced/core/bus_center/lnn/lane_hub/time_sync:lnn_time_sync_impl" ]
         } else {
@@ -110,8 +112,10 @@ if (defined(ohos_lite)) {
       sources += [ "time_sync/src/lnn_time_sync_manager.c" ]
       native_source_path = rebase_path("$dsoftbus_root_path")
       dep_file = "enhanced/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
-      enhanced = exec_script("//build/lite/run_shell_cmd.py",
-        [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ], "value")
+      enhanced = exec_script(
+              "//build/lite/run_shell_cmd.py",
+              [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
+              "value")
       if (enhanced) {
         deps += [ "$dsoftbus_root_path/enhanced/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
       } else {
@@ -122,9 +126,8 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
         "$dsoftbus_root_path/core/common/message_handler/include",
       ]
-      deps += [
-        "$dsoftbus_root_path/core/common/message_handler:message_handler",
-      ]
+      deps +=
+          [ "$dsoftbus_root_path/core/common/message_handler:message_handler" ]
     } else {
       sources += [ "time_sync/src/lnn_time_sync_manager_stub.c" ]
     }
