@@ -80,3 +80,17 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     }
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
+        return SOFTBUS_ERR;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
+}

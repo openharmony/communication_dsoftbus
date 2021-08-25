@@ -56,6 +56,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] =
         &SoftBusClientStub::OnNodeBasicInfoChangedInner;
+    memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] =
+        &SoftBusClientStub::OnTimeSyncResultInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -424,6 +426,32 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t infoTypeLen;
+    if (!data.ReadUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read info length failed!");
+        return SOFTBUS_ERR;
+    }
+    void *info = (void *)data.ReadRawData(infoTypeLen);
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read info failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retCode;
+    if (!data.ReadInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read retCode failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t retReply = OnTimeSyncResult(info, infoTypeLen, retCode);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addrTypeLen;
@@ -445,5 +473,11 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeL
 {
     (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(info, type);
+}
+
+int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    (void)infoTypeLen;
+    return LnnOnTimeSyncResult(info, retCode);
 }
 } // namespace OHOS

@@ -214,4 +214,42 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTy
     }
     return SOFTBUS_OK;
 }
+
+int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info length failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(info, infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_TIME_SYNC_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnTimeSyncResult send request failed");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnTimeSyncResult read serverRet failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

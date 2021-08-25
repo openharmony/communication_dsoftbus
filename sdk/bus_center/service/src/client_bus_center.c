@@ -169,3 +169,38 @@ int32_t UnregNodeDeviceStateCb(INodeStateCb *callback)
     }
     return UnregNodeDeviceStateCbInner(callback);
 }
+
+int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
+    TimeSyncPeriod period, ITimeSyncCb *cb)
+{
+    if (pkgName == NULL || targetNetworkId == NULL || cb == NULL || cb->onTimeSyncResult == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return StartTimeSyncInner(pkgName, targetNetworkId, accuracy, period, cb);
+}
+
+int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (pkgName == NULL || targetNetworkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return StopTimeSyncInner(pkgName, targetNetworkId);
+}

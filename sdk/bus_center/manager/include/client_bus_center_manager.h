@@ -36,11 +36,15 @@ int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int
 int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info);
 int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId,
     NodeDeivceInfoKey key, uint8_t *info, int32_t infoLen);
+int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
+    TimeSyncPeriod period, ITimeSyncCb *cb);
+int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type);
+int32_t LnnOnTimeSyncResult(const void *info, int retCode);
 
 #ifdef __cplusplus
 }

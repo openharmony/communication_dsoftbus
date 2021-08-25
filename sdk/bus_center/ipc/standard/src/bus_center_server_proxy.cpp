@@ -129,3 +129,31 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     }
     return SOFTBUS_OK;
 }
+
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->StartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync failed!");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync failed!");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}

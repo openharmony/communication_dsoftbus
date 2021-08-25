@@ -23,6 +23,7 @@
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -156,6 +157,35 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
+int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+
+    TimeSyncAccuracy acc = (TimeSyncAccuracy)accuracy;
+    TimeSyncPeriod per = (TimeSyncPeriod)period;
+    int32_t ret = LnnStartTimeSync(pkgName, targetNetworkId, acc, per);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStartTimeSync fail from: %s", pkgName);
+    }
+    return ret;
+}
+
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = LnnStopTimeSync(pkgName, targetNetworkId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStopTimeSync fail from %s", pkgName);
+    }
+    return ret;
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
     if (addr == nullptr) {
@@ -205,6 +235,18 @@ int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
+}
+
+int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    if (pkgName == nullptr || info == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult fail from %s", pkgName);
+    }
+    return SOFTBUS_OK;
 }
 
 void RemoveJoinRequestInfoByPkgName(const char *pkgName)
