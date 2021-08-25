@@ -341,7 +341,7 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32
 
     int32_t ret = ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
     if (ret != SOFTBUS_OK) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult fail from %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult fail from %s", pkgName);
     }
     return ret;
 }
