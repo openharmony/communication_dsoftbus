@@ -322,8 +322,8 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy,
-    int period)
+int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+    int32_t period)
 {
     if (pkgName == nullptr || targetNetworkId == nullptr) {
         return SOFTBUS_ERR;
