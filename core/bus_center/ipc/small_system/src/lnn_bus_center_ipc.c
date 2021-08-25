@@ -264,7 +264,7 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     }
     int32_t ret = LnnStopTimeSync(pkgName, targetNetworkId);
     if (ret != SOFTBUS_OK) {
-	    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStopTimeSync fail from %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStopTimeSync fail from %s", pkgName);
     }
     return ret;
 }
