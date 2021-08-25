@@ -116,6 +116,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
     int32_t countSuccess = 0;
     for (int32_t i = 0; i < pool->threadNum; ++i) {
         ThreadAttr attr = {"ThreadPoolWorker", 0, THREAD_PRIORITY};
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "create pthread now.");
         if (CreateThread((Runnable)ThreadPoolWorker, (void *)pool, &attr, (uint32_t *)&(pool->pthreads[i])) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create pthreads no. [%d] failed\n", i);
             pool->pthreads[i] = (pthread_t)0;
@@ -166,7 +167,9 @@ static void JobCheck(ThreadPool *pool, Job *job)
 
 static void ThreadPoolWorker(void *arg)
 {
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Start");
     if (arg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ThreadPoolWorker arg is NULL");
         return;
     }
     ThreadPool *pool = (ThreadPool *)arg;
@@ -233,7 +236,6 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
         pthread_mutex_unlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
-    pthread_mutex_unlock(&(pool->mutex));
     return SOFTBUS_OK;
 }
 

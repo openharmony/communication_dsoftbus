@@ -370,4 +370,15 @@ int32_t TransServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networ
 {
     return SOFTBUS_OK;
 }
+
+int32_t TransServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+    int32_t period)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return SOFTBUS_OK;
+}
 }

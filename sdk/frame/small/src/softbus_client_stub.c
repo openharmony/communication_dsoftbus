@@ -17,7 +17,6 @@
 #include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "liteipc_adapter.h"
-#include "softbus_adapter_file.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_client_context_manager.h"
 #include "softbus_client_event_manager.h"
@@ -50,6 +49,7 @@ static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_LEAVE_RESULT, ClientOnLeaveLNNResult },
     { CLIENT_ON_NODE_ONLINE_STATE_CHANGED, ClientOnNodeOnlineStateChanged },
     { CLIENT_ON_NODE_BASIC_INFO_CHANGED, ClientOnNodeBasicInfoChanged },
+    { CLIENT_ON_TIME_SYNC_RESULT, ClientOnTimeSyncResult },
     { CLIENT_ON_CHANNEL_OPENED, ClientOnChannelOpened },
     { CLIENT_ON_CHANNEL_OPENFAILED, ClientOnChannelOpenfailed },
     { CLIENT_ON_CHANNEL_CLOSED, ClientOnChannelClosed },

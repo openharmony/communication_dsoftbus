@@ -48,6 +48,9 @@ public:
     virtual int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
         uint32_t len) = 0;
+    virtual int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+        int32_t period) = 0;
+    virtual int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

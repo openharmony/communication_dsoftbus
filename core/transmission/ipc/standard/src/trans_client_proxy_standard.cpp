@@ -250,4 +250,9 @@ int32_t TransClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLe
 {
     return SOFTBUS_OK;
 }
+
+int32_t TransClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

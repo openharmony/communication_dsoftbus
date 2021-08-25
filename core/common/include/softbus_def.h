@@ -48,7 +48,7 @@ extern "C" {
 #define SESSION_KEY_LENGTH 32
 #define DEVICE_KEY_LEN 16
 
-#define MAX_SESSION_ID 17
+#define MAX_SESSION_ID 16
 #define MAX_SESSION_SERVER_NUMBER 8
 
 #ifdef SOFTBUS_WATCH

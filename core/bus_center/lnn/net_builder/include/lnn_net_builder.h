@@ -35,7 +35,7 @@ void LnnDeinitNetBuilder(void);
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
 int32_t LnnNotifySyncOfflineFinish(const char *networkId);
 int32_t LnnRequestLeaveByAddrType(ConnectionAddrType type);
-int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, const char *newNetworkId);
+int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId);
 int32_t LnnRequestCleanConnFsm(uint16_t connFsmId);
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t masterWeight);

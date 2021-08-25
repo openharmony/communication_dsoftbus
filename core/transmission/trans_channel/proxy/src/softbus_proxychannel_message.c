@@ -18,7 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
-#include "base64.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
@@ -177,7 +177,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 
 static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInfo *appInfo, cJSON *root)
 {
-    int32_t ret = mbedtls_base64_encode((unsigned char *)sessionBase64->sessionKeyBase64,
+    int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
                                         sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
                                         (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
@@ -230,7 +230,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
             return NULL;
         }
     } else {
-        ret = mbedtls_base64_encode((uint8_t *)sessionBase64.sessionKeyBase64,
+        ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64,
                                     sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
                                     (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
@@ -326,7 +326,7 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
         return SOFTBUS_ERR;
     }
     size_t len = 0;
-    int32_t ret = mbedtls_base64_decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
+    int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decode session fail %d ", ret);
@@ -379,7 +379,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
             return SOFTBUS_ERR;
         }
         size_t len = 0;
-        int32_t ret = mbedtls_base64_decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
+        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
             &len, (uint8_t *)sessionKey, strlen(sessionKey));
         if (len != sizeof(appInfo->sessionKey) || ret != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decode session fail %d ", ret);

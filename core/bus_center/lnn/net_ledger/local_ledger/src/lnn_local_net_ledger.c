@@ -46,7 +46,7 @@ static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -61,11 +61,11 @@ static int32_t LlGetDeviceUdid(void *buf, uint32_t len)
     }
     udid = LnnGetDeviceUdid(info);
     if (udid == NULL) {
-        LOG_ERR("get device udid fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device udid fail");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -78,7 +78,7 @@ static int32_t LlGetNetworkId(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(buf, len, info->networkId, strlen(info->networkId)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -91,7 +91,7 @@ static int32_t LlGetUuid(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(buf, len, info->uuid, strlen(info->uuid)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -115,11 +115,11 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
     }
     deviceType = LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId);
     if (deviceType == NULL) {
-        LOG_ERR("deviceType fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deviceType fail.");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, deviceType, strlen(deviceType)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -136,7 +136,7 @@ static int32_t UpdateLocalDeviceType(const void *buf)
         info->deviceInfo.deviceTypeId = typeId;
         return SOFTBUS_OK;
     }
-    LOG_ERR("set device type error.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set device type error.");
     return SOFTBUS_ERR;
 }
 
@@ -149,11 +149,11 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
     }
     deviceName = LnnGetDeviceName(&info->deviceInfo);
     if (deviceName == NULL) {
-        LOG_ERR("get device name fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device name fail.");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, deviceName, strlen(deviceName)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -169,11 +169,11 @@ static int32_t LlGetBtMac(void *buf, uint32_t len)
     }
     mac = LnnGetBtMac(info);
     if (mac == NULL) {
-        LOG_ERR("get bt mac fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -188,11 +188,11 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     ip = LnnGetWiFiIp(info);
     if (ip == NULL) {
-        LOG_ERR("get wifi ip fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi ip fail.");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, ip, strlen(ip)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -207,11 +207,11 @@ static int32_t LlGetNetIfName(void *buf, uint32_t len)
     }
     ifName = LnnGetNetIfName(info);
     if (ifName == NULL) {
-        LOG_ERR("get bt mac fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, ifName, strlen(ifName)) != EOK) {
-        LOG_ERR("STR COPY ERROR!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -331,26 +331,26 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     char devType[DEVICE_TYPE_BUF_LEN] = TYPE_UNKNOWN;
 
     if (info == NULL) {
-        LOG_ERR("fail:para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     (void)memset_s(info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
 
     // get device info
     if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, info->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_ERR;
     }
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, info->deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("GetCommonDevInfo: COMM_DEVICE_KEY_DEVNAME failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVNAME failed");
         return SOFTBUS_ERR;
     }
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
-        LOG_ERR("GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;
     }
     if (UpdateLocalDeviceType(devType) != SOFTBUS_OK) {
-        LOG_ERR("UpdateLocalDeviceType failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdateLocalDeviceType failed");
     }
     return SOFTBUS_OK;
 }
@@ -358,11 +358,11 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 static int32_t InitLocalVersionType(NodeInfo *info)
 {
     if (info == NULL) {
-        LOG_ERR("fail:para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(info->versionType, VERSION_MAX_LEN, VERSION_TYPE_LITE, strlen(VERSION_TYPE_LITE)) != EOK) {
-        LOG_ERR("strncpy_s error");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s error");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -371,7 +371,7 @@ static int32_t InitLocalVersionType(NodeInfo *info)
 static int32_t InitConnectInfo(ConnectInfo *info)
 {
     if (info == NULL) {
-        LOG_ERR("fail:para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     // get mac addr
@@ -381,11 +381,11 @@ static int32_t InitConnectInfo(ConnectInfo *info)
 static int32_t ModifyId(char *dstId, uint32_t dstLen, const char *sourceId)
 {
     if (dstId == NULL || sourceId == NULL || strlen(sourceId) > dstLen - 1) {
-        LOG_ERR("id:para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "id:para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(dstId, dstLen, sourceId, strlen(sourceId)) != EOK) {
-        LOG_ERR("strncpy_s error");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s error");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -460,7 +460,7 @@ int32_t UpdateLocalWeight(uint32_t weight)
 static int32_t UpdateLocalDeviceIp(const void *ip)
 {
     if (ip == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnSetWiFiIp(&g_localNetLedger.localInfo, ip);
@@ -470,7 +470,7 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
 static int32_t UpdateLocalBtMac(const void *mac)
 {
     if (mac == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
@@ -480,7 +480,7 @@ static int32_t UpdateLocalBtMac(const void *mac)
 static int32_t UpdateLocalNetIfName(const void *netIfName)
 {
     if (netIfName == NULL) {
-        LOG_ERR("para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnSetNetIfName(&g_localNetLedger.localInfo, (char *)netIfName);
@@ -531,15 +531,15 @@ int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
     uint32_t i;
     int32_t ret;
     if (info == NULL) {
-        LOG_ERR("para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (key >= STRING_KEY_END) {
-        LOG_ERR("KEY error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_localNetLedger.lock) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
@@ -552,7 +552,7 @@ int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
         }
     }
     pthread_mutex_unlock(&g_localNetLedger.lock);
-    LOG_ERR("KEY NOT exist.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY NOT exist.");
     return SOFTBUS_ERR;
 }
 
@@ -561,15 +561,15 @@ int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info)
     uint32_t i;
     int32_t ret;
     if (info == NULL) {
-        LOG_ERR("para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
-        LOG_ERR("KEY error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_localNetLedger.lock) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
@@ -582,7 +582,7 @@ int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info)
         }
     }
     pthread_mutex_unlock(&g_localNetLedger.lock);
-    LOG_ERR("KEY NOT exist.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY NOT exist.");
     return SOFTBUS_ERR;
 }
 
@@ -596,15 +596,15 @@ int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
     uint32_t i;
     int32_t ret;
     if (info == NULL) {
-        LOG_ERR("para error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (key >= STRING_KEY_END) {
-        LOG_ERR("KEY error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_localNetLedger.lock) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
@@ -614,13 +614,13 @@ int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
                 pthread_mutex_unlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LOG_ERR("key=%d not support or info format error", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key=%d not support or info format error", key);
             pthread_mutex_unlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
     }
     pthread_mutex_unlock(&g_localNetLedger.lock);
-    LOG_ERR("key not exist.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
 }
 
@@ -629,11 +629,11 @@ int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
     uint32_t i;
     int32_t ret;
     if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
-        LOG_ERR("KEY error.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_localNetLedger.lock) != 0) {
-        LOG_ERR("lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
@@ -643,13 +643,13 @@ int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
                 pthread_mutex_unlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LOG_ERR("key=%d not support", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key=%d not support", key);
             pthread_mutex_unlock(&g_localNetLedger.lock);
             return SOFTBUS_ERR;
         }
     }
     pthread_mutex_unlock(&g_localNetLedger.lock);
-    LOG_ERR("key not exist.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
 }
 
@@ -657,34 +657,34 @@ int32_t LnnInitLocalLedger()
 {
     NodeInfo *nodeInfo = NULL;
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
-        LOG_INFO("local net ledger already init.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local net ledger already init.");
         return SOFTBUS_OK;
     }
     g_localNetLedger.status = LL_INIT_UNKNOWN;
     nodeInfo = &g_localNetLedger.localInfo;
     (void)memset_s(nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (strncpy_s(nodeInfo->softBusVersion, VERSION_MAX_LEN, SOFTBUS_VERSION, strlen(SOFTBUS_VERSION)) != EOK) {
-        LOG_ERR("fail:strncpy_s fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:strncpy_s fail!");
         g_localNetLedger.status = LL_INIT_FAIL;
         return SOFTBUS_MEM_ERR;
     }
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (InitLocalDeviceInfo(deviceInfo) != SOFTBUS_OK) {
-        LOG_ERR("init local device info error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local device info error!");
         goto EXIT;
     }
     if (InitLocalVersionType(nodeInfo) != SOFTBUS_OK) {
-        LOG_ERR("init local version type error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local version type error!");
         goto EXIT;
     }
     if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
-        LOG_ERR("init local connect info error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local connect info error!");
         goto EXIT;
     }
 
     if (pthread_mutex_init(&g_localNetLedger.lock, NULL) != 0) {
-        LOG_ERR("mutex init fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mutex init fail!");
         goto EXIT;
     }
     g_localNetLedger.status = LL_INIT_SUCCESS;

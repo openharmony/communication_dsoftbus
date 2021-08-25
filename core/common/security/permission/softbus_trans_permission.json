@@ -60,5 +60,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.dmsdp.*",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "com.huawei.dmsdp",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]

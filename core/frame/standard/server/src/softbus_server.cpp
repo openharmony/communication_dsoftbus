@@ -195,6 +195,17 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
     return LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
 
+int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+    int32_t period)
+{
+    return LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+}
+
+int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return LnnIpcStopTimeSync(pkgName, targetNetworkId);
+}
+
 void SoftBusServer::OnStart()
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServer OnStart called!\n");

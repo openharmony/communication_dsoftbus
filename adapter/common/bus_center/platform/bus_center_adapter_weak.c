@@ -19,8 +19,8 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
+#include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define DEFAULT_DEVICE_NAME "UNKNOWN"
 #define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
@@ -28,7 +28,7 @@
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "fail: para error!");
+        HILOG_ERROR(LOG_CORE, "fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {

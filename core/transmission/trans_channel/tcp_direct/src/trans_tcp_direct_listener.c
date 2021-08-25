@@ -21,9 +21,9 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
-#include "softbus_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
@@ -36,7 +36,7 @@ static int32_t StartVerifySession(SessionConn *conn)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartVerifySession");
     uint64_t seq = TransTdcGetNewSeqId(conn->serverSide);
-    if (GenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+    if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Generate SessionKey failed");
         return SOFTBUS_ERR;
     }
@@ -88,7 +88,7 @@ static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
 
 static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const char *ip)
 {
-    SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail in create session conn node.");
         return SOFTBUS_MALLOC_ERR;

@@ -28,7 +28,7 @@
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
-        LOG_ERR("in para error!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     *capability = (*capability) | (1 << (uint32_t)type);
@@ -42,10 +42,10 @@ uint32_t LnnGetNetCapabilty(void)
 
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_SUPPORT_CAPBILITY,
         (unsigned char*)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
-        LOG_ERR("get lnn capbility fail, use default value");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn capbility fail, use default value");
         configValue = DEFAUTL_LNN_CAPBILITY;
     }
-    LOG_INFO("lnn capbility is %u", configValue);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn capbility is %u", configValue);
     if ((configValue & (1 << BIT_BLE)) != 0) {
         (void)LnnSetNetCapability(&capability, BIT_BLE);
     }

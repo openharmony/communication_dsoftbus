@@ -24,9 +24,9 @@
 #include <unistd.h>
 
 #include "securec.h"
+#include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000
@@ -36,7 +36,7 @@ static unsigned int g_timerType;
 void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 {
     if (timerId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
+        HILOG_ERROR(LOG_CORE, "timerId is null");
         return NULL;
     }
     struct sigevent envent;
@@ -47,7 +47,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer create error, errno code: [%d]", errno);
+        HILOG_ERROR(LOG_CORE, "timer create error, errno code: [%{public}d]", errno);
         return NULL;
     }
 
@@ -57,7 +57,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
     if (timerId < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
+        HILOG_ERROR(LOG_CORE, "timerId is null");
         return SOFTBUS_ERR;
     }
     struct itimerspec value;
@@ -73,7 +73,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     }
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer start error, errno code: [%d]", errno);
+        HILOG_ERROR(LOG_CORE, "timer start error, errno code: [%{public}d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -83,12 +83,12 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timerId is null");
+        HILOG_ERROR(LOG_CORE, "timerId is null");
         return SOFTBUS_ERR;
     }
 
     if (timer_delete(timerId) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "timer delete err, errno code: [%d]", errno);
+        HILOG_ERROR(LOG_CORE, "timer delete err, errno code: [%{public}d]", errno);
         return SOFTBUS_ERR;
     }
 

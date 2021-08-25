@@ -41,6 +41,7 @@ public:
     virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode) = 0;
     virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) = 0;
+    virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

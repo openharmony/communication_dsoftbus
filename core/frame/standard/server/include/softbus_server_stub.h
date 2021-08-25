@@ -48,6 +48,8 @@ private:
     int32_t GetAllOnlineNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartTimeSyncInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopTimeSyncInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);
