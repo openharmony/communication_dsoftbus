@@ -36,8 +36,9 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnTimeSyncInit(void)
+int32_t LnnTimeSyncInit(LnnOnTimeSyncResult notifyCallback)
 {
+    (void)notifyCallback;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync stub init");
     return SOFTBUS_OK;
 }

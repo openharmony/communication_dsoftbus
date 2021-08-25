@@ -41,6 +41,7 @@ public:
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;
     int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) override;
+    int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
 
 private:
     int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
@@ -56,6 +57,7 @@ private:
     int32_t OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);

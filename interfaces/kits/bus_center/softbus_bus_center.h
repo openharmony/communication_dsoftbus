@@ -115,7 +115,7 @@ typedef enum {
  * @version 1.0
  */
 typedef enum {
-    LOW_ACCURACY = 0,
+    LOW_ACCURACY = 10,
     NORMAL_ACCURACY,
     HIGH_ACCURACY,
     SUPER_HIGH_ACCURACY,
@@ -131,7 +131,7 @@ typedef enum {
 typedef enum {
     SHORT_PERIOD = 0,
     NORMAL_PERIOD,
-    LOGN_PERIOD,
+    LONG_PERIOD,
 } TimeSyncPeriod;
 
 /**
@@ -259,7 +259,7 @@ typedef struct {
      * @since 1.0
      * @version 1.0
      */
-    void (*onTimeSyncResult)(TimeSyncResultInfo *info, int32_t retCode);
+    void (*onTimeSyncResult)(const TimeSyncResultInfo *info, int32_t retCode);
 } ITimeSyncCb;
 
 /**
@@ -426,7 +426,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
  * @version 1.0
  */
 int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
-    TimeSyncPeriod period, ITimeSyncCb cb);
+    TimeSyncPeriod period, ITimeSyncCb *cb);
 
 /**
  * @brief Stop the time synchronize with specific target node.

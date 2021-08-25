@@ -16,6 +16,7 @@
 #ifndef LNN_TIME_SYNC_MANAGER_H
 #define LNN_TIME_SYNC_MANAGER_H
 
+#include "bus_center_event.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -26,7 +27,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period);
 int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId);
 
-int32_t LnnTimeSyncInit(void);
+int32_t LnnTimeSyncInit(LnnOnTimeSyncResult notifyCallback);
 void LnnTimeSyncDeinit(void);
 
 #ifdef __cplusplus

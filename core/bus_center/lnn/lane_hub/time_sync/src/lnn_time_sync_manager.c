@@ -57,6 +57,7 @@ typedef struct {
     ListNode reqList;
     SoftBusLooper *looper;
     SoftBusHandler handler;
+    LnnOnTimeSyncResult notifyCallback;
 } TimeSyncCtrl;
 
 typedef struct {
@@ -90,7 +91,7 @@ static TimeSyncReqInfo *FindTimeSyncReqInfo(const char *networkId)
     TimeSyncReqInfo *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_timeSyncCtrl.reqList, TimeSyncReqInfo, node) {
-        if (strcmp(networkId, item->targetNetworkId) != 0) {
+        if (strcmp(networkId, item->targetNetworkId) == 0) {
             return item;
         }
     }
@@ -176,6 +177,7 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
         ListDelete(&item->node);
         SoftBusFree(item);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove start time sync req for %s", pkgName);
+        break;
     }
 }
 
@@ -246,7 +248,7 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
 {
     StartTimeSyncReq *item = NULL;
     TimeSyncAccuracy curAccuracy = LOW_ACCURACY;
-    TimeSyncPeriod curPeriod = LOGN_PERIOD;
+    TimeSyncPeriod curPeriod = LONG_PERIOD;
     uint32_t count = 0;
 
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
@@ -300,8 +302,8 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
     StartTimeSyncReq *item = NULL;
     TimeSyncResultInfo resultInfo;
 
-    (void)memset_s(&info, sizeof(TimeSyncResultInfo), 0, sizeof(TimeSyncResultInfo));
-    if (retCode == SOFTBUS_OK) {
+    (void)memset_s(&resultInfo, sizeof(TimeSyncResultInfo), 0, sizeof(TimeSyncResultInfo));
+    if (retCode == SOFTBUS_OK || retCode == SOFTBUS_NETWORK_TIME_SYNC_INTERFERENCE) {
         resultInfo.result.millisecond = (int32_t)offset;
         resultInfo.result.microsecond = ((int32_t)(offset * THOUSAND)) % THOUSAND;
         resultInfo.result.accuracy = info->curAccuracy;
@@ -320,7 +322,22 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
         resultInfo.result.millisecond, resultInfo.result.microsecond, resultInfo.result.accuracy, resultInfo.flag);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify time sync result to %s", item->pkgName);
+        g_timeSyncCtrl.notifyCallback(item->pkgName, &resultInfo, retCode);
     }
+}
+
+
+static void RemoveAllStartTimeSyncReq(TimeSyncReqInfo *info)
+{
+    StartTimeSyncReq *startTimeSyncItem = NULL;
+    StartTimeSyncReq *startTimeSyncNextItem = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(startTimeSyncItem, startTimeSyncNextItem, &info->startReqList, StartTimeSyncReq, node) {
+        RemoveStartTimeSyncReq(info, startTimeSyncItem->pkgName);
+    }
+    (void)LnnStopTimeSyncImpl(info->targetNetworkId);
+    ListDelete(&info->node);
+    SoftBusFree(info);    
 }
 
 static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
@@ -340,6 +357,10 @@ static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync complete result(offset=%.6lf, retCode=%d)",
         para->offset, para->retCode);
     NotifyTimeSyncResult(info, para->offset, para->retCode);
+    if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync fail(%d), stop it internal", para->retCode);
+        RemoveAllStartTimeSyncReq(info);
+    }
     SoftBusFree((void *)para);
     return SOFTBUS_OK;
 }
@@ -348,17 +369,9 @@ static void ProcessRemoveAll(void)
 {
     TimeSyncReqInfo *timeSyncItem = NULL;
     TimeSyncReqInfo *timeSyncNextItem = NULL;
-    StartTimeSyncReq *startTimeSyncItem = NULL;
-    StartTimeSyncReq *startTimeSyncNextItem = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(timeSyncItem, timeSyncNextItem, &g_timeSyncCtrl.reqList, TimeSyncReqInfo, node) {
-        LIST_FOR_EACH_ENTRY_SAFE(startTimeSyncItem, startTimeSyncNextItem, &timeSyncItem->startReqList,
-            StartTimeSyncReq, node) {
-            RemoveStartTimeSyncReq(timeSyncItem, startTimeSyncItem->pkgName);
-        }
-        (void)LnnStopTimeSyncImpl(timeSyncItem->targetNetworkId);
-        ListDelete(&timeSyncItem->node);
-        SoftBusFree(timeSyncItem);
+        RemoveAllStartTimeSyncReq(timeSyncItem);
     }
 }
 
@@ -448,8 +461,12 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
     return true;
 }
 
-int32_t LnnTimeSyncInit(void)
+int32_t LnnTimeSyncInit(LnnOnTimeSyncResult notifyCallback)
 {
+    if (notifyCallback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "null time sync result callback");
+        return SOFTBUS_INVALID_PARAM;
+    }
     ListInit(&g_timeSyncCtrl.reqList);
     g_timeSyncCtrl.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_timeSyncCtrl.looper == NULL) {
@@ -459,8 +476,9 @@ int32_t LnnTimeSyncInit(void)
     g_timeSyncCtrl.handler.name = "TimeSync";
     g_timeSyncCtrl.handler.looper = g_timeSyncCtrl.looper;
     g_timeSyncCtrl.handler.HandleMessage = TimeSyncMessageHandler;
+    g_timeSyncCtrl.notifyCallback = notifyCallback;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init time sync success");
-    return SOFTBUS_OK;
+    return LnnTimeSyncImplInit();
 }
 
 void LnnTimeSyncDeinit(void)
@@ -472,6 +490,7 @@ void LnnTimeSyncDeinit(void)
     if (PostMessageToHandler(MSG_TYPE_REMOVE_ALL, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post remove all time sync msg fail");
     }
+    LnnTimeSyncImplDeinit();
 }
 
 int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,

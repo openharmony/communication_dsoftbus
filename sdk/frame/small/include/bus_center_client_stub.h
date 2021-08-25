@@ -28,6 +28,7 @@ int32_t ClientOnJoinLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 int32_t ClientOnLeaveLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 int32_t ClientOnNodeOnlineStateChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 
 #ifdef __cplusplus
 #if __cplusplus

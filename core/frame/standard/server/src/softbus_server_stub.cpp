@@ -61,6 +61,10 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::GetLocalDeviceInfoInner;
     memberFuncMap_[SERVER_GET_NODE_KEY_INFO] =
         &SoftBusServerStub::GetNodeKeyInfoInner;
+    memberFuncMap_[SERVER_START_TIME_SYNC] = 
+        &SoftBusServerStub::StartTimeSyncInner;
+    memberFuncMap_[SERVER_STOP_TIME_SYNC] = 
+        &SoftBusServerStub::StopTimeSyncInner;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -489,6 +493,56 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         return SOFTBUS_ERR;
     }
     SoftBusFree(buf);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    const char *targetNetworkId = data.ReadCString();
+    if (targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read targetNetworkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t accuracy;
+    if (!data.ReadInt32(accuracy)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read accuracy failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t period;
+    if (!data.ReadInt32(period)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read period failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = StartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    const char *targetNetworkId = data.ReadCString();
+    if (targetNetworkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read targetNetworkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = StopTimeSync(pkgName, targetNetworkId);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 } // namespace OHOS

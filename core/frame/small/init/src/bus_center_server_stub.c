@@ -194,3 +194,65 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
     IpcIoPushFlatObj(reply, buf, len);
     return SOFTBUS_OK;
 }
+
+int32_t ServerStartTimeSync(void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStartTimeSync ipc server pop.");
+    size_t length;
+    const char *pkgName = (const char*)IpcIoPopString(req, &length);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+
+    const char *targetNetworkId = (const char*)IpcIoPopString(req, &length);
+    if (targetNetworkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync read targetNetworkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t accuracy = IpcIoPopInt32(req);
+    int32_t period = IpcIoPopInt32(req);
+
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync start time sync failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopTimeSync ipc server pop.");
+    size_t length;
+    const char *pkgName = (const char*)IpcIoPopString(req, &length);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+
+    const char *targetNetworkId = (const char*)IpcIoPopString(req, &length);
+    if (targetNetworkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync read targetNetworkId failed!");
+        return SOFTBUS_ERR;
+    }
+    
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync start time sync failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}

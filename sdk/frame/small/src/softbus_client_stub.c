@@ -49,6 +49,7 @@ static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_LEAVE_RESULT, ClientOnLeaveLNNResult },
     { CLIENT_ON_NODE_ONLINE_STATE_CHANGED, ClientOnNodeOnlineStateChanged },
     { CLIENT_ON_NODE_BASIC_INFO_CHANGED, ClientOnNodeBasicInfoChanged },
+    { CLIENT_ON_TIME_SYNC_RESULT, ClientOnTimeSyncResult },
     { CLIENT_ON_CHANNEL_OPENED, ClientOnChannelOpened },
     { CLIENT_ON_CHANNEL_OPENFAILED, ClientOnChannelOpenfailed },
     { CLIENT_ON_CHANNEL_CLOSED, ClientOnChannelClosed },
