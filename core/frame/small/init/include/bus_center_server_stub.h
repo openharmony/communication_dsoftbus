@@ -39,4 +39,4 @@ int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif //
+#endif // !BUS_CENTER_SERVER_STUB_H
