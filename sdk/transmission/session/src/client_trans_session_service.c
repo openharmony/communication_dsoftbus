@@ -206,7 +206,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     if (obj == NULL) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (memset_s(addrInfo, sizeof(addrInfo), 0x0, sizeof(addrInfo)) != EOK) {
+    if (memset_s(addrInfo, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
         cJSON_Delete(obj);
         return SOFTBUS_MEM_ERR;
     }

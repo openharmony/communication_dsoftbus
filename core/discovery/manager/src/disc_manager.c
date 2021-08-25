@@ -230,7 +230,8 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
 {
     uint32_t tmp;
     DiscInfo *infoNode = NULL;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d", device->capabilityBitmap[0]);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d",
+        device->capabilityBitmap[0]);
     for (tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
