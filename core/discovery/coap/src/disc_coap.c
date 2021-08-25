@@ -357,8 +357,7 @@ static int32_t CoapStopAdvertise(const SubscribeOption *option)
 
 static void CoapUpdateLocalIp(LinkStatus status)
 {
-    (void)status;
-    DiscCoapUpdateLocalIp();
+    DiscCoapUpdateLocalIp(status);
 }
 
 static DiscoveryFuncInterface g_discCoapFuncInterface = {
