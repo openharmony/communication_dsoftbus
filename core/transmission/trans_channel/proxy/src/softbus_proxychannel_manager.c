@@ -20,6 +20,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -798,8 +799,8 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
         return SOFTBUS_ERR;
     }
 
-    if (GenerateRandomArray((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomArray err");
+    if (SoftBusGenerateRandomArray((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusGenerateRandomArray err");
         return SOFTBUS_ERR;
     }
 

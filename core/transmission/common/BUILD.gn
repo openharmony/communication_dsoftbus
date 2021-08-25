@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_root_path/core/common/include",
     "//third_party/cJSON",
-    "//third_party/mbedtls/include/mbedtls/",
+    "$softbus_adapter_common/include",
     "$hilog_lite_include_path",
     "$libsec_include_path",
   ]
@@ -45,10 +45,7 @@ if (defined(ohos_lite)) {
       sources = [ "src/softbus_message_open_channel.c" ]
       public_configs = [ ":trans_common_interface" ]
       deps = common_deps
-      deps += [
-        "//build/lite/config/component/cJSON:cjson_static",
-        "//third_party/mbedtls:mbedtls_static",
-      ]
+      deps += [ "//build/lite/config/component/cJSON:cjson_static" ]
     }
   } else {
     shared_library("dsoftbus_trans_common") {
@@ -59,10 +56,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "src/softbus_message_open_channel.c" ]
       deps = common_deps
-      deps += [
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//third_party/mbedtls:mbedtls_shared",
-      ]
+      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
       public_configs = [ ":trans_common_interface" ]
     }
   }
@@ -75,7 +69,6 @@ if (defined(ohos_lite)) {
       "//third_party/cJSON",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct",
       "$softbus_adapter_common/include",
-      "//third_party/mbedtls/include/mbedtls/",
     ]
     sources = [ "src/softbus_message_open_channel.c" ]
     public_configs = [ ":trans_common_interface" ]
@@ -83,7 +76,7 @@ if (defined(ohos_lite)) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
     public_deps = [
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
     ]

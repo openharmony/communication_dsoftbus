@@ -17,9 +17,9 @@
 
 #include <string.h>
 
+#include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_utils.h"
 
 #define MAX_WEIGHT_VALUE 1000
 
@@ -32,7 +32,7 @@ int32_t LnnGetLocalWeight(void)
     if (isGenWeight) {
         return weight;
     }
-    if (GenerateRandomArray(&randVal, sizeof(randVal)) != SOFTBUS_OK) {
+    if (SoftBusGenerateRandomArray(&randVal, sizeof(randVal)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate random weight fail");
         return randVal;
     }

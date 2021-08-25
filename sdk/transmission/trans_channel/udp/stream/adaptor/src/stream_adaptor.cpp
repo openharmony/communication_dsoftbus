@@ -22,7 +22,7 @@
 
 #include "client_trans_udp_stream_interface.h"
 #include "securec.h"
-#include "softbus_crypto.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
