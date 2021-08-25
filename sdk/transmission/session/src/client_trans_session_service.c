@@ -216,7 +216,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
             bleIndex = index;
         }
     }
-    addrIndex = (wifiIndex > 0) ? wifiIndex : addrIndex;
+    addrIndex = (wifiIndex >= 0) ? wifiIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
     return addrIndex;
