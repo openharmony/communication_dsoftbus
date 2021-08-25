@@ -53,6 +53,7 @@ if (ohos_kernel_type == "liteos_m") {
       "small/init/include",
       "small/client_manager/include",
       "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/core/bus_center/utils/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/inner_communication",

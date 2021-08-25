@@ -79,7 +79,7 @@ int32_t ClientAddNewSession(const char* sessionName, SessionInfo* session);
  */
 int32_t ClientAddSession(const SessionParam* param, int32_t* sessionId, bool* isEnabled);
 
-int32_t ClientAddNonEncryptSession(const char *sessionName, int32_t *sessionId);
+int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId);
 
 int32_t ClientDeleteSessionServer(SoftBusSecType type, const char* sessionName);
 

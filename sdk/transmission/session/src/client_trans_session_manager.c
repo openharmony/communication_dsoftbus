@@ -450,7 +450,7 @@ static SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
     return session;
 }
 
-int32_t ClientAddNonEncryptSession(const char *sessionName, int32_t *sessionId)
+int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId)
 {
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || (sessionId == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
