@@ -642,7 +642,7 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode)
 {
     SoftBusList *list = g_busCenterClient.timeSyncCbList;
     TimeSyncCallbackItem *item = NULL;
-    TimeSyncResultInfo * basicInfo = (TimeSyncResultInfo *)info;
+    TimeSyncResultInfo *basicInfo = (TimeSyncResultInfo *)info;
 
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info or list is null");
