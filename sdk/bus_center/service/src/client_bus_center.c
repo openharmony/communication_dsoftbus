@@ -173,7 +173,7 @@ int32_t UnregNodeDeviceStateCb(INodeStateCb *callback)
 int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb)
 {
-    if (pkgName == NULL || cb == NULL || cb->onTimeSyncResult == NULL) {
+    if (pkgName == NULL || targetNetworkId == NULL || cb == NULL || cb->onTimeSyncResult == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
