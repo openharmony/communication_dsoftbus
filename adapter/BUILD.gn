@@ -27,6 +27,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/include",
     "$hilog_lite_include_path",
     "$libsec_include_path",
+    "//third_party/mbedtls/include",
     "//utils/native/base/include",
   ]
 
@@ -45,6 +46,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
@@ -62,9 +64,11 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = common_deps
+      deps += [ "//third_party/mbedtls:mbedtls_shared" ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
@@ -80,15 +84,22 @@ if (defined(ohos_lite)) {
   }
 
   ohos_shared_library("softbus_adapter") {
-    include_dirs = [ "//utils/native/base/include" ]
+    include_dirs = [
+      "//third_party/mbedtls/include",
+      "//utils/native/base/include",
+    ]
     sources = [
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
+      "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
       "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
-    deps = [ "//utils/native/base:utils" ]
+    public_deps = [
+      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
+      "//utils/native/base:utils",
+    ]
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
