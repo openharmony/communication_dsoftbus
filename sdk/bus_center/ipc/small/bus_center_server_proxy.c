@@ -298,7 +298,7 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
 
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop time sync ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "stop time sync ipc client push.");
     if (targetNetworkId == NULL || pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_ERR;
