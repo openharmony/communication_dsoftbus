@@ -236,7 +236,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
 
     int32_t sessionId;
-    int32_t ret = ClientAddNonEncryptSession(sessionName, &sessionId);
+    int32_t ret = ClientAddAuthNonEncryptSession(sessionName, &sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add non encrypt session err: ret=%d", ret);
         return ret;

@@ -28,22 +28,6 @@
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 
-static int32_t ConvertConnectType(int32_t type)
-{
-    switch (type) {
-        case CONNECTION_ADDR_BR:
-            return CONNECT_BR;
-        case CONNECTION_ADDR_BLE:
-            return CONNECT_BLE;
-        case CONNECTION_ADDR_ETH:
-            return CONNECT_TCP;
-        case CONNECTION_ADDR_WLAN:
-            return CONNECT_TCP;
-        default:
-            return CONNECT_TYPE_MAX;
-    }
-}
-
 int32_t ServerCreateSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create session server ipc server pop");
@@ -130,8 +114,8 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
     uint32_t size;
     ConnectOption connOpt;
     const char *sessionName = (const char*)IpcIoPopString(req, &size);
-    ConnectionAddr *addr = (ConnectionAddr *)IpcIoPopFlatObj(reg, &size);
-    if (!LnnConvertAddrToOption(addr, &option)) {
+    ConnectionAddr *addr = (ConnectionAddr *)IpcIoPopFlatObj(req, &size);
+    if (!LnnConvertAddrToOption(addr, &connOpt)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LnnConvertAddrToOption fail");
         IpcIoPushInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
