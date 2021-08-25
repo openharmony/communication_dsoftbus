@@ -99,7 +99,8 @@ void DiscClientDeinit(void)
 
 void DiscClientOnDeviceFound(const DeviceInfo *device)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d", device->capabilityBitmap[0]);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d",
+        device->capabilityBitmap[0]);
     g_discInfo->subscribeCb.OnDeviceFound(device);
 }
 

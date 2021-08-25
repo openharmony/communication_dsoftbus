@@ -18,7 +18,6 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "lnn_lane_manager.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
@@ -201,15 +200,16 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     }
     if (!exists) {
         item = CreateAuthChannelInfo(appInfo->myData.sessionName);
-        item->authId = authId;
-        appInfo->myData.channelId = item->appInfo.myData.channelId;
         if (item == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateAuthChannelInfo failed");
             pthread_mutex_unlock(&g_authChannelList->lock);
             return SOFTBUS_ERR;
         }
+        item->authId = authId;
+        appInfo->myData.channelId = item->appInfo.myData.channelId;
         if (AddAuthChannelInfo(item) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
+            SoftBusFree(item);
             pthread_mutex_unlock(&g_authChannelList->lock);
             return SOFTBUS_ERR;
         } 
@@ -374,7 +374,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
     if (pthread_mutex_lock(&g_authChannelList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    AuthChannelInfo *item;
+    AuthChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == info->appInfo.myData.channelId) {
             (void)pthread_mutex_unlock(&g_authChannelList->lock);
@@ -555,20 +555,21 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     int64_t authId = AuthOpenChannel(connOpt);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthOpenChannel failed");
+        SoftBusFree(channel);
         return SOFTBUS_ERR;
     }
     channel->authId = authId;
     if (AddAuthChannelInfo(channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
-        SoftBusFree(channel);
         AuthCloseChannel(channel->authId);
+        SoftBusFree(channel);
         return SOFTBUS_ERR;
     }
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransPostAuthRequest failed");
-        SoftBusFree(channel);
         AuthCloseChannel(channel->authId);
         DelAuthChannelInfoByChanId(*channelId);
+        SoftBusFree(channel);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -590,9 +591,9 @@ int32_t TransCloseAuthChannel(int32_t channelId)
             return ret;
         }
         ListDelete(&channel->node);
-        SoftBusFree(channel);
         g_authChannelList->cnt--;
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channelId);
+        SoftBusFree(channel);
         pthread_mutex_unlock(&g_authChannelList->lock);
         return ret;
     }
