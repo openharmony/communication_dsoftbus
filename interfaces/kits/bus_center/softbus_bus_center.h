@@ -426,7 +426,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
  * @version 1.0
  */
 int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
-    TimeSyncPeriod period, ITimeSyncCb* cb);
+    TimeSyncPeriod period, ITimeSyncCb *cb);
 
 /**
  * @brief Stop the time synchronize with specific target node.
