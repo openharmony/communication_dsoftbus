@@ -18,7 +18,6 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "lnn_lane_manager.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
