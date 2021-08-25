@@ -130,7 +130,7 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync g_serverProxy is nullptr!");
