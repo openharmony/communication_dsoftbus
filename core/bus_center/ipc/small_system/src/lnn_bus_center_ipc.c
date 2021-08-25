@@ -333,7 +333,7 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
 }
 
-int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void* info, uint32_t infoTypeLen, int32_t retCode)
+int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
         return SOFTBUS_INVALID_PARAM;
