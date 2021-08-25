@@ -471,8 +471,7 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
     rc = SOFTBUS_ERR;
     do {
         if (FindTimeSyncCbItem(targetNetworkId, cb) != NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat timesync request from (pkgName:%s networkId:%s), StopTimeSync first!",
-            pkgName, targetNetworkId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat request from %s, StopTimeSync first!", pkgName);
             break;
         }
         rc = ServerIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
