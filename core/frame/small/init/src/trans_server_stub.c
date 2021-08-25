@@ -156,6 +156,35 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
+int32_t ServerSetAuthResult(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set auth result server pop");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t channelId = IpcIoPopInt32(req);
+    int32_t callingUid = GetCallingUid(origin);
+    int32_t callingPid = GetCallingPid(origin);
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    if (TransAuthGetNameByChanId(channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get session name fail");
+        IpcIoPushInt32(reply, SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID);
+        return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
+    }
+    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
+        IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = TransSetAuthResult(channelId);
+    IpcIoPushInt32(reply, ret);
+    return ret;
+}
+
 int32_t ServerCloseChannel(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel ipc server pop");
