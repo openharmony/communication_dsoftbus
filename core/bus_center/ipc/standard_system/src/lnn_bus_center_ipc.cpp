@@ -157,7 +157,7 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
-int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int accuracy, int period)
+int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
     if (pkgName == nullptr || targetNetworkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
