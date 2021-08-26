@@ -1057,7 +1057,7 @@ void AuthNotifyLnnDisconn(const AuthManager *auth)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth no need to notify lnn disconn");
         (void)AuthHandleLeaveLNN(auth->authId);
     } else {
-        if (auth->cb != 0) {
+        if (auth->cb != NULL) {
             auth->cb->onDisconnect(auth->authId);
         }
     }
