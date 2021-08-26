@@ -205,9 +205,6 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     }
     if (!exists) {
         item = CreateAuthChannelInfo(appInfo->myData.sessionName);
-        item->authId = authId;
-        appInfo->myData.channelId = item->appInfo.myData.channelId;
-        item->isConnOptValid = false;
         if (item == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateAuthChannelInfo failed");
             pthread_mutex_unlock(&g_authChannelList->lock);
@@ -215,6 +212,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
         }
         item->authId = authId;
         appInfo->myData.channelId = item->appInfo.myData.channelId;
+        item->isConnOptValid = false;
         if (AddAuthChannelInfo(item) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
             SoftBusFree(item);
