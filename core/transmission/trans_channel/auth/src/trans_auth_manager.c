@@ -18,12 +18,9 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-<<<<<<< HEAD
 #include "lnn_connection_addr_utils.h"
 #include "lnn_lane_manager.h"
 #include "lnn_net_builder.h"
-=======
->>>>>>> a958f5bc85df42ae8f9d4f9d9344e5e5dd3cfd76
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
