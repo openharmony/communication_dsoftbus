@@ -296,9 +296,9 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     return channelId;
 }
 
-int32_t TransSetAuthResult(int32_t channelId)
+int32_t TransNotifyAuthSuccess(int32_t channelId)
 {
-    return TransSetAuthDataResult(channelId);
+    return TransNotifyAuthDataSuccess(channelId);
 }
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)

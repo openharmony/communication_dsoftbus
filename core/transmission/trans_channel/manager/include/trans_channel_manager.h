@@ -33,7 +33,7 @@ int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName,
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt);
 
-int32_t TransSetAuthResult(int32_t channelId);
+int32_t TransNotifyAuthSuccess(int32_t channelId);
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 

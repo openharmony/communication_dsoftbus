@@ -254,7 +254,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     return sessionId;
 }
 
-void SetAuthResult(int sessionId)
+void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId;
     int32_t type;
@@ -263,8 +263,8 @@ void SetAuthResult(int sessionId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
     }
-    if (ServerIpcSetAuthResult(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult err");
+    if (ServerIpcNotifyAuthSuccess(channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess err");
         return;
     }
 }

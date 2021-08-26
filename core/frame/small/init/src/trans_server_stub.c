@@ -125,7 +125,7 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
     return ret;
 }
 
-int32_t ServerSetAuthResult(const void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerNotifyAuthSuccess(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set auth result server pop");
     if (req == NULL || reply == NULL) {
@@ -149,7 +149,7 @@ int32_t ServerSetAuthResult(const void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_PERMISSION_DENIED;
     }
 
-    int32_t ret = TransSetAuthResult(channelId);
+    int32_t ret = TransNotifyAuthSuccess(channelId);
     IpcIoPushInt32(reply, ret);
     return ret;
 }

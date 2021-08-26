@@ -632,7 +632,7 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
     return AuthPostData(&head, data, len);
 }
 
-int32_t TransSetAuthDataResult(int32_t channelId)
+int32_t TransNotifyAuthDataSuccess(int32_t channelId)
 {
     AuthChannelInfo chanInfo;
     if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {

@@ -186,9 +186,9 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     return ret;
 }
 
-int32_t ServerIpcSetAuthResult(int channelId)
+int32_t ServerIpcNotifyAuthSuccess(int channelId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSetAuthResult begin");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcNotifyAuthSuccess begin");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -199,12 +199,12 @@ int32_t ServerIpcSetAuthResult(int channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_AUTH_RESULT, &request, &ret, ProxyCallback);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_NOTIFY_AUTH_SUCCESS, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcSetAuthResult callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess callback ret [%d]", ret);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcSetAuthResult end");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcNotifyAuthSuccess end");
     return ret;
 }
 

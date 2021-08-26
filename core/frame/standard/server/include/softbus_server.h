@@ -39,7 +39,7 @@ public:
     int32_t OpenSession(const char *mySessionName, const char *peerSessionName,
         const char *peerDeviceId, const char *groupId, int32_t flags) override;
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
-    int32_t SetAuthResult(int32_t channelId) override;
+    int32_t NotifyAuthSuccess(int32_t channelId) override;
     int32_t CloseChannel(int32_t channelId, int32_t channelType) override;
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t msgType) override;
