@@ -63,6 +63,8 @@ The main code directory structure of DSoftBus is as follows:
 >**NOTICE:** 
 >To use RPC across devices, you must have the  **ohos.permission.DISTRIBUTED\_DATASYNC**  permission \(which is a dangerous one\).
 
+>A device can proactively discover a smartphone only when the smartphone has the Visible to all nearby devices feature enabled. (This feature is available in Settings > Super Device > Visible to > All nearby devices.)
+
 **1. Discovery**
 
 -   **Publishing process**
