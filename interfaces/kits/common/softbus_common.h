@@ -82,7 +82,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define UUID_BUF_LEN 17
+#define UUID_BUF_LEN 65
 
 /**
  * @brief Indicates the maximum length of an IP address in string format,
