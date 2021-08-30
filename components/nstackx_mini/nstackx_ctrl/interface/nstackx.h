@@ -130,18 +130,6 @@ int32_t NSTACKX_StartDeviceFindAn(uint8_t mode);
 int32_t NSTACKX_StopDeviceFind(void);
 
 /*
- * subscribe module
- * return 0 on success, negative value on failure
- */
-int32_t NSTACKX_SubscribeModule(void);
-
-/*
- * unsubscribe module
- * return 0 on success, negative value on failure
- */
-int32_t NSTACKX_UnsubscribeModule(void);
-
-/*
  * Register the capability of local device.
  * return 0 on success, negative value on failure
  */
@@ -157,37 +145,7 @@ int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
  * Register the serviceData of local device.
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_RegisterServiceData(const char* serviceData);
-
-/*
- * Send Msg to remote peer
- * return 0 on success, negative value on failure
- */
-int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint8_t *data,
-                        uint32_t len);
-
-/*
- * Send Msg to remote peer
- * return 0 on success, negative value on failure
- */
-int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, const uint8_t *data,
-    uint32_t len, const char *ipaddr, uint8_t sendType);
-
-/*
- * Get device list from cache
- * param: deviceList - Device list return from NSTACKX, user should prepare sufficient buffer to store
- *                     device list.
- * param: deviceCountPtr - In/Out parameter. It indicates buffer size (number of elements) in deviceList
- *                         When returns, it indicates numbers of valid device in deviceList.
- * return 0 on success, negative value on failure
- */
-int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr);
-
-/*
- * NSTACKX Initialization, only used for restart.
- * return 0 on success, negative value on failure
- */
-void NSTACKX_StartDeviceFindRestart(void);
+int32_t NSTACKX_RegisterServiceData(const char *serviceData);
 
 #ifdef __cplusplus
 }
