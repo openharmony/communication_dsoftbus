@@ -196,6 +196,39 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     return sessionId;
 }
 
+static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
+{
+    if (addrStr == NULL || addrInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    cJSON *obj = cJSON_Parse(addrStr);
+    if (obj == NULL) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (memset_s(addrInfo, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
+        cJSON_Delete(obj);
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t port;
+    if (GetJsonObjectStringItem(obj, "WIFI_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
+        GetJsonObjectNumberItem(obj, "WIFI_PORT", &port)) {
+        addrInfo->info.ip.port = (uint16_t)port;
+        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
+            cJSON_Delete(obj);
+            addrInfo->type = CONNECTION_ADDR_WLAN;
+            return SOFTBUS_OK;
+        }
+    }
+    if (GetJsonObjectStringItem(obj, "BR_MAC", addrInfo->info.br.brMac, BT_MAC_LEN)) {
+        cJSON_Delete(obj);
+        addrInfo->type = CONNECTION_ADDR_BR;
+        return SOFTBUS_OK;
+    }
+    cJSON_Delete(obj);
+    return SOFTBUS_ERR;
+}
+
 static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 {
     int32_t addrIndex = -1;
@@ -223,16 +256,23 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
     return addrIndex;
 }
 
-int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num)
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
 {
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
+    ConnectionAddr *addr = NULL;
     if (addrIndex < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
-        return SOFTBUS_INVALID_PARAM;
+        ConnectionAddr mix;
+        if (ConvertAddrStr(mixAddr, &mix) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        addr = &mix;
+    } else {
+        addr = &addrInfo[addrIndex];
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
 
@@ -243,7 +283,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
         return ret;
     }
 
-    int32_t channelId = ServerIpcOpenAuthSession(sessionName, &addrInfo[addrIndex]);
+    int32_t channelId = ServerIpcOpenAuthSession(sessionName, addr);
     ret = ClientSetChannelBySessionId(sessionId, channelId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
