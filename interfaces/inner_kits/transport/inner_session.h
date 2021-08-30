@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num);
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr);
 void NotifyAuthSuccess(int sessionId);
 
 #ifdef __cplusplus
