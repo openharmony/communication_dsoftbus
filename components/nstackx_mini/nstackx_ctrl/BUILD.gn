@@ -1,0 +1,49 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+config("dfinder_interface") {
+  include_dirs = [ "interface" ]
+}
+static_library("nstackx_ctrl") {
+  sources = [
+    "core/coap_discover/coap_adapter.c",
+    "core/coap_discover/coap_app.c",
+    "core/coap_discover/coap_discover.c",
+    "core/coap_discover/json_payload.c",
+    "core/nstackx_common.c",
+    "core/nstackx_database.c",
+    "core/nstackx_device.c",
+  ]
+  include_dirs = [
+    "include",
+    "include/coap_discover",
+  ]
+  public_configs = [ ":dfinder_interface" ]
+  deps = [
+    "../nstackx_util:nstackx_util.open",
+    "//build/lite/config/component/cJSON:cjson_static",
+  ]
+  defines = [
+    "NSTACKX_WITH_LITEOS",
+    "LWIP_LITEOS_A_COMPAT",
+  ]
+  cflags = [
+    "-Wall",
+    "-fPIC",
+    "-std=c99",
+  ]
+  cflags_cc = cflags
+  ldflags = [ "-fPIC" ]
+}
