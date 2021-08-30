@@ -17,8 +17,8 @@
 
 #include <securec.h>
 
-#include "client_trans_channel_manager.h"
 #include "client_bus_center_manager.h"
+#include "client_trans_channel_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
