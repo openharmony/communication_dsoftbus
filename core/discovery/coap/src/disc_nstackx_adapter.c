@@ -343,7 +343,7 @@ static int32_t SetLocalDeviceInfo()
 void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     if(memcpy_s(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
-                INVALID_IP_ADDR, NSTACKX_MAX_IP_STRING_LEN) != EOK) {
+                INVALID_IP_ADDR, strlen(INVALID_IP_ADDR + 1)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy failed.");
     }
     if ((status == LINK_STATUS_UP) &&
