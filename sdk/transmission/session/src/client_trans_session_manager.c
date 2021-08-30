@@ -825,37 +825,6 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     return SOFTBUS_ERR;
 }
 
-int32_t ClientGetSessionSide(int32_t sessionId)
-{
-    if (g_clientSessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
-        return SOFTBUS_ERR;
-    }
-
-    int32_t side = -1;
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-
-    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
-        return SOFTBUS_ERR;
-    }
-
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (IsListEmpty(&serverNode->sessionList)) {
-            continue;
-        }
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->sessionId != sessionId) {
-                continue;
-            }
-            side = sessionNode->isServer ? IS_SERVER : IS_CLIENT;
-        }
-    }
-    (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    return side;
-}
-
 static void DestroyClientSessionByDevId(const ClientSessionServer *server, const char *devId)
 {
     SessionInfo *sessionNode = NULL;
