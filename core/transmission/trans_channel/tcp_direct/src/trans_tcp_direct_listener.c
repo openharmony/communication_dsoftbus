@@ -277,6 +277,7 @@ int32_t TransTdcStopSessionListener(void)
     }
 
     ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
+    DestroyBaseListener(DIRECT_CHANNEL_SERVER);
     return ret;
 }
 
