@@ -27,10 +27,10 @@ common_include = [
   "$dsoftbus_core_path/common/include",
   "$softbus_adapter_common/include",
   "$dsoftbus_root_path/interfaces/kits/transport",
-  "$dsoftbus_sdk_path/transmission/trans_channel/auth/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_sdk_path/bus_center/manager/include",
+  "$dsoftbus_sdk_path/transmission/trans_channel/auth/include",
 ]
 
 common_src = [

@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "client_trans_channel_manager.h"
+#include "client_bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -908,7 +909,8 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server, const
     SessionInfo *sessionNodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         if (strcmp(sessionNode->info.peerDeviceId, devId) == 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]", server->sessionName);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]",
+                       server->sessionName);
             server->listener.session.OnSessionClosed(sessionNode->sessionId);
             (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
             DestroySessionId(sessionNode->sessionId);
