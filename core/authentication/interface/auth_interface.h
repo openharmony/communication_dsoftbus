@@ -82,6 +82,7 @@ typedef enum {
     LNN = 0,
     TRANS_UDP_DATA,
     TRANS_AUTH_CHANNEL,
+    TRANS_TIME_SYNC_CHANNEL,
     MODULE_NUM,
 } AuthModuleId;
 

@@ -61,13 +61,13 @@ if (defined(ohos_lite)) {
       if (enable_time_sync == true) {
         sources += [ "time_sync/src/lnn_time_sync_manager.c" ]
         native_source_path = rebase_path("$dsoftbus_root_path")
-        dep_file = "enhanced/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
+        dep_file = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
         enhanced = exec_script(
                 "//build/lite/run_shell_cmd.py",
                 [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
                 "value")
         if (enhanced) {
-          deps += [ "$dsoftbus_root_path/enhanced/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
+          deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
         } else {
           sources += [ "time_sync/src/lnn_time_sync_impl_stub.c" ]
         }
@@ -111,13 +111,13 @@ if (defined(ohos_lite)) {
     if (enable_time_sync == true) {
       sources += [ "time_sync/src/lnn_time_sync_manager.c" ]
       native_source_path = rebase_path("$dsoftbus_root_path")
-      dep_file = "enhanced/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
+      dep_file = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
       enhanced = exec_script(
               "//build/lite/run_shell_cmd.py",
               [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
               "value")
       if (enhanced) {
-        deps += [ "$dsoftbus_root_path/enhanced/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
+        deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
       } else {
         sources += [ "time_sync/src/lnn_time_sync_impl_stub.c" ]
       }
