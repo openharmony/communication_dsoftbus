@@ -179,6 +179,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
+    NotifyJoinResult(connFsm, networkId, retCode);
     if (retCode == SOFTBUS_OK) {
         ReportCategory report = LnnAddOnlineNode(connInfo->nodeInfo);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
@@ -190,7 +191,6 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;
     }
-    NotifyJoinResult(connFsm, networkId, retCode);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]join failed, ready clean", connFsm->id);
@@ -233,10 +233,10 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
         return;
     }
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
+    NotifyLeaveResult(connFsm, networkId, retCode);
     if (retCode == SOFTBUS_OK) {
         UpdateLeaveToLedger(connFsm, networkId);
     }
-    NotifyLeaveResult(connFsm, networkId, retCode);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     (void)AuthHandleLeaveLNN(connInfo->authId);
     connFsm->isDead = true;
