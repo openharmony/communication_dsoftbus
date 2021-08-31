@@ -27,6 +27,9 @@ common_include = [
   "$dsoftbus_core_path/common/include",
   "$softbus_adapter_common/include",
   "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_sdk_path/bus_center/manager/include",
   "$dsoftbus_sdk_path/transmission/trans_channel/auth/include",
 ]
 
@@ -49,6 +52,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_core_path/common/utils:softbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_sdk_path/bus_center:dsoftbus_bus_center_manager_sdk",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/auth:dsoftbus_trans_auth_channel_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel_sdk",
@@ -87,6 +91,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_sdk_path/bus_center:dsoftbus_bus_center_manager_sdk",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
       "$dsoftbus_sdk_path/transmission/trans_channel/auth:dsoftbus_trans_auth_channel_sdk",
       "$dsoftbus_sdk_path/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel_sdk",
