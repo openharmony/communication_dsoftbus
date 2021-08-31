@@ -17,6 +17,7 @@
 
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
+#include "inner_session.h"
 #include "securec.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -195,7 +196,6 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     return sessionId;
 }
 
-
 static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
 {
     if (addrStr == NULL || addrInfo == NULL) {
@@ -229,31 +229,61 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     return SOFTBUS_ERR;
 }
 
-int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || addrInfo == NULL) {
+    int32_t addrIndex = -1;
+    if (addrInfo == NULL || num <= 0) {
+        return addrIndex;
+    }
+    int32_t wifiIndex = -1;
+    int32_t brIndex = -1;
+    int32_t bleIndex = -1;
+    for (int32_t index = 0; index < num; index++) {
+        if ((addrInfo[index].type == CONNECTION_ADDR_ETH || addrInfo[index].type == CONNECTION_ADDR_WLAN) &&
+            wifiIndex < 0) {
+            wifiIndex = index;
+        }
+        if (addrInfo[index].type == CONNECTION_ADDR_BR && brIndex < 0) {
+            brIndex = index;
+        }
+        if (addrInfo[index].type == CONNECTION_ADDR_BLE && bleIndex < 0) {
+            bleIndex = index;
+        }
+    }
+    addrIndex = (wifiIndex >= 0) ? wifiIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
+    return addrIndex;
+}
+
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
+    ConnectionAddr *addr = NULL;
+    if (addrIndex < 0) {
+        ConnectionAddr mix;
+        if (ConvertAddrStr(mixAddr, &mix) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        addr = &mix;
+    } else {
+        addr = &addrInfo[addrIndex];
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
 
     int32_t sessionId;
-    int32_t ret = ClientAddNonEncryptSession(sessionName, &sessionId);
+    int32_t ret = ClientAddAuthSession(sessionName, &sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add non encrypt session err: ret=%d", ret);
         return ret;
     }
-    int32_t channelId = INVALID_CHANNEL_ID;
-    if (addrInfo->type == CONNECTION_ADDR_MIX) {
-        ConnectionAddr addr;
-        ret = ConvertAddrStr((const char *)addrInfo->info.mixAddr.addr, &addr);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
-        channelId = ServerIpcOpenAuthSession(sessionName, &addr);
-    } else {
-        channelId = ServerIpcOpenAuthSession(sessionName, addrInfo);
-    }
+
+    int32_t channelId = ServerIpcOpenAuthSession(sessionName, addr);
     ret = ClientSetChannelBySessionId(sessionId, channelId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
@@ -262,6 +292,21 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d", sessionId);
     return sessionId;
+}
+
+void NotifyAuthSuccess(int sessionId)
+{
+    int32_t channelId;
+    int32_t type;
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
+        return;
+    }
+    if (ServerIpcNotifyAuthSuccess(channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess err");
+        return;
+    }
 }
 
 static void CheckSessionIsOpened(int32_t sessionId)

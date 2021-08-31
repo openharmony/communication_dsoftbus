@@ -47,6 +47,8 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::OpenSessionInner;
     memberFuncMap_[SERVER_OPEN_AUTH_SESSION] =
         &SoftBusServerStub::OpenAuthSessionInner;
+    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = 
+        &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] =
         &SoftBusServerStub::CloseChannelInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] =
@@ -275,6 +277,21 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
     int32_t retReply = OpenAuthSession(sessionName, &addrInfo);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner read channel Id failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = NotifyAuthSuccess(channelId);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

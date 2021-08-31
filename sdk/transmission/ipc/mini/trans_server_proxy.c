@@ -48,5 +48,5 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
-    return TransSendMsg(channelId, data, len, msgType);
+    return TransSendMsg(channelId, channelType, data, len, msgType);
 }
