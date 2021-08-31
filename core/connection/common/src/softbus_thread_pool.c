@@ -15,6 +15,8 @@
 
 #include "softbus_thread_pool.h"
 
+#include <sys/prctl.h>
+
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -23,6 +25,7 @@
 #define MIN_STACK_SIZE 0x2000
 #define THREAD_PRIORITY 20
 #endif
+#define THREAD_POOL_NAME "THREAD_POOL_WORKER"
 
 typedef void *(*Runnable)(void *argv);
 typedef struct ThreadAttr ThreadAttr;
@@ -174,6 +177,7 @@ static void ThreadPoolWorker(void *arg)
     }
     ThreadPool *pool = (ThreadPool *)arg;
     Job *job = NULL;
+    prctl(PR_SET_NAME, THREAD_POOL_NAME);
     while (1) {
         if (pthread_mutex_lock(&(pool->mutex)) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
@@ -189,9 +193,10 @@ static void ThreadPoolWorker(void *arg)
         pool->queueCurNum--;
         job = pool->head;
         if (pthread_mutex_lock(&(job->mutex)) != 0) {
+            pool->queueCurNum++;
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
             pthread_mutex_unlock(&(pool->mutex));
-            return;
+            continue;
         }
         JobCheck(pool, job);
         if (pool->queueCurNum == 0) {
@@ -214,6 +219,7 @@ static void ThreadPoolWorker(void *arg)
             pthread_mutex_unlock(&(job->mutex));
         }
     }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Exit");
 }
 
 static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunction)(void *arg))
@@ -226,6 +232,7 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
         return SOFTBUS_LOCK_ERR;
     }
     if (pool->queueCurNum == pool->queueMaxNum) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "queueCurNum equals queueMaxNum, just quit");
         pthread_mutex_unlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
@@ -236,6 +243,7 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
         pthread_mutex_unlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
+    // will call pthread_mutex_unlock in ThreadPoolAddJob
     return SOFTBUS_OK;
 }
 
@@ -250,7 +258,7 @@ int32_t ThreadPoolAddJob(ThreadPool *pool, int32_t (*callbackFunction)(void *arg
     while (job != NULL) {
         if (job->handle == handle && job->runnable == true) {
             pthread_mutex_unlock(&(pool->mutex));
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_ALREADY_EXISTED;
         }
         job = job->next;
     }
@@ -285,6 +293,7 @@ int32_t ThreadPoolAddJob(ThreadPool *pool, int32_t (*callbackFunction)(void *arg
 int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
 {
     if (pool == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ThreadPoolRemoveJob failed, pool == NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&(pool->mutex)) != 0) {
