@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -64,6 +65,7 @@ int TransClientInit(void)
         return SOFTBUS_ERR;
     }
 
+    ClientTransRegLnnOffline();
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init succ");
     return SOFTBUS_OK;
 }
@@ -821,4 +823,59 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
     return SOFTBUS_ERR;
+}
+
+static void DestroyClientSessionByDevId(const ClientSessionServer *server, const char *devId)
+{
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (strcmp(sessionNode->info.peerDeviceId, devId) == 0) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]",
+                       server->sessionName);
+            server->listener.session.OnSessionClosed(sessionNode->sessionId);
+            (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+            DestroySessionId(sessionNode->sessionId);
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
+        }
+    }
+}
+
+static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "offline networkid %s", info->networkId);
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return;
+    }
+
+    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        DestroyClientSessionByDevId(serverNode, info->networkId);
+    }
+    (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
+    return;
+}
+
+static INodeStateCb g_transLnnCb = {
+    .events = EVENT_NODE_STATE_OFFLINE,
+    .onNodeOffline = ClientTransLnnOfflineProc,
+};
+
+void ClientTransRegLnnOffline()
+{
+    int32_t ret;
+    ret = RegNodeDeviceStateCbInner("trans", &g_transLnnCb);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reg lnn offline fail");
+    }
 }

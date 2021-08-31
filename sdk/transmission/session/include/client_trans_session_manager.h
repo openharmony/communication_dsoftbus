@@ -105,6 +105,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char* pkgName, const c
 int TransClientInit(void);
 void TransClientDeinit(void);
 
+void ClientTransRegLnnOffline();
 #ifdef __cplusplus
 }
 #endif
