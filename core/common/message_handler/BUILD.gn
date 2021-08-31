@@ -48,7 +48,7 @@ if (defined(ohos_lite)) {
       ]
       deps = common_deps
       deps += [
-      	"$hilog_lite_deps_path",
+        "$hilog_lite_deps_path",
         "$libsec_deps_path",
       ]
       public_configs = [ ":message_handler_interface" ]
