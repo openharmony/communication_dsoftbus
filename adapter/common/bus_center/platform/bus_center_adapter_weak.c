@@ -28,7 +28,7 @@
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        HILOG_ERROR(LOG_CORE, "fail: para error!");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     switch (key) {

@@ -23,8 +23,6 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
-    "$libsec_include_path",
-    "$hilog_lite_include_path",
   ]
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -36,7 +34,6 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("message_handler") {
       include_dirs = common_include
-      include_dirs += "//device/hisilicon/hispark_pegasus/sdk_liteos/platform/os/Huawei_LiteOS/components/lib/libc/musl/include"
       sources = [ "message_handler.c" ]
       deps = common_deps
       public_configs = [ ":message_handler_interface" ]
@@ -50,6 +47,10 @@ if (defined(ohos_lite)) {
         "-fPIC",
       ]
       deps = common_deps
+      deps += [
+      	"$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
       public_configs = [ ":message_handler_interface" ]
     }
   }

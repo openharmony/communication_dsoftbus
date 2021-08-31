@@ -23,16 +23,16 @@ void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
 #endif
     switch (level) {
         case SOFTBUS_LOG_DBG:
-            HILOG_DEBUG(LOG_CORE, "%{public}s", buf);
+            HILOG_DEBUG(SOFTBUS_HILOG_ID, "%{public}s", buf);
             break;
         case SOFTBUS_LOG_INFO:
-            HILOG_INFO(LOG_CORE, "%{public}s", buf);
+            HILOG_INFO(SOFTBUS_HILOG_ID, "%{public}s", buf);
             break;
         case SOFTBUS_LOG_WARN:
-            HILOG_WARN(LOG_CORE, "%{public}s", buf);
+            HILOG_WARN(SOFTBUS_HILOG_ID, "%{public}s", buf);
             break;
         case SOFTBUS_LOG_ERROR:
-            HILOG_ERROR(LOG_CORE, "%{public}s", buf);
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "%{public}s", buf);
             break;
         default:
             break;

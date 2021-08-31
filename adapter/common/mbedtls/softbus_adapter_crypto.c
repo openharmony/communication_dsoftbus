@@ -38,7 +38,7 @@ static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigne
 {
     if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
         (cipherTextLen < plainTextSize + OVERHEAD_LEN)) {
-        HILOG_ERROR(LOG_CORE, "Encrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para\n");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -80,7 +80,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
 {
     if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
         (plainLen < cipherTextSize - OVERHEAD_LEN)) {
-        HILOG_ERROR(LOG_CORE, "Decrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Decrypt invalid para\n");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -89,7 +89,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
     int32_t ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherkey->key,
         cipherkey->keyLen * KEY_BITS_UNIT);
     if (ret != 0) {
-        HILOG_ERROR(LOG_CORE, "Decrypt mbedtls_gcm_setkey fail\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Decrypt mbedtls_gcm_setkey fail\n");
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -98,7 +98,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
         GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
-        HILOG_ERROR(LOG_CORE, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -137,7 +137,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     int32_t ret;
 
     if (pthread_mutex_lock(&g_randomLock) != 0) {
-        HILOG_ERROR(LOG_CORE, "lock mutex failed");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -147,7 +147,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
         ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
         if (ret != 0) {
             pthread_mutex_unlock(&g_randomLock);
-            HILOG_ERROR(LOG_CORE, "gen random seed error, ret[%d]", ret);
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "gen random seed error, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
         initFlag = true;
@@ -156,7 +156,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
     pthread_mutex_unlock(&g_randomLock);
     if (ret != 0) {
-        HILOG_ERROR(LOG_CORE, "gen random error, ret[%d]", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "gen random error, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -165,7 +165,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
 int32_t SoftBusGenerateSessionKey(char *key, int32_t len)
 {
     if (SoftBusGenerateRandomArray((unsigned char*)key, len) != SOFTBUS_OK) {
-        HILOG_ERROR(LOG_CORE, "generate sessionKey error.");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "generate sessionKey error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -179,7 +179,7 @@ int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
     }
 
     if (SoftBusGenerateRandomArray(cipherKey->iv, sizeof(cipherKey->iv)) != SOFTBUS_OK) {
-        HILOG_ERROR(LOG_CORE, "generate random iv error.");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "generate random iv error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     uint32_t outLen = inLen + OVERHEAD_LEN;
@@ -198,7 +198,7 @@ int32_t SoftBusEncryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned cha
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusGenerateRandomArray(cipherKey->iv, sizeof(cipherKey->iv)) != SOFTBUS_OK) {
-        HILOG_ERROR(LOG_CORE, "generate random iv error.");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "generate random iv error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     if (memcpy_s(cipherKey->iv, sizeof(int32_t), &seqNum, sizeof(int32_t)) != EOK) {
@@ -221,7 +221,7 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
     }
 
     if (memcpy_s(cipherKey->iv, sizeof(cipherKey->iv), input, GCM_IV_LEN) != EOK) {
-        HILOG_ERROR(LOG_CORE, "copy iv failed.");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "copy iv failed.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     uint32_t outLen = inLen - OVERHEAD_LEN;
