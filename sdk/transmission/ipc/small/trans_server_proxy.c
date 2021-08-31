@@ -170,23 +170,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     IpcIoPushString(&request, sessionName);
-    IpcIoPushInt32(&request, addrInfo->type);
-    switch (addrInfo->type) {
-        case CONNECTION_ADDR_WLAN:
-        case CONNECTION_ADDR_ETH:
-            IpcIoPushString(&request, addrInfo->info.ip.ip);
-            IpcIoPushUint16(&request, addrInfo->info.ip.port);
-            break;
-        case CONNECTION_ADDR_BR:
-            IpcIoPushString(&request, addrInfo->info.br.brMac);
-            break;
-        case CONNECTION_ADDR_BLE:
-            IpcIoPushString(&request, addrInfo->info.ble.bleMac);
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "addrInfo type error");
-            return SOFTBUS_ERR;
-    }
+    IpcIoPushFlatObj(&request, (void*)addrInfo, sizeof(ConnectionAddr));
 
     int32_t ret = SOFTBUS_ERR;
     if (g_serverProxy == NULL) {
@@ -199,6 +183,28 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenAuthSession end");
+    return ret;
+}
+
+int32_t ServerIpcNotifyAuthSuccess(int channelId)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcNotifyAuthSuccess begin");
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushInt32(&request, channelId);
+    int32_t ret = SOFTBUS_ERR;
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_NOTIFY_AUTH_SUCCESS, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess callback ret [%d]", ret);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcNotifyAuthSuccess end");
     return ret;
 }
 

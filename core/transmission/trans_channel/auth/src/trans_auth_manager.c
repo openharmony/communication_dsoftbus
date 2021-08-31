@@ -18,6 +18,9 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_connection_addr_utils.h"
+#include "lnn_lane_manager.h"
+#include "lnn_net_builder.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
@@ -38,6 +41,8 @@ typedef struct {
     ListNode node;
     AppInfo appInfo;
     int64_t authId;
+    ConnectOption connOpt;
+    bool isConnOptValid;
 } AuthChannelInfo;
 
 static SoftBusList *g_authChannelList = NULL;
@@ -207,6 +212,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
         }
         item->authId = authId;
         appInfo->myData.channelId = item->appInfo.myData.channelId;
+        item->isConnOptValid = false;
         if (AddAuthChannelInfo(item) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
             SoftBusFree(item);
@@ -535,6 +541,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
         pthread_mutex_unlock(&g_authChannelList->lock);
         goto EXIT_ERR;
     }
+    info->isConnOptValid = false;
     pthread_mutex_unlock(&g_authChannelList->lock);
     return info;
 EXIT_ERR:
@@ -551,7 +558,12 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     if (channel == NULL) {
         return SOFTBUS_ERR;
     }
+    if (memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
+        SoftBusFree(channel);
+        return SOFTBUS_MEM_ERR;
+    }
     *channelId = channel->appInfo.myData.channelId;
+    channel->isConnOptValid = true;
     int64_t authId = AuthOpenChannel(connOpt);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthOpenChannel failed");
@@ -618,4 +630,20 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
         .module = MODULE_AUTH_MSG,
     };
     return AuthPostData(&head, data, len);
+}
+
+int32_t TransNotifyAuthDataSuccess(int32_t channelId)
+{
+    AuthChannelInfo chanInfo;
+    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (!chanInfo.isConnOptValid) {
+        return SOFTBUS_ERR;
+    }
+    ConnectionAddr addr;
+    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+        return SOFTBUS_ERR;
+    }
+    return LnnNotifyDiscoveryDevice(&addr);
 }

@@ -16,6 +16,7 @@
 #include "trans_server_stub.h"
 
 #include "liteipc_adapter.h"
+#include "lnn_connection_addr_utils.h"
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
@@ -26,22 +27,6 @@
 #include "trans_auth_manager.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
-
-static int32_t ConvertConnectType(int32_t type)
-{
-    switch (type) {
-        case CONNECTION_ADDR_BR:
-            return CONNECT_BR;
-        case CONNECTION_ADDR_BLE:
-            return CONNECT_BLE;
-        case CONNECTION_ADDR_ETH:
-            return CONNECT_TCP;
-        case CONNECTION_ADDR_WLAN:
-            return CONNECT_TCP;
-        default:
-            return CONNECT_TYPE_MAX;
-    }
-}
 
 int32_t ServerCreateSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
 {
@@ -129,29 +114,42 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
     uint32_t size;
     ConnectOption connOpt;
     const char *sessionName = (const char*)IpcIoPopString(req, &size);
-    connOpt.type = ConvertConnectType(IpcIoPopInt32(req));
-    const char *addr = (const char*)IpcIoPopString(req, &size);
-    if (connOpt.type == CONNECT_TCP) {
-        if (memcpy_s(connOpt.info.ipOption.ip, IP_LEN, addr, IP_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-        connOpt.info.ipOption.port = (int32_t)IpcIoPopUint16(req);
-    } else if (connOpt.type == CONNECT_BLE) {
-        if (memcpy_s(connOpt.info.bleOption.bleMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (connOpt.type == CONNECT_BR) {
-        if (memcpy_s(connOpt.info.brOption.brMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            IpcIoPushInt32(reply, SOFTBUS_MEM_ERR);
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
+    ConnectionAddr *addr = (ConnectionAddr *)IpcIoPopFlatObj(req, &size);
+    if (!LnnConvertAddrToOption(addr, &connOpt)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LnnConvertAddrToOption fail");
         IpcIoPushInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     ret = TransOpenAuthChannel(sessionName, &connOpt);
+    IpcIoPushInt32(reply, ret);
+    return ret;
+}
+
+int32_t ServerNotifyAuthSuccess(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set auth result server pop");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t channelId = IpcIoPopInt32(req);
+    int32_t callingUid = GetCallingUid(origin);
+    int32_t callingPid = GetCallingPid(origin);
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    if (TransAuthGetNameByChanId(channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get session name fail");
+        IpcIoPushInt32(reply, SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID);
+        return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
+    }
+    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
+        IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = TransNotifyAuthSuccess(channelId);
     IpcIoPushInt32(reply, ret);
     return ret;
 }
