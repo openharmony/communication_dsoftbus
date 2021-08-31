@@ -222,6 +222,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     }
     if (CopyPeerAppInfo(appInfo, &item->appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CopyPeerAppInfo failed");
+        SoftBusFree(item);
         pthread_mutex_unlock(&g_authChannelList->lock);
         return SOFTBUS_MEM_ERR;
     }
