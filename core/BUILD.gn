@@ -14,5 +14,9 @@
 import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_server") {
-  features = [ "frame:softbus_server" ]
+  if (ohos_kernel_type == "liteos_m") {
+    features = [ "frame:softbus_server_frame" ]
+  } else {
+    features = [ "frame:softbus_server" ]
+  }
 }
