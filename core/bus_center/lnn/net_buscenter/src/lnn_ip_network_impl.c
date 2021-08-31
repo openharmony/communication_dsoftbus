@@ -288,10 +288,12 @@ int32_t LnnInitIpNetwork(void)
     }
     if (GetUpdateLocalIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
     if (SetLocalIpInfo(ipAddr, ifName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed\n");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
@@ -322,6 +324,7 @@ void LnnCallIpDiscovery(void)
         return;
     }
     if (!g_lnnIpNetworkInfo.isIpLinkClosed) {
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     if (GetLocalIpInfo(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
