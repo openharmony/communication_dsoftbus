@@ -17,6 +17,7 @@
 
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
+#include "inner_session.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -191,6 +192,16 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d", sessionId, channelId);
     return sessionId;
+}
+
+int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
+{
+    return SOFTBUS_OK;
+}
+
+void NotifyAuthSuccess(int sessionId)
+{
+    return;
 }
 
 static void CheckSessionIsOpened(int32_t sessionId)
