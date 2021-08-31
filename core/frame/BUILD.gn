@@ -35,15 +35,13 @@ if (ohos_kernel_type == "liteos_m") {
       "$softbus_adapter_config/spec_config",
     ]
 
-    sources = [
-      "src/softbus_server_frame.c",
-    ]
+    sources = [ "src/softbus_server_frame.c" ]
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
     ]
   }
 } else {
