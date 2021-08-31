@@ -38,7 +38,7 @@ static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigne
 {
     if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
         (cipherTextLen < plainTextSize + OVERHEAD_LEN)) {
-        HILOG_ERROR(LOG_CORE, "Encrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para\n");
         return SOFTBUS_INVALID_PARAM;
     }
 

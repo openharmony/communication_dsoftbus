@@ -36,7 +36,7 @@ static unsigned int g_timerType;
 void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(LOG_CORE, "timerId is null");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
         return NULL;
     }
     struct sigevent envent;
@@ -47,7 +47,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {
-        HILOG_ERROR(LOG_CORE, "timer create error, errno code: [%{public}d]", errno);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer create error, errno code: [%{public}d]", errno);
         return NULL;
     }
 
@@ -57,7 +57,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
     if (timerId < 0) {
-        HILOG_ERROR(LOG_CORE, "timerId is null");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
         return SOFTBUS_ERR;
     }
     struct itimerspec value;
@@ -73,7 +73,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     }
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
-        HILOG_ERROR(LOG_CORE, "timer start error, errno code: [%{public}d]", errno);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer start error, errno code: [%{public}d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -83,12 +83,12 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(LOG_CORE, "timerId is null");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
         return SOFTBUS_ERR;
     }
 
     if (timer_delete(timerId) != 0) {
-        HILOG_ERROR(LOG_CORE, "timer delete err, errno code: [%{public}d]", errno);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer delete err, errno code: [%{public}d]", errno);
         return SOFTBUS_ERR;
     }
 

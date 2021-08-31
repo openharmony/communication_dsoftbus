@@ -28,7 +28,7 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     uint32_t fileLen = 0;
     int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
     if (fd < 0) {
-        HILOG_ERROR(LOG_CORE, "Read UtilsFileOpen fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Read UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     int ret = UtilsFileStat(fileName, &fileLen);
@@ -38,16 +38,16 @@ int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen)
     }
     ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
     if (ret < 0) {
-        HILOG_ERROR(LOG_CORE, "Read UtilsFileSeek fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Read UtilsFileSeek fail");
         goto EXIT;
     }
     if (fileLen > maxLen) {
-        HILOG_ERROR(LOG_CORE, "Read file len not legal, clear buf");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Read file len not legal, clear buf");
         goto EXIT;
     }
     ret = UtilsFileRead(fd, readBuf, maxLen);
     if (ret < 0) {
-        HILOG_ERROR(LOG_CORE, "Read UtilsFileRead, ret=%{public}d", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Read UtilsFileRead, ret=%{public}d", ret);
         goto EXIT;
     }
     UtilsFileClose(fd);
@@ -64,12 +64,12 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
     int fd;
     fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
     if (fd < 0) {
-        HILOG_ERROR(LOG_CORE, "WriteDeviceId UtilsFileOpen fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteDeviceId UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
     if (ret != len) {
-        HILOG_ERROR(LOG_CORE, "UtilsFileOpen UtilsFileWrite fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "UtilsFileOpen UtilsFileWrite fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
