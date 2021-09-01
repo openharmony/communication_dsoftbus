@@ -46,7 +46,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
     int32_t ret;
 
     if (module >= SOFTBUS_LOG_MODULE_MAX || level >= SOFTBUS_LOG_LEVEL_MAX) {
-        HILOG_ERROR(LOG_CORE, "[COMM]softbus log type or module error");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM]softbus log type or module error");
         return;
     }
 
@@ -57,7 +57,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
 
     ret = sprintf_s(szStr, sizeof(szStr), "[%s]", g_logInfo[module].name);
     if (ret < 0) {
-        HILOG_ERROR(LOG_CORE, "[COMM]softbus log error");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM]softbus log error");
         return;
     }
     ulPos = strlen(szStr);
@@ -66,7 +66,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
     ret = vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, fmt, arg);
     va_end(arg);
     if (ret < 0) {
-        HILOG_ERROR(LOG_CORE, "[COMM]softbus log len error");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM]softbus log len error");
         return;
     }
     SoftBusOutPrint(szStr, level);

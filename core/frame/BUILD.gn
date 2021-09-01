@@ -24,6 +24,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/transmission/session/include",
+      "$dsoftbus_root_path/core/frame/common/include",
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
       "$dsoftbus_root_path/sdk/bus_center/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
@@ -34,16 +35,13 @@ if (ohos_kernel_type == "liteos_m") {
       "$softbus_adapter_config/spec_config",
     ]
 
-    sources = [
-      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_client_interface.c",
-      "$dsoftbus_root_path/core/common/inner_communication/c/softbus_server_interface_impl.c",
-      "src/softbus_server_frame.c",
-      "src/softbus_server_frame_weak.c",
-    ]
+    sources = [ "src/softbus_server_frame.c" ]
 
     deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$hilog_lite_deps_path",
+      "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
     ]
   }
 } else {
