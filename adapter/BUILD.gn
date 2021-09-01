@@ -31,12 +31,6 @@ if (defined(ohos_lite)) {
     "//utils/native/base/include",
   ]
 
-  common_deps = [
-    "$hilog_lite_deps_path",
-    "$libsec_deps_path",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
-
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include
@@ -51,7 +45,6 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
-      deps = common_deps
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
@@ -70,7 +63,11 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
-      deps = common_deps
+      deps = [
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
       deps += [ "//third_party/mbedtls:mbedtls_shared" ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
