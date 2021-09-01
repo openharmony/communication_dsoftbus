@@ -30,10 +30,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$hilog_lite_deps_path",
-        "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_static",
-        "//utils/native/base:utils",
       ]
     }
   } else {

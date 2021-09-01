@@ -37,8 +37,6 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$hilog_lite_deps_path",
-        "$libsec_deps_path",
       ]
       public_configs = [ ":dsoftbus_log_interface" ]
     }

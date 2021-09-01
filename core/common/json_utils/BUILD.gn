@@ -30,8 +30,6 @@ if (defined(ohos_lite)) {
       sources = [ "softbus_json_utils.c" ]
       deps = [
         "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$hilog_lite_deps_path",
-        "$libsec_deps_path",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
     }

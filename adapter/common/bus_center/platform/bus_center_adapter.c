@@ -27,7 +27,7 @@
 int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        HILOG_ERROR(LOG_CORE, "fail: para error!");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
@@ -36,7 +36,7 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
         case COMM_DEVICE_KEY_DEVNAME:
             sn = GetSerial();
             if (sn == NULL) {
-                HILOG_ERROR(LOG_CORE, "GetSerial failed!");
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetSerial failed!");
             }
             if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
                 return SOFTBUS_ERR;
@@ -44,7 +44,7 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
             break;
         case COMM_DEVICE_KEY_UDID:
             if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {
-                HILOG_ERROR(LOG_CORE, "GetDevUdid failed!");
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDevUdid failed!");
                 return SOFTBUS_ERR;
             }
             if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {
