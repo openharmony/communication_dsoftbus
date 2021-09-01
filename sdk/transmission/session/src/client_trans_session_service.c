@@ -278,8 +278,8 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     }
     int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
     ConnectionAddr *addr = NULL;
+    ConnectionAddr mix;
     if (addrIndex < 0) {
-        ConnectionAddr mix;
         if (ConvertAddrStr(mixAddr, &mix) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
             return SOFTBUS_INVALID_PARAM;
