@@ -211,8 +211,17 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         return SOFTBUS_MEM_ERR;
     }
     int32_t port;
-    if (GetJsonObjectStringItem(obj, "WIFI_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
-        GetJsonObjectNumberItem(obj, "WIFI_PORT", &port)) {
+    if (GetJsonObjectStringItem(obj, "ethIp", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
+        GetJsonObjectNumberItem(obj, "ethPort", &port)) {
+        addrInfo->info.ip.port = (uint16_t)port;
+        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
+            cJSON_Delete(obj);
+            addrInfo->type = CONNECTION_ADDR_ETH;
+            return SOFTBUS_OK;
+        }
+    }
+    if (GetJsonObjectStringItem(obj, "wifiIp", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
+        GetJsonObjectNumberItem(obj, "wifiPort", &port)) {
         addrInfo->info.ip.port = (uint16_t)port;
         if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
             cJSON_Delete(obj);
@@ -220,9 +229,14 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
             return SOFTBUS_OK;
         }
     }
-    if (GetJsonObjectStringItem(obj, "BR_MAC", addrInfo->info.br.brMac, BT_MAC_LEN)) {
+    if (GetJsonObjectStringItem(obj, "brMac", addrInfo->info.br.brMac, BT_MAC_LEN)) {
         cJSON_Delete(obj);
         addrInfo->type = CONNECTION_ADDR_BR;
+        return SOFTBUS_OK;
+    }
+    if (GetJsonObjectStringItem(obj, "bleMac", addrInfo->info.ble.bleMac, BT_MAC_LEN)) {
+        cJSON_Delete(obj);
+        addrInfo->type = CONNECTION_ADDR_BLE;
         return SOFTBUS_OK;
     }
     cJSON_Delete(obj);
