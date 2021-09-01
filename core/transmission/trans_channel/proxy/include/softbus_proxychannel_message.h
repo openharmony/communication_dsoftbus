@@ -18,6 +18,8 @@
 #include "stdint.h"
 #include "common_list.h"
 #include "softbus_app_info.h"
+#include "softbus_conn_interface.h"
+
 typedef enum {
     PROXYCHANNEL_MSG_TYPE_NORMAL,
     PROXYCHANNEL_MSG_TYPE_HANDSHAKE,
@@ -64,6 +66,8 @@ typedef struct {
 #define ENCRYPTED 0x1
 #define AUTH_SERVER_SIDE 0x2
 #define USE_BLE_CIPHER 0x4
+#define PROXY_BYTES_LENGTH_MAX (4 * 1024)
+#define PROXY_MESSAGE_LENGTH_MAX 1024
 
 #define IDENTITY_LEN 32
 typedef enum {
@@ -92,17 +96,35 @@ typedef struct {
     int16_t myId;
     int16_t peerId;
     uint32_t connId;
+    ConnectType type;
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
     int32_t chiperSide;
 } ProxyChannelInfo;
 
+typedef struct {
+    int32_t active;
+    int32_t timeout;
+    int32_t sliceNumber;
+    int32_t expectedSeq;
+    int32_t dataLen;
+    int32_t bufLen;
+    char *data;
+} SliceProcessor;
+
+#define PROCESSOR_MAX 3
+typedef struct {
+    ListNode head;
+    int32_t channelId;
+    SliceProcessor processor[PROCESSOR_MAX];
+} ChannelSliceProcessor;
+
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
-                              char *payload, int32_t payloadLen, char** data, int32_t *dataLen);
+    char *payload, int32_t payloadLen, char **data, int32_t *dataLen);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);

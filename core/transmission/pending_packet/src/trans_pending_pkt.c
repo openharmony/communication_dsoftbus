@@ -63,6 +63,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     PendingPktInfo *item;
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pending[%d] list not inited.", type);
         return SOFTBUS_ERR;
     }
 
@@ -77,6 +78,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
         pthread_mutex_unlock(&pendingList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create pending[%d] pkg info failed", type);
         return SOFTBUS_ERR;
     }
 

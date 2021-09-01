@@ -213,7 +213,7 @@ int32_t TransTdcManagerInit(const IClientSessionCallBack *cb)
         return SOFTBUS_ERR;
     }
     if (PendingInit(PENDING_TYPE_DIRECT) == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans pending init failed.s");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans direct pending init failed.");
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init tcp direct channel success.");

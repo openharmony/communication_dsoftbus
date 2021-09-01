@@ -15,6 +15,8 @@
 
 #include "client_trans_session_service.h"
 
+#include <unistd.h>
+
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
 #include "inner_session.h"

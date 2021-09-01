@@ -35,6 +35,7 @@ void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo);
 void TransProxyonMessageReceived(const ProxyMessage *msg);
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int32_t sessionKeySize);
 int16_t TransProxyGetNewMyId(void);
+int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo);
 void TransProxyDelChanByReqId(int32_t reqId);
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);

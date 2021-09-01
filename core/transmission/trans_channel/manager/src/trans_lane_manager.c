@@ -117,6 +117,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del trans land mgr.[chanid=%d][type=%d]", channelId, channelType);
     if (g_channelLaneList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
         return SOFTBUS_ERR;
@@ -125,9 +126,9 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-
     TransLaneInfo *laneItem = NULL;
-    LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
+    TransLaneInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
             ListDelete(&(laneItem->node));
             LnnReleaseLanesObject(laneItem->lanesObj);
