@@ -59,9 +59,12 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     data.WriteBool(subInfo->isSameAccount);
     data.WriteBool(subInfo->isWakeRemote);
     data.WriteCString(subInfo->capability);
-    data.WriteCString((char *)subInfo->capabilityData);
     data.WriteUint32(subInfo->dataLen);
-
+    if (subInfo->dataLen != 0) {
+        data.WriteCString((char *)subInfo->capabilityData);
+    } else {
+        subInfo->capabilityData = NULL;
+    }
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
@@ -124,9 +127,12 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     data.WriteInt32(pubInfo->medium);
     data.WriteInt32(pubInfo->freq);
     data.WriteCString(pubInfo->capability);
-    data.WriteCString((char *)pubInfo->capabilityData);
     data.WriteUint32(pubInfo->dataLen);
-
+    if (pubInfo->dataLen != 0) {
+	data.WriteCString((char *)pubInfo->capabilityData);
+    } else {
+        pubInfo->capabilityData = NULL;
+    }
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
