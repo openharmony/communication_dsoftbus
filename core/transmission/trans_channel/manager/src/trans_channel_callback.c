@@ -62,6 +62,8 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t chann
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
+        "trasn server on channel open failed.[pkgname=%s][channid=%d][type=%d]", pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
 
