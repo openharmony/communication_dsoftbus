@@ -30,7 +30,7 @@ static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 {
     if (id == IP_READY) {
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-        HILOG_INFO(SOFTBUS_HILOG_ID, envent "%{public}s: dev event received: %{public}u", (char*)priv, id);
+        HILOG_INFO(SOFTBUS_HILOG_ID, "envent %{public}s: dev event received: %{public}u", (char*)priv, id);
     }
     return HDF_SUCCESS;
 }
