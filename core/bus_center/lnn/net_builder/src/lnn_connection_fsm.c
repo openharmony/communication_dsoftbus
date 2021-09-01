@@ -179,12 +179,13 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
-    NotifyJoinResult(connFsm, networkId, retCode);
     if (retCode == SOFTBUS_OK) {
         ReportCategory report = LnnAddOnlineNode(connInfo->nodeInfo);
+        NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
     } else {
+        NotifyJoinResult(connFsm, networkId, retCode);
         (void)AuthHandleLeaveLNN(connInfo->authId);
     }
     if (connInfo->nodeInfo != NULL) {
@@ -200,22 +201,24 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete join LNN done", connFsm->id);
 }
 
-static void UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId)
+static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId, NodeBasicInfo *basic)
 {
     const LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeInfo *info = NULL;
     const char *udid = NULL;
-    NodeBasicInfo basic;
+    bool needReportOffline = false;
 
     info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (info == NULL) {
-        return;
+        return needReportOffline;
     }
     udid = LnnGetDeviceUdid(info);
     if (LnnSetNodeOffline(udid, (int32_t)connInfo->authId) == REPORT_OFFLINE) {
-        (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-        if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
-            LnnNotifyOnlineState(false, &basic);
+        needReportOffline = true;
+        (void)memset_s(basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+        if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]get basic info fail", connFsm->id);
+            needReportOffline = false;
         }
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0) {
@@ -223,19 +226,25 @@ static void UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
             LnnRemoveNode(udid);
         }
     }
+    return needReportOffline;
 }
 
 static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
+    NodeBasicInfo basic;
+    bool needReportOffline = false;
 
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
-    NotifyLeaveResult(connFsm, networkId, retCode);
     if (retCode == SOFTBUS_OK) {
-        UpdateLeaveToLedger(connFsm, networkId);
+        needReportOffline = UpdateLeaveToLedger(connFsm, networkId, &basic);
+    }
+    NotifyLeaveResult(connFsm, networkId, retCode);
+    if (needReportOffline) {
+        LnnNotifyOnlineState(false, &basic);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     (void)AuthHandleLeaveLNN(connInfo->authId);
