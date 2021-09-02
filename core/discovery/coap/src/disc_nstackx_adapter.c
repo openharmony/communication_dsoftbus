@@ -31,6 +31,7 @@
 #define DEVICE_UDID "UDID"
 #define AUTH_PORT_LEN 6
 #define WLAN_IFACE_NAME_PREFIX "wlan"
+#define INVALID_IP_ADDR "0.0.0.0"
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
@@ -339,20 +340,20 @@ static int32_t SetLocalDeviceInfo()
     return SOFTBUS_OK;
 }
 
-void DiscCoapUpdateLocalIp(void)
+void DiscCoapUpdateLocalIp(LinkStatus status)
 {
-    size_t len = sizeof(g_localDeviceInfo->networkIpAddr);
-    (void)memset_s(g_localDeviceInfo->networkIpAddr, len, 0, len);
-    len = sizeof(g_localDeviceInfo->networkName);
-    (void)memset_s(g_localDeviceInfo->networkName, len, 0, len);
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
-                           sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
+    if(memcpy_s(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
+                INVALID_IP_ADDR, NSTACKX_MAX_IP_STRING_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy failed.");
+    }
+    if ((status == LINK_STATUS_UP) &&
+        ((LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
+                            sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
-                           sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK) {
+                            sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK))) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return;
     }
-
     if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register new ip to dfinder failed.");
         return;
