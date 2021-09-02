@@ -421,7 +421,6 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
     return TransSendFile(channel.dfileId, sFileList, dFileList, fileCnt);
 }
 
-
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 {
     if (g_udpChannelMgr == NULL) {
@@ -448,4 +447,9 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
     }
     (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
     return SOFTBUS_ERR;
+}
+
+void TransUdpDeleteFileListener(const char *sessionName)
+{
+    return TransDeleteFileListener(sessionName);
 }
