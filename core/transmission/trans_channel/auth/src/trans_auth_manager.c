@@ -642,7 +642,7 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
     if (!chanInfo.isConnOptValid) {
         return SOFTBUS_ERR;
     }
-    ConnectionAddr addr;
+    ConnectionAddr addr = {0};
     if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
         return SOFTBUS_ERR;
     }
