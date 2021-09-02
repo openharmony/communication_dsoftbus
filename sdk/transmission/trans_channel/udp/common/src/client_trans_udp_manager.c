@@ -308,7 +308,7 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
     return CloseUdpChannel(channelId, false);
 }
 
-int32_t TransCloseUdpChannel(int32_t channelId)
+int32_t ClientTransCloseUdpChannel(int32_t channelId)
 {
     return CloseUdpChannel(channelId, true);
 }

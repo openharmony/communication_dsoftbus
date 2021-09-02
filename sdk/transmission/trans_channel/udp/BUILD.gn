@@ -50,14 +50,14 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_core_path/common/include",
         "$dsoftbus_root_path/sdk/transmission/session/include",
+        "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
         "stream/include",
       ]
       sources = common_src
       public_configs = [ ":trans_udp_channel_sdk_interface" ]
 
       if (enable_trans_udp == true) {
-        deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-        deps += common_deps
+        deps = common_deps
       }
     }
   } else {

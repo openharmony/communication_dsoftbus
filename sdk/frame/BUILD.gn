@@ -38,18 +38,23 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
         "$softbus_adapter_config/spec_config",
         "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$dsoftbus_root_path/sdk/frame/common/include",
+        "$dsoftbus_root_path/sdk/transmission/session/include",
+        "$dsoftbus_root_path/interfaces/kits/common",
       ]
       sources = [
-        "$dsoftbus_root_path/core/common/inner_communication/c/softbus_client_interface_impl.c",
-        "$dsoftbus_root_path/core/common/inner_communication/c/softbus_server_interface.c",
-        "softbus_client_event_manager.c",
-        "softbus_client_frame_manager.c",
-        "softbus_client_frame_manager_weak.c",
+        "common/src/softbus_client_event_manager.c",
+        "common/src/softbus_client_frame_manager.c",
       ]
 
       deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$hilog_lite_deps_path",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
+        "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
+        "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
       ]
     }
   } else {

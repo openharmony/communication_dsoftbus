@@ -37,10 +37,7 @@ if (defined(ohos_lite)) {
         "src/softbus_tcp_socket.c",
         "src/softbus_thread_pool.c",
       ]
-      deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$hilog_lite_deps_path",
-      ]
+      deps = [ "$dsoftbus_root_path/core/common/log:softbus_log" ]
     }
   } else {
     shared_library("conn_common") {

@@ -38,8 +38,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/connection/common:conn_common",
     "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
-    "$hilog_lite_deps_path",
-    "$libsec_deps_path",
   ]
 
   common_include = [
@@ -71,6 +69,10 @@ if (defined(ohos_lite)) {
       sources = common_src
       public_configs = [ ":trans_direct_channel_sdk_interface" ]
       deps = common_deps
+      deps += [
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
     }
   }
 } else {
