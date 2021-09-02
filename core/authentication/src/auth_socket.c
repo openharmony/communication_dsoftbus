@@ -47,7 +47,7 @@ int32_t OpenTcpChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpClientSocket failed");
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(AUTH, fd, RW_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
@@ -189,7 +189,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
     if (len < (int32_t)headSize) {
         if (len < 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth RecvTcpData failed, DelTrigger");
-            (void)DelTrigger(AUTH, fd, RW_TRIGGER);
+            (void)DelTrigger(AUTH, fd, READ_TRIGGER);
             AuthNotifyDisconn(fd);
         }
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv data head len not correct, len is %d", len);
@@ -222,6 +222,9 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
     if (head->module == MODULE_UDP_INFO || head->module == MODULE_AUTH_CHANNEL || head->module == MODULE_AUTH_MSG) {
         ethHead.seq = head->seq;
         ethHead.flag = head->flag;
+    } else if (head->module == MODULE_AUTH_CONNECTION && auth->side == SERVER_SIDE_FLAG) {
+        ethHead.seq = 0;
+        ethHead.flag = auth->side;
     } else {
         ethHead.seq = auth->authId;
         ethHead.flag = auth->side;
@@ -273,7 +276,7 @@ static int32_t AuthOnConnectEvent(int32_t events, int32_t cfd, const char *ip)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth GetTcpSockPort failed");
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(AUTH, cfd, RW_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         return SOFTBUS_ERR;
     }
@@ -310,7 +313,7 @@ int32_t OpenAuthServer(void)
 
 void AuthCloseTcpFd(int32_t fd)
 {
-    (void)DelTrigger(AUTH, fd, RW_TRIGGER);
+    (void)DelTrigger(AUTH, fd, READ_TRIGGER);
     TcpShutDown(fd);
 }
 
