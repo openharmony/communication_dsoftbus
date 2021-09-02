@@ -367,7 +367,7 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelInfo *info, char *payLoad,
+int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelInfo *info, const char *payLoad,
     int payLoadLen, int priority)
 {
     char *buf = NULL;
