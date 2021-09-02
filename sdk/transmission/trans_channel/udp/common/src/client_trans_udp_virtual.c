@@ -69,3 +69,8 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 {
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+void TransUdpDeleteFileListener(const char *sessionName)
+{
+    (void)sessionName;
+}
