@@ -65,7 +65,7 @@ static int32_t MyIdIsValid(int16_t myId)
     return SOFTBUS_OK;
 }
 
-static bool IsLittleEndianCPU()
+static bool IsLittleEndianCPU(void)
 {
 #define CHECK_NUM 0x0100
 #define CHECK_NUM_HIGH 0x01

@@ -296,7 +296,7 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan)
     return;
 }
 
-int32_t TransProxyLoopInit()
+static int32_t TransProxyLoopInit(void)
 {
     g_transLoophandler.name = g_transProxyLoopName;
     g_transLoophandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -600,11 +600,10 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
 {
     ConnectResult result = {0};
     ProxyConnInfo conn;
-    uint32_t reqId;
-    int32_t ret, chanNewId;
+    int32_t ret;
 
-    reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
-    chanNewId = TransProxyGetNewMyId();
+    uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
+    int32_t chanNewId = TransProxyGetNewMyId();
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         if (TransProxyConnExistProc(&conn, appInfo, chanNewId) == SOFTBUS_ERR) {
             return SOFTBUS_ERR;

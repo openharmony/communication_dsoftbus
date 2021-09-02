@@ -20,6 +20,12 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef enum {
     PROXYCHANNEL_MSG_TYPE_NORMAL,
     PROXYCHANNEL_MSG_TYPE_HANDSHAKE,
@@ -124,10 +130,16 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
-    char *payload, int32_t payloadLen, char **data, int32_t *dataLen);
+    const char *payload, int32_t payloadLen, char **data, int32_t *dataLen);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, int32_t identitySize);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif

@@ -108,7 +108,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 }
 
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
-    char *payload, int32_t payloadLen, char **data, int32_t *dataLen)
+    const char *payload, int32_t payloadLen, char **data, int32_t *dataLen)
 {
     char *buf = NULL;
     int32_t bufLen;
@@ -179,8 +179,8 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInfo *appInfo, cJSON *root)
 {
     int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
-                                        sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
-                                        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+        sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
+        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
         return ret;
@@ -232,8 +232,8 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         }
     } else {
         ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64,
-                                    sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
-                                    (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+            sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
+            (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
             cJSON_Delete(root);
