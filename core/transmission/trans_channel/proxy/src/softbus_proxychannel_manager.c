@@ -22,17 +22,23 @@
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_message.h"
+#include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
+#include "trans_pending_pkt.h"
 
 #define PROXY_CHANNEL_CONTROL_TIMEOUT 19
 #define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240 // 4min
+#define PROXY_CHANNEL_IDLE_TIMEOUT 15 // 10800 = 3 hour
+#define PROXY_CHANNEL_TCP_IDLE_TIMEOUT 43200 // tcp 24 hour
+
 static SoftBusList *g_proxyChannelList = NULL;
 static pthread_mutex_t g_myIdLock;
 
@@ -59,7 +65,7 @@ static int32_t MyIdIsValid(int16_t myId)
     return SOFTBUS_OK;
 }
 
-static bool IsLittleEndianCPU()
+static bool IsLittleEndianCPU(void)
 {
 #define CHECK_NUM 0x0100
 #define CHECK_NUM_HIGH 0x01
@@ -266,7 +272,6 @@ void TransProxyDelChanByChanId(int32_t chanlId)
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 {
     ProxyChannelInfo *item = NULL;
-    ProxyChannelInfo *nextNode = NULL;
 
     if (g_proxyChannelList == NULL) {
         return;
@@ -277,7 +282,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         return;
     }
 
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->reqId == reqId && item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             item->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
             item->connId = connId;
@@ -434,7 +439,7 @@ static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
     return SOFTBUS_ERR;
 }
 
-static int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo)
+int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -737,7 +742,7 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 
 void TransProxyProcessDataRecv(const ProxyMessage *msg)
 {
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
     }
@@ -799,8 +804,8 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusGenerateRandomArray((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusGenerateRandomArray err");
+    if (SoftBusGenerateRandomArray((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomArray err");
         return SOFTBUS_ERR;
     }
 
@@ -811,10 +816,8 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
 
 void TransProxyOpenProxyChannelSuccess(int32_t chanId)
 {
-    ProxyChannelInfo *chan = NULL;
-
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake msg");
-    chan = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         return;
     }
@@ -851,10 +854,30 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
 }
 
+static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo *info)
+{
+    if (info == NULL) {
+        LOG_ERR("info: invalid para");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
+        LOG_ERR("del channel err %d", channelId);
+    }
+
+    if (DelPendingPacket(channelId, PENDING_TYPE_PROXY) != SOFTBUS_OK) {
+        LOG_ERR("del pending pkt err %d", channelId);
+    }
+
+    TransProxyPostDisConnectMsgToLoop(info->connId);
+    TransProxyPostResetPeerMsgToLoop(info);
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     int32_t ret;
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -868,14 +891,16 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     TransProxyResetPeer(info);
     ret = TransProxyCloseConnChannel(info->connId);
     SoftBusFree(info);
+    ret = TransProxyCloseProxyOtherRes(channelId, info);
     return ret;
 }
 
 int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
 {
     int32_t ret;
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc in trans proxy send message.id[%d]", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -996,6 +1021,11 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
 
+    if (PendingInit(PENDING_TYPE_PROXY) == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy pending init failed.");
+        return SOFTBUS_ERR;
+    }
+
     if (RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, TransProxyTimerProc) != SOFTBUS_OK) {
         DestroySoftBusList(g_proxyChannelList);
         return SOFTBUS_ERR;
@@ -1034,6 +1064,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 void TransProxyManagerDeinit(void)
 {
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
+    PendingDeinit(PENDING_TYPE_PROXY);
 }
 
 void TransProxyDeathCallback(const char *pkgName)

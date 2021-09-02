@@ -328,7 +328,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
         case CHANNEL_TYPE_AUTH:
             return TransSendAuthMsg(channelId, data, len);
         case CHANNEL_TYPE_PROXY:
-            return TransProxyPostSessionData(channelId, (uint8_t*)data, len, msgType);
+            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, msgType);
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
             return SOFTBUS_ERR;

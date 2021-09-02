@@ -52,6 +52,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.peerPid = appInfo->peerData.pid;
     info.peerUid = appInfo->peerData.uid;
     char buf[NETWORK_ID_BUF_LEN] = {0};
+    info.sessionKey = (char*)appInfo->sessionKey;
+    info.keyLen = SESSION_KEY_LENGTH;
+
     int32_t ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get info networkId fail.");
@@ -100,7 +103,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo)
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param: channelId=%d, appType=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param1: channelId=%d, appType=%d",
         channelId, appInfo->appType);
 
     switch (appInfo->appType) {
@@ -125,7 +128,7 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param: channelId=%d, appType=%d", channelId, appInfo->appType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param2: channelId=%d, appType=%d", channelId, appInfo->appType);
 
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->appType) {

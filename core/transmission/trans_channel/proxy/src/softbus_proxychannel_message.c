@@ -27,7 +27,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 
-int32_t ChiperSideProc(ProxyMessage *msg, int32_t *side)
+static int32_t ChiperSideProc(ProxyMessage *msg, int32_t *side)
 {
     if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
         *side = ((msg->msgHead.chiper & AUTH_SERVER_SIDE) ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG);
@@ -39,7 +39,7 @@ int32_t ChiperSideProc(ProxyMessage *msg, int32_t *side)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyParseMessageHead(ProxyMessage *msg, char *data, int32_t len)
+static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
     char *ptr = data;
     uint8_t firstByte = *ptr;
@@ -73,10 +73,11 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: invalid message length(%d)", len);
         return SOFTBUS_ERR;
     }
-    if (TransProxyParseMessageHead(msg, data, len) != SOFTBUS_OK) {
+    if (TransProxyParseMessageHead(data, len, msg) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     isEncrypted = ((msg->msgHead.chiper & ENCRYPTED) != 0);
+    isServer = ((msg->msgHead.chiper & AUTH_SERVER_SIDE) != 0);
     if (isEncrypted) {
         if (ChiperSideProc(msg, &isServer) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get side fail chanId[%d]", msg->msgHead.myId);
@@ -107,7 +108,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 }
 
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
-    char *payload, int32_t payloadLen, char **data, int32_t *dataLen)
+    const char *payload, int32_t payloadLen, char **data, int32_t *dataLen)
 {
     char *buf = NULL;
     int32_t bufLen;
@@ -142,7 +143,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             return SOFTBUS_ERR;
         }
         bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen + AuthGetEncryptHeadLen();
-        buf = SoftBusCalloc(bufLen);
+        buf = (char *)SoftBusCalloc(bufLen);
         if (buf == NULL) {
             return SOFTBUS_ERR;
         }
@@ -178,8 +179,8 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInfo *appInfo, cJSON *root)
 {
     int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64->sessionKeyBase64,
-                                        sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
-                                        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+        sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
+        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
         return ret;
@@ -231,8 +232,8 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         }
     } else {
         ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64,
-                                    sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
-                                    (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+            sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
+            (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
             cJSON_Delete(root);
