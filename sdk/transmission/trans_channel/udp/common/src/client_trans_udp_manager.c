@@ -17,6 +17,7 @@
 
 #include <stdbool.h>
 #include "client_trans_file.h"
+#include "client_trans_file_listener.h"
 #include "client_trans_stream.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
