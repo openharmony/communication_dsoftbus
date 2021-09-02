@@ -25,6 +25,39 @@ config("bus_center_utils_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_bus_center_utils") {
+      sources = [
+        "src/lnn_async_callback_utils.c",
+        "src/lnn_connection_addr_utils.c",
+        "src/lnn_file_utils.c",
+        "src/lnn_ip_utils_lite.c",
+      ]
+      include_dirs = [
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$libsec_include_path",
+        "$hilog_lite_include_path",
+        "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
+      ]
+      if (ohos_third_party_dir == "$hispark_pegasus_sdk_path/third_party") {
+        include_dirs += []
+      }
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
+      ]
+      public_configs = [ ":bus_center_utils_interface" ]
+      deps = [
+        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/core/common/message_handler:message_handler",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
+    }
   } else {
     shared_library("dsoftbus_bus_center_utils") {
       sources = [
