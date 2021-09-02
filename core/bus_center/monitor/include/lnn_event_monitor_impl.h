@@ -30,6 +30,8 @@ int32_t __attribute__ ((weak)) LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler 
 
 int32_t __attribute__ ((weak)) LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
 
+int32_t __attribute__ ((weak)) LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
+
 #ifdef __cplusplus
 }
 #endif

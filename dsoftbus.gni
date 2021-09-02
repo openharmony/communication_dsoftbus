@@ -14,11 +14,12 @@
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
+hispark_pegasus_sdk_path = "//device/hisilicon/hispark_pegasus/sdk_liteos"
 
-declare_args()
-{
+declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
-  softbus_adapter_config = "//foundation/communication/dsoftbus/adapter/default_config"
+  softbus_adapter_config =
+      "//foundation/communication/dsoftbus/adapter/default_config"
 }
 
 if (defined(ohos_lite)) {

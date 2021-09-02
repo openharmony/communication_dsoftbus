@@ -116,7 +116,7 @@ void SetCallLnnStatus(bool flag)
     g_isCallLnn = flag;
 }
 
-bool GetCallLnnStatus()
+bool GetCallLnnStatus(void)
 {
     return g_isCallLnn;
 }

@@ -242,6 +242,9 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
 
 void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium);
 
+void SetCallLnnStatus(bool flag);
+bool GetCallLnnStatus(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
