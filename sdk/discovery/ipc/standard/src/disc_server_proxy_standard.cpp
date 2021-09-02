@@ -62,8 +62,6 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     data.WriteUint32(subInfo->dataLen);
     if (subInfo->dataLen != 0) {
         data.WriteCString((char *)subInfo->capabilityData);
-    } else {
-        subInfo->capabilityData = NULL;
     }
     MessageParcel reply;
     MessageOption option;
@@ -129,9 +127,7 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     data.WriteCString(pubInfo->capability);
     data.WriteUint32(pubInfo->dataLen);
     if (pubInfo->dataLen != 0) {
-	data.WriteCString((char *)pubInfo->capabilityData);
-    } else {
-        pubInfo->capabilityData = NULL;
+        data.WriteCString((char *)pubInfo->capabilityData);
     }
     MessageParcel reply;
     MessageOption option;
