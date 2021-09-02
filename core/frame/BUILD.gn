@@ -33,15 +33,33 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
       "$softbus_adapter_config/spec_config",
+      "$dsoftbus_root_path/core/authentication/include",
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/connection/manager",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/discovery/manager/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "//base/security/deviceauth/interfaces/innerkits",
     ]
 
-    sources = [ "src/softbus_server_frame.c" ]
+    sources = [
+      "common/src/softbus_server_frame.c",
+      "mini/src/softbus_server_stub.c",
+    ]
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+      "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/connection:softbus_connection",
+      "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
     ]
   }
 } else {

@@ -28,8 +28,6 @@ if (defined(ohos_lite)) {
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$libsec_include_path",
-    "$hilog_lite_include_path",
   ]
 
   common_deps = [
@@ -62,6 +60,8 @@ if (defined(ohos_lite)) {
       deps = common_deps
       deps += [
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+        "$hilog_lite_include_path",
+        "$libsec_include_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
       ]
     }

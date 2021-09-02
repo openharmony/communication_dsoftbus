@@ -65,14 +65,11 @@ if (defined(ohos_lite)) {
     "$libsec_include_path",
   ]
 
-  common_deps += [
-    "$hilog_lite_deps_path",
-    "$libsec_deps_path",
-  ]
-
   if (ohos_kernel_type == "liteos_m") {
     static_library("dsoftbus_trans_proxy_channel") {
       include_dirs = common_include
+      include_dirs +=
+          [ "$dsoftbus_root_path/core/common/message_handler/include" ]
       sources = common_src
       public_configs = [ ":trans_proxy_channel_interface" ]
       deps = common_deps
@@ -88,7 +85,11 @@ if (defined(ohos_lite)) {
       sources = common_src
       public_configs = [ ":trans_proxy_channel_interface" ]
       deps = common_deps
-      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
+      deps += [
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+        "//build/lite/config/component/cJSON:cjson_shared",
+      ]
     }
   }
 } else {
