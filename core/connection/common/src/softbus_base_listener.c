@@ -424,7 +424,6 @@ static int32_t SelectThread(void)
     }
     int32_t maxFd = g_maxFd;
     if (maxFd < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "no valied select set");
         select(0, NULL, NULL, NULL, &tv);
         return SOFTBUS_OK;
     }
