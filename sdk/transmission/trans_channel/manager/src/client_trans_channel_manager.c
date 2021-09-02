@@ -154,3 +154,8 @@ int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
 {
     return TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
 }
+
+void DeleteFileListener(const char *sessionName)
+{
+    return TransUdpDeleteFileListener(sessionName);
+}
