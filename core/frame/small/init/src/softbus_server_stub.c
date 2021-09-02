@@ -158,7 +158,7 @@ EXIT:
 
 typedef struct {
     enum SoftBusFuncId id;
-    int (*func)(void *origin, IpcIo *req, IpcIo *reply);
+    int (*func)(const void *origin, IpcIo *req, IpcIo *reply);
 } ServerInvokeCmd;
 
 ServerInvokeCmd g_serverInvokeCmdTbl[] = {
