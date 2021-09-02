@@ -72,5 +72,16 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.devicegroupmanage",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.devicegroupmanage",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
