@@ -99,7 +99,7 @@ int32_t ServerStartDiscovery(const void *origin, IpcIo *req, IpcIo *reply)
     }
     char *capability = (char *)IpcIoPopString(req, &len);
     if (info->commonSerializer.dataLen != 0) {
-	capabilityData = (unsigned char *)IpcIoPopString(req, &len);
+        capabilityData = (unsigned char *)IpcIoPopString(req, &len);
     }
     SubscribeInfo subscribeInfo = {
         .capability = capability,
