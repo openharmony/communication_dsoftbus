@@ -400,6 +400,9 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
         if (strcmp(item->connInfo.info.brOption.brMac, chan->connInfo.info.brOption.brMac) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
             (void)pthread_mutex_unlock(&g_proxyConnectionList->lock);
+            if (item->state == PROXY_CHANNEL_STATUS_PYH_CONNECTED) {
+                TransProxyChanProcessByReqId(chan->requestId, item->connId);
+            }
             return SOFTBUS_ERR;
         }
     }
