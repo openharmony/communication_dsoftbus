@@ -59,7 +59,7 @@ typedef struct  {
 } PacketHead;
 
 static SoftBusList *g_channelSliceProcessorList = NULL;
-int32_t TransProxyTransDataSendMsg(int32_t channelId, const char* payLoad, int payLoadLen, ProxyPacketType flag);
+int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag);
 
 int32_t NotifyClientMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len,
     SessionPktType type)
@@ -111,7 +111,7 @@ SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
     }
 }
 
-int32_t TransProxyEncryptPacketData(int32_t channelId, int32_t seq, ProxyDataInfo *dataInfo)
+static int32_t TransProxyEncryptPacketData(int32_t channelId, int32_t seq, ProxyDataInfo *dataInfo)
 {
     char sessionKey[SESSION_KEY_LENGTH] = {0};
     AesGcmCipherKey cipherKey = {0};
@@ -137,7 +137,7 @@ int32_t TransProxyEncryptPacketData(int32_t channelId, int32_t seq, ProxyDataInf
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyDecryptPacketData(int32_t channelId, int32_t seq, ProxyDataInfo *dataInfo)
+static int32_t TransProxyDecryptPacketData(int32_t channelId, int32_t seq, ProxyDataInfo *dataInfo)
 {
     char sessionKey[SESSION_KEY_LENGTH] = {0};
     AesGcmCipherKey cipherKey = {0};
@@ -154,7 +154,7 @@ int32_t TransProxyDecryptPacketData(int32_t channelId, int32_t seq, ProxyDataInf
     }
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     ret = SoftBusDecryptDataWithSeq(&cipherKey, dataInfo->inData, dataInfo->inLen,
-                                    dataInfo->outData, &(dataInfo->outLen), seq);
+        dataInfo->outData, &(dataInfo->outLen), seq);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy Decrypt Data fail. %d ", ret);
@@ -175,7 +175,7 @@ static int32_t TransProxyGetPktSeqId(int32_t channelId, const ProxyDataInfo *dat
     return TransProxyGetNewChanSeq(channelId);
 }
 
-int32_t TransProxyPackBytes(int32_t channelId, ProxyDataInfo* dataInfo, ProxyPacketType flag, int32_t *outseq)
+static int32_t TransProxyPackBytes(int32_t channelId, ProxyDataInfo *dataInfo, ProxyPacketType flag, int32_t *outseq)
 {
 #define MAGIC_NUMBER 0xBABEFACE
     uint32_t outBufLen;
@@ -213,7 +213,7 @@ int32_t TransProxyPackBytes(int32_t channelId, ProxyDataInfo* dataInfo, ProxyPac
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len)
+static int32_t TransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len)
 {
     int32_t seq;
 
@@ -263,7 +263,8 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PackBytes err");
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "InLen = %d, seq:%d, outLen = %d flags %d", len, seq, packDataInfo.outLen, flags);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "InLen[%d] seq[%d] outLen[%d] flags[%d]",
+        len, seq, packDataInfo.outLen, flags);
     if (flags == PROXY_FLAG_MESSAGE) {
         ret = TransProxyTransDataSendSyncMsg(channelId, (char *)packDataInfo.outData, packDataInfo.outLen, flags, seq);
     } else {
@@ -285,7 +286,7 @@ static int32_t TransProxyGetBufLen(void)
     return MAX_SEND_LENGTH;
 }
 
-static char* TransProxyPackAppNormalMsg(const ProxyMessageHead* msg, const SliceHead *sliceHead, const char* payLoad,
+static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const SliceHead *sliceHead, const char *payLoad,
     int32_t datalen, int32_t *outlen)
 {
     char *buf = NULL;
@@ -319,7 +320,7 @@ static char* TransProxyPackAppNormalMsg(const ProxyMessageHead* msg, const Slice
     return buf;
 }
 
-static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo* info, const char* payLoad, int payLoadLen,
+static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const char *payLoad, int payLoadLen,
     ProxyPacketType flag)
 {
     int32_t dataLen;
@@ -338,7 +339,7 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo* info, const c
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     for (int i = 0; i < sliceNum; i++) {
-        char* buf = NULL;
+        char *buf = NULL;
         int bufLen = 0;
         SliceHead slicehead = {0};
         slicehead.priority = ProxyTypeToProxyIndex(flag);
@@ -511,7 +512,7 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
+static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
 {
     PacketHead *head = (PacketHead*)data;
     if ((uint32_t)head->magicNumber != MAGIC_NUMBER) {
@@ -522,7 +523,7 @@ int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId, const 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dataLen %d", head->dataLen);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc data info %d", head->dataLen);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,  len);
     int32_t ret = TransProxyProcessSessionData(pkgName, channelId, head, data + sizeof(PacketHead));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data err");
@@ -770,28 +771,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t TransSliceManagerInit(void)
-{
-    g_channelSliceProcessorList = CreateSoftBusList();
-    if (g_channelSliceProcessorList == NULL) {
-        return SOFTBUS_ERR;
-    }
-    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, (void *)TransProxySliceTimerProc) != SOFTBUS_OK) {
-        DestroySoftBusList(g_channelSliceProcessorList);
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-void TransSliceManagerDeInit(void)
-{
-    if (g_channelSliceProcessorList) {
-        DestroySoftBusList(g_channelSliceProcessorList);
-    }
-    return;
-}
-
-void TransProxySliceTimerProc(void)
+static void TransProxySliceTimerProc(void)
 {
 #define SLICE_PACKET_TIMEOUT 10  //  10s
     ChannelSliceProcessor *removeNode = NULL;
@@ -820,3 +800,23 @@ void TransProxySliceTimerProc(void)
     return;
 }
 
+int32_t TransSliceManagerInit(void)
+{
+    g_channelSliceProcessorList = CreateSoftBusList();
+    if (g_channelSliceProcessorList == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, (void *)TransProxySliceTimerProc) != SOFTBUS_OK) {
+        DestroySoftBusList(g_channelSliceProcessorList);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void TransSliceManagerDeInit(void)
+{
+    if (g_channelSliceProcessorList) {
+        DestroySoftBusList(g_channelSliceProcessorList);
+    }
+    return;
+}

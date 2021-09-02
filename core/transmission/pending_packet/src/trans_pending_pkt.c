@@ -78,8 +78,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
         pthread_mutex_unlock(&pendingList->lock);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create pending[%d] pkg info failed", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     pthread_mutex_init(&item->lock, NULL);
