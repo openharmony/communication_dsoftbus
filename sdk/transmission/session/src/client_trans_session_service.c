@@ -128,7 +128,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete session server [%s] failed", sessionName);
     }
-    TransDeleteFileListener(sessionName);
+    DeleteFileListener(sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer ok: ret=%d", ret);
     return ret;
 }
