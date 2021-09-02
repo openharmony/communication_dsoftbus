@@ -91,7 +91,6 @@ ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
         case TRANS_SESSION_BYTES:
             return PROXY_FLAG_BYTES;
         case TRANS_SESSION_MESSAGE:
-            // todo when use PROXY_FLAG_ASYNC_MESSAGE mode
             return PROXY_FLAG_MESSAGE;
         default:
             return PROXY_FLAG_BYTES;
@@ -275,7 +274,7 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
     return ret;
 }
 
-int32_t TransProxyPostSessionData(int32_t channelId, const uint8_t *data, uint32_t len, SessionPktType flags)
+int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len, SessionPktType flags)
 {
     ProxyPacketType type = SessionTypeToPacketType(flags);
     return TransProxyPostPacketData(channelId, data, len, type);
@@ -296,7 +295,7 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
 
     connHeadLen = ConnGetHeadSize();
     bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + sizeof(SliceHead) + datalen;
-    buf = SoftBusCalloc(bufLen);
+    buf = (char*)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         return NULL;
     }
