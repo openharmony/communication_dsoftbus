@@ -26,42 +26,73 @@ if (defined(ohos_lite)) {
       "src/disc_nstackx_adapter.c",
     ]
     deps_coap = [
-      "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$hilog_lite_deps_path",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
   } else {
     sources_coap = [ "src/disc_coap_virtual.c" ]
     deps_coap = []
   }
 
-  shared_library("dsoftbus_disc_coap") {
-    sources = sources_coap
-    include_dirs = [
-      "include",
-      "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/bus_center/interface",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/discovery/interface",
-      "$dsoftbus_root_path/core/discovery/manager/include",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/interfaces/kits/discovery",
-      "//third_party/bounds_checking_function/include",
-      "//third_party/cJSON",
-      "$hilog_lite_include_path",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_disc_coap") {
+      sources = sources_coap
+      include_dirs = [
+        "include",
+        "$softbus_adapter_common/include",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/discovery/interface",
+        "$dsoftbus_root_path/core/discovery/manager/include",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "//third_party/bounds_checking_function/include",
+        "//third_party/cJSON",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+      deps = deps_coap
+      deps += [
+        "$dsoftbus_root_path/components/nstackx_mini/nstackx_ctrl:nstackx_ctrl",
+      ]
+    }
+  } else {
+    shared_library("dsoftbus_disc_coap") {
+      sources = sources_coap
+      include_dirs = [
+        "include",
+        "$softbus_adapter_common/include",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/discovery/interface",
+        "$dsoftbus_root_path/core/discovery/manager/include",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "//third_party/bounds_checking_function/include",
+        "//third_party/cJSON",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
 
-    deps = deps_coap
+      deps = deps_coap
+      deps += [
+        "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
   }
 } else {
   import("//build/ohos.gni")

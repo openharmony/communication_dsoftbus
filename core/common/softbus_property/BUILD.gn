@@ -29,7 +29,6 @@ if (defined(ohos_lite)) {
       sources = [ "src/softbus_feature_config.c" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
     }
