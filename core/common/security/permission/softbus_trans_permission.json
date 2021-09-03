@@ -83,5 +83,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.devicemanager.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.devicemanager",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
