@@ -27,37 +27,71 @@ config("disc_server_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  shared_library("dsoftbus_disc_server") {
-    sources = [
-      "ipc/small/disc_client_proxy.c",
-      "manager/src/disc_manager.c",
-      "manager/src/softbus_disc_server.c",
-    ]
-    include_dirs = [
-      "coap/include",
-      "ipc/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/interfaces/innerkits/discovery",
-      "$softbus_adapter_common/include",
-      "//third_party/bounds_checking_function/include",
-      "$hilog_lite_include_path",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-    ]
-    public_configs = [ ":disc_server_interface" ]
-    deps = [
-      "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
-      "$hilog_lite_deps_path",
-      "coap:dsoftbus_disc_coap",
-      "//foundation/communication/ipc_lite:liteipc_adapter",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_disc_server") {
+      sources = [
+        "ipc/mini/disc_client_proxy.c",
+        "manager/src/disc_manager.c",
+        "manager/src/softbus_disc_server.c",
+      ]
+      include_dirs = [
+        "coap/include",
+        "ipc/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/interfaces/innerkits/discovery",
+        "$dsoftbus_root_path/sdk/discovery/manager/include",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$softbus_adapter_common/include",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      public_configs = [ ":disc_server_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$hilog_lite_deps_path",
+        "coap:dsoftbus_disc_coap",
+      ]
+    }
+  } else {
+    shared_library("dsoftbus_disc_server") {
+      sources = [
+        "ipc/small/disc_client_proxy.c",
+        "manager/src/disc_manager.c",
+        "manager/src/softbus_disc_server.c",
+      ]
+      include_dirs = [
+        "coap/include",
+        "ipc/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "$dsoftbus_root_path/interfaces/innerkits/discovery",
+        "$softbus_adapter_common/include",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      public_configs = [ ":disc_server_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+        "$hilog_lite_deps_path",
+        "coap:dsoftbus_disc_coap",
+        "//foundation/communication/ipc_lite:liteipc_adapter",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
   }
 } else {
   import("//build/ohos.gni")

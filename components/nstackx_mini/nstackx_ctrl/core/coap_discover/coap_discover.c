@@ -135,7 +135,7 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
     DeviceInfo *deviceInfo = (DeviceInfo *)malloc(sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
         LOGE(TAG, "malloc device info failed");
-        return NSTACKX_ENOMEM;
+        return;
     }
     (void)memset_s(deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     if (HndPostServiceDiscoverInner(pkt->payload.buffer, pkt->payload.len, &remoteUrl, deviceInfo) != NSTACKX_EOK) {
