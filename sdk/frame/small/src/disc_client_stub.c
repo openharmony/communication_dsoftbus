@@ -55,6 +55,10 @@ void ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 
     uint32_t size;
     const DeviceInfo *deviceInfo = (const DeviceInfo*)IpcIoPopFlatObj(reply, &size);
+    if (deviceInfo == NULL) {
+        FreeBuffer(ctx, ipcMsg);
+        return;
+    }
     DiscClientOnDeviceFound(deviceInfo);
     FreeBuffer(ctx, ipcMsg);
 }
