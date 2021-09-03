@@ -366,9 +366,6 @@ int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscov
  */
 int StopDiscovery(const char *pkgName, int subscribeId);
 
-void SetCallLnnStatus(bool flag);
-bool GetCallLnnStatus();
-
 #ifdef __cplusplus
 #if __cplusplus
 }
