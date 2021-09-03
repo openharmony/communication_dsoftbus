@@ -131,51 +131,68 @@ static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceIn
     return SOFTBUS_OK;
 }
 
+static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
+{
+    if (strcpy_s(discDevInfo->devName, sizeof(discDevInfo->devName), nstackxDevInfo->deviceName) != EOK ||
+        memcpy_s(discDevInfo->capabilityBitmap, sizeof(discDevInfo->capabilityBitmap),
+                 nstackxDevInfo->capabilityBitmap, sizeof(nstackxDevInfo->capabilityBitmap)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s or memcpy_s failed.");
+        return SOFTBUS_ERR;
+    }
+
+    discDevInfo->addrNum = 1;
+    discDevInfo->devType = nstackxDevInfo->deviceType;
+    discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
+
+    if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
+        discDevInfo->addr[0].type = CONNECTION_ADDR_WLAN;
+    } else {
+        discDevInfo->addr[0].type = CONNECTION_ADDR_ETH;
+    }
+
+    if (ParseDeviceUdid(nstackxDevInfo, discDevInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device udid failed.");
+        return SOFTBUS_ERR;
+    }
+
+    if (ParseReservedInfo(nstackxDevInfo, discDevInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse reserve information failed.");
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
-    if (deviceCount == 0) {
+    if ((deviceList == NULL) || (deviceCount == 0)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "invalid param.");
+        return;
+    }
+
+    DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
+    if (discDeviceInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "malloc device info failed.");
         return;
     }
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
-        if (nstackxDeviceInfo == NULL) {
-            return;
-        }
         if (((nstackxDeviceInfo->update) & 0x1) == 0) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "duplicate  device is not reported.");
             continue;
         }
-
-        DeviceInfo discDeviceInfo;
-        (void)memset_s(&discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-        if (memcpy_s(discDeviceInfo.devName, sizeof(discDeviceInfo.devName),
-                     nstackxDeviceInfo->deviceName, sizeof(nstackxDeviceInfo->deviceName)) != EOK ||
-            memcpy_s(discDeviceInfo.capabilityBitmap, sizeof(discDeviceInfo.capabilityBitmap),
-                     nstackxDeviceInfo->capabilityBitmap, sizeof(nstackxDeviceInfo->capabilityBitmap))) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
-            return;
+        (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+        if (ParseDiscDevInfo(nstackxDeviceInfo, discDeviceInfo) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "parse discovery device info failed.");
+            continue;
         }
-        discDeviceInfo.addrNum = 1;
-        discDeviceInfo.devType = nstackxDeviceInfo->deviceType;
-        discDeviceInfo.capabilityBitmapNum = nstackxDeviceInfo->capabilityBitmapNum;
-        if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
-            discDeviceInfo.addr[0].type = CONNECTION_ADDR_WLAN;
-        } else {
-            discDeviceInfo.addr[0].type = CONNECTION_ADDR_ETH;
-        }
-        if (ParseDeviceUdid(nstackxDeviceInfo, &discDeviceInfo) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device udid failed.");
-            return;
-        }
-        if (ParseReservedInfo(nstackxDeviceInfo, &discDeviceInfo) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse reserve information failed.");
-            return;
-        }
-        if (g_discCoapInnerCb != NULL) {
-            g_discCoapInnerCb->OnDeviceFound(&discDeviceInfo);
+        if ((g_discCoapInnerCb != NULL) && (g_discCoapInnerCb->OnDeviceFound != NULL)) {
+            g_discCoapInnerCb->OnDeviceFound(discDeviceInfo);
         }
     }
+
+    SoftBusFree(discDeviceInfo);
 }
 
 static NSTACKX_Parameter g_nstackxCallBack = {
@@ -315,9 +332,9 @@ static int32_t SetLocalDeviceInfo(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get device id string failed.");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr, strlen(deviceIdStr))) {
+    if (strcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr) != EOK) {
         cJSON_free(deviceIdStr);
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_ERR;
     }
     cJSON_free(deviceIdStr);
@@ -350,9 +367,9 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
             return;
         }
     } else if (status == LINK_STATUS_DOWN) {
-        if(memcpy_s(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
-                    INVALID_IP_ADDR, strlen(INVALID_IP_ADDR) + 1) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy failed.");
+        if (strcpy_s(g_localDeviceInfo->networkIpAddr, sizeof(g_localDeviceInfo->networkIpAddr),
+            INVALID_IP_ADDR) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
             return;
         }
     } else {
