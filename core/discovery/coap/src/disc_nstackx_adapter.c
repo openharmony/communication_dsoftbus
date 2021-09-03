@@ -309,7 +309,7 @@ static int32_t SetLocalDeviceInfo()
         return SOFTBUS_DISCOVER_COAP_NOT_INIT;
     }
 
-    (void)memset_s(g_localDeviceInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
+    (void)memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
     char *deviceIdStr = GetDeviceId();
     if (deviceIdStr == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get device id string failed.");
