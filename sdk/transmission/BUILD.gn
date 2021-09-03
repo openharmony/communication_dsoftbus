@@ -58,13 +58,18 @@ if (defined(ohos_lite)) {
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/udp:dsoftbus_trans_udp_channel_sdk",
-    "$hilog_lite_deps_path",
-    "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
     static_library("dsoftbus_trans_session_manager_sdk") {
       include_dirs = common_include
+      include_dirs += [
+        "$dsoftbus_sdk_path/transmission/ipc/include",
+        "$dsoftbus_sdk_path/transmission/trans_channel/proxy/include",
+        "$dsoftbus_sdk_path/transmission/trans_channel/tcp_direct/include",
+        "$dsoftbus_root_path/core/common/security/sequence_verification/include",
+        "$dsoftbus_sdk_path/transmission/trans_channel/udp/common/include",
+      ]
       sources = common_src
       public_configs = [ ":trans_session_manager_sdk_interface" ]
       deps = common_deps
@@ -79,6 +84,10 @@ if (defined(ohos_lite)) {
       sources = common_src
       public_configs = [ ":trans_session_manager_sdk_interface" ]
       deps = common_deps
+      deps += [
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
     }
   }
 } else {

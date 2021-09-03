@@ -28,16 +28,14 @@ if (defined(ohos_lite)) {
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$libsec_include_path",
     "$hilog_lite_include_path",
+    "$libsec_include_path",
   ]
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/connection/common:conn_common",
-    "$hilog_lite_deps_path",
-    "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -62,6 +60,8 @@ if (defined(ohos_lite)) {
       deps = common_deps
       deps += [
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
       ]
     }
