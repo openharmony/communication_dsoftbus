@@ -309,6 +309,7 @@ static int32_t SetLocalDeviceInfo()
         return SOFTBUS_DISCOVER_COAP_NOT_INIT;
     }
 
+    (void)memset_s(g_localDeviceInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
     char *deviceIdStr = GetDeviceId();
     if (deviceIdStr == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get device id string failed.");
@@ -342,21 +343,25 @@ static int32_t SetLocalDeviceInfo()
 
 void DiscCoapUpdateLocalIp(LinkStatus status)
 {
-    if(memcpy_s(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
-                INVALID_IP_ADDR, NSTACKX_MAX_IP_STRING_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy failed.");
-    }
-    if ((status == LINK_STATUS_UP) &&
-        ((LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
-                            sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
-                            sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK))) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
+    if (status == LINK_STATUS_UP) {
+        int32_t ret = SetLocalDeviceInfo();
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set local device info failed, ret = %d.", ret);
+            return;
+        }
+    } else if (status == LINK_STATUS_DOWN) {
+        if(memcpy_s(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
+                    INVALID_IP_ADDR, strlen(INVALID_IP_ADDR) + 1) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy failed.");
+            return;
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invlaid link status, status = %d.", status);
         return;
     }
+
     if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register new ip to dfinder failed.");
-        return;
     }
 }
 
@@ -386,10 +391,6 @@ static int32_t InitLocalInfo()
             return SOFTBUS_MEM_ERR;
         }
     }
-    if (SetLocalDeviceInfo() != SOFTBUS_OK) {
-        DeinitLocalInfo();
-        return SOFTBUS_ERR;
-    }
     if (g_capabilityData == NULL) {
         g_capabilityData = (char*)SoftBusCalloc(NSTACKX_MAX_SERVICE_DATA_LEN);
         if (g_capabilityData == NULL) {
@@ -412,14 +413,12 @@ int32_t DiscNstackxInit(void)
     if (InitLocalInfo() != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
+
     if (NSTACKX_Init(&g_nstackxCallBack) != SOFTBUS_OK) {
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
-    if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
-        DiscNstackxDeinit();
-        return SOFTBUS_DISCOVER_COAP_REGISTER_DEVICE_FAIL;
-    }
+
     return SOFTBUS_OK;
 }
 
