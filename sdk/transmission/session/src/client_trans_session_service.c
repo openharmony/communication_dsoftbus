@@ -334,6 +334,11 @@ int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
     return ClientGetSessionDataById(sessionId, devId, len, KEY_PEER_DEVICE_ID);
 }
 
+int GetSessionSide(int sessionId)
+{
+    return ClientGetSessionSide(sessionId);
+}
+
 int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
