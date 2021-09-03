@@ -372,7 +372,7 @@ static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .LinkStatusChanged = CoapUpdateLocalIp
 };
 
-static DiscCoapInfo *NewDiscCoapInfo()
+static DiscCoapInfo *NewDiscCoapInfo(void)
 {
     DiscCoapInfo *coapInfo = (DiscCoapInfo*)SoftBusCalloc(sizeof(DiscCoapInfo));
     if (coapInfo == NULL) {
@@ -394,7 +394,7 @@ static void DeleteDiscCoapInfo(DiscCoapInfo *coapInfo)
     SoftBusFree(coapInfo);
 }
 
-static void DeinitCoapManager()
+static void DeinitCoapManager(void)
 {
     DeleteDiscCoapInfo(g_publishMgr);
     g_publishMgr = NULL;
@@ -402,7 +402,7 @@ static void DeinitCoapManager()
     g_subscribeMgr = NULL;
 }
 
-static int32_t InitCoapManager()
+static int32_t InitCoapManager(void)
 {
     if (g_publishMgr == NULL) {
         g_publishMgr = NewDiscCoapInfo();

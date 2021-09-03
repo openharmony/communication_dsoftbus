@@ -276,7 +276,7 @@ int32_t DiscCoapStopDiscovery(void)
     return SOFTBUS_OK;
 }
 
-static char *GetDeviceId()
+static char *GetDeviceId(void)
 {
     char *formatString = NULL;
     char udid[UDID_BUF_LEN] = {0};
@@ -303,7 +303,7 @@ GET_DEVICE_ID_END:
     return formatString;
 }
 
-static int32_t SetLocalDeviceInfo()
+static int32_t SetLocalDeviceInfo(void)
 {
     if (g_localDeviceInfo == NULL) {
         return SOFTBUS_DISCOVER_COAP_NOT_INIT;
@@ -365,7 +365,7 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     }
 }
 
-static void DeinitLocalInfo()
+static void DeinitLocalInfo(void)
 {
     if (g_localDeviceInfo != NULL) {
         SoftBusFree(g_localDeviceInfo);
@@ -383,7 +383,7 @@ static void DeinitLocalInfo()
     }
 }
 
-static int32_t InitLocalInfo()
+static int32_t InitLocalInfo(void)
 {
     if (g_localDeviceInfo == NULL) {
         g_localDeviceInfo = (NSTACKX_LocalDeviceInfo*)SoftBusCalloc(sizeof(NSTACKX_LocalDeviceInfo));

@@ -40,7 +40,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$hilog_lite_deps_path",
-    "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -52,6 +51,7 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":disc_client_interface" ]
       deps = common_deps
+      deps += [ "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server" ]
     }
   } else {
     shared_library("dsoftbus_disc_manager_sdk") {
@@ -63,6 +63,7 @@ if (defined(ohos_lite)) {
       public_configs = [ ":disc_client_interface" ]
       deps = common_deps
       deps += [
+        "$libsec_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
       ]
