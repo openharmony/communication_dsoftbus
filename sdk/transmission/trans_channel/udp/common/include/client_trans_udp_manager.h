@@ -60,7 +60,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
 int32_t TransOnUdpChannelOpenFailed(int32_t channelId);
 int32_t TransOnUdpChannelClosed(int32_t channelId);
 
-int32_t TransCloseUdpChannel(int32_t channelId);
+int32_t ClientTransCloseUdpChannel(int32_t channelId);
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const FrameInfo *param);

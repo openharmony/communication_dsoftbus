@@ -41,7 +41,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$dsoftbus_root_path/core/connection/common:conn_common",
-        "$hilog_lite_deps_path",
       ]
     }
   } else {
