@@ -132,7 +132,8 @@ AuthManager *AuthGetManagerByAuthId(int64_t authId, AuthSideFlag side)
         }
     }
     (void)pthread_mutex_unlock(&g_authLock);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "cannot find auth by authId, authId is %lld, side is %d", authId, side);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
+        "cannot find auth by authId, authId is %lld, side is %d", authId, side);
     return NULL;
 }
 
@@ -306,7 +307,8 @@ static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, const Co
     return SOFTBUS_OK;
 }
 
-static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOption *option, const ConnectionAddr *addr)
+static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOption *option,
+    const ConnectionAddr *addr)
 {
     if (pthread_mutex_lock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -699,7 +701,8 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
     AuthDataInfo authDataInfo = {0};
     uint8_t *recvData = NULL;
     AuthSideFlag side;
@@ -852,6 +855,7 @@ void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data,
     for (i = 0; i < MODULE_NUM; i++) {
         if (g_transCallback[i].onTransUdpDataRecv != NULL) {
             AuthTransDataInfo info = {0};
+            info.module = head->module;
             info.flags = head->flag;
             info.seq = head->seq;
             info.data = data;
@@ -863,7 +867,7 @@ void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data,
 
 int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
 {
-    if (cb == NULL || cb->onTransUdpDataRecv == NULL || moduleId >= MODULE_NUM) {
+    if (cb == NULL || moduleId >= MODULE_NUM) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -876,7 +880,12 @@ int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
         (void)memset_s(g_transCallback, sizeof(AuthTransCallback) * MODULE_NUM, 0,
             sizeof(AuthTransCallback) * MODULE_NUM);
     }
-    g_transCallback[moduleId].onTransUdpDataRecv = cb->onTransUdpDataRecv;
+    if (cb->onTransUdpDataRecv != NULL) {
+        g_transCallback[moduleId].onTransUdpDataRecv = cb->onTransUdpDataRecv;
+    }
+    if (cb->onAuthChannelClose != NULL) {
+        g_transCallback[moduleId].onAuthChannelClose = cb->onAuthChannelClose;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1003,13 +1012,68 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     return SOFTBUS_OK;
 }
 
+int64_t AuthOpenChannel(const ConnectOption *option)
+{
+    if (option == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
+        return SOFTBUS_ERR;
+    }
+    int32_t fd;
+    fd = OpenTcpChannel(option);
+    if (fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
+        return SOFTBUS_ERR;
+    }
+    AuthManager *auth = (AuthManager *)SoftBusCalloc(sizeof(AuthManager));
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusCalloc failed");
+        return SOFTBUS_ERR;
+    }
+    (void)pthread_mutex_lock(&g_authLock);
+    auth->side = CLIENT_SIDE_FLAG;
+    auth->authId = GetSeq(CLIENT_SIDE_FLAG);
+    auth->softbusVersion = SOFT_BUS_NEW_V1;
+    auth->option = *option;
+    auth->fd = fd;
+    auth->hichain = g_hichainGaInstance;
+    ListNodeInsert(&g_authClientHead, &auth->node);
+    (void)pthread_mutex_unlock(&g_authLock);
+    return auth->authId;
+}
+
+int32_t AuthCloseChannel(int64_t authId)
+{
+    return AuthHandleLeaveLNN(authId);
+}
+
 void AuthNotifyLnnDisconn(const AuthManager *auth)
 {
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
+        return;
+    }
     EventRemove(auth->authId);
     if (auth->side == SERVER_SIDE_FLAG && auth->status < IN_SYNC_PROGRESS) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth no need to notify lnn disconn");
         (void)AuthHandleLeaveLNN(auth->authId);
     } else {
-        auth->cb->onDisconnect(auth->authId);
+        if (auth->cb != NULL) {
+            auth->cb->onDisconnect(auth->authId);
+        }
+    }
+}
+
+void AuthNotifyTransDisconn(int64_t authId)
+{
+    int32_t i;
+    if (g_transCallback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth trans callback is null");
+        return;
+    }
+    for (i = 0; i < MODULE_NUM; i++) {
+        if (g_transCallback[i].onAuthChannelClose != NULL) {
+            g_transCallback[i].onAuthChannelClose(authId);
+        }
     }
 }
 

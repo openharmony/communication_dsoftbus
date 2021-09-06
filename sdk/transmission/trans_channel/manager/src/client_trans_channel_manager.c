@@ -14,6 +14,8 @@
  */
 
 #include "client_trans_channel_manager.h"
+
+#include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
 #include "client_trans_tcp_direct_manager.h"
@@ -32,7 +34,9 @@ int32_t ClientTransChannelInit(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans tcp direct manager init failed.");
         return SOFTBUS_ERR;
     }
-
+    if (ClientTransAuthInit(cb) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     if (ClinetTransProxyInit(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -64,6 +68,9 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
             break;
         case CHANNEL_TYPE_UDP:
             ret = TransCloseUdpChannel(channelId);
+			break;
+        case CHANNEL_TYPE_AUTH:
+            ClientTransAuthCloseChannel(channelId);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid type");
@@ -81,6 +88,9 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
 
     int32_t ret = SOFTBUS_OK;
     switch (type) {
+        case CHANNEL_TYPE_AUTH:
+            ret = TransAuthChannelSendBytes(channelId, data, len);
+            break;
         case CHANNEL_TYPE_PROXY:
             ret = TransProxyChannelSendBytes(channelId, data, len);
             break;
@@ -103,6 +113,9 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
 
     int32_t ret = SOFTBUS_OK;
     switch (type) {
+        case CHANNEL_TYPE_AUTH:
+            ret = TransAuthChannelSendMessage(channelId, data, len);
+            break;
         case CHANNEL_TYPE_PROXY:
             ret = TransProxyChannelSendMessage(channelId, data, len);
             break;

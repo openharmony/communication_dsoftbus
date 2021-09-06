@@ -17,6 +17,7 @@ config("trans_direct_channel_sdk_interface") {
   include_dirs = [
     "include",
     "$dsoftbus_core_path/common/security/sequence_verification/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 }
 
