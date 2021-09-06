@@ -169,8 +169,8 @@ ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_CREATE_SESSION_SERVER, ServerCreateSessionServer },
     { SERVER_REMOVE_SESSION_SERVER, ServerRemoveSessionServer },
     { SERVER_OPEN_SESSION, ServerOpenSession },
-    { SERVER_OPEN_AUTH_SESSION, ServerOpenAuthSession},
-    { SERVER_NOTIFY_AUTH_SUCCESS, ServerNotifyAuthSuccess},
+    { SERVER_OPEN_AUTH_SESSION, ServerOpenAuthSession },
+    { SERVER_NOTIFY_AUTH_SUCCESS, ServerNotifyAuthSuccess },
     { SERVER_CLOSE_CHANNEL, ServerCloseChannel },
     { SERVER_SESSION_SENDMSG, ServerSendSessionMsg },
 };
