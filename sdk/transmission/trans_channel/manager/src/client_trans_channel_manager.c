@@ -68,7 +68,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
             break;
         case CHANNEL_TYPE_UDP:
             ret = TransCloseUdpChannel(channelId);
-			break;
+            break;
         case CHANNEL_TYPE_AUTH:
             ClientTransAuthCloseChannel(channelId);
             break;
