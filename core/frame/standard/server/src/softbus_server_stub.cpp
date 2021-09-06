@@ -18,7 +18,9 @@
 #include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
@@ -43,6 +45,10 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::RemoveSessionServerInner;
     memberFuncMap_[SERVER_OPEN_SESSION] =
         &SoftBusServerStub::OpenSessionInner;
+    memberFuncMap_[SERVER_OPEN_AUTH_SESSION] =
+        &SoftBusServerStub::OpenAuthSessionInner;
+    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = 
+        &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] =
         &SoftBusServerStub::CloseChannelInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] =
@@ -242,6 +248,59 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *sessionName = data.ReadCString();
+    if (sessionName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner read session name failed!");
+        return SOFTBUS_ERR;
+    }
+    ConnectionAddr addrInfo;
+    addrInfo.type = static_cast<ConnectionAddrType>(data.ReadInt32());
+    const char *addr = data.ReadCString();
+    if (addr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner read type failed!");
+        return SOFTBUS_ERR;
+    }
+    if (addrInfo.type == CONNECTION_ADDR_ETH || addrInfo.type == CONNECTION_ADDR_WLAN) {
+        if (memcpy_s(addrInfo.info.ip.ip, IP_LEN, addr, IP_LEN) != EOK) {
+            return SOFTBUS_MEM_ERR;
+        }
+        addrInfo.info.ip.port = static_cast<uint16_t>(data.ReadInt16());
+    } else if (addrInfo.type == CONNECTION_ADDR_BLE) {
+        if (memcpy_s(addrInfo.info.ble.bleMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
+            return SOFTBUS_MEM_ERR;
+        }
+    } else if (addrInfo.type == CONNECTION_ADDR_BR) {
+        if (memcpy_s(addrInfo.info.br.brMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = OpenAuthSession(sessionName, &addrInfo);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner read channel Id failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = NotifyAuthSuccess(channelId);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -269,6 +328,11 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage read channel Id failed!");
         return SOFTBUS_ERR;
     }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage read channel type failed!");
+        return SOFTBUS_ERR;
+    }
     uint32_t len;
     if (!data.ReadUint32(len)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage dataInfo len failed!");
@@ -285,7 +349,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         return SOFTBUS_ERR;
     }
 
-    int32_t retReply = SendMessage(channelId, dataInfo, len, msgType);
+    int32_t retReply = SendMessage(channelId, channelType, dataInfo, len, msgType);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage write reply failed!");
         return SOFTBUS_ERR;

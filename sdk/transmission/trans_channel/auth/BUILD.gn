@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-config("trans_proxy_channel_sdk_interface") {
+config("trans_auth_channel_sdk_interface") {
   include_dirs = [ "include" ]
 }
 
@@ -27,19 +27,19 @@ if (defined(ohos_lite)) {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_proxy_channel_sdk") {
+    static_library("dsoftbus_trans_auth_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_core_path/common/include",
         "$dsoftbus_root_path/sdk/transmission/session/include",
       ]
-      sources = [ "src/client_trans_proxy_manager.c" ]
-      public_configs = [ ":trans_proxy_channel_sdk_interface" ]
+      sources = [ "src/client_trans_auth_manager.c" ]
+      public_configs = [ ":trans_auth_channel_sdk_interface" ]
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_trans_proxy_channel_sdk") {
+    shared_library("dsoftbus_trans_auth_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -50,23 +50,23 @@ if (defined(ohos_lite)) {
         "-Wall",
         "-fPIC",
       ]
-      sources = [ "src/client_trans_proxy_manager.c" ]
-      public_configs = [ ":trans_proxy_channel_sdk_interface" ]
+      sources = [ "src/client_trans_auth_manager.c" ]
+      public_configs = [ ":trans_auth_channel_sdk_interface" ]
       deps = common_deps
     }
   }
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_proxy_channel_sdk") {
+  ohos_shared_library("dsoftbus_trans_auth_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_core_path/common/include",
       "$dsoftbus_root_path/sdk/transmission/session/include",
     ]
-    sources = [ "src/client_trans_proxy_manager.c" ]
-    public_configs = [ ":trans_proxy_channel_sdk_interface" ]
+    sources = [ "src/client_trans_auth_manager.c" ]
+    public_configs = [ ":trans_auth_channel_sdk_interface" ]
     deps = [
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",

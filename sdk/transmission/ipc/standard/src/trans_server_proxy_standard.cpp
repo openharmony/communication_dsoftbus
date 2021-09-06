@@ -180,6 +180,96 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
     return channelId;
 }
 
+int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    if (sessionName == nullptr || addrInfo == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenAuthSession begin");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteCString(sessionName)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(addrInfo->type)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+        return SOFTBUS_ERR;
+    }
+    switch (addrInfo->type) {
+        case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_ETH:
+            if (!data.WriteCString(addrInfo->info.ip.ip)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+                return SOFTBUS_ERR;
+            }
+            if (!data.WriteInt16(addrInfo->info.ip.port)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+                return SOFTBUS_ERR;
+            }
+            break;
+        case CONNECTION_ADDR_BR:
+            if (!data.WriteCString(addrInfo->info.br.brMac)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+                return SOFTBUS_ERR;
+            }
+            break;
+        case CONNECTION_ADDR_BLE:
+            if (!data.WriteCString(addrInfo->info.ble.bleMac)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+                return SOFTBUS_ERR;
+            }
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "addrInfo type error");
+            return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_OPEN_AUTH_SESSION, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t channelId = 0;
+    if (!reply.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession read channelId failed!");
+        return SOFTBUS_ERR;
+    }
+    return channelId;
+}
+
+int32_t TransServerProxy::NotifyAuthSuccess(int channelId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel id failed!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_NOTIFY_AUTH_SUCCESS, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
 int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -211,7 +301,8 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
     return serverRet;
 }
 
-int32_t TransServerProxy::SendMessage(int32_t channelId, const void *dataInfo, uint32_t len, int32_t msgType)
+int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *dataInfo,
+    uint32_t len, int32_t msgType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
@@ -221,6 +312,10 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, const void *dataInfo, u
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel type failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(len)) {
