@@ -151,7 +151,7 @@ int32_t TcpOnConnectEvent(int32_t events, int32_t cfd, const char *ip)
     }
     tcpConnInfoNode->info.info.ipInfo.port = GetTcpSockPort(cfd);
     tcpConnInfoNode->info.info.ipInfo.fd = cfd;
-    if (AddTrigger(PROXY, cfd, RW_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(PROXY, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         goto EXIT;
     }
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
@@ -162,7 +162,7 @@ int32_t TcpOnConnectEvent(int32_t events, int32_t cfd, const char *ip)
 
 EXIT:
     SoftBusFree(tcpConnInfoNode);
-    (void)DelTrigger(PROXY, cfd, RW_TRIGGER);
+    (void)DelTrigger(PROXY, cfd, READ_TRIGGER);
     TcpShutDown(cfd);
     return SOFTBUS_ERR;
 }
@@ -287,7 +287,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
-    if (AddTrigger(PROXY, fd, RW_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(PROXY, fd, READ_TRIGGER) != SOFTBUS_OK) {
         TcpShutDown(fd);
         SoftBusFree(tcpConnInfoNode);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -303,7 +303,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     tcpConnInfoNode->info.info.ipInfo.fd = fd;
     if (strcpy_s(tcpConnInfoNode->info.info.ipInfo.ip, IP_LEN, option->info.ipOption.ip) != EOK ||
         AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
-        (void)DelTrigger(PROXY, fd, RW_TRIGGER);
+        (void)DelTrigger(PROXY, fd, READ_TRIGGER);
         TcpShutDown(fd);
         SoftBusFree(tcpConnInfoNode);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
