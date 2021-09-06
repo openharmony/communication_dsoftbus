@@ -166,7 +166,7 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
     return serverRet;
 }
 
-int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, const void *dataInfo,
+int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *dataInfo,
     uint32_t len, int32_t type)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -178,6 +178,10 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, const void *da
     MessageParcel data;
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel id failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(len)) {

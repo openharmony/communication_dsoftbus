@@ -219,9 +219,12 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
     char *connPostData = NULL;
     ethHead.magic = MAGIC_NUMBER;
     ethHead.module = head->module;
-    if (head->module == MODULE_UDP_INFO) {
+    if (head->module == MODULE_UDP_INFO || head->module == MODULE_AUTH_CHANNEL || head->module == MODULE_AUTH_MSG) {
         ethHead.seq = head->seq;
         ethHead.flag = head->flag;
+    } else if (head->module == MODULE_AUTH_CONNECTION && auth->side == SERVER_SIDE_FLAG) {
+        ethHead.seq = 0;
+        ethHead.flag = auth->side;
     } else {
         ethHead.seq = auth->authId;
         ethHead.flag = auth->side;

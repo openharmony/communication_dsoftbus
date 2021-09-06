@@ -48,7 +48,7 @@ int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t channelId)
 int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t channelId,
     const void *data, uint32_t len, int32_t type)
 {
-    return g_channelCb.OnDataReceived(pkgName, channelId, data, len, type);
+    return g_channelCb.OnDataReceived(pkgName, channelId, CHANNEL_TYPE_PROXY, data, len, type);
 }
 
 int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
