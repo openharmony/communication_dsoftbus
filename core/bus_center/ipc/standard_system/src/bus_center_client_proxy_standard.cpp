@@ -36,7 +36,7 @@ int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channel
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType, 
+int32_t BusCenterClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *dataInfo, uint32_t len, int32_t type)
 {
     return SOFTBUS_OK;

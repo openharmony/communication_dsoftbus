@@ -786,7 +786,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                             channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
                         (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
                         return SOFTBUS_MEM_ERR;
-                    }   
+                    }
                 }
                 (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;
