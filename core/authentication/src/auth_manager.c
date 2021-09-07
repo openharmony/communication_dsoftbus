@@ -1018,8 +1018,7 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    int32_t fd;
-    fd = OpenTcpChannel(option);
+    int32_t fd = OpenTcpChannel(option);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
         return SOFTBUS_ERR;
