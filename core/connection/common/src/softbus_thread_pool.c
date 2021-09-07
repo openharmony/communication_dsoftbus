@@ -177,7 +177,7 @@ static void ThreadPoolWorker(void *arg)
     }
     ThreadPool *pool = (ThreadPool *)arg;
     Job *job = NULL;
-    prctl(PR_SET_NAME, THREAD_POOL_NAME);
+    pthread_setname_np(pthread_self(), THREAD_POOL_NAME);
     while (1) {
         if (pthread_mutex_lock(&(pool->mutex)) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
