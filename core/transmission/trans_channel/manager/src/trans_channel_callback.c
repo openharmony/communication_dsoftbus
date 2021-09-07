@@ -62,17 +62,19 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t chann
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
+        "trasn server on channel open failed.[pkgname=%s][channid=%d][type=%d]", pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t channelId,
+static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, int32_t type)
 {
     if (pkgName == NULL || data == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (ClientIpcOnChannelMsgReceived(pkgName, channelId, data, len, type) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelMsgReceived(pkgName, channelId, channelType, data, len, type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail");
         return SOFTBUS_ERR;
     }
