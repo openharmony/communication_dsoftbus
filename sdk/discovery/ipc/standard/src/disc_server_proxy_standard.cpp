@@ -197,12 +197,23 @@ int32_t DiscServerProxy::OpenSession(const char *mySessionName, const char *peer
     return SOFTBUS_OK;
 }
 
+int32_t DiscServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t DiscServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
     return SOFTBUS_OK;
 }

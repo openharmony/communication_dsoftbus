@@ -18,6 +18,8 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
+#include "securec.h"
+#include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -30,6 +32,22 @@
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
+
+static ConnectType ConvertConnectType(ConnectionAddrType type)
+{
+    switch (type) {
+        case CONNECTION_ADDR_BR:
+            return CONNECT_BR;
+        case CONNECTION_ADDR_BLE:
+            return CONNECT_BLE;
+        case CONNECTION_ADDR_ETH:
+            return CONNECT_TCP;
+        case CONNECTION_ADDR_WLAN:
+            return CONNECT_TCP;
+        default:
+            return CONNECT_TYPE_MAX;
+    }
+}
 
 SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate)
 {
@@ -105,14 +123,50 @@ int32_t SoftBusServer::OpenSession(const char *mySessionName, const char *peerSe
     return TransOpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
 }
 
+int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    if (sessionName == nullptr || addrInfo == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ConnectOption connOpt;
+    connOpt.type = ConvertConnectType(addrInfo->type);
+    switch (connOpt.type) {
+        case CONNECT_TCP:
+            if (memcpy_s(connOpt.info.ipOption.ip, IP_LEN, addrInfo->info.ip.ip, IP_LEN) != EOK) {
+                return SOFTBUS_MEM_ERR;
+            }
+            connOpt.info.ipOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
+            break;
+        case CONNECT_BLE:
+            if (memcpy_s(connOpt.info.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        case CONNECT_BR:
+            if (memcpy_s(connOpt.info.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        default:
+            return SOFTBUS_ERR;
+    }
+    return TransOpenAuthChannel(sessionName, &connOpt);
+}
+
+int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId)
+{
+    return TransNotifyAuthSuccess(channelId);
+}
+
 int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return TransCloseChannel(channelId, channelType);
 }
 
-int32_t SoftBusServer::SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
-    return TransSendMsg(channelId, data, len, msgType);
+    return TransSendMsg(channelId, channelType, data, len, msgType);
 }
 
 int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)

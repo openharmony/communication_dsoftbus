@@ -138,7 +138,8 @@ static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
         if (sessionKeyList->type == devInfo->type &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth get last session key succ, seq is:%d", sessionKeyList->seq);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+                "auth get last session key succ, seq is:%d", sessionKeyList->seq);
             return sessionKeyList;
         }
     }
@@ -163,7 +164,8 @@ static SessionKeyList *GetSessionKeyByDevinfo(const NecessaryDevInfo *devInfo)
         if (sessionKeyList->type == devInfo->type &&
             sessionKeyList->seq == devInfo->seq &&
             strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth get session key by dev info succ, seq is:%d", sessionKeyList->seq);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+                "auth get session key by dev info succ, seq is:%d", sessionKeyList->seq);
             return sessionKeyList;
         }
     }

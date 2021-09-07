@@ -28,6 +28,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_utils.h"
+#include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
@@ -42,6 +43,10 @@ int32_t TransChannelInit(void)
 
     if (TransLaneMgrInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager init failed.");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransAuthInit(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
@@ -63,6 +68,7 @@ int32_t TransChannelInit(void)
 void TransChannelDeinit(void)
 {
     TransLaneMgrDeinit();
+    TransAuthDeinit();
     TransProxyManagerDeinit();
     TransTcpDirectDeinit();
     TransUdpChannelDeinit();
@@ -275,6 +281,26 @@ EXIT_ERR:
     return INVALID_CHANNEL_ID;
 }
 
+int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
+{
+    int32_t channelId = INVALID_CHANNEL_ID;
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+        return channelId;
+    }
+    if (connOpt->type != CONNECT_TCP) {
+        return channelId;
+    }
+    if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId) != SOFTBUS_OK) {
+        return INVALID_CHANNEL_ID;
+    }
+    return channelId;
+}
+
+int32_t TransNotifyAuthSuccess(int32_t channelId)
+{
+    return TransNotifyAuthDataSuccess(channelId);
+}
+
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel: id=%d, type=%d", channelId, channelType);
@@ -287,15 +313,26 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
             return SOFTBUS_OK;
         case CHANNEL_TYPE_UDP:
             return TransCloseUdpChannel(channelId);
+        case CHANNEL_TYPE_AUTH:
+            return TransCloseAuthChannel(channelId);
         default:
             break;
     }
     return SOFTBUS_ERR;
 }
 
-int32_t TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
-    return TransProxyPostSessionData(channelId, (uint8_t*)data, len, msgType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
+    switch (channelType) {
+        case CHANNEL_TYPE_AUTH:
+            return TransSendAuthMsg(channelId, data, len);
+        case CHANNEL_TYPE_PROXY:
+            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, msgType);
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
+            return SOFTBUS_ERR;
+    }
 }
 
 void TransChannelDeathCallback(const char *pkgName)

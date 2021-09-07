@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+int32_t OpenTcpChannel(const ConnectOption *option);
 int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option);
 void AuthCloseTcpFd(int32_t fd);
 int32_t OpenAuthServer(void);
