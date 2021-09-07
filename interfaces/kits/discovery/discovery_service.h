@@ -173,7 +173,9 @@ typedef enum {
     /** Device virtualization tool package */
     DVKIT_CAPABILITY_BITMAP,
     /** Distributed middleware */
-    DDMP_CAPABILITY_BITMAP
+    DDMP_CAPABILITY_BITMAP,
+    /** Osd capability */
+    OSD_CAPABILITY_BITMAP
 } DataBitMap;
 
 /**
@@ -199,6 +201,7 @@ static const CapabilityMap g_capabilityMap[] = {
     {AA_CAPABILITY_BITMAP, (char *)"aaCapability"},
     {DVKIT_CAPABILITY_BITMAP, (char *)"dvKit"},
     {DDMP_CAPABILITY_BITMAP, (char *)"ddmpCapability"},
+    {OSD_CAPABILITY_BITMAP, (char *)"osdCapability"},
 };
 
 /**
