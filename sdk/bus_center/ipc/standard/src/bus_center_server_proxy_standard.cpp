@@ -95,7 +95,7 @@ int32_t BusCenterServerProxy::OpenAuthSession(const char *sessionName, const Con
 
 int32_t BusCenterServerProxy::NotifyAuthSuccess(int channelId)
 {
-    return SOFTBUS_OK;    
+    return SOFTBUS_OK;
 }
 
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)

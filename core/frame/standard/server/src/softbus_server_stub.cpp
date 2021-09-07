@@ -47,7 +47,7 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::OpenSessionInner;
     memberFuncMap_[SERVER_OPEN_AUTH_SESSION] =
         &SoftBusServerStub::OpenAuthSessionInner;
-    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = 
+    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] =
         &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] =
         &SoftBusServerStub::CloseChannelInner;

@@ -56,7 +56,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int64_t authId);
 
-static int32_t GenerateAuthChannelId()
+static int32_t GenerateAuthChannelId(void)
 {
     g_channelId++;
     return g_channelId;
@@ -238,7 +238,7 @@ static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t l
     }
 
     AppInfo appInfo;
-    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo); 
+    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpackRequest failed");
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
@@ -473,7 +473,7 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-void TransAuthDeinit()
+void TransAuthDeinit(void)
 {
     g_channelId = 1;
     g_cb = NULL;
