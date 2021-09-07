@@ -57,7 +57,7 @@ if (defined(ohos_lite)) {
     static_library("dsoftbus_trans_direct_channel") {
       include_dirs =
           [ "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite" ]
-      include_dirs = common_include
+      include_dirs += common_include
       sources = common_src
       public_configs = [ ":trans_direct_channel_interface" ]
       deps = common_deps

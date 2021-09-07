@@ -60,6 +60,7 @@ if (ohos_kernel_type == "liteos_m") {
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection:softbus_connection",
       "$dsoftbus_root_path/core/transmission/session:dsoftbus_trans_session",
+      "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
     ]
   }
 } else {
