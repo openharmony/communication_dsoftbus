@@ -26,6 +26,7 @@
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
+#include "softbus_tcp_socket.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
