@@ -515,7 +515,7 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         return;
     }
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
-    int32_t ret = TransAuthChannelErrorPack(errcode, errMsg, cJsonStr, ERR_MSG_MAX_LEN); 
+    int32_t ret = TransAuthChannelErrorPack(errcode, errMsg, cJsonStr, ERR_MSG_MAX_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAuthChannelErrorPack failed");
         return;

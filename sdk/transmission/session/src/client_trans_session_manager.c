@@ -949,7 +949,7 @@ static INodeStateCb g_transLnnCb = {
     .onNodeOffline = ClientTransLnnOfflineProc,
 };
 
-void ClientTransRegLnnOffline()
+void ClientTransRegLnnOffline(void)
 {
     int32_t ret;
     ret = RegNodeDeviceStateCbInner("trans", &g_transLnnCb);

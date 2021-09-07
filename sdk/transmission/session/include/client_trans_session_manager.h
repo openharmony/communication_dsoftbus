@@ -109,7 +109,7 @@ int32_t ClientGetSessionSide(int32_t sessionId);
 int TransClientInit(void);
 void TransClientDeinit(void);
 
-void ClientTransRegLnnOffline();
+void ClientTransRegLnnOffline(void);
 #ifdef __cplusplus
 }
 #endif
