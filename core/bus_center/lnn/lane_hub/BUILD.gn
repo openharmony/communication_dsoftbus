@@ -63,7 +63,7 @@ if (defined(ohos_lite)) {
         native_source_path = rebase_path("$dsoftbus_root_path")
         dep_file = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
         enhanced = exec_script(
-                "//build/lite/run_shell_cmd.py",
+                "$dsoftbus_root_path/run_shell_cmd.py",
                 [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
                 "value")
         if (enhanced) {
@@ -113,7 +113,7 @@ if (defined(ohos_lite)) {
       native_source_path = rebase_path("$dsoftbus_root_path")
       dep_file = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync/BUILD.gn"
       enhanced = exec_script(
-              "//build/lite/run_shell_cmd.py",
+              "$dsoftbus_root_path/run_shell_cmd.py",
               [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
               "value")
       if (enhanced) {
