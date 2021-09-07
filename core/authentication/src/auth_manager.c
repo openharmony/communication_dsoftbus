@@ -49,6 +49,10 @@ static SoftBusHandler g_authHandler = {0};
 static pthread_mutex_t g_authLock;
 static bool g_isAuthInit = false;
 
+#define INITIAL_STATE 0
+#define RECV_ENCRYPT_DATA_STATE 1
+#define KEY_GENERATEG_STATE 2
+
 int32_t __attribute__ ((weak)) HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
 {
     (void)auth;
@@ -494,7 +498,19 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
     AuthSetLocalSessionKey(&devInfo, auth->peerUdid, sessionKey, sessionKeyLen);
     auth->status = IN_SYNC_PROGRESS;
     (void)pthread_mutex_unlock(&g_authLock);
-    auth->cb->onKeyGenerated(authId, &auth->option, auth->peerVersion);
+    if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG) {
+        if (auth->encryptInfoStatus == INITIAL_STATE) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "wait client send encrypt dev info");
+            auth->encryptInfoStatus = KEY_GENERATEG_STATE;
+        } else if (auth->encryptInfoStatus == RECV_ENCRYPT_DATA_STATE) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "recv peer dev info already");
+            auth->cb->onKeyGenerated(authId, &auth->option, auth->peerVersion);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth encrypt info state error!");
+        }
+    } else {
+        auth->cb->onKeyGenerated(authId, &auth->option, auth->peerVersion);
+    }
 }
 
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
@@ -544,6 +560,13 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
+
+    if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
+        auth->encryptInfoStatus == KEY_GENERATEG_STATE) {
+        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
+    }
+    auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
+
     if (AuthIsSeqInKeyList((int32_t)(auth->authId)) == false ||
         auth->status == IN_SYNC_PROGRESS) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth saved encrypted data first");
@@ -973,6 +996,7 @@ static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peer
     auth->hichain = g_hichainGaInstance;
     auth->fd = cfd;
     auth->authId = 0;
+    auth->encryptInfoStatus = INITIAL_STATE;
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_TCP;
@@ -1018,7 +1042,8 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    int32_t fd = OpenTcpChannel(option);
+    int32_t fd;
+    fd = OpenTcpChannel(option);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
         return SOFTBUS_ERR;
