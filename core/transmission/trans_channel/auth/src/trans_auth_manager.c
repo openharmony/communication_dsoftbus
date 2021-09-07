@@ -180,7 +180,7 @@ static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
             recvAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         memcpy_s(recvAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
             channelAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX, 
+        memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX,
             recvAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
