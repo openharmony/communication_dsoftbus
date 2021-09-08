@@ -920,7 +920,7 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server, const
     }
 }
 
-static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
+static void ClientTransLnnOfflineProc(const NodeBasicInfo *info)
 {
     if (info == NULL) {
         return;
