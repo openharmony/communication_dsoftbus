@@ -15,7 +15,6 @@
 
 #include "nstackx_database.h"
 
-#include <malloc.h>
 #include <securec.h>
 #include <stdint.h>
 #include <string.h>

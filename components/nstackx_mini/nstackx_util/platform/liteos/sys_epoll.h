@@ -32,8 +32,6 @@ struct EpollEvent {
 #endif
 };
 
-typedef int32_t TaskDesc;
-
 #ifndef EPOLL_CTL_ADD
 #define EPOLL_CTL_ADD 1
 #define EPOLL_CTL_DEL 2

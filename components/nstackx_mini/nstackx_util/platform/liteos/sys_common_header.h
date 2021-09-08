@@ -49,8 +49,6 @@
 
 #define NSTACKX_EXPORT extern
 
-typedef int32_t SocketDesc;
-
 #define INVALID_SOCKET (-1)
 
 #ifdef LWIP_LITEOS_A_COMPAT

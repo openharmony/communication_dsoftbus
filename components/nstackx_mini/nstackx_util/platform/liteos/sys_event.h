@@ -18,8 +18,6 @@
 
 #include "nstackx_common_header.h"
 
-typedef int32_t PipeDesc;
-
 #define INVALID_PIPE_DESC (-1)
 
 #endif // SYS_EVENT_H
