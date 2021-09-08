@@ -16,8 +16,8 @@
 #include "json_payload.h"
 
 #include "cJSON.h"
-#include "nstackx_error.h"
 #include "nstackx_device.h"
+#include "nstackx_error.h"
 #include "nstackx_log.h"
 #include "securec.h"
 

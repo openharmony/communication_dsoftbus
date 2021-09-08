@@ -15,22 +15,21 @@
 
 #include "nstackx_device.h"
 
-#include <string.h>
-#include <stdio.h>
 #include <securec.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "cJSON.h"
-#include "nstackx_log.h"
-#include "nstackx_event.h"
-#include "nstackx_timer.h"
-#include "nstackx_error.h"
-#include "nstackx_util.h"
-#include "nstackx_common.h"
-#include "nstackx_database.h"
 #include "coap_discover/coap_app.h"
 #include "coap_discover/coap_discover.h"
+#include "nstackx_common.h"
+#include "nstackx_database.h"
+#include "nstackx_error.h"
+#include "nstackx_event.h"
+#include "nstackx_log.h"
+#include "nstackx_timer.h"
 
 #define TAG "nStackXDFinder"
 
@@ -265,7 +264,7 @@ int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
     return NSTACKX_EOK;
 }
 
-static int32_t GetReservedInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList)
+static int32_t GetReservedInfo(const DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList)
 {
     char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
     (void)memset_s(wifiIpAddr, sizeof(wifiIpAddr), 0, sizeof(wifiIpAddr));
@@ -309,7 +308,7 @@ static int32_t GetReservedInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *devic
     return NSTACKX_EOK;
 }
 
-void PushPublishInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uint32_t deviceNum)
+void PushPublishInfo(const DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uint32_t deviceNum)
 {
     if (deviceNum != PUBLISH_DEVICE_NUM || deviceInfo == NULL) {
         return;
@@ -334,7 +333,7 @@ void PushPublishInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uin
     deviceList[0].deviceType = deviceInfo->deviceType;
 }
 
-static bool MatchDeviceFilter(DeviceInfo *deviceInfo)
+static bool MatchDeviceFilter(const DeviceInfo *deviceInfo)
 {
     uint32_t i, ret;
 
@@ -351,17 +350,17 @@ static bool MatchDeviceFilter(DeviceInfo *deviceInfo)
     return false;
 }
 
-static int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t count, DeviceInfo *deviceInfo)
+static int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t count, const DeviceInfo *devInfo)
 {
     char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
     int ret  = NSTACKX_EFAILED;
     if (deviceList == NULL) {
-        LOGE(TAG, "deviceList or deviceInfo is null");
+        LOGE(TAG, "deviceList or devInfo is null");
         return NSTACKX_EINVAL;
     }
 
     (void)memset_s(wifiIpAddr, sizeof(wifiIpAddr), 0, sizeof(wifiIpAddr));
-    (void)inet_ntop(AF_INET, &deviceInfo->netChannelInfo.wifiApInfo.ip, wifiIpAddr, sizeof(wifiIpAddr));
+    (void)inet_ntop(AF_INET, &devInfo->netChannelInfo.wifiApInfo.ip, wifiIpAddr, sizeof(wifiIpAddr));
     if (sprintf_s(deviceList[count].reservedInfo, sizeof(deviceList[count].reservedInfo),
         NSTACKX_RESERVED_INFO_JSON_FORMAT, wifiIpAddr) == -1) {
         LOGE(TAG, "sprintf_s reservedInfo with wifiIpAddr fails");
@@ -373,18 +372,18 @@ static int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint
         return NSTACKX_EINVAL;
     }
 
-    if (deviceInfo->mode != 0 && !cJSON_AddNumberToObject(item, "mode", deviceInfo->mode)) {
+    if (devInfo->mode != 0 && !cJSON_AddNumberToObject(item, "mode", devInfo->mode)) {
         goto L_END;
     }
-    if (!cJSON_AddStringToObject(item, "hwAccountHashVal", deviceInfo->deviceHash)) {
+    if (!cJSON_AddStringToObject(item, "hwAccountHashVal", devInfo->deviceHash)) {
         goto L_END;
     }
-    const char *ver = (strlen(deviceInfo->version) == 0) ? NSTACKX_DEFAULT_VER : deviceInfo->version;
+    const char *ver = (strlen(devInfo->version) == 0) ? NSTACKX_DEFAULT_VER : devInfo->version;
     if (!cJSON_AddStringToObject(item, "version", ver)) {
         goto L_END;
     }
-    if (strlen(deviceInfo->serviceData) != 0 && strlen(deviceInfo->serviceData) < NSTACKX_MAX_SERVICE_DATA_LEN) {
-        if (!cJSON_AddStringToObject(item, "serviceData", deviceInfo->serviceData)) {
+    if (strlen(devInfo->serviceData) != 0 && strlen(devInfo->serviceData) < NSTACKX_MAX_SERVICE_DATA_LEN) {
+        if (!cJSON_AddStringToObject(item, "serviceData", devInfo->serviceData)) {
             goto L_END;
         }
     }

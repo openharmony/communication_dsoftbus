@@ -19,10 +19,10 @@
 #include <unistd.h>
 
 #include "cJSON.h"
-#include "ohos_init.h"
 #include "lwip/netif.h"
 #include "lwip/netifapi.h"
 #include "nstackx.h"
+#include "ohos_init.h"
 #include "softbus_errcode.h"
 
 #define DEVICE_NAME "HI3861"
@@ -34,7 +34,8 @@
 #define AUTH_PORT 45576
 
 #define MAXT_WAIT_COUNT 6
-#define SLEEP_SECOND_INTERVAL 10
+#define WIFI_CONFIG_INTERVAL 10
+#define TEST_COUNT_INTREVAL 180
 #define MAX_TEST_COUNT 20
 
 static char *g_capData = NULL;
@@ -80,7 +81,7 @@ static void GetLocalWifiIp(char *ip, int32_t len)
     int32_t cnt = 0;
     while (cnt < MAXT_WAIT_COUNT) {
         cnt++;
-        sleep(SLEEP_SECOND_INTERVAL);
+        sleep(WIFI_CONFIG_INTERVAL);
         wifiNetIf = netifapi_netif_find(NET_WORK_NAME);
         if (wifiNetIf == NULL) {
             printf("netif find device failed.\n");
@@ -281,7 +282,7 @@ static void NstackxTestEntry(void)
             return;
         }
         testCnt++;
-        sleep(SLEEP_SECOND_INTERVAL);
+        sleep(TEST_COUNT_INTREVAL);
         TestDeinit();
     }
 }

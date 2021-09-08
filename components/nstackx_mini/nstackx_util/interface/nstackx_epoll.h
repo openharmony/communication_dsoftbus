@@ -42,7 +42,7 @@ typedef void (*TaskHandle)(void *arg);
 
 typedef struct {
     EpollDesc epollfd;
-    TaskDesc taskfd;
+    int32_t taskfd;
     TaskHandle readHandle;
     TaskHandle writeHandle;
     TaskHandle errorHandle;
