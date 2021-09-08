@@ -46,6 +46,24 @@ int32_t GenerateTdcChannelId(void)
     return channelId;
 }
 
+static void OnSesssionTimeOutProc(const SessionConn *node)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionTimeOutProc: channelId = %d, side = %d",
+        node->channelId, node->serverSide);
+    if (node->serverSide == false) {
+        if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->channelId) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify channel open fail err");
+        }
+    }
+
+    int32_t fd = node->appInfo.fd;
+    if (fd >= 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, RW_TRIGGER);
+        TcpShutDown(fd);
+    }
+}
+
 static void TransTdcTimerProc(void)
 {
     SessionConn *removeNode = NULL;
@@ -64,22 +82,10 @@ static void TransTdcTimerProc(void)
         if (removeNode->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
             if (removeNode->timeout >= HANDSHAKE_TIMEOUT) {
                 removeNode->status = TCP_DIRECT_CHANNEL_STATUS_TIMEOUT;
-
-                (void)pthread_mutex_unlock(&g_sessionConnList->lock);
-                NotifyChannelOpenFailed(removeNode->channelId);
-                pthread_mutex_lock(&g_sessionConnList->lock);
+                OnSesssionTimeOutProc(removeNode);
 
                 ListDelete(&removeNode->node);
                 g_sessionConnList->cnt--;
-                int fd = removeNode->appInfo.fd;
-                if (fd >= 0) {
-                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
-                    DelTrigger(DIRECT_CHANNEL_SERVER, fd, RW_TRIGGER);
-                    TcpShutDown(fd);
-                }
-
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel[%d] handshake is timeout",
-                    removeNode->channelId);
                 SoftBusFree(removeNode);
             }
         }
