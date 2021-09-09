@@ -64,6 +64,7 @@ typedef struct {
     uint8_t status;
     int32_t fd;
     ConnectOption option;
+    int32_t encryptInfoStatus;
 
     const GroupAuthManager *hichain;
     VerifyCallback *cb;
