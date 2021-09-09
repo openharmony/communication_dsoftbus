@@ -127,7 +127,7 @@ int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *da
 int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *data, uint32_t len, OutBuf *outbuf);
 int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf);
 
-int32_t OpenAuthServer(void); 
+int32_t OpenAuthServer(void);
 void CloseAuthServer(void);
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb);
 int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb);

@@ -28,6 +28,31 @@ config("bus_center_client_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_bus_center_manager_sdk") {
+      include_dirs = [
+        "ipc/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$softbus_adapter_config/spec_config",
+        "$libsec_include_path",
+        "$hilog_lite_include_path",
+        "$dsoftbus_root_path/core/bus_center/ipc/include",  # todo
+      ]
+      sources = [
+        "ipc/mini/bus_center_server_proxy.c",  # todo
+        "manager/src/client_bus_center_manager.c",
+      ]
+      public_configs = [ ":bus_center_client_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$hilog_lite_deps_path",
+      ]
+    }
   } else {
     shared_library("dsoftbus_bus_center_manager_sdk") {
       include_dirs = [
