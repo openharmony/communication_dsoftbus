@@ -113,7 +113,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
 
     len = nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
-    ParseRtAttr(tb, IFLA_MAX, IFLA_RTA (ifinfo), len);
+    ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
 
     if (tb[IFLA_IFNAME] == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
