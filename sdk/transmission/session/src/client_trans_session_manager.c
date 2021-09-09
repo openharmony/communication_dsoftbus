@@ -678,9 +678,9 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
+int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo* transInfo)
 {
-    if ((sessionId < 0) || (channelId < 0)) {
+    if ((sessionId < 0) || (transInfo->channelId < 0)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -704,7 +704,8 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
-    sessionNode->channelId = channelId;
+    sessionNode->channelId = transInfo->channelId;
+    sessionNode->channelType = transInfo->channelType;
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
@@ -775,8 +776,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channel->channelId) {
-                sessionNode->channelType = channel->channelType;
+            if ((sessionNode->channelId == channel->channelId) && (sessionNode->channelType == channel->channelType)) {
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
@@ -795,7 +795,8 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
     }
 
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d]", channel->channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d], channelType [%d]",
+        channel->channelId, channel->channelType);
     return SOFTBUS_ERR;
 }
 

@@ -18,6 +18,9 @@
 
 #include "session.h"
 #include "softbus_def.h"
+#include "softbus_trans_def.h"
+#include "softbus_trans_def.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,14 +56,6 @@ typedef struct {
     ListNode sessionList;
 } ClientSessionServer;
 
-typedef struct {
-    const char *sessionName;
-    const char *peerSessionName;
-    const char *peerDeviceId;
-    const char *groupId;
-    const SessionAttribute* attr;
-} SessionParam;
-
 typedef enum {
     KEY_SESSION_NAME = 1,
     KEY_PEER_SESSION_NAME,
@@ -91,7 +86,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 
 int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t* channelId, int32_t* type);
 
-int32_t ClientSetChannelBySessionId(int32_t sessionId, int32_t channelId);
+int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo* transInfo);
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t* sessionId);
 

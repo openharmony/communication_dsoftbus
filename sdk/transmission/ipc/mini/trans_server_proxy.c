@@ -35,10 +35,8 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionName,
-                             const char *peerDeviceId, const char *groupId, int32_t flags)
-{
-    return TransOpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
+int32_t ServerIpcOpenSession(SessionParam *param, TransInfo *info)
+    return TransOpenSession(param, info);
 }
 
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
