@@ -15,10 +15,10 @@
 
 #include "lwip/sockets.h"
 #include "nstackx_dev.h"
-#include "nstackx_util.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
 #include "securec.h"
+#include "sys_util.h"
 
 #define TAG "nStackXDev"
 
@@ -197,7 +197,7 @@ static int32_t BindToDeviceInner(int32_t sockfd, const struct ifreq *ifBinding)
  * If localAddr isn't NULL, bind to interface correspond to ip,
  * otherwise, bind to interface which is choosed by strategy.
  */
-int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
+int32_t BindToDevice(int32_t sockfd, const struct sockaddr_in *localAddr)
 {
     struct ifreq buf[INTERFACE_MAX];
     struct ifconf ifc;
@@ -359,7 +359,7 @@ L_ERROR:
     return NSTACKX_EFAILED;
 }
 
-void BindToDevInTheSameLan(SocketDesc sockfd, const struct sockaddr_in *sockAddr)
+void BindToDevInTheSameLan(int32_t sockfd, const struct sockaddr_in *sockAddr)
 {
     struct ifreq localInterface;
     if (sockfd < 0) {
@@ -377,7 +377,7 @@ void BindToDevInTheSameLan(SocketDesc sockfd, const struct sockaddr_in *sockAddr
     LOGI(TAG, "bind to %s successfully", localInterface.ifr_name);
 }
 
-int32_t BindToTargetDev(SocketDesc sockfd, const char *targetInterfaceName)
+int32_t BindToTargetDev(int32_t sockfd, const char *targetInterfaceName)
 {
     struct ifreq buf[INTERFACE_MAX];
     struct ifconf ifc;

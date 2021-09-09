@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#include "nstackx_epoll.h"
+#include "nstackx_error.h"
 #include "nstackx_event.h"
 #include "nstackx_log.h"
-#include "nstackx_error.h"
-#include "nstackx_util.h"
-#include "nstackx_epoll.h"
 #include "securec.h"
+#include "sys_util.h"
 
 #define TAG "nStackXEvent"
 

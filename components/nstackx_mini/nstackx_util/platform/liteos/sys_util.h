@@ -72,10 +72,10 @@ static inline int32_t GetErrno(void)
     return errno;
 }
 
+NSTACKX_EXPORT void CloseDesc(int32_t desc);
 #define CloseSocketInner CloseDesc
 #define gettid() (pid_t)pthread_self()
-NSTACKX_EXPORT void CloseDesc(int32_t desc);
-NSTACKX_EXPORT int32_t SetSocketNonBlock(SocketDesc fd);
+NSTACKX_EXPORT int32_t SetSocketNonBlock(int32_t fd);
 
 #ifdef __cplusplus
 }

@@ -83,7 +83,7 @@ typedef struct DeviceInfo {
 int32_t DeviceModuleInit(EpollDesc epollfd);
 
 void DeviceModuleClean(void);
-void PushPublishInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uint32_t deviceNum);
+void PushPublishInfo(const DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uint32_t deviceNum);
 
 int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate);
 uint8_t ClearDevices(void *deviceList);
