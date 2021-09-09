@@ -30,7 +30,7 @@
 #include "nstackx_epoll.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
-#include "nstackx_util.h"
+#include "sys_util.h"
 
 #define TAG "nStackXCoAP"
 
@@ -256,9 +256,7 @@ static uint32_t RegisterCoAPEpollTask(EpollDesc epollfd)
         return NSTACKX_FALSE;
     }
 
-
-    uint32_t events = 0;
-    events = EPOLLIN | EPOLLERR;
+    uint32_t events = EPOLLIN | EPOLLERR;
     g_task.taskfd = g_coapListenFd;
     g_task.epollfd = epollfd;
     g_task.readHandle = CoAPEpollReadHandle;

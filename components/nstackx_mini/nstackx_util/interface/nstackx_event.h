@@ -29,7 +29,7 @@ typedef void (*EventHandle)(void *arg);
 typedef struct EventNode {
     List list;
     EpollDesc epollfd;
-    PipeDesc pipeFd[PIPE_FD_NUM];
+    int32_t pipeFd[PIPE_FD_NUM];
     EpollTask task;
 } EventNode;
 

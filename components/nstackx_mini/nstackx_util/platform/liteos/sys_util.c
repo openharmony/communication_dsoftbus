@@ -14,9 +14,9 @@
  */
 
 #include "lwip/sockets.h"
-#include "nstackx_util.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
+#include "nstackx_util.h"
 #include "securec.h"
 #include "sys_epoll.h"
 
@@ -104,7 +104,7 @@ void CloseDesc(int32_t desc)
     }
 }
 
-int32_t SetSocketNonBlock(SocketDesc fd)
+int32_t SetSocketNonBlock(int32_t fd)
 {
     int32_t flag;
 
