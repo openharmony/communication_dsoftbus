@@ -117,10 +117,9 @@ int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sess
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t SoftBusServer::OpenSession(const char *mySessionName, const char *peerSessionName,
-    const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t SoftBusServer::OpenSession(SessionParam *param, TransInfo *info)
 {
-    return TransOpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
+    return TransOpenSession(param, info);
 }
 
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
