@@ -113,6 +113,7 @@ static char *PackElectMessage(int32_t weight, const char *masterUdid)
 static int32_t UnpackElectMessage(const char *msg, uint32_t len,
     char *masterUdid, int32_t masterUdidLen, int32_t *masterWeight)
 {
+    (void)len;
     cJSON *json = cJSON_Parse((char *)msg);
 
     if (json == NULL) {
