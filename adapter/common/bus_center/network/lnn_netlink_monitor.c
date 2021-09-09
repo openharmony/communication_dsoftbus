@@ -78,9 +78,10 @@ static int32_t CreateNetlinkSocket(void)
 
 static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int len)
 {
-    for (; RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-        if (attr->rta_type <= max) {
-            tb[attr->rta_type] = attr;
+    struct rtattr * attr1 = attr;
+    for (; RTA_OK(attr1, len); attr1 = RTA_NEXT(attr1, len)) {
+        if (attr1->rta_type <= max) {
+            tb[attr1->rta_type] = attr1;
         }
     }
 }
