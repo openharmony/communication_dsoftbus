@@ -28,7 +28,6 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$dsoftbus_root_path/core/adapter/kernel/include",
         "$dsoftbus_root_path/core/common/include",
-        "$libsec_include_path",
         "$hilog_lite_include_path",
         "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
       ]
