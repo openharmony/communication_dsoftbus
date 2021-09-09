@@ -68,7 +68,7 @@ static int32_t CreateNetlinkSocket(void)
     // Kernel will assign a unique nl_pid if set to zero.
     nladdr.nl_pid = 0;
     nladdr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
-    if (bind(sockFd, (struct sockaddr *) &nladdr, sizeof(nladdr)) < 0) {
+    if (bind(sockFd, (struct sockaddr *)&nladdr, sizeof(nladdr)) < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind netlink socket failed");
         close(sockFd);
         return SOFTBUS_ERR;

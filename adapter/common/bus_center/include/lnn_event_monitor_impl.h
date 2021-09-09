@@ -13,24 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef LNN_EVENT_MONITOR_H
-#define LNN_EVENT_MONITOR_H
+#ifndef LNN_EVENT_MONITOR_IMPL_H
+#define LNN_EVENT_MONITOR_IMPL_H
 
 #include <stdint.h>
-
-#include "lnn_event_monitor_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t LnnInitEventMonitor(void);
-void LnnDeinitEventMonitor(void);
+typedef enum {
+    LNN_MONITOR_EVENT_IP_ADDR_CHANGED,
+    LNN_MONITOR_EVENT_TYPE_MAX,
+} LnnMonitorEventType;
 
-int32_t LnnRegisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
-void LnnUnregisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
+typedef struct {
+    uint32_t len;
+    uint8_t value[0];
+} LnnMoniterData;
+
+typedef void (*LnnMonitorEventHandler)(LnnMonitorEventType event, const LnnMoniterData *para);
+
+typedef int32_t (*LnnInitEventMonitorImpl)(LnnMonitorEventHandler handler);
+
+int32_t LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler);
+
+int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
+
+int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_EVENT_MONITOR_H */
+#endif /* LNN_EVENT_MONITOR_IMPL_H */

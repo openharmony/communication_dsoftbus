@@ -17,29 +17,17 @@
 
 #include <securec.h>
 
-#include "permission/permission.h"
-#include "permission/permission_kit.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_permission.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
 using namespace testing::ext;
-using namespace OHOS::Security::Permission;
 
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
-constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 10;
+constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
-
-const std::string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
-const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
-
-const std::string TEST_LABEL = "test label";
-const std::string TEST_DESCRIPTION = "test description";
-const int TEST_LABEL_ID = 9527;
-const int TEST_DESCRIPTION_ID = 9528;
 
 class BusCenterSdkTest : public testing::Test {
 public:
@@ -47,19 +35,14 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-private:
-    static void AddPermission(const string &pkgName);
-    static void RemovePermission(const string &pkgName);
 };
 
 void BusCenterSdkTest::SetUpTestCase()
 {
-    AddPermission(TEST_PKG_NAME);
 }
 
 void BusCenterSdkTest::TearDownTestCase()
 {
-    RemovePermission(TEST_PKG_NAME);
 }
 
 void BusCenterSdkTest::SetUp()
@@ -68,46 +51,6 @@ void BusCenterSdkTest::SetUp()
 
 void BusCenterSdkTest::TearDown()
 {
-}
-
-void BusCenterSdkTest::AddPermission(const string &pkgName)
-{
-    std::vector<PermissionDef> permDefList;
-    PermissionDef permissionDefAlpha = {
-        .permissionName = SYSTEM_APP_PERMISSION,
-        .bundleName = pkgName,
-        .grantMode = GrantMode::SYSTEM_GRANT,
-        .availableScope = AVAILABLE_SCOPE_ALL,
-        .label = TEST_LABEL,
-        .labelId = TEST_LABEL_ID,
-        .description = TEST_DESCRIPTION,
-        .descriptionId = TEST_DESCRIPTION_ID
-    };
-    PermissionDef permissionDefBeta = {
-        .permissionName = DANGER_APP_PERMISSION,
-        .bundleName = pkgName,
-        .grantMode = GrantMode::SYSTEM_GRANT,
-        .availableScope = AVAILABLE_SCOPE_ALL,
-        .label = TEST_LABEL,
-        .labelId = TEST_LABEL_ID,
-        .description = TEST_DESCRIPTION,
-        .descriptionId = TEST_DESCRIPTION_ID
-    };
-    permDefList.emplace_back(permissionDefAlpha);
-    permDefList.emplace_back(permissionDefBeta);
-    PermissionKit::AddDefPermissions(permDefList);
-    std::vector<std::string> permList;
-    permList.push_back(SYSTEM_APP_PERMISSION);
-    permList.push_back(DANGER_APP_PERMISSION);
-    PermissionKit::AddSystemGrantedReqPermissions(pkgName, permList);
-    PermissionKit::GrantSystemGrantedPermission(pkgName, SYSTEM_APP_PERMISSION);
-    PermissionKit::GrantSystemGrantedPermission(pkgName, DANGER_APP_PERMISSION);
-}
-
-void BusCenterSdkTest::RemovePermission(const string &pkgName)
-{
-    int ret = PermissionKit::RemoveDefPermissions(pkgName);
-    ret = PermissionKit::RemoveSystemGrantedReqPermissions(pkgName);
 }
 
 static void OnNodeOnline(NodeBasicInfo *info)
@@ -132,6 +75,16 @@ static void OnLeaveLNNDone(const char *networkId, int32_t retCode)
     (void)networkId;
     (void)retCode;
 }
+
+static void OnTimeSyncResult(const TimeSyncResultInfo *info, int32_t retCode)
+{
+    (void)info;
+    (void)retCode;
+}
+
+static ITimeSyncCb g_timeSyncCb = {
+    .onTimeSyncResult = OnTimeSyncResult,
+};
 
 /*
 * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
@@ -251,5 +204,36 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UUID,
         (uint8_t *)uuid, UUID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strlen(uuid) == (UUID_BUF_LEN - 1));
+}
+
+/*
+* @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_001
+* @tc.desc: start time sync interface test
+* @tc.type: FUNC
+* @tc.require: AR000FN60G
+*/
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_001, TestSize.Level0)
+{
+    char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
+
+    EXPECT_TRUE(StartTimeSync(NULL, networkId, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, NULL, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, networkId, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, networkId, LOW_ACCURACY, SHORT_PERIOD, NULL) != SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_002
+* @tc.desc: start time sync interface test
+* @tc.type: FUNC
+* @tc.require: AR000FN60G
+*/
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Level0)
+{
+    char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
+
+    EXPECT_TRUE(StopTimeSync(NULL, networkId) != SOFTBUS_OK);
+    EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, NULL) != SOFTBUS_OK);
+    EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, networkId) != SOFTBUS_OK);
 }
 } // namespace OHOS

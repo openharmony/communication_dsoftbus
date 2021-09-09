@@ -60,7 +60,7 @@ static EventMonitorCtrl g_eventMonitorCtrl = {
     .lock = PTHREAD_MUTEX_INITIALIZER,
 };
 
-static void EventMonitorHandler(LnnMonitorEventType event, const void *para)
+static void EventMonitorHandler(LnnMonitorEventType event, const LnnMoniterData *para)
 {
     EventHandler *item = NULL;
 
