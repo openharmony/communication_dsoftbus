@@ -17,11 +17,11 @@
 
 #include "securec.h"
 
+#include "lnn_bus_center_ipc.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "lnn_bus_center_ipc.h"
 
 int32_t BusCenterServerProxyInit(void)
 {
