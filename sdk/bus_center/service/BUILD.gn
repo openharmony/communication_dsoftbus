@@ -21,11 +21,22 @@ if (defined(ohos_lite)) {
         "include",
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/kits",
         "$dsoftbus_root_path/sdk/bus_center/manager/include",
         "$dsoftbus_root_path/sdk/frame/include",
+        "$dsoftbus_root_path/sdk/frame/common/include",
+        "$hilog_lite_include_path",
+        "$softbus_adapter_common/include",
       ]
 
       sources = [ "src/client_bus_center.c" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
+        "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
+      ]
     }
   } else {
     shared_library("dsoftbus_bus_center_service_sdk") {

@@ -34,10 +34,10 @@ if (defined(ohos_lite)) {
       ]
       include_dirs = [
         "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/common/message_handler/include",
-        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
-        "$libsec_include_path",
         "$hilog_lite_include_path",
         "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
       ]
@@ -52,10 +52,10 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_utils_interface" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common/message_handler:message_handler",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
         "$hilog_lite_deps_path",
-        "$libsec_deps_path",
       ]
     }
   } else {

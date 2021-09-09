@@ -17,6 +17,7 @@ config("bus_center_server_interface") {
   include_dirs = [
     "ipc/include",
     "service/include",
+    "lnn/net_buscenter/include",
     "interface",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -29,6 +30,82 @@ config("bus_center_server_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_bus_center_server") {
+      sources = [
+        "ipc/mini_system/lnn_bus_center_ipc.c",
+        "lnn/net_builder/src/lnn_connection_fsm.c",
+        "lnn/net_builder/src/lnn_discovery_manager.c",
+        "lnn/net_builder/src/lnn_net_builder.c",
+        "lnn/net_builder/src/lnn_network_id.c",
+        "lnn/net_builder/src/lnn_node_weight.c",
+        "lnn/net_builder/src/lnn_state_machine.c",
+        "lnn/net_builder/sync_info/src/lnn_exchange_device_info.c",
+        "lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
+        "lnn/net_buscenter/src/lnn_ip_network_impl.c",
+        "lnn/net_buscenter/src/lnn_network_manager.c",
+        "service/src/bus_center_event.c",
+        "service/src/bus_center_manager.c",
+      ]
+      if (enable_auto_networking == true) {
+        sources += [ "lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+      }
+      include_dirs = [
+        "$dsoftbus_root_path/core/bus_center/ipc/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+        "$dsoftbus_root_path/core/bus_center/ipc/mini_system/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+        "$dsoftbus_root_path/core/adapter/bus_center/include",
+        "$dsoftbus_root_path/core/adapter/kernel/include",
+        "$dsoftbus_root_path/core/authentication/interface",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/inner_communication",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/transmission/interface",
+        "$dsoftbus_root_path/core/transmission/common/include",
+        "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "$dsoftbus_root_path/core/discovery/interface",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$softbus_adapter_config/spec_config",
+        "$hilog_lite_include_path",
+        "$dsoftbus_root_path/sdk/bus_center/manager/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+        "lnn/lane_hub/time_sync/include",
+        "$dsoftbus_root_path/sdk/bus_center/manager/include",
+        "//third_party/cJSON",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
+      ]
+      public_configs = [ ":bus_center_server_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub:dsoftbus_bus_center_hub",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/bus_center/monitor:dsoftbus_bus_center_monitor",
+        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/common/json_utils:json_utils",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/message_handler:message_handler",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/connection/manager:conn_manager",
+        "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
+        "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
+        "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel",
+        "$hilog_lite_deps_path",
+      ]
+    }
   } else {
     shared_library("dsoftbus_bus_center_server") {
       sources = [
