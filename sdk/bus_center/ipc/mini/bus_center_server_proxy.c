@@ -31,12 +31,12 @@ int32_t BusCenterServerProxyInit(void)
 
 int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
-    return LnnIpcGetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);;
+    return LnnIpcGetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
 }
 
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
-    return LnnIpcGetLocalDeviceInfo(pkgName, info, infoTypeLen);;
+    return LnnIpcGetLocalDeviceInfo(pkgName, info, infoTypeLen);
 }
 
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
