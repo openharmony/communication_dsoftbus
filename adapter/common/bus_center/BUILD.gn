@@ -41,7 +41,7 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":bus_center_monitor_interface" ]
       deps = [
-        "$dsoftbus_root_path/core/adapter/kernel:softbus_adapter_kernel",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
