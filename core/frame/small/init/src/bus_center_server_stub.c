@@ -245,7 +245,7 @@ int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync read targetNetworkId failed!");
         return SOFTBUS_ERR;
     }
-    
+
     int32_t callingUid = GetCallingUid(origin);
     if (!CheckBusCenterPermission(callingUid, pkgName)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync no permission.");
