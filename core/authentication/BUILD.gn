@@ -34,45 +34,84 @@ if (enable_auth_account == true) {
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("dsoftbus_auth_server") {
+      sources = common_src
+      include_dirs = [
+        "$dsoftbus_root_path/adapter/common/include",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/utils/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$softbus_adapter_config/spec_config",
+        "$hilog_lite_include_path",
+        "//base/security/deviceauth/interfaces/innerkits",
+        "//third_party/cJSON",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      public_configs = [ ":auth_server_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/common/json_utils:json_utils",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
+        "$hilog_lite_deps_path",
 
-  shared_library("dsoftbus_auth_server") {
-    sources = common_src
-    include_dirs = [
-      "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/bus_center/interface",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-      "$dsoftbus_root_path/core/bus_center/utils/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/message_handler/include",
-      "$dsoftbus_root_path/core/connection/manager",
-      "$dsoftbus_root_path/core/connection/interface",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/core/common/softbus_property/include",
-      "$softbus_adapter_config/spec_config",
-      "$hilog_lite_include_path",
-      "//base/security/deviceauth/interfaces/innerkits",
-      "//third_party/bounds_checking_function/include",
-      "//third_party/cJSON",
-    ]
-    cflags = [
-      "-Wall",
-      "-fPIC",
-    ]
-    public_configs = [ ":auth_server_interface" ]
-    deps = [
-      "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
-      "$dsoftbus_root_path/core/common/json_utils:json_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
-      "$hilog_lite_deps_path",
-      "//base/security/deviceauth/services:deviceauth_sdk",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+        #"//base/security/deviceauth:deviceauth_lite",
+      ]
+    }
+  } else {
+    shared_library("dsoftbus_auth_server") {
+      sources = common_src
+      include_dirs = [
+        "$softbus_adapter_common/include",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/utils/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/message_handler/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$softbus_adapter_config/spec_config",
+        "$hilog_lite_include_path",
+        "//base/security/deviceauth/interfaces/innerkits",
+        "//third_party/bounds_checking_function/include",
+        "//third_party/cJSON",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+      public_configs = [ ":auth_server_interface" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/common/json_utils:json_utils",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
+        "$hilog_lite_deps_path",
+        "//base/security/deviceauth/services:deviceauth_sdk",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
   }
 } else {
   import("//build/ohos.gni")

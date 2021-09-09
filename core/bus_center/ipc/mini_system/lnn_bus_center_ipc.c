@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "bus_center_manager.h"
-#include "softbus_interface.h"
+#include "client_bus_center_manager.h"
 
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
@@ -56,22 +56,29 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
-    return GetClientProvideInterface()->onJoinLNNResult(NULL, addr, addrTypeLen, networkId, retCode);
+    return LnnOnJoinResult(addr, networkId, retCode);
 }
 
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
-    return GetClientProvideInterface()->onLeaveLNNResult(NULL, networkId, retCode);
+    return LnnOnLeaveResult(networkId, retCode);
 }
 
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 {
-    return GetClientProvideInterface()->onNodeOnlineStateChanged(isOnline, info, infoTypeLen);
+    return LnnOnNodeOnlineStateChanged(isOnline, info);
 }
 
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
-    return GetClientProvideInterface()->onNodeBasicInfoChanged(info, infoTypeLen, type);
+    return LnnOnNodeBasicInfoChanged(info, type);
+}
+
+int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+{
+    (void)pkgName;
+    (void)infoTypeLen;
+    return LnnOnTimeSyncResult(info, retCode);
 }
 
 void BusCenterServerDeathCallback(const char *pkgName)
