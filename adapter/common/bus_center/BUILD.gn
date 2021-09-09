@@ -31,7 +31,6 @@ if (defined(ohos_lite)) {
         "$libsec_include_path",
         "$hilog_lite_include_path",
         "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
-        "$dsoftbus_root_path/core/bus_center/monitor/include",
       ]
       cflags = [
         "-Wall",
@@ -44,7 +43,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
         "$hilog_lite_deps_path",
-        "$libsec_deps_path",
       ]
     }
   } else {
@@ -61,7 +59,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/include",
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
-        "$dsoftbus_root_path/core/bus_center/monitor/include",
       ]
       if (ohos_kernel_type == "liteos_a") {
         sources = [
@@ -113,7 +110,6 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "//utils/native/base/include",
-      "$dsoftbus_root_path/core/bus_center/monitor/include",
     ]
     public_configs = [ ":bus_center_monitor_interface" ]
     deps = [
