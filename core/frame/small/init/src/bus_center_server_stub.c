@@ -118,7 +118,6 @@ int32_t ServerGetAllOnlineNodeInfo(void *origin, IpcIo *req, IpcIo *reply)
     IpcIoPushInt32(reply, infoNum);
     if (infoNum > 0) {
         IpcIoPushFlatObj(reply, nodeInfo, infoTypeLen * infoNum);
-        SoftBusFree(nodeInfo);
     }
     return SOFTBUS_OK;
 }
@@ -154,7 +153,6 @@ int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     IpcIoPushFlatObj(reply, nodeInfo, infoTypeLen);
-    SoftBusFree(nodeInfo);
     return SOFTBUS_OK;
 }
 
@@ -194,7 +192,6 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     IpcIoPushFlatObj(reply, buf, len);
-    SoftBusFree(buf);
     return SOFTBUS_OK;
 }
 
