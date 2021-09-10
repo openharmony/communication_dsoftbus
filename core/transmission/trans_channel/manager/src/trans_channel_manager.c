@@ -223,7 +223,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
-int32_t TransOpenChannel(SessionParam *param, TransInfo *transInfo)
+int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
     transInfo->channelId = INVALID_CHANNEL_ID;
@@ -278,8 +278,6 @@ EXIT_ERR:
     if (transInfo->channelId != INVALID_CHANNEL_ID) {
         (void)TransCloseChannel(transInfo->channelId, transInfo->channelType);
     }
-    transInfo->channelId = INVALID_CHANNEL_ID;
-    transInfo->channelType = CHANNEL_TYPE_BUTT;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel err");
     return INVALID_CHANNEL_ID;
 }

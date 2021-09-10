@@ -115,7 +115,7 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
     return TransSessionServerDelItem(sessionName);
 }
 
-int32_t TransOpenSession(SessionParam *param, TransInfo *info)
+int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans server opensession.");
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||

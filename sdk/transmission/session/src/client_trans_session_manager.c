@@ -678,7 +678,7 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo* transInfo)
+int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
 {
     if ((sessionId < 0) || (transInfo->channelId < 0)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
@@ -950,7 +950,7 @@ static INodeStateCb g_transLnnCb = {
     .onNodeOffline = ClientTransLnnOfflineProc,
 };
 
-void ClientTransRegLnnOffline()
+void ClientTransRegLnnOffline(void)
 {
     int32_t ret;
     ret = RegNodeDeviceStateCbInner("trans", &g_transLnnCb);

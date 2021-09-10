@@ -27,7 +27,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
 
 int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName);
 
-int32_t TransOpenSession(SessionParam *param, TransInfo *info);
+int32_t TransOpenSession(const SessionParam *param, TransInfo *info);
 
 int TransServerInit(void);
 

@@ -107,7 +107,7 @@ int32_t SoftBusServerProxyFrame::RemoveSessionServer(const char *pkgName, const 
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::OpenSession(SessionParam *param, TransInfo *info)
+int32_t SoftBusServerProxyFrame::OpenSession(const SessionParam *param, TransInfo *info)
 {
     return SOFTBUS_OK;
 }

@@ -144,7 +144,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return ret;
 }
 
-int32_t ServerIpcOpenSession(SessionParam *param, TransInfo *info)
+int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
 
@@ -164,7 +164,8 @@ int32_t ServerIpcOpenSession(SessionParam *param, TransInfo *info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request, &transSerializer, OpenSessionProxyCallback);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request,
+        &transSerializer, OpenSessionProxyCallback);
     if (ans != EC_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", transSerializer.ret);
         return SOFTBUS_ERR;

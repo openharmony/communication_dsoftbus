@@ -86,7 +86,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return g_serverProxy->RemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t ServerIpcOpenSession(SessionParam *param, TransInfo *info)
+int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
