@@ -17,7 +17,7 @@
 #define SOFTBUS_PROXYCHANNEL_CONTROL_H
 #include "softbus_proxychannel_message.h"
 
-int32_t TransProxySendMessage(ProxyChannelInfo *info, char *payLoad, int32_t payLoadLen, int32_t priority);
+int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen, int32_t priority);
 int32_t TransProxyHandshake(ProxyChannelInfo *info);
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan);
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info);
