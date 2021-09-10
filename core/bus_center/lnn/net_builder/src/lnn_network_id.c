@@ -43,7 +43,7 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid: %s", id);
-        if (SoftBusWriteFile(uuidFilePath, (uint8_t *)id, len) != SOFTBUS_OK) {
+        if (SoftBusWriteFile(uuidFilePath, id, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write uuid to file failed");
             return SOFTBUS_ERR;
         }
