@@ -34,28 +34,27 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen)
     int32_t ret = UtilsFileStat(fileName, &fileLen);
     if (ret < 0) {
         UtilsFileClose(fd);
-        goto EXIT;
+        return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileSeek(fd, 0, SEEK_SET_FS);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Read UtilsFileSeek fail");
-        goto EXIT;
+        UtilsFileClose(fd);
+        return SOFTBUS_FILE_ERR;
     }
     if (fileLen > maxLen) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Read file len not legal, clear buf");
-        goto EXIT;
+        UtilsFileClose(fd);
+        return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileRead(fd, readBuf, maxLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Read UtilsFileRead, ret=%{public}d", ret);
-        goto EXIT;
+        UtilsFileClose(fd);
+        return SOFTBUS_FILE_ERR;
     }
     UtilsFileClose(fd);
     return SOFTBUS_OK;
-
-EXIT:
-    UtilsFileClose(fd);
-    return SOFTBUS_FILE_ERR;
 }
 
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, int32_t len)
