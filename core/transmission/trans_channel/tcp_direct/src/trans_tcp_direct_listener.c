@@ -168,11 +168,24 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
     return SOFTBUS_OK;
 }
 
-void CloseTcpDirectFd(int fd)
+static void CloseTcpDirectFd(int fd)
 {
 #ifndef __LITEOS_M__
     CloseTcpFd(fd);
 #endif
+}
+
+static void TransProcDataRes(int32_t ret, int32_t channelId, int32_t fd)
+{
+    if (ret != SOFTBUS_OK) {
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        CloseTcpFd(fd);
+        NotifyChannelOpenFailed(channelId);
+    } else {
+        CloseTcpDirectFd(fd);
+    }
+    TransDelSessionConnById(channelId);
+    TransSrvDelDataBufNode(channelId);
 }
 
 static int32_t OnDataEvent(int events, int fd)
@@ -195,15 +208,7 @@ static int32_t OnDataEvent(int events, int fd)
             SoftBusFree(conn);
             return SOFTBUS_OK;
         }
-        if (ret != SOFTBUS_OK) {
-            DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
-            CloseTcpFd(fd);
-            NotifyChannelOpenFailed(conn->channelId);
-        } else {
-            CloseTcpDirectFd(fd);
-        }
-        TransDelSessionConnById(conn->channelId);
-        TransSrvDelDataBufNode(conn->channelId);
+        TransProcDataRes(ret, conn->channelId, fd);
     } else if (events == SOFTBUS_SOCKET_OUT) {
         if (conn->serverSide == true) {
             SoftBusFree(conn);
