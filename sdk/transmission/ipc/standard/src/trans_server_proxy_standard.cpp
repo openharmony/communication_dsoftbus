@@ -133,7 +133,7 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
-int32_t TransServerProxy::OpenSession(SessionParam *param, TransInfo *info)
+int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
     if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
         param->peerDeviceId == nullptr || param->groupId == nullptr) {
