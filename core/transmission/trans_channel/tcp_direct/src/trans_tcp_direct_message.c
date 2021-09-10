@@ -543,6 +543,7 @@ static int32_t TransTdcSrvProcData(int32_t channelId)
             bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
+    DelTrigger(DIRECT_CHANNEL_SERVER, node->fd, READ_TRIGGER);
     pthread_mutex_unlock(&g_tcpSrvDataList->lock);
     return ProcessReceivedData(channelId);
 }
