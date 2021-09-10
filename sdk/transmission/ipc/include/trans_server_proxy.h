@@ -28,7 +28,7 @@ int32_t TransServerProxyInit(void);
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName);
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName);
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName);
-int32_t ServerIpcOpenSession(SessionParam *param, TransInfo *info);
+int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info);
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
 int32_t ServerIpcNotifyAuthSuccess(int channelId);
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType);

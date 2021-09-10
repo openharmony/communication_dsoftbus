@@ -72,7 +72,7 @@ int32_t ClientAddNewSession(const char* sessionName, SessionInfo* session);
  * @brief Add session.
  * @return  if session already added, return SOFTBUS_TRANS_SESSION_REPEATED, else return SOFTBUS_OK or SOFTBUS_ERR.
  */
-int32_t ClientAddSession(const SessionParam* param, int32_t* sessionId, bool* isEnabled);
+int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
 
 int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId);
 
@@ -84,19 +84,19 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char* data, uint16_t len, Se
 
 int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t* channelId, int32_t* type);
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type);
 
-int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo* transInfo);
+int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 
-int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t* sessionId);
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
-int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t* sessionId);
+int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId);
 
 int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener* callback);
 
-int32_t ClientGetSessionCallbackByName(const char* sessionName, ISessionListener* callback);
+int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener *callback);
 
-int32_t ClientAddSessionServer(SoftBusSecType type, const char* pkgName, const char* sessionName,
+int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
     const ISessionListener* listener);
 
 int32_t ClientGetSessionSide(int32_t sessionId);
@@ -104,7 +104,7 @@ int32_t ClientGetSessionSide(int32_t sessionId);
 int TransClientInit(void);
 void TransClientDeinit(void);
 
-void ClientTransRegLnnOffline();
+void ClientTransRegLnnOffline(void);
 #ifdef __cplusplus
 }
 #endif

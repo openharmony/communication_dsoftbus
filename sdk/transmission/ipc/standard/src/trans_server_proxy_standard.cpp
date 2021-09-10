@@ -147,8 +147,7 @@ int32_t TransServerProxy::OpenSession(SessionParam *param, TransInfo *info)
 
     MessageParcel data;
     if (!data.WriteCString(param->sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN,
-        SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(param->peerSessionName)) {

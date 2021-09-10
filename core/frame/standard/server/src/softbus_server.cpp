@@ -117,7 +117,7 @@ int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sess
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t SoftBusServer::OpenSession(SessionParam *param, TransInfo *info)
+int32_t SoftBusServer::OpenSession(const SessionParam *param, TransInfo *info)
 {
     return TransOpenSession(param, info);
 }

@@ -36,7 +36,7 @@ public:
 
     virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
     virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
-    virtual int32_t OpenSession(SessionParam *param, TransInfo *info) = 0;
+    virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int channelId) = 0;
     virtual int32_t CloseChannel(int32_t channelId, int32_t channelType) = 0;

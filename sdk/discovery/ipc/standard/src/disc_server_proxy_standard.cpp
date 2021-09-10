@@ -191,7 +191,7 @@ int32_t DiscServerProxy::RemoveSessionServer(const char *pkgName, const char *se
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::OpenSession(SessionParam *param, TransInfo *info)
+int32_t DiscServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
     return SOFTBUS_OK;
 }

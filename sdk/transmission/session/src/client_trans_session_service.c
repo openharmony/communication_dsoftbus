@@ -201,7 +201,8 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d", sessionId, transInfo.channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d, channelType = %d",
+        sessionId, transInfo.channelId, transInfo.channelType);
     return sessionId;
 }
 
@@ -309,15 +310,14 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
 
     transInfo.channelId = ServerIpcOpenAuthSession(sessionName, addr);
     transInfo.channelType = CHANNEL_TYPE_AUTH;
-\
-
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d", sessionId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d, channelId=%d, channelType = %d",
+        sessionId, transInfo.channelId, transInfo.channelType);
     return sessionId;
 }
 
