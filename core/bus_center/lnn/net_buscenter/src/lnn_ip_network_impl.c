@@ -250,7 +250,7 @@ static int32_t UpdateLocalIp(char *ipCurrentAddr, char *ifCurrentName)
     return SOFTBUS_OK;
 }
 
-static void IpAddrChangeEventHandler(LnnMonitorEventType event, const void *para)
+static void IpAddrChangeEventHandler(LnnMonitorEventType event, const LnnMoniterData *para)
 {
     char ipCurrentAddr[IP_LEN] = {0};
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
