@@ -28,20 +28,7 @@ typedef enum {
     LNN_FILE_ID_MAX
 } LnnFileId;
 
-typedef struct {
-    LnnFileId fileId;
-    const char *filePath;
-} LnnFilePath;
-
-#define LNN_PATH_SEPRATOR '/'
-#define LNN_MAX_DIR_PATH_LEN 256
-
-int32_t LnnFileCreate(LnnFileId id);
-int32_t LnnFileOpen(LnnFileId id);
-int32_t LnnFileClose(int32_t fd);
-
-int32_t LnnFileRead(int32_t fd, uint8_t *dst, uint32_t len, bool needReadAll);
-int32_t LnnFileWrite(int32_t fd, const uint8_t *src, uint32_t len, bool needWriteAll);
+int32_t LnnGetFullStoragePath(LnnFileId id, char *path, int32_t len);
 
 #ifdef __cplusplus
 }
