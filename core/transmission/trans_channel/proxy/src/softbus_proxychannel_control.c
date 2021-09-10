@@ -26,7 +26,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 
-int32_t TransProxySendMessage(ProxyChannelInfo *info, char *payLoad, int32_t payLoadLen, int32_t priority)
+int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen, int32_t priority)
 {
     char *buf = NULL;
     int32_t bufLen = 0;

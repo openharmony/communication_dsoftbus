@@ -889,9 +889,9 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     }
 
     TransProxyResetPeer(info);
-    ret = TransProxyCloseConnChannel(info->connId);
-    SoftBusFree(info);
+    (void)TransProxyCloseConnChannel(info->connId);
     ret = TransProxyCloseProxyOtherRes(channelId, info);
+    SoftBusFree(info);
     return ret;
 }
 
