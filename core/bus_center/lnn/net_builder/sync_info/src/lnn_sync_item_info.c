@@ -291,9 +291,9 @@ static int32_t HandleChannelClosed(const ChannelEventMsgPara *msgPara)
     return rc;
 }
 
-static void ChannelEventHandler(void *para)
+static void ChannelEventHandler(const void *para)
 {
-    ChannelEventMsgPara *msgPara = (ChannelEventMsgPara *)para;
+    const ChannelEventMsgPara *msgPara = (const ChannelEventMsgPara *)para;
 
     if (msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ChannelEventHandler: null para");
