@@ -16,15 +16,20 @@
 #ifndef SOFTBUS_ADAPTER_FILE_H
 #define SOFTBUS_ADAPTER_FILE_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
+#define SOFTBUS_PATH_SEPRATOR '/'
+#define SOFTBUS_MAX_PATH_LEN 256
+
 /* File operation */
-int SoftBusReadFile(const char *fileName, char *readBuf, int maxLen);
-int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len);
+int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen);
+int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, int32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus
