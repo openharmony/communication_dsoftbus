@@ -58,7 +58,7 @@ static EventMonitorCtrl g_eventMonitorCtrl = {
             .implInit = LnnInitLwipMonitorImpl,
         },
         [MONITOR_IMPL_WIFISERVICE_TYPE] = {
-            .implInit = LnnInitWifiserviceMonitorImpl,
+            .implInit = LnnInitWifiServiceMonitorImpl,
         },
     },
     .lock = PTHREAD_MUTEX_INITIALIZER,
