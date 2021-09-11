@@ -42,6 +42,8 @@ int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
 
 int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
 
+int32_t LnnInitWifiserviceMonitorImpl(LnnMonitorEventHandler handler);
+
 #ifdef __cplusplus
 }
 #endif

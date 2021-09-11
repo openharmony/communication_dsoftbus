@@ -1,0 +1,151 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "lnn_event_monitor_impl.h"
+
+#include "common_event_data.h"
+#include "common_event_manager.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
+#include "ohos/aafwk/content/want.h"
+#include "lnn_async_callback_utils.h"
+#include "wifi_msg.h"
+
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+
+#define WIFISERVICE_DELAY_LEN 1000
+#define RETRY_MAX_NUM 10
+
+static LnnMonitorEventHandler g_eventHandler;
+
+namespace OHOS {
+namespace EventFwk {
+
+class WifiServiceMonitor : public CommonEventSubscriber {
+public:
+    WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
+    virtual ~WifiServiceMonitor(){};
+    virtual void OnReceiveEvent(const CommonEventData &data);
+};
+
+WifiServiceMonitor::WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo)
+    : CommonEventSubscriber(subscriberInfo)
+{}
+
+void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
+{
+    int code = data.GetCode();
+    std::string action = data.GetWant().GetAction();
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
+
+    if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {       
+        switch (code) {
+            case int(OHOS::Wifi::ConnectionState::CONNECT_AP_CONNECTED):
+            case int(OHOS::Wifi::ConnectionState::DISCONNECT_DISCONNECTED):
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
+                g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+                break;
+            default: {
+                break;
+            }
+        }
+    }
+    if (action == CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE) {
+        switch (code) {
+            case int(OHOS::Wifi::WifiState::DISABLED):
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
+                g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+                break;
+            default: {
+                break;
+            }
+        }
+    }
+
+}
+
+class SubscribeEvent {
+public:
+    int32_t SubscribeWifiConnStateEvent();
+    int32_t SubscribeWifiPowerStateEvent();
+};
+ 
+int32_t SubscribeEvent::SubscribeWifiConnStateEvent()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+}
+}
+
+void LnnSubscribeWifiService(void *para)
+{
+    (void)para;
+    static int32_t retry = 0;
+    if (retry > RETRY_MAX_NUM) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe wifiservice event max times");
+        return;
+    }
+    OHOS::EventFwk::SubscribeEvent *subscriberPtr = new OHOS::EventFwk::SubscribeEvent();
+    if (subscriberPtr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeEvent init fail");
+        return;
+    }
+    if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
+        subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice conn and power state success");
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice event fail");
+        retry++;
+        SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, WIFISERVICE_DELAY_LEN) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
+        }
+    }
+}
+
+int32_t LnnInitWifiserviceMonitorImpl(LnnMonitorEventHandler handler)
+{
+    if (handler == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");
+        return SOFTBUS_ERR;
+    }
+    g_eventHandler = handler;
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, WIFISERVICE_DELAY_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
+    }
+    return ret;
+}
