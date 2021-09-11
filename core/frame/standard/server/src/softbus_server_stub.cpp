@@ -244,6 +244,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     param.attr = (SessionAttribute *)data.ReadRawData(sizeof(SessionAttribute));
     if (param.attr == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read SessionAttribute failed!");
+        return SOFTBUS_ERR;
     }
     int32_t retReply = OpenSession(&param, &(transSerializer.transInfo));
     transSerializer.ret = retReply;

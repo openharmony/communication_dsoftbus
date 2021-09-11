@@ -175,7 +175,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     }
     TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
     if (transSerializer == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read TransSerializer failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSession read TransSerializer failed!");
         return SOFTBUS_ERR;
     }
     info->channelId = transSerializer->transInfo.channelId;

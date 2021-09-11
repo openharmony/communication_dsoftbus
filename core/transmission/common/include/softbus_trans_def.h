@@ -27,17 +27,17 @@ typedef struct {
     const char *peerSessionName;
     const char *peerDeviceId;
     const char *groupId;
-    const SessionAttribute* attr;
+    const SessionAttribute *attr;
 } SessionParam;
 
 typedef struct {
-    int channelId;
-    int channelType;
+    int32_t channelId;
+    int32_t channelType;
 } TransInfo;
 
 typedef struct {
     TransInfo transInfo;
-    int ret;
+    int32_t ret;
 } TransSerializer;
 
 #ifdef __cplusplus
