@@ -32,7 +32,7 @@ static IClientProxy *g_serverProxy = NULL;
 
 static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
-    if (code != 0) {
+    if (code != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "publish service callback error[%d].", code);
         return SOFTBUS_ERR;
     }
@@ -44,7 +44,7 @@ static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 
 static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
-    if (code != 0) {
+    if (code != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "publish service callback error[%d].", code);
         return SOFTBUS_ERR;
     }

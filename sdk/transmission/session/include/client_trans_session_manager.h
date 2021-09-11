@@ -19,8 +19,6 @@
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
-#include "softbus_trans_def.h"
-
 
 #ifdef __cplusplus
 extern "C" {
