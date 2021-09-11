@@ -39,6 +39,12 @@
 #define DEFAULT_STORAGE_PATH "/data/data"
 #endif
 
+#ifdef __LITEOS_M__
+#define DEFAULT_SElECT_INTERVAL 100000
+#else
+#define DEFAULT_SElECT_INTERVAL 10000
+#endif
+
 typedef struct {
     int32_t maxByteLen;
     int32_t maxMsgLen;
@@ -200,13 +206,11 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
 static void SoftbusConfigSetDefaultVal(void)
 {
 #ifdef __LITEOS_M__
-#define SElECT_INTERVAL 100000
     g_tranConfig.isSupportTcpProxy = 0;
 #else
-#define SElECT_INTERVAL 10000
     g_tranConfig.isSupportTcpProxy = 1;
 #endif
-    g_tranConfig.selectInterval = SElECT_INTERVAL;
+    g_tranConfig.selectInterval = DEFAULT_SElECT_INTERVAL;
 }
 
 void SoftbusConfigInit(void)
