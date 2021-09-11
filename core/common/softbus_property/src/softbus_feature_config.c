@@ -84,7 +84,7 @@ typedef struct {
     int32_t selectInterval;
 } TransConfigItem;
 
-TransConfigItem g_tranConfig = {0};
+static TransConfigItem g_tranConfig = {0};
 
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
@@ -197,13 +197,13 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
     return SOFTBUS_OK;
 }
 
-static void SoftbusConfigSetDefaultVal()
+static void SoftbusConfigSetDefaultVal(void)
 {
 #ifdef __LITEOS_M__
-    #define SElECT_INTERVAL 100000
+#define SElECT_INTERVAL 100000
     g_tranConfig.isSupportTcpProxy = 0;
 #else
-    #define SElECT_INTERVAL 10000
+#define SElECT_INTERVAL 10000
     g_tranConfig.isSupportTcpProxy = 1;
 #endif
     g_tranConfig.selectInterval = SElECT_INTERVAL;
