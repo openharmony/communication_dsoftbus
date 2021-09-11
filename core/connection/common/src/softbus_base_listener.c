@@ -24,6 +24,7 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_thread_pool.h"
@@ -411,7 +412,10 @@ static int32_t SelectThread(void)
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = TIMEOUT;
-
+    int32_t timeOut = 0;
+    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, &timeOut, sizeof(timeOut)) == SOFTBUS_OK) {
+        tv.tv_usec = timeOut;
+    }
     fd_set readSet;
     fd_set writeSet;
     fd_set exceptSet;

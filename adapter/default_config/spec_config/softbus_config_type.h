@@ -39,6 +39,8 @@ typedef enum {
     SOFTBUS_INT_AUTH_ABILITY_COLLECTION, /* the default val is 0 */
     SOFTBUS_INT_ADAPTER_LOG_LEVEL, /* the default val is 0 */
     SOFTBUS_STR_STORAGE_DIRECTORY, /* the max length is MAX_STORAGE_PATH_LEN */
+    SOFTBUS_INT_SUPPORT_TCP_PROXY, /* the l0 devices val is 0 , others is 1 */
+    SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, /* the l0 devices val is 100000us , others is 10000us */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 
