@@ -89,82 +89,82 @@ static TransConfigItem g_tranConfig = {0};
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
         SOFTBUS_INT_MAX_BYTES_LENGTH, 
-        (unsigned char*)&(g_config.maxByteLen), 
+        (unsigned char*)&(g_config.maxByteLen),
         sizeof(g_config.maxByteLen)
     },
     {
         SOFTBUS_INT_MAX_MESSAGE_LENGTH, 
-        (unsigned char*)&(g_config.maxMsgLen), 
+        (unsigned char*)&(g_config.maxMsgLen),
         sizeof(g_config.maxMsgLen)
     },
     {
         SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, 
-        (unsigned char*)&(g_config.connBrMaxDataLen), 
+        (unsigned char*)&(g_config.connBrMaxDataLen),
         sizeof(g_config.connBrMaxDataLen)
     },
     {
         SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN, 
-        (unsigned char*)&(g_config.connRfcomSendMaxLen), 
+        (unsigned char*)&(g_config.connRfcomSendMaxLen),
         sizeof(g_config.connRfcomSendMaxLen)
     },
     {
         SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN, 
-        (unsigned char*)&(g_config.connBrRecvMaxLen), 
+        (unsigned char*)&(g_config.connBrRecvMaxLen),
         sizeof(g_config.connBrRecvMaxLen)
     },
     {
         SOFTBUS_INT_CONN_TCP_MAX_LENGTH, 
-        (unsigned char*)&(g_config.connTcpMaxLen), 
+        (unsigned char*)&(g_config.connTcpMaxLen),
         sizeof(g_config.connTcpMaxLen)
     },
     {
         SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, 
-        (unsigned char*)&(g_config.connTcpMaxConnNum), 
+        (unsigned char*)&(g_config.connTcpMaxConnNum),
         sizeof(g_config.connTcpMaxConnNum)
     },
     {
         SOFTBUS_INT_CONN_TCP_TIME_OUT, 
-        (unsigned char*)&(g_config.connTcpTimeOut), 
+        (unsigned char*)&(g_config.connTcpTimeOut),
         sizeof(g_config.connTcpTimeOut)
     },
     {
         SOFTBUS_INT_MAX_NODE_STATE_CB_CNT, 
-        (unsigned char*)&(g_config.maxNodeStateCbCnt), 
+        (unsigned char*)&(g_config.maxNodeStateCbCnt),
         sizeof(g_config.maxNodeStateCbCnt)
     },
     {
         SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, 
-        (unsigned char*)&(g_config.maxLnnConnCnt), 
+        (unsigned char*)&(g_config.maxLnnConnCnt),
         sizeof(g_config.maxLnnConnCnt)
     },
     {
         SOFTBUS_INT_LNN_SUPPORT_CAPBILITY,
-        (unsigned char*)&(g_config.maxLnnSupportCap), 
+        (unsigned char*)&(g_config.maxLnnSupportCap),
         sizeof(g_config.maxLnnSupportCap)
     },
     {
         SOFTBUS_INT_AUTH_ABILITY_COLLECTION, 
-        (unsigned char*)&(g_config.authAbilityConn), 
+        (unsigned char*)&(g_config.authAbilityConn),
         sizeof(g_config.authAbilityConn)
     },
     {
         SOFTBUS_INT_ADAPTER_LOG_LEVEL, 
-        (unsigned char*)&(g_config.adapterLogLevel), 
+        (unsigned char*)&(g_config.adapterLogLevel),
         sizeof(g_config.adapterLogLevel)
     },
     {
         SOFTBUS_STR_STORAGE_DIRECTORY, 
-        (unsigned char*)(g_config.storageDir), 
+        (unsigned char*)(g_config.storageDir),
         sizeof(g_config.storageDir)
     },
     {
         SOFTBUS_INT_SUPPORT_TCP_PROXY,
-        (unsigned char*)&(g_tranConfig.isSupportTcpProxy), 
+        (unsigned char*)&(g_tranConfig.isSupportTcpProxy),
         sizeof(g_tranConfig.isSupportTcpProxy)
     },
     {
         SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL,
-        (unsigned char*)&(g_tranConfig.selectInterval), 
+        (unsigned char*)&(g_tranConfig.selectInterval),
         sizeof(g_tranConfig.selectInterval)
     },
 };
