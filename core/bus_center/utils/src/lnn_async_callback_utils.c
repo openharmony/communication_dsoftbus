@@ -28,7 +28,7 @@ typedef struct {
     SoftBusMessage msg;
     SoftBusHandler handler;
     LnnAsyncCallbackFunc callback;
-    void *cbPara;
+    const void *cbPara;
 } AsyncCallbackInfo;
 
 #define TO_ASYNC_CALLBACK_INFO(cb) CONTAINER_OF(cb, AsyncCallbackInfo, callback)
@@ -81,7 +81,7 @@ static void InitAsyncCallbackHandler(SoftBusHandler *handler, SoftBusLooper *loo
 }
 
 static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper,
-    LnnAsyncCallbackFunc callback, void *para, int32_t msgType)
+    LnnAsyncCallbackFunc callback, const void *para, int32_t msgType)
 {
     AsyncCallbackInfo *info = NULL;
 
@@ -97,7 +97,7 @@ static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper,
     return info;
 }
 
-int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, const void *para)
 {
     AsyncCallbackInfo *info = NULL;
 
@@ -115,7 +115,7 @@ int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callb
 }
 
 int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+    const void *para, uint64_t delayMillis)
 {
     AsyncCallbackInfo *info = NULL;
 
