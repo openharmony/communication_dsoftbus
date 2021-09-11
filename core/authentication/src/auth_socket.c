@@ -199,6 +199,10 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
         head.len, head.module, head.flag, head.seq);
+    if (head.len > AUTH_MAX_DATA_LEN) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
+        return SOFTBUS_ERR;
+    }
     AuthIpDataProcess(fd, &head);
 
     return SOFTBUS_OK;
