@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/appexecfwk/standard/appexecfwk.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("bus_center_monitor_interface") {
@@ -24,6 +25,7 @@ if (defined(ohos_lite)) {
         "network/lnn_lwip_monitor.c",
         "network/lnn_netlink_monitor_virtual.c",
         "platform/lnn_product_monitor_virtual.c",
+        "wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
       include_dirs = [
         "$dsoftbus_root_path/core/adapter/kernel/include",
@@ -51,6 +53,7 @@ if (defined(ohos_lite)) {
           "network/lnn_lwip_monitor_virtual.c",
           "network/lnn_netlink_monitor.c",
           "platform/lnn_product_monitor_virtual.c",
+          "wlan/lnn_wifiservice_monitor_virtual.cpp",
         ]
       }
       include_dirs = [
@@ -64,6 +67,7 @@ if (defined(ohos_lite)) {
           "network/lnn_lwip_monitor_virtual.c",
           "network/lnn_netlink_monitor_virtual.c",
           "platform/lnn_product_monitor.c",
+          "wlan/lnn_wifiservice_monitor_virtual.cpp",
         ]
         include_dirs += [
           "//drivers/adapter/uhdf/posix/include",
@@ -104,21 +108,30 @@ if (defined(ohos_lite)) {
       "network/lnn_lwip_monitor_virtual.c",
       "network/lnn_netlink_monitor.c",
       "platform/lnn_product_monitor_virtual.c",
+      "wlan/lnn_wifiservice_monitor.cpp",
     ]
     include_dirs = [
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "//utils/native/base/include",
+      "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
+      "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
     ]
     public_configs = [ ":bus_center_monitor_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common/message_handler:message_handler",
+      "${aafwk_path}/interfaces/innerkits/want:want",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [
+        "ces_standard:cesfwk_innerkits",
+        "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_core",
+      ]
     }
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
