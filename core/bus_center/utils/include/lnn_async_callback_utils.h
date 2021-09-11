@@ -24,11 +24,11 @@
 extern "C" {
 #endif
 
-typedef void (*LnnAsyncCallbackFunc)(void *para);
+typedef void (*LnnAsyncCallbackFunc)(const void *para);
 
-int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, const void *para);
 int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis);
+    const void *para, uint64_t delayMillis);
 
 #ifdef __cplusplus
 }
