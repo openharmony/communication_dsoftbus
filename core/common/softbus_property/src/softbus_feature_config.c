@@ -104,7 +104,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_config.maxMsgLen)
     },
     {
-        SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, 
+        SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
         (unsigned char*)&(g_config.connBrMaxDataLen),
         sizeof(g_config.connBrMaxDataLen)
     },
