@@ -21,6 +21,7 @@
 
 #ifndef SOFTBUS_DEBUG
 #if defined(__LITEOS_M__)
+#define SOFTBUS_PRINTF
 #include "log.h"
 #else
 #include "hilog/log.h"

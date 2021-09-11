@@ -20,6 +20,7 @@ if (defined(ohos_lite)) {
     static_library("conn_common") {
       include_dirs = [
         "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/connection/common/include",
         "$dsoftbus_root_path/core/connection/interface",
         "$softbus_adapter_common/include",
@@ -37,12 +38,16 @@ if (defined(ohos_lite)) {
         "src/softbus_tcp_socket.c",
         "src/softbus_thread_pool.c",
       ]
-      deps = [ "$dsoftbus_root_path/core/common/log:softbus_log" ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+      ]
     }
   } else {
     shared_library("conn_common") {
       include_dirs = [
         "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/connection/common/include",
         "$dsoftbus_root_path/core/connection/interface",
         "$softbus_adapter_common/include",
@@ -75,6 +80,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("conn_common") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/connection/common/include",
       "$dsoftbus_root_path/core/connection/interface",
       "$softbus_adapter_common/include",
