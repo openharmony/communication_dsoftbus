@@ -425,23 +425,14 @@ EpollDesc CreateEpollDesc(void)
         goto FAIL_FREE;
     }
 
-    if (CreateEpollFdPair(&(epollSetPtr->epollfd)) != NSTACKX_EOK) {
-        LOGE(TAG, "Create Epoll failed");
+    epollSetPtr->epollfd.recvFd = -1;
+    epollSetPtr->epollfd.sendFd = -1;
+
+    if (EpollEventRecordAdd(epollSetPtr) != NSTACKX_EOK) {
         goto FAIL_MUTEX;
     }
 
-    FD_SET(epollSetPtr->epollfd.recvFd, &epollSetPtr->readfds);
-    FD_SET(epollSetPtr->epollfd.recvFd, &epollSetPtr->exceptfds);
-    epollSetPtr->maxfd = epollSetPtr->epollfd.recvFd;
-
-    if (EpollEventRecordAdd(epollSetPtr) != NSTACKX_EOK) {
-        goto FAIL_CLOSE;
-    }
-
     return &(epollSetPtr->epollfd);
-FAIL_CLOSE:
-    close(epollSetPtr->epollfd.recvFd);
-    close(epollSetPtr->epollfd.sendFd);
 FAIL_MUTEX:
     if (pthread_mutex_destroy(&(epollSetPtr->mutex)) != 0) {
         LOGE(TAG, "pthread mutex destroy error: %d", errno);
