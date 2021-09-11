@@ -21,6 +21,7 @@
 #include <securec.h>
 
 #include "lnn_file_utils.h"
+#include "softbus_adapter_file.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -28,47 +29,31 @@
 
 static int32_t GetUuidFromFile(char *id, uint32_t len)
 {
-    int32_t fd;
-    bool needWrite = false;
+    int32_t rc;
+    char uuidFilePath[SOFTBUS_MAX_PATH_LEN];
 
-    fd = LnnFileOpen(LNN_FILE_ID_UUID);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create uuid file");
-        if (LnnFileCreate(LNN_FILE_ID_UUID) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create file failed");
-            return SOFTBUS_ERR;
-        }
-        fd = LnnFileOpen(LNN_FILE_ID_UUID);
-        if (fd < 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open uuid file failed");
-            return SOFTBUS_ERR;
-        }
-        needWrite = true;
+    rc = LnnGetFullStoragePath(LNN_FILE_ID_UUID, uuidFilePath, SOFTBUS_MAX_PATH_LEN);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get uuid save path fail");
+        return SOFTBUS_ERR;
     }
-    if (needWrite) {
+    if (SoftBusReadFile(uuidFilePath, id, len) != SOFTBUS_OK) {
         if (GenerateRandomStr(id, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid id fail");
-            LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
-        if (LnnFileWrite(fd, (uint8_t *)id, len, true) != (int32_t)len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid: %s", id);
+        if (SoftBusWriteFile(uuidFilePath, id, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write uuid to file failed");
-            LnnFileClose(fd);
             return SOFTBUS_ERR;
         }
     } else {
-        if (LnnFileRead(fd, (uint8_t *)id, len, true) != (int32_t)len) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read uuid from file failed");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
-        if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid is invalid format from file");
-            LnnFileClose(fd);
-            return SOFTBUS_ERR;
-        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read uuid %s", id);
     }
-    LnnFileClose(fd);
+    if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid is invalid format");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
