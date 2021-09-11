@@ -16,6 +16,7 @@
 #include "trans_client_stub.h"
 
 #include "client_trans_channel_callback.h"
+#include "liteipc_adapter.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
@@ -67,7 +68,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransOnChannelOpened fail, error code: %d.", ret);
     }
-    
+
     FreeBuffer(ctx, ipcMsg);
 }
 

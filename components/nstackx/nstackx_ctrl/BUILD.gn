@@ -18,7 +18,7 @@ if (defined(ohos_lite)) {
   config("dfinder_interface") {
     include_dirs = [ "interface" ]
   }
-  shared_library("nstackx_ctrl") {
+  source_set("nstackx_ctrl") {
     sources = [
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
@@ -50,6 +50,9 @@ if (defined(ohos_lite)) {
       "-Wall",
       "-fPIC",
       "-std=c99",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-Os",
     ]
     cflags_cc = cflags
     ldflags = [ "-fPIC" ]

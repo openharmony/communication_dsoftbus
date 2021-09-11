@@ -16,6 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("trans_common_interface") {
   include_dirs = [
     "include",
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
   ]
 }
@@ -24,7 +25,6 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_include = [
-    "$dsoftbus_root_path/core/common/include",
     "//third_party/cJSON",
     "$softbus_adapter_common/include",
     "$hilog_lite_include_path",
@@ -33,28 +33,33 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/json_utils:json_utils",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_common") {
+    source_set("dsoftbus_trans_common") {
       include_dirs = common_include
-      sources = [ "src/softbus_message_open_channel.c" ]
+      sources = [
+        "src/softbus_message_open_channel.c",
+        "src/trans_pending_pkt.c",
+      ]
       public_configs = [ ":trans_common_interface" ]
       deps = common_deps
       deps += [ "//build/lite/config/component/cJSON:cjson_static" ]
     }
   } else {
-    shared_library("dsoftbus_trans_common") {
+    source_set("dsoftbus_trans_common") {
       include_dirs = common_include
       cflags = [
         "-Wall",
         "-fPIC",
       ]
-      sources = [ "src/softbus_message_open_channel.c" ]
+      sources = [
+        "src/softbus_message_open_channel.c",
+        "src/trans_pending_pkt.c",
+      ]
       deps = common_deps
       deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
       public_configs = [ ":trans_common_interface" ]
@@ -65,20 +70,21 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("dsoftbus_trans_common") {
     include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
       "//third_party/cJSON",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct",
       "$softbus_adapter_common/include",
     ]
-    sources = [ "src/softbus_message_open_channel.c" ]
+    sources = [
+      "src/softbus_message_open_channel.c",
+      "src/trans_pending_pkt.c",
+    ]
     public_configs = [ ":trans_common_interface" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/json_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

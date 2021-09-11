@@ -35,13 +35,13 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_ipc_proxy_sdk") {
+    source_set("dsoftbus_trans_ipc_proxy_sdk") {
       include_dirs = common_include
       include_dirs += [
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
@@ -52,7 +52,7 @@ if (defined(ohos_lite)) {
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_trans_ipc_proxy_sdk") {
+    source_set("dsoftbus_trans_ipc_proxy_sdk") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -93,7 +93,7 @@ if (defined(ohos_lite)) {
         "ipc:ipc_single",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "//utils/native/base:utils",
       ]
     }

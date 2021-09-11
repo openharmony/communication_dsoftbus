@@ -27,7 +27,7 @@ config("disc_server_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  shared_library("dsoftbus_disc_server") {
+  source_set("dsoftbus_disc_server") {
     sources = [
       "ipc/small/disc_client_proxy.c",
       "manager/src/disc_manager.c",
@@ -50,8 +50,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":disc_server_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
       "$hilog_lite_deps_path",
       "coap:dsoftbus_disc_coap",
@@ -90,8 +89,7 @@ if (defined(ohos_lite)) {
     }
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
       "coap:dsoftbus_disc_coap",
       "//utils/native/base:utils",

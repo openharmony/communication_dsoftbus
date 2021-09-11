@@ -30,13 +30,13 @@ if (defined(ohos_lite)) {
     "//third_party/cJSON",
   ]
   if (ohos_kernel_type == "liteos_m") {
-    static_library("softbus_permission") {
+    source_set("softbus_permission") {
       include_dirs = common_include
       sources = [ "mini_system/softbus_permission.c" ]
       deps = []
     }
   } else {
-    shared_library("softbus_permission") {
+    source_set("softbus_permission") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -49,9 +49,8 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         ":permission_json",
-        "$dsoftbus_core_path/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//base/security/permission/services/permission_lite/pms_client:pms_client",
@@ -85,9 +84,7 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       ":softbus_permission_json",
-      "$dsoftbus_core_path/common/json_utils:json_utils",
-      "$dsoftbus_core_path/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "//foundation/appexecfwk/standard/kits:appkit_native",
       "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",

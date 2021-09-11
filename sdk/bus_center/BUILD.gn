@@ -29,7 +29,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_manager_sdk") {
+    source_set("dsoftbus_bus_center_manager_sdk") {
       include_dirs = [
         "ipc/include",
         "$softbus_adapter_common/include",
@@ -45,11 +45,14 @@ if (defined(ohos_lite)) {
         "ipc/small/bus_center_server_proxy.c",
         "manager/src/client_bus_center_manager.c",
       ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
       public_configs = [ ":bus_center_client_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$hilog_lite_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
@@ -82,8 +85,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_client_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

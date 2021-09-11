@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("conn_common") {
+    source_set("conn_common") {
       include_dirs = [
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/common/include",
@@ -38,12 +38,12 @@ if (defined(ohos_lite)) {
         "src/softbus_thread_pool.c",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
   } else {
-    shared_library("conn_common") {
+    source_set("conn_common") {
       include_dirs = [
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/connection/common/include",
@@ -65,8 +65,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
       ]
@@ -89,7 +88,7 @@ if (defined(ohos_lite)) {
     ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {
