@@ -26,17 +26,15 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define WIFISERVICE_DELAY_LEN 1000
-#define RETRY_MAX_NUM 10
-
+const int32_t DELAY_LEN = 1000;
+const int32_t RETRY_MAX = 10;
 static LnnMonitorEventHandler g_eventHandler;
 
 namespace OHOS {
 namespace EventFwk {
-
 class WifiServiceMonitor : public CommonEventSubscriber {
 public:
-    WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
+    explicit WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
     virtual ~WifiServiceMonitor(){};
     virtual void OnReceiveEvent(const CommonEventData &data);
 };
@@ -51,7 +49,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     std::string action = data.GetWant().GetAction();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
 
-    if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {       
+    if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
             case int(OHOS::Wifi::ConnectionState::CONNECT_AP_CONNECTED):
             case int(OHOS::Wifi::ConnectionState::DISCONNECT_DISCONNECTED):
@@ -74,7 +72,6 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
             }
         }
     }
-
 }
 
 class SubscribeEvent {
@@ -82,7 +79,7 @@ public:
     int32_t SubscribeWifiConnStateEvent();
     int32_t SubscribeWifiPowerStateEvent();
 };
- 
+
 int32_t SubscribeEvent::SubscribeWifiConnStateEvent()
 {
     MatchingSkills matchingSkills;
@@ -109,11 +106,11 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
 }
 }
 
-void LnnSubscribeWifiService(void *para)
+static void LnnSubscribeWifiService(void *para)
 {
     (void)para;
     static int32_t retry = 0;
-    if (retry > RETRY_MAX_NUM) {
+    if (retry > RETRY_MAX) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe wifiservice event max times");
         return;
     }
@@ -143,7 +140,7 @@ int32_t LnnInitWifiserviceMonitorImpl(LnnMonitorEventHandler handler)
     }
     g_eventHandler = handler;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, WIFISERVICE_DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
     }
