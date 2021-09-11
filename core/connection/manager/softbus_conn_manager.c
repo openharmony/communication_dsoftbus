@@ -24,6 +24,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
@@ -450,10 +451,14 @@ int32_t ConnServerInit(void)
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
     g_connManagerCb.OnDataReceived = ConnManagerRecvData;
 
-    connectObj = ConnInitTcp(&g_connManagerCb);
-    if (connectObj != NULL) {
-        g_connManager[CONNECT_TCP] = connectObj;
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init tcp ok \r\n");
+    int isSupportTcp = 0;
+    (void)SoftbusGetConfig(SOFTBUS_INT_SUPPORT_TCP_PROXY, &isSupportTcp, sizeof(isSupportTcp));
+    if (isSupportTcp) {
+        connectObj = ConnInitTcp(&g_connManagerCb);
+        if (connectObj != NULL) {
+            g_connManager[CONNECT_TCP] = connectObj;
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init tcp ok \r\n");
+        }
     }
 
     connectObj = ConnInitBr(&g_connManagerCb);

@@ -20,6 +20,7 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/connection/ble/include",
         "$dsoftbus_root_path/core/connection/br/include",
         "$dsoftbus_root_path/core/connection/tcp/include",
@@ -43,6 +44,7 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/connection/ble/include",
         "$dsoftbus_root_path/core/connection/br/include",
         "$dsoftbus_root_path/core/connection/tcp/include",
@@ -71,6 +73,7 @@ if (defined(ohos_lite)) {
     sources = [ "softbus_conn_manager.c" ]
     include_dirs = [
       "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/connection/ble/include",
       "$dsoftbus_root_path/core/connection/br/include",

@@ -79,6 +79,13 @@ ConfigItem g_config = {
     DEFAULT_STORAGE_PATH,
 };
 
+typedef struct {
+    int32_t isSupportTcpProxy;
+    int32_t selectInterval;
+} TransConfigItem;
+
+TransConfigItem g_tranConfig = {0};
+
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
         SOFTBUS_INT_MAX_BYTES_LENGTH, 
@@ -150,6 +157,16 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         (unsigned char*)(g_config.storageDir), 
         sizeof(g_config.storageDir)
     },
+    {
+        SOFTBUS_INT_SUPPORT_TCP_PROXY,
+        (unsigned char*)&(g_tranConfig.isSupportTcpProxy), 
+        sizeof(g_tranConfig.isSupportTcpProxy)
+    },
+    {
+        SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL,
+        (unsigned char*)&(g_tranConfig.selectInterval), 
+        sizeof(g_tranConfig.selectInterval)
+    },
 };
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
@@ -180,10 +197,22 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
     return SOFTBUS_OK;
 }
 
+static void SoftbusConfigSetDefaultVal()
+{
+#ifdef __LITEOS_M__
+    #define SElECT_INTERVAL 100000
+    g_tranConfig.isSupportTcpProxy = 0;
+#else
+    #define SElECT_INTERVAL 10000
+    g_tranConfig.isSupportTcpProxy = 1;
+#endif
+    g_tranConfig.selectInterval = SElECT_INTERVAL;
+}
+
 void SoftbusConfigInit(void)
 {
     ConfigSetProc sets;
-
+    SoftbusConfigSetDefaultVal();
     sets.SetConfig = &SoftbusSetConfig;
     SoftbusConfigAdapterInit(&sets);
 }
