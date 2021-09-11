@@ -132,7 +132,7 @@ static void LnnSubscribeWifiService(void *para)
     }
 }
 
-int32_t LnnInitWifiserviceMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
 {
     if (handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");
