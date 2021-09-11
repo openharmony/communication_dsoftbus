@@ -27,7 +27,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_hub") {
+    source_set("dsoftbus_bus_center_hub") {
       sources = [
         "src/lnn_lane_info.c",
         "src/lnn_lane_manager.c",

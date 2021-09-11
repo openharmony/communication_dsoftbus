@@ -34,15 +34,14 @@ if (defined(ohos_lite)) {
   if (enable_trans_udp == true) {
     common_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
       "$hilog_lite_deps_path",
     ]
   }
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_udp_channel_sdk") {
+    source_set("dsoftbus_trans_udp_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_core_path/common/include",
@@ -58,7 +57,7 @@ if (defined(ohos_lite)) {
       }
     }
   } else {
-    shared_library("dsoftbus_trans_udp_channel_sdk") {
+    source_set("dsoftbus_trans_udp_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_core_path/common/include",
@@ -121,7 +120,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/components/nstackx_enhanced:nstackx",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
         "//utils/native/base:utilsecurec_shared",

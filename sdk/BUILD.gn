@@ -14,10 +14,33 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_client") {
-  features = [
+if (is_build_shared_sdk == true) {
+  build_type = "shared_library"
+} else {
+  build_type = "static_library"
+}
+
+config("dsoftbus_sdk_interface") {
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+  ]
+}
+
+target(build_type, "dsoftbus_sdk") {
+  if (is_build_shared_sdk == false) {
+    complete_static_lib = true
+  }
+  deps = [
+    "bus_center/service:dsoftbus_bus_center_service_sdk",
     "discovery/service:dsoftbus_disc_service_sdk",
     "transmission/session:dsoftbus_trans_session_sdk",
-    "bus_center/service:dsoftbus_bus_center_service_sdk",
   ]
+  public_configs = [ ":dsoftbus_sdk_interface" ]
+}
+
+lite_component("softbus_client") {
+  features = [ ":dsoftbus_sdk" ]
 }

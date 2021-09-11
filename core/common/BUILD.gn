@@ -11,14 +11,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_core_common") {
-  features = [
-    "json_utils:json_utils",
-    "utils:softbus_utils",
-    "softbus_property:softbus_property",
-    "message_handler:message_handler",
-    "log:softbus_log",
-  ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  config("dsoftbus_utils_interface") {
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$softbus_adapter_common/include",
+    ]
+  }
+
+  if (ohos_kernel_type == "liteos_m") {
+    diff_deps = [
+      "//build/lite/config/component/cJSON:cjson_static",
+    ]
+  } else {
+    diff_deps = [
+      "//build/lite/config/component/cJSON:cjson_shared",
+    ]
+  }
+
+  source_set("dsoftbus_utils") {
+    include_dirs = [
+      "$libsec_include_path",
+      "$hilog_lite_include_path",
+    ]
+    sources = [
+      "json_utils/softbus_json_utils.c",
+      "log/softbus_log.c",
+      "message_handler/message_handler.c",
+      "security/sequence_verification/softbus_sequence_verification.c",
+      "softbus_property/softbus_feature_config.c",
+      "utils/softbus_utils.c",
+    ]
+    cflags = [
+      "-Wall",
+      "-fPIC",
+      "-std=c99",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-Os",
+    ]
+    if (ohos_kernel_type == "liteos_m") {
+    } else {
+      defines = [
+        "DEFAULT_STORAGE_PATH=\"/usr\"",
+      ]
+    }
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$libsec_deps_path",
+    ]
+    deps += diff_deps
+    public_configs = [ ":dsoftbus_utils_interface" ]
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("dsoftbus_utils") {
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$softbus_adapter_common/include",
+    ]
+    sources = [
+      "json_utils/softbus_json_utils.c",
+      "log/softbus_log.c",
+      "message_handler/message_handler.c",
+      "security/sequence_verification/softbus_sequence_verification.c",
+      "softbus_property/softbus_feature_config.c",
+      "utils/softbus_utils.c",
+    ]
+    defines = [
+      "DEFAULT_STORAGE_PATH=\"/data/data\"",
+    ]
+    public_deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

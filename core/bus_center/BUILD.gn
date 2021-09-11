@@ -21,7 +21,6 @@ config("bus_center_server_interface") {
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/softbus_property/include",
     "$softbus_adapter_config/spec_config",
   ]
@@ -30,7 +29,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_server") {
+    source_set("dsoftbus_bus_center_server") {
       sources = [
         "ipc/small_system/src/bus_center_client_proxy.c",
         "ipc/small_system/src/lnn_bus_center_ipc.c",
@@ -63,7 +62,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/core/common/inner_communication",
         "$dsoftbus_root_path/core/common/message_handler/include",
-        "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/transmission/interface",
         "$dsoftbus_root_path/core/transmission/common/include",
         "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
@@ -87,12 +85,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-        "$dsoftbus_root_path/core/common/json_utils:json_utils",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/message_handler:message_handler",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
-        "$dsoftbus_root_path/core/connection:softbus_connection",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
         "$hilog_lite_deps_path",
@@ -141,7 +134,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/authentication/interface",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/message_handler/include",
-      "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/transmission/interface",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
@@ -160,12 +152,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
-      "$dsoftbus_root_path/core/common/json_utils:json_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/message_handler:message_handler",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/connection/manager:conn_manager",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
       "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
       "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",

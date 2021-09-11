@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-static_library("br_adapter") {
+source_set("br_adapter") {
   sources = [ "wrapper_br_interface.c" ]
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",

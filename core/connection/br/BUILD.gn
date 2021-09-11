@@ -21,8 +21,7 @@ if (enable_connection_br == false) {
   deps_br = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/adapter/br/mock:br_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
-    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
   ]
 }
 
@@ -30,7 +29,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("br_connection") {
+    source_set("br_connection") {
       sources = sources_br
       include_dirs = [
         "include",
@@ -50,7 +49,7 @@ if (defined(ohos_lite)) {
       deps = deps_br
     }
   } else {
-    shared_library("br_connection") {
+    source_set("br_connection") {
       sources = sources_br
       include_dirs = [
         "include",

@@ -38,13 +38,13 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_disc_manager_sdk") {
+    source_set("dsoftbus_disc_manager_sdk") {
       include_dirs = common_include
       sources = [
         "ipc/mini/disc_server_proxy.c",
@@ -54,11 +54,15 @@ if (defined(ohos_lite)) {
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_disc_manager_sdk") {
+    source_set("dsoftbus_disc_manager_sdk") {
       include_dirs = common_include
       sources = [
         "ipc/small/disc_server_proxy.c",
         "manager/src/client_disc_manager.c",
+      ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
       ]
       public_configs = [ ":disc_client_interface" ]
       deps = common_deps
@@ -97,7 +101,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "//utils/native/base:utils",
       ]
     }

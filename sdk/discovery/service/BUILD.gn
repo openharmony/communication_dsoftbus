@@ -37,21 +37,21 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
     "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
     "$hilog_lite_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_disc_service_sdk") {
+    source_set("dsoftbus_disc_service_sdk") {
       include_dirs = common_include
       public_configs = [ ":disc_client_service_interface" ]
       sources = [ "src/client_disc_service.c" ]
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_disc_service_sdk") {
+    source_set("dsoftbus_disc_service_sdk") {
       include_dirs = common_include
       public_configs = [ ":disc_client_service_interface" ]
       sources = [ "src/client_disc_service.c" ]
@@ -79,7 +79,7 @@ if (defined(ohos_lite)) {
     sources = [ "src/client_disc_service.c" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
       "$dsoftbus_root_path/sdk/frame:softbus_client_frame",
     ]

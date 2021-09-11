@@ -33,10 +33,9 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/authentication:dsoftbus_auth_server",
-    "$dsoftbus_core_path/common:softbus_core_common",
+    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$dsoftbus_core_path/connection/common:conn_common",
     "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
-    "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$libsec_deps_path",
   ]
@@ -54,7 +53,7 @@ if (defined(ohos_lite)) {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_direct_channel") {
+    source_set("dsoftbus_trans_direct_channel") {
       include_dirs =
           [ "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite" ]
       include_dirs = common_include
@@ -64,7 +63,7 @@ if (defined(ohos_lite)) {
       deps += [ "//build/lite/config/component/cJSON:cjson_static" ]
     }
   } else {
-    shared_library("dsoftbus_trans_direct_channel") {
+    source_set("dsoftbus_trans_direct_channel") {
       include_dirs = [ "//base/hiviewdfx/hilog_lite/interfaces/native/kits" ]
       include_dirs += common_include
       cflags = [
@@ -99,10 +98,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_direct_channel_interface" ]
 
     deps = [
-      "$dsoftbus_core_path/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_core_path/connection/common:conn_common",
       "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
-      "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",

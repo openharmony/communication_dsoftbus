@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("ble_connection") {
+    source_set("ble_connection") {
       sources = [ "src/ble_connection_virtual.c" ]
       include_dirs = [
         "include",
@@ -29,7 +29,7 @@ if (defined(ohos_lite)) {
       deps = []
     }
   } else {
-    shared_library("ble_connection") {
+    source_set("ble_connection") {
       sources = [ "src/ble_connection_virtual.c" ]
       include_dirs = [
         "include",
