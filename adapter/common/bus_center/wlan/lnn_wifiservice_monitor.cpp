@@ -106,7 +106,7 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
 }
 }
 
-static void LnnSubscribeWifiService(const void *para)
+static void LnnSubscribeWifiService(void *para)
 {
     (void)para;
     static int32_t retry = 0;
