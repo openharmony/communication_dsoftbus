@@ -26,8 +26,8 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-const int32_t DELAY_LEN = 1000;
-const int32_t RETRY_MAX = 10;
+static const int32_t DELAY_LEN = 1000;
+static const int32_t RETRY_MAX = 10;
 static LnnMonitorEventHandler g_eventHandler;
 
 namespace OHOS {
