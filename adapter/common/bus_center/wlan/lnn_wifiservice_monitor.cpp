@@ -126,7 +126,7 @@ static void LnnSubscribeWifiService(void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice event fail");
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, WIFISERVICE_DELAY_LEN) != SOFTBUS_OK) {
+        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
         }
     }
