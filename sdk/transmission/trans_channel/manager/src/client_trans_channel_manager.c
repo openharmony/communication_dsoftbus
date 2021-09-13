@@ -159,3 +159,18 @@ void DeleteFileListener(const char *sessionName)
 {
     return TransUdpDeleteFileListener(sessionName);
 }
+
+int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len)
+{
+    return TransTdcGetSessionKey(channelId, key, len);
+}
+
+int32_t ClientGetHandle(int32_t channelId, int *handle)
+{
+    return TransTdcGetHandle(channelId, handle);
+}
+
+int32_t ClientDisableSessionListener(int32_t channelId)
+{
+    return TransDisableSessionListener(channelId);
+}

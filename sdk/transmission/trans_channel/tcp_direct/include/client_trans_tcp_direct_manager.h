@@ -55,6 +55,10 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
 int32_t TransTdcManagerInit(const IClientSessionCallBack *callback);
 void TransTdcManagerDeinit(void);
 
+int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len);
+int32_t TransTdcGetHandle(int32_t channelId, int *handle);
+int32_t TransDisableSessionListener(int32_t channelId);
+
 #ifdef __cplusplus
 }
 #endif
