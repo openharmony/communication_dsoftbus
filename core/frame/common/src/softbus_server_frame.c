@@ -93,8 +93,3 @@ ERR_EXIT:
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus framework init failed.");
     return;
 }
-
-#if defined(__LITEOS_M__)
-// 4 stand for pri
-SYS_SERVICE_INIT_PRI(InitSoftBusServer, 4);
-#endif
