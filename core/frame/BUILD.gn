@@ -46,16 +46,9 @@ if (ohos_kernel_type == "liteos_m") {
   }
 } else {
   shared_library("softbus_server_frame") {
-    if (enable_auth_account == true) {
-      hichain_include_dir = "//base/security/deviceauth/interface"
-    } else {
-      hichain_include_dir = "//base/security/deviceauth/interfaces/innerkits"
-    }
-
     include_dirs = [
       "common/include",
       "small/init/include",
-      "$hichain_include_dir",
       "small/client_manager/include",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/bus_center/utils/include",
