@@ -20,12 +20,10 @@ int ClientStubInit(void)
 
 void InitDeviceAuthService(void)
 {
-
 }
 
 void DestroyDeviceAuthService(void)
 {
-
 }
 
 int GetGaInstance(void)
