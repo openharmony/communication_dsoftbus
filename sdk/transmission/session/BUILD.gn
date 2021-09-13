@@ -25,6 +25,7 @@ if (defined(ohos_lite)) {
     "include",
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -73,6 +74,7 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   config("trans_session_sdk_interface") {
     include_dirs = [
+      "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/inner_kits/transport",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path/sdk/transmission/session/cpp/include",

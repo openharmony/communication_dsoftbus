@@ -133,10 +133,10 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
-int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *peerSessionName,
-    const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
-    if (mySessionName == nullptr || peerSessionName == nullptr || peerDeviceId == nullptr || groupId == nullptr) {
+    if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
+        param->peerDeviceId == nullptr || param->groupId == nullptr) {
         return SOFTBUS_ERR;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -146,23 +146,24 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
     }
 
     MessageParcel data;
-    if (!data.WriteCString(mySessionName)) {
+    if (!data.WriteCString(param->sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteCString(peerSessionName)) {
+    if (!data.WriteCString(param->peerSessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write peer session name failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteCString(peerDeviceId)) {
+    if (!data.WriteCString(param->peerDeviceId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteCString(groupId)) {
+    if (!data.WriteCString(param->groupId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteInt32(flags)) {
+    
+    if (!data.WriteRawData(param->attr, sizeof(SessionAttribute))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
@@ -172,12 +173,14 @@ int32_t TransServerProxy::OpenSession(const char *mySessionName, const char *pee
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
         return SOFTBUS_ERR;
     }
-    int32_t channelId = 0;
-    if (!reply.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession read channelId failed!");
+    TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
+    if (transSerializer == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSession read TransSerializer failed!");
         return SOFTBUS_ERR;
     }
-    return channelId;
+    info->channelId = transSerializer->transInfo.channelId;
+    info->channelType = transSerializer->transInfo.channelType;
+    return transSerializer->ret;
 }
 
 int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)

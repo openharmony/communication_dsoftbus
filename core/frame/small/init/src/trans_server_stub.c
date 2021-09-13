@@ -24,6 +24,7 @@
 #include "softbus_log.h"
 #include "softbus_permission.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_trans_def.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
@@ -80,26 +81,33 @@ int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
-    const char *mySessionName = (const char*)IpcIoPopString(req, &size);
-    const char *peerSessionName = (const char *)IpcIoPopString(req, &size);
-    const char *peerDeviceId = (const char *)IpcIoPopString(req, &size);
-    const char *groupId = (const char *)IpcIoPopString(req, &size);
-    int32_t flags = IpcIoPopInt32(req);
+    SessionParam param;
+    TransSerializer transSerializer;
+    transSerializer.transInfo.channelId = INVALID_CHANNEL_ID;
+    transSerializer.transInfo.channelType = CHANNEL_TYPE_BUTT;
+    param.sessionName = (const char*)IpcIoPopString(req, &size);
+    param.peerSessionName = (const char *)IpcIoPopString(req, &size);
+    param.peerDeviceId = (const char *)IpcIoPopString(req, &size);
+    param.groupId = (const char *)IpcIoPopString(req, &size);
+    param.attr = (SessionAttribute *)IpcIoPopFlatObj(req, &size);
     int32_t callingUid = GetCallingUid(origin);
     int32_t callingPid = GetCallingPid(origin);
     char pkgName[PKG_NAME_SIZE_MAX];
-    if (TransGetPkgNameBySessionName(mySessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransGetPkgNameBySessionName(param.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName failed");
-        IpcIoPushInt32(reply, SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID);
+        transSerializer.ret = SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+        IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
-    if (CheckTransPermission(callingUid, callingPid, pkgName, mySessionName, ACTION_OPEN) != SOFTBUS_OK) {
+    if (CheckTransPermission(callingUid, callingPid, pkgName, param.sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerOpenSession no permission");
-        IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
+        transSerializer.ret = SOFTBUS_PERMISSION_DENIED;
+        IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = TransOpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
-    IpcIoPushInt32(reply, ret);
+    int32_t ret = TransOpenSession(&param, &(transSerializer.transInfo));
+    transSerializer.ret = ret;
+    IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
     return ret;
 }
 
