@@ -17,6 +17,7 @@
 #define TRANS_SESSION_SERVICE_H
 
 #include <stdint.h>
+#include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,8 +27,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
 
 int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName);
 
-int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
-    const char *groupId, int flags);
+int32_t TransOpenSession(const SessionParam *param, TransInfo *info);
 
 int TransServerInit(void);
 

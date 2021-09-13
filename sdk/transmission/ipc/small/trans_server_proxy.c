@@ -26,20 +26,31 @@
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
-
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50
 
 static IClientProxy *g_serverProxy = NULL;
 
 static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
-    if (code != 0) {
+    if (code != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "publish service callback error[%d].", code);
         return SOFTBUS_ERR;
     }
 
     *(int32_t*)owner = IpcIoPopInt32(reply);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "publish service return[%d].", *(int32_t*)owner);
+    return SOFTBUS_OK;
+}
+
+static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
+{
+    if (code != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "publish service callback error[%d].", code);
+        return SOFTBUS_ERR;
+    }
+    uint32_t size;
+
+    *(TransSerializer*)owner = *(TransSerializer*)IpcIoPopFlatObj(reply, &size);
     return SOFTBUS_OK;
 }
 
@@ -133,33 +144,36 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return ret;
 }
 
-int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionName,
-                             const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, mySessionName);
-    IpcIoPushString(&request, peerSessionName);
-    IpcIoPushString(&request, peerDeviceId);
-    IpcIoPushString(&request, groupId);
-    IpcIoPushInt32(&request, flags);
+    IpcIoPushString(&request, param->sessionName);
+    IpcIoPushString(&request, param->peerSessionName);
+    IpcIoPushString(&request, param->peerDeviceId);
+    IpcIoPushString(&request, param->groupId);
+    IpcIoPushFlatObj(&request, (void*)param->attr, sizeof(SessionAttribute));
 
-    int32_t ret = SOFTBUS_ERR;
+    TransSerializer transSerializer;
+    transSerializer.ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request, &ret, ProxyCallback);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request,
+        &transSerializer, OpenSessionProxyCallback);
     if (ans != EC_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", transSerializer.ret);
         return SOFTBUS_ERR;
     }
+    info->channelId = transSerializer.transInfo.channelId;
+    info->channelType = transSerializer.transInfo.channelType;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
-    return ret;
+    return transSerializer.ret;
 }
 
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)

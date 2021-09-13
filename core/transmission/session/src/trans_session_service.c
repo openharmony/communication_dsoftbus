@@ -115,23 +115,22 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
     return TransSessionServerDelItem(sessionName);
 }
 
-int32_t TransOpenSession(const char *mySessionName, const char *peerSessionName,
-    const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans server opensession.");
-    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX)) {
+    if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX)) {
         return INVALID_CHANNEL_ID;
     }
-    if (groupId == NULL || strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+    if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {
         return INVALID_CHANNEL_ID;
     }
 
-    if (!TransSessionServerIsExist(mySessionName)) {
+    if (!TransSessionServerIsExist(param->sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session server invalid");
         return INVALID_CHANNEL_ID;
     }
 
-    return TransOpenChannel(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
+    return TransOpenChannel(param, info);
 }
