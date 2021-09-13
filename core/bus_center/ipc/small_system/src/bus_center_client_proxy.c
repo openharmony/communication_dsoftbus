@@ -114,7 +114,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     IpcIoPushInt32(&io, retCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLsNNResult callback get svc failed.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
@@ -127,7 +127,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
 
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClinetOnNodeOnlineStateChanged callback ipc server push.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnNodeOnlineStateChanged callback ipc server push.");
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
@@ -140,11 +140,11 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     int num;
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeOnlineStateChanged callback get svc num failed.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback get svc num failed.");
         return SOFTBUS_ERR;
     }
     if (num == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeOnlineStateChanged callback svc num NULL.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback svc num NULL.");
         return SOFTBUS_ERR;
     }
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
@@ -153,7 +153,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
         return SOFTBUS_ERR;
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback get svc num failed.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback get svc num failed.");
         SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
@@ -161,7 +161,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
         int32_t ans = SendRequest(NULL, svc[i], CLIENT_ON_NODE_ONLINE_STATE_CHANGED, &io, NULL,
             LITEIPC_FLAG_ONEWAY, NULL);
         if (ans != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeOnlineStateChanged callback SendRequest failed.");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback SendRequest failed.");
             SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
