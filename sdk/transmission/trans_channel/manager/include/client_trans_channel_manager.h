@@ -40,6 +40,12 @@ int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt);
 
 void DeleteFileListener(const char *sessionName);
+
+int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len);
+
+int32_t ClientGetHandle(int32_t channelId, int *handle);
+
+int32_t ClientDisableSessionListener(int32_t handle);
 #ifdef __cplusplus
 }
 #endif

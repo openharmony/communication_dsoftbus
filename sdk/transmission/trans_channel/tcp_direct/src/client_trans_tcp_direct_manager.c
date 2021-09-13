@@ -20,6 +20,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -237,3 +238,41 @@ int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId)
     return ClientTransTdcOnSessionOpenFailed(channelId);
 }
 
+int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len)
+{
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tcp direct channel info failed.");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(key, len, channel.detail.sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy session key failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransTdcGetHandle(int32_t channelId, int *handle)
+{
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tcp direct channel info failed.");
+        return SOFTBUS_ERR;
+    }
+    *handle = channel.detail.fd;
+    return SOFTBUS_OK;
+}
+
+int32_t TransDisableSessionListener(int32_t channelId)
+{
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tcp direct channel info failed.");
+        return SOFTBUS_ERR;
+    }
+    if (channel.detail.fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid handle.");
+        return SOFTBUS_ERR;
+    }
+    return DelTrigger(DIRECT_CHANNEL_CLIENT, channel.detail.fd, READ_TRIGGER);
+}
