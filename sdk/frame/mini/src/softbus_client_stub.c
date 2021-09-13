@@ -17,3 +17,23 @@ int ClientStubInit(void)
 {
     return 0;
 }
+
+void InitDeviceAuthService(void)
+{
+
+}
+
+void DestroyDeviceAuthService(void)
+{
+
+}
+
+int GetGaInstance(void)
+{
+    return 0;
+}
+
+int GetGmInstance(void)
+{
+    return 0;
+}

@@ -46,6 +46,7 @@ if (defined(ohos_lite)) {
       sources = [
         "common/src/softbus_client_event_manager.c",
         "common/src/softbus_client_frame_manager.c",
+        "mini/src/softbus_client_stub.c",
       ]
 
       deps = [
