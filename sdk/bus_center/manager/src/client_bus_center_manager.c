@@ -623,7 +623,7 @@ int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
         return SOFTBUS_ERR;
     }
 
-    if (type < 0 || type > TYPE_DEVICE_NAME) {
+    if ((type < 0) || (type > TYPE_DEVICE_NAME)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged invalid type: %d", type);
         return SOFTBUS_INVALID_PARAM;
     }
