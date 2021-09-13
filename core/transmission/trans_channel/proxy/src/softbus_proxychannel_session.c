@@ -656,7 +656,7 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
     const char *data, uint32_t len, const char *pkgName, int32_t channelId)
 {
     int32_t ret = TransProxySliceProcessChkPkgIsValid(processor, head, data, len);
-    if (ret == SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         return ret;
     }
     if (memcpy_s(processor->data + processor->dataLen, processor->bufLen - processor->dataLen, data, len) != EOK) {

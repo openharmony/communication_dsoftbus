@@ -170,7 +170,7 @@ EXIT:
 static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
 {
     uint32_t headSize = sizeof(ConnPktHead);
-    ssize_t recvLen;
+    ssize_t recvLen = 0;
     if (len > g_tcpMaxLen) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Tcp recv data out of max data length, shutdown");
         return NULL;
@@ -184,10 +184,14 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Tcp recv data copy head failed");
         goto EXIT;
     }
-    recvLen = RecvTcpData(fd, data + headSize, len, g_tcpTimeOut);
-    if (recvLen != len) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "receiveData: error occurred!");
-        goto EXIT;
+    while (recvLen < len) {
+        ssize_t n = RecvTcpData(fd, data + headSize + recvLen, len - recvLen, g_tcpTimeOut);
+        if (n < 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "receiveData: error occurred![recvLen=%d][len=%d][errno=%d]", recvLen, len, errno);
+            goto EXIT;
+        }
+        recvLen += n;
     }
     return data;
 EXIT:
@@ -463,26 +467,26 @@ int32_t TcpStopListening(const LocalListenerInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t InitProperty()
+static int32_t InitProperty(void)
 {
     g_tcpMaxConnNum = INVALID_DATA;
     g_tcpTimeOut = INVALID_DATA;
     g_tcpMaxLen = INVALID_DATA;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
         (unsigned char*)&g_tcpMaxConnNum, sizeof(g_tcpMaxConnNum)) != SOFTBUS_OK) {
-        LOG_ERR("get tcp MaxConnNum fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp MaxConnNum fail");
     }
-    LOG_INFO("tcp MaxConnNum is %u", g_tcpMaxConnNum);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxConnNum is %u", g_tcpMaxConnNum);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
         (unsigned char*)&g_tcpMaxLen, sizeof(g_tcpMaxLen)) != SOFTBUS_OK) {
-        LOG_ERR("get tcp MaxLen fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp MaxLen fail");
     }
-    LOG_INFO("tcp MaxLen is %u", g_tcpMaxLen);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxLen is %u", g_tcpMaxLen);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT,
         (unsigned char*)&g_tcpTimeOut, sizeof(g_tcpTimeOut)) != SOFTBUS_OK) {
-        LOG_ERR("get tcp TimeOut fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp TimeOut fail");
     }
-    LOG_INFO("tcp TimeOut is %u", g_tcpTimeOut);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp TimeOut is %u", g_tcpTimeOut);
     if (g_tcpMaxConnNum == INVALID_DATA || g_tcpTimeOut == INVALID_DATA ||
         g_tcpMaxLen == INVALID_DATA) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
