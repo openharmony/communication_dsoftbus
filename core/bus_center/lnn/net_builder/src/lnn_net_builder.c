@@ -727,9 +727,9 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local master(%u) weight=%d", connFsm->id, localMasterWeight);
     if (LnnGetDLStrInfo(connFsm->connInfo.peerNetworkId, STRING_KEY_MASTER_NODE_UDID,
-            peerMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+                        peerMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
         LnnGetDLNumInfo(connFsm->connInfo.peerNetworkId, NUM_KEY_MASTER_NODE_WEIGHT,
-            &peerMasterWeight) != SOFTBUS_OK) {
+                        &peerMasterWeight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer node info(%u) is not found", connFsm->id);
         return SOFTBUS_ERR;
     }
@@ -911,16 +911,38 @@ static void NetBuilderMessageHandler(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "net builder process msg(%d) done, ret=%d", msg->what, ret);
 }
 
+static int32_t getCurrentConnectType(ConnectionAddrType *type)
+{
+    char ifCurrentName[NET_IF_NAME_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalStrInfo getCurrentConnectType failed");
+        return SOFTBUS_ERR;
+    }
+    if (strstr(ifCurrentName, LNN_WLAN_IF_NAME_PREFIX) != NULL) {
+        *type = CONNECTION_ADDR_WLAN;
+    } else if (strstr(ifCurrentName, LNN_ETH_IF_NAME_PREFIX) != NULL) {
+        *type = CONNECTION_ADDR_ETH;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType unknown connect type");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
 {
     AuthKeyGeneratedMsgPara *para = NULL;
-
+    ConnectionAddrType type;
     para = SoftBusMalloc(sizeof(AuthKeyGeneratedMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth key generated msg para fail");
         return;
     }
-    if (!LnnConvertOptionToAddr(&para->addr, option, CONNECTION_ADDR_ETH)) {
+    if (getCurrentConnectType(&type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType failed");
+        return;
+    }
+    if (!LnnConvertOptionToAddr(&para->addr, option, type)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert option to addr failed");
         SoftBusFree(para);
         return;
