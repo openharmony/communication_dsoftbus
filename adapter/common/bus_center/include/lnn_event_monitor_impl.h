@@ -34,11 +34,11 @@ typedef struct {
 } LnnMoniterData;
 
 typedef enum {
-    WIFI_CONNECTED,
-    WIFI_DISCONNECTED,
-    WIFI_DISABLED,
-    UNKNOWN,
-} WifiState;
+    SOFTBUS_WIFI_CONNECTED,
+    SOFTBUS_WIFI_DISCONNECTED,
+    SOFTBUS_WIFI_DISABLED,
+    SOFTBUS_UNKNOWN,
+} SoftBusWifiState;
 
 typedef void (*LnnMonitorEventHandler)(LnnMonitorEventType event, const LnnMoniterData *para);
 
