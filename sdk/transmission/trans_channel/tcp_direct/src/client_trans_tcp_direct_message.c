@@ -201,7 +201,7 @@ static int32_t TransGetDataBufSize(void)
 static int32_t TransGetDataBufMaxSize(void)
 {
     uint32_t maxLen;
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) !=SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config err");
         return SOFTBUS_ERR;
     }
