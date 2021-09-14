@@ -24,6 +24,7 @@ extern "C" {
 
 typedef enum {
     LNN_MONITOR_EVENT_IP_ADDR_CHANGED,
+    LNN_MONITOR_EVENT_WIFI_STATE_CHANGED,
     LNN_MONITOR_EVENT_TYPE_MAX,
 } LnnMonitorEventType;
 
@@ -31,6 +32,13 @@ typedef struct {
     uint32_t len;
     uint8_t value[0];
 } LnnMoniterData;
+
+typedef enum {
+    WIFI_CONNECTED,
+    WIFI_DISCONNECTED,
+    WIFI_DISABLED,
+    UNKNOWN,
+} WifiState;
 
 typedef void (*LnnMonitorEventHandler)(LnnMonitorEventType event, const LnnMoniterData *para);
 

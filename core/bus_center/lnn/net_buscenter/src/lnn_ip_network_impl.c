@@ -209,24 +209,36 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
     }
 }
 
-static int32_t UpdateLocalIp(char *ipCurrentAddr, char *ifCurrentName)
+static int32_t UpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen,
+    bool isWifiDisconnected)
 {
     char ipNewAddr[IP_LEN] = {0};
     char ifNewName[NET_IF_NAME_LEN] = {0};
 
-    if (GetLocalIpInfo(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+    if (GetLocalIpInfo(ipAddr, ipAddrLen, ifName, ifNameLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get current ip info failed\n");
         return SOFTBUS_ERR;
     }
-    if (GetUpdateLocalIp(ipNewAddr, IP_LEN, ifNewName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
-        return SOFTBUS_ERR;
+    if (isWifiDisconnected) {
+        if (strncpy_s(ipNewAddr, IP_LEN, LNN_LOOPBACK_IP, strlen(LNN_LOOPBACK_IP)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi disconnect copy loopback ip addr failed\n");
+            return SOFTBUS_ERR;
+        }
+        if (strncpy_s(ifNewName, NET_IF_NAME_LEN, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi disconnect copy loopback ifname failed\n");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        if (GetUpdateLocalIp(ipNewAddr, IP_LEN, ifNewName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
+            return SOFTBUS_ERR;
+        }
+        if (strcmp(ipAddr, ipNewAddr) == 0 && strcmp(ifName, ifNewName) == 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip info not changed\n");
+            return SOFTBUS_ERR;
+        }
     }
-    if (strcmp(ipCurrentAddr, ipNewAddr) == 0 && strcmp(ifCurrentName, ifNewName) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip info not changed\n");
-        return SOFTBUS_ERR;
-    }
-    if (strncmp(ifCurrentName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
+    if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "close previous ip link and stop previous discovery\n");
         CloseIpLink();
         LnnStopDiscovery();
@@ -258,7 +270,33 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const LnnMoniter
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    if (UpdateLocalIp(ipCurrentAddr, ifCurrentName) != SOFTBUS_OK) {
+    if (UpdateLocalIp(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN, false) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        return;
+    }
+    LeaveOldIpNetwork(ifCurrentName);
+    g_lnnIpNetworkInfo.isIpLinkClosed = true;
+    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+}
+
+static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoniterData *para)
+{
+    char ipCurrentAddr[IP_LEN] = {0};
+    char ifCurrentName[NET_IF_NAME_LEN] = {0};
+    if (event != LNN_MONITOR_EVENT_WIFI_STATE_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event: %d\n", event);
+        return;
+    }
+    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    WifiState state = *(WifiState *)para->value;
+    bool isWifiDisconnect = false;
+    if (state == WIFI_DISCONNECTED) {
+        isWifiDisconnect = true;
+    }
+    if (UpdateLocalIp(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN, isWifiDisconnect) != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
@@ -274,6 +312,10 @@ int32_t LnnInitIpNetwork(void)
 
     if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed\n");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register wifi state change event handler failed\n");
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {

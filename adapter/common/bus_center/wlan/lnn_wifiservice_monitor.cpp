@@ -15,6 +15,8 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include <securec.h>
+
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
@@ -23,6 +25,7 @@
 #include "lnn_async_callback_utils.h"
 #include "wifi_msg.h"
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -47,14 +50,22 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
+    WifiState state = UNKNOWN;
+    LnnMoniterData *para = (LnnMoniterData *)SoftBusCalloc(sizeof(LnnMoniterData *) + sizeof(int));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnMoniterData malloc failed");
+        return;
+    }
+    para->len = sizeof(int);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
             case int(OHOS::Wifi::ConnectionState::CONNECT_AP_CONNECTED):
+                state = WIFI_CONNECTED;
+                break;
             case int(OHOS::Wifi::ConnectionState::DISCONNECT_DISCONNECTED):
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
-                g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+                state = WIFI_DISCONNECTED;
                 break;
             default: {
                 break;
@@ -64,13 +75,17 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE) {
         switch (code) {
             case int(OHOS::Wifi::WifiState::DISABLED):
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
-                g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+                state = WIFI_DISABLED;
                 break;
             default: {
                 break;
             }
         }
+    }
+    if (state != UNKNOWN) {
+        (void)memcpy_s(para->value, para->len, &state, sizeof(int));
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
+        g_eventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, para);
     }
 }
 
