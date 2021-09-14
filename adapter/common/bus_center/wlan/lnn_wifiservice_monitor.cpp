@@ -84,7 +84,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     }
     if (state != SOFTBUS_UNKNOWN) {
         (void)memcpy_s(para->value, para->len, &state, sizeof(int));
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send wifi state change event to LNN");
         g_eventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, para);
     }
 }
