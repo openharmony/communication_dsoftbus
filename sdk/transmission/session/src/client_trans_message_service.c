@@ -60,7 +60,7 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen;
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) !=SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     if (len > maxLen) {
