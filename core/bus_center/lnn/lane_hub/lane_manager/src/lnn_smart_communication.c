@@ -79,12 +79,12 @@ static bool GetNumInfo(const char *netWorkId, int32_t *local, int32_t *remote)
     int32_t ret;
     ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
     if (ret < 0 || *local < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo error. ret = %d, local = %d", ret, *local);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo err. ret = %d, local = %d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_NET_CAP, remote);
     if (ret < 0 || *remote < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo error. ret = %d, remote = %d", ret, *remote);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo err. ret = %d, remote = %d", ret, *remote);
         return false;
     }
     return true;

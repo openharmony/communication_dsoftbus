@@ -15,11 +15,9 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "netif.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "netif.h"
-#include "opt.h"
-#include "netifapi.h"
 
 static LnnMonitorEventHandler g_eventHandler;
 #define LWIP_NSC_IPSTATUS_CHANGE 0xf0

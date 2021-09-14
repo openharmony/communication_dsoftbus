@@ -24,8 +24,8 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <cstdint>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <string>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -107,7 +107,7 @@ void NetBusCenterTest::TearDown()
 {
 }
 
-static int SetIpaddr(const char* ip)
+static int SetIpaddr(const std:string ip)
 {
     int sockFd  = -1;
     struct sockaddr_in addr;
@@ -133,13 +133,13 @@ static int SetIpaddr(const char* ip)
     }
 
     addr.sin_family = AF_INET;
-    if (inet_pton(AF_INET, ip, &(addr.sin_addr)) <= 0) {
+    if (inet_pton(AF_INET, ip.c_str(), &(addr.sin_addr)) <= 0) {
         printf("inet_pton fail for ip\n");
         close(sockFd);
         return SOFTBUS_ERR;
     }
     (void)memcpy_s(&ifr.ifr_addr, sizeof(addr), &addr, sizeof(addr));
-    if (ioctl(sockFd, SIOCSIFADDR, &ifr) < 0 ) {
+    if (ioctl(sockFd, SIOCSIFADDR, &ifr) < 0) {
         printf("error to set interface address, error: %s\n", strerror(errno));
         close(sockFd);
         return SOFTBUS_ERR;
