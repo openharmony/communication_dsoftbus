@@ -19,6 +19,7 @@
 
 #include "client_trans_channel_manager.h"
 #include "client_trans_session_manager.h"
+#include "dfs_session.h"
 #include "inner_session.h"
 #include "securec.h"
 #include "softbus_client_frame_manager.h"
@@ -481,11 +482,11 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX) || recvListener == NULL) {
-        LOG_ERR("set file receive listener invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        LOG_ERR("set file receive listener init softbus client error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener init softbus client error");
         return SOFTBUS_ERR;
     }
     return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
@@ -495,12 +496,75 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         sendListener == NULL) {
-        LOG_ERR("set file send listener invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        LOG_ERR("set file send listener init softbus client error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener init softbus client error");
         return SOFTBUS_ERR;
     }
     return TransSetFileSendListener(sessionName, sendListener);
+}
+
+static const char *g_busName = "DistributedFileService";
+
+static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    if (GetMySessionName(sessionId, sessionName, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dfs session name failed");
+        return SOFTBUS_ERR;
+    }
+    if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t type;
+    if (ClientGetChannelBySessionId(sessionId, channelId, &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len)
+{
+    int32_t channelId;
+    if (!IsValidSessionId(sessionId) || key == NULL || len < SESSION_KEY_LEN) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientGetSessionKey(channelId, key, len);
+}
+
+int32_t GetSessionHandle(int32_t sessionId, int *handle)
+{
+    int32_t channelId;
+    if (!IsValidSessionId(sessionId) || handle == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientGetHandle(channelId, handle);
+}
+
+int32_t DisableSessionListener(int32_t sessionId)
+{
+    int32_t channelId;
+    if (!IsValidSessionId(sessionId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientDisableSessionListener(channelId);
 }
