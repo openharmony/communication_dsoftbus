@@ -281,7 +281,7 @@ static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoni
     }
     SoftBusWifiState state = *(SoftBusWifiState *)para->value;
     bool isWifiDisconnect = false;
-    if (state == WIFI_DISCONNECTED) {
+    if (state == SOFTBUS_WIFI_DISCONNECTED) {
         isWifiDisconnect = true;
     }
     if (UpdateLocalIp(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN, isWifiDisconnect) != SOFTBUS_OK) {
