@@ -49,7 +49,7 @@
 #define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (1 * 1024 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
-#elif defined SOFTBUS_SMALL_SYSTEM^M
+#elif defined SOFTBUS_SMALL_SYSTEM
 #define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (1 * 1024 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
@@ -216,7 +216,7 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
 }
 
 static void SoftbusConfigSetTransDefaultVal(void)
- {
+{
     g_tranConfig.isSupportTcpProxy = DEFAULT_IS_SUPPORT_TCP_PROXY;
     g_tranConfig.selectInterval = DEFAULT_SElECT_INTERVAL;
     g_tranConfig.maxBytesLen = DEFAULT_MAX_BYTES_LEN;
