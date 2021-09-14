@@ -50,7 +50,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
-    WifiState state = UNKNOWN;
+    SoftBusWifiState state = SOFTBUS_UNKNOWN;
     LnnMoniterData *para = (LnnMoniterData *)SoftBusCalloc(sizeof(LnnMoniterData) + sizeof(int));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnMoniterData malloc failed");
@@ -62,10 +62,10 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
             case int(OHOS::Wifi::ConnectionState::CONNECT_AP_CONNECTED):
-                state = WIFI_CONNECTED;
+                state = SOFTBUS_WIFI_CONNECTED;
                 break;
             case int(OHOS::Wifi::ConnectionState::DISCONNECT_DISCONNECTED):
-                state = WIFI_DISCONNECTED;
+                state = SOFTBUS_WIFI_DISCONNECTED;
                 break;
             default: {
                 break;
@@ -75,14 +75,14 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE) {
         switch (code) {
             case int(OHOS::Wifi::WifiState::DISABLED):
-                state = WIFI_DISABLED;
+                state = SOFTBUS_WIFI_DISABLED;
                 break;
             default: {
                 break;
             }
         }
     }
-    if (state != UNKNOWN) {
+    if (state != SOFTBUS_UNKNOWN) {
         (void)memcpy_s(para->value, para->len, &state, sizeof(int));
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send ip change event to LNN");
         g_eventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, para);
