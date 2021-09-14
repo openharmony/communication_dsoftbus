@@ -29,7 +29,7 @@
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
 
-int32_t TransAddUdpChannel(UdpChannel *channel)
+static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -216,7 +216,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "convert channel info to udp channel failed.");
         return SOFTBUS_MEM_ERR;
     }
-    if (TransAddUdpChannel(newChannel) != SOFTBUS_OK) {
+    if (ClientTransAddUdpChannel(newChannel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add udp channel failed.");
         SoftBusFree(newChannel);
         return SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED;
