@@ -27,6 +27,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
+#include "lnn_ip_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
