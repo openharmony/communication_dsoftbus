@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+
 typedef struct {
     char *type;
     uint8_t id;
@@ -70,7 +71,6 @@ int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId)
     *typeId = info->deviceTypeId;
     return SOFTBUS_OK;
 }
-
 int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint8_t *typeId)
 {
     if (deviceType == NULL || typeId == NULL) {
@@ -87,7 +87,6 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint8_t *typeId)
     *typeId = TYPE_UNKNOW_ID;
     return SOFTBUS_ERR;
 }
-
 char *LnnConvertIdToDeviceType(uint8_t typeId)
 {
     int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
