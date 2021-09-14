@@ -112,8 +112,8 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     },
     {
         SOFTBUS_INT_MAX_MESSAGE_LENGTH,
-        (unsigned char*)&(g_config.maxMsgLen),
-        sizeof(g_config.maxMsgLen)
+        (unsigned char*)&(g_tranConfig.maxMessageLen),
+        sizeof(g_tranConfig.maxMessageLen)
     },
     {
         SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
