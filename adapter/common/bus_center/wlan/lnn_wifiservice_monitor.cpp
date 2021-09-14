@@ -51,7 +51,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
     WifiState state = UNKNOWN;
-    LnnMoniterData *para = (LnnMoniterData *)SoftBusCalloc(sizeof(LnnMoniterData *) + sizeof(int));
+    LnnMoniterData *para = (LnnMoniterData *)SoftBusCalloc(sizeof(LnnMoniterData) + sizeof(int));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnMoniterData malloc failed");
         return;
