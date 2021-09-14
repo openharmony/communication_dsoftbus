@@ -279,7 +279,7 @@ static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoni
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    WifiState state = *(WifiState *)para->value;
+    SoftBusWifiState state = *(SoftBusWifiState *)para->value;
     bool isWifiDisconnect = false;
     if (state == WIFI_DISCONNECTED) {
         isWifiDisconnect = true;
