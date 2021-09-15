@@ -912,7 +912,7 @@ static void NetBuilderMessageHandler(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "net builder process msg(%d) done, ret=%d", msg->what, ret);
 }
 
-static int32_t getCurrentConnectType(ConnectionAddrType *type)
+static int32_t GetCurrentConnectType(ConnectionAddrType *type)
 {
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
@@ -939,7 +939,7 @@ static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVer
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth key generated msg para fail");
         return;
     }
-    if (getCurrentConnectType(&type) != SOFTBUS_OK) {
+    if (GetCurrentConnectType(&type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType failed");
         return;
     }
