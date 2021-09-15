@@ -87,6 +87,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send wifi state change event to LNN");
         g_eventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, para);
     }
+    SoftBusFree(para);
 }
 
 class SubscribeEvent {
