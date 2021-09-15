@@ -37,7 +37,7 @@ extern "C" {
 #define AUTH_DELAY_MS (10 * 1000)
 
 /* auth data max length */
-#define AUTH_MAX_DATA_LEN (45 * 1024)
+#define AUTH_MAX_DATA_LEN (64 * 1024)
 
 /* auth status */
 #define INIT_STATE 0
