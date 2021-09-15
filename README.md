@@ -179,7 +179,7 @@ The main code directory structure of DSoftBus is as follows:
     typedef struct {
         char networkId[NETWORK_ID_BUF_LEN];
         char deviceName[DEVICE_NAME_BUF_LEN];
-        uint8_t deviceTypeId;
+        uint16_t deviceTypeId;
     } NodeBasicInfo;
     
     // Device state event callbacks
