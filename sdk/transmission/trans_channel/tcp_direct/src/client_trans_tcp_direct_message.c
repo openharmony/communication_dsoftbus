@@ -34,7 +34,7 @@
 
 #define ACK_SIZE 4
 #define DATA_EXTEND_LEN (DC_DATA_HEAD_SIZE + OVERHEAD_LEN)
-#define MIN_BUF_LEN (2048 + DATA_EXTEND_LEN)
+#define MIN_BUF_LEN (1024 + DATA_EXTEND_LEN)
 
 typedef struct {
     ListNode node;
