@@ -11,15 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("stream_config") {
   defines = [ "FILLP_LINUX" ]
-  cflags_cc = [
-    "-std=c++14",
-    "-g",
-  ]
+  cflags_cc = [ "-std=c++14" ]
   ldflags = [ "-lstdc++" ]
 }
 
@@ -27,32 +23,60 @@ config("stream_common_config") {
   include_dirs = [ "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/adaptor/include" ]
 }
 
-shared_library("dsoftbus_trans_dstream") {
-  configs -= [ "//build/lite/config:language_cpp" ]
-  configs += [ ":stream_config" ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  shared_library("dsoftbus_trans_dstream") {
+    configs -= [ "//build/lite/config:language_cpp" ]
+    configs += [ ":stream_config" ]
+    sources = [
+      "src/client_trans_udp_stream_interface.cpp",
+      "src/stream_adaptor.cpp",
+    ]
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+      "$softbus_adapter_common/include",
+    ]
+    public_configs = [ ":stream_common_config" ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_core_common",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream:libsoftbus_stream",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
+} else {
+  import("//build/ohos.gni")
 
-  sources = [
-    "src/client_trans_udp_stream_interface.cpp",
-    "src/stream_adaptor.cpp",
-  ]
-
-  include_dirs = [
-    "include",
-    "../libsoftbus_stream/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$softbus_adapter_common/include",
-  ]
-  include_dirs += [ "$hilog_lite_include_path" ]
-  include_dirs += [ "$libsec_include_path" ]
-
-  public_configs = [ ":stream_common_config" ]
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_core_common",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
-    "../libsoftbus_stream:libsoftbus_stream",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
-  deps += [ "$hilog_lite_deps_path" ]
+  ohos_shared_library("dsoftbus_trans_dstream") {
+    sources = [
+      "src/client_trans_udp_stream_interface.cpp",
+      "src/stream_adaptor.cpp",
+    ]
+    include_dirs = [
+      "include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+      "$softbus_adapter_common/include",
+    ]
+    defines = [ "FILLP_LINUX" ]
+    cflags_cc = [ "-std=c++14" ]
+    public_configs = [ ":stream_common_config" ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_core_common",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream:libsoftbus_stream",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }
