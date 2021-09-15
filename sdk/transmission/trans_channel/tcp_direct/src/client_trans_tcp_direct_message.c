@@ -33,9 +33,8 @@
 #include "trans_pending_pkt.h"
 
 #define ACK_SIZE 4
-#define BUF_ADD_STEP 2048
-#define DATA_EXTEND_LEN 128
-#define MIN_BUF_LEN (BUF_ADD_STEP + DATA_EXTEND_LEN)
+#define DATA_EXTEND_LEN (DC_DATA_HEAD_SIZE + OVERHEAD_LEN)
+#define MIN_BUF_LEN (2048 + DATA_EXTEND_LEN)
 
 typedef struct {
     ListNode node;
@@ -367,24 +366,19 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransResizeDataBuffer: channelId=%d, pkgLen=%d",
         oldBuf->channelId, pkgLen);
-
-    uint32_t newLen = MIN_BUF_LEN;
-    while (newLen < pkgLen) {
-        newLen += BUF_ADD_STEP;
-    }
-    char *newBuf = (char *)SoftBusCalloc(newLen);
+    char *newBuf = (char *)SoftBusCalloc(pkgLen);
     if (newBuf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransResizeDataBuffer malloc err(%u)", newLen);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransResizeDataBuffer malloc err(%u)", pkgLen);
         return SOFTBUS_MEM_ERR;
     }
     uint32_t bufLen = oldBuf->w - oldBuf->data;
-    if (memcpy_s(newBuf, newLen, oldBuf->data, bufLen) != EOK) {
+    if (memcpy_s(newBuf, pkgLen, oldBuf->data, bufLen) != EOK) {
         SoftBusFree(newBuf);
         return SOFTBUS_MEM_ERR;
     }
     SoftBusFree(oldBuf->data);
     oldBuf->data = newBuf;
-    oldBuf->size = newLen;
+    oldBuf->size = pkgLen;
     oldBuf->w = newBuf + bufLen;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransResizeDataBuffer ok");
     return SOFTBUS_OK;
