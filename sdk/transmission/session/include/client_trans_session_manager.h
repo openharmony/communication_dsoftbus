@@ -82,7 +82,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char* data, uint16_t len, Se
 
 int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type);
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable);
 
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
 
