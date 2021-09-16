@@ -857,16 +857,16 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
 static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo *info)
 {
     if (info == NULL) {
-        LOG_ERR("info: invalid para");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "info: invalid para");
         return SOFTBUS_ERR;
     }
 
     if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
-        LOG_ERR("del channel err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
     }
 
     if (DelPendingPacket(channelId, PENDING_TYPE_PROXY) != SOFTBUS_OK) {
-        LOG_ERR("del pending pkt err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
     }
 
     TransProxyPostDisConnectMsgToLoop(info->connId);
