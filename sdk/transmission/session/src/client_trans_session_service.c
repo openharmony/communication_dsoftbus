@@ -425,7 +425,7 @@ void CloseSession(int sessionId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return;
     }
-    ret = ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
+    ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
@@ -517,7 +517,7 @@ static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
     }
     if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     
     if (ClientGetChannelBySessionId(sessionId, channelId, &type, NULL) != SOFTBUS_OK) {
@@ -526,7 +526,7 @@ static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
     }
     if (type != CHANNEL_TYPE_TCP_DIRECT) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channel type");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
 }
@@ -540,7 +540,7 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetSessionKey(channelId, key, len);
 }
@@ -554,7 +554,7 @@ int32_t GetSessionHandle(int32_t sessionId, int *handle)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetHandle(channelId, handle);
 }
@@ -568,7 +568,7 @@ int32_t DisableSessionListener(int32_t sessionId)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientDisableSessionListener(channelId);
 }
