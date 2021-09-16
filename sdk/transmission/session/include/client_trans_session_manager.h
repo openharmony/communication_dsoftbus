@@ -39,6 +39,7 @@ typedef struct {
     ChannelType channelType;
     SessionTag info;
     bool isServer;
+    bool isEnable;
     int32_t peerUid;
     int32_t peerPid;
 } SessionInfo;
