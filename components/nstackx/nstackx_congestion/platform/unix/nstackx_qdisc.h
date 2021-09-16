@@ -13,33 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef NSTACKX_CONFIG_H
-#define NSTACKX_CONFIG_H
+#ifndef NSTACKX_QDISC_H
+#define NSTACKX_QDISC_H
 
-#ifdef NSTACKX_WITH_LITEOS
+#include <stdint.h>
 
-/**
- * Enable(1) or Disable(0) fillp support in nStackx
- */
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 0
+#define QDISC_FILE_NAME_NAX_LENGTH 100
+#define QDISC_MAX_LENGTH 10000
+#define QDISC_DEFAULT_LENGTH 1000
+#define QDISC_MIN_LENGTH 100
+
+#define FIRST_QDISC_LEN 20
+#define SECOND_QDISC_LEN 50
+
+typedef struct _QdiscArg {
+    int32_t ifIndex;
+    int32_t protocol;
+} QdiscArg;
+
+typedef struct _QdiscValue {
+    int32_t qlen;
+} QdiscValue;
+
+int32_t GetQdiscLeftLength(const char *devName, int32_t protocol, uint32_t *len);
 #endif
-
-/**
- * Enable(1) or Disable(0) encrypt support in nStackx
- */
-
-#endif /* NSTACKX_WITH_LITEOS */
-
-#ifdef NSTACKX_WITH_HMOS_LINUX
-
-#ifndef NSTACKX_2_4G_WIFI
-#define NSTACKX_2_4G_WIFI
-#endif
-#endif /* NSTACKX_WITH_HMOS_LINUX */
-
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 1
-#endif
-
-#endif /* NSTACKX_CONFIG_H */
