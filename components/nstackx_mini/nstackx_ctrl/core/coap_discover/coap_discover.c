@@ -22,7 +22,6 @@
 #include "coap_app.h"
 #include "json_payload.h"
 #include "nstackx_log.h"
-#include "nstackx_util.h"
 #include "nstackx_timer.h"
 #include "nstackx_error.h"
 #include "nstackx_device.h"
