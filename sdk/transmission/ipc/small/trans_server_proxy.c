@@ -50,7 +50,12 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo* reply)
     }
     uint32_t size;
 
-    *(TransSerializer*)owner = *(TransSerializer*)IpcIoPopFlatObj(reply, &size);
+    void *data = IpcIoPopFlatObj(reply, &size);
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pop data is null.");
+        return SOFTBUS_ERR;
+    }
+    *(TransSerializer *)owner = *(TransSerializer *)data;
     return SOFTBUS_OK;
 }
 
