@@ -646,7 +646,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type)
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable)
 {
     if (sessionId < 0) {
         return SOFTBUS_INVALID_PARAM;
