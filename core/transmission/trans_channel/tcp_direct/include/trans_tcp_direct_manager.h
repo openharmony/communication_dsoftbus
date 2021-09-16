@@ -52,11 +52,6 @@ typedef struct {
 } IAuthConnection;
 
 typedef struct {
-    char data[MAX_BUF_LENGTH];
-    char *w;
-} DataBuffer;
-
-typedef struct {
     ListNode node;
     bool serverSide;
     int32_t channelId;

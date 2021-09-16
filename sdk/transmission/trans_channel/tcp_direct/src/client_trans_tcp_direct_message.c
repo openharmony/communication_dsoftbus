@@ -25,14 +25,16 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_property.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
 
-#define ACK_SIZE 4 // Message ACK 4 bytes
-static SoftBusList *g_tcpDataList = NULL;
+#define ACK_SIZE 4
+#define DATA_EXTEND_LEN (DC_DATA_HEAD_SIZE + OVERHEAD_LEN)
+#define MIN_BUF_LEN (1024 + DATA_EXTEND_LEN)
 
 typedef struct {
     ListNode node;
@@ -42,6 +44,9 @@ typedef struct {
     char *data;
     char *w;
 } ClientDataBuf;
+
+static uint32_t g_dataBufferMaxLen = 0;
+static SoftBusList *g_tcpDataList = NULL;
 
 static int32_t TransTdcDecrypt(const char *sessionKey, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
 {
@@ -189,7 +194,18 @@ static int32_t TransTdcSendAck(const TcpDirectChannelInfo *channel, int32_t seq)
 
 static int32_t TransGetDataBufSize(void)
 {
-    return MAX_BUF_LENGTH;
+    return MIN_BUF_LEN;
+}
+
+static int32_t TransGetDataBufMaxSize(void)
+{
+    uint32_t maxLen;
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config err");
+        return SOFTBUS_ERR;
+    }
+    g_dataBufferMaxLen = maxLen + DATA_EXTEND_LEN;
+    return SOFTBUS_OK;
 }
 
 int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
@@ -346,6 +362,28 @@ static int32_t TransTdcProcessData(int32_t channelId)
     return ret;
 }
 
+static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransResizeDataBuffer: channelId=%d, pkgLen=%d",
+        oldBuf->channelId, pkgLen);
+    char *newBuf = (char *)SoftBusCalloc(pkgLen);
+    if (newBuf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransResizeDataBuffer malloc err(%u)", pkgLen);
+        return SOFTBUS_MEM_ERR;
+    }
+    uint32_t bufLen = oldBuf->w - oldBuf->data;
+    if (memcpy_s(newBuf, pkgLen, oldBuf->data, bufLen) != EOK) {
+        SoftBusFree(newBuf);
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusFree(oldBuf->data);
+    oldBuf->data = newBuf;
+    oldBuf->size = pkgLen;
+    oldBuf->w = newBuf + bufLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransResizeDataBuffer ok");
+    return SOFTBUS_OK;
+}
+
 static int32_t TransTdcProcAllData(int32_t channelId)
 {
     while (1) {
@@ -370,15 +408,21 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_ERR;
         }
 
-        uint32_t dataLen = pktHead->dataLen;
-        if (dataLen > node->size - DC_DATA_HEAD_SIZE) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv data buf size[%d]", dataLen);
+        uint32_t pkgLen = pktHead->dataLen + DC_DATA_HEAD_SIZE;
+        if (pkgLen > g_dataBufferMaxLen) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv data buf size[%d]", pkgLen);
             pthread_mutex_unlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
+
+        if (pkgLen > node->size && pkgLen <= g_dataBufferMaxLen) {
+            int32_t ret = TransResizeDataBuffer(node, pkgLen);
+            pthread_mutex_unlock(&g_tcpDataList->lock);
+            return ret;
+        }
         pthread_mutex_unlock(&g_tcpDataList->lock);
 
-        if (bufLen < dataLen + DC_DATA_HEAD_SIZE) {
+        if (bufLen < pkgLen) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "data not enough, recv biz data next time.");
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
@@ -415,6 +459,9 @@ int32_t TransDataListInit(void)
 {
     if (g_tcpDataList != NULL) {
         return SOFTBUS_OK;
+    }
+    if (TransGetDataBufMaxSize() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
     }
     g_tcpDataList = CreateSoftBusList();
     if (g_tcpDataList == NULL) {

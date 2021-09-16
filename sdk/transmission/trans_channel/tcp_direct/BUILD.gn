@@ -17,6 +17,7 @@ config("trans_direct_channel_sdk_interface") {
   include_dirs = [
     "include",
     "$dsoftbus_core_path/common/security/sequence_verification/include",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
 }
@@ -36,6 +37,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_core_common",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
     "$dsoftbus_root_path/core/connection/common:conn_common",
     "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
   ]
@@ -96,6 +98,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_core_path/common/security/sequence_verification:softbus_seq_verification",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
       "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
