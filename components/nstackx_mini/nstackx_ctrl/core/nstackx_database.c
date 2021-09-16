@@ -16,7 +16,6 @@
 #include "nstackx_database.h"
 
 #include <securec.h>
-#include <stdint.h>
 #include <string.h>
 
 #include "nstackx_error.h"
