@@ -79,6 +79,8 @@ int32_t ClientAddNewSession(const char* sessionName, SessionInfo* session);
  */
 int32_t ClientAddSession(const SessionParam* param, int32_t* sessionId, bool* isEnabled);
 
+int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId);
+
 int32_t ClientDeleteSessionServer(SoftBusSecType type, const char* sessionName);
 
 int32_t ClientDeleteSession(int32_t sessionId);
@@ -102,9 +104,12 @@ int32_t ClientGetSessionCallbackByName(const char* sessionName, ISessionListener
 int32_t ClientAddSessionServer(SoftBusSecType type, const char* pkgName, const char* sessionName,
     const ISessionListener* listener);
 
+int32_t ClientGetSessionSide(int32_t sessionId);
+
 int TransClientInit(void);
 void TransClientDeinit(void);
 
+void ClientTransRegLnnOffline(void);
 #ifdef __cplusplus
 }
 #endif

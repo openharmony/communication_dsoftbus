@@ -17,6 +17,7 @@
 #define TRANS_SERVER_PROXY_H
 
 #include "stdint.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +28,10 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName);
 int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionName,
                              const char *peerDeviceId, const char *groupId, int32_t flags);
+int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
+int32_t ServerIpcNotifyAuthSuccess(int channelId);
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType);
-int32_t ServerIpcSendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType);
+int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
 #ifdef __cplusplus
 }

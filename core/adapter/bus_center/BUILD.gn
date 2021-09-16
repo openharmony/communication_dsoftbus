@@ -24,21 +24,29 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "platform/bus_center_adapter_weak.c" ]
       deps = [
-        "$hilog_lite_deps_path",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$hilog_lite_deps_path",
       ]
     }
   } else {
     shared_library("softbus_adapter_bus_center") {
+      if (enable_auth_account == true) {
+        bus_center_adapter_source = "platform/bus_center_adapter.c"
+      } else {
+        bus_center_adapter_source = "platform/bus_center_adapter_weak.c"
+      }
       include_dirs = [
         "include",
+        "$dsoftbus_root_path/interfaces/kits",
+        "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_root_path/core/common/include",
         "$hilog_lite_include_path",
+        "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       ]
-      sources = [ "platform/bus_center_adapter_weak.c" ]
+      sources = [ "$bus_center_adapter_source" ]
       deps = [
-        "$hilog_lite_deps_path",
         "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
     }
@@ -55,10 +63,10 @@ if (defined(ohos_lite)) {
     ]
     sources = [ "platform/bus_center_adapter.c" ]
     deps = [
-      "//third_party/bounds_checking_function:libsec_static",
-      "//utils/native/base:utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
+      "//third_party/bounds_checking_function:libsec_static",
+      "//utils/native/base:utils",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

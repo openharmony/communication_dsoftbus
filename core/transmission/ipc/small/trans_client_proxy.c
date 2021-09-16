@@ -142,14 +142,15 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     return ans;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, const void *data,
-                                      unsigned int len, int32_t type)
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+                                      const void *data, unsigned int len, int32_t type)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     IpcIo io;
     uint8_t *tmpData = (uint8_t *)SoftBusCalloc(len + MAX_SOFT_BUS_IPC_LEN);
     IpcIoInit(&io, tmpData, len + MAX_SOFT_BUS_IPC_LEN, 0);
     IpcIoPushInt32(&io, channelId);
+    IpcIoPushInt32(&io, channelType);
     IpcIoPushInt32(&io, type);
     IpcIoPushFlatObj(&io, data, len);
     SvcIdentity svc = {0};
