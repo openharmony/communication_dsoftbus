@@ -32,6 +32,7 @@
 #define AUTH_PORT_LEN 6
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR "0.0.0.0"
+#define DEFAULT_DEVICE_TYPE 11
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
@@ -326,6 +327,7 @@ static int32_t SetLocalDeviceInfo()
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device type failed.");
         return SOFTBUS_ERR;
     }
+    deviceType = DEFAULT_DEVICE_TYPE;
     g_localDeviceInfo->deviceType = (uint8_t)deviceType;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name,
                            sizeof(g_localDeviceInfo->name)) != SOFTBUS_OK ||
@@ -338,6 +340,7 @@ static int32_t SetLocalDeviceInfo()
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return SOFTBUS_ERR;
     }
+
     return SOFTBUS_OK;
 }
 
