@@ -28,7 +28,7 @@ static int32_t GetConnectionTypeByIP(const uint32_t sourceIp, const uint32_t des
     if (sourceIp == htonl(SOFTAP_ADDR_KEY) || destinationIp == htonl(SOFTAP_ADDR_KEY) ||
         sourceIp == htonl(P2P_ADDR_KEY) || destinationIp == htonl(P2P_ADDR_KEY)) {
         *connectType = CONNECT_TYPE_P2P;
-        LOGI(TAG, "connType is P2P(%hu)", *connectType);
+        LOGI(TAG, "connType is P2P(%u)", *connectType);
         return NSTACKX_EOK;
     }
     return NSTACKX_EFAILED;
