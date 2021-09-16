@@ -38,7 +38,7 @@ int32_t DiscClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
     return SOFTBUS_OK;
 }
 
-int32_t DiscClientProxy::OnChannelMsgReceived(int32_t channelId, const void *dataInfo,
+int32_t DiscClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *dataInfo,
     uint32_t len, int32_t type)
 {
     return SOFTBUS_OK;

@@ -15,7 +15,7 @@
 
 #include "softbus_server_frame.h"
 
-#include "auth_manager.h"
+#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "message_handler.h"
 #include "ohos_init.h"
@@ -46,7 +46,7 @@ bool GetServerIsInit()
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-    
+
     if (ServerStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server stub init failed.");
         return;
@@ -74,13 +74,13 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    if (BusCenterServerInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
+    if (DiscServerInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus disc server init failed.");
         goto ERR_EXIT;
     }
 
-    if (DiscServerInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus disc server init failed.");
+    if (BusCenterServerInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
 

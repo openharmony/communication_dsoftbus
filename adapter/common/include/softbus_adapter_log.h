@@ -87,6 +87,12 @@ enum {
 } while (0)
 #endif
 
+#if defined(__LITEOS_M__)
+#define SOFTBUS_HILOG_ID HILOG_MODULE_SOFTBUS
+#else
+#define SOFTBUS_HILOG_ID LOG_CORE
+#endif
+
 typedef enum {
     SOFTBUS_LOG_DBG,
     SOFTBUS_LOG_INFO,

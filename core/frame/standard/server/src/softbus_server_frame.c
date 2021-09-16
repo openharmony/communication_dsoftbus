@@ -42,7 +42,7 @@ static void ServerModuleDeinit(void)
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-    
+
     if (SoftBusTimerInit() == SOFTBUS_ERR) {
         return;
     }
@@ -65,13 +65,13 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    if (BusCenterServerInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
+    if (DiscServerInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus disc server init failed.");
         goto ERR_EXIT;
     }
 
-    if (DiscServerInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus disc server init failed.");
+    if (BusCenterServerInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
 

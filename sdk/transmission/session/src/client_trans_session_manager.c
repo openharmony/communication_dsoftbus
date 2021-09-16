@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -64,6 +65,7 @@ int TransClientInit(void)
         return SOFTBUS_ERR;
     }
 
+    ClientTransRegLnnOffline();
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init succ");
     return SOFTBUS_OK;
 }
@@ -72,7 +74,7 @@ static int32_t GenerateSessionId(void)
 {
 #define SESSION_ID_INIT_VALUE 1
     /* need get lock before */
-    for (uint32_t id = SESSION_ID_INIT_VALUE; id < MAX_SESSION_ID; id++) {
+    for (uint32_t id = SESSION_ID_INIT_VALUE; id <= MAX_SESSION_ID; id++) {
         if (((g_idFlagBitmap[(id >> SHIFT_3)] >> (id & 0x7)) & ID_USED) == ID_NOT_USED) {
             g_idFlagBitmap[(id >> SHIFT_3)] |= (ID_USED << (id & 0x7));
             return (int32_t)id;
@@ -432,6 +434,46 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     return SOFTBUS_OK;
 }
 
+static SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return NULL;
+    }
+    SessionInfo *session = SoftBusCalloc(sizeof(SessionInfo));
+    if (session == NULL) {
+        return NULL;
+    }
+    session->channelType = CHANNEL_TYPE_AUTH;
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        SoftBusFree(session);
+        return NULL;
+    }
+    return session;
+}
+
+int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || (sessionId == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+    SessionInfo *session = CreateNonEncryptSessionInfo(sessionName);
+    if (session == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (ClientAddNewSession(sessionName, session) != SOFTBUS_OK) {
+        SoftBusFree(session);
+        return SOFTBUS_ERR;
+    }
+    *sessionId = session->sessionId;
+    return SOFTBUS_OK;
+}
+
 int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 {
     if ((type == SEC_TYPE_UNKNOWN) || (sessionName == NULL)) {
@@ -739,6 +781,13 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
                 *sessionId = sessionNode->sessionId;
+                if (channel->channelType == CHANNEL_TYPE_AUTH) {
+                    if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
+                            channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
+                        (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
+                        return SOFTBUS_MEM_ERR;
+                    }
+                }
                 (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;
             }
@@ -821,4 +870,90 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
     return SOFTBUS_ERR;
+}
+
+int32_t ClientGetSessionSide(int32_t sessionId)
+{
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t side = -1;
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId != sessionId) {
+                continue;
+            }
+            side = sessionNode->isServer ? IS_SERVER : IS_CLIENT;
+        }
+    }
+    (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
+    return side;
+}
+
+static void DestroyClientSessionByDevId(const ClientSessionServer *server, const char *devId)
+{
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (strcmp(sessionNode->info.peerDeviceId, devId) == 0) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]",
+                       server->sessionName);
+            server->listener.session.OnSessionClosed(sessionNode->sessionId);
+            (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+            DestroySessionId(sessionNode->sessionId);
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
+        }
+    }
+}
+
+static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "offline networkid %s", info->networkId);
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return;
+    }
+
+    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        DestroyClientSessionByDevId(serverNode, info->networkId);
+    }
+    (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
+    return;
+}
+
+static INodeStateCb g_transLnnCb = {
+    .events = EVENT_NODE_STATE_OFFLINE,
+    .onNodeOffline = ClientTransLnnOfflineProc,
+};
+
+void ClientTransRegLnnOffline(void)
+{
+    int32_t ret;
+    ret = RegNodeDeviceStateCbInner("trans", &g_transLnnCb);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reg lnn offline fail");
+    }
 }

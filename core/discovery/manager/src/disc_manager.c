@@ -234,10 +234,15 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
         }
+        if (pthread_mutex_lock(&(g_discoveryInfoList->lock)) != 0) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
+            return;
+        }
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "find callback:id = %d", infoNode->id);
             InnerDeviceFound(infoNode, device);
         }
+        (void)pthread_mutex_unlock(&(g_discoveryInfoList->lock));
     }
     return;
 }

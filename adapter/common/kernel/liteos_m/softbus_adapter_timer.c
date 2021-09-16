@@ -27,31 +27,31 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
     void *id = osTimerNew((osTimerFunc_t)timerFunc, type, NULL, NULL);
     if (id != NULL) {
-        HILOG_INFO(LOG_CORE, "create timer success");
+        HILOG_INFO(SOFTBUS_HILOG_ID, "create timer success");
         return id;
     }
-    HILOG_ERROR(LOG_CORE, "create timer failed");
+    HILOG_ERROR(SOFTBUS_HILOG_ID, "create timer failed");
     return NULL;
 }
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
-        HILOG_ERROR(LOG_CORE, "start timer failed");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "start timer failed");
         (void)osTimerDelete(timerId);
         return SOFTBUS_ERR;
     }
-    HILOG_INFO(LOG_CORE, "start timer success");
+    HILOG_INFO(SOFTBUS_HILOG_ID, "start timer success");
     return SOFTBUS_OK;
 }
 
 int SoftBusDeleteTimer(void *timerId)
 {
     if (osTimerDelete(timerId) != osOK) {
-        HILOG_ERROR(LOG_CORE, "delete timer failed");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "delete timer failed");
         return SOFTBUS_ERR;
     }
-    HILOG_INFO(LOG_CORE, "delete timer success");
+    HILOG_INFO(SOFTBUS_HILOG_ID, "delete timer success");
     return SOFTBUS_OK;
 }
 

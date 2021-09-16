@@ -18,6 +18,8 @@
 
 #include <stdint.h>
 
+#include "softbus_conn_interface.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,9 +31,13 @@ void TransChannelDeinit(void);
 int32_t TransOpenChannel(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int32_t flags);
 
+int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt);
+
+int32_t TransNotifyAuthSuccess(int32_t channelId);
+
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 
-int32_t TransSendMsg(int32_t channelId, const void *data, uint32_t len, int32_t msgType);
+int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
 void TransChannelDeathCallback(const char *pkgName);
 #ifdef __cplusplus

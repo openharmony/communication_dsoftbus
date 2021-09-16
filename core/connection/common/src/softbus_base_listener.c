@@ -603,10 +603,14 @@ void DestroyBaseListener(ListenerModule module)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    SoftBusFree(g_listenerList[module].info);
-    SoftBusFree(g_listenerList[module].listener);
-    g_listenerList[module].info = NULL;
-    g_listenerList[module].listener = NULL;
+    if (g_listenerList[module].info != NULL) {
+        SoftBusFree(g_listenerList[module].info);
+        g_listenerList[module].info = NULL;
+    }
+    if (g_listenerList[module].listener != NULL) {
+        SoftBusFree(g_listenerList[module].listener);
+        g_listenerList[module].listener = NULL;
+    }
     pthread_mutex_unlock(&g_listenerList[module].lock);
 }
 

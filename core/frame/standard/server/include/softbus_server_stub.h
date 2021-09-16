@@ -38,6 +38,8 @@ private:
     int32_t CreateSessionServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t OpenSessionInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply);
+    int32_t NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply);
     int32_t CloseChannelInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
 

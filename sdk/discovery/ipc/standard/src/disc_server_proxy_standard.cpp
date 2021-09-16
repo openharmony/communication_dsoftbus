@@ -59,9 +59,10 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     data.WriteBool(subInfo->isSameAccount);
     data.WriteBool(subInfo->isWakeRemote);
     data.WriteCString(subInfo->capability);
-    data.WriteCString((char *)subInfo->capabilityData);
     data.WriteUint32(subInfo->dataLen);
-
+    if (subInfo->dataLen != 0) {
+        data.WriteCString((char *)subInfo->capabilityData);
+    }
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
@@ -124,9 +125,10 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     data.WriteInt32(pubInfo->medium);
     data.WriteInt32(pubInfo->freq);
     data.WriteCString(pubInfo->capability);
-    data.WriteCString((char *)pubInfo->capabilityData);
     data.WriteUint32(pubInfo->dataLen);
-
+    if (pubInfo->dataLen != 0) {
+        data.WriteCString((char *)pubInfo->capabilityData);
+    }
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
@@ -195,12 +197,23 @@ int32_t DiscServerProxy::OpenSession(const char *mySessionName, const char *peer
     return SOFTBUS_OK;
 }
 
+int32_t DiscServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::SendMessage(int32_t channelId, const void *data, uint32_t len, int32_t msgType)
+int32_t DiscServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, int32_t msgType)
 {
     return SOFTBUS_OK;
 }

@@ -33,6 +33,7 @@ int32_t ServerPublishService(const void *origin, IpcIo *req, IpcIo *reply)
     }
     size_t len;
     uint32_t size;
+    unsigned char *capabilityData = NULL;
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
     PublishSerializer *info = (PublishSerializer*)IpcIoPopFlatObj(req, &size);
     if (info == NULL) {
@@ -40,7 +41,9 @@ int32_t ServerPublishService(const void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     char *capability = (char*)IpcIoPopString(req, &len);
-    unsigned char *capabilityData = (unsigned char*)IpcIoPopString(req, &len);
+    if (info->commonSerializer.dataLen != 0) {
+        capabilityData = (unsigned char*)IpcIoPopString(req, &len);
+    }
     PublishInfo publishInfo = {
         .capability = capability,
         .capabilityData = capabilityData,
@@ -87,6 +90,7 @@ int32_t ServerStartDiscovery(const void *origin, IpcIo *req, IpcIo *reply)
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "start discovery ipc server pop.");
     size_t len;
     uint32_t size;
+    unsigned char *capabilityData = NULL;
     const char *pkgName = (const char *)IpcIoPopString(req, &len);
     SubscribeSerializer *info = (SubscribeSerializer *)IpcIoPopFlatObj(req, &size);
     if (info == NULL) {
@@ -94,7 +98,9 @@ int32_t ServerStartDiscovery(const void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     char *capability = (char *)IpcIoPopString(req, &len);
-    unsigned char *capabilityData = (unsigned char *)IpcIoPopString(req, &len);
+    if (info->commonSerializer.dataLen != 0) {
+        capabilityData = (unsigned char *)IpcIoPopString(req, &len);
+    }
     SubscribeInfo subscribeInfo = {
         .capability = capability,
         .capabilityData = capabilityData,
