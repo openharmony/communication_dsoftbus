@@ -341,15 +341,14 @@ static void CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 50000
-    int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t type = CHANNEL_TYPE_BUTT;
     int32_t i = 0;
+    bool isEnable = false;
 
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
-        if (ClientGetChannelBySessionId(sessionId, &channelId, &type) != SOFTBUS_OK) {
+        if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
             return;
         }
-        if (type != CHANNEL_TYPE_BUTT) {
+        if (isEnable == true) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
             return;
         }
