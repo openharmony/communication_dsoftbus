@@ -13,33 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef NSTACKX_CONFIG_H
-#define NSTACKX_CONFIG_H
+#ifndef NSTACKX_FILE_MANAGER_CLIENT_H
+#define NSTACKX_FILE_MANAGER_CLIENT_H
 
-#ifdef NSTACKX_WITH_LITEOS
+#include "nstackx_file_manager.h"
+#include "nstackx_list.h"
 
-/**
- * Enable(1) or Disable(0) fillp support in nStackx
- */
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 0
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/**
- * Enable(1) or Disable(0) encrypt support in nStackx
- */
+void SendTaskProcess(FileManager *fileManager, FileListTask *fileList);
 
-#endif /* NSTACKX_WITH_LITEOS */
+void ClearSendFileList(FileManager *fileManager, FileListTask *fileList);
 
-#ifdef NSTACKX_WITH_HMOS_LINUX
+int32_t InitSendBlockLists(FileManager *fileManager);
 
-#ifndef NSTACKX_2_4G_WIFI
-#define NSTACKX_2_4G_WIFI
+uint32_t GetMaxSendListSize(uint16_t connType);
+
+uint16_t GetSendListNum(uint16_t connType, const DFileSession *session);
+
+void ClearSendFrameList(FileManager *fileManager);
+
+#ifdef __cplusplus
+}
 #endif
-#endif /* NSTACKX_WITH_HMOS_LINUX */
 
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 1
 #endif
-
-#endif /* NSTACKX_CONFIG_H */

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "nstackx_event.h"
 #include "nstackx_log.h"
 #include "nstackx_error.h"
