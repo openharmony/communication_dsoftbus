@@ -164,20 +164,3 @@ void CloseDesc(int32_t desc)
         LOGE(TAG, "close desc error : %d", errno);
     }
 }
-
-int32_t SetSocketNonBlock(SocketDesc fd)
-{
-    int32_t flag;
-
-    flag = fcntl(fd, F_GETFL, 0);
-    if (flag < 0) {
-        LOGE(TAG, "fcntl GETFL error");
-        return NSTACKX_EFAILED;
-    }
-
-    if (fcntl(fd, F_SETFL, (unsigned int)flag | O_NONBLOCK) < 0) {
-        LOGE(TAG, "fcntl SETFL error");
-        return NSTACKX_EFAILED;
-    }
-    return NSTACKX_EOK;
-}

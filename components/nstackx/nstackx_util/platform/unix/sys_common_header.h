@@ -20,6 +20,13 @@
 #define _GNU_SOURCE
 #endif
 
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <netinet/udp.h>
+#include <net/if.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
@@ -27,17 +34,10 @@
 #include <sys/prctl.h>
 #include <sys/select.h>
 #include <sys/types.h>
-
 #include <syscall.h>
-#include <netinet/in.h>
-#include <netinet/udp.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
-
 #include <unistd.h>
-#include <pthread.h>
-#include <semaphore.h>
+
+#include <linux/limits.h>
 
 #ifndef offsetof
 #define offsetof(type, member) __builtin_offsetof(type, member)

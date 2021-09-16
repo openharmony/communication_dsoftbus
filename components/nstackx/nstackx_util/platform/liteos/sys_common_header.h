@@ -28,14 +28,10 @@
 #include "asm/atomic.h"
 #include "lwip/sockets.h"
 #else
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
 #include <net/if.h>
 #include <limits.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
-#include <sys/select.h>
 #endif /* LWIP_LITEOS_A_COMPAT */
 
 #ifndef offsetof
