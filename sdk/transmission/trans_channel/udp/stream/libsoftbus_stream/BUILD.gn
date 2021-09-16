@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("stream_config") {
@@ -20,49 +19,81 @@ config("stream_config") {
   ldflags = [ "-lstdc++" ]
 }
 
-shared_library("libsoftbus_stream") {
-  configs -= [ "//build/lite/config:language_cpp" ]
-  configs += [ ":stream_config" ]
-
-  include_dirs = [
-    "include",
-    "$softbus_adapter_common/include",
-    "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/cJSON",
-    "//third_party/openssl/include",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-  ]
-  include_dirs += [ "$hilog_lite_include_path" ]
-  cflags = [
-    "-Wall",
-    "-fPIC",
-    "-fno-builtin",
-    "-Wno-multichar",
-    "-Wno-unused-command-line-argument",
-    "-Werror",
-    "-Wall",
-    "-g",
-  ]
-  sources = [
-    "raw_stream_data.cpp",
-    "stream_common_data.cpp",
-    "stream_depacketizer.cpp",
-    "stream_manager.cpp",
-    "stream_msg_manager.cpp",
-    "stream_packetizer.cpp",
-    "vtp_instance.cpp",
-    "vtp_stream_socket.cpp",
-  ]
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
-    "$dsoftbus_root_path/core/common:softbus_core_common",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
-  deps += [ "$hilog_lite_deps_path" ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  shared_library("libsoftbus_stream") {
+    configs -= [ "//build/lite/config:language_cpp" ]
+    configs += [ ":stream_config" ]
+    include_dirs = [
+      "include",
+      "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "//third_party/bounds_checking_function/include",
+      "//third_party/cJSON",
+      "//third_party/openssl/include",
+      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    ]
+    cflags = [ "-fPIC" ]
+    sources = [
+      "raw_stream_data.cpp",
+      "stream_common_data.cpp",
+      "stream_depacketizer.cpp",
+      "stream_manager.cpp",
+      "stream_msg_manager.cpp",
+      "stream_packetizer.cpp",
+      "vtp_instance.cpp",
+      "vtp_stream_socket.cpp",
+    ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
+      "$dsoftbus_root_path/core/common:softbus_core_common",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("libsoftbus_stream") {
+    defines = [ "FILLP_LINUX" ]
+    cflags_cc = [ "-std=c++14" ]
+    include_dirs = [
+      "include",
+      "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "//third_party/bounds_checking_function/include",
+      "//third_party/cJSON",
+      "//third_party/openssl/include",
+      "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+    ]
+    cflags = [ "-fPIC" ]
+    sources = [
+      "raw_stream_data.cpp",
+      "stream_common_data.cpp",
+      "stream_depacketizer.cpp",
+      "stream_manager.cpp",
+      "stream_msg_manager.cpp",
+      "stream_packetizer.cpp",
+      "vtp_instance.cpp",
+      "vtp_stream_socket.cpp",
+    ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
+      "$dsoftbus_root_path/core/common:softbus_core_common",
+      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }
