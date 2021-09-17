@@ -68,7 +68,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_common") {
+  ohos_source_set("dsoftbus_trans_common") {
     include_dirs = [
       "//third_party/cJSON",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct",

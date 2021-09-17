@@ -11,12 +11,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_server") {
-  if (ohos_kernel_type == "liteos_m") {
-    features = [ "frame:softbus_server_frame" ]
-  } else {
-    features = [ "frame:softbus_server" ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  lite_component("softbus_server") {
+    if (ohos_kernel_type == "liteos_m") {
+      features = [ "frame:softbus_server_frame" ]
+    } else {
+      features = [ "frame:softbus_server" ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  group("softbus_server") {
+    deps = [
+      "frame:softbus_server",
+    ]
   }
 }

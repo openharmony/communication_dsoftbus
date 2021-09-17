@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_SERVER_STUB_H
-#define SOFTBUS_SERVER_STUB_H
+#include "softbus_server_death_recipient.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "softbus_client_info_manager.h"
+#include "softbus_log.h"
+#include "softbus_server_frame.h"
 
-int ServerStubInit(void);
-
-#ifdef __cplusplus
+namespace OHOS {
+void SoftBusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    std::string pkgName;
+    SoftBusServerData::GetInstance().SoftbusRemoveService(remote.promote(), pkgName);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+        "client service %s died, remove it from softbus server", pkgName.c_str());
+    ClientDeathCallback(pkgName.c_str());
 }
-#endif
-
-#endif
+}  // namespace OHOS

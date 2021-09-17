@@ -17,6 +17,7 @@ config("trans_proxy_channel_interface") {
   include_dirs = [
     "include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
   ]
 }
 
@@ -90,7 +91,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_proxy_channel") {
+  ohos_source_set("dsoftbus_trans_proxy_channel") {
     include_dirs = common_include
     include_dirs += [
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
@@ -102,7 +103,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/message_handler",
       "$dsoftbus_root_path/core/connection:conn_manager",
     ]
     if (is_standard_system) {

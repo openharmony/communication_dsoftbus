@@ -79,7 +79,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_direct_channel") {
+  ohos_source_set("dsoftbus_trans_direct_channel") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/transmission/common/include",

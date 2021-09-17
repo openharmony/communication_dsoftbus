@@ -27,7 +27,7 @@ ohos_prebuilt_etc("softbus_server.rc") {
   subsystem_name = "communication"
 }
 
-ohos_shared_library("softbus_server") {
+ohos_source_set("softbus_server") {
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -58,7 +58,7 @@ ohos_shared_library("softbus_server") {
     "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$dsoftbus_root_path/core/connection:conn_manager",
     "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
-    "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
+    "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",
     "$dsoftbus_root_path/core/transmission:dsoftbus_trans_session",
     "//utils/native/base:utils",
   ]

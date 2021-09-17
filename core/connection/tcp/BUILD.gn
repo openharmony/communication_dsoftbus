@@ -75,7 +75,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("tcp_connection") {
+  ohos_source_set("tcp_connection") {
     if (enable_connection_tcp == true) {
       sources = [ "src/softbus_tcp_connect_manager.c" ]
     } else {

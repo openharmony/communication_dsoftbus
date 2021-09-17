@@ -61,15 +61,14 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_disc_server") {
+  ohos_source_set("dsoftbus_disc_server") {
     include_dirs = [
       "coap/include",
       "ipc/include",
       "ipc/standard/include",
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/frame/standard/client/include",
-      "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
+      "$dsoftbus_root_path/sdk/frame/standard/include",
       "//utils/system/safwk/native/include",
     ]
 
@@ -90,7 +89,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:dsoftbus_utils",
-      "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
+      "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",
       "coap:dsoftbus_disc_coap",
       "//utils/native/base:utils",
     ]

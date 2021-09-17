@@ -11,93 +11,107 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (ohos_kernel_type == "liteos_m") {
-  static_library("softbus_server_frame") {
-    complete_static_lib = true
-    include_dirs = [
-      "include",
-      "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/common/message_handler/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/common/softbus_property/include",
-      "$dsoftbus_root_path/core/transmission/session/include",
-      "$dsoftbus_root_path/core/frame/common/include",
-      "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-      "$dsoftbus_root_path/sdk/bus_center/include",
-      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "$hilog_lite_include_path",
-      "$softbus_adapter_config/spec_config",
-    ]
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("softbus_server_frame") {
+      complete_static_lib = true
+      # mini system not support
+    }
+  } else {
+    source_set("softbus_server_frame") {
+      include_dirs = [
+        "common/include",
+        "small/init/include",
+      ]
 
-    sources = [ "src/softbus_server_frame.c" ]
+      sources = [
+        "common/src/softbus_server_frame.c",
+        "small/init/src/bus_center_server_stub.c",
+        "small/init/src/disc_server_stub.c",
+        "small/init/src/softbus_server_stub.c",
+        "small/init/src/trans_server_stub.c",
+      ]
 
-    deps = [
-      "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
-    ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+        "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
+        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
+        "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
+        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/connection:conn_manager",
+        "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
+        "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+        "$dsoftbus_root_path/core/transmission:dsoftbus_trans_session",
+        "$hilog_lite_deps_path",
+        "//foundation/communication/ipc_lite:liteipc_adapter",
+        "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      ]
+    }
+    executable("softbus_server") {
+      sources = [ "small/init/src/softbus_server_main.c" ]
+      include_dirs = [ "common/include" ]
+      deps = [ ":softbus_server_frame" ]
+    }
   }
 } else {
-  source_set("softbus_server_frame") {
-    include_dirs = [
-      "common/include",
-      "small/init/include",
-      "small/client_manager/include",
-      "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/bus_center/utils/include",
-      "$dsoftbus_root_path/core/common/message_handler/include",
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/inner_communication",
-      "$dsoftbus_root_path/core/connection/interface",
-      "$dsoftbus_root_path/core/connection/manager",
-      "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-      "$dsoftbus_root_path/core/transmission/common/include",
-      "$dsoftbus_root_path/core/common/softbus_property/include",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-      "//base/security/deviceauth/interfaces/innerkits",
-      "//utils/native/lite/include",
-      "$hilog_lite_include_path",
-      "$softbus_adapter_config/spec_config",
-    ]
+  import("//build/ohos.gni")
 
+  ohos_prebuilt_etc("softbus_server.rc") {
+    relative_install_dir = "init"
+    if (use_musl) {
+      source =
+          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
+    } else {
+      source =
+          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.rc"
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
+
+  ohos_shared_library("softbus_server") {
+    include_dirs = [
+      "$dsoftbus_root_path/core/frame/standard/init/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+    ]
     sources = [
       "common/src/softbus_server_frame.c",
-      "small/init/src/bus_center_server_stub.c",
-      "small/init/src/disc_server_stub.c",
-      "small/init/src/softbus_server_stub.c",
-      "small/init/src/trans_server_stub.c",
+      "standard/init/src/softbus_server_death_recipient.cpp",
+      "standard/init/src/if_softbus_server.cpp",
+      "standard/init/src/softbus_server.cpp",
+      "standard/init/src/softbus_server_stub.cpp",
     ]
-
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
-
     deps = [
+      ":softbus_server.rc",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
-      "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
       "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/connection:conn_manager",
       "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
-      "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
+      "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",
       "$dsoftbus_root_path/core/transmission:dsoftbus_trans_session",
-      "$hilog_lite_deps_path",
-      "//foundation/communication/ipc_lite:liteipc_adapter",
-      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      "//utils/native/base:utils",
     ]
-  }
-  executable("softbus_server") {
-    sources = [ "small/init/src/softbus_server_main.c" ]
-    include_dirs = [ "common/include" ]
-    deps = [ ":softbus_server_frame" ]
+    if (is_standard_system) {
+      external_deps = [
+        "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_core",
+        "safwk:system_ability_fwk",
+      ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

@@ -102,7 +102,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_udp_channel_sdk") {
+  ohos_source_set("dsoftbus_trans_udp_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_core_path/common/include",

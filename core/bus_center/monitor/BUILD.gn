@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_monitor") {
+  ohos_source_set("dsoftbus_bus_center_monitor") {
     sources = [
       "src/lnn_event_monitor.c",
       "src/lnn_netlink_monitor.c",

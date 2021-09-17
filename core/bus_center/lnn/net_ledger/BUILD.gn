@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_ledger") {
+  ohos_source_set("dsoftbus_bus_center_ledger") {
     sources = [
       "common/src/lnn_device_info.c",
       "common/src/lnn_map.c",

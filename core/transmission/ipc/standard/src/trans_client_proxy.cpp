@@ -15,9 +15,9 @@
 
 #include "trans_client_proxy.h"
 
+#include "softbus_client_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_server_data.h"
 #include "trans_client_proxy_standard.h"
 
 using namespace OHOS;

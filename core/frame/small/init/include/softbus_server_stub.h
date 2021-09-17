@@ -16,11 +16,13 @@
 #ifndef SOFTBUS_SERVER_STUB_H
 #define SOFTBUS_SERVER_STUB_H
 
-#include "softbus_server_stub_interface.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int32_t ServerStubInit(void);
 
 #ifdef __cplusplus
 }

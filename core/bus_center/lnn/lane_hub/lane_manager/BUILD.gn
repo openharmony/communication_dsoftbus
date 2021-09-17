@@ -60,7 +60,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_hub") {
+  ohos_source_set("dsoftbus_bus_center_hub") {
     sources = [
       "src/lnn_lane_info.c",
       "src/lnn_lane_manager.c",
