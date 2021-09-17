@@ -128,7 +128,7 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
 static int32_t UpdateLocalDeviceType(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    uint8_t typeId;
+    uint16_t typeId;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }

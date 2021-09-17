@@ -155,7 +155,7 @@ typedef enum {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];    /**< Device ID */
     char deviceName[DEVICE_NAME_BUF_LEN];  /**< Device name */
-    uint8_t deviceTypeId;                  /**< Device type ID */
+    uint16_t deviceTypeId;
 } NodeBasicInfo;
 
 /**
