@@ -33,7 +33,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/connection/common:conn_common",
     "$dsoftbus_root_path/core/transmission/common:dsoftbus_trans_common",
     "$hilog_lite_deps_path",
@@ -90,7 +90,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_direct_channel_sdk_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
       "$dsoftbus_root_path/core/transmission/common:dsoftbus_trans_common",
     ]

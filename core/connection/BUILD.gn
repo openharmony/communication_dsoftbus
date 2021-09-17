@@ -53,16 +53,14 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/ble:ble_connection",
         "$dsoftbus_root_path/core/connection/br:br_connection",
         "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
       ]
-      public_configs = [
-        ":conn_manager_interface",
-      ]
+      public_configs = [ ":conn_manager_interface" ]
     }
   }
 } else {
@@ -81,14 +79,12 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/ble:ble_connection",
       "$dsoftbus_root_path/core/connection/br:br_connection",
       "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
     ]
-    public_configs = [
-      ":conn_manager_interface",
-    ]
+    public_configs = [ ":conn_manager_interface" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }

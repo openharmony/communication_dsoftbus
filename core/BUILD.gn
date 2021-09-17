@@ -27,8 +27,6 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   group("softbus_server") {
-    deps = [
-      "frame:softbus_server",
-    ]
+    deps = [ "frame:softbus_server" ]
   }
 }

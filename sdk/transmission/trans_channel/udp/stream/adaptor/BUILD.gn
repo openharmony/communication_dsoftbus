@@ -50,7 +50,7 @@ source_set("dsoftbus_trans_dstream") {
   public_configs = [ ":stream_common_config" ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "../libsoftbus_stream:libsoftbus_stream",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

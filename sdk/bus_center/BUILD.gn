@@ -52,7 +52,7 @@ if (defined(ohos_lite)) {
       public_configs = [ ":bus_center_client_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
@@ -84,7 +84,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_client_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

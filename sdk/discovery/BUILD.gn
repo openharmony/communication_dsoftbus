@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
@@ -101,7 +101,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "//utils/native/base:utils",
       ]
     }

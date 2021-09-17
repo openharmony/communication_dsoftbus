@@ -19,13 +19,13 @@
 #include "softbus_log.h"
 
 namespace OHOS {
-SoftBusServerData &SoftBusServerData::GetInstance()
+SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 {
-    static SoftBusServerData instance;
+    static SoftbusClientInfoManager instance;
     return instance;
 }
 
-int32_t SoftBusServerData::SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
+int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
     const sptr<IRemoteObject::DeathRecipient> &abilityDeath)
 {
     if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
@@ -38,7 +38,7 @@ int32_t SoftBusServerData::SoftbusAddService(const std::string &pkgName, const s
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerData::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName)
+int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName)
 {
     if (object == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveService object is nullptr\n");
@@ -56,7 +56,7 @@ int32_t SoftBusServerData::SoftbusRemoveService(const sptr<IRemoteObject> &objec
     return SOFTBUS_OK;
 }
 
-sptr<IRemoteObject> SoftBusServerData::GetSoftbusClientProxy(const std::string &pkgName)
+sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     auto iter = clientObjectMap_.find(pkgName);
@@ -67,7 +67,7 @@ sptr<IRemoteObject> SoftBusServerData::GetSoftbusClientProxy(const std::string &
     return nullptr;
 }
 
-void SoftBusServerData::GetSoftbusClientProxyMap(std::map<std::string, sptr<IRemoteObject>> &softbusClientMap)
+void SoftbusClientInfoManager::GetSoftbusClientProxyMap(std::map<std::string, sptr<IRemoteObject>> &softbusClientMap)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
@@ -75,7 +75,7 @@ void SoftBusServerData::GetSoftbusClientProxyMap(std::map<std::string, sptr<IRem
     }
 }
 
-bool SoftBusServerData::SoftbusClientIsExist(const std::string &pkgName)
+bool SoftbusClientInfoManager::SoftbusClientIsExist(const std::string &pkgName)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     auto iter = clientObjectMap_.find(pkgName);

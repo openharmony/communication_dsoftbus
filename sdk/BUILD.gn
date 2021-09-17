@@ -15,14 +15,14 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
-  if (is_build_shared_sdk == true) {
+  if (enable_build_shared_sdk == true) {
     build_type = "shared_library"
   } else {
     build_type = "static_library"
   }
 } else {
   import("//build/ohos.gni")
-  if (is_build_shared_sdk == true) {
+  if (enable_build_shared_sdk == true) {
     build_type = "ohos_shared_library"
   } else {
     build_type = "ohos_static_library"
@@ -40,7 +40,7 @@ config("dsoftbus_sdk_interface") {
 }
 
 target(build_type, "softbus_client") {
-  if (is_build_shared_sdk == false) {
+  if (enable_build_shared_sdk == false) {
     complete_static_lib = true
   }
   deps = [

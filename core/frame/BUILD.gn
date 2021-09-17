@@ -46,13 +46,13 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
         "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
         "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
-        "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$dsoftbus_root_path/core/connection:conn_manager",
         "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
         "$dsoftbus_root_path/core/transmission:dsoftbus_trans_session",
+        "$dsoftbus_root_path/core/transmission/trans_channel/proxy:dsoftbus_trans_proxy_channel",
         "$hilog_lite_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
@@ -87,9 +87,9 @@ if (defined(ohos_lite)) {
     ]
     sources = [
       "common/src/softbus_server_frame.c",
-      "standard/init/src/softbus_server_death_recipient.cpp",
       "standard/init/src/if_softbus_server.cpp",
       "standard/init/src/softbus_server.cpp",
+      "standard/init/src/softbus_server_death_recipient.cpp",
       "standard/init/src/softbus_server_stub.cpp",
     ]
     deps = [
@@ -97,7 +97,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection:conn_manager",
       "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
       "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",

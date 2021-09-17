@@ -20,7 +20,6 @@
 #include <unistd.h>
 #include "client_disc_manager.h"
 #include "softbus_common.h"
-#include "softbus_log.h"
 
 using namespace testing::ext;
 
@@ -112,27 +111,27 @@ static SubscribeInfo g_sInfo1 = {
 
 static void TestDeviceFound(const DeviceInfo *device)
 {
-    LOG_INFO("[client]TestDeviceFound\n");
+    printf("[client]TestDeviceFound\n");
 }
 
 static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
 {
-    LOG_INFO("[client]TestDiscoverFailed\n");
+    printf("[client]TestDiscoverFailed\n");
 }
 
 static void TestDiscoverySuccess(int subscribeId)
 {
-    LOG_INFO("[client]TestDiscoverySuccess\n");
+    printf("[client]TestDiscoverySuccess\n");
 }
 
 static void TestPublishSuccess(int publishId)
 {
-    LOG_INFO("[client]TestPublishSuccess\n");
+    printf("[client]TestPublishSuccess\n");
 }
 
 static void TestPublishFail(int publishId, PublishFailReason reason)
 {
-    LOG_INFO("[client]TestPublishFail\n");
+    printf("[client]TestPublishFail\n");
 }
 
 static IDiscoveryCallback g_subscribeCb = {

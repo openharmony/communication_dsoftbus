@@ -24,7 +24,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "platform/bus_center_adapter_weak.c" ]
       deps = [
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
@@ -45,7 +45,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "$bus_center_adapter_source" ]
       deps = [
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -63,7 +63,7 @@ if (defined(ohos_lite)) {
     ]
     sources = [ "platform/bus_center_adapter.c" ]
     deps = [
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",

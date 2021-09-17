@@ -48,7 +48,7 @@ if (defined(ohos_lite)) {
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
-    source_set("softbus_adapter") {
+    shared_library("softbus_adapter") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -81,7 +81,7 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  ohos_source_set("softbus_adapter") {
+  ohos_shared_library("softbus_adapter") {
     include_dirs = [
       "//third_party/mbedtls/include",
       "//utils/native/base/include",
