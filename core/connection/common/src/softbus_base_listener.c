@@ -36,11 +36,8 @@
 #define FDARR_START_SIZE  16
 #define FDARR_EXPAND_BASE 2
 
-#define CLIENT_THREADNUM  1
-#define CLIENT_QUEUE_NUM  10
-
-#define SERVER_THREADNUM  1
-#define SERVER_QUEUE_NUM  10
+#define THREADPOOL_THREADNUM 1
+#define THREADPOOL_QUEUE_NUM 10
 
 typedef enum {
     LISTENER_IDLE,
@@ -72,8 +69,7 @@ typedef struct {
 } SoftbusListenerNode;
 
 static SoftbusListenerNode g_listenerList[UNUSE_BUTT];
-static ThreadPool *g_clientPool = NULL;
-static ThreadPool *g_serverPool = NULL;
+static ThreadPool *g_threadPool = NULL;
 static fd_set g_readSet;
 static fd_set g_writeSet;
 static fd_set g_exceptSet;
@@ -452,15 +448,9 @@ static int32_t StartThread(ListenerModule module, ModeType modeType)
     }
     listenerInfo->modeType = modeType;
     listenerInfo->status = LISTENER_RUNNING;
-    if (modeType == SERVER_MODE) {
-        return ThreadPoolAddJob(g_serverPool, (int(*)(void *))SelectThread,
-            NULL, PERSISTENT, (uintptr_t)0);
-    } else if (modeType == CLIENT_MODE) {
-        return ThreadPoolAddJob(g_clientPool, (int(*)(void *))SelectThread,
-            NULL, PERSISTENT, (uintptr_t)0);
-    } else {
-        return SOFTBUS_INVALID_PARAM;
-    }
+
+    return ThreadPoolAddJob(g_threadPool, (int(*)(void *))SelectThread,
+        NULL, PERSISTENT, (uintptr_t)0);
 }
 
 static int32_t PrepareBaseListener(ListenerModule module, ModeType modeType)
@@ -473,21 +463,13 @@ static int32_t PrepareBaseListener(ListenerModule module, ModeType modeType)
         return SOFTBUS_ERR;
     }
 
-    if (modeType == SERVER_MODE) {
-        if (g_serverPool == NULL) {
-            g_serverPool = ThreadPoolInit(SERVER_THREADNUM, SERVER_QUEUE_NUM);
-            if (g_serverPool == NULL) {
-                return SOFTBUS_MALLOC_ERR;
-            }
-        }
-    } else {
-        if (g_clientPool == NULL) {
-            g_clientPool = ThreadPoolInit(CLIENT_THREADNUM, CLIENT_QUEUE_NUM);
-            if (g_clientPool == NULL) {
-                return SOFTBUS_MALLOC_ERR;
-            }
+    if (g_threadPool == NULL) {
+        g_threadPool = ThreadPoolInit(THREADPOOL_THREADNUM, THREADPOOL_QUEUE_NUM);
+        if (g_threadPool == NULL) {
+            return SOFTBUS_MALLOC_ERR;
         }
     }
+
     int ret = StartThread(module, modeType);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_ALREADY_EXISTED) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "StartThread failed");
