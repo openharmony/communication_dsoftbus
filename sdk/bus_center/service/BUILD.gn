@@ -57,7 +57,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_service_sdk") {
+  ohos_source_set("dsoftbus_bus_center_service_sdk") {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",

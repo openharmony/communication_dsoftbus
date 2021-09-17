@@ -44,7 +44,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("ble_connection") {
+  ohos_source_set("ble_connection") {
     sources = [ "src/ble_connection_virtual.c" ]
     include_dirs = [
       "include",

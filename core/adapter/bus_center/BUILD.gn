@@ -53,7 +53,7 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/ohos.gni")
-  ohos_shared_library("softbus_adapter_bus_center") {
+  ohos_source_set("softbus_adapter_bus_center") {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",

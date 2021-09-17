@@ -15,7 +15,10 @@ import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("client_manager_interface") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
 }
 
 source_set("client_manager") {

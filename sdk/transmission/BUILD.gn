@@ -91,7 +91,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_session_manager_sdk") {
+  ohos_source_set("dsoftbus_trans_session_manager_sdk") {
     include_dirs = common_include
     sources = common_src
     public_configs = [ ":trans_session_manager_sdk_interface" ]

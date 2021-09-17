@@ -67,7 +67,7 @@ if (defined(ohos_lite)) {
     part_name = "dsoftbus_standard"
   }
 
-  ohos_shared_library("softbus_permission") {
+  ohos_source_set("softbus_permission") {
     include_dirs = [
       "$dsoftbus_core_path/common/include",
       "$dsoftbus_core_path/common/security/permission/include",

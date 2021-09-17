@@ -14,18 +14,18 @@
 import("//build/ohos.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-config("softbus_data_interface") {
+config("client_manager_interface") {
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("softbus_server_data") {
-  sources = [ "src/softbus_server_data.cpp" ]
+ohos_source_set("client_manager") {
+  sources = [ "src/softbus_client_info_manager.cpp" ]
 
   include_dirs = [
     "include",
     "$dsoftbus_root_path/core/common/include",
   ]
-  public_configs = [ ":softbus_data_interface" ]
+  public_configs = [ ":client_manager_interface" ]
   if (is_standard_system) {
     external_deps = [
       "ipc:ipc_core",

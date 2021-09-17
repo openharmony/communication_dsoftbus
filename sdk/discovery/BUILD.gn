@@ -75,12 +75,12 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_disc_manager_sdk") {
+  ohos_source_set("dsoftbus_disc_manager_sdk") {
     include_dirs = [
       "ipc/include",
       "ipc/standard/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "//utils/system/safwk/native/include",

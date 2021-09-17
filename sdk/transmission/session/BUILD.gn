@@ -79,7 +79,7 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  ohos_shared_library("dsoftbus_trans_session_sdk") {
+  ohos_source_set("dsoftbus_trans_session_sdk") {
     include_dirs = [
       "include",
       "$softbus_adapter_common/include",

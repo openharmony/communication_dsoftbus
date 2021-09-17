@@ -70,11 +70,11 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_ipc_proxy_sdk") {
+  ohos_source_set("dsoftbus_trans_ipc_proxy_sdk") {
     include_dirs = [
       "standard/include",
       "//utils/system/safwk/native/include",
-      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/transport",

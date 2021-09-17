@@ -61,7 +61,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_utils") {
+  ohos_source_set("dsoftbus_bus_center_utils") {
     sources = [
       "src/lnn_async_callback_utils.c",
       "src/lnn_connection_addr_utils.c",

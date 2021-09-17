@@ -24,4 +24,6 @@ declare_args() {
   enable_auth_account = false
 
   enable_auto_networking = true
+
+  is_build_shared_sdk = true
 }

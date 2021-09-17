@@ -74,7 +74,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("conn_common") {
+  ohos_source_set("conn_common") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/connection/common/include",

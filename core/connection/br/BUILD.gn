@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("br_connection") {
+  ohos_source_set("br_connection") {
     sources = sources_br
     include_dirs = [
       "include",

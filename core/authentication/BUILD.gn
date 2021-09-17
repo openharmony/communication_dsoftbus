@@ -17,6 +17,9 @@ config("auth_server_interface") {
   include_dirs = [
     "include",
     "interface",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/common/include",
   ]
 }
 
@@ -81,7 +84,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_auth_server") {
+  ohos_source_set("dsoftbus_auth_server") {
     sources = common_src
     include_dirs = [
       "$softbus_adapter_common/include",

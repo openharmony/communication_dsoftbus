@@ -16,6 +16,8 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("conn_manager_interface") {
   include_dirs = [
     "interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
   ]
 }
 
@@ -66,7 +68,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("conn_manager") {
+  ohos_source_set("conn_manager") {
     sources = [ "manager/softbus_conn_manager.c" ]
     include_dirs = [
       "$softbus_adapter_common/include",

@@ -74,7 +74,7 @@ if (defined(ohos_lite)) {
     sources_coap = [ "src/disc_coap_virtual.c" ]
   }
 
-  ohos_shared_library("dsoftbus_disc_coap") {
+  ohos_source_set("dsoftbus_disc_coap") {
     sources = sources_coap
     include_dirs = [
       "include",
