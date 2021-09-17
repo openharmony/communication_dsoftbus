@@ -28,13 +28,13 @@ ohos_source_set("client_manager") {
   public_configs = [ ":client_manager_interface" ]
   if (is_standard_system) {
     external_deps = [
-      "ipc:ipc_core",
       "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
     ]
 
     deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//utils/native/base:utils",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
     ]
     part_name = "dsoftbus_standard"
   }

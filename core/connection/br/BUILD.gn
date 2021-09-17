@@ -21,7 +21,7 @@ if (enable_connection_br == false) {
   deps_br = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/adapter/br/mock:br_adapter",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
   ]
 }
 

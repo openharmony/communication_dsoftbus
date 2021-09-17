@@ -49,9 +49,9 @@ common_src = [
 ]
 
 common_deps = [
-  "$dsoftbus_root_path/core/common:dsoftbus_utils",
   "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
   "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
 ]
 
 if (defined(ohos_lite)) {
@@ -100,9 +100,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_proxy_channel_interface" ]
     deps = common_deps
     deps += [
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection:conn_manager",
     ]
     if (is_standard_system) {

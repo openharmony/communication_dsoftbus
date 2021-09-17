@@ -29,7 +29,7 @@ if (defined(ohos_lite)) {
         "-lstdc++",
         "-Wl,-rpath-link=$ohos_root_path/$root_out_dir",
       ]
-      deps = [ "$dsoftbus_root_path/core/common:dsoftbus_utils" ]
+      deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
     }
   }
 } else {

@@ -50,8 +50,8 @@ if (defined(ohos_lite)) {
   ]
 
   common_deps = [
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_sdk_path/bus_center:dsoftbus_bus_center_manager_sdk",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     "$dsoftbus_sdk_path/transmission/trans_channel/auth:dsoftbus_trans_auth_channel_sdk",
@@ -97,7 +97,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_session_manager_sdk_interface" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_sdk_path/bus_center:dsoftbus_bus_center_manager_sdk",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
       "$dsoftbus_sdk_path/transmission/trans_channel/auth:dsoftbus_trans_auth_channel_sdk",

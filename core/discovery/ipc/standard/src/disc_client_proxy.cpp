@@ -24,7 +24,7 @@ using namespace OHOS;
 
 static sptr<DiscClientProxy> GetClientProxy(const char *pkgName)
 {
-    sptr<IRemoteObject> clientObject = SoftBusServerData::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
     sptr<DiscClientProxy> clientProxy = new (std::nothrow) DiscClientProxy(clientObject);
     return clientProxy;
 }

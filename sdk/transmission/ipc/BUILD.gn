@@ -16,7 +16,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("trans_ipc_proxy_sdk_interface") {
   include_dirs = [
     "include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/connection/interface",
   ]
 }
@@ -35,7 +37,7 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
@@ -93,7 +95,7 @@ if (defined(ohos_lite)) {
         "ipc:ipc_single",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "//utils/native/base:utils",
       ]
     }

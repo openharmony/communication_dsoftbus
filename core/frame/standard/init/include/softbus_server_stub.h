@@ -22,8 +22,6 @@
 #include "iremote_object.h"
 #include "iremote_stub.h"
 
-// int32_t ServerStubInit(void);
-
 namespace OHOS {
 class SoftBusServerStub : public IRemoteStub<ISoftBusServer> {
 public:

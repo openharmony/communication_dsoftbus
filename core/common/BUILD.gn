@@ -21,19 +21,23 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
     ]
+    cflags = [
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-Os",
+    ]
+    cflags_cc = cflags
   }
 
   if (ohos_kernel_type == "liteos_m") {
-    diff_deps = [
-      "//build/lite/config/component/cJSON:cjson_static",
-    ]
+    diff_deps = [ "//build/lite/config/component/cJSON:cjson_static" ]
+    build_type = "static_library"
   } else {
-    diff_deps = [
-      "//build/lite/config/component/cJSON:cjson_shared",
-    ]
+    diff_deps = [ "//build/lite/config/component/cJSON:cjson_shared" ]
+    build_type = "shared_library"
   }
 
-  source_set("dsoftbus_utils") {
+  target(build_type, "softbus_utils") {
     include_dirs = [
       "$libsec_include_path",
       "$hilog_lite_include_path",
@@ -50,15 +54,10 @@ if (defined(ohos_lite)) {
       "-Wall",
       "-fPIC",
       "-std=c99",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Os",
     ]
     if (ohos_kernel_type == "liteos_m") {
     } else {
-      defines = [
-        "DEFAULT_STORAGE_PATH=\"/usr\"",
-      ]
+      defines = [ "DEFAULT_STORAGE_PATH=\"/usr\"" ]
     }
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -70,7 +69,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_source_set("dsoftbus_utils") {
+  ohos_shared_library("softbus_utils") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
@@ -83,14 +82,12 @@ if (defined(ohos_lite)) {
       "softbus_property/softbus_feature_config.c",
       "utils/softbus_utils.c",
     ]
-    defines = [
-      "DEFAULT_STORAGE_PATH=\"/data/data\"",
-    ]
+    defines = [ "DEFAULT_STORAGE_PATH=\"/data/data\"" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "//utils/native/base:utilsecurec_shared",
       "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",
+      "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

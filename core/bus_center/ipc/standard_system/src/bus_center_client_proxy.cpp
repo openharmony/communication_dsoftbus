@@ -25,7 +25,7 @@ using namespace OHOS;
 
 static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName)
 {
-    sptr<IRemoteObject> clientObject = SoftBusServerData::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(clientObject);
     return clientProxy;
 }
@@ -62,7 +62,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     std::map<std::string, sptr<IRemoteObject>> proxyMap;
-    SoftBusServerData::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
         clientProxy->OnNodeOnlineStateChanged(isOnline, info, infoTypeLen);
@@ -73,7 +73,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     std::map<std::string, sptr<IRemoteObject>> proxyMap;
-    SoftBusServerData::GetInstance().GetSoftbusClientProxyMap(proxyMap);
+    SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
         clientProxy->OnNodeBasicInfoChanged(info, infoTypeLen, type);

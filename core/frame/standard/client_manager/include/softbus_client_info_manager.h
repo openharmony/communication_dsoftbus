@@ -25,9 +25,9 @@
 #include "iremote_proxy.h"
 
 namespace OHOS {
-class SoftBusServerData {
+class SoftbusClientInfoManager {
 public:
-    static SoftBusServerData &GetInstance();
+    static SoftbusClientInfoManager &GetInstance();
     int32_t SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
         const sptr<IRemoteObject::DeathRecipient> &abilityDeath);
     int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName);
@@ -36,12 +36,12 @@ public:
     bool SoftbusClientIsExist(const std::string &pkgName);
 
 private:
-    ~SoftBusServerData() = default;
-    SoftBusServerData() = default;
+    ~SoftbusClientInfoManager() = default;
+    SoftbusClientInfoManager() = default;
     std::recursive_mutex clientObjectMapLock_;
     std::unordered_map<std::string, std::pair<sptr<IRemoteObject>,
         sptr<IRemoteObject::DeathRecipient>>> clientObjectMap_;
-    DISALLOW_COPY_AND_MOVE(SoftBusServerData);
+    DISALLOW_COPY_AND_MOVE(SoftbusClientInfoManager);
 };
 } // namespace OHOS
 #endif

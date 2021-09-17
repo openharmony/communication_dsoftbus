@@ -49,8 +49,8 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         ":permission_json",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
         "//base/security/permission/services/permission_lite/pms_client:pms_client",
@@ -84,7 +84,7 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       ":softbus_permission_json",
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//foundation/appexecfwk/standard/kits:appkit_native",
       "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",

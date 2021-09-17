@@ -30,7 +30,7 @@ if (defined(ohos_lite)) {
       ]
     }
   }
-  source_set("nstackx_util") {
+  shared_library("nstackx_util") {
     sources = [
       "core/nstackx_dev.c",
       "core/nstackx_event.c",
@@ -66,9 +66,6 @@ if (defined(ohos_lite)) {
       "-Wall",
       "-fPIC",
       "-std=c99",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Os",
     ]
     public_configs = [ ":nstackx_util_header" ]
   }

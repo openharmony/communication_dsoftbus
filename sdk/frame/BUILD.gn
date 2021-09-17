@@ -49,7 +49,7 @@ if (defined(ohos_lite)) {
       ]
 
       deps = [
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
@@ -88,7 +88,7 @@ if (defined(ohos_lite)) {
 
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
         "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
@@ -132,25 +132,23 @@ if (defined(ohos_lite)) {
     sources = [
       "common/src/softbus_client_event_manager.c",
       "common/src/softbus_client_frame_manager.c",
+      "standard/src/if_softbus_client.cpp",
       "standard/src/softbus_client_death_recipient.cpp",
+      "standard/src/softbus_client_stub.cpp",
       "standard/src/softbus_server_proxy_frame.cpp",
       "standard/src/softbus_server_proxy_standard.cpp",
-      "standard/src/if_softbus_client.cpp",
-      "standard/src/softbus_client_stub.cpp",
     ]
 
     defines = [ "SOFTBUS_WATCH" ]
 
-    public_configs = [
-      ":softbus_client_interface"
-    ]
+    public_configs = [ ":softbus_client_interface" ]
     if (is_standard_system) {
       external_deps = [
         "hiviewdfx_hilog_native:libhilog",
         "ipc:ipc_single",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common:dsoftbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
         "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",

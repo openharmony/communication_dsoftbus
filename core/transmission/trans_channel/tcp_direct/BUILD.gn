@@ -33,10 +33,10 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_core_path/authentication:dsoftbus_auth_server",
-    "$dsoftbus_root_path/core/common:dsoftbus_utils",
     "$dsoftbus_core_path/connection/common:conn_common",
     "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$libsec_deps_path",
   ]
 
@@ -98,12 +98,12 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_direct_channel_interface" ]
 
     deps = [
-      "$dsoftbus_root_path/core/common:dsoftbus_utils",
       "$dsoftbus_core_path/connection/common:conn_common",
       "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//third_party/cJSON:cjson_static",
     ]
     if (is_standard_system) {

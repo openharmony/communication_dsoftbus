@@ -31,6 +31,7 @@ static bool g_isInit = false;
 
 int32_t __attribute__((weak)) ServerStubInit(void)
 {
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus server stub init(weak function).");
     return SOFTBUS_OK;
 }
 
@@ -45,7 +46,7 @@ static void ServerModuleDeinit(void)
     LooperDeinit();
 }
 
-bool GetServerIsInit()
+bool GetServerIsInit(void)
 {
     return g_isInit;
 }
