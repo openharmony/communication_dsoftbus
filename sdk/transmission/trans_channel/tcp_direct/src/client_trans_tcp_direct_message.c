@@ -26,7 +26,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_property.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
