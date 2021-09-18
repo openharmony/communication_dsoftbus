@@ -326,7 +326,7 @@ void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId;
     int32_t type;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
@@ -341,15 +341,14 @@ static void CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 50000
-    int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t type = CHANNEL_TYPE_BUTT;
     int32_t i = 0;
+    bool isEnable = false;
 
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
-        if (ClientGetChannelBySessionId(sessionId, &channelId, &type) != SOFTBUS_OK) {
+        if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
             return;
         }
-        if (type != CHANNEL_TYPE_BUTT) {
+        if (isEnable == true) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
             return;
         }
@@ -426,7 +425,7 @@ void CloseSession(int sessionId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return;
     }
-    ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
@@ -511,18 +510,23 @@ static const char *g_busName = "DistributedFileService";
 static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    int32_t type;
     if (GetMySessionName(sessionId, sessionName, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dfs session name failed");
         return SOFTBUS_ERR;
     }
     if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
-    int32_t type;
-    if (ClientGetChannelBySessionId(sessionId, channelId, &type) != SOFTBUS_OK) {
+
+    if (ClientGetChannelBySessionId(sessionId, channelId, &type, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
         return SOFTBUS_ERR;
+    }
+    if (type != CHANNEL_TYPE_TCP_DIRECT) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channel type");
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
 }
@@ -536,7 +540,7 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetSessionKey(channelId, key, len);
 }
@@ -550,7 +554,7 @@ int32_t GetSessionHandle(int32_t sessionId, int *handle)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetHandle(channelId, handle);
 }
@@ -564,7 +568,7 @@ int32_t DisableSessionListener(int32_t sessionId)
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientDisableSessionListener(channelId);
 }
