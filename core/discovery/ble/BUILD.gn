@@ -58,7 +58,7 @@ if (defined(ohos_lite)) {
       deps = deps_ble
     }
   } else {
-    shared_library("ble_connection") {
+    shared_library("ble_discovery") {
       sources = sources_ble
       include_dirs = common_include
       deps = deps_ble
