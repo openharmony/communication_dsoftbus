@@ -35,6 +35,7 @@ if (defined(ohos_lite)) {
         "manager/src/softbus_disc_server.c",
       ]
       include_dirs = [
+      	"ble/include",
         "coap/include",
         "ipc/include",
         "$dsoftbus_root_path/core/common/include",
@@ -56,6 +57,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/log:softbus_log",
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
+	"ble:ble_discovery"
         "coap:dsoftbus_disc_coap",
       ]
     }
@@ -67,6 +69,7 @@ if (defined(ohos_lite)) {
         "manager/src/softbus_disc_server.c",
       ]
       include_dirs = [
+      	"ble/include",
         "coap/include",
         "ipc/include",
         "$dsoftbus_root_path/core/common/include",
@@ -87,6 +90,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
         "$hilog_lite_deps_path",
+	"ble:ble_discovery",
         "coap:dsoftbus_disc_coap",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//third_party/bounds_checking_function:libsec_shared",
@@ -98,6 +102,7 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("dsoftbus_disc_server") {
     include_dirs = [
+      "ble/include",
       "coap/include",
       "ipc/include",
       "ipc/standard/include",
@@ -127,6 +132,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
+      "ble:ble_discovery",
       "coap:dsoftbus_disc_coap",
       "//utils/native/base:utils",
     ]
