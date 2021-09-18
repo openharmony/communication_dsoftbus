@@ -25,7 +25,6 @@
 #include "nstackx_error.h"
 #include "nstackx_log.h"
 #include "nstackx_timer.h"
-#include "nstackx_util.h"
 #include "securec.h"
 
 #define TAG "nStackXCoAP"
