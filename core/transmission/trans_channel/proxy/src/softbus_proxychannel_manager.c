@@ -854,7 +854,7 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
 }
 
-static void TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo *info)
+static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
     if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
