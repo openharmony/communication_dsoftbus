@@ -68,8 +68,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
         "$hilog_lite_deps_path",
-
-        #"//base/security/deviceauth:deviceauth_lite",
+        "//base/security/deviceauth:deviceauth_lite",
       ]
     }
   } else {
