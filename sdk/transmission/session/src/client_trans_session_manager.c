@@ -294,6 +294,7 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
     session->channelId = INVALID_CHANNEL_ID;
     session->channelType = CHANNEL_TYPE_BUTT;
     session->isServer = false;
+    session->isEnable = false;
     session->info.flag = param->attr->dataType;
 
     return session;
@@ -409,7 +410,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     SessionInfo *session = GetExistSession(param);
     if (session != NULL) {
         *sessionId = session->sessionId;
-        *isEnabled = (session->channelType != CHANNEL_TYPE_BUTT);
+        *isEnabled = session->isEnable;
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SESSION_REPEATED;
     }
@@ -645,18 +646,15 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type)
+int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable)
 {
-    if ((sessionId < 0) || (channelId == NULL) || (type == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+    if (sessionId < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (g_clientSessionServerList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
-
     if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
@@ -664,16 +662,21 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
 
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-
-    int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
-    if (ret != SOFTBUS_OK) {
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
         (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
         return SOFTBUS_ERR;
     }
 
-    *channelId = sessionNode->channelId;
-    *type = sessionNode->channelType;
+    if (channelId != NULL) {
+        *channelId = sessionNode->channelId;
+    }
+    if (type != NULL) {
+        *type = sessionNode->channelType;
+    }
+    if (isEnable != NULL) {
+        *isEnable = sessionNode->isEnable;
+    }
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
@@ -780,6 +783,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
+                sessionNode->isEnable = true;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
