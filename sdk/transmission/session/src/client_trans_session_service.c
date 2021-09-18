@@ -519,7 +519,7 @@ static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
-    
+
     if (ClientGetChannelBySessionId(sessionId, channelId, &type, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
         return SOFTBUS_ERR;
