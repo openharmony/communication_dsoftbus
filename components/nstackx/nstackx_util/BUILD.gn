@@ -13,6 +13,8 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+NSTACKX_ROOT = "//foundation/communication/dsoftbus/components/nstackx"
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_a") {
@@ -31,63 +33,127 @@ if (defined(ohos_lite)) {
     }
   }
   shared_library("nstackx_util.open") {
-    sources = [
-      "core/nstackx_dev.c",
-      "core/nstackx_event.c",
-      "core/nstackx_log.c",
-      "core/nstackx_timer.c",
-      "core/nstackx_util.c",
-    ]
-    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     if (ohos_kernel_type == "liteos_a") {
-      sources += [
+      cflags = [
+        "-Wall",
+        "-D_GNU_SOURCE",
+        "-DNSTACKX_WITH_LITEOS",
+        "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
+        "-DLWIP_LITEOS_A_COMPAT",
+        "-DMBEDTLS_INCLUDED",
+      ]
+      cflags_cc = cflags
+      include_dirs = [
+        "include",
+        "interface",
+        "platform/liteos",
+        "$NSTACKX_ROOT/nstackx_core/",
+        "//third_party/bounds_checking_function/include/",
+        "//third_party/mbedtls/include",
+        "//third_party/mbedtls/include/mbedtls/",
+      ]
+      sources = [
+        "core/nstackx_dev.c",
+        "core/nstackx_event.c",
+        "core/nstackx_log.c",
+        "core/nstackx_mbedtls.c",
+        "core/nstackx_socket.c",
+        "core/nstackx_timer.c",
+        "core/nstackx_util.c",
         "platform/liteos/sys_dev.c",
         "platform/liteos/sys_epoll.c",
         "platform/liteos/sys_event.c",
         "platform/liteos/sys_log.c",
+        "platform/liteos/sys_socket.c",
         "platform/liteos/sys_timer.c",
         "platform/liteos/sys_util.c",
       ]
-      defines = [
-        "NSTACKX_WITH_LITEOS",
-        "LWIP_LITEOS_A_COMPAT",
-      ]
+      deps = [ "//third_party/mbedtls:mbedtls_shared" ]
     } else if (ohos_kernel_type == "linux") {
-      sources += [
+      cflags = [
+        "-Wall",
+        "-DNSTACKX_WITH_HMOS_LINUX",
+        "-DMBEDTLS_INCLUDED",
+      ]
+      cflags_cc = cflags
+      include_dirs = [
+        "include",
+        "interface",
+        "platform/unix",
+        "$NSTACKX_ROOT/nstackx_core/",
+        "//third_party/bounds_checking_function/include/",
+        "//third_party/mbedtls/include",
+        "//third_party/mbedtls/include/mbedtls/",
+      ]
+      sources = [
+        "core/nstackx_dev.c",
+        "core/nstackx_event.c",
+        "core/nstackx_log.c",
+        "core/nstackx_mbedtls.c",
+        "core/nstackx_socket.c",
+        "core/nstackx_timer.c",
+        "core/nstackx_util.c",
         "platform/unix/sys_dev.c",
         "platform/unix/sys_epoll.c",
         "platform/unix/sys_event.c",
         "platform/unix/sys_log.c",
+        "platform/unix/sys_socket.c",
         "platform/unix/sys_timer.c",
         "platform/unix/sys_util.c",
       ]
+      deps = [ "//third_party/mbedtls:mbedtls_shared" ]
     }
     public_configs = [ ":nstackx_util_header" ]
   }
 } else {
   import("//build/ohos.gni")
 
+  config("nstackx_util_header") {
+    include_dirs = [
+      "interface",
+      "platform/unix",
+    ]
+  }
+
   ohos_shared_library("nstackx_util.open") {
+    cflags = [
+      "-Wall",
+      "-DMBEDTLS_INCLUDED",
+      "-DNSTACKX_WITH_HMOS_LINUX",
+    ]
+    cflags_cc = cflags
+    include_dirs = [
+      "include",
+      "interface",
+      "platform/unix",
+      "$NSTACKX_ROOT/nstackx_core/",
+      "//utils/native/base/include/",
+      "//third_party/mbedtls/include",
+      "//third_party/mbedtls/include/mbedtls/",
+    ]
     sources = [
       "core/nstackx_dev.c",
       "core/nstackx_event.c",
       "core/nstackx_log.c",
+      "core/nstackx_mbedtls.c",
+      "core/nstackx_socket.c",
       "core/nstackx_timer.c",
       "core/nstackx_util.c",
       "platform/unix/sys_dev.c",
       "platform/unix/sys_epoll.c",
       "platform/unix/sys_event.c",
       "platform/unix/sys_log.c",
+      "platform/unix/sys_socket.c",
       "platform/unix/sys_timer.c",
       "platform/unix/sys_util.c",
     ]
-    include_dirs = [
-      "platform/unix",
-      "interface",
-      "//third_party/bounds_checking_function/include",
+
+    deps = [
+      "//foundation/communication/dsoftbus/components/mbedtls:mbedtls_shared",
+      "//utils/native/base:utilsecurec_shared",
     ]
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-    subsystem_name = "communication"
+    public_configs = [ ":nstackx_util_header" ]
     part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
   }
 }

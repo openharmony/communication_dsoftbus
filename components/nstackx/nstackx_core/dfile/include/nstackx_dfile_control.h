@@ -12,34 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NSTACKX_DFILE_CONTROL_H
+#define NSTACKX_DFILE_CONTROL_H
 
-#ifndef NSTACKX_CONFIG_H
-#define NSTACKX_CONFIG_H
+#include "nstackx_dfile_session.h"
 
-#ifdef NSTACKX_WITH_LITEOS
-
-/**
- * Enable(1) or Disable(0) fillp support in nStackx
- */
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 0
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/**
- * Enable(1) or Disable(0) encrypt support in nStackx
- */
-
-#endif /* NSTACKX_WITH_LITEOS */
-
-#ifdef NSTACKX_WITH_HMOS_LINUX
-
-#ifndef NSTACKX_2_4G_WIFI
-#define NSTACKX_2_4G_WIFI
-#endif
-#endif /* NSTACKX_WITH_HMOS_LINUX */
-
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 1
+void DFileSendTransferDoneAck(DFileSession *session);
+void DFileSenderControlHandle(DFileSession *session);
+void DFileReceiverControlHandle(DFileSession *session);
+#ifdef __cplusplus
+}
 #endif
 
-#endif /* NSTACKX_CONFIG_H */
+#endif
