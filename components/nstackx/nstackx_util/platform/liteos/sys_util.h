@@ -76,7 +76,6 @@ static inline int32_t GetErrno(void)
 #define CloseSocketInner CloseDesc
 #define gettid() (pid_t)pthread_self()
 NSTACKX_EXPORT void CloseDesc(int32_t desc);
-NSTACKX_EXPORT int32_t SetSocketNonBlock(SocketDesc fd);
 NSTACKX_EXPORT int32_t GetInterfaceList(struct ifconf *ifc, struct ifreq *buf, uint32_t size);
 NSTACKX_EXPORT int32_t GetInterfaceIP(int32_t fd, struct ifreq *interface);
 NSTACKX_EXPORT int32_t GetTargetInterface(const struct sockaddr_in *dstAddr, struct ifreq *localDev);
