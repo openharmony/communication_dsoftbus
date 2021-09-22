@@ -142,7 +142,7 @@ int32_t DiscBleGetHwAccount(char *hwAccount)
     if (hwAccount == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    const char *account = DEFAULT_ACCOUNT;
+    const char *account = "";
     if (memcpy_s(hwAccount, strlen(account) + 1, account, strlen(account) + 1) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
