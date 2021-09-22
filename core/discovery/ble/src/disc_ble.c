@@ -571,8 +571,9 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
     if (GetDeviceIdHash(deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId Hash failed");
     }
+    uint8_t devType = info->devType;
     (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, deviceIdHash, SHORT_DEVICE_ID_HASH_LENGTH);
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, &info->devType, DEVICE_TYPE_LEN);
+    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, &devType, DEVICE_TYPE_LEN);
     if (advId == NON_ADV_ID && g_recvMessageInfo.numNeedBrMac > 0) {
         SoftBusBtAddr addr;
         if (SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
