@@ -36,6 +36,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/security/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
