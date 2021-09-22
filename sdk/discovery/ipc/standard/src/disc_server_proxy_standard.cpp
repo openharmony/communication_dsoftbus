@@ -191,8 +191,7 @@ int32_t DiscServerProxy::RemoveSessionServer(const char *pkgName, const char *se
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::OpenSession(const char *mySessionName, const char *peerSessionName,
-    const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t DiscServerProxy::OpenSession(const SessionParam* param, TransInfo* info)
 {
     return SOFTBUS_OK;
 }
