@@ -26,6 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_trans_def.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
@@ -165,6 +166,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
         mySessionName, peerSessionName);
 
+    TransInfo transInfo;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
@@ -186,15 +188,21 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return ret;
     }
 
-    int32_t channelId = ServerIpcOpenSession(mySessionName, peerSessionName,
-        peerDeviceId, groupId, (int32_t)attr->dataType);
-    ret = ClientSetChannelBySessionId(sessionId, channelId);
+    ret = ServerIpcOpenSession(&param, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session ipc err: ret=%d", ret);
+        (void)ClientDeleteSession(sessionId);
+        return ret;
+    }
+
+    ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session failed");
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d", sessionId, channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d, channelType = %d",
+        sessionId, transInfo.channelId, transInfo.channelType);
     return sessionId;
 }
 
@@ -278,6 +286,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    TransInfo transInfo;
     int32_t addrIndex = IsValidAddrInfoArr(addrInfo, num);
     ConnectionAddr *addr = NULL;
     ConnectionAddr mix;
@@ -299,14 +308,16 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
         return ret;
     }
 
-    int32_t channelId = ServerIpcOpenAuthSession(sessionName, addr);
-    ret = ClientSetChannelBySessionId(sessionId, channelId);
+    transInfo.channelId = ServerIpcOpenAuthSession(sessionName, addr);
+    transInfo.channelType = CHANNEL_TYPE_AUTH;
+    ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d", sessionId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d, channelId=%d, channelType = %d",
+        sessionId, transInfo.channelId, transInfo.channelType);
     return sessionId;
 }
 
@@ -314,7 +325,7 @@ void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId;
     int32_t type;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
@@ -329,15 +340,14 @@ static void CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 50000
-    int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t type = CHANNEL_TYPE_BUTT;
     int32_t i = 0;
+    bool isEnable = false;
 
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
-        if (ClientGetChannelBySessionId(sessionId, &channelId, &type) != SOFTBUS_OK) {
+        if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
             return;
         }
-        if (type != CHANNEL_TYPE_BUTT) {
+        if (isEnable == true) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
             return;
         }
@@ -361,6 +371,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%s, peerSessionName=%s",
         mySessionName, peerSessionName);
 
+    TransInfo transInfo;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
@@ -383,9 +394,13 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         return ret;
     }
 
-    int32_t channelId = ServerIpcOpenSession(mySessionName, peerSessionName,
-        peerDeviceId, groupId, (int32_t)attr->dataType);
-    ret = ClientSetChannelBySessionId(sessionId, channelId);
+    ret = ServerIpcOpenSession(&param, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session ipc err: ret=%d", ret);
+        (void)ClientDeleteSession(sessionId);
+        return ret;
+    }
+    ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server open session err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
@@ -394,7 +409,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
 
     CheckSessionIsOpened(sessionId);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%d, channelId=%d",
-        sessionId, channelId);
+        sessionId, transInfo.channelId);
     return sessionId;
 }
 
@@ -409,7 +424,7 @@ void CloseSession(int sessionId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return;
     }
-    ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
+    ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
