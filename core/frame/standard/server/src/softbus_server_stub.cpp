@@ -219,33 +219,36 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    const char *mySessionName = data.ReadCString();
-    if (mySessionName == nullptr) {
+    SessionParam param;
+    TransSerializer transSerializer;
+    param.sessionName = data.ReadCString();
+    if (param.sessionName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read my session name failed!");
         return SOFTBUS_ERR;
     }
-    const char *peerSessionName = data.ReadCString();
-    if (peerSessionName == nullptr) {
+    param.peerSessionName = data.ReadCString();
+    if (param.peerSessionName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read peer session name failed!");
         return SOFTBUS_ERR;
     }
-    const char *peerDeviceId = data.ReadCString();
-    if (peerDeviceId == nullptr) {
+    param.peerDeviceId = data.ReadCString();
+    if (param.peerDeviceId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read peeer deviceid failed!");
         return SOFTBUS_ERR;
     }
-    const char *groupId = data.ReadCString();
-    if (groupId == nullptr) {
+    param.groupId = data.ReadCString();
+    if (param.groupId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read group id failed!");
         return SOFTBUS_ERR;
     }
-    int32_t flags;
-    if (!data.ReadInt32(flags)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read flags failed!");
+    param.attr = (SessionAttribute*)data.ReadRawData(sizeof(SessionAttribute));
+    if (param.attr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read SessionAttribute failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = OpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
-    if (!reply.WriteInt32(retReply)) {
+    int32_t retReply = OpenSession(&param, &(transSerializer.transInfo));
+    transSerializer.ret = retReply;
+    if (!reply.WriteRawData(&transSerializer, sizeof(TransSerializer))) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner write reply failed!");
         return SOFTBUS_ERR;
     }
