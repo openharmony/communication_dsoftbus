@@ -531,7 +531,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         }
     }
     if (targetNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Not find OnPackResponse device");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Not find OnPackResponse device");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return;
     }
@@ -663,19 +663,18 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call SoftBusGattsStartService222");
     if ((g_gattService.state == BLE_GATT_SERVICE_STARTED) ||
         (g_gattService.state == BLE_GATT_SERVICE_STARTING)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleStartLocalListening service already started or is starting");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "BleStartLocalListening service already started or is starting");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_OK;
     }
     if (g_gattService.state == BLE_GATT_SERVICE_ADDED) {
         g_gattService.state = BLE_GATT_SERVICE_STARTING;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call SoftBusGattsStartService");
         int ret = SoftBusGattsStartService(g_gattService.svcId);
         if (ret != SOFTBUS_OK) {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsStartService failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsStartService failed");
             g_gattService.state = BLE_GATT_SERVICE_ADDED;
         }
         (void)pthread_mutex_unlock(&g_connectionLock);
@@ -732,11 +731,8 @@ static void UpdateGattService(SoftBusGattService *service, int status)
                 (service->bleConnDesId != -1) &&
                 (service->bleNetDesId != -1)) {
                 service->state = BLE_GATT_SERVICE_ADDED;
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call BleStartLocalListening");
                 if (BleStartLocalListening(NULL) != SOFTBUS_OK) {
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleStartLocalListening failed");
-                } else {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleStartLocalListening success");
                 }
                 break;
             }
@@ -862,7 +858,6 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleCharacteristicAddCallback uuid:%s", uuid->uuid);
     if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLENET_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
@@ -1129,8 +1124,6 @@ int PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t l
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-        "PeerBasicInfoParse devId:%s type:%d", connInfo->peerDevId, connInfo->peerType);
     return SOFTBUS_OK;
 }
 
