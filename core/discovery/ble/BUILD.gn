@@ -1,0 +1,78 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+if (enable_discovery_ble == false) {
+  sources_ble = [ "src/disc_ble_virtual.c" ]
+  deps_ble = []
+} else {
+  sources_ble = [
+    "src/disc_ble_utils.c",
+    "src/disc_ble.c",
+  ]
+  deps_ble = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth:softbus_adapter_ble",
+    "$dsoftbus_root_path/core/common/message_handler:message_handler",
+    "$dsoftbus_root_path/core/common:softbus_core_common",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+  ]
+}
+
+common_include = [
+  "include",
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/interfaces/kits/discovery",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+  "$dsoftbus_root_path/core/discovery/interface",
+  "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/core/discovery/ble/include",
+  "$dsoftbus_root_path/core/connection/interface",
+  "$dsoftbus_root_path/core/connection/manager",
+  "//third_party/cJSON",
+]
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+
+  if (ohos_kernel_type == "liteos_m") {
+    static_library("ble_discovery") {
+      sources = sources_ble
+      include_dirs = common_include
+      deps = deps_ble
+    }
+  } else {
+    shared_library("ble_discovery") {
+      sources = sources_ble
+      include_dirs = common_include
+      deps = deps_ble
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("ble_discovery") {
+    sources = sources_ble
+    include_dirs = common_include
+    deps = deps_ble
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
+}
