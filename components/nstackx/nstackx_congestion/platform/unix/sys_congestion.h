@@ -13,33 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef NSTACKX_CONFIG_H
-#define NSTACKX_CONFIG_H
+#ifndef SYS_CONGESTION_H
+#define SYS_CONGESTION_H
 
-#ifdef NSTACKX_WITH_LITEOS
+#include "nstackx_common_header.h"
+#include "nstackx_congestion.h"
 
-/**
- * Enable(1) or Disable(0) fillp support in nStackx
- */
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 0
-#endif
+int32_t GetWifiInfo(const char *devName, WifiStationInfo *wifiStationInfo);
+int32_t CheckDevNameValid(const char *devName);
 
-/**
- * Enable(1) or Disable(0) encrypt support in nStackx
- */
-
-#endif /* NSTACKX_WITH_LITEOS */
-
-#ifdef NSTACKX_WITH_HMOS_LINUX
-
-#ifndef NSTACKX_2_4G_WIFI
-#define NSTACKX_2_4G_WIFI
-#endif
-#endif /* NSTACKX_WITH_HMOS_LINUX */
-
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 1
-#endif
-
-#endif /* NSTACKX_CONFIG_H */
+#endif // SYS_CONGESTION_H
