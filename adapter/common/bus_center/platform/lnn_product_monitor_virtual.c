@@ -13,26 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef LNN_EVENT_MONITOR_IMPL_H
-#define LNN_EVENT_MONITOR_IMPL_H
+#include "lnn_event_monitor_impl.h"
 
-#include <stdint.h>
+#include "softbus_errcode.h"
 
-#include "lnn_event_monitor.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef int32_t (*LnnInitEventMonitorImpl)(LnnMonitorEventHandler handler);
-
-int32_t __attribute__ ((weak)) LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t __attribute__ ((weak)) LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t __attribute__ ((weak)) LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
-
-#ifdef __cplusplus
+int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler)
+{
+    (void)handler;
+    return SOFTBUS_OK;
 }
-#endif
-#endif /* LNN_EVENT_MONITOR_IMPL_H */
