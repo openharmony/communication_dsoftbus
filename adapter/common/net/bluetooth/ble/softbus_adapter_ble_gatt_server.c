@@ -92,7 +92,7 @@ int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int 
         .uuid = characUuid.uuid,
         .uuidLen = characUuid.uuidLen
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, 
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
         "BLEINFOPRTINT:BleGattsAddCharacteristic(%d, %d, %s, %d, %d)",
         g_halServerId, srvcHandle, uuid.uuid, properties, permissions);
     if (BleGattsAddCharacteristic(g_halServerId, srvcHandle, uuid, properties, permissions) != SOFTBUS_OK) {
