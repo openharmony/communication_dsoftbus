@@ -13,24 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef LNN_EVENT_MONITOR_H
-#define LNN_EVENT_MONITOR_H
-
-#include <stdint.h>
-
 #include "lnn_event_monitor_impl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "softbus_errcode.h"
 
-int32_t LnnInitEventMonitor(void);
-void LnnDeinitEventMonitor(void);
-
-int32_t LnnRegisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
-void LnnUnregisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
-
-#ifdef __cplusplus
+int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
+{
+    (void)handler;
+    return SOFTBUS_OK;
 }
-#endif
-#endif /* LNN_EVENT_MONITOR_H */

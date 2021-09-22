@@ -44,6 +44,7 @@ if (defined(ohos_lite)) {
         "lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
         "lnn/net_buscenter/src/lnn_ip_network_impl.c",
         "lnn/net_buscenter/src/lnn_network_manager.c",
+        "monitor/src/lnn_event_monitor.c",
         "service/src/bus_center_event.c",
         "service/src/bus_center_manager.c",
       ]
@@ -76,6 +77,7 @@ if (defined(ohos_lite)) {
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
         "lnn/net_buscenter/include",
+        "monitor/include",
       ]
       cflags = [
         "-Wall",
@@ -87,6 +89,7 @@ if (defined(ohos_lite)) {
       public_configs = [ ":bus_center_server_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/adapter/common/bus_center:dsoftbus_bus_center_monitor",
         "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
         "$dsoftbus_root_path/core/common/json_utils:json_utils",
         "$dsoftbus_root_path/core/common/log:softbus_log",
@@ -99,7 +102,6 @@ if (defined(ohos_lite)) {
         "$hilog_lite_deps_path",
         "lnn/lane_hub:dsoftbus_bus_center_hub",
         "lnn/net_ledger:dsoftbus_bus_center_ledger",
-        "monitor:dsoftbus_bus_center_monitor",
         "utils:dsoftbus_bus_center_utils",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc_lite:liteipc_adapter",
@@ -124,6 +126,7 @@ if (defined(ohos_lite)) {
       "lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
       "lnn/net_buscenter/src/lnn_ip_network_impl.c",
       "lnn/net_buscenter/src/lnn_network_manager.c",
+      "monitor/src/lnn_event_monitor.c",
       "service/src/bus_center_event.c",
       "service/src/bus_center_manager.c",
     ]
@@ -156,11 +159,13 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config",
       "//utils/system/safwk/native/include",
       "lnn/net_buscenter/include",
+      "monitor/include",
     ]
 
     public_configs = [ ":bus_center_server_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/adapter/common/bus_center:dsoftbus_bus_center_monitor",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
@@ -174,7 +179,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct:dsoftbus_trans_direct_channel",
       "lnn/lane_hub:dsoftbus_bus_center_hub",
       "lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "monitor:dsoftbus_bus_center_monitor",
       "utils:dsoftbus_bus_center_utils",
       "//utils/native/base:utils",
     ]

@@ -68,7 +68,7 @@ static int32_t CreateNetlinkSocket(void)
     // Kernel will assign a unique nl_pid if set to zero.
     nladdr.nl_pid = 0;
     nladdr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
-    if (bind(sockFd, (struct sockaddr *) &nladdr, sizeof(nladdr)) < 0) {
+    if (bind(sockFd, (struct sockaddr *)&nladdr, sizeof(nladdr)) < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind netlink socket failed");
         close(sockFd);
         return SOFTBUS_ERR;
@@ -78,9 +78,10 @@ static int32_t CreateNetlinkSocket(void)
 
 static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int len)
 {
-    for (; RTA_OK(attr, len); attr = RTA_NEXT(attr, len)) {
-        if (attr->rta_type <= max) {
-            tb[attr->rta_type] = attr;
+    struct rtattr *attr1 = attr;
+    for (; RTA_OK(attr1, len); attr1 = RTA_NEXT(attr1, len)) {
+        if (attr1->rta_type <= max) {
+            tb[attr1->rta_type] = attr1;
         }
     }
 }
@@ -113,7 +114,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
 
     len = nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
-    ParseRtAttr(tb, IFLA_MAX, IFLA_RTA (ifinfo), len);
+    ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
 
     if (tb[IFLA_IFNAME] == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
