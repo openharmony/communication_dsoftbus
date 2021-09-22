@@ -326,9 +326,7 @@ void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen)
         if (connInfo->channelId == chanId) {
             if (memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey,
                 keyLen) != EOK) {
-                pthread_mutex_unlock(&g_sessionConnList->lock);
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy error.");
-                return;
             }
             pthread_mutex_unlock(&g_sessionConnList->lock);
             return;
