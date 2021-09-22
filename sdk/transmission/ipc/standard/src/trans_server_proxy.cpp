@@ -86,24 +86,23 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return g_serverProxy->RemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t ServerIpcOpenSession(const char *mySessionName, const char *peerSessionName,
-                             const char *peerDeviceId, const char *groupId, int32_t flags)
+int32_t ServerIpcOpenSession(const SessionParam* param, TransInfo* info)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    if ((mySessionName == nullptr) || (peerSessionName == nullptr) ||
-        (peerDeviceId == nullptr) || (groupId == nullptr)) {
+    if ((param->sessionName == nullptr) || (param->peerSessionName == nullptr) ||
+        (param->peerDeviceId == nullptr) || (param->groupId == nullptr) || (param->attr == nullptr)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    int channelId = g_serverProxy->OpenSession(mySessionName, peerSessionName, peerDeviceId, groupId, flags);
-    if (channelId < SOFTBUS_OK) {
+    int ret = g_serverProxy->OpenSession(param, info);
+    if (ret < SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession failed!\n");
         return SOFTBUS_ERR;
     }
-    return channelId;
+    return ret;
 }
 
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)

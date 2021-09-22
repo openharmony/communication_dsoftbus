@@ -25,6 +25,7 @@ config("trans_session_manager_sdk_interface") {
 common_include = [
   "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_core_path/common/include",
+  "$dsoftbus_root_path/core/transmission/common/include",
   "$softbus_adapter_common/include",
   "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
