@@ -20,6 +20,7 @@ declare_args() {
   enable_connection_ble = false
 
   enable_trans_udp = false
+  enable_trans_udp_stream = false
   enable_trans_udp_file = false
   enable_auth_account = false
 

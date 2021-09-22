@@ -59,6 +59,13 @@ config enable_trans_udp_file
     help
       Answer Y to enable file transmission with udp
 
+config enable_trans_udp_stream
+    bool "Enable stream transmission"
+    default n
+    depends on enable_trans_udp
+    help
+      Answer Y to enable stream transmission with udp
+
 comment "Other configuration"
 config enable_auth_account
     bool "Enable auth account"
