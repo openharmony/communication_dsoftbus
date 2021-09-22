@@ -26,13 +26,13 @@
 #include "message_handler.h"
 #include "pthread.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_adapter_ble_gatt.h"
+#include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_ble_gatt.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -66,7 +66,7 @@
 #define BIT_CON 0x80
 #define BIT_CON_POS 7
 
-enum {
+typedef enum {
     PUBLISH_ACTIVE_SERVICE,
     PUBLISH_PASSIVE_SERVICE,
     UNPUBLISH_SERVICE,
@@ -76,7 +76,7 @@ enum {
     REPLY_PASSIVE_NON_BROADCAST,
     PROCESS_TIME_OUT,
     RECOVERY,
-};
+} DISC_BLE_MESSAGE;
 
 typedef struct {
     int32_t advId;
@@ -147,9 +147,9 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac);
 static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBitMap);
 static RecvMessage *GetRecvMessage(const char *key);
-static int32_t StartAdvertiser(int32_t advId);
-static int32_t StopAdvertiser(int32_t advId);
-static int32_t UpdateAdvertiser(int32_t advId);
+static int32_t StartAdvertiser(int32_t adv);
+static int32_t StopAdvertiser(int32_t adv);
+static int32_t UpdateAdvertiser(int32_t adv);
 static int32_t ReplyPassiveNonBroadcast(void);
 static void ClearRecvMessage(void);
 static int32_t StopScaner(void);
@@ -163,6 +163,8 @@ static int ConvertCapBitMap(int oldCap)
             return 0x2;
         case 0x20: // dvkit
             return 0x4;
+        default:
+            return oldCap;
     }
     return oldCap;
 }
@@ -331,18 +333,23 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
 
 static void BleOnScanStart(int listenerId, int status)
 {
+    (void)listenerId;
+    (void)status;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleOnScanStart");
     g_isScanning = true;
 }
 
 static void BleOnScanStop(int listenerId, int status)
 {
+    (void)listenerId;
+    (void)status;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleOnScanStop");
     g_isScanning = false;
 }
 
 static void BleOnStateChanged(int listenerId, int state)
 {
+    (void)listenerId;
     switch (state) {
         case SOFTBUS_BT_STATE_TURN_ON:
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleOnStateChanged to SOFTBUS_BT_STATE_TURNING_ON");
@@ -512,7 +519,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
                 boardcastData->data.rspData, advData->scanRspLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy err");
             return SOFTBUS_MEM_ERR;
-        }   
+        }
     }
     advData->scanRspData[POS_RSP_LENGTH] = advData->scanRspLength - POS_RSP_LENGTH - 1;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advData->scanRspLength:%d POS_RSP_LENGTH:%d",
@@ -550,7 +557,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
             boardcastData->data.data[POS_BUSSINESS_EXTENSION] |= BIT_WAKE_UP;
         }
         (void)memcpy_s(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
-                    info->hwAccountHash, SHORT_USER_ID_HASH_LEN);
+            info->hwAccountHash, SHORT_USER_ID_HASH_LEN);
     } else {
         if (GetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH]) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
@@ -745,7 +752,7 @@ static int32_t StopScaner(void)
     return SOFTBUS_OK;
 }
 
-static int32_t RegisterCapability(DiscBleInfo *info, DiscBleOption *option)
+static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
 {
     if (info == NULL || option == NULL ||
         (option->publishOption == NULL && option->subscribeOption == NULL) ||
@@ -764,8 +771,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, DiscBleOption *option)
         custDataLen = option->publishOption->dataLen;
         custData = option->publishOption->capabilityData;
         freq = option->publishOption->freq;
-    }
-    else {
+    } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
         optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
         custDataLen = option->subscribeOption->dataLen;
@@ -816,8 +822,7 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
         optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
-    }
-    else {
+    } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
         optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
         isSameAccount = option->subscribeOption->isSameAccount;
@@ -1313,8 +1318,9 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
         case RECOVERY:
             Recovery(msg);
             break;
-        break;
+        default:
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "wrong msg what: %d", msg->what);
+            break;
     }
     return;
 }

@@ -38,7 +38,7 @@ static BtGattServerCallbacks g_bleGattsHalCallback = { 0 };
 static int g_halServerId = -1;
 static int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 
-int CheckGattsStatus ()
+int CheckGattsStatus(void)
 {
     if (g_gattsCallback == NULL) {
         return SOFTBUS_ERR;
@@ -252,6 +252,8 @@ static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int sr
 
 static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle, int includeSrvcHandle)
 {
+    (void)serverId;
+    (void)srvcHandle;
     LOG_INFO("IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle,
         includeSrvcHandle);
 }
