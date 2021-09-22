@@ -326,14 +326,6 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
         cJSON_Delete(msg);
         return NULL;
     }
-#ifdef AUTH_ACCOUNT
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "in account auth mode");
-    if (!AddStringToJsonObject(msg, FIELD_UID_HASH, auth->peerUid)) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
-        cJSON_Delete(msg);
-        return NULL;
-    }
-#endif
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
