@@ -56,9 +56,7 @@ if (defined(ohos_lite)) {
       "//third_party/cJSON",
     ]
     sources = [ "softbus_queue.c" ]
-    deps = [
-      "$dsoftbus_root_path/adapter:softbus_adapter",
-    ]
+    deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
     public_deps = [
       "$dsoftbus_root_path/core/common/log:softbus_log",
       "//utils/native/base:utilsecurec_shared",
