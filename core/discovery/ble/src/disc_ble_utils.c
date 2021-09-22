@@ -35,10 +35,7 @@
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
-
 #define BYTE_SHIFT 4
-
-#define DEFAULT_ACCOUNT "jcz"
 
 #ifndef PACKET_CHECK_LENGTH
 #define PACKET_CHECK_LENGTH(len) \
