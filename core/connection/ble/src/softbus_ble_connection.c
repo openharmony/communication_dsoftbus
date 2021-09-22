@@ -144,8 +144,8 @@ static SoftBusGattService g_gattService = {
 };
 static BleQueue g_sendQueue;
 
-static int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
+static int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen,
+    uint8_t *binMac, int32_t binMacLen)
 {
     int32_t ret;
 
@@ -218,7 +218,7 @@ static int32_t AllocBleConnectionIdLocked()
     return tempId;
 }
 
-static BleConnectionInfo* CreateBleConnectionNode()
+static BleConnectionInfo* CreateBleConnectionNode(void)
 {
     BleConnectionInfo *newConnectionInfo = SoftBusCalloc(sizeof(BleConnectionInfo));
     if (newConnectionInfo == NULL) {
@@ -320,11 +320,12 @@ int32_t GetBleAttrHandle(int32_t module)
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectDevice failed, reason:gatt client is not currently supported");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "ConnectDevice failed, reason:gatt client is not currently supported");
     return SOFTBUS_BLECONNECTION_GATT_CLIENT_NOT_SUPPORT;
 }
 
-static int BleEnqueueNonBlock(void *msg)
+static int BleEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
         return SOFTBUS_ERR;
@@ -347,7 +348,8 @@ static int BleDequeueBlock(void **msg)
 
 static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
@@ -367,7 +369,7 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     node->flag = flag;
     node->len = len;
     node->data = data;
-    int ret = BleEnqueueNonBlock(node);
+    int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         return ret;
@@ -401,7 +403,7 @@ static int32_t BlePostBytesInner(uint32_t connectionId, ConnPostData *data)
     node->isInner = 1;
     node->module = data->module;
     node->isInner = data->seq;
-    int ret = BleEnqueueNonBlock(node);
+    int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         return ret;
@@ -482,7 +484,8 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
 
 static void PackRequest(int32_t delta, uint32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onNotifyRequest: delta=%d, connectionIds=%u", delta, connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[onNotifyRequest: delta=%d, connectionIds=%u", delta, connectionId);
     ListNode *item = NULL;
     BleConnectionInfo *targetNode = NULL;
     int refCount;
@@ -509,7 +512,8 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
 
 static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "[onNotifyRequest: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
     ListNode *item = NULL;
     BleConnectionInfo *targetNode = NULL;
     int myRefCount;
@@ -613,14 +617,16 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
     }
     SoftBusBtAddr btAddr;
     if (server != NULL) {
-        ret = ConvertBtMacToBinary(server->info.info.bleInfo.bleMac, BT_MAC_LEN, btAddr.addr, BT_ADDR_LEN);
+        ret = ConvertBtMacToBinary((const char *)server->info.info.bleInfo.bleMac,
+            BT_MAC_LEN, btAddr.addr, BT_ADDR_LEN);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr to binary failed:%d", ret);
             return ret;
         }
         ret = SoftBusGattsDisconnect(btAddr, server->halConnId);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectDeviceNow failed, reason:gatt client not support");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "BleDisconnectDeviceNow failed, reason:gatt client not support");
         return SOFTBUS_BLECONNECTION_GATT_CLIENT_NOT_SUPPORT;
     }
     return ret;
@@ -676,7 +682,8 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleStartLocalListening wrong service state:%d", g_gattService.state);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "BleStartLocalListening wrong service state:%d", g_gattService.state);
     return SOFTBUS_ERR;
 }
 
@@ -688,7 +695,8 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
     }
     if ((g_gattService.state == BLE_GATT_SERVICE_ADDED) ||
         (g_gattService.state == BLE_GATT_SERVICE_STOPPING)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleStopLocalListening service already stopped or is stopping");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "BleStopLocalListening service already stopped or is stopping");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_OK;
     }
@@ -702,7 +710,8 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleStopLocalListening wrong service state:%d", g_gattService.state);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "BleStopLocalListening wrong service state:%d", g_gattService.state);
     return SOFTBUS_ERR;
 }
 
@@ -804,7 +813,8 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -828,7 +838,7 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
         g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
 
         msg = BleConnCreateLoopMsg(ADD_CHARA_MSG,
-            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP|
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE, SOFTBUS_GATT_PERMISSION_READ |
             SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_CHARA_BLECONN_UUID);
@@ -844,7 +854,8 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
 static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle,
         characteristicHandle);
     if ((uuid == NULL) || (uuid->uuid == NULL)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceAddCallback appUuid is null");
@@ -863,7 +874,8 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -883,7 +895,8 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -920,7 +933,8 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -986,7 +1000,6 @@ static void BleConnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    //save connId
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_conection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
@@ -1107,7 +1120,7 @@ int SendSelfBasicInfo(uint32_t connId)
     return SOFTBUS_OK;
 }
 
-int PeerBasicInfoParse(BleConnectionInfo *connInfo, char *value, int32_t len)
+int PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t len)
 {
     cJSON *data = NULL;
     data = cJSON_Parse(value + TYPE_HEADER_SIZE);
@@ -1116,11 +1129,12 @@ int PeerBasicInfoParse(BleConnectionInfo *connInfo, char *value, int32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse devId:%s type:%d", connInfo->peerDevId, connInfo->peerType);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "PeerBasicInfoParse devId:%s type:%d", connInfo->peerDevId, connInfo->peerType);
     return SOFTBUS_OK;
 }
 
-static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, char *value)
+static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived invalid data");
@@ -1150,16 +1164,17 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
             cJSON_Delete(data);
         } else {
             if (head->len + sizeof(ConnPktHead) > len) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BLEINFOPRTINT: recv a big data:%d, not support", head->len + sizeof(ConnPktHead));
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BLEINFOPRTINT: recv a big data:%d, not support",
+                    head->len + sizeof(ConnPktHead));
             }
             if (g_connectCallback != NULL) {
                 g_connectCallback->OnDataReceived(targetNode->connId, (ConnModule)head->module, head->seq,
-                    value, head->len + sizeof(ConnPktHead));
+                    (char *)value, head->len + sizeof(ConnPktHead));
             }
         }
     } else {
         if (targetNode->state == BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
-            g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, value, len);
+            g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, (char *)value, len);
         } else {
             if (PeerBasicInfoParse(targetNode, value, len) != SOFTBUS_OK) {
                 (void)pthread_mutex_unlock(&g_connectionLock);
@@ -1174,8 +1189,8 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
 
 static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestReadCallback transId=%d, attrHandle=%d\n", readCbPara.transId,
-        readCbPara.attrHandle);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestReadCallback transId=%d, attrHandle=%d\n",
+        readCbPara.transId, readCbPara.attrHandle);
     SoftBusGattsResponse response = {
         .connectId = readCbPara.connId,
         .status = SOFTBUS_BT_STATUS_SUCCESS,
@@ -1190,10 +1205,11 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
 static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestWriteCallback halconnId=%d, transId=%d, attrHandle=%d\n",
-    writeCbPara.connId, writeCbPara.transId, writeCbPara.attrHandle);
+        writeCbPara.connId, writeCbPara.transId, writeCbPara.attrHandle);
     if (writeCbPara.attrHandle != g_gattService.bleConnCharaId &&
         writeCbPara.attrHandle != g_gattService.bleNetCharaId) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived not support handle :%d expect:%d", writeCbPara.attrHandle, g_gattService.bleConnCharaId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived not support handle :%d expect:%d",
+            writeCbPara.attrHandle, g_gattService.bleConnCharaId);
         return;
     }
     if (writeCbPara.needRsp) {
@@ -1207,14 +1223,16 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRequestWriteCallback sendresponse");
         SoftBusGattsSendResponse(&response);
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BLEINFOPRTINT:BleRequestWriteCallback valuelen:%d value:)", writeCbPara.length);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+        "BLEINFOPRTINT:BleRequestWriteCallback valuelen:%d value:)", writeCbPara.length);
     uint32_t len;
     int32_t index = -1;
-    char *value = BleTransRecv(writeCbPara.connId, (char *)writeCbPara.value, (uint32_t)writeCbPara.length, &len, &index);
+    char *value = BleTransRecv(writeCbPara.connId, (char *)writeCbPara.value,
+        (uint32_t)writeCbPara.length, &len, &index);
     if (value == NULL) {
         return;
     }
-    BleOnDataReceived(writeCbPara.attrHandle, writeCbPara.connId, len, value);
+    BleOnDataReceived(writeCbPara.attrHandle, writeCbPara.connId, len, (const char *)value);
     if (index != -1) {
         BleTransCacheFree(writeCbPara.connId, index);
     }
@@ -1222,7 +1240,8 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
 
 static void BleResponseConfirmationCallback(int status, int handle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
 }
 
 static void BleNotifySentCallback(int connId, int status)

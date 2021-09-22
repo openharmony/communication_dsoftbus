@@ -37,13 +37,12 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     header->size = ntohl(tmpHeader->size);
     header->offset = ntohl(tmpHeader->offset);
     header->total = ntohl(tmpHeader->total);
-    if((header->size != len - (int32_t)sizeof(BleTransHeader)) ||
-     (header->total < header->size + header->offset) ||
-     (header->offset < 0) ||
-     (header->total > MAX_DATA_LEN)) {
-         return SOFTBUS_ERR;
-     }
-     return SOFTBUS_OK;
+    if ((header->size != len - (int32_t)sizeof(BleTransHeader)) ||
+        (header->total < header->size + header->offset) ||
+        (header->offset < 0) || (header->total > MAX_DATA_LEN)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
@@ -109,7 +108,8 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
         *index = i;
         return targetNode->recvCache[i].cache;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransRecv a part pack, wait next one, total:%d, current:%d", header.total, targetNode->recvCache[i].currentSize);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransRecv a part pack, wait next one, total:%d, current:%d",
+        header.total, targetNode->recvCache[i].currentSize);
     return NULL;
 }
 
@@ -127,7 +127,7 @@ void BleTransCacheFree(int32_t halConnId, int32_t index)
     targetNode->recvCache[index].isUsed = 0;
 }
 
-static int32_t BleHalSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t module)
+static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t module)
 {
     if (connInfo->info.isServer == 1) {
         SoftBusGattsNotify notify = {
@@ -167,7 +167,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
         transHeader->size = htonl(sendlenth);
         transHeader->offset = htonl(offset);
         transHeader->seq = htonl(seq);
-        ret = BleHalSend(connInfo, buff, sendlenth + sizeof(BleTransHeader), module);
+        ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendlenth + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
             LOG_INFO("BleTransSend BleHalSend failed");
             SoftBusFree(buff);
