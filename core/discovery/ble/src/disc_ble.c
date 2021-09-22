@@ -431,13 +431,13 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "All capbit is zero");
         return SOFTBUS_ERR;
     }
-    if (GetDeviceIdHash(info->devId) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash(info->devId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId failed");
     }
-    if (GetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceName failed");
     }
-    info->devType = GetDeviceType();
+    info->devType = DiscBleGetDeviceType();
     bool isSameAccount = false;
     bool isWakeRemote = false;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
@@ -446,7 +446,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
     }
     (void)memset_s(info->hwAccountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
     if (isSameAccount) {
-        if (GetShortUserIdHash(info->hwAccountHash) != SOFTBUS_OK) {
+        if (DiscBleGetShortUserIdHash(info->hwAccountHash) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
         }
     }
@@ -463,13 +463,13 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
-    if (GetDeviceIdHash(info->devId) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash(info->devId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId failed");
     }
-    if (GetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceName failed");
     }
-    info->devType = GetDeviceType();
+    info->devType = DiscBleGetDeviceType();
     uint32_t passiveCapBitMap[CAPABILITY_NUM] = {0};
     if (MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap, passiveCapBitMap) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "MatchRecvMessage failed");
@@ -560,7 +560,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
         (void)memcpy_s(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
             info->hwAccountHash, SHORT_USER_ID_HASH_LEN);
     } else {
-        if (GetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH]) != SOFTBUS_OK) {
+        if (DiscBleGetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH]) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
         }
     }
@@ -568,7 +568,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
     boardcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
     boardcastData->dataLen = POS_TLV;
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = {0};
-    if (GetDeviceIdHash(deviceIdHash) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash(deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId Hash failed");
     }
     uint8_t devType = info->devType;
