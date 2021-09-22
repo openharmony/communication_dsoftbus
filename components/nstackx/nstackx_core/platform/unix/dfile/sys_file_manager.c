@@ -13,33 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef NSTACKX_CONFIG_H
-#define NSTACKX_CONFIG_H
+#include "nstackx_file_manager.h"
+#include "nstackx_log.h"
 
-#ifdef NSTACKX_WITH_LITEOS
+#define TAG "nStackXDFile"
 
-/**
- * Enable(1) or Disable(0) fillp support in nStackx
- */
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 0
-#endif
-
-/**
- * Enable(1) or Disable(0) encrypt support in nStackx
- */
-
-#endif /* NSTACKX_WITH_LITEOS */
-
-#ifdef NSTACKX_WITH_HMOS_LINUX
-
-#ifndef NSTACKX_2_4G_WIFI
-#define NSTACKX_2_4G_WIFI
-#endif
-#endif /* NSTACKX_WITH_HMOS_LINUX */
-
-#ifndef NSTACKX_SUPPORT_FILLP
-#define NSTACKX_SUPPORT_FILLP 1
-#endif
-
-#endif /* NSTACKX_CONFIG_H */
+void FileSync(const FileInfo *fileInfo)
+{
+    if (fileInfo == NULL || fileInfo->fd == NSTACKX_INVALID_FD) {
+        return;
+    }
+    if (fsync(fileInfo->fd) != 0) {
+        LOGE(TAG, "fsync failed. error %d", errno);
+    }
+}
