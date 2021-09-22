@@ -33,6 +33,7 @@ ohos_shared_library("softbus_adapter_ble") {
   ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common/log:softbus_log",
     "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework:btframework",
     "//third_party/bounds_checking_function:libsec_static",
   ]
