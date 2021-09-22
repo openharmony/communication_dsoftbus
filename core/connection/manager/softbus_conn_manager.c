@@ -17,10 +17,10 @@
 
 #include <securec.h>
 
-#include "ble_connection.h"
 #include "br_connection.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_ble_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
