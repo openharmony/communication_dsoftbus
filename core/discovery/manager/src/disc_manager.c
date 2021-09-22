@@ -16,6 +16,7 @@
 #include "disc_manager.h"
 #include "common_list.h"
 #include "disc_coap.h"
+#include "disc_ble.h"
 #include "securec.h"
 #include "softbus.h"
 #include "softbus_adapter_mem.h"
@@ -28,6 +29,7 @@ static bool g_isInited = false;
 static SoftBusList *g_publishInfoList = NULL;
 static SoftBusList *g_discoveryInfoList = NULL;
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
+static DiscoveryFuncInterface *g_discBleInterface = NULL;
 static DiscInnerCallback g_discMgrMediumCb;
 static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
 static const char *g_discModuleMap[] = {
@@ -126,6 +128,8 @@ static int32_t DiscInterfaceByMedium(const DiscInfo *info, const InterfaceFuncTy
     switch (info->medium) {
         case COAP:
             return DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
+        case BLE:
+            return DiscInterfaceProcess(&(info->option), g_discBleInterface, info->mode, type);
         case AUTO: {
             int32_t ret = DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
             if (ret == SOFTBUS_OK) {
@@ -1144,7 +1148,8 @@ int32_t DiscMgrInit(void)
     }
     g_discMgrMediumCb.OnDeviceFound = DiscOnDeviceFound;
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
-    if (g_discCoapInterface == NULL) {
+    g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
+    if (g_discCoapInterface == NULL && g_discBleInterface == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium init all fail");
         return SOFTBUS_ERR;
     }
@@ -1205,7 +1210,9 @@ void DiscMgrDeinit(void)
     g_publishInfoList = NULL;
     g_discoveryInfoList = NULL;
     g_discCoapInterface = NULL;
+    g_discBleInterface = NULL;
     DiscCoapDeinit();
+    DiscBleDeinit();
     g_isInited = false;
 }
 
