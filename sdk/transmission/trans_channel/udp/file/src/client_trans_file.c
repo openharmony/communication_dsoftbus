@@ -147,7 +147,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
             return SOFTBUS_ERR;
         }
-        fileSession = StartNStackXDFileServer(channel->myIp, channel->sessionKey,
+        fileSession = StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
             DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
         if (fileSession < 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start file channel as server failed");
@@ -161,7 +161,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
-            channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
+            (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
         if (fileSession < 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start file channel as client failed");
             return SOFTBUS_ERR;
