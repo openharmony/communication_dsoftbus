@@ -48,12 +48,12 @@ bool CheckCapBitMapEqual(const uint32_t *srcBitMap, const uint32_t *dstBitMap, u
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 
-int32_t GetDeviceUdid(char *devId);
-int32_t GetDeviceName(char *deviceName);
-int32_t GetHwAccount(char *hwAccount);
-uint8_t GetDeviceType(void);
-int32_t GetDeviceIdHash(unsigned char *hashStr);
-int32_t GetShortUserIdHash(unsigned char *hashStr);
+int32_t DiscBleGetDeviceUdid(char *devId);
+int32_t DiscBleGetDeviceName(char *deviceName);
+int32_t DiscBleGetHwAccount(char *hwAccount);
+uint8_t DiscBleGetDeviceType(void);
+int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr);
+int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr);
 
 int32_t GenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const unsigned char *data, uint32_t dataLen);
