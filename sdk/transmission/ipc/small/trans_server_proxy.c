@@ -170,6 +170,8 @@ int32_t ServerIpcOpenSession(const SessionParam* param, TransInfo* info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", transSerializer.ret);
         return SOFTBUS_ERR;
     }
+    info->channelId = transSerializer.transInfo.channelId;
+    info->channelType = transSerializer.transInfo.channelType;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
     return transSerializer.ret;
 }
