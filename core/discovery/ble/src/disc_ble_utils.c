@@ -19,8 +19,8 @@
 
 #include "bus_center_manager.h"
 #include "cJSON.h"
-#include "discovery_service.h"
 #include "disc_ble_constant.h"
+#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "mbedtls/md.h"
 #include "mbedtls/platform.h"
@@ -152,9 +152,6 @@ int32_t GetHwAccount(char *hwAccount)
     return SOFTBUS_OK;
 }
 
-#define BUS_CENTER_MOCK
-#ifndef BUS_CENTER_MOCK
-
 int32_t GetDeviceUdid(char *devId)
 {
     if (devId == NULL) {
@@ -193,39 +190,6 @@ uint8_t GetDeviceType(void)
     return typeId;
 }
 
-#else
-#define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
-#define DEFAULT_DEVICE_NAME "SKYLARK"
-
-int32_t GetDeviceUdid(char *devId)
-{
-    if (devId == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strcpy_s(devId, UDID_BUF_LEN, DEFAULT_UDID_NAME) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t GetDeviceName(char *deviceName)
-{
-    if (deviceName == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strcpy_s(deviceName, DEVICE_TYPE_BUF_LEN, DEFAULT_DEVICE_NAME) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-uint8_t GetDeviceType(void)
-{
-    return TYPE_AUDIO_ID;
-}
-
-#endif
-
 int32_t GetDeviceIdHash(unsigned char *hashStr)
 {
     if (hashStr == NULL) {
@@ -245,7 +209,7 @@ int32_t GetDeviceIdHash(unsigned char *hashStr)
         return ret;
     }
     ret = ConvertBytesToHexString(hashStr, SHORT_DEVICE_ID_HASH_LENGTH + 1, hashResult,
-                                    SHORT_DEVICE_ID_HASH_LENGTH / HEXIFY_UNIT_LEN);
+        SHORT_DEVICE_ID_HASH_LENGTH / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
         return ret;
@@ -319,7 +283,7 @@ int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const 
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t len = dataLen & DATA_LENGTH_MASK;
-    boardcastData->data.data[boardcastData->dataLen] = (dataType << 4) & DATA_TYPE_MASK;
+    boardcastData->data.data[boardcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
     boardcastData->data.data[boardcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
     boardcastData->dataLen += 1;
     uint32_t remainLen = BOARDCAST_MAX_LEN - boardcastData->dataLen;
@@ -369,7 +333,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(info->hwAccountHash, SHORT_USER_ID_HASH_LEN,
-                &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
+                 &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy hwAccountHash failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -382,10 +346,6 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
     PACKET_CHECK_LENGTH(len);
     info->devType = (DeviceType)devType;
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_BR_MAC, curLen, (unsigned char *)info->addr[0].info.ble.bleMac);
-    // if (len > 0) {
-    //     info->addrNum = 1;
-    //     info->addr[0].type = CONNECTION_ADDR_BLE;
-    // }
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_CUST, curLen, (unsigned char *)info->custData);
     PACKET_CHECK_LENGTH(len);
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_NAME, curLen, info->devName);

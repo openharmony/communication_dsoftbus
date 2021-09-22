@@ -16,14 +16,13 @@
 #ifndef ADAPTER_BT_UTILS_H
 #define ADAPTER_BT_UTILS_H
 
-#include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_ble_gatt.h"
-
+#include <stdbool.h>
 #include "ohos_bt_def.h"
 #include "ohos_bt_gatt.h"
 #include "ohos_bt_gap.h"
+#include "softbus_adapter_ble_gatt.h"
+#include "softbus_adapter_bt_common.h"
 
 int BleOhosStatusToSoftBus(BtStatus status);
-void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult *dst);
 
 #endif

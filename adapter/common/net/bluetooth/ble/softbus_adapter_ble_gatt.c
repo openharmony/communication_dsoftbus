@@ -325,6 +325,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
 
 static void WrapperSecurityRespondCallback(const BdAddr *bdAddr)
 {
+    (void)bdAddr;
     LOG_INFO("WrapperSecurityRespondCallback");
 }
 
@@ -351,6 +352,8 @@ static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
 
 static void WrapperScanParameterSetCompletedCallback(int clientId, int status)
 {
+    (void)clientId;
+    (void)status;
     LOG_INFO("WrapperScanParameterSetCompletedCallback");
 }
 
@@ -364,7 +367,7 @@ static BtGattCallbacks g_softbusGattCb = {
     .scanParamSetCb = WrapperScanParameterSetCompletedCallback
 };
 
-static int RegisterBleGattCallback()
+static int RegisterBleGattCallback(void)
 {
     if (g_isRegCb) {
         return SOFTBUS_OK;
@@ -599,7 +602,7 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
             g_scanListener[index].isUsed = true;
             g_scanListener[index].isScanning = false;
             (void)memset_s(&g_scanListener[index].param, sizeof(SoftBusBleScanParams),
-                            0x0, sizeof(SoftBusBleScanParams));
+                           0x0, sizeof(SoftBusBleScanParams));
             g_scanListener[index].listener = (SoftBusScanListener *)listener;
             pthread_mutex_unlock(&g_scanerLock);
             return index;

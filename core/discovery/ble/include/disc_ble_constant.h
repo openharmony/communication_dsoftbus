@@ -73,6 +73,4 @@
 #define DEVICE_TYPE_LEN 1
 #define TL_LEN 1
 
-/* POS scanRespDataw*/
-
 #endif

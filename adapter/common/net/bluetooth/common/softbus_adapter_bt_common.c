@@ -21,7 +21,6 @@
 #include "ohos_bt_gap.h"
 #include "ohos_bt_gatt.h"
 
-#include "adapter_bt_utils.h"
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
@@ -55,6 +54,7 @@ static bool g_isRegCb = false;
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
+    (void)transport;
     LOG_INFO("WrapperStateChangeCallback");
     int listenerId;
     int st = ConvertBtState((BtStatus)status);
@@ -71,7 +71,7 @@ static BtGapCallBacks g_softbusGapCb = {
     .stateChangeCallback = WrapperStateChangeCallback
 };
 
-static int RegisterListenerCallback()
+static int RegisterListenerCallback(void)
 {
     if (g_isRegCb) {
         return SOFTBUS_OK;
