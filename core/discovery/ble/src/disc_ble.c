@@ -313,6 +313,7 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
 
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
 {
+    (void)listenerId;
     if (scanResultData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "scanResultData is NULL");
         return;
@@ -516,7 +517,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
         if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
-                boardcastData->data.rspData, advData->scanRspLength) != EOK) {
+                     boardcastData->data.rspData, advData->scanRspLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy err");
             return SOFTBUS_MEM_ERR;
         }
@@ -754,8 +755,7 @@ static int32_t StopScaner(void)
 
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
 {
-    if (info == NULL || option == NULL ||
-        (option->publishOption == NULL && option->subscribeOption == NULL) ||
+    if (info == NULL || option == NULL || (option->publishOption == NULL && option->subscribeOption == NULL) ||
         (option->publishOption != NULL && option->subscribeOption != NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -951,7 +951,7 @@ static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 
 static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
-    return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, (void *)option);   
+    return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, (void *)option);
 }
 
 static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
