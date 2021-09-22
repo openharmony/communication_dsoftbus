@@ -137,7 +137,7 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
     capBitMap[index] = capBitMap[index] & mask;
 }
 
-int32_t GetHwAccount(char *hwAccount)
+int32_t DiscBleGetHwAccount(char *hwAccount)
 {
     if (hwAccount == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -149,7 +149,7 @@ int32_t GetHwAccount(char *hwAccount)
     return SOFTBUS_OK;
 }
 
-int32_t GetDeviceUdid(char *devId)
+int32_t DiscBleGetDeviceUdid(char *devId)
 {
     if (devId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -161,7 +161,7 @@ int32_t GetDeviceUdid(char *devId)
     return SOFTBUS_OK;
 }
 
-int32_t GetDeviceName(char *deviceName)
+int32_t DiscBleGetDeviceName(char *deviceName)
 {
     if (deviceName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -173,7 +173,7 @@ int32_t GetDeviceName(char *deviceName)
     return SOFTBUS_OK;
 }
 
-uint8_t GetDeviceType(void)
+uint8_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN];
     uint8_t typeId;
@@ -187,7 +187,7 @@ uint8_t GetDeviceType(void)
     return typeId;
 }
 
-int32_t GetDeviceIdHash(unsigned char *hashStr)
+int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
 {
     if (hashStr == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "hashstr is null");
@@ -195,7 +195,7 @@ int32_t GetDeviceIdHash(unsigned char *hashStr)
     }
     char devId[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = GetDeviceUdid(devId);
+    int32_t ret = DiscBleGetDeviceUdid(devId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceId failed");
         return ret;
@@ -214,7 +214,7 @@ int32_t GetDeviceIdHash(unsigned char *hashStr)
     return SOFTBUS_OK;
 }
 
-int32_t GetShortUserIdHash(unsigned char *hashStr)
+int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr)
 {
     if (hashStr == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "hashstr is null");
@@ -222,9 +222,9 @@ int32_t GetShortUserIdHash(unsigned char *hashStr)
     }
     unsigned char account[MAX_ACCOUNT_HASH_LEN] = {0};
     unsigned char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = GetHwAccount(account);
+    int32_t ret = DiscBleGetHwAccount(account);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetHwAccount failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetHwAccount failed");
         return ret;
     }
     ret = GenerateStrHash(account, strlen(account) + 1, hashResult);
