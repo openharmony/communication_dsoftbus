@@ -16,11 +16,11 @@
 #ifndef SOFTBUS_SERVER_FRAME_H
 #define SOFTBUS_SERVER_FRAME_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdbool.h>
 
 void InitSoftBusServer();
 bool GetServerIsInit();

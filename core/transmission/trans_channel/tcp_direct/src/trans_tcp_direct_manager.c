@@ -136,7 +136,10 @@ void TransDelSessionConnById(int32_t channelId)
 
     SessionConn *item = NULL;
     SessionConn *next = NULL;
-    pthread_mutex_lock(&g_sessionConnList->lock);
+    if (pthread_mutex_lock(&g_sessionConnList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
@@ -321,7 +324,10 @@ void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen)
     pthread_mutex_lock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == chanId) {
-            (void)memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey, keyLen);
+            if (memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey,
+                keyLen) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy error.");
+            }
             pthread_mutex_unlock(&g_sessionConnList->lock);
             return;
         }
