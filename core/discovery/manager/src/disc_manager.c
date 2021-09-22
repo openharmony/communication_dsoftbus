@@ -1149,7 +1149,7 @@ int32_t DiscMgrInit(void)
     g_discMgrMediumCb.OnDeviceFound = DiscOnDeviceFound;
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
     g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
-    if (g_discCoapInterface == NULL || g_discBleInterface == NULL) {
+    if (g_discCoapInterface == NULL && g_discBleInterface == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium init all fail");
         return SOFTBUS_ERR;
     }
