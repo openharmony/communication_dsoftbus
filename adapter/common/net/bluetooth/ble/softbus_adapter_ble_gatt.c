@@ -410,7 +410,7 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength, 
-                data->advData, data->advLength) != EOK) {
+                     data->advData, data->advLength) != EOK) {
             LOG_ERR("SetAdvData memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;

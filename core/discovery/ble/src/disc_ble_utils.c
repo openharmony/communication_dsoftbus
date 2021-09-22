@@ -236,7 +236,7 @@ int32_t GetShortUserIdHash(unsigned char *hashStr)
         return ret;
     }
     ret = ConvertBytesToHexString(hashStr, SHORT_USER_ID_HASH_LEN + 1, hashResult,
-                                    SHORT_USER_ID_HASH_LEN / HEXIFY_UNIT_LEN);
+        SHORT_USER_ID_HASH_LEN / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
         return ret;
@@ -307,7 +307,7 @@ static int32_t ParseRecvAdvData(const unsigned char *data, uint32_t dataLen, uns
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "index >= dataLen");
         return 0;
     }
-    if (type != (data[index] & DATA_TYPE_MASK) >> BYTE_SHIFT) {
+    if (type != ((data[index] & DATA_TYPE_MASK) >> BYTE_SHIFT)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "type check failed");
         return 0;
     }
