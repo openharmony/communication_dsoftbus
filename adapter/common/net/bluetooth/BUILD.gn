@@ -11,32 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
 import("//build/ohos.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ohos_shared_library("softbus_adapter_ble") {
-    sources = [
-        "common/adapter_bt_utils.c",
-        "common/softbus_adapter_bt_common.c",
-        "ble/softbus_adapter_ble_gatt.c",
-        "ble/softbus_adapter_ble_gatt_server.c",
-    ]
-    include_dirs = [
-        "include",
-        "$dsoftbus_root_path/adapter/common/include",
-        "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-        "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
-        "$dsoftbus_root_path/interfaces/kits/common",
-        "$dsoftbus_root_path/core/common/include",
-        "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
-        "//third_party/bounds_checking_function/include",
-    ]
-    deps = [
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework:btframework",
-        "//third_party/bounds_checking_function:libsec_static",
-    ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    part_name = "dsoftbus_standard"
-    subsystem_name = "communication"
+  sources = [
+    "ble/softbus_adapter_ble_gatt.c",
+    "ble/softbus_adapter_ble_gatt_server.c",
+    "common/adapter_bt_utils.c",
+    "common/softbus_adapter_bt_common.c",
+  ]
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/common/include",
+    "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework:btframework",
+    "//third_party/bounds_checking_function:libsec_static",
+  ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  part_name = "dsoftbus_standard"
+  subsystem_name = "communication"
 }
