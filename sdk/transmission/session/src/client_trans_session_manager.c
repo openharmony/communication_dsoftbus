@@ -783,7 +783,6 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if ((sessionNode->channelId == channel->channelId) && (sessionNode->channelType == channel->channelType)) {
-                sessionNode->channelType = channel->channelType;
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
