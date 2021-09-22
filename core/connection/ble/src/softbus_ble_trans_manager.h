@@ -18,7 +18,7 @@
 
 #include "softbus_ble_connection_inner.h"
 
-#define MAX_DATA_LEN 4 * 1024
+#define MAX_DATA_LEN 4096
 
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module);
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index);

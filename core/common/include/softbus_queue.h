@@ -17,9 +17,9 @@
 #define SOFTBUS_QUEUE_H
 
 #include <pthread.h>
-#include "securec.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "securec.h"
 
 #include "softbus_adapter_cpu.h"
 #include "softbus_adapter_atomic.h"
@@ -92,7 +92,7 @@ static inline int32_t QueueIsEmpty(LockFreeQueue* queue)
 }
 
 /** @brief Enqueue operation, thread unsafe */
-static inline int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, void *node)
+static inline int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, const void *node)
 {
     uint32_t producerHead;
     uint32_t producerNext;
@@ -141,7 +141,7 @@ static inline int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, void *nod
 }
 
 /** @brief Enqueue operation, thread safe */
-static inline uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, void* node)
+static inline uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node)
 {
     uint32_t producerHead;
     uint32_t producerNext;
