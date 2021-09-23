@@ -595,7 +595,7 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
     if (chan->appInfo.appType != APP_TYPE_INNER) {
         int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
-        chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
+                                           chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
             return SOFTBUS_ERR;
