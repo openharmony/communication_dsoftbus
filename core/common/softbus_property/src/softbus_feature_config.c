@@ -39,6 +39,12 @@
 #define DEFAULT_STORAGE_PATH "/data/data"
 #endif
 
+#ifdef __LITEOS_M__
+#define DEFAULT_SElECT_INTERVAL 100000
+#else
+#define DEFAULT_SElECT_INTERVAL 10000
+#endif
+
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
