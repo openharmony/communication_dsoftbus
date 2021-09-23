@@ -601,7 +601,7 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
     if (chan->appInfo.appType != APP_TYPE_INNER) {
-        ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
+        int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
         chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
@@ -619,7 +619,6 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
-    int32_t ret;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -639,7 +638,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
 
     int16_t newChanId = TransProxyGetNewMyId();
-    ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
+    int32_t ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
         SoftBusFree(chan);
