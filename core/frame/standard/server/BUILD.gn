@@ -30,11 +30,13 @@ ohos_prebuilt_etc("softbus_server.rc") {
 ohos_shared_library("softbus_server") {
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/frame/standard/server/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/authentication/interface",
