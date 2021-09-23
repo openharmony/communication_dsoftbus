@@ -243,6 +243,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
             ret = SOFTBUS_OK;
             break;
         default:
+            (void)TransDeleteUdpChannel(newChannel->channelId);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport businessType.");
             break;
     }
