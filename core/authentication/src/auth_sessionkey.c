@@ -215,7 +215,7 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
         return SOFTBUS_ENCRYPT_ERR;
     }
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
@@ -259,7 +259,7 @@ int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *da
         return SOFTBUS_ENCRYPT_ERR;
     }
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
@@ -304,7 +304,7 @@ int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *dat
     }
 
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
