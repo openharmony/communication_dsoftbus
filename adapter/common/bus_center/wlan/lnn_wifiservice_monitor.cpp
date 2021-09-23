@@ -146,6 +146,7 @@ static void LnnSubscribeWifiService(void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
         }
     }
+    delete subscriberPtr;
 }
 
 int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
