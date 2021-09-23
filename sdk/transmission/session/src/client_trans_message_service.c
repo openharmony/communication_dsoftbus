@@ -31,13 +31,11 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
-        return ret;
+    bool isEnable = false;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (type == CHANNEL_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
+    if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
@@ -54,13 +52,11 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
-        return ret;
+    bool isEnable = false;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (type == CHANNEL_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
+    if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
@@ -76,13 +72,14 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
-        return ret;
+    bool isEnable = false;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (type == CHANNEL_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel opening");
+    if (type != CHANNEL_TYPE_UDP) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
@@ -98,14 +95,15 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
 
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type);
-    if (ret != SOFTBUS_OK) {
-        LOG_ERR("get channel failed");
-        return ret;
+    bool isEnable = false;
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (type != CHANNEL_TYPE_UDP) {
-        LOG_INFO("invalid channel type");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if (isEnable != true) {
+        return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
     return ClientTransChannelSendFile(channelId, sFileList, dFileList, fileCnt);
