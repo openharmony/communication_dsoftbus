@@ -25,6 +25,7 @@ extern "C" {
 typedef enum {
     LNN_MONITOR_EVENT_IP_ADDR_CHANGED,
     LNN_MONITOR_EVENT_WIFI_STATE_CHANGED,
+    LNN_MONITOR_EVENT_WLAN_PARAM,
     LNN_MONITOR_EVENT_TYPE_MAX,
 } LnnMonitorEventType;
 
@@ -52,6 +53,7 @@ int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
 
 int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler);
 
+int32_t LnnInitDriverMonitorImpl(LnnMonitorEventHandler handler);
 #ifdef __cplusplus
 }
 #endif
