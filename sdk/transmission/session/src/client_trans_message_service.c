@@ -19,13 +19,21 @@
 #include "client_trans_session_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
 int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendBytes: sessionId=%d", sessionId);
-    if ((data == NULL) || (len == 0) || (len > TRANS_BYTES_LENGTH_MAX) || sessionId < 0) {
+    if (data == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    if (len > maxLen) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -45,8 +53,15 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
 int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendMessage: sessionId=%d", sessionId);
-    if ((data == NULL) || (len == 0) || (len > TRANS_MESSAGE_LENGTH_MAX)) {
+    if (data == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    if (len > maxLen) {
         return SOFTBUS_INVALID_PARAM;
     }
 

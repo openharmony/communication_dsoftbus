@@ -25,6 +25,7 @@ if (defined(ohos_lite)) {
     "include",
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/common/include",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/transport",
@@ -40,6 +41,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common/json_utils:json_utils",
     "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
     "$dsoftbus_sdk_path/frame:softbus_client_frame",
     "$dsoftbus_sdk_path/transmission:dsoftbus_trans_session_manager_sdk",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
@@ -74,6 +76,7 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   config("trans_session_sdk_interface") {
     include_dirs = [
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/inner_kits/transport",
       "$dsoftbus_root_path/interfaces/kits/transport",
@@ -101,6 +104,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/core/common/json_utils:json_utils",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "$dsoftbus_sdk_path/bus_center/service:dsoftbus_bus_center_service_sdk",
       "$dsoftbus_sdk_path/frame:softbus_client_frame",
