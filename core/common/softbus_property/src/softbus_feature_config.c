@@ -39,9 +39,21 @@
 #define DEFAULT_STORAGE_PATH "/data/data"
 #endif
 
+#ifdef SOFTBUS_STANDARD_SYSTEM
+#define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
+#define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
+#define DEFAULT_IS_SUPPORT_TCP_PROXY 1
+#elif defined SOFTBUS_SMALL_SYSTEM
+#define DEFAULT_MAX_BYTES_LEN (1 * 1024 * 1024)
+#define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
+#define DEFAULT_IS_SUPPORT_TCP_PROXY 1
+#else
+#define DEFAULT_MAX_BYTES_LEN (2 * 1024)
+#define DEFAULT_MAX_MESSAGE_LEN (1 * 1024)
+#define DEFAULT_IS_SUPPORT_TCP_PROXY 0
+#endif
+
 typedef struct {
-    int32_t maxByteLen;
-    int32_t maxMsgLen;
     int32_t authAbilityConn;
     int32_t connBrMaxDataLen;
     int32_t connRfcomSendMaxLen;
@@ -63,8 +75,6 @@ typedef struct {
 } ConfigVal;
 
 ConfigItem g_config = {
-    MAX_BYTES_LENGTH,
-    MAX_MESSAGE_LENGTH,
     AUTH_ABILITY_COLLECTION,
     CONN_BR_MAX_DATA_LENGTH,
     CONN_RFCOM_SEND_MAX_LEN,
@@ -79,16 +89,25 @@ ConfigItem g_config = {
     DEFAULT_STORAGE_PATH,
 };
 
+typedef struct {
+    int32_t isSupportTcpProxy;
+    int32_t selectInterval;
+    int32_t maxBytesLen;
+    int32_t maxMessageLen;
+} TransConfigItem;
+
+static TransConfigItem g_tranConfig = {0};
+
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
         SOFTBUS_INT_MAX_BYTES_LENGTH, 
-        (unsigned char*)&(g_config.maxByteLen), 
-        sizeof(g_config.maxByteLen)
+        (unsigned char*)&(g_tranConfig.maxBytesLen),
+        sizeof(g_tranConfig.maxBytesLen)
     },
     {
         SOFTBUS_INT_MAX_MESSAGE_LENGTH, 
-        (unsigned char*)&(g_config.maxMsgLen), 
-        sizeof(g_config.maxMsgLen)
+        (unsigned char*)&(g_tranConfig.maxMessageLen),
+        sizeof(g_tranConfig.maxMessageLen)
     },
     {
         SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, 
@@ -180,10 +199,23 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
     return SOFTBUS_OK;
 }
 
+static void SoftbusConfigSetTransDefaultVal(void)
+{
+    g_tranConfig.isSupportTcpProxy = DEFAULT_IS_SUPPORT_TCP_PROXY;
+    g_tranConfig.selectInterval = DEFAULT_SElECT_INTERVAL;
+    g_tranConfig.maxBytesLen = DEFAULT_MAX_BYTES_LEN;
+    g_tranConfig.maxMessageLen = DEFAULT_MAX_MESSAGE_LEN;
+}
+
+static void SoftbusConfigSetDefaultVal(void)
+{
+    SoftbusConfigSetTransDefaultVal();
+}
+
 void SoftbusConfigInit(void)
 {
     ConfigSetProc sets;
-
+    SoftbusConfigSetDefaultVal();
     sets.SetConfig = &SoftbusSetConfig;
     SoftbusConfigAdapterInit(&sets);
 }

@@ -25,11 +25,6 @@ extern "C" {
 #endif
 #endif
 
-// softbus default defined value
-#define MAX_BYTES_LENGTH (4 * 1024 * 1024)  // Bytes max size 4M
-#define MAX_MESSAGE_LENGTH (4 * 1024)   // Message max size 4K
-#define MAX_BUF_LENGTH (MAX_MESSAGE_LENGTH + 64)
-
 #ifdef __cplusplus
 #if __cplusplus
 }
