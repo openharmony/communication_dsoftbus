@@ -68,11 +68,11 @@ static int ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
 int32_t BusCenterServerProxyInit(void)
 {
     if (g_serverProxy != NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "server proxy has initialized.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "server proxy has initialized.");
         return SOFTBUS_OK;
     }
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center start get server proxy");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center start get server proxy");
     int32_t proxyInitCount = 0;
     while (g_serverProxy == NULL) {
         proxyInitCount++;
@@ -94,7 +94,7 @@ int32_t BusCenterServerProxyInit(void)
             continue;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center get server proxy ok");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center get server proxy ok");
     return SOFTBUS_OK;
 }
 
@@ -219,7 +219,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
 
 int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join Lnn ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join Lnn ipc client push.");
     if (addr == NULL || pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -245,7 +245,7 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 
 int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "leave Lnn ipc client push.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "leave Lnn ipc client push.");
     if (pkgName == NULL || networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;

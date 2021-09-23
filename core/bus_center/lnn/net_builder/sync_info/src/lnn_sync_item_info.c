@@ -456,8 +456,8 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
     }
     if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ChannelDataHandler, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async handle channel opened message fail");
+        SoftBusFree(para);
     }
-    SoftBusFree(para);
 }
 
 static int32_t FillSyncItemInfo(const char *networkId, SyncItemInfo *info, SyncItemType type,
