@@ -13,7 +13,28 @@
  * limitations under the License.
  */
 
-int ClientStubInit(void)
-{
-    return 0;
+#ifndef LNN_DRIVER_REQUEST_H
+#define LNN_DRIVER_REQUEST_H
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+typedef enum {
+    LNN_DRIVER_MODULE_WLAN_PARAM = 0,
+    LNN_DRIVER_MODULE_MAX_INDEX,
+} LnnDriverModuleId;
+
+int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
+    uint8_t *reply, uint32_t replyLen);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* LNN_DRIVER_REQUEST_H */

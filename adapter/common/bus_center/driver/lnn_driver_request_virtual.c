@@ -13,7 +13,17 @@
  * limitations under the License.
  */
 
-int ClientStubInit(void)
+#include "lnn_driver_request.h"
+
+#include "softbus_errcode.h"
+
+int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
+    uint8_t *reply, uint32_t replyLen)
 {
-    return 0;
+    (void)moduleId;
+    (void)cmd;
+    (void)cmdLen;
+    (void)reply;
+    (void)replyLen;
+    return SOFTBUS_OK;
 }

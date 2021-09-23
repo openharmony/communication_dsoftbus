@@ -21,6 +21,8 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("dsoftbus_bus_center_monitor") {
       sources = [
+        "driver/lnn_driver_monitor_virtual.c",
+        "driver/lnn_driver_request_virtual.c",
         "network/lnn_lwip_monitor.c",
         "network/lnn_netlink_monitor_virtual.c",
         "platform/lnn_product_monitor_virtual.c",
@@ -47,9 +49,13 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("dsoftbus_bus_center_monitor") {
+      sources = [
+        "driver/lnn_driver_monitor_virtual.c",
+        "driver/lnn_driver_request_virtual.c",
+        "network/lnn_lwip_monitor_virtual.c",
+      ]
       if (ohos_kernel_type == "linux") {
-        sources = [
-          "network/lnn_lwip_monitor_virtual.c",
+        sources += [
           "network/lnn_netlink_monitor.c",
           "platform/lnn_product_monitor_virtual.c",
           "wlan/lnn_wifiservice_monitor_virtual.cpp",
@@ -62,8 +68,7 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
       ]
       if (ohos_kernel_type == "liteos_a") {
-        sources = [
-          "network/lnn_lwip_monitor_virtual.c",
+        sources += [
           "network/lnn_netlink_monitor_virtual.c",
           "platform/lnn_product_monitor.c",
           "wlan/lnn_wifiservice_monitor_virtual.cpp",
@@ -125,6 +130,18 @@ if (defined(ohos_lite)) {
       "//foundation/aafwk/standard/interfaces/innerkits/want:want",
       "//utils/native/base:utils",
     ]
+    if (enable_dsoftbus_driver) {
+      sources += [
+        "driver/lnn_hdf_driver_monitor.c",
+        "driver/lnn_hdf_driver_request.c",
+      ]
+      deps += [ "//drivers/adapter/uhdf2/osal:libhdf_utils" ]
+    } else {
+      sources += [
+        "driver/lnn_driver_monitor_virtual.c",
+        "driver/lnn_driver_request_virtual.c",
+      ]
+    }
     if (is_standard_system) {
       external_deps = [
         "ces_standard:cesfwk_innerkits",

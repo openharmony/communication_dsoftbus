@@ -28,6 +28,7 @@ typedef enum {
     MONITOR_IMPL_PRODUCT_TYPE,
     MONITOR_IMPL_LWIP_TYPE,
     MONITOR_IMPL_WIFISERVICE_TYPE,
+    MONITOR_IMPL_DRIVER_TYPE,
     MONITOR_IMPL_MAX_TYPE,
 } MonitorImplType;
 
@@ -59,6 +60,9 @@ static EventMonitorCtrl g_eventMonitorCtrl = {
         },
         [MONITOR_IMPL_WIFISERVICE_TYPE] = {
             .implInit = LnnInitWifiServiceMonitorImpl,
+        },
+        [MONITOR_IMPL_DRIVER_TYPE] = {
+            .implInit = LnnInitDriverMonitorImpl,
         },
     },
     .lock = PTHREAD_MUTEX_INITIALIZER,

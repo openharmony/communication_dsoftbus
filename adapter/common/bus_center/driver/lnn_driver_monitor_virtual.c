@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-int ClientStubInit(void)
+#include "lnn_event_monitor_impl.h"
+
+#include "softbus_errcode.h"
+
+int32_t LnnInitDriverMonitorImpl(LnnMonitorEventHandler handler)
 {
-    return 0;
+    (void)handler;
+    return SOFTBUS_OK;
 }
