@@ -25,6 +25,7 @@ if (defined(ohos_lite)) {
   ]
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_property") {
+      defines = [ "SOFTBUS_MINI_SYSTEM" ]
       include_dirs = common_include
       sources = [ "src/softbus_feature_config.c" ]
       deps = [
@@ -34,6 +35,7 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("softbus_property") {
+      defines = [ "SOFTBUS_SMALL_SYSTEM" ]
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -52,6 +54,7 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_shared_library("softbus_property") {
+    defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
     sources = [ "src/softbus_feature_config.c" ]
     include_dirs = [
       "$dsoftbus_core_path/common/include",

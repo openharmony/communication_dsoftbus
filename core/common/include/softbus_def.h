@@ -51,13 +51,6 @@ extern "C" {
 #define MAX_SESSION_ID 16
 #define MAX_SESSION_SERVER_NUMBER 8
 
-#ifdef SOFTBUS_WATCH
-#define TRANS_BYTES_LENGTH_MAX (3 * 1024)
-#else
-#define TRANS_BYTES_LENGTH_MAX (4 * 1024)
-#endif
-#define TRANS_MESSAGE_LENGTH_MAX 1024
-
 #define WAIT_SERVER_READY_INTERVAL 200
 
 typedef struct {
