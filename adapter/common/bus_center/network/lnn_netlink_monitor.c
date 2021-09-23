@@ -39,8 +39,8 @@
 #include "softbus_log.h"
 
 #undef NLMSG_OK
-#define NLMSG_OK(nlh, len) ((len) >= (int32_t)(sizeof(struct nlmsghdr)) && (nlh)->nlmsg_len >= \
-    sizeof(struct nlmsghdr) && (int32_t)((nlh)->nlmsg_len) <= (len))
+#define NLMSG_OK(nlh, len) (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= \
+    sizeof(struct nlmsghdr)) && ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
 #define DEFAULT_NETLINK_RECVBUF (4 * 1024)
 

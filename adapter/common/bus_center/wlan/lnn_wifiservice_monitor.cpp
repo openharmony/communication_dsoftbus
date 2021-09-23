@@ -21,8 +21,8 @@
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
-#include "ohos/aafwk/content/want.h"
 #include "lnn_async_callback_utils.h"
+#include "ohos/aafwk/content/want.h"
 #include "wifi_msg.h"
 
 #include "softbus_adapter_mem.h"
@@ -146,6 +146,7 @@ static void LnnSubscribeWifiService(void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
         }
     }
+    delete subscriberPtr;
 }
 
 int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
