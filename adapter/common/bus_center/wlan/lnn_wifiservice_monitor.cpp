@@ -21,8 +21,8 @@
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
-#include "ohos/aafwk/content/want.h"
 #include "lnn_async_callback_utils.h"
+#include "ohos/aafwk/content/want.h"
 #include "wifi_msg.h"
 
 #include "softbus_adapter_mem.h"
