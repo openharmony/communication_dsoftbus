@@ -30,6 +30,7 @@ common_include = [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/core/bus_center/interface",
@@ -54,6 +55,7 @@ common_deps = [
   "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
   "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
   "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub:dsoftbus_bus_center_hub",
   "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
 ]
 
