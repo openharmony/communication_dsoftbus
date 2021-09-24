@@ -49,7 +49,8 @@ void TransFileDeinit(void)
         return;
     }
     FileListener *fileNode = NULL;
-    LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
+    FileListener *nextNode = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(fileNode, nextNode, &(g_fileListener->list), FileListener, node) {
         ListDelete(&(fileNode->node));
         SoftBusFree(fileNode);
     }
