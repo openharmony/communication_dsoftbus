@@ -291,7 +291,6 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
         LnnReleaseLanesObject(object);
     }
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
-
 }
 
 int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
