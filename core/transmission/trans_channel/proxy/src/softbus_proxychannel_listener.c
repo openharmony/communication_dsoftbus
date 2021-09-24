@@ -281,7 +281,7 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "net Channel lane info: udp=%d, proxy=%d, type=%d",
         info->isSupportUdp, info->isProxy, info->conOption.type);
-    if (TransParseConnectOption(&info->conOption, &connOpt) != SOFTBUS_OK) {
+    if (TransParseConnectOption(&info->conOption, connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     LnnReleaseLanesObject(object);
