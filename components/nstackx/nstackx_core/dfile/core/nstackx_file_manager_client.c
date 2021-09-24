@@ -832,6 +832,7 @@ int32_t FileManagerSendFileTask(FileManager *fileManager, const SendFileListInfo
     }
     PeerInfo *peerinfo = ClientGetPeerInfoByTransId(fileListInfo->transId, (DFileSession *)fileManager->context);
     if (!peerinfo) {
+        ClearSendFileList(fileManager, fmFileList);
         return NSTACKX_EFAILED;
     }
     fmFileList->socketIndex = peerinfo->socketIndex;
