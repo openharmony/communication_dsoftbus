@@ -51,6 +51,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/bus_center/service:dsoftbus_bus_center_service_sdk",
       "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
       "$dsoftbus_root_path/sdk/transmission/session:dsoftbus_trans_session_sdk",
+      "//utils/native/base:utils",
     ]
 
     if (is_standard_system) {

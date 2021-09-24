@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 
+#include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
@@ -41,6 +42,8 @@ const std::string TEST_DESCRIPTION = "test description";
 const int TEST_LABEL_ID = 9527;
 const int TEST_DESCRIPTION_ID = 9528;
 const int NETWORK_ID_LEN = 65;
+const int ARG_NUM = 2;
+const int FILE_NUM = 4;
 
 const std::string PERMISSION_PKGNAME  = "com.huawei.plrdtest.dsoftbus";
 const char *g_testModuleName   = "com.huawei.plrdtest.dsoftbus";
@@ -48,7 +51,7 @@ const char *g_testSessionName  = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSessi
 const char *g_testSessionNamE2 = "com.huawei.plrdtest.dsoftbus.JtOpenFileSession";
 const char *g_testGroupId = "g_testGroupId";
 
-enum {
+enum StatusNum {
     TRANS_STATE_NONE = 0,           // 0
     TRANS_STATE_INIT,           // 1
     TRANS_STATE_CREATE_SESSION_SERVER,  // 2
@@ -74,13 +77,6 @@ SessionAttribute attr;
 int32_t g_sessionId = -1;
 char g_networkId[NETWORK_ID_LEN] = {0};
 int32_t g_stateDebug = LNN_STATE_JOINLNN;
-
-const char *sFileList[] = {
-    "/data/big.tar",
-    "/data/richu.jpg",
-    "/data/richu-002.jpg",
-    "/data/richu-003.jpg",
-};
 }
 
 static void AddPermission(const std::string &pkgName)
@@ -144,7 +140,7 @@ static void TestChangeDebugState(int32_t state)
 
 static void OnLeaveLNNDone(const char *networkId, int32_t retCode)
 {
-    if (networkId == NULL) {
+    if (networkId == nullptr) {
         LOG2_ERR("OnLeaveLNNDone error! retCode = %d", retCode);
         return;
     }
@@ -154,17 +150,17 @@ static void OnLeaveLNNDone(const char *networkId, int32_t retCode)
 
 static void OnNodeOnline(NodeBasicInfo *info)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
-    strncpy(g_networkId, info->networkId, NETWORK_ID_LEN);
+    strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId);
     TestChangeDebugState(TRANS_STATE_CREATE_SESSION_SERVER);
     LOG2_INFO("node online, network id: %s", info->networkId);
 }
 
 static void OnNodeOffline(NodeBasicInfo *info)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     LOG2_INFO("node offline, network id: %s", info->networkId);
@@ -195,17 +191,15 @@ static void OnSessionClosed(int sessionId)
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    (void)data;
     LOG2_INFO("session bytes received, sessionid[%d], dataLen[%d]", sessionId, len);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    (void)data;
     LOG2_INFO("session msg received, sessionid[%d], dataLen[%d]", sessionId, len);
 }
 
-static void TestSessionListenerInit()
+static void TestSessionListenerInit(void)
 {
     g_sessionlistener.OnSessionOpened = OnSessionOpened;
     g_sessionlistener.OnSessionClosed = OnSessionClosed;
@@ -240,7 +234,7 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-static void TestSetFileSendListener()
+static void TestSetFileSendListener(void)
 {
     LOG2_INFO("*******************SET FILE SEND LISTENER*************");
     int ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
@@ -249,7 +243,13 @@ static void TestSetFileSendListener()
 
 static int TestSendFile(int sessionId)
 {
-    int ret = SendFile(sessionId, sFileList, NULL, 4);
+    const char *sfileList[] = {
+        "/data/big.tar",
+        "/data/richu.jpg",
+        "/data/richu-002.jpg",
+        "/data/richu-003.jpg",
+    };
+    int ret = SendFile(sessionId, sfileList, nullptr, FILE_NUM);
     LOG2_INFO("SendFile ret = %d\n", ret);
     return ret;
 }
@@ -313,7 +313,7 @@ static int OnSessionOpenRecvFile(int sessionId, int result)
     return 0;
 }
 
-static int OnReceiveFileStarted(int sessionId, const char* files, int fileCnt)
+static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
 {
     LOG2_INFO("File receive start sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
     return 0;
@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     int testWay = 0;
-    if (argc >= 2) {
+    if (argc >= ARG_NUM) {
         testWay = atoi(argv[1]);
     }
     AddPermission(PERMISSION_PKGNAME);
