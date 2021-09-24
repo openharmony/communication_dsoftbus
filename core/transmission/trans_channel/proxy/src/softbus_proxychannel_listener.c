@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "lnn_lane_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -174,25 +175,6 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo,
     return ret;
 }
 
-static int32_t TransProxyGetConnectOptionBr(const char *peerNetworkId, ConnectOption *opt)
-{
-    char brMac[BT_MAC_LEN] = {0};
-    int ret;
-
-    ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_BT_MAC, brMac, sizeof(brMac));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get momote node mac err %d", ret);
-        return SOFTBUS_ERR;
-    }
-
-    opt->type = CONNECT_BR;
-    if (strcpy_s(opt->info.brOption.brMac, sizeof(opt->info.brOption.brMac), brMac) != 0) {
-        return SOFTBUS_ERR;
-    }
-
-    return SOFTBUS_OK;
-}
-
 static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
 {
     int ret;
@@ -223,6 +205,94 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     return SOFTBUS_OK;
 }
 
+static int32_t TransParseConnectOption(const ConnectionAddr *connAddr, ConnectOption *connOpt)
+{
+    ConnectionAddrType type = connAddr->type;
+    if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
+        connOpt->type = CONNECT_TCP;
+        connOpt->info.ipOption.port = (int32_t)connAddr->info.ip.port;
+        if (strcpy_s(connOpt->info.ipOption.ip, sizeof(connOpt->info.ipOption.ip), connAddr->info.ip.ip) != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    } else if (type == CONNECTION_ADDR_BR) {
+        connOpt->type = CONNECT_BR;
+        if (strcpy_s(connOpt->info.brOption.brMac, sizeof(connOpt->info.brOption.brMac),
+            connAddr->info.br.brMac) != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get conn opt err: type=%d", type);
+        return SOFTBUS_ERR;
+    }
+}
+
+static LnnLaneProperty TransGetLnnLaneProperty(SessionType type)
+{
+    switch (type) {
+        case TYPE_MESSAGE:
+            return LNN_MESSAGE_LANE;
+        case TYPE_BYTES:
+            return LNN_BYTES_LANE;
+        case TYPE_FILE:
+            return LNN_FILE_LANE;
+        case TYPE_STREAM:
+            return LNN_STREAM_LANE;
+        default:
+            return LNN_LANE_PROPERTY_BUTT;
+    }
+}
+
+static int32_t TransGetLaneInfo(SessionType flags, const char *peerDeviceId,
+    LnnLanesObject **lanesObject, const LnnLaneInfo **laneInfo)
+{
+    LnnLaneProperty laneProperty = TransGetLnnLaneProperty(flags);
+    if (laneProperty == LNN_LANE_PROPERTY_BUTT) {
+        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
+    }
+    LnnLanesObject *object = LnnRequestLanesObject(peerDeviceId, laneProperty, 1);
+    if (object == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lne obj err");
+        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
+    }
+    int32_t laneIndex = 0;
+    int32_t laneId = LnnGetLaneId(object, laneIndex);
+    const LnnLaneInfo *info = LnnGetConnection(laneId);
+    if (info == NULL) {
+        LnnReleaseLanesObject(object);
+        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
+    }
+
+    *lanesObject = object;
+    *laneInfo = info;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get lane info ok: flags=%d", flags);
+    return SOFTBUS_OK;
+}
+
+
+static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *connOpt)
+{
+    LnnLanesObject *object = NULL;
+    const LnnLaneInfo *info = NULL;
+
+    if (TransGetLaneInfo(TYPE_MESSAGE, peerNetworkId, &object, &info) != SOFTBUS_OK) {
+        goto EXIT_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "net Channel lane info: udp=%d, proxy=%d, type=%d",
+        info->isSupportUdp, info->isProxy, info->conOption.type);
+    if (TransParseConnectOption(&info->conOption, connOpt) != SOFTBUS_OK) {
+        goto EXIT_ERR;
+    }
+    LnnReleaseLanesObject(object);
+    return SOFTBUS_OK;
+ EXIT_ERR:
+    if (object != NULL) {
+        LnnReleaseLanesObject(object);
+    }
+    return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
+}
+
 int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
 {
     AppInfo appInfo;
@@ -233,9 +303,8 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
-
-    if (TransProxyGetConnectOptionBr(peerNetworkId, &connOpt) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get conn opthon fail");
+    if (TransGetConnectOption(peerNetworkId, &connOpt) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get connect option fail");
         return channelId;
     }
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
