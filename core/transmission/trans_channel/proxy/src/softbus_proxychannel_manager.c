@@ -598,6 +598,24 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     (void)OnProxyChannelOpened(info->channelId, &(info->appInfo), 0);
     SoftBusFree(info);
 }
+static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
+{
+    if (chan->appInfo.appType != APP_TYPE_INNER) {
+        int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
+                                           chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
+            return SOFTBUS_ERR;
+        }
+    }
+
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
+                           sizeof(chan->appInfo.myData.deviceId)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
@@ -613,23 +631,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         SoftBusFree(chan);
         return;
     }
-    int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
-        chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
-        SoftBusFree(chan);
-        return;
-    }
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
-                           sizeof(chan->appInfo.myData.deviceId)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
+    if (TransProxyGetLocalInfo(chan) != SOFTBUS_OK) {
         SoftBusFree(chan);
         return;
     }
 
     int16_t newChanId = TransProxyGetNewMyId();
-    ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
+    int32_t ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
         SoftBusFree(chan);
