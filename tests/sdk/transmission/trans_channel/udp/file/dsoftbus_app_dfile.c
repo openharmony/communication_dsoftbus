@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <securec.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
@@ -27,8 +27,10 @@
 #define LOG2_WARN(fmt, ...) printf("WARN:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define LOG2_ERR(fmt, ...)  printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define NETWORK_ID_LEN 65
+#define ARG_NUM 2
+#define FILE_NUM 4
 
-enum {
+typedef enum {
     TRANS_STATE_NONE = 0,           // 0
     TRANS_STATE_INIT,           // 1
     TRANS_STATE_CREATE_SESSION_SERVER,  // 2
@@ -47,7 +49,7 @@ enum {
 
     LNN_STATE_JOINLNN = 20,     // 20
     LNN_STATE_LEAVELNN,         // 21
-};
+} StatusNum;
 
 static const char *g_testModuleName    = "com.huawei.plrdtest.dsoftbus";
 static const char *g_testSessionName   = "com.huawei.plrdtest.dsoftbus.JtOpenFileSession";
@@ -80,7 +82,7 @@ static void OnNodeOnline(NodeBasicInfo *info)
     if (info == NULL) {
         return;
     }
-    strncpy(g_networkId, info->networkId, NETWORK_ID_LEN);
+    (void)strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId);
     TestChangeDebugState(TRANS_STATE_CREATE_SESSION_SERVER);
     LOG2_INFO("node online, network id: %s", info->networkId);
 }
@@ -128,7 +130,7 @@ static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
     LOG2_INFO("session msg received, sessionid[%d], dataLen[%d]", sessionId, len);
 }
 
-static void TestSessionListenerInit()
+static void TestSessionListenerInit(void)
 {
     g_sessionlistener.OnSessionOpened = OnSessionOpened;
     g_sessionlistener.OnSessionClosed = OnSessionClosed;
@@ -163,23 +165,22 @@ static IFileSendListener g_fileSendListener = {
     .OnFileTransError = OnFileTransError,
 };
 
-static void TestSetFileSendListener()
+static void TestSetFileSendListener(void)
 {
     LOG2_INFO("*******************SET FILE SEND LISTENER*************");
     int ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
     LOG2_INFO("SetFileSendListener ret = %d\n", ret);
 }
 
-static const char *sFileList[] = {
-    "/data/big.tar",
-    "/data/richu.jpg",
-    "/data/richu-002.jpg",
-    "/data/richu-003.jpg",
-};
-
 static int TestSendFile(int sessionId)
 {
-    int ret = SendFile(sessionId, sFileList, NULL, 4);
+    const char *sfileList[] = {
+        "/data/big.tar",
+        "/data/richu.jpg",
+        "/data/richu-002.jpg",
+        "/data/richu-003.jpg",
+    };
+    int ret = SendFile(sessionId, sfileList, NULL, FILE_NUM);
     LOG2_INFO("SendFile ret = %d\n", ret);
     return ret;
 }
@@ -262,7 +263,7 @@ static IFileReceiveListener g_fileRecvListener  = {
 
 static void TestSetFileRecvListener()
 {
-    int ret = SetFileReceiveListener(g_testModuleName, g_testSessionNameE2, &g_fileRecvListener , "/data/");
+    int ret = SetFileReceiveListener(g_testModuleName, g_testSessionNameE2, &g_fileRecvListener, "/data/");
     LOG2_INFO("SetFileRecvListener ret = %d\n", ret);
 }
 
@@ -292,7 +293,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     int testWay = 0;
-    if (argc >= 2) {
+    if (argc >= ARG_NUM) {
         testWay = atoi(argv[1]);
     }
     TestSessionListenerInit();
