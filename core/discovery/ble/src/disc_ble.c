@@ -76,6 +76,7 @@ typedef enum {
     REPLY_PASSIVE_NON_BROADCAST,
     PROCESS_TIME_OUT,
     RECOVERY,
+    TURN_OFF,
 } DISC_BLE_MESSAGE;
 
 typedef struct {
@@ -351,10 +352,11 @@ static void BleOnScanStop(int listenerId, int status)
 static void BleOnStateChanged(int listenerId, int state)
 {
     (void)listenerId;
+    SoftBusMessage *msg;
     switch (state) {
         case SOFTBUS_BT_STATE_TURN_ON:
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleOnStateChanged to SOFTBUS_BT_STATE_TURNING_ON");
-            SoftBusMessage *msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
+            msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
             if (msg == NULL) {
                 return;
             }
@@ -362,9 +364,11 @@ static void BleOnStateChanged(int listenerId, int state)
             break;
         case SOFTBUS_BT_STATE_TURN_OFF:
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleOnStateChanged to SOFTBUS_BT_STATE_TURNING_OFF");
-            (void)StopAdvertiser(NON_ADV_ID);
-            (void)StopAdvertiser(CON_ADV_ID);
-            (void)StopScaner();
+            msg = CreateBleHandlerMsg(TURN_OFF, 0, 0, NULL);
+            if (msg == NULL) {
+                return;
+            }
+            g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
             break;
         default:
             return;
@@ -393,7 +397,7 @@ static int32_t GetMaxExchangeFreq(void)
     int32_t maxFreq = 0;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
-            maxFreq = maxFreq > g_bleInfoManager[index].freq[pos] ? maxFreq : g_bleInfoManager[index].freq[pos];
+            maxFreq = (maxFreq > g_bleInfoManager[index].freq[pos]) ? maxFreq : g_bleInfoManager[index].freq[pos];
         }
     }
     return maxFreq;
@@ -517,7 +521,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
         if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
-                     boardcastData->data.rspData, advData->scanRspLength) != EOK) {
+            boardcastData->data.rspData, advData->scanRspLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy err");
             return SOFTBUS_MEM_ERR;
         }
@@ -1093,6 +1097,18 @@ static void Recovery(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recovery finish");
 }
 
+static void BleDiscTurnOff(SoftBusMessage *msg)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc ble turn off");
+    if (msg == NULL || msg->what != RECOVERY) {
+        return;
+    }
+    (void)StopAdvertiser(NON_ADV_ID);
+    (void)StopAdvertiser(CON_ADV_ID);
+    (void)StopScaner();
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "disc ble turn off finish");
+}
+
 static int32_t ReplyPassiveNonBroadcast(void)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ReplyPassiveNonBroadcast");
@@ -1318,6 +1334,9 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             break;
         case RECOVERY:
             Recovery(msg);
+            break;
+        case TURN_OFF:
+            BleDiscTurnOff(msg);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "wrong msg what: %d", msg->what);
