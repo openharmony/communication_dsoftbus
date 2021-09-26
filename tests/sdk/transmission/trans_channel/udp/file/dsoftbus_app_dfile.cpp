@@ -153,7 +153,9 @@ static void OnNodeOnline(NodeBasicInfo *info)
     if (info == nullptr) {
         return;
     }
-    strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId);
+    if(strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId) != EOK) {
+        return;
+    }
     TestChangeDebugState(TRANS_STATE_CREATE_SESSION_SERVER);
     LOG2_INFO("node online, network id: %s", info->networkId);
 }

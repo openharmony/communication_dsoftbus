@@ -82,7 +82,9 @@ static void OnNodeOnline(NodeBasicInfo *info)
     if (info == NULL) {
         return;
     }
-    (void)strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId);
+    if(strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId) != EOK) {
+        return;
+    }
     TestChangeDebugState(TRANS_STATE_CREATE_SESSION_SERVER);
     LOG2_INFO("node online, network id: %s", info->networkId);
 }
@@ -261,7 +263,7 @@ static IFileReceiveListener g_fileRecvListener  = {
     .OnFileTransError = OnFileTransError,
 };
 
-static void TestSetFileRecvListener()
+static void TestSetFileRecvListener(void)
 {
     int ret = SetFileReceiveListener(g_testModuleName, g_testSessionNameE2, &g_fileRecvListener, "/data/");
     LOG2_INFO("SetFileRecvListener ret = %d\n", ret);
