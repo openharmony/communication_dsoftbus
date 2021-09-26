@@ -120,6 +120,7 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
         (void)memset_s(deviceList, deviceListLen, 0, deviceListLen);
         PushPublishInfo(deviceInfo, deviceList, PUBLISH_DEVICE_NUM);
         NotifyDeviceFound(deviceList, PUBLISH_DEVICE_NUM);
+        free(deviceList);
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
