@@ -380,7 +380,7 @@ static void ProcessData(const fd_set *readSet, const fd_set *writeSet, const fd_
     }
 }
 
-static int32_t SetSelect(const fd_set *readSet, const fd_set *writeSet, const fd_set *exceptSet)
+static int32_t SetSelect(fd_set *readSet, fd_set *writeSet, fd_set *exceptSet)
 {
     if (pthread_mutex_lock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
