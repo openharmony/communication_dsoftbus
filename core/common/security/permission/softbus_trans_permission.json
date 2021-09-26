@@ -95,5 +95,16 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "objectstore",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.objectstore.foundation",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
