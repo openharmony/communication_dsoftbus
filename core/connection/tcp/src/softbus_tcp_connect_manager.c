@@ -364,15 +364,17 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
 {
     (void)pid;
     TcpConnInfoNode *item = NULL;
-    if (g_tcpConnInfoList == NULL) {
-        return SOFTBUS_ERR;
-    }
     if (data == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_tcpConnInfoList == NULL) {
+        SoftBusFree((void*)data);
+        return SOFTBUS_ERR;
     }
     int32_t fd = -1;
     if (pthread_mutex_lock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -383,11 +385,13 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
     }
     (void)pthread_mutex_unlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
+        SoftBusFree((void*)data);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
             "TcpPostBytes failed, connectionId:%08x not found.", connectionId);
         return SOFTBUS_ERR;
     }
     int32_t bytes = SendTcpData(fd, data, len, flag);
+    SoftBusFree((void*)data);
     if (bytes != len) {
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
