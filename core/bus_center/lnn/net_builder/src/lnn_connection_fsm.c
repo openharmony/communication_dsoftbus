@@ -263,6 +263,15 @@ static int32_t OnJoinFail(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
+static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
+{
+    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_LEAVE_AUTO) != 0) {
+        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
+    } else {
+        NotifyJoinResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
+    }
+}
+
 static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -363,7 +372,7 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
             OnJoinFail(connFsm);
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
-            NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
+            TryCancelJoinProcedure(connFsm);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -547,7 +556,7 @@ static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, vo
             OnAuthDoneInSyncInfo(connFsm, (bool *)para);
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
-            NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
+            TryCancelJoinProcedure(connFsm);
             break;
         case FSM_MSG_TYPE_NOT_TRUSTED:
         case FSM_MSG_TYPE_DISCONNECT:
@@ -628,7 +637,7 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
         connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_LEAVE_LNN:
-            NotifyLeaveResult(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ERR);
+            TryCancelJoinProcedure(connFsm);
             break;
         case FSM_MSG_TYPE_NOT_TRUSTED:
         case FSM_MSG_TYPE_DISCONNECT:
