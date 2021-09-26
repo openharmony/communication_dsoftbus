@@ -268,6 +268,7 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
     /* sync */
     if (g_serverProxy == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
+        SoftBusFree(ipcData);
         return SOFTBUS_NO_INIT;
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SESSION_SENDMSG, &request, &ret, ProxyCallback);
