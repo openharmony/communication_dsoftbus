@@ -16,7 +16,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 config("trans_ipc_proxy_sdk_interface") {
   include_dirs = [
     "include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/connection/interface",
   ]
 }
@@ -35,13 +37,13 @@ if (defined(ohos_lite)) {
 
   common_deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_ipc_proxy_sdk") {
+    source_set("dsoftbus_trans_ipc_proxy_sdk") {
       include_dirs = common_include
       include_dirs += [
         "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
@@ -52,7 +54,7 @@ if (defined(ohos_lite)) {
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_trans_ipc_proxy_sdk") {
+    source_set("dsoftbus_trans_ipc_proxy_sdk") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -70,11 +72,11 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_ipc_proxy_sdk") {
+  ohos_source_set("dsoftbus_trans_ipc_proxy_sdk") {
     include_dirs = [
       "standard/include",
       "//utils/system/safwk/native/include",
-      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/transport",
@@ -93,7 +95,7 @@ if (defined(ohos_lite)) {
         "ipc:ipc_single",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "//utils/native/base:utils",
       ]
     }

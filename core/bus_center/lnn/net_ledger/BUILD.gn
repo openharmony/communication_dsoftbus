@@ -28,7 +28,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_ledger") {
+    source_set("dsoftbus_bus_center_ledger") {
       sources = [
         "common/src/lnn_device_info.c",
         "common/src/lnn_map.c",
@@ -63,9 +63,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
-        "$dsoftbus_root_path/core/common/json_utils:json_utils",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -74,7 +72,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_ledger") {
+  ohos_source_set("dsoftbus_bus_center_ledger") {
     sources = [
       "common/src/lnn_device_info.c",
       "common/src/lnn_map.c",
@@ -100,9 +98,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/adapter/bus_center:softbus_adapter_bus_center",
-      "$dsoftbus_root_path/core/common/json_utils:json_utils",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

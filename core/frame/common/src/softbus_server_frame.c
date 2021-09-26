@@ -17,15 +17,23 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
-#include "ohos_init.h"
+#include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "trans_session_manager.h"
+#include "softbus_utils.h"
+#include "trans_session_service.h"
 
 static bool g_isInit = false;
+
+int32_t __attribute__((weak)) ServerStubInit(void)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus server stub init(weak function).");
+    return SOFTBUS_OK;
+}
 
 static void ServerModuleDeinit(void)
 {
@@ -38,7 +46,7 @@ static void ServerModuleDeinit(void)
     LooperDeinit();
 }
 
-bool GetServerIsInit()
+bool GetServerIsInit(void)
 {
     return g_isInit;
 }
@@ -94,7 +102,9 @@ ERR_EXIT:
     return;
 }
 
-#if defined(__LITEOS_M__)
-// 4 stand for pri
-SYS_SERVICE_INIT_PRI(InitSoftBusServer, 4);
-#endif
+void ClientDeathCallback(const char *pkgName)
+{
+    DiscServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName);
+    BusCenterServerDeathCallback(pkgName);
+}

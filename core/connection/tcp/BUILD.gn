@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("tcp_connection") {
+    source_set("tcp_connection") {
       if (enable_connection_tcp == true) {
         sources = [ "src/softbus_tcp_connect_manager.c" ]
       } else {
@@ -38,14 +38,13 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$hilog_lite_deps_path",
       ]
     }
   } else {
-    shared_library("tcp_connection") {
+    source_set("tcp_connection") {
       if (enable_connection_tcp == true) {
         sources = [ "src/softbus_tcp_connect_manager.c" ]
       } else {
@@ -66,9 +65,7 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/common:conn_common",
         "$hilog_lite_deps_path",
         "$libsec_deps_path",
@@ -78,7 +75,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("tcp_connection") {
+  ohos_source_set("tcp_connection") {
     if (enable_connection_tcp == true) {
       sources = [ "src/softbus_tcp_connect_manager.c" ]
     } else {
@@ -97,9 +94,7 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
     ]
     if (is_standard_system) {

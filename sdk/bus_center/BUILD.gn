@@ -29,7 +29,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_manager_sdk") {
+    source_set("dsoftbus_bus_center_manager_sdk") {
       include_dirs = [
         "ipc/include",
         "$softbus_adapter_common/include",
@@ -45,11 +45,14 @@ if (defined(ohos_lite)) {
         "ipc/small/bus_center_server_proxy.c",
         "manager/src/client_bus_center_manager.c",
       ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
       public_configs = [ ":bus_center_client_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//foundation/communication/ipc_lite:liteipc_adapter",
         "//foundation/distributedschedule/samgr_lite/samgr:samgr",
@@ -59,18 +62,17 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_manager_sdk") {
+  ohos_source_set("dsoftbus_bus_center_manager_sdk") {
     include_dirs = [
       "ipc/include",
       "ipc/standard/include",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/bus_center/interface",
-      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$softbus_adapter_config/spec_config",
       "//utils/system/safwk/native/include",
     ]
@@ -82,8 +84,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_client_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

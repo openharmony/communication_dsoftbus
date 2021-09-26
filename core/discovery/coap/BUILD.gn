@@ -29,8 +29,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/json_utils:json_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$hilog_lite_deps_path",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
@@ -39,7 +38,7 @@ if (defined(ohos_lite)) {
     deps_coap = []
   }
 
-  shared_library("dsoftbus_disc_coap") {
+  source_set("dsoftbus_disc_coap") {
     sources = sources_coap
     include_dirs = [
       "include",
@@ -75,7 +74,7 @@ if (defined(ohos_lite)) {
     sources_coap = [ "src/disc_coap_virtual.c" ]
   }
 
-  ohos_shared_library("dsoftbus_disc_coap") {
+  ohos_source_set("dsoftbus_disc_coap") {
     sources = sources_coap
     include_dirs = [
       "include",
@@ -94,8 +93,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/json_utils:json_utils",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:softbus_utils",
     ]
     configs = [ ":discovery_coap_config" ]
     if (is_standard_system) {

@@ -21,13 +21,13 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_deps = [
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     "$hilog_lite_deps_path",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_proxy_channel_sdk") {
+    source_set("dsoftbus_trans_proxy_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -41,7 +41,7 @@ if (defined(ohos_lite)) {
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_trans_proxy_channel_sdk") {
+    source_set("dsoftbus_trans_proxy_channel_sdk") {
       include_dirs = [
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -62,7 +62,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_proxy_channel_sdk") {
+  ohos_source_set("dsoftbus_trans_proxy_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path/interfaces/kits/common",
@@ -74,7 +74,7 @@ if (defined(ohos_lite)) {
     sources = [ "src/client_trans_proxy_manager.c" ]
     public_configs = [ ":trans_proxy_channel_sdk_interface" ]
     deps = [
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_sdk_path/transmission/ipc:dsoftbus_trans_ipc_proxy_sdk",
     ]
     if (is_standard_system) {

@@ -32,12 +32,10 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   common_deps = [
-    "$dsoftbus_core_path/common/security/sequence_verification:softbus_seq_verification",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_core_common",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/connection/common:conn_common",
-    "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
+    "$dsoftbus_root_path/core/transmission/common:dsoftbus_trans_common",
     "$hilog_lite_deps_path",
     "$libsec_deps_path",
   ]
@@ -55,14 +53,14 @@ if (defined(ohos_lite)) {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_direct_channel_sdk") {
+    source_set("dsoftbus_trans_direct_channel_sdk") {
       include_dirs = common_include
       sources = common_src
       public_configs = [ ":trans_direct_channel_sdk_interface" ]
       deps = common_deps
     }
   } else {
-    shared_library("dsoftbus_trans_direct_channel_sdk") {
+    source_set("dsoftbus_trans_direct_channel_sdk") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -76,7 +74,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_direct_channel_sdk") {
+  ohos_source_set("dsoftbus_trans_direct_channel_sdk") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$softbus_adapter_common/include",
@@ -91,12 +89,10 @@ if (defined(ohos_lite)) {
     sources = common_src
     public_configs = [ ":trans_direct_channel_sdk_interface" ]
     deps = [
-      "$dsoftbus_core_path/common/security/sequence_verification:softbus_seq_verification",
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/common:conn_common",
-      "$dsoftbus_root_path/core/transmission/pending_packet:softbus_trans_pending",
+      "$dsoftbus_root_path/core/transmission/common:dsoftbus_trans_common",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

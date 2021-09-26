@@ -17,6 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   config("dsoftbus_adapter_common_interface") {
+    cflags = [ "-fPIC" ]
     include_dirs = [
       "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
@@ -32,7 +33,7 @@ if (defined(ohos_lite)) {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("softbus_adapter") {
+    source_set("softbus_adapter") {
       include_dirs = common_include
       include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
       cflags = [ "-Wall" ]
@@ -63,10 +64,9 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$hilog_lite_deps_path",
-        "$libsec_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
+        "//third_party/mbedtls:mbedtls_shared",
       ]
-      deps += [ "//third_party/mbedtls:mbedtls_shared" ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }

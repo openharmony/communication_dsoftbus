@@ -16,6 +16,7 @@
 #include "disc_client_stub.h"
 
 #include "client_disc_manager.h"
+#include "liteipc_adapter.h"
 #include "softbus_log.h"
 
 void ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)

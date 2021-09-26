@@ -11,8 +11,84 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_connection") {
-  features = [ "manager:conn_manager" ]
+config("conn_manager_interface") {
+  include_dirs = [
+    "interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+}
+
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    source_set("conn_manager") {
+      sources = [ "manager/softbus_conn_manager.c" ]
+      include_dirs = [
+        "$softbus_adapter_common/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/ble/include",
+        "$dsoftbus_root_path/core/connection/br/include",
+        "$dsoftbus_root_path/core/connection/tcp/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$hilog_lite_include_path",
+      ]
+      deps = [ "$hilog_lite_deps_path" ]
+    }
+  } else {
+    source_set("conn_manager") {
+      sources = [ "manager/softbus_conn_manager.c" ]
+      include_dirs = [
+        "$softbus_adapter_common/include",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/ble/include",
+        "$dsoftbus_root_path/core/connection/br/include",
+        "$dsoftbus_root_path/core/connection/tcp/include",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "//third_party/bounds_checking_function/include",
+        "$hilog_lite_include_path",
+      ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/core/connection/ble:ble_connection",
+        "$dsoftbus_root_path/core/connection/br:br_connection",
+        "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
+        "$hilog_lite_deps_path",
+        "$libsec_deps_path",
+      ]
+      public_configs = [ ":conn_manager_interface" ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_source_set("conn_manager") {
+    sources = [ "manager/softbus_conn_manager.c" ]
+    include_dirs = [
+      "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/ble/include",
+      "$dsoftbus_root_path/core/connection/br/include",
+      "$dsoftbus_root_path/core/connection/tcp/include",
+      "$dsoftbus_root_path/core/connection/manager",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/connection/ble:ble_connection",
+      "$dsoftbus_root_path/core/connection/br:br_connection",
+      "$dsoftbus_root_path/core/connection/tcp:tcp_connection",
+    ]
+    public_configs = [ ":conn_manager_interface" ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

@@ -34,7 +34,7 @@ ohos_unittest("softbus_tcp_manager_test") {
   ]
   sources = [ "tcp_manager_test.cpp" ]
   deps = [
-    "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
