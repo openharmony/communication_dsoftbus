@@ -263,7 +263,7 @@ static int32_t OnJoinFail(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-static int32_t TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
+static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
 {
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_LEAVE_AUTO) != 0) {
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
