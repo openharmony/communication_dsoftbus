@@ -786,7 +786,7 @@ static void RecvTaskProcess(FileManager *fileManager, FileListTask *fileList)
             break;
         }
         if (SwapRecvBlockListHead(&fileList->recvBlockList, &isEmpty, &fileList->innerRecvBlockHead,
-                                  &(fileList->innerRecvSize)) != NSTACKX_EOK) {
+            &(fileList->innerRecvSize)) != NSTACKX_EOK) {
             LOGE(TAG, "Swap receive block list head error:transId %u", fileList->transId);
             fileList->errCode = FILE_MANAGER_EMUTEX;
             break;
