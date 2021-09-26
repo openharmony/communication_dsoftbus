@@ -62,6 +62,11 @@ if (defined(ohos_lite)) {
         "platform/unix/sys_util.c",
       ]
     }
+    cflags = [
+      "-Wall",
+      "-fPIC",
+      "-std=c99",
+    ]
     public_configs = [ ":nstackx_util_header" ]
   }
 } else {

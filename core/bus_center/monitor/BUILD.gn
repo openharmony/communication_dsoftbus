@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_monitor") {
+    source_set("dsoftbus_bus_center_monitor") {
       sources = [ "src/lnn_event_monitor.c" ]
       if (ohos_kernel_type == "linux") {
         sources += [ "src/lnn_netlink_monitor.c" ]
@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_monitor") {
+  ohos_source_set("dsoftbus_bus_center_monitor") {
     sources = [
       "src/lnn_event_monitor.c",
       "src/lnn_netlink_monitor.c",

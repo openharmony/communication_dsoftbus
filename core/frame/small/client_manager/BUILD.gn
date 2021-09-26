@@ -15,10 +15,13 @@ import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 config("client_manager_interface") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
 }
 
-shared_library("client_manager") {
+source_set("client_manager") {
   sources = [ "src/softbus_client_info_manager.c" ]
   include_dirs = [
     "include",
@@ -34,8 +37,7 @@ shared_library("client_manager") {
   ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
-    "$dsoftbus_root_path/core/common/utils:softbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$hilog_lite_deps_path",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

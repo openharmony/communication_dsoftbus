@@ -19,6 +19,7 @@ config("stream_config") {
   cflags_cc = [
     "-std=c++14",
     "-g",
+    "-fPIC",
   ]
   ldflags = [ "-lstdc++" ]
 }
@@ -27,7 +28,7 @@ config("stream_common_config") {
   include_dirs = [ "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/adaptor/include" ]
 }
 
-shared_library("dsoftbus_trans_dstream") {
+source_set("dsoftbus_trans_dstream") {
   configs -= [ "//build/lite/config:language_cpp" ]
   configs += [ ":stream_config" ]
 
@@ -49,8 +50,7 @@ shared_library("dsoftbus_trans_dstream") {
   public_configs = [ ":stream_common_config" ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_core_common",
-    "$dsoftbus_root_path/core/common/log:softbus_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "../libsoftbus_stream:libsoftbus_stream",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

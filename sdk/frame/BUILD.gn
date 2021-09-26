@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("softbus_client_frame") {
+    source_set("softbus_client_frame") {
       include_dirs = [
         "include",
         "$softbus_adapter_common/include",
@@ -49,12 +49,12 @@ if (defined(ohos_lite)) {
       ]
 
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
   } else {
-    shared_library("softbus_client_frame") {
+    source_set("softbus_client_frame") {
       include_dirs = [
         "common/include",
         "small/include",
@@ -79,13 +79,16 @@ if (defined(ohos_lite)) {
         "small/src/trans_client_stub.c",
       ]
 
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
+
       defines = [ "SOFTBUS_WATCH" ]
 
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
         "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",
@@ -99,7 +102,18 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("softbus_client_frame") {
+  config("softbus_client_interface") {
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+    ]
+  }
+
+  ohos_source_set("softbus_client_frame") {
     include_dirs = [
       "common/include",
       "standard/include",
@@ -107,35 +121,34 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "//utils/system/safwk/native/include",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
-      "$dsoftbus_root_path/core/frame/standard/server/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/sdk/transmission/session/include",
       "$dsoftbus_root_path/sdk/bus_center/manager/include",
-      "$dsoftbus_root_path/core/frame/standard/client/include",
-      "$dsoftbus_root_path/core/transmission/common/include",
       "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/softbus_property/include",
     ]
 
     sources = [
-      "$dsoftbus_root_path/core/frame/standard/client/src/softbus_client_stub.cpp",
       "common/src/softbus_client_event_manager.c",
       "common/src/softbus_client_frame_manager.c",
+      "standard/src/if_softbus_client.cpp",
       "standard/src/softbus_client_death_recipient.cpp",
+      "standard/src/softbus_client_stub.cpp",
       "standard/src/softbus_server_proxy_frame.cpp",
       "standard/src/softbus_server_proxy_standard.cpp",
     ]
 
     defines = [ "SOFTBUS_WATCH" ]
 
+    public_configs = [ ":softbus_client_interface" ]
     if (is_standard_system) {
       external_deps = [
         "hiviewdfx_hilog_native:libhilog",
         "ipc:ipc_single",
       ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
-        "$dsoftbus_root_path/core/common/utils:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/sdk/bus_center:dsoftbus_bus_center_manager_sdk",
         "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
         "$dsoftbus_root_path/sdk/transmission:dsoftbus_trans_session_manager_sdk",

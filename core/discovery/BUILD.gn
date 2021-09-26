@@ -27,7 +27,7 @@ config("disc_server_interface") {
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
-  shared_library("dsoftbus_disc_server") {
+  source_set("dsoftbus_disc_server") {
     sources = [
       "ipc/small/disc_client_proxy.c",
       "manager/src/disc_manager.c",
@@ -50,8 +50,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":disc_server_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/frame/small/client_manager:client_manager",
       "$hilog_lite_deps_path",
       "coap:dsoftbus_disc_coap",
@@ -62,15 +61,14 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_disc_server") {
+  ohos_source_set("dsoftbus_disc_server") {
     include_dirs = [
       "coap/include",
       "ipc/include",
       "ipc/standard/include",
       "$dsoftbus_root_path/core/common/include",
       "$softbus_adapter_common/include",
-      "$dsoftbus_root_path/core/frame/standard/client/include",
-      "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
+      "$dsoftbus_root_path/sdk/frame/standard/include",
       "//utils/system/safwk/native/include",
     ]
 
@@ -90,9 +88,8 @@ if (defined(ohos_lite)) {
     }
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/log:softbus_log",
-      "$dsoftbus_root_path/core/common/utils:softbus_utils",
-      "$dsoftbus_root_path/core/frame/standard/softbusdata:softbus_server_data",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",
       "coap:dsoftbus_disc_coap",
       "//utils/native/base:utils",
     ]

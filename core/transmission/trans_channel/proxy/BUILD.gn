@@ -17,6 +17,7 @@ config("trans_proxy_channel_interface") {
   include_dirs = [
     "include",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
   ]
 }
 
@@ -48,11 +49,9 @@ common_src = [
 ]
 
 common_deps = [
-  "$dsoftbus_core_path/common/json_utils:json_utils",
-  "$dsoftbus_core_path/common/message_handler:message_handler",
   "$dsoftbus_core_path/transmission/common:dsoftbus_trans_common",
-  "$dsoftbus_core_path/transmission/ipc:dsoftbus_trans_ipc_proxy",
   "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
 ]
 
 if (defined(ohos_lite)) {
@@ -69,7 +68,7 @@ if (defined(ohos_lite)) {
   ]
 
   if (ohos_kernel_type == "liteos_m") {
-    static_library("dsoftbus_trans_proxy_channel") {
+    source_set("dsoftbus_trans_proxy_channel") {
       include_dirs = common_include
       sources = common_src
       public_configs = [ ":trans_proxy_channel_interface" ]
@@ -77,7 +76,7 @@ if (defined(ohos_lite)) {
       deps += [ "//build/lite/config/component/cJSON:cjson_static" ]
     }
   } else {
-    shared_library("dsoftbus_trans_proxy_channel") {
+    source_set("dsoftbus_trans_proxy_channel") {
       include_dirs = common_include
       cflags = [
         "-Wall",
@@ -92,7 +91,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_trans_proxy_channel") {
+  ohos_source_set("dsoftbus_trans_proxy_channel") {
     include_dirs = common_include
     include_dirs += [
       "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
@@ -101,11 +100,10 @@ if (defined(ohos_lite)) {
     public_configs = [ ":trans_proxy_channel_interface" ]
     deps = common_deps
     deps += [
-      "$dsoftbus_core_path/common/utils:softbus_utils",
       "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
-      "$dsoftbus_root_path/core/common/message_handler",
-      "$dsoftbus_root_path/core/connection/manager:conn_manager",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/connection:conn_manager",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

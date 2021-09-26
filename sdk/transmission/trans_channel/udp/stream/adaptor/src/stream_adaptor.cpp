@@ -148,4 +148,3 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
 
     return outLen;
 }
-

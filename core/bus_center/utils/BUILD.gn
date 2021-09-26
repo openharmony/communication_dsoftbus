@@ -26,7 +26,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
   } else {
-    shared_library("dsoftbus_bus_center_utils") {
+    source_set("dsoftbus_bus_center_utils") {
       sources = [
         "src/lnn_async_callback_utils.c",
         "src/lnn_connection_addr_utils.c",
@@ -52,8 +52,7 @@ if (defined(ohos_lite)) {
       public_configs = [ ":bus_center_utils_interface" ]
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common/message_handler:message_handler",
-        "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -62,7 +61,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  ohos_shared_library("dsoftbus_bus_center_utils") {
+  ohos_source_set("dsoftbus_bus_center_utils") {
     sources = [
       "src/lnn_async_callback_utils.c",
       "src/lnn_connection_addr_utils.c",
@@ -80,8 +79,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":bus_center_utils_interface" ]
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common/message_handler:message_handler",
-      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//utils/native/base:utils",
     ]
     if (is_standard_system) {

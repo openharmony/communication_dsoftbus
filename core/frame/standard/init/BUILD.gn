@@ -1,0 +1,74 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+ohos_prebuilt_etc("softbus_server.rc") {
+  relative_install_dir = "init"
+  if (use_musl) {
+    source =
+        "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.cfg"
+  } else {
+    source =
+        "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server.rc"
+  }
+  part_name = "dsoftbus_standard"
+  subsystem_name = "communication"
+}
+
+ohos_source_set("softbus_server") {
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/frame/standard/server/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/standard/softbusdata/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
+    "$softbus_adapter_config/spec_config",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server_death_recipient.cpp",
+    "$dsoftbus_root_path/core/frame/standard/server/src/softbus_server_frame.c",
+    "src/if_softbus_server.cpp",
+    "src/softbus_server.cpp",
+    "src/softbus_server_stub.cpp",
+  ]
+  deps = [
+    ":softbus_server.rc",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/authentication:dsoftbus_auth_server",
+    "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection:conn_manager",
+    "$dsoftbus_root_path/core/discovery:dsoftbus_disc_server",
+    "$dsoftbus_root_path/core/frame/standard/client_manager:client_manager",
+    "$dsoftbus_root_path/core/transmission:dsoftbus_trans_session",
+    "//utils/native/base:utils",
+  ]
+  if (is_standard_system) {
+    external_deps = [
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+    ]
+  }
+  part_name = "dsoftbus_standard"
+  subsystem_name = "communication"
+}

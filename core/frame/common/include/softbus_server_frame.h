@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-void InitSoftBusServer();
-bool GetServerIsInit();
+void InitSoftBusServer(void);
+bool GetServerIsInit(void);
 void ClientDeathCallback(const char *pkgName);
 
 #ifdef __cplusplus

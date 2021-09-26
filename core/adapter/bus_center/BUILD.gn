@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
-    static_library("softbus_adapter_bus_center") {
+    source_set("softbus_adapter_bus_center") {
       include_dirs = [
         "include",
         "$dsoftbus_root_path/core/common/include",
@@ -24,12 +24,12 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "platform/bus_center_adapter_weak.c" ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
   } else {
-    shared_library("softbus_adapter_bus_center") {
+    source_set("softbus_adapter_bus_center") {
       if (enable_auth_account == true) {
         bus_center_adapter_source = "platform/bus_center_adapter.c"
       } else {
@@ -45,7 +45,7 @@ if (defined(ohos_lite)) {
       ]
       sources = [ "$bus_center_adapter_source" ]
       deps = [
-        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -53,7 +53,7 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/ohos.gni")
-  ohos_shared_library("softbus_adapter_bus_center") {
+  ohos_source_set("softbus_adapter_bus_center") {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/core/common/include",
@@ -63,7 +63,7 @@ if (defined(ohos_lite)) {
     ]
     sources = [ "platform/bus_center_adapter.c" ]
     deps = [
-      "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common:softbus_utils",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
       "//utils/native/base:utils",
