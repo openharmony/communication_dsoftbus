@@ -43,6 +43,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     if (channel.groupId == NULL || channel.sessionKey == NULL || channel.peerSessionName == NULL ||
         channel.peerDeviceId == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pointer null error.");
+        FreeBuffer(ctx, ipcMsg);
         return;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {

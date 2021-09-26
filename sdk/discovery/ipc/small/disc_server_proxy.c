@@ -69,6 +69,9 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_ERR;
+    }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -105,6 +108,9 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_ERR;
+    }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
@@ -126,6 +132,9 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     if (pkgName == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_ERR;
     }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
@@ -164,6 +173,9 @@ int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
     if (pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_ERR;
     }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
