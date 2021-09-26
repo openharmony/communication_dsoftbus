@@ -156,6 +156,7 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed get svc failed.");
+        SoftBusFree(tmpData);
         return SOFTBUS_ERR;
     }
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_MSGRECEIVED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
