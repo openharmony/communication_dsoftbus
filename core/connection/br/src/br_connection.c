@@ -304,7 +304,7 @@ static BrConnectionInfo *GetConnectionRef(uint32_t connID)
 
 static void ReleaseConnection(BrConnectionInfo *conn)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReleaseConnection node + u%", conn->connectionId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReleaseConnection node + %u", conn->connectionId);
     ListNode *item = NULL;
     ListNode *nextItem = NULL;
     LIST_FOR_EACH_SAFE(item, nextItem, &conn->requestList) {
@@ -498,7 +498,6 @@ static void ReleaseBrconnectionNode(BrConnectionInfo *newConnectionInfo)
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReleaseBrconnectionNode");
     pthread_cond_destroy(&newConnectionInfo->congestCond);
-    pthread_mutex_destroy(&newConnectionInfo->lock);
     pthread_mutex_destroy(&newConnectionInfo->lock);
     if (newConnectionInfo->recvBuf != NULL) {
         SoftBusFree(newConnectionInfo->recvBuf);
