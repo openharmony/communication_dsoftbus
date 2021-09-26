@@ -82,7 +82,7 @@ static void OnNodeOnline(NodeBasicInfo *info)
     if (info == NULL) {
         return;
     }
-    if(strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId) != EOK) {
+    if (strcpy_s(g_networkId, NETWORK_ID_LEN, info->networkId) != EOK) {
         return;
     }
     TestChangeDebugState(TRANS_STATE_CREATE_SESSION_SERVER);
