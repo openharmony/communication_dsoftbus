@@ -71,7 +71,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     int i;
     for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
         if (targetNode->recvCache[i].isUsed == 0) {
-            availableIndex = availableIndex > -1 ? availableIndex : i;
+            availableIndex = (availableIndex > -1) ? availableIndex : i;
             continue;
         }
         if (targetNode->recvCache[i].seq == header.seq) {
