@@ -92,8 +92,8 @@ static ISessionListener g_sessionlistener = {
     .OnBytesReceived = OnBytesReceived,
     .OnMessageReceived = OnMessageReceived
 };
-char const *g_pkgName = "com.huawei.communication.demo";
-char const *g_sessionName = "com.huawei.communication.demo.JtOnOpenSession";
+char const *g_pkgName = "com.communication.demo";
+char const *g_sessionName = "com.communication.demo.JtOnOpenSession";
 char const *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 char const *g_groupid = "TEST_GROUP_ID";
 #define TEST_SESSION_KEY "TEST_SESSION_KEY"
@@ -168,29 +168,29 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level1)
 {
     int ret, i;
     char const *sessionName[] = {
-        "com.huawei.communication.demo.JtOnOpenSession0",
-        "com.huawei.communication.demo.JtOnOpenSession1",
-        "com.huawei.communication.demo.JtOnOpenSession2",
-        "com.huawei.communication.demo.JtOnOpenSession3",
-        "com.huawei.communication.demo.JtOnOpenSession4",
-        "com.huawei.communication.demo.JtOnOpenSession5",
-        "com.huawei.communication.demo.JtOnOpenSession6",
-        "com.huawei.communication.demo.JtOnOpenSession7",
-        "com.huawei.communication.demo.JtOnOpenSession8",
-        "com.huawei.communication.demo.JtOnOpenSession9"
+        "com.communication.demo.JtOnOpenSession0",
+        "com.communication.demo.JtOnOpenSession1",
+        "com.communication.demo.JtOnOpenSession2",
+        "com.communication.demo.JtOnOpenSession3",
+        "com.communication.demo.JtOnOpenSession4",
+        "com.communication.demo.JtOnOpenSession5",
+        "com.communication.demo.JtOnOpenSession6",
+        "com.communication.demo.JtOnOpenSession7",
+        "com.communication.demo.JtOnOpenSession8",
+        "com.communication.demo.JtOnOpenSession9"
     };
 
     char const *pkgName[] = {
-        "com.huawei.communication.demo0",
-        "com.huawei.communication.demo1",
-        "com.huawei.communication.demo2",
-        "com.huawei.communication.demo3",
-        "com.huawei.communication.demo4",
-        "com.huawei.communication.demo5",
-        "com.huawei.communication.demo6",
-        "com.huawei.communication.demo7",
-        "com.huawei.communication.demo8",
-        "com.huawei.communication.demo9"
+        "com.communication.demo0",
+        "com.communication.demo1",
+        "com.communication.demo2",
+        "com.communication.demo3",
+        "com.communication.demo4",
+        "com.communication.demo5",
+        "com.communication.demo6",
+        "com.communication.demo7",
+        "com.communication.demo8",
+        "com.communication.demo9"
     };
 
     for (i = 0; i < 8; i++) {
