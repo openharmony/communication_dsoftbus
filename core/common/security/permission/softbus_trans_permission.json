@@ -85,12 +85,12 @@
     ]
   },
   {
-    "SESSION_NAME": "com.ohos.devicemanager.*",
+    "SESSION_NAME": "ohos.distributedhardware.devicemanager.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
       {
-        "PKG_NAME": "com.ohos.devicemanager",
+        "PKG_NAME": "ohos.distributedhardware.devicemanager",
         "TYPE": "system_app",
         "ACTIONS": "create,open"
       }
