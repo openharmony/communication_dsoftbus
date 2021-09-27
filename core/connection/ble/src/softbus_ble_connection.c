@@ -315,7 +315,7 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
 
 int32_t GetBleAttrHandle(int32_t module)
 {
-    return module == MODULE_BLE_NET ? g_gattService.bleNetCharaId : g_gattService.bleConnCharaId;
+    return (module == MODULE_BLE_NET) ? g_gattService.bleNetCharaId : g_gattService.bleConnCharaId;
 }
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
@@ -337,6 +337,9 @@ static int BleDequeueBlock(void **msg)
 {
     if (msg == NULL) {
         return SOFTBUS_ERR;
+    }
+    if (QueueSingleConsumerDequeue(g_sendQueue.queue, msg) == 0) {
+        return SOFTBUS_OK;
     }
     (void)pthread_mutex_lock(&g_sendQueue.lock);
     if (QueueIsEmpty(g_sendQueue.queue) == 0) {
@@ -372,6 +375,7 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
+        SoftBusFree(node);
         return ret;
     }
     (void)pthread_mutex_lock(&g_sendQueue.lock);
@@ -406,6 +410,7 @@ static int32_t BlePostBytesInner(uint32_t connectionId, ConnPostData *data)
     int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
+        SoftBusFree(node);
         return ret;
     }
     (void)pthread_mutex_lock(&g_sendQueue.lock);
@@ -478,7 +483,10 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         return;
     }
     cJSON_free(data);
-    (void)BlePostBytes(connectionId, buf, dataLen, 0, 0);
+    if (BlePostBytes(connectionId, buf, dataLen, 0, 0) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage BlePostBytes failed");
+        SoftBusFree(buf);
+    }
     return;
 }
 
@@ -1068,6 +1076,7 @@ int SendSelfBasicInfo(uint32_t connId)
     }
     char devId[UUID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, UDID_BUF_LEN) != SOFTBUS_OK) {
+        cJSON_Delete(json);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo Get local dev Id failed.");
         return SOFTBUS_ERR;
     }
@@ -1111,19 +1120,29 @@ int SendSelfBasicInfo(uint32_t connId)
         .len = dataLen,
         .buf = (char*)buf
     };
-    BlePostBytesInner(connId, &postData);
-    return SOFTBUS_OK;
+    int ret = BlePostBytesInner(connId, &postData);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo BlePostBytesInner failed");
+        SoftBusFree(buf);
+    }
+    return ret;
 }
 
 int PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t len)
 {
     cJSON *data = NULL;
     data = cJSON_Parse(value + TYPE_HEADER_SIZE);
-    if (!GetJsonObjectStringItem(data, "devid", connInfo->peerDevId, UUID_BUF_LEN) ||
-        !GetJsonObjectNumberItem(data, "type", &connInfo->peerType)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse failed");
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse cJSON_Parse failed");
         return SOFTBUS_ERR;
     }
+    if (!GetJsonObjectStringItem(data, "devid", connInfo->peerDevId, UUID_BUF_LEN) ||
+        !GetJsonObjectNumberItem(data, "type", &connInfo->peerType)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse get info failed");
+        cJSON_Delete(data);
+        return SOFTBUS_ERR;
+    }
+    cJSON_Delete(data);
     return SOFTBUS_OK;
 }
 
@@ -1290,8 +1309,7 @@ void *BleSendTask(void *arg)
 {
     while (1) {
         SendQueueNode *node = NULL;
-        BleDequeueBlock((void **)(&node));
-        if (node == NULL) {
+        if (BleDequeueBlock((void **)(&node)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get sendItem failed");
             continue;
         }
@@ -1421,6 +1439,8 @@ static int BleQueueInit(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create BleSendTask failed");
         SoftBusFree(g_sendQueue.queue);
         g_sendQueue.queue = NULL;
+        pthread_cond_destroy(&g_sendQueue.cond);
+        pthread_mutex_destroy(&g_sendQueue.lock);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
