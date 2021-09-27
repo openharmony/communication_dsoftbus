@@ -33,7 +33,7 @@ constexpr char TEST_PKG_NAME[] = "com.softbus.test";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 10;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
 
-const std::string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
+const std::string SYSTEM_APP_PERMISSION = "com.permission.MANAGE_DISTRIBUTED_PERMISSION";
 const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
 
 const std::string TEST_LABEL = "test label";
