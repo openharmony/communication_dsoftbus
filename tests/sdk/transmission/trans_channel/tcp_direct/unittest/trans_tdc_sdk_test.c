@@ -35,12 +35,12 @@
 static int g_succTestCount = 0;
 static int g_failTestCount = 0;
 
-static char const *g_pkgName = "com.huawei.communication.demo";
+static char const *g_pkgName = "com.communication.demo";
 static char g_networkId[NETWORKIDSIZE];
 static int g_sessionId = 0;
 static char *g_contcx = NULL;
 static int g_testCount = 0;
-char const *g_sessionName = "com.huawei.ctrlbustest.JtCreateSessionServerLimit";
+char const *g_sessionName = "com.ctrlbustest.JtCreateSessionServerLimit";
 char const *g_groupid = "TEST_GROUP_ID";
 static bool g_state = true;
 static SessionAttribute g_sessionAttr = {
