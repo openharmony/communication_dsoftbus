@@ -80,7 +80,7 @@ static int32_t g_maxFd;
 static pthread_mutex_t g_fdSetLock = PTHREAD_MUTEX_INITIALIZER;
 static bool g_fdSetInit = false;
 
-static int32_t FdCopy(const fd_set *dest, const fd_set *src)
+static int32_t FdCopy(fd_set *dest, const fd_set *src)
 {
     return memcpy_s((void *)dest, sizeof(fd_set), (void *)src, sizeof(fd_set));
 }
@@ -146,7 +146,7 @@ static int32_t CheckTrigger(TriggerType triggerType)
     return SOFTBUS_OK;
 }
 
-static void ClearListenerFdList(const ListNode *cfdList)
+static void ClearListenerFdList(ListNode *cfdList)
 {
     FdNode *item = NULL;
 
@@ -298,7 +298,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
     return SOFTBUS_OK;
 }
 
-static int CreateFdArr(const int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
+static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
 {
     if (list == NULL || list->next == list) {
         *fdArrLen = 0;
