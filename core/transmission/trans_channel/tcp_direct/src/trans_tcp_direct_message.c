@@ -137,6 +137,7 @@ void TransSrvDelDataBufNode(int channelId)
 static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *packetHead, uint8_t *buffer,
     uint32_t bufLen)
 {
+#define AUTH_CONN_SERVER_SIDE 0x01
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
         return SOFTBUS_ERR;
@@ -172,6 +173,9 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthDecrypt err.");
         return SOFTBUS_ERR;
+    }
+    if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
+        packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
     }
     return SOFTBUS_OK;
 }
