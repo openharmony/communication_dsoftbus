@@ -137,11 +137,7 @@ void TransSrvDelDataBufNode(int channelId)
 static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *packetHead, uint8_t *buffer,
     uint32_t bufLen)
 {
-    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
-        return SOFTBUS_ERR;
-    }
-
+#define AUTH_CONN_SERVER_SIDE 0x01
     ConnectOption option = {0};
     option.type = CONNECT_TCP;
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
@@ -173,6 +169,15 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthDecrypt err.");
         return SOFTBUS_ERR;
     }
+    if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
+        packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
+    }
+    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=%d, seq=%llu",
+        side, packetHead->flags, packetHead->seq);
     return SOFTBUS_OK;
 }
 
