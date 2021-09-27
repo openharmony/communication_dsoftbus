@@ -74,6 +74,9 @@ int32_t StopDiscoveryInner(const char *packageName, int32_t subscribeId)
 
 int32_t DiscClientInit(void)
 {
+    if (g_discInfo != NULL) {
+        SoftBusFree(g_discInfo);
+    }
     g_discInfo = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     if (g_discInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Calloc failed");
