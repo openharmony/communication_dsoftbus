@@ -52,6 +52,9 @@ int32_t DiscServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     sptr<IRemoteObject> object = GetSystemAbility();
+    if (g_serverProxy != nullptr) {
+        delete g_serverProxy;
+    }
     g_serverProxy = new (std::nothrow) DiscServerProxy(object);
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");

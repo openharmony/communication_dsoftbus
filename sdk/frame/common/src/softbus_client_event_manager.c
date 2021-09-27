@@ -39,7 +39,10 @@ int EventClientInit(void)
     if (g_isInited) {
         return SOFTBUS_OK;
     }
-
+    
+    if (g_observerList != NULL) {
+        SoftBusFree(g_observerList);
+    }
     g_observerList = CreateSoftBusList();
     if (g_observerList == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create observer list failed");
@@ -56,8 +59,7 @@ void EventClientDeinit(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event client not init");
         return;
     }
-
-    if (g_observerList) {
+    if (g_observerList != NULL) {
         DestroySoftBusList(g_observerList);
         g_observerList = NULL;
     }
