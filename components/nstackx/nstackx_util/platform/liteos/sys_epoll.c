@@ -383,6 +383,9 @@ static int32_t EpollEventRecordAdd(EpollSet *epollSetPtr)
 #ifdef LWIP_LITEOS_A_COMPAT
     struct EpollEventPtr *ptr = (struct EpollEventPtr *)malloc(sizeof(struct EpollEventPtr));
     if (ptr == NULL) {
+        if (pthread_mutex_unlock(&g_epollEventPtrMutex) != 0) {
+            LOGE(TAG, "pthread mutex unlock error");
+        }
         LOGE(TAG, "EpollEventPtr alloc failed");
         return NSTACKX_ENOMEM;
     }
