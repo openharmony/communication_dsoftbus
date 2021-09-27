@@ -330,7 +330,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(info->hwAccountHash, SHORT_USER_ID_HASH_LEN,
-                 &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
+        &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy hwAccountHash failed");
         return SOFTBUS_MEM_ERR;
     }
