@@ -179,7 +179,25 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
     return SOFTBUS_OK;
 }
 
-int SERVER_UnregisterService(const char *name)
+void SERVER_UnregisterService(const char *name)
 {
-    return SOFTBUS_OK;
+    if (g_clientInfoList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server info list not init");
+        return;
+    }
+    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client service %s died, remove it from softbus server", name);
+    SoftBusClientInfoNode *clientInfo = NULL;
+    LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
+        if (strcmp(clientInfo->name, name) == 0) {
+            ListDelete(&(clientInfo->node));
+            SoftBusFree(clientInfo);
+            g_clientInfoList->cnt--;
+            break;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
 }
