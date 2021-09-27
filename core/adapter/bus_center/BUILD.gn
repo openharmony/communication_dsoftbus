@@ -30,11 +30,6 @@ if (defined(ohos_lite)) {
     }
   } else {
     source_set("softbus_adapter_bus_center") {
-      if (enable_auth_account == true) {
-        bus_center_adapter_source = "platform/bus_center_adapter.c"
-      } else {
-        bus_center_adapter_source = "platform/bus_center_adapter_weak.c"
-      }
       include_dirs = [
         "include",
         "$dsoftbus_root_path/interfaces/kits",
@@ -43,10 +38,11 @@ if (defined(ohos_lite)) {
         "$hilog_lite_include_path",
         "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       ]
-      sources = [ "$bus_center_adapter_source" ]
+      sources = [ "platform/bus_center_adapter.c" ]
       deps = [
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$hilog_lite_deps_path",
+        "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
     }
