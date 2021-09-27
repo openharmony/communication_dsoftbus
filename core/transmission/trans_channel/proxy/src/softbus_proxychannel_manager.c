@@ -863,13 +863,8 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
 }
 
-static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo *info)
+static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "info: invalid para");
-        return SOFTBUS_ERR;
-    }
-
     if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
     }
@@ -878,14 +873,13 @@ static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
     }
 
-    TransProxyPostDisConnectMsgToLoop(info->connId);
+    uint32_t connId = info->connId;
     TransProxyPostResetPeerMsgToLoop(info);
-    return SOFTBUS_OK;
+    TransProxyPostDisConnectMsgToLoop(connId);
 }
 
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
-    int32_t ret;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return SOFTBUS_MALLOC_ERR;
@@ -897,11 +891,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         return SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID;
     }
 
-    TransProxyResetPeer(info);
-    (void)TransProxyCloseConnChannel(info->connId);
-    ret = TransProxyCloseProxyOtherRes(channelId, info);
-    SoftBusFree(info);
-    return ret;
+    TransProxyCloseProxyOtherRes(channelId, info);
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
