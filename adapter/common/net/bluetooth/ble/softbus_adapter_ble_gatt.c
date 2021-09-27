@@ -410,7 +410,7 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength, 
-                     data->advData, data->advLength) != EOK) {
+            data->advData, data->advLength) != EOK) {
             LOG_ERR("SetAdvData memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
@@ -426,7 +426,7 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength, 
-                data->scanRspData, data->scanRspLength) != EOK) {
+            data->scanRspData, data->scanRspLength) != EOK) {
             LOG_ERR("SetAdvData memcpy scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             SoftBusFree(g_advChannel[advId].advData.scanRspData);
@@ -498,14 +498,13 @@ int SoftBusReleaseAdvChannel(int advId)
 int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
 {
     if (data == NULL) {
-        LOG_ERR("SoftBusSetAdvData 1");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_advLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
-        LOG_ERR("SoftBusSetAdvData 2");
+        pthread_mutex_unlock(&g_advLock);
         return SOFTBUS_ERR;
     }
     int ret = SetAdvData(advId, data);
@@ -527,6 +526,7 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
+        pthread_mutex_unlock(&g_advLock);
         return SOFTBUS_ERR;
     }
     int innerAdvId;
