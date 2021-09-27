@@ -138,11 +138,6 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
     uint32_t bufLen)
 {
 #define AUTH_CONN_SERVER_SIDE 0x01
-    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
-        return SOFTBUS_ERR;
-    }
-
     ConnectOption option = {0};
     option.type = CONNECT_TCP;
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
@@ -177,6 +172,12 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
     if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
         packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
     }
+    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy packetHead error.");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=%d, seq=%llu",
+        side, packetHead->flags, packetHead->seq);
     return SOFTBUS_OK;
 }
 
