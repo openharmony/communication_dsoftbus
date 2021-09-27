@@ -29,7 +29,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId);
 
 int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId);
 
-int SERVER_UnregisterService(const char *name);
+void SERVER_UnregisterService(const char *name);
 
 int SERVER_GetClientInfoNodeNum(int *num);
 
