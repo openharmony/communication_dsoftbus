@@ -598,6 +598,24 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     (void)OnProxyChannelOpened(info->channelId, &(info->appInfo), 0);
     SoftBusFree(info);
 }
+static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
+{
+    if (chan->appInfo.appType != APP_TYPE_INNER) {
+        int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
+                                           chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
+            return SOFTBUS_ERR;
+        }
+    }
+
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
+                           sizeof(chan->appInfo.myData.deviceId)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
@@ -613,23 +631,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         SoftBusFree(chan);
         return;
     }
-    int32_t ret = TransProxyGetPkgName(chan->appInfo.myData.sessionName,
-        chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
-        SoftBusFree(chan);
-        return;
-    }
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
-                           sizeof(chan->appInfo.myData.deviceId)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
+    if (TransProxyGetLocalInfo(chan) != SOFTBUS_OK) {
         SoftBusFree(chan);
         return;
     }
 
     int16_t newChanId = TransProxyGetNewMyId();
-    ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
+    int32_t ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
         SoftBusFree(chan);
@@ -854,13 +863,8 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
 }
 
-static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo *info)
+static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "info: invalid para");
-        return SOFTBUS_ERR;
-    }
-
     if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
     }
@@ -869,14 +873,13 @@ static int32_t TransProxyCloseProxyOtherRes(int32_t channelId, ProxyChannelInfo 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
     }
 
-    TransProxyPostDisConnectMsgToLoop(info->connId);
+    uint32_t connId = info->connId;
     TransProxyPostResetPeerMsgToLoop(info);
-    return SOFTBUS_OK;
+    TransProxyPostDisConnectMsgToLoop(connId);
 }
 
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
-    int32_t ret;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return SOFTBUS_MALLOC_ERR;
@@ -888,11 +891,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         return SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID;
     }
 
-    TransProxyResetPeer(info);
-    (void)TransProxyCloseConnChannel(info->connId);
-    ret = TransProxyCloseProxyOtherRes(channelId, info);
-    SoftBusFree(info);
-    return ret;
+    TransProxyCloseProxyOtherRes(channelId, info);
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
