@@ -70,7 +70,7 @@ typedef struct {
 
 int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
-uint64_t TransTdcGetNewSeqId(bool serverSide);
+uint64_t TransTdcGetNewSeqId(void);
 SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
 SessionConn *GetSessionConnByFd(int fd, SessionConn *conn);
 
