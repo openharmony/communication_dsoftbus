@@ -77,6 +77,13 @@ static TaskConfig GetTaskConfig(Service *service)
     return config;
 }
 
+static void ComponentDeathCallback(const char *pkgName)
+{
+    DiscServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName);
+    BusCenterServerDeathCallback(pkgName);
+}
+
 static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
 {
     if (arg == NULL) {
@@ -91,6 +98,7 @@ static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, 
         return;
     }
     SERVER_UnregisterService((const char *)arg);
+    ComponentDeathCallback((const char *)arg);
     SoftBusFree(arg);
     arg = NULL;
 #ifdef __LINUX__
