@@ -51,6 +51,9 @@ if (defined(ohos_lite)) {
   } else {
     source_set("br_connection") {
       sources = sources_br
+      cflags = [
+        "-fPIC",
+      ]
       include_dirs = [
         "include",
         "$dsoftbus_root_path/interfaces/kits/common",

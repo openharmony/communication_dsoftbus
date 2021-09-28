@@ -21,7 +21,7 @@ if (defined(ohos_lite)) {
       # mini system not support
     }
   } else {
-    source_set("softbus_server_frame") {
+    shared_library("softbus_server_frame") {
       include_dirs = [
         "common/include",
         "small/init/include",

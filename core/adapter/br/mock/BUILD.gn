@@ -15,6 +15,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 source_set("br_adapter") {
   sources = [ "wrapper_br_interface.c" ]
+  cflags = [
+    "-fPIC",
+  ]
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
