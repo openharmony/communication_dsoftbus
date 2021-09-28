@@ -31,6 +31,9 @@ if (defined(ohos_lite)) {
   } else {
     source_set("ble_connection") {
       sources = [ "src/ble_connection_virtual.c" ]
+      cflags = [
+        "-fPIC",
+      ]
       include_dirs = [
         "include",
         "$dsoftbus_root_path/interfaces/kits/common",

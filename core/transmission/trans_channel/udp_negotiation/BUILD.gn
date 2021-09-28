@@ -82,6 +82,7 @@ if (defined(ohos_lite)) {
       cflags = [
         "-Wall",
         "-std=c99",
+        "-fPIC",
       ]
       deps = common_deps
     }
