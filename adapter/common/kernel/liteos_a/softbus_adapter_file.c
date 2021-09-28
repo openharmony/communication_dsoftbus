@@ -30,7 +30,7 @@
 
 static int32_t SoftBusCreateFile(const char *fileName)
 {
-    char dirPath[SOFTBUS_MAX_PATH_LEN];
+    char dirPath[SOFTBUS_MAX_PATH_LEN] = {0};
 
     if (fileName == NULL) {
         return SOFTBUS_FILE_ERR;
