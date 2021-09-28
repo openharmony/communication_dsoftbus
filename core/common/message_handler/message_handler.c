@@ -92,6 +92,10 @@ static void *LoopTask(void *arg)
 {
     SoftBusLooper *looper = arg;
     SoftBusLooperContext *context = looper->context;
+    if (context == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "loop context is NULL");
+        return NULL;
+    }
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "LoopTask[%s] running", context->name);
 
