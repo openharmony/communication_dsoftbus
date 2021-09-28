@@ -135,7 +135,7 @@ if (defined(ohos_lite)) {
         "driver/lnn_hdf_driver_monitor.c",
         "driver/lnn_hdf_driver_request.c",
       ]
-      deps += [ "//drivers/adapter/uhdf2/osal:libhdf_utils" ]
+      deps += [ "//drivers/adapter/uhdf2/utils:libhdf_utils" ]
     } else {
       sources += [
         "driver/lnn_driver_monitor_virtual.c",
