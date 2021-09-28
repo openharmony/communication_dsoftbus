@@ -67,6 +67,25 @@ int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
 
 static bool IsProxyPort(LnnLaneProperty prop, LnnLaneLinkType type)
 {
+    int32_t port;
+
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &port);
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo session port failed. ret = %d", ret);
+        return false;
+    }
+    if (port > 0) {
+        return false;
+    }
+
+    ret = LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &port);
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo proxy port failed. ret = %d", ret);
+        return false;
+    }
+    if (port <= 0) {
+        return false;
+    }
     if (prop == LNN_MESSAGE_LANE &&
         (type == LNN_LINK_TYPE_WLAN_5G || type == LNN_LINK_TYPE_WLAN_2P4G || type == LNN_LINK_TYPE_BR)) {
         return true;
