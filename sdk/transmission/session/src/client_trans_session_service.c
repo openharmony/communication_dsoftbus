@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "client_trans_channel_manager.h"
+#include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
 #include "dfs_session.h"
 #include "inner_session.h"
@@ -298,7 +299,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
         }
         addr = &mix;
     } else {
-        addr = &addrInfo[addrIndex];
+        addr = (ConnectionAddr *)&addrInfo[addrIndex];
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
 
