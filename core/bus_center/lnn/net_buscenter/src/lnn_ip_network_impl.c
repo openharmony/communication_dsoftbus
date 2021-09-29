@@ -132,13 +132,6 @@ static int32_t OpenIpLink(void)
         CloseAuthPort();
         return SOFTBUS_ERR;
     }
-    ret = OpenProxyPort();
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenProxyPort fail!\n");
-        CloseAuthPort();
-        CloseSessionPort();
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
