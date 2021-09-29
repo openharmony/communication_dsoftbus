@@ -30,6 +30,7 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
+#include "trans_lane_manager.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_udp_negotiation.h"
