@@ -26,21 +26,6 @@ void UnregisterStreamCb(void)
     return;
 }
 
-static void SetStreamChannelStatus(int32_t channelId, int32_t status)
-{
-    (void)channelId;
-    (void)status;
-}
-
-static void OnStreamReceived(int32_t channelId, const StreamData *data,
-    const StreamData *ext, const FrameInfo *param)
-{
-    (void)channelId;
-    (void)data;
-    (void)ext;
-    (void)param;
-}
-
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)
 {
     (void)channel;

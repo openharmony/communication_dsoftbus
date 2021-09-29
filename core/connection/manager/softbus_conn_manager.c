@@ -451,7 +451,7 @@ int32_t ConnServerInit(void)
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
     g_connManagerCb.OnDataReceived = ConnManagerRecvData;
 
-    int isSupportTcp = 0;
+    unsigned char isSupportTcp = 0;
     (void)SoftbusGetConfig(SOFTBUS_INT_SUPPORT_TCP_PROXY, &isSupportTcp, sizeof(isSupportTcp));
     if (isSupportTcp) {
         connectObj = ConnInitTcp(&g_connManagerCb);

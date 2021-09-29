@@ -105,9 +105,9 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
     public_deps = [
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/mbedtls:mbedtls_shared",
       "//utils/native/base:utils",
     ]
     public_configs = [ ":config_adapter_common" ]

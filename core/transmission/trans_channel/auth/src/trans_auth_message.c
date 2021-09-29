@@ -29,7 +29,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strlen(appInfo->reqId) == 0) {
-        if (GenerateRandomStr(appInfo->reqId, REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
+        if (GenerateRandomStr((char *)(appInfo->reqId), REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
