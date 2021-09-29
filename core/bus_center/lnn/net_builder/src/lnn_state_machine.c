@@ -326,7 +326,7 @@ int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
-        RemoveMessageFunc, (void *)(int32_t *)msgType);
+        RemoveMessageFunc, (void *)(uintptr_t)msgType);
     return SOFTBUS_OK;
 }
 
