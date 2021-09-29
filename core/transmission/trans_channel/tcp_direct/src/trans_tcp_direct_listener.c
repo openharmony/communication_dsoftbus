@@ -200,6 +200,10 @@ static int32_t OnDataEvent(int events, int fd)
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info.", fd);
         SoftBusFree(conn);
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
+        TcpShutDown(fd);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
