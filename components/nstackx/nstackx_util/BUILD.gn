@@ -149,7 +149,7 @@ if (defined(ohos_lite)) {
     ]
 
     deps = [
-      "//third_party/mbedtls:mbedtls_shared",
+      "//foundation/communication/dsoftbus/components/mbedtls:mbedtls_shared",
       "//utils/native/base:utilsecurec_shared",
     ]
     public_configs = [ ":nstackx_util_header" ]
