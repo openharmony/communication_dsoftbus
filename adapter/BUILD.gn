@@ -17,7 +17,6 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   config("dsoftbus_adapter_common_interface") {
-    cflags = [ "-fPIC" ]
     include_dirs = [
       "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
