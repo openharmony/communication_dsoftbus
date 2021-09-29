@@ -524,7 +524,7 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         .module = MODULE_AUTH_CHANNEL,
         .flag = AUTH_CHANNEL_REPLY,
     };
-    AuthPostData(&head, (const uint8_t *)dcJsonStr, strlen(cJsonStr));
+    AuthPostData(&head, (const uint8_t *)cJsonStr, strlen(cJsonStr));
 }
 
 static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
