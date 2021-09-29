@@ -85,30 +85,6 @@ static void CloseSessionPort(void)
     (void)LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, IP_DEFAULT_PORT);
 }
 
-static int32_t OpenProxyPort(void)
-{
-    LocalListenerInfo listenerInfo = {0};
-    char ipAddr[IP_LEN] = {0};
-    int32_t port;
-
-    listenerInfo.type = CONNECT_TCP;
-    listenerInfo.info.ipListenerInfo.port = 0;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
-        return SOFTBUS_ERR;
-    }
-    if (strncpy_s(listenerInfo.info.ipListenerInfo.ip, IP_LEN, ipAddr, strlen(ipAddr)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip failed\n");
-        return SOFTBUS_MEM_ERR;
-    }
-    port = ConnStartLocalListening(&listenerInfo);
-    if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed\n");
-        return SOFTBUS_ERR;
-    }
-    return LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, port);
-}
-
 static void CloseProxyPort(void)
 {
     LocalListenerInfo listenerInfo = {0};
@@ -130,13 +106,6 @@ static int32_t OpenIpLink(void)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSessionPort fail!\n");
         CloseAuthPort();
-        return SOFTBUS_ERR;
-    }
-    ret = OpenProxyPort();
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenProxyPort fail!\n");
-        CloseAuthPort();
-        CloseSessionPort();
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
