@@ -90,8 +90,6 @@ mbedtls_sources += [
 
 config("mbedtls_config") {
   include_dirs = [ "//third_party/mbedtls/include" ]
-
-  cflags = [ "-Wno-error" ]
 }
 
 ohos_shared_library("mbedtls_shared") {
