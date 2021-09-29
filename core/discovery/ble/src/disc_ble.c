@@ -87,6 +87,7 @@ typedef struct {
 } DiscBleAdvertiser;
 
 typedef struct {
+    bool needUpdate;
     uint32_t capBitMap[CAPABILITY_NUM];
     int16_t capCount[CAPABILITY_MAX_BITNUM];
     unsigned char *capabilityData[CAPABILITY_MAX_BITNUM];
@@ -155,6 +156,7 @@ static int32_t ReplyPassiveNonBroadcast(void);
 static void ClearRecvMessage(void);
 static int32_t StopScaner(void);
 
+/* This function is used to compatibled with mobile phone, will remove later */
 static int ConvertCapBitMap(int oldCap)
 {
     switch (oldCap) {
@@ -168,6 +170,29 @@ static int ConvertCapBitMap(int oldCap)
             return oldCap;
     }
     return oldCap;
+}
+
+static void ResetInfoUpdate(int adv)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ResetInfoUpdate");
+    if (adv == NON_ADV_ID) {
+        g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = false;
+        g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate = false;
+    } else {
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate = false;
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate = false;
+    }
+}
+
+static int32_t GetNeedUpdateAdvertiser(int32_t adv)
+{
+    if (adv == NON_ADV_ID) {
+        return g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate ||
+            g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate;
+    } else {
+        return g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate ||
+            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate;
+    }
 }
 
 static void BleAdvEnableCallback(int advId, int status)
@@ -607,8 +632,13 @@ static int32_t StartAdvertiser(int32_t adv)
         return SOFTBUS_ERR;
     }
     if (advertiser->isAdvertising) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "already advertising");
-        return UpdateAdvertiser(adv);
+        if (GetNeedUpdateAdvertiser(adv)) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advertising need update");
+            return UpdateAdvertiser(adv);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advertising no need update");
+            return SOFTBUS_OK;
+        }
     }
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
     if (ret != SOFTBUS_OK) {
@@ -638,6 +668,7 @@ static int32_t StartAdvertiser(int32_t adv)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start adv adv:%d failed", adv);
         return SOFTBUS_ERR;
     }
+    ResetInfoUpdate(adv);
     DestoryBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
@@ -693,6 +724,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UpdateAdv failed");
         return SOFTBUS_ERR;
     }
+    ResetInfoUpdate(adv);
     DestoryBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
@@ -789,7 +821,11 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos)) {
             continue;
         }
-        (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
+        if (!CheckCapBitMapExist(CAPABILITY_NUM, info->capBitMap, pos)) {
+            (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
+            info->needUpdate = true;
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "RegisterCapability set update");
+        }
         info->capCount[pos] += 1;
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
@@ -844,6 +880,8 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
             SoftBusFree(info->capabilityData[pos]);
             info->capabilityData[pos] = NULL;
             info->capDataLen[pos] = 0;
+            info->needUpdate = true;
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UnregisterCapability set update");
         }
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
