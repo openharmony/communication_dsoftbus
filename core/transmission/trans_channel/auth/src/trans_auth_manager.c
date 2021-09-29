@@ -138,8 +138,8 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.isServer = isServer;
     channelInfo.isEnabled = true;
     channelInfo.channelId = appInfo->myData.channelId;
-    channelInfo.peerDeviceId = appInfo->peerData.deviceId;
-    channelInfo.peerSessionName = appInfo->peerData.sessionName;
+    channelInfo.peerDeviceId = (char *)appInfo->peerData.deviceId;
+    channelInfo.peerSessionName = (char *)appInfo->peerData.sessionName;
     channelInfo.groupId = AUTH_GROUP_ID;
     channelInfo.sessionKey = AUTH_SESSION_KEY;
     channelInfo.keyLen = strlen(channelInfo.sessionKey) + 1;
@@ -505,7 +505,7 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, i
         .flag = flag,
     };
     cJSON_Delete(msg);
-    return AuthPostData(&head, data, strlen(data));
+    return AuthPostData(&head, (const uint8_t *)data, strlen(data));
 }
 
 static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const char *errMsg)
@@ -524,7 +524,7 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         .module = MODULE_AUTH_CHANNEL,
         .flag = AUTH_CHANNEL_REPLY,
     };
-    AuthPostData(&head, cJsonStr, strlen(cJsonStr));
+    AuthPostData(&head, (const uint8_t *)cJsonStr, strlen(cJsonStr));
 }
 
 static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
@@ -629,7 +629,7 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
         .authId = authId,
         .module = MODULE_AUTH_MSG,
     };
-    return AuthPostData(&head, data, len);
+    return AuthPostData(&head, (const uint8_t *)data, len);
 }
 
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)

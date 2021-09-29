@@ -295,7 +295,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
     return SOFTBUS_OK;
 }
 
-static int CreateFdArr(const int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
+static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
 {
     if (list == NULL || list->next == list) {
         *fdArrLen = 0;
@@ -409,8 +409,8 @@ static int32_t SelectThread(void)
     tv.tv_sec = 0;
     tv.tv_usec = TIMEOUT;
     int32_t timeOut = 0;
-    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, &timeOut, sizeof(timeOut)) == SOFTBUS_OK) {
-        tv.tv_usec = timeOut;
+    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, (unsigned char *)&timeOut, sizeof(timeOut)) == SOFTBUS_OK) {
+        tv.tv_usec = (long)timeOut;
     }
     fd_set readSet;
     fd_set writeSet;
