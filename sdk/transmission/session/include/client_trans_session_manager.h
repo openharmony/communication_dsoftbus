@@ -28,7 +28,7 @@ typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
     char groupId[GROUP_ID_SIZE_MAX];
-    uint32_t flag; // TYPE_MESSAGE & TYPE_BYTES & TYPE_FILE
+    int flag; // TYPE_MESSAGE & TYPE_BYTES & TYPE_FILE
 } SessionTag;
 
 typedef struct {
