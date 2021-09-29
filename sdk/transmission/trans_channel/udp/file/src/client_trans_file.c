@@ -26,8 +26,6 @@
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
-static const ChannelInfo *g_channel = NULL;
-
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
