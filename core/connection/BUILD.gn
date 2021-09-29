@@ -40,6 +40,9 @@ if (defined(ohos_lite)) {
   } else {
     source_set("conn_manager") {
       sources = [ "manager/softbus_conn_manager.c" ]
+      cflags = [
+        "-fPIC",
+      ]
       include_dirs = [
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",

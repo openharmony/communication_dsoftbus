@@ -50,6 +50,9 @@ if (defined(ohos_lite)) {
       } else {
         sources = [ "src/softbus_tcp_connect_virtual.c" ]
       }
+      cflags = [
+        "-fPIC",
+      ]
       include_dirs = [
         "include",
         "$dsoftbus_root_path/core/common/include",
