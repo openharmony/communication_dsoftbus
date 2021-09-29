@@ -31,6 +31,8 @@
 typedef struct {
     int advId;
     bool isUsed;
+    bool isAdvertising;
+    pthread_cond_t cond;
     SoftBusBleAdvData advData;
     SoftBusAdvCallback *advCallback;
 } AdvChannel;
@@ -260,6 +262,10 @@ static void WrapperAdvEnableCallback(int advId, int status)
             pthread_mutex_unlock(&g_advLock);
             continue;
         }
+        if (st == SOFTBUS_BT_STATUS_SUCCESS) {
+            advChannel->isAdvertising = true;
+            pthread_cond_signal(&advChannel->cond);
+        }
         advChannel->advCallback->AdvEnableCallback(index, st);
         pthread_mutex_unlock(&g_advLock);
         break;
@@ -278,6 +284,10 @@ static void WrapperAdvDisableCallback(int advId, int status)
             advChannel->advCallback->AdvDisableCallback == NULL) {
             pthread_mutex_unlock(&g_advLock);
             continue;
+        }
+        if (st == SOFTBUS_BT_STATUS_SUCCESS) {
+            advChannel->isAdvertising = false;
+            pthread_cond_signal(&advChannel->cond);
         }
         advChannel->advCallback->AdvDisableCallback(index, st);
         pthread_mutex_unlock(&g_advLock);
@@ -473,6 +483,8 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
     }
     g_advChannel[freeAdvId].advId = -1;
     g_advChannel[freeAdvId].isUsed = true;
+    g_advChannel[freeAdvId].isAdvertising = false;
+    pthread_cond_init(&g_advChannel[freeAdvId].cond, NULL);
     g_advChannel[freeAdvId].advCallback = (SoftBusAdvCallback *)callback;
     pthread_mutex_unlock(&g_advLock);
     return freeAdvId;
@@ -490,6 +502,8 @@ int SoftBusReleaseAdvChannel(int advId)
     ClearAdvData(advId);
     g_advChannel[advId].advId = -1;
     g_advChannel[advId].isUsed = false;
+    g_advChannel[advId].isAdvertising = false;
+    pthread_cond_destroy(&g_advChannel[advId].cond);
     g_advChannel[advId].advCallback = NULL;
     pthread_mutex_unlock(&g_advLock);
     return SOFTBUS_OK;
@@ -529,6 +543,9 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
         pthread_mutex_unlock(&g_advLock);
         return SOFTBUS_ERR;
     }
+    if (g_advChannel[advId].isAdvertising) {
+        pthread_cond_wait(&g_advChannel[advId].cond, &g_advLock);
+    }
     int innerAdvId;
     BleAdvParams dstParam;
     StartAdvRawData advData;
@@ -548,11 +565,15 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
 
 int SoftBusStopAdv(int advId)
 {
-    if (!CheckAdvChannelInUsed(advId)) {
-        return SOFTBUS_ERR;
-    }
     if (pthread_mutex_lock(&g_advLock) != 0) {
         return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckAdvChannelInUsed(advId)) {
+        pthread_mutex_unlock(&g_advLock);
+        return SOFTBUS_ERR;
+    }
+    if (!g_advChannel[advId].isAdvertising) {
+        pthread_cond_wait(&g_advChannel[advId].cond, &g_advLock);
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
