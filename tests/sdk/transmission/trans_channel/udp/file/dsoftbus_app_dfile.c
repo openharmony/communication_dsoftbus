@@ -170,7 +170,8 @@ static IFileSendListener g_fileSendListener = {
 static void TestSetFileSendListener(void)
 {
     LOG2_INFO("*******************SET FILE SEND LISTENER*************");
-    int ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
+    int ret;
+    ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
     LOG2_INFO("SetFileSendListener ret = %d\n", ret);
 }
 
@@ -182,7 +183,8 @@ static int TestSendFile(int sessionId)
         "/data/richu-002.jpg",
         "/data/richu-003.jpg",
     };
-    int ret = SendFile(sessionId, sfileList, NULL, FILE_NUM);
+    int ret;
+    ret = SendFile(sessionId, sfileList, NULL, FILE_NUM);
     LOG2_INFO("SendFile ret = %d\n", ret);
     return ret;
 }

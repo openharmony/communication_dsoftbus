@@ -54,7 +54,7 @@ static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleT
     int i;
     for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
         if (targetNode->recvCache[i].isUsed == 0) {
-            availableIndex = availableIndex > -1 ? availableIndex : i;
+            availableIndex = (availableIndex > -1) ? availableIndex : i;
             continue;
         }
         if (targetNode->recvCache[i].seq == header->seq) {
@@ -104,9 +104,9 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
         *index = -1;
         return value + sizeof(BleTransHeader);
     }
-    
+
     int i;
-    if (FindAvailableCacheIndex(targetNode, &header, &i) == SOFTBUS_ERR) {
+    if (FindAvailableCacheIndex(targetNode, (const BleTransHeader *)&header, &i) == SOFTBUS_ERR) {
         return NULL;
     }
     if (memcpy_s(targetNode->recvCache[i].cache + header.offset, MAX_DATA_LEN - header.offset,
