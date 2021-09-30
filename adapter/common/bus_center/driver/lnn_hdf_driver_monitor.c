@@ -21,12 +21,15 @@
 
 #include "lnn_async_callback_utils.h"
 #include "lnn_driver_request.h"
+#include "lnn_ip_utils.h"
 #include "message_handler.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
 
 #define DRIVER_SERVICE_NAME "hdf_dsoftbus"
+
+#define NETIF_NAME_LENGTH 16
 
 #define BIND_HDF_DELAY 1000
 #define MAX_BIND_HDF_RETRY_COUNT 10
@@ -37,7 +40,49 @@ typedef struct {
     LnnMonitorEventHandler handler;
 } HdfDriverEventCtrl;
 
+typedef struct {
+    uint32_t event;
+    char ifName[NETIF_NAME_LENGTH];
+    union ExtInfo {
+        int32_t status;
+    } extInfo;
+} LwipMonitorReportInfo;
+
 static HdfDriverEventCtrl g_driverCtrl;
+
+static void ProcessLwipEvent(const LnnMoniterData *monitorData)
+{
+    const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)monitorData->value;
+
+    if (monitorData->len != sizeof(LwipMonitorReportInfo)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor not correct size: %d<->%d",
+            monitorData->len, sizeof(LwipMonitorReportInfo));
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor event(%d) for %s",
+        info->event, info->ifName);
+    if (strncmp(info->ifName, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
+        return;
+    }
+    if (strncmp(info->ifName, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
+    }
+}
+
+static void DispatchModuleEvent(int32_t moduleId, const LnnMoniterData *monitorData)
+{
+    switch (moduleId) {
+        case LNN_DRIVER_MODULE_WLAN_PARAM:
+            g_driverCtrl.handler(LNN_MONITOR_EVENT_WLAN_PARAM, monitorData);
+            break;
+        case LNN_DRIVER_MODULE_LWIP_MONITOR:
+            ProcessLwipEvent(monitorData);
+            break;
+        default:
+            break;
+    }
+}
 
 static int32_t OnReceiveDriverEvent(struct HdfDevEventlistener *listener,
     struct HdfIoService *service, uint32_t moduleId, struct HdfSBuf *data)
@@ -69,9 +114,8 @@ static int32_t OnReceiveDriverEvent(struct HdfDevEventlistener *listener,
             return SOFTBUS_ERR;
         }
     }
-    if (moduleId == LNN_DRIVER_MODULE_WLAN_PARAM) {
-        g_driverCtrl.handler(LNN_MONITOR_EVENT_WLAN_PARAM, monitorData);
-    }
+    DispatchModuleEvent(moduleId, monitorData);
+    SoftBusFree(monitorData);
     return SOFTBUS_OK;
 }
 
