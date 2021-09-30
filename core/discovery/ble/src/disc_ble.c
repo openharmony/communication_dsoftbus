@@ -765,51 +765,47 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t *optionCapBitMap;
-    uint32_t custDataLen;
+    uint32_t custDataLen, freq;
     unsigned char *custData;
     bool isSameAccount = false;
     bool isWakeRemote = false;
-    int32_t freq;
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
         custDataLen = option->publishOption->dataLen;
         custData = option->publishOption->capabilityData;
         freq = option->publishOption->freq;
     } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
         custDataLen = option->subscribeOption->dataLen;
         custData = option->subscribeOption->capabilityData;
         isSameAccount = option->subscribeOption->isSameAccount;
         isWakeRemote = option->subscribeOption->isWakeRemote;
         freq = option->subscribeOption->freq;
     }
+    optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos)) {
-            continue;
-        }
-        (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
-        info->capCount[pos] += 1;
-        info->isSameAccount[pos] = isSameAccount;
-        info->isWakeRemote[pos] = isWakeRemote;
-        info->freq[pos] = freq;
-        if (custData == NULL) {
-            info->capDataLen[pos] = 0;
-            continue;
-        }
-        if (info->capabilityData[pos] == NULL) {
-            info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
-            if (info->capabilityData[pos] == NULL) {
+        if (CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos)) {
+            (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
+            info->capCount[pos] += 1;
+            info->isSameAccount[pos] = isSameAccount;
+            info->isWakeRemote[pos] = isWakeRemote;
+            info->freq[pos] = freq;
+            if (custData == NULL) {
                 info->capDataLen[pos] = 0;
-                return SOFTBUS_MALLOC_ERR;
+                continue;
             }
+            if (info->capabilityData[pos] == NULL) {
+                if ((info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN)) == NULL) {
+                    info->capDataLen[pos] = 0;
+                    return SOFTBUS_MALLOC_ERR;
+                }
+            }
+            if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+                info->capDataLen[pos] = 0;
+                return SOFTBUS_MEM_ERR;
+            }
+            info->capDataLen[pos] = custDataLen;
         }
-        if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
-            info->capDataLen[pos] = 0;
-            return SOFTBUS_MEM_ERR;
-        }
-        info->capDataLen[pos] = custDataLen;
     }
     return SOFTBUS_OK;
 }

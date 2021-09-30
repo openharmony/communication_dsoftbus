@@ -37,6 +37,13 @@
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
 
+#define ZERO 0
+#define ONE 1
+#define TWO 2
+#define THREE 3
+#define FOUR 4
+#define FIVE 5
+
 #ifndef PACKET_CHECK_LENGTH
 #define PACKET_CHECK_LENGTH(len) \
     if (len >= 0) { \
@@ -250,7 +257,7 @@ int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
         return SOFTBUS_INVALID_PARAM;
     }
     ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
-        &binMac[0], &binMac[1], &binMac[2], &binMac[3], &binMac[4], &binMac[5]);
+        &binMac[ZERO], &binMac[ONE], &binMac[TWO], &binMac[THREE], &binMac[FOUR], &binMac[FIVE]);
     if (ret < 0) {
         return SOFTBUS_ERR;
     }
@@ -266,7 +273,7 @@ int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
         return SOFTBUS_INVALID_PARAM;
     }
     ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
-        binMac[0], binMac[1], binMac[2], binMac[3], binMac[4], binMac[5]);
+        binMac[ZERO], binMac[ONE], binMac[TWO], binMac[THREE], binMac[FOUR], binMac[FIVE]);
     if (ret < 0) {
         return SOFTBUS_ERR;
     }
