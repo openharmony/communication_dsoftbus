@@ -901,7 +901,7 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID);
         if (msg != NULL) {
             g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
-        }  
+        }
     }
 }
 
@@ -1058,7 +1058,7 @@ static void BleDisconnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
     g_connectCallback->OnDisconnected(targetNode->connId, &(targetNode->info));
 }
 
-static cJson *GetLocalInfoJson()
+static cJson *GetLocalInfoJson(void)
 {
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
@@ -1086,7 +1086,7 @@ static cJson *GetLocalInfoJson()
 int SendSelfBasicInfo(uint32_t connId)
 {
     cJSON *json =  GetLocalInfoJson();
-    if (NULL == json) {
+    if (json == NULL) {
         return SOFTBUS_ERR;
     }
     char *data = cJSON_PrintUnformatted(json);

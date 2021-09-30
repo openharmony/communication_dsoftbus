@@ -790,21 +790,19 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             info->isSameAccount[pos] = isSameAccount;
             info->isWakeRemote[pos] = isWakeRemote;
             info->freq[pos] = freq;
-            if (custData == NULL) {
-                info->capDataLen[pos] = 0;
-                continue;
-            }
-            if (info->capabilityData[pos] == NULL) {
-                if ((info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN)) == NULL) {
-                    info->capDataLen[pos] = 0;
-                    return SOFTBUS_MALLOC_ERR;
+            info->capDataLen[pos] = 0;
+            if (custData != NULL) {
+                if (info->capabilityData[pos] == NULL) {
+                    info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
+                    if (info->capabilityData[pos] == NULL) {
+                        return SOFTBUS_MALLOC_ERR;
+                    }
                 }
+                if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+                    return SOFTBUS_MEM_ERR;
+                }
+                info->capDataLen[pos] = custDataLen;
             }
-            if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
-                info->capDataLen[pos] = 0;
-                return SOFTBUS_MEM_ERR;
-            }
-            info->capDataLen[pos] = custDataLen;
         }
     }
     return SOFTBUS_OK;
