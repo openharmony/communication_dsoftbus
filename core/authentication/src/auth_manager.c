@@ -995,7 +995,7 @@ static int32_t ServerIpAuthInit(AuthManager *auth, int32_t cfd, const char *peer
     }
     auth->hichain = g_hichainGaInstance;
     auth->fd = cfd;
-    auth->authId = 0;
+    auth->authId = cfd;
     auth->encryptInfoStatus = INITIAL_STATE;
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
