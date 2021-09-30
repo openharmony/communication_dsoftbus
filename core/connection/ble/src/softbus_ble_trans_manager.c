@@ -45,6 +45,41 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     return SOFTBUS_OK;
 }
 
+static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, BleTransHeader *header, int *pAvailableIndex) {
+    if (NULL==targetNode || NULL==header || NULL==pAvailableIndex) {
+        return SOFTBUS_ERR;
+    }
+    int availableIndex = -1;
+    int i;
+    for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
+        if (targetNode->recvCache[i].isUsed == 0) {
+            availableIndex = availableIndex > -1 ? availableIndex : i;
+            continue;
+        }
+        if (targetNode->recvCache[i].seq == header->seq) {
+            break;
+        }
+    }
+    if ((i == MAX_CACHE_NUM_PER_CONN) && (availableIndex == -1)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv no availed cache");
+        return SOFTBUS_ERR;
+    }
+    if (i == MAX_CACHE_NUM_PER_CONN) {
+        targetNode->recvCache[availableIndex].isUsed = 1;
+        targetNode->recvCache[availableIndex].currentSize = 0;
+        targetNode->recvCache[availableIndex].seq = header->seq;
+        if (targetNode->recvCache[availableIndex].cache == NULL) {
+            targetNode->recvCache[availableIndex].cache = (char *)SoftBusCalloc(MAX_DATA_LEN);
+            if (targetNode->recvCache[availableIndex].cache == NULL) {
+                targetNode->recvCache[availableIndex].isUsed = 0;
+                return SOFTBUS_ERR;
+            }
+        }
+        i = availableIndex;
+    }
+    *pAvailableIndex = i;
+    return SOFTBUS_OK;
+}
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
 {
     if (value == NULL) {
@@ -67,33 +102,10 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
         *index = -1;
         return value + sizeof(BleTransHeader);
     }
-    int availableIndex = -1;
+    
     int i;
-    for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
-        if (targetNode->recvCache[i].isUsed == 0) {
-            availableIndex = availableIndex > -1 ? availableIndex : i;
-            continue;
-        }
-        if (targetNode->recvCache[i].seq == header.seq) {
-            break;
-        }
-    }
-    if ((i == MAX_CACHE_NUM_PER_CONN) && (availableIndex == -1)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv no availed cache");
+    if (SOFTBUS_ERR == FindAvailableCacheIndex(targetNode, &header, &i)) {
         return NULL;
-    }
-    if (i == MAX_CACHE_NUM_PER_CONN) {
-        targetNode->recvCache[availableIndex].isUsed = 1;
-        targetNode->recvCache[availableIndex].currentSize = 0;
-        targetNode->recvCache[availableIndex].seq = header.seq;
-        if (targetNode->recvCache[availableIndex].cache == NULL) {
-            targetNode->recvCache[availableIndex].cache = (char *)SoftBusCalloc(MAX_DATA_LEN);
-            if (targetNode->recvCache[availableIndex].cache == NULL) {
-                targetNode->recvCache[availableIndex].isUsed = 0;
-                return NULL;
-            }
-        }
-        i = availableIndex;
     }
     if (memcpy_s(targetNode->recvCache[i].cache + header.offset, MAX_DATA_LEN - header.offset,
         value + sizeof(BleTransHeader), header.size) != 0) {
