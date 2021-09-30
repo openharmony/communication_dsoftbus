@@ -26,6 +26,7 @@ extern "C" {
 
 typedef enum {
     LNN_DRIVER_MODULE_WLAN_PARAM = 0,
+    LNN_DRIVER_MODULE_LWIP_MONITOR,
     LNN_DRIVER_MODULE_MAX_INDEX,
 } LnnDriverModuleId;
 

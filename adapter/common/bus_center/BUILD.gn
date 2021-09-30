@@ -49,24 +49,29 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("dsoftbus_bus_center_monitor") {
-      sources = [
-        "driver/lnn_driver_monitor_virtual.c",
-        "driver/lnn_driver_request_virtual.c",
-        "network/lnn_lwip_monitor_virtual.c",
-      ]
-      if (ohos_kernel_type == "linux") {
-        sources += [
-          "network/lnn_netlink_monitor.c",
-          "platform/lnn_product_monitor_virtual.c",
-          "wlan/lnn_wifiservice_monitor_virtual.cpp",
-        ]
-      }
+      sources = [ "network/lnn_lwip_monitor_virtual.c" ]
       include_dirs = [
         "$softbus_adapter_common/include",
         "$dsoftbus_root_path/core/common/include",
         "//third_party/bounds_checking_function/include",
         "$hilog_lite_include_path",
       ]
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
+        "$dsoftbus_root_path/core/common/log:softbus_log",
+        "$hilog_lite_deps_path",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+      if (ohos_kernel_type == "linux") {
+        sources += [
+          "driver/lnn_driver_monitor_virtual.c",
+          "driver/lnn_driver_request_virtual.c",
+          "network/lnn_netlink_monitor.c",
+          "platform/lnn_product_monitor_virtual.c",
+          "wlan/lnn_wifiservice_monitor_virtual.cpp",
+        ]
+      }
       if (ohos_kernel_type == "liteos_a") {
         sources += [
           "network/lnn_netlink_monitor_virtual.c",
@@ -79,6 +84,30 @@ if (defined(ohos_lite)) {
           "//drivers/framework/include/core",
           "//drivers/framework/ability/sbuf/include",
         ]
+        if (enable_dsoftbus_driver) {
+          sources += [
+            "driver/lnn_hdf_driver_monitor.c",
+            "driver/lnn_hdf_driver_request.c",
+          ]
+          include_dirs += [
+            "$dsoftbus_root_path/core/common/message_handler/include",
+            "//drivers/framework/core/shared/include",
+            "//drivers/framework/include",
+            "//drivers/framework/include/core",
+            "//drivers/ability/sbuf/include",
+            "//drivers/adapter/uhdf/posix/include",
+          ]
+          deps += [
+            "//drivers/adapter/uhdf/manager:hdf_core",
+            "//drivers/adapter/uhdf/platform:hdf_platform",
+            "//drivers/adapter/uhdf/posix:hdf_posix_osal",
+          ]
+        } else {
+          sources += [
+            "driver/lnn_driver_monitor_virtual.c",
+            "driver/lnn_driver_request_virtual.c",
+          ]
+        }
       }
       cflags = [
         "-Wall",
@@ -88,20 +117,6 @@ if (defined(ohos_lite)) {
         "-std=c99",
       ]
       public_configs = [ ":bus_center_monitor_interface" ]
-      deps = [
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
-        "$dsoftbus_root_path/core/common/log:softbus_log",
-        "$hilog_lite_deps_path",
-        "//third_party/bounds_checking_function:libsec_shared",
-      ]
-      if (ohos_kernel_type == "liteos_a") {
-        deps += [
-          "//drivers/adapter/uhdf/manager:hdf_core",
-          "//drivers/adapter/uhdf/platform:hdf_platform",
-          "//drivers/adapter/uhdf/posix:hdf_posix_osal",
-        ]
-      }
     }
   }
 } else {
