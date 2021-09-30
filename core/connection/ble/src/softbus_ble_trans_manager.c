@@ -45,8 +45,9 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     return SOFTBUS_OK;
 }
 
-static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, BleTransHeader *header, int *pAvailableIndex) {
-    if (NULL==targetNode || NULL==header || NULL==pAvailableIndex) {
+static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleTransHeader *header, int *pAIndex)
+{
+    if (targetNode == NULL || header == NULL || pAvailableIndex == NULL) {
         return SOFTBUS_ERR;
     }
     int availableIndex = -1;
@@ -77,9 +78,10 @@ static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, BleTransHe
         }
         i = availableIndex;
     }
-    *pAvailableIndex = i;
+    *pAIndex = i;
     return SOFTBUS_OK;
 }
+
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
 {
     if (value == NULL) {
@@ -104,7 +106,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
     
     int i;
-    if (SOFTBUS_ERR == FindAvailableCacheIndex(targetNode, &header, &i)) {
+    if (FindAvailableCacheIndex(targetNode, &header, &i) == SOFTBUS_ERR) {
         return NULL;
     }
     if (memcpy_s(targetNode->recvCache[i].cache + header.offset, MAX_DATA_LEN - header.offset,
