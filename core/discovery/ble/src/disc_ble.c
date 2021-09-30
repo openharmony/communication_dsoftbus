@@ -716,32 +716,32 @@ static int32_t GetScannerParam(int32_t freq, SoftBusBleScanParams *scanParam)
     return SOFTBUS_OK;
 }
 
-static int32_t StartScaner(void)
+static void StartScaner(void)
 {
     if (!CheckScanner()) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "no need to start scanner");
         (void)StopScaner();
-        return SOFTBUS_ERR;
+        return;
     }
     if (g_isScanning) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "scanner already start");
         if (StopScaner() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "stop scanner failed");
-            return SOFTBUS_ERR;
+            return;
         }
     }
     SoftBusBleScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
     if (GetScannerParam(maxFreq, &scanParam) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetScannerParam failed");
-        return SOFTBUS_ERR;
+        return;
     }
     if (SoftBusStartScan(g_bleListener.scanListenerId, &scanParam) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start scan failed");
-        return SOFTBUS_ERR;
+        return;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartScanner success");
-    return SOFTBUS_OK;
+    //return ;
 }
 
 static int32_t StopScaner(void)
@@ -792,17 +792,18 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             info->freq[pos] = freq;
             info->capDataLen[pos] = 0;
             if (custData != NULL) {
-                if (info->capabilityData[pos] == NULL) {
-                    info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
-                    if (info->capabilityData[pos] == NULL) {
-                        return SOFTBUS_MALLOC_ERR;
-                    }
-                }
-                if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
-                    return SOFTBUS_MEM_ERR;
-                }
-                info->capDataLen[pos] = custDataLen;
+                continue;
             }
+            if (info->capabilityData[pos] == NULL) {
+                info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
+                if (info->capabilityData[pos] == NULL) {
+                    return SOFTBUS_MALLOC_ERR;
+                }
+            }
+            if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+                return SOFTBUS_MEM_ERR;
+            }
+            info->capDataLen[pos] = custDataLen;
         }
     }
     return SOFTBUS_OK;
@@ -1053,7 +1054,7 @@ static void StartPassivePublish(SoftBusMessage *msg)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UpdateAdvertiser %d", NON_ADV_ID);
         UpdateAdvertiser(NON_ADV_ID);
     }
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartPassivePublish finish");
 }
 
@@ -1064,7 +1065,7 @@ static void StartActiveDiscovery(SoftBusMessage *msg)
         return;
     }
     if (StartAdvertiser(CON_ADV_ID) == SOFTBUS_OK) {
-        (void)StartScaner();
+        StartScaner();
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartActiveDiscovery finish");
 }
@@ -1075,7 +1076,7 @@ static void StartPassiveDiscovery(SoftBusMessage *msg)
     if (msg == NULL || msg->what != START_PASSIVE_DISCOVERY) {
         return;
     }
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartPassiveDiscovery finish");
 }
 
@@ -1087,7 +1088,7 @@ static void Recovery(SoftBusMessage *msg)
     }
     (void)StartAdvertiser(CON_ADV_ID);
     (void)StartAdvertiser(NON_ADV_ID);
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recovery finish");
 }
 
@@ -1304,7 +1305,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
                 UpdateAdvertiser(NON_ADV_ID);
             }
-            (void)StartScaner();
+            StartScaner();
             break;
         case START_ACTIVE_DISCOVERY:
             StartActiveDiscovery(msg);
