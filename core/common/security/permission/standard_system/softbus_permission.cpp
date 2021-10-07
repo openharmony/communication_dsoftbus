@@ -69,7 +69,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
 
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
 {
-    if (mySessionName == NULL || peerSessionName == NULL) {
+    if (mySessionName == nullptr || peerSessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(mySessionName, peerSessionName) == 0) {
