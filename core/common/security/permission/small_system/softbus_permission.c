@@ -90,6 +90,23 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     return SOFTBUS_PERMISSION_DENIED;
 }
 
+int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
+{
+    if (mySessionName == NULL || peerSessionName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(mySessionName, peerSessionName) == 0) {
+        return SOFTBUS_OK;
+    }
+    if (!PermIsSecLevelPublic(mySessionName)) {
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (!PermIsSecLevelPublic(peerSessionName)) {
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
     (void)pkgName;
