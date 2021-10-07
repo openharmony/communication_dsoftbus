@@ -61,7 +61,7 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-int32_t TransPermissionInit()
+int32_t TransPermissionInit(void)
 {
     return LoadPermissionJson(PERMISSION_JSON_FILE);
 }
