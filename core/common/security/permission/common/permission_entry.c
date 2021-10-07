@@ -37,7 +37,7 @@
 #define SESSION_NAME_STR "SESSION_NAME"
 #define REGEXP_STR "REGEXP"
 #define DEVID_STR "DEVID"
-#define SEC_LEVEL_STR "SEV_LEVEL"
+#define SEC_LEVEL_STR "SEC_LEVEL"
 #define APP_INFO_STR "APP_INFO"
 
 /* app info key */
@@ -485,4 +485,27 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
     return SOFTBUS_PERMISSION_DENIED;
+}
+
+bool PermIsSecLevelPublic(const char *sessionName)
+{
+    if (sessionName == NULL) {
+        return false;
+    }
+    SoftBusPermissionEntry *pe = NULL;
+    bool ret = false;
+    if (pthread_mutex_lock(&g_permissionEntryList->lock) != 0) {
+        return false;
+    }
+    LIST_FOR_EACH_ENTRY(pe, &g_permissionEntryList->list, SoftBusPermissionEntry, node) {
+        if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
+            if (pe->secLevel == LEVEL_PUBLIC) {
+                ret = true;
+            }
+            break;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PermIsSecLevelPublic: %s is %d", sessionName, ret);
+    return ret;
 }
