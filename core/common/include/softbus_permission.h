@@ -37,7 +37,7 @@ enum {
     GRANTED_APP,
 };
 
-int32_t TransPermissionInit();
+int32_t TransPermissionInit(void);
 void TransPermissionDeinit(void);
 int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions);
