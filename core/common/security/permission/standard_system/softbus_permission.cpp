@@ -39,7 +39,7 @@ namespace {
     const int32_t MULTE_USER_RADIX = 100000;
 }
 
-int32_t TransPermissionInit()
+int32_t TransPermissionInit(void)
 {
     return LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
 }
