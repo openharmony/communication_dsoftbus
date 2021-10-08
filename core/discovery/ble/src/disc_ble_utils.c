@@ -37,12 +37,12 @@
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
 
-#define ZERO 0
-#define ONE 1
-#define TWO 2
-#define THREE 3
-#define FOUR 4
-#define FIVE 5
+#define MAC_BIT_ZERO 0
+#define MAC_BIT_ONE 1
+#define MAC_BIT_TWO 2
+#define MAC_BIT_THREE 3
+#define MAC_BIT_FOUR 4
+#define MAC_BIT_FIVE 5
 
 #ifndef PACKET_CHECK_LENGTH
 #define PACKET_CHECK_LENGTH(len) \
@@ -257,7 +257,8 @@ int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
         return SOFTBUS_INVALID_PARAM;
     }
     ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
-        &binMac[ZERO], &binMac[ONE], &binMac[TWO], &binMac[THREE], &binMac[FOUR], &binMac[FIVE]);
+        &binMac[MAC_BIT_ZERO], &binMac[MAC_BIT_ONE], &binMac[MAC_BIT_TWO],
+        &binMac[MAC_BIT_THREE], &binMac[MAC_BIT_FOUR], &binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         return SOFTBUS_ERR;
     }
@@ -273,7 +274,8 @@ int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
         return SOFTBUS_INVALID_PARAM;
     }
     ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
-        binMac[ZERO], binMac[ONE], binMac[TWO], binMac[THREE], binMac[FOUR], binMac[FIVE]);
+        binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
+        binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
         return SOFTBUS_ERR;
     }
