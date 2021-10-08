@@ -33,7 +33,6 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_property.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 

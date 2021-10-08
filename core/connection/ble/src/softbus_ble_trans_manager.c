@@ -45,8 +45,9 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     return SOFTBUS_OK;
 }
 
-static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleTransHeader *header, int *pAIndex)
+static int32_t FindAvailableCacheIndex(int32_t halConnId, const BleTransHeader *header, int *pAIndex)
 {
+    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
     if (targetNode == NULL || header == NULL || pAvailableIndex == NULL) {
         return SOFTBUS_ERR;
     }
@@ -106,9 +107,10 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
 
     int i;
-    if (FindAvailableCacheIndex(targetNode, (const BleTransHeader *)&header, &i) == SOFTBUS_ERR) {
+    if (FindAvailableCacheIndex(halConnId, (const BleTransHeader *)&header, &i) == SOFTBUS_ERR) {
         return NULL;
     }
+
     if (memcpy_s(targetNode->recvCache[i].cache + header.offset, MAX_DATA_LEN - header.offset,
         value + sizeof(BleTransHeader), header.size) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv memcpy_s failed");
