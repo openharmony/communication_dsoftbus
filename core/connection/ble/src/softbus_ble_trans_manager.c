@@ -45,17 +45,13 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     return SOFTBUS_OK;
 }
 
-static int32_t FindAvailableCacheIndex(int32_t halConnId, const BleTransHeader *header, int *canIndex)
+static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleTransHeader *header, int *canIndex)
 {
-    if (header == NULL || pAvailableIndex == NULL) {
+    if (targetNode == NULL || header == NULL || pAvailableIndex == NULL) {
         return SOFTBUS_ERR;
     }
-    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
-    if (targetNode == NULL) {
-        return SOFTBUS_ERR;
-    }
-    int availableIndex = -1;
-    int i;
+    int32_t availableIndex = -1;
+    int32_t i;
     for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
         if (targetNode->recvCache[i].isUsed == 0) {
             availableIndex = (availableIndex > -1) ? availableIndex : i;
@@ -110,7 +106,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
 
     int32_t canIndex;
-    if (FindAvailableCacheIndex(halConnId, (const BleTransHeader *)&header, &canIndex) != SOFBUS_OK) {
+    if (FindAvailableCacheIndex(targetNode, (const BleTransHeader *)&header, &canIndex) != SOFBUS_OK) {
         return NULL;
     }
 
@@ -175,7 +171,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
             sendlenth = dataLenMax;
         }
         char *buff = (char *)SoftBusCalloc(sendlenth + sizeof(BleTransHeader));
-        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendlenth, sendData, sendlenth);
+        int32_t ret = memcpy_s(buff + sizeof(BleTransHeader), sendlenth, sendData, sendlenth);
         if (ret != SOFTBUS_OK) {
             LOG_INFO("BleTransSend big msg, len:%{public}d\n", templen);
             SoftBusFree(buff);
