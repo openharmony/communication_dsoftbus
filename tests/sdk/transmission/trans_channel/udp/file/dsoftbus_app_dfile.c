@@ -170,9 +170,12 @@ static IFileSendListener g_fileSendListener = {
 static void TestSetFileSendListener(void)
 {
     LOG2_INFO("*******************SET FILE SEND LISTENER*************");
-    int ret;
-    ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
-    LOG2_INFO("SetFileSendListener ret = %d\n", ret);
+    int32_t ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
+    if (ret != SOFTBUS_OK) {
+        LOG2_INFO("SetFileSendListener ret = %d\n", ret);
+    } else {
+        LOG2_INFO("TestSetFileSendListener ok\n");
+    }
 }
 
 static int TestSendFile(int sessionId)
@@ -183,9 +186,12 @@ static int TestSendFile(int sessionId)
         "/data/richu-002.jpg",
         "/data/richu-003.jpg",
     };
-    int ret;
-    ret = SendFile(sessionId, sfileList, NULL, FILE_NUM);
-    LOG2_INFO("SendFile ret = %d\n", ret);
+    int32_t ret = SendFile(sessionId, sfileList, NULL, FILE_NUM);
+    if (ret != SOFTBUS_OK) {
+        LOG2_INFO("SendFile ret = %d\n", ret);
+    } else {
+        LOG2_INFO("SendFile ok\n");
+    }
     return ret;
 }
 
@@ -267,8 +273,12 @@ static IFileReceiveListener g_fileRecvListener  = {
 
 static void TestSetFileRecvListener(void)
 {
-    int ret = SetFileReceiveListener(g_testModuleName, g_testSessionNameE2, &g_fileRecvListener, "/data/");
-    LOG2_INFO("SetFileRecvListener ret = %d\n", ret);
+    int32_t ret = SetFileReceiveListener(g_testModuleName, g_testSessionNameE2, &g_fileRecvListener, "/data/");
+    if (ret != SOFTBUS_OK) {
+        LOG2_INFO("SetFileReceiveListener ret = %d\n", ret);
+    } else {
+        LOG2_INFO("SetFileReceiveListener ok\n");
+    }
 }
 
 static void TestReceiveFile(int state)

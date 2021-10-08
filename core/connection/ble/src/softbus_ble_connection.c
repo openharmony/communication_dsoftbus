@@ -1340,10 +1340,10 @@ static void InitBleInterface(void)
     g_bleInterface.StopLocalListening = BleStopLocalListening;
 }
 
-static void BleConnAddSerMsgHandler(SoftBusMessage *msg)
+static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call GattsRegisterCallback");
-    int ret = GattsRegisterCallback();
+    int32_t ret = GattsRegisterCallback();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed：%d", ret);
         return;
@@ -1378,8 +1378,8 @@ static void BleConnMsgHandler(SoftBusMessage *msg)
         case ADD_CHARA_MSG:
             uuid.uuid = (char *)msg->obj;
             uuid.uuidLen = BT_UUID_LEN;
-            properties = (int)msg->arg1;
-            permissions = (int)msg->arg2;
+            properties = (int32_t)msg->arg1;
+            permissions = (int32_t)msg->arg2;
             ret = SoftBusGattsAddCharacteristic(g_gattService.svcId, uuid, properties, permissions);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddCharacteristic  failed:%d", ret);
@@ -1389,7 +1389,7 @@ static void BleConnMsgHandler(SoftBusMessage *msg)
         case ADD_DESCRIPTOR_MSG:
             uuid.uuid = (char *)msg->obj;
             uuid.uuidLen = BT_UUID_LEN;
-            permissions = (int)msg->arg2;
+            permissions = (int32_t)msg->arg2;
             ret = SoftBusGattsAddDescriptor(g_gattService.svcId, uuid, permissions);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddDescriptor  failed:%d", ret);
@@ -1459,7 +1459,7 @@ static SoftBusBtStateListener g_bleConnStateListener = {
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBle]");
-    int ret;
+    int32_t ret;
     ret = BleConnLooperInit();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnLoopInit failed：%d", ret);
