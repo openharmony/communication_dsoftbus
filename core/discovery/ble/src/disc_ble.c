@@ -130,8 +130,8 @@ typedef struct {
     unsigned char *custData;
     uint32_t custDataLen;
     uint32_t freq;
-    bool isSameAccount = false;
-    bool isWakeRemote = false;
+    bool isSameAccount;
+    bool isWakeRemote;
 } BleOption;
 
 static ScanSetting g_scanTable[FREQ_BUTT] = {
@@ -786,7 +786,7 @@ static int32_t GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
         bleOption->freq = option->subscribeOption->freq;
     }
-    optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
+    bleOption->optionCapBitMap[0] = ConvertCapBitMap(bleOption->optionCapBitMap[0]);
     return SOFTBUS_OK;
 }
 
