@@ -73,20 +73,32 @@ extern LockFreeQueue* CreateQueue(uint32_t unitNum);
 
 static inline int32_t QueueIsEmpty(LockFreeQueue* queue)
 {
+    uint32_t producerTail;
+    uint32_t consumerTail;
+    uint32_t mask;
+
     if (queue == NULL) {
         return QUEUE_INVAL;
     }
-    if (((queue->producer.tail - queue->consumer.tail) & queue->producer.mask) == 0) {
+
+    producerTail = queue->producer.tail;
+    consumerTail = queue->consumer.tail;
+    mask = queue->producer.mask;
+
+    if (((producerTail - consumerTail) & mask) == 0) {
         return 0;
     }
     return -1;
 }
 
 /** @brief Enqueue operation, thread unsafe */
-static int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, const void *node)
+static inline int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, const void *node)
 {
-    uint32_t producerHead, producerNext, consumerTail;
-    uint32_t availableCount, mask;
+    uint32_t producerHead;
+    uint32_t producerNext;
+    uint32_t consumerTail;
+    uint32_t availableCount;
+    uint32_t mask;
 
     if (queue == NULL || node == NULL) {
         return QUEUE_INVAL;
@@ -129,11 +141,14 @@ static int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, const void *node
 }
 
 /** @brief Enqueue operation, thread safe */
-static uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node)
+static inline uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node)
 {
-    uint32_t producerHead, producerNext, consumerTail;
-    uint32_t availableCount, mask;
+    uint32_t producerHead;
+    uint32_t producerNext;
+    uint32_t consumerTail;
+    uint32_t availableCount;
     bool success = false;
+    uint32_t mask;
 
     if (queue == NULL || node == NULL) {
         return QUEUE_INVAL;
@@ -190,10 +205,13 @@ static uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node
 }
 
 /** @brief Dequeue operation, thread unsafe */
-static uint32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** node)
+static inline uint32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** node)
 {
-    uint32_t consumerHead, producerTail, consumerNext;
-    uint32_t availableCount, mask;
+    uint32_t consumerHead;
+    uint32_t producerTail;
+    uint32_t consumerNext;
+    uint32_t availableCount;
+    uint32_t mask;
 
     if (queue == NULL || node == NULL) {
         return QUEUE_INVAL;
@@ -240,11 +258,14 @@ static uint32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** node)
 }
 
 /** @brief Dequeue operation, thread safe */
-static uint32_t QueueMultiConsumerDequeue(LockFreeQueue *queue, void **node)
+static inline uint32_t QueueMultiConsumerDequeue(LockFreeQueue *queue, void **node)
 {
     bool success = false;
-    uint32_t consumerHead, producerTail, consumerNext;
-    uint32_t availableCount, mask;
+    uint32_t consumerHead;
+    uint32_t producerTail;
+    uint32_t consumerNext;
+    uint32_t availableCount;
+    uint32_t mask;
 
     if (queue == NULL || node == NULL) {
         return QUEUE_INVAL;

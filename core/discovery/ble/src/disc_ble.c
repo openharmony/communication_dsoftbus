@@ -741,7 +741,6 @@ static void StartScaner(void)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartScanner success");
-    //return ;
 }
 
 static int32_t StopScaner(void)
@@ -796,9 +795,9 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             }
             if (info->capabilityData[pos] == NULL) {
                 info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
-                if (info->capabilityData[pos] == NULL) {
-                    return SOFTBUS_MALLOC_ERR;
-                }
+            }
+            if (info->capabilityData[pos] == NULL) {
+                return SOFTBUS_MALLOC_ERR;
             }
             if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
                 return SOFTBUS_MEM_ERR;

@@ -21,7 +21,6 @@
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
-#include "softbus_property.h"
 #include "trans_channel_callback.h"
 
 #ifdef __cplusplus
