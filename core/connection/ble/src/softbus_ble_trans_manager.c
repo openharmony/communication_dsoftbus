@@ -168,7 +168,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
             sendlenth = dataLenMax;
         }
         char *buff = (char *)SoftBusCalloc(sendlenth + sizeof(BleTransHeader));
-        int32_t ret = memcpy_s(buff + sizeof(BleTransHeader), sendlenth, sendData, sendlenth);
+        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendlenth, sendData, sendlenth);
         if (ret != SOFTBUS_OK) {
             LOG_INFO("BleTransSend big msg, len:%{public}d\n", templen);
             SoftBusFree(buff);
