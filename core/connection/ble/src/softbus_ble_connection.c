@@ -874,7 +874,7 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService state no equal BLE_GATT_SERVICE_ADDING");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService state not equal BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -892,7 +892,6 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService state no equal BLE_GATT_SERVICE_ADDING");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return;
         }
@@ -900,9 +899,10 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
         (void)pthread_mutex_unlock(&g_connectionLock);
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_DESCRIPTOR_MSG, 0,
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID);
-        if (msg != NULL) {
-            g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
+        if (msg == NULL) {
+            return;
         }
+        g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
     }
 }
 
@@ -1068,6 +1068,7 @@ static cJson *GetLocalInfoJson(void)
     }
     char devId[UUID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, UDID_BUF_LEN) != SOFTBUS_OK) {
+        cJSON_Delete(json);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo Get local dev Id failed.");
         return NULL;
     }
