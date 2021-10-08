@@ -47,9 +47,6 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
 
 static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleTransHeader *header, int *canIndex)
 {
-    if (targetNode == NULL || header == NULL || pAvailableIndex == NULL) {
-        return SOFTBUS_ERR;
-    }
     int32_t availableIndex = -1;
     int32_t i;
     for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
@@ -106,7 +103,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
 
     int32_t canIndex;
-    if (FindAvailableCacheIndex(targetNode, (const BleTransHeader *)&header, &canIndex) != SOFBUS_OK) {
+    if (FindAvailableCacheIndex(targetNode, &header, &canIndex) != SOFBUS_OK) {
         return NULL;
     }
 
