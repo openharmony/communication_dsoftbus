@@ -766,7 +766,7 @@ static int32_t StopScaner(void)
     return SOFTBUS_OK;
 }
 
-static int32_t GetBleOption(BleOption *bleOption, const DiscBleOption *option)
+static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
 {
     if (option->publishOption != NULL) {
         bleOption->optionCapBitMap = option->publishOption->capabilityBitmap;
@@ -784,7 +784,6 @@ static int32_t GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->freq = option->subscribeOption->freq;
     }
     bleOption->optionCapBitMap[0] = ConvertCapBitMap(bleOption->optionCapBitMap[0]);
-    return SOFTBUS_OK;
 }
 
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
@@ -794,9 +793,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         return SOFTBUS_INVALID_PARAM;
     }
     BleOption bleOption;
-    if (GetBleOption(&bleOption, option) != SOFTBUS_OK) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    GetBleOption(&bleOption, option);
     uint32_t *optionCapBitMap = bleOption.optionCapBitMap;
     uint32_t custDataLen = bleOption.custDataLen;
     uint32_t freq = bleOption.freq;

@@ -35,6 +35,7 @@
 #include "softbus_log.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
+#include "softbus_utils.h"
 
 #define SEND_QUEUE_UNIT_NUM 128
 #define CONNECT_REF_INCRESE 1
@@ -47,13 +48,6 @@
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
 #define TYPE_HEADER_SIZE 4
-
-#define MAC_BIT_ZERO 0
-#define MAC_BIT_ONE 1
-#define MAC_BIT_TWO 2
-#define MAC_BIT_THREE 3
-#define MAC_BIT_FOUR 4
-#define MAC_BIT_FIVE 5
 
 typedef enum {
     BLE_GATT_SERVICE_INITIAL = 0,
@@ -149,40 +143,6 @@ static SoftBusGattService g_gattService = {
     .bleNetDesId = -1
 };
 static BleQueue g_sendQueue;
-
-static int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen,
-    uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
-        &binMac[MAC_BIT_ZERO], &binMac[MAC_BIT_ONE], &binMac[MAC_BIT_TWO],
-        &binMac[MAC_BIT_THREE], &binMac[MAC_BIT_FOUR], &binMac[MAC_BIT_FIVE]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
-        binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
-        binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
 
 static SoftBusMessage *BleConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, const char *data)
 {
