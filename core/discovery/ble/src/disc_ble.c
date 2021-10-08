@@ -768,9 +768,6 @@ static int32_t StopScaner(void)
 
 static int32_t GetBleOption(BleOption *bleOption, const DiscBleOption *option)
 {
-    if (bleOption == NULL || option == NULL) {
-        return SOFTBUS_ERR;
-    }
     if (option->publishOption != NULL) {
         bleOption->optionCapBitMap = option->publishOption->capabilityBitmap;
         bleOption->custDataLen = option->publishOption->dataLen;
@@ -996,8 +993,8 @@ static DiscoveryFuncInterface g_discBleFuncInterface = {
 
 static int32_t InitAdvertiser(void)
 {
-    int conAdvId = SoftBusGetAdvChannel(&g_advCallback);
-    int nonAdvId = SoftBusGetAdvChannel(&g_advCallback);
+    int32_t conAdvId = SoftBusGetAdvChannel(&g_advCallback);
+    int32_t nonAdvId = SoftBusGetAdvChannel(&g_advCallback);
     if (conAdvId < 0 || nonAdvId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "SoftBusGetAdvChannel failed");
         (void)SoftBusReleaseAdvChannel(conAdvId);
