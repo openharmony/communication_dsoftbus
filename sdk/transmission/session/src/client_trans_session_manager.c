@@ -100,11 +100,12 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         SessionInfo *sessionNode = NULL;
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-            server->listener.session.OnSessionClosed(sessionNode->sessionId);
+            int id = sessionNode->sessionId;
             (void) ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
             DestroySessionId(sessionNode->sessionId);
             ListDelete(&sessionNode->node);
             SoftBusFree(sessionNode);
+            server->listener.session.OnSessionClosed(id);
         }
     }
 
@@ -916,11 +917,12 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server, const
         if (strcmp(sessionNode->info.peerDeviceId, devId) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]",
                        server->sessionName);
-            server->listener.session.OnSessionClosed(sessionNode->sessionId);
+            int id = sessionNode->sessionId;
             (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
             DestroySessionId(sessionNode->sessionId);
             ListDelete(&sessionNode->node);
             SoftBusFree(sessionNode);
+            server->listener.session.OnSessionClosed(id);
         }
     }
 }
