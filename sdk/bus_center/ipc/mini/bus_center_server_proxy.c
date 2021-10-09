@@ -25,7 +25,7 @@
 
 int32_t BusCenterServerProxyInit(void)
 {
-    LOG_INFO("bus center get server proxy ok");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center get server proxy ok");
     return SOFTBUS_OK;
 }
 

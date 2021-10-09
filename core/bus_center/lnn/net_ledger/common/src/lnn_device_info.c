@@ -142,6 +142,10 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
     }
     if (strlen(deviceType) <= DEVICE_TYPE_MAX_LENGTH) {
         mstRet = memset_s(g_stringTypeId, strlen(g_stringTypeId), '0', DEVICE_TYPE_MAX_LENGTH);
+        if (mstRet != EOK) {
+            *typeId = TYPE_UNKNOW_ID;
+            return SOFTBUS_ERR;
+        }
         *typeId = ConvertStringToInt(deviceType, typeId);
         if (*typeId != TYPE_UNKNOW_ID) {
             return SOFTBUS_OK;
