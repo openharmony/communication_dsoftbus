@@ -73,7 +73,7 @@ enum StatusNum {
 };
 
 ISessionListener g_sessionlistener;
-SessionAttribute attr;
+SessionAttribute g_sessionAttr;
 int32_t g_sessionId = -1;
 char g_networkId[NETWORK_ID_LEN] = {0};
 int32_t g_stateDebug = LNN_STATE_JOINLNN;
@@ -208,7 +208,7 @@ static void TestSessionListenerInit(void)
     g_sessionlistener.OnBytesReceived = OnBytesReceived;
     g_sessionlistener.OnMessageReceived = OnMessageReceived;
 
-    attr.dataType = TYPE_FILE;
+    g_sessionAttr.dataType = TYPE_FILE;
 }
 
 static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
@@ -271,7 +271,7 @@ static void TestActiveSendFile(int state)
             break;
         }
         case TRANS_STATE_OPEN: {
-            g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &attr);
+            g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &g_sessionAttr);
             if (g_sessionId < 0) {
                 LOG2_ERR("OpenSession ret[%d]", g_sessionId);
                 return;
