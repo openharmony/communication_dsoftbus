@@ -56,7 +56,7 @@ static const char *g_testSessionName   = "com.huawei.plrdtest.dsoftbus.JtOpenFil
 static const char *g_testSessionNameE2 = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSession";
 static const char *g_testGroupId = "g_testGroupId";
 static ISessionListener g_sessionlistener;
-static SessionAttribute attr;
+static SessionAttribute g_sessionAttr;
 static int32_t g_sessionId = -1;
 static char g_networkId[NETWORK_ID_LEN] = {0};
 static int32_t g_stateDebug = LNN_STATE_JOINLNN;
@@ -139,7 +139,7 @@ static void TestSessionListenerInit(void)
     g_sessionlistener.OnBytesReceived = OnBytesReceived;
     g_sessionlistener.OnMessageReceived = OnMessageReceived;
 
-    attr.dataType = TYPE_FILE;
+    g_sessionAttr.dataType = TYPE_FILE;
 }
 
 static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
@@ -202,7 +202,7 @@ static void TestActiveSendFile(int state)
             break;
         }
         case TRANS_STATE_OPEN: {
-            g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &attr);
+            g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &g_sessionAttr);
             if (g_sessionId < 0) {
                 LOG2_ERR("OpenSession ret[%d]", g_sessionId);
                 return;
