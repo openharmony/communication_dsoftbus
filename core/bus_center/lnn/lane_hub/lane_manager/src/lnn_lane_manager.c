@@ -17,16 +17,27 @@
 
 #include <securec.h>
 
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_smart_communication.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 struct LnnLanesObject {
     LnnLaneProperty prop;
     uint32_t laneNum;
     int32_t laneId[0];
 };
+
+typedef struct {
+    ListNode node;
+    LnnLanesObject *object;
+    LNNLaneQosObserverNotify notify;
+} LaneObserverListItem;
+
+static SoftBusList *g_laneQosObserver;
 
 LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty prop, uint32_t laneNum)
 {
@@ -49,10 +60,12 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty pro
         int32_t laneId = LnnGetRightLane(netWorkId, prop);
         if (laneId < 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRightLane error. laneId = %d", laneId);
-            SoftBusFree(lanesObject);
+            lanesObject->laneNum = i;
+            LnnReleaseLanesObject(lanesObject);
             return NULL;
         }
         lanesObject->laneId[i] = laneId;
+        (void)LnnSetLaneCount(laneId, 1); // laneCount add 1
     }
     return lanesObject;
 }
@@ -63,6 +76,7 @@ void LnnReleaseLanesObject(LnnLanesObject *lanesObject)
         return;
     }
     for (uint32_t i = 0; i < lanesObject->laneNum; i++) {
+        (void)LnnSetLaneCount(lanesObject->laneId[i], -1); // laneCount subtract 1
         LnnReleaseLane(lanesObject->laneId[i]);
     }
     SoftBusFree(lanesObject);
@@ -84,4 +98,95 @@ uint32_t LnnGetLaneNum(LnnLanesObject *lanesObject)
         return SOFTBUS_ERR;
     }
     return lanesObject->laneNum;
+}
+
+static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LNNLaneQosObserverNotify notify)
+{
+    LaneObserverListItem *item = NULL;
+    SoftBusList *list = g_laneQosObserver;
+    item = (LaneObserverListItem *)SoftBusMalloc(sizeof(LaneObserverListItem));
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc LaneQosObserver list item");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&item->node);
+    item->object = object;
+    item->notify = notify;
+    ListAdd(&list->list, &item->node);
+    list->cnt++;
+    return SOFTBUS_OK;
+}
+
+static void ClearLaneQosObserverList(LnnLanesObject *object)
+{
+    LaneObserverListItem *item = NULL;
+    LaneObserverListItem *next = NULL;
+    ListNode *list = &g_laneQosObserver->list;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, list, LaneObserverListItem, node) {
+        if (object != item->object) {
+            continue;
+        }
+        ListDelete(&item->node);
+        if (g_laneQosObserver->cnt > 0) {
+            g_laneQosObserver->cnt--;
+        }
+        SoftBusFree(item);
+    }
+}
+
+int32_t LNNLaneQosObserverAttach(LnnLanesObject *object, LNNLaneQosObserverNotify notify)
+{
+    if (object == NULL || notify == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        return SOFTBUS_ERR;
+    }
+    if (AddLaneQosObserverItem(object, notify) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddLaneQosObserverItem failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void LNNLaneQosObserverDetach(LnnLanesObject *object)
+{
+    if (object == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+    }
+    ClearLaneQosObserverList(object);
+}
+
+static void LaneMonitorCallback(int32_t laneId, int32_t socre)
+{
+    LaneObserverListItem *item = NULL;
+    SoftBusList *list = g_laneQosObserver;
+    LIST_FOR_EACH_ENTRY(item, &list->list, LaneObserverListItem, node) {
+        for (uint32_t i = 0; i < item->object->laneNum; i++) {
+            if (laneId == item->object->laneId[i]) {
+                item->notify(laneId, socre);
+            }
+        }
+    }
+}
+
+int32_t InitLaneManager(void)
+{
+    if (LnnLanesInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanesInit error");
+        return SOFTBUS_ERR;
+    }
+    if (g_laneQosObserver == NULL) {
+        g_laneQosObserver = CreateSoftBusList();
+        if (g_laneQosObserver == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateSoftBusList error");
+            return SOFTBUS_ERR;
+        }
+    }
+    if (LnnRegisterLaneMonitor(LaneMonitorCallback) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnRegisterLaneMonitor error");
+        DestroySoftBusList(g_laneQosObserver);
+        g_laneQosObserver = NULL;
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitLaneManager success");
+    return SOFTBUS_OK;
 }

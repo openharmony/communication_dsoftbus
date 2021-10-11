@@ -37,6 +37,7 @@ if (defined(ohos_lite)) {
         "lane_manager/include",
         "time_sync/include",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
         "$dsoftbus_root_path/core/bus_center/service/include",
         "$dsoftbus_root_path/core/common/include",
         "$hilog_lite_include_path",
@@ -51,6 +52,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
       ]
     }
@@ -83,6 +85,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+        "$dsoftbus_root_path/core/common/utils:softbus_utils",
         "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
@@ -135,6 +138,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
+      "$dsoftbus_root_path/core/common/utils:softbus_utils",
       "//utils/native/base:utils",
     ]
     if (enable_time_sync == true) {
