@@ -133,7 +133,7 @@ static void DeinitConnectionCode(ConnectionCode *cnnCode)
 
 static void InitLaneStatus()
 {
-    uint32_t len = LNN_LINK_TYPE_BUTT * sizeof(uint32_t);
+    uint32_t len = LNN_LINK_TYPE_BUTT * sizeof(int32_t);
     (void)memset_s(g_distributedNetLedger.laneCount, len, 0, len);
 }
 
