@@ -92,15 +92,17 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         return;
     }
     if (head->module != MODULE_UDP_INFO && head->module != MODULE_AUTH_CHANNEL && head->module != MODULE_AUTH_MSG) {
-        if (auth->authId != head->seq && auth->authId != 0 &&
+        if (auth->authId != head->seq && auth->authId != fd &&
             (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION)) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                "handle verify device failed, authId = %lld, fd = %d", auth->authId, fd);
             return;
         }
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d", head->module);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
-            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == 0) {
+            if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == fd) {
                 auth->authId = head->seq;
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %lld", auth->authId);
             }
@@ -201,6 +203,10 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
         head.len, head.module, head.flag, head.seq);
     if (head.len > AUTH_MAX_DATA_LEN) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
+        return SOFTBUS_ERR;
+    }
+    if (head.magic != MAGIC_NUMBER) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv invalid packet head");
         return SOFTBUS_ERR;
     }
     AuthIpDataProcess(fd, &head);
