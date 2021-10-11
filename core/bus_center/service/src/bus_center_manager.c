@@ -19,12 +19,12 @@
 #include <stdlib.h>
 
 #include "bus_center_event.h"
-#include "lnn_network_manager.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_time_sync_manager.h"
