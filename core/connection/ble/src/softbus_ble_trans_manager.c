@@ -103,7 +103,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
 
     int32_t canIndex;
-    if (FindAvailableCacheIndex(targetNode, &header, &canIndex) != SOFBUS_OK) {
+    if (FindAvailableCacheIndex(targetNode, &header, &canIndex) != SOFTBUS_OK) {
         return NULL;
     }
 
