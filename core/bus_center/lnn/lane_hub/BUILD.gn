@@ -37,6 +37,7 @@ if (defined(ohos_lite)) {
         "lane_manager/include",
         "time_sync/include",
         "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
         "$dsoftbus_root_path/core/bus_center/service/include",
         "$dsoftbus_root_path/core/common/include",
         "$hilog_lite_include_path",
