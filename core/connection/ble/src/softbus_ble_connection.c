@@ -48,6 +48,10 @@
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
 #define TYPE_HEADER_SIZE 4
+#define SOFTBUS_SERVICE_UUID "11C8B310-80E4-4276-AFC0-F81590B2177F"
+#define SOFTBUS_CHARA_BLENET_UUID "00002B00-0000-1000-8000-00805F9B34FB"
+#define SOFTBUS_CHARA_BLECONN_UUID "00002B01-0000-1000-8000-00805F9B34FB"
+#define SOFTBUS_DESCRIPTOR_CONFIGURE_UUID "00002902-0000-1000-8000-00805F9B34FB"
 
 typedef enum {
     BLE_GATT_SERVICE_INITIAL = 0,
@@ -120,11 +124,6 @@ static const int MTU_HEADER_SIZE = 3;
 static const int BLE_GATT_ATT_MTU_MAX = 512;
 static const int BLE_ROLE_CLIENT = 1;
 static const int BLE_ROLE_SERVER = 2;
-
-static const char *g_softbusServiceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
-static const char *g_softbusCharaBlenetUuid = "00002B00-0000-1000-8000-00805F9B34FB";
-static const char *g_softbusCharaBleconnUuid = "00002B01-0000-1000-8000-00805F9B34FB";
-static const char *g_softbusDescriptorConfigureUuid = "00002902-0000-1000-8000-00805F9B34FB";
 
 static LIST_HEAD(g_conection_list);
 static ConnectCallback *g_connectCallback = NULL;
@@ -798,7 +797,7 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
         return;
     }
 
-    if (memcmp(uuid->uuid, g_softbusServiceUuid, uuid->uuidLen) == 0) {
+    if (memcmp(uuid->uuid, SOFTBUS_SERVICE_UUID, uuid->uuidLen) == 0) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
@@ -820,14 +819,14 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE, SOFTBUS_GATT_PERMISSION_READ |
-            SOFTBUS_GATT_PERMISSION_WRITE, g_softbusCharaBlenetUuid);
+            SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_CHARA_BLENET_UUID);
         if (msg == NULL) {
             return;
         }
         g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
 
         msg = BleConnCreateLoopMsg(ADD_DESCRIPTOR_MSG, 0,
-            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, g_softbusDescriptorConfigureUuid);
+            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID);
         if (msg == NULL) {
             return;
         }
@@ -837,7 +836,7 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE, SOFTBUS_GATT_PERMISSION_READ |
-            SOFTBUS_GATT_PERMISSION_WRITE, g_softbusCharaBleconnUuid);
+            SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_CHARA_BLECONN_UUID);
         if (msg == NULL) {
             return;
         }
@@ -858,7 +857,7 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
         return;
     }
 
-    if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, g_softbusCharaBlenetUuid, uuid->uuidLen) == 0)) {
+    if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLENET_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
@@ -879,7 +878,7 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
         return;
     }
 
-    if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, g_softbusCharaBleconnUuid, uuid->uuidLen) == 0)) {
+    if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLECONN_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
@@ -898,7 +897,7 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
         g_gattService.bleConnCharaId = characteristicHandle;
         (void)pthread_mutex_unlock(&g_connectionLock);
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_DESCRIPTOR_MSG, 0,
-            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, g_softbusDescriptorConfigureUuid);
+            SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID);
         if (msg == NULL) {
             return;
         }
@@ -917,7 +916,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
     }
 
     if ((srvcHandle == g_gattService.svcId) &&
-        (memcmp(uuid->uuid, g_softbusDescriptorConfigureUuid, uuid->uuidLen) == 0)) {
+        (memcmp(uuid->uuid, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
@@ -1430,7 +1429,7 @@ void BleConnOnBtStateChanged(int listenerId, int state)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BleOnBtStateChanged] id:%d, state:%d", listenerId, state);
     if (state == SOFTBUS_BT_STATE_TURN_ON) {
-        SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_SERVICE_MSG, 0, 0, g_softbusServiceUuid);
+        SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_SERVICE_MSG, 0, 0, SOFTBUS_SERVICE_UUID);
         if (msg == NULL) {
             return;
         }
