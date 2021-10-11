@@ -109,7 +109,7 @@ bool AuthIsSeqInKeyList(int32_t seq)
 {
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "no session key in memory");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "auth is seq in key list, no session key in memory");
         return false;
     }
     ListNode *item = NULL;
@@ -130,7 +130,7 @@ static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
     }
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no session key in memory");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get last session key, no session key in memory");
         return NULL;
     }
     ListNode *item = NULL;
@@ -155,7 +155,8 @@ static SessionKeyList *GetSessionKeyByDevinfo(const NecessaryDevInfo *devInfo)
     }
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no session key in memory");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "auth get session key by device info, no session key in memory");
         return NULL;
     }
     ListNode *item = NULL;
@@ -177,7 +178,7 @@ static SessionKeyList *AuthGetSessionKeyBySeq(int32_t seq)
 {
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no session key in memory");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get session key by seq, no session key in memory");
         return NULL;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth get session key by seq %d", seq);
@@ -326,7 +327,7 @@ void AuthClearSessionKeyBySeq(int32_t seq)
 {
     SessionKeyList *sessionKeyList = NULL;
     if (IsListEmpty(&g_sessionKeyListHead) == true) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no session key in memory");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth clear session key by seq, no session key in memory");
         return;
     }
     ListNode *item = NULL;
