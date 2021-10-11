@@ -24,6 +24,11 @@ extern "C" {
 #endif
 
 #define LNN_REQUEST_MAX_LANE_NUM 1
+#define MAX_LANE_QUALITY_SCORE 100
+#define PASSING_LANE_QUALITY_SCORE 80
+#define THRESHOLD_LANE_QUALITY_SCORE 60
+#define LANE_COUNT_THRESHOLD 5
+
 /* Link type */
 typedef enum {
     LNN_LINK_TYPE_WLAN_5G = 0x0,
@@ -50,8 +55,12 @@ ConnectionAddrType LnnGetLaneType(int32_t laneId);
 void LnnReleaseLane(int32_t laneId);
 const LnnLaneInfo *LnnGetConnection(int32_t laneId);
 bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool mode);
-void LnnLanesInit(void);
+int32_t LnnLanesInit(void);
 void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport);
+typedef void (*LnnLaneMonitorCallback)(int32_t laneId, int32_t socre);
+int32_t LnnRegisterLaneMonitor(LnnLaneMonitorCallback callback);
+int32_t LNNGetLaneScore(int32_t laneId);
+void TriggerLaneMonitor(void);
 
 #ifdef __cplusplus
 }

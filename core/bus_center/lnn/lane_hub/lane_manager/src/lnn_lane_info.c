@@ -21,23 +21,72 @@
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
+#include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 typedef struct {
     LnnLaneInfo laneInfo;
     int32_t laneId;
     bool isUse;
     pthread_mutex_t lock;
+    int32_t score;
 } LaneInfoImpl;
 
 static LaneInfoImpl g_lanes[LNN_LINK_TYPE_BUTT];
-void LnnLanesInit(void)
+static LnnLaneMonitorCallback g_callback;
+
+int32_t LNNGetLaneScore(int32_t laneId)
+{
+    int32_t count = LnnGetLaneCount(laneId);
+    if (count == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLaneCount failed");
+        return SOFTBUS_ERR;
+    }
+    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+    if (count >= LANE_COUNT_THRESHOLD) {
+        g_lanes[laneId].score = THRESHOLD_LANE_QUALITY_SCORE;
+    } else {
+        g_lanes[laneId].score = PASSING_LANE_QUALITY_SCORE;
+    }
+    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+    return g_lanes[laneId].score;
+}
+
+void TriggerLaneMonitor(void)
+{
+    for (int32_t laneId = 0; laneId < LNN_LINK_TYPE_BUTT; laneId++) {
+        int32_t score = LNNGetLaneScore(laneId);
+        if (score < PASSING_LANE_QUALITY_SCORE && g_callback != NULL) {
+            g_callback(laneId, score);
+        }
+    }
+}
+
+int32_t LnnLanesInit(void)
 {
     uint32_t firstLaneId = LNN_LINK_TYPE_WLAN_5G;
     for (uint32_t i = firstLaneId; i < LNN_LINK_TYPE_BUTT; i++) {
         g_lanes[i].laneId = firstLaneId++;
         (void)pthread_mutex_init(&g_lanes[i].lock, NULL);
+        g_lanes[i].score = MAX_LANE_QUALITY_SCORE;
     }
+    g_callback = NULL;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnRegisterLaneMonitor(LnnLaneMonitorCallback callback)
+{
+    if (callback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        return SOFTBUS_ERR;
+    }
+    g_callback = callback;
+    return SOFTBUS_OK;
 }
 
 static bool IsValidLaneId(int32_t laneId)

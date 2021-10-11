@@ -17,6 +17,7 @@
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_info.h"
 #include "lnn_net_capability.h"
 #include "softbus_errcode.h"
@@ -57,7 +58,7 @@ int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
     int32_t lane = SOFTBUS_ERR;
     for (uint8_t i = 0; i < g_smartLaneMap[prop].preferredLinkNum; i++) {
         lane = g_smartLaneMap[prop].getLaneByType[i](netWorkId, prop);
-        if (lane >= 0) {
+        if (lane >= 0 && LNNGetLaneScore(lane) > THRESHOLD_LANE_QUALITY_SCORE) {
             LnnSetLaneSupportUdp(netWorkId, lane, IsSupportUdp(prop));
             return lane;
         }
@@ -148,7 +149,6 @@ static int32_t GetLaneOf2P4GWlan(const char* netWorkId, LnnLaneProperty prop)
 static int32_t GetLaneOfBR(const char *netWorkId, LnnLaneProperty prop)
 {
     int32_t local, remote;
-
     if (!GetNumInfo(netWorkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLaneOfBR error.");
         return SOFTBUS_ERR;
