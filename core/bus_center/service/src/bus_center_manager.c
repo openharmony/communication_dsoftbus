@@ -23,7 +23,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
-#include "lnn_lane_info.h"
+#include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
@@ -31,10 +31,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-
-void __attribute__ ((weak)) LnnLanesInit(void)
-{
-}
 
 int32_t BusCenterServerInit(void)
 {
@@ -66,7 +62,10 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init net builder fail!");
         return SOFTBUS_ERR;
     }
-    LnnLanesInit();
+    if (InitLaneManager() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init InitLaneManager fail!");
+        return SOFTBUS_ERR;
+    }
     LnnTimeSyncInit(LnnNotifyTimeSyncResult);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
 

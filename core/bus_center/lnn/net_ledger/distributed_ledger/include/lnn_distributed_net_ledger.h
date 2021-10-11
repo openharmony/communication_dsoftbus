@@ -60,6 +60,8 @@ int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info);
 short LnnGetCnnCode(const char *uuid, DiscoveryType type);
 int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
+int32_t LnnGetLaneCount(int32_t laneId);
+int32_t LnnSetLaneCount(int32_t laneId, int32_t num);
 
 #ifdef __cplusplus
 }
