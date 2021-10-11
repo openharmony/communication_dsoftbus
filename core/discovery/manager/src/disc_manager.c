@@ -645,6 +645,13 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
         if (strcmp(itemNode->packageName, packageName) != 0) {
             continue;
         }
+        if (itemNode->infoNum == 0) {
+            serviceList->cnt--;
+            ListDelete(&(itemNode->node));
+            SoftBusFree(itemNode);
+            (void)pthread_mutex_unlock(&(serviceList->lock));
+            return NULL;
+        }
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
             if (infoNode->id != id) {
                 continue;
@@ -682,6 +689,8 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
     ret = DiscInterfaceByMedium(info, PUBLISH_FUNC);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "interface fail");
+        info->item->infoNum--;
+        ListDelete(&(info->node));
         return ret;
     }
     return SOFTBUS_OK;
@@ -724,6 +733,9 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
     ret = DiscInterfaceByMedium(info, STARTDISCOVERTY_FUNC);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "interface fail");
+        info->item->infoNum--;
+        DeleteInfoFromCapability(info, type);
+        ListDelete(&(info->node));
         return ret;
     }
     return SOFTBUS_OK;
