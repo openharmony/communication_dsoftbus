@@ -18,10 +18,10 @@
 #include <stdlib.h>
 
 #include "common_list.h"
-#include "discovery_service.h"
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
 #include "disc_manager.h"
+#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "message_handler.h"
 #include "pthread.h"

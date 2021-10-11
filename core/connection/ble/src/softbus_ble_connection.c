@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/prctl.h>
-#include "time.h"
+#include <time.h>
 
 #include "bus_center_manager.h"
 #include "cJSON.h"
@@ -48,6 +48,10 @@
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
 #define TYPE_HEADER_SIZE 4
+#define SOFTBUS_SERVICE_UUID "11C8B310-80E4-4276-AFC0-F81590B2177F"
+#define SOFTBUS_CHARA_BLENET_UUID "00002B00-0000-1000-8000-00805F9B34FB"
+#define SOFTBUS_CHARA_BLECONN_UUID "00002B01-0000-1000-8000-00805F9B34FB"
+#define SOFTBUS_DESCRIPTOR_CONFIGURE_UUID "00002902-0000-1000-8000-00805F9B34FB"
 
 typedef enum {
     BLE_GATT_SERVICE_INITIAL = 0,
@@ -120,11 +124,6 @@ static const int MTU_HEADER_SIZE = 3;
 static const int BLE_GATT_ATT_MTU_MAX = 512;
 static const int BLE_ROLE_CLIENT = 1;
 static const int BLE_ROLE_SERVER = 2;
-
-static const char *SOFTBUS_SERVICE_UUID = "11C8B310-80E4-4276-AFC0-F81590B2177F";
-static const char *SOFTBUS_CHARA_BLENET_UUID = "00002B00-0000-1000-8000-00805F9B34FB";
-static const char *SOFTBUS_CHARA_BLECONN_UUID = "00002B01-0000-1000-8000-00805F9B34FB";
-static const char *SOFTBUS_DESCRIPTOR_CONFIGURE_UUID = "00002902-0000-1000-8000-00805F9B34FB";
 
 static LIST_HEAD(g_conection_list);
 static ConnectCallback *g_connectCallback = NULL;
