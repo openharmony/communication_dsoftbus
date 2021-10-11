@@ -933,7 +933,6 @@ static void ClientTransLnnOfflineProc(const NodeBasicInfo *info)
     if (info == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "offline networkid %s", info->networkId);
     if (g_clientSessionServerList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return;
