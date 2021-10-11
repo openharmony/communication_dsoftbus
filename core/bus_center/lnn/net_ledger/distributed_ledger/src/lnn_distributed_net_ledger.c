@@ -21,6 +21,7 @@
 
 #include <securec.h>
 
+#include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
@@ -62,6 +63,7 @@ typedef struct {
     int countMax;
     pthread_mutex_t lock;
     DistributedLedgerStatus status;
+    int32_t laneCount[LNN_LINK_TYPE_BUTT];
 } DistributedNetLedger;
 
 static DistributedNetLedger g_distributedNetLedger;
@@ -129,6 +131,12 @@ static void DeinitConnectionCode(ConnectionCode *cnnCode)
     return;
 }
 
+static void InitLaneStatus()
+{
+    uint32_t len = LNN_LINK_TYPE_BUTT * sizeof(int32_t);
+    (void)memset_s(g_distributedNetLedger.laneCount, len, 0, len);
+}
+
 int32_t LnnInitDistributedLedger(void)
 {
     if (g_distributedNetLedger.status == DL_INIT_SUCCESS) {
@@ -152,6 +160,7 @@ int32_t LnnInitDistributedLedger(void)
         g_distributedNetLedger.status = DL_INIT_FAIL;
         return SOFTBUS_ERR;
     }
+    InitLaneStatus();
     g_distributedNetLedger.status = DL_INIT_SUCCESS;
     return SOFTBUS_OK;
 }
@@ -925,6 +934,34 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         (void)pthread_mutex_unlock(&g_distributedNetLedger.lock);
         return SOFTBUS_MEM_ERR;
+    }
+    (void)pthread_mutex_unlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetLaneCount(int32_t laneId)
+{
+    if (laneId < 0 || laneId >= LNN_LINK_TYPE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:", laneId);
+        return SOFTBUS_ERR;
+    }
+    return g_distributedNetLedger.laneCount[laneId];
+}
+
+int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
+{
+    if (laneId < 0 || laneId >= LNN_LINK_TYPE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:", laneId);
+        return SOFTBUS_ERR;
+    }
+    if (pthread_mutex_lock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    g_distributedNetLedger.laneCount[laneId] += num;
+    if (g_distributedNetLedger.laneCount[laneId] < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneCount(%d) error", g_distributedNetLedger.laneCount[laneId]);
+        g_distributedNetLedger.laneCount[laneId] = 0;
     }
     (void)pthread_mutex_unlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
