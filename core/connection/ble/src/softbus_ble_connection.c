@@ -1019,7 +1019,7 @@ static void BleDisconnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
     g_connectCallback->OnDisconnected(targetNode->connId, &(targetNode->info));
 }
 
-static cJson *GetLocalInfoJson(void)
+static cJSON *GetLocalInfoJson(void)
 {
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
@@ -1340,7 +1340,7 @@ static void BleConnMsgHandler(SoftBusMessage *msg)
             uuid.uuidLen = BT_UUID_LEN;
             properties = (int32_t)msg->arg1;
             permissions = (int32_t)msg->arg2;
-            ret = SoftBusGattsAddCharacteristic(g_gattService.svcId, uuid, properties, permissions);
+            int32_t ret = SoftBusGattsAddCharacteristic(g_gattService.svcId, uuid, properties, permissions);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddCharacteristic  failed:%d", ret);
                 return;

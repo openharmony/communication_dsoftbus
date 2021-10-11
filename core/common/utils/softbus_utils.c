@@ -226,8 +226,7 @@ bool IsValidString(const char *input, uint32_t maxLen)
     return true;
 }
 
-int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
+int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *binMac, int32_t binMacLen)
 {
     int32_t ret;
 
@@ -243,8 +242,7 @@ int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
     return SOFTBUS_OK;
 }
 
-int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
+int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen, const uint8_t *binMac, int32_t binMacLen)
 {
     int32_t ret;
 
