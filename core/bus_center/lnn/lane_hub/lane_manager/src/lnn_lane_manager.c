@@ -106,7 +106,7 @@ static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LNNLaneQosObserver
     SoftBusList *list = g_laneQosObserver;
     item = (LaneObserverListItem *)SoftBusMalloc(sizeof(LaneObserverListItem));
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc join LNN cb list item");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc LaneQosObserver list item");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&item->node);
@@ -174,13 +174,17 @@ int32_t InitLaneManager(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanesInit error");
         return SOFTBUS_ERR;
     }
-    g_laneQosObserver = CreateSoftBusList();
     if (g_laneQosObserver == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateSoftBusList error");
-        return SOFTBUS_ERR;
+        g_laneQosObserver = CreateSoftBusList();
+        if (g_laneQosObserver == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateSoftBusList error");
+            return SOFTBUS_ERR;
+        }
     }
     if (LnnRegisterLaneMonitor(LaneMonitorCallback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnRegisterLaneMonitor error");
+        DestroySoftBusList(g_laneQosObserver);
+        g_laneQosObserver = NULL;
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitLaneManager success");
