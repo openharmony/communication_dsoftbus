@@ -30,6 +30,7 @@ typedef enum {
 } NodeType;
 
 int32_t LnnInitNetBuilder(void);
+int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);

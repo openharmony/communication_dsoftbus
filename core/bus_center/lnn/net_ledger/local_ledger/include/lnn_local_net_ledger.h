@@ -41,6 +41,7 @@ typedef struct {
 } LocalLedgerKey;
 
 int32_t LnnInitLocalLedger(void);
+int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
 const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len);
