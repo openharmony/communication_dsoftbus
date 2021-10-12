@@ -45,7 +45,9 @@ extern "C" {
 #define IN_AUTH_PROGRESS 2
 #define IN_SYNC_PROGRESS 3
 #define SYNC_FINISH 4
-#define AUTH_PASSED 5
+#define WAIT_PEER_DEV_INFO 5
+#define AUTH_PASSED 6
+#define RECV_CLSOE_ACK 7
 
 typedef struct {
     uint32_t type;
