@@ -168,6 +168,26 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
     return SOFTBUS_OK;
 }
 
+static void CloseTcpDirectFd(int fd)
+{
+#ifndef __LITEOS_M__
+    CloseTcpFd(fd);
+#endif
+}
+
+static void TransProcDataRes(int32_t ret, int32_t channelId, int32_t fd)
+{
+    if (ret != SOFTBUS_OK) {
+        DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        CloseTcpFd(fd);
+        NotifyChannelOpenFailed(channelId);
+    } else {
+        CloseTcpDirectFd(fd);
+    }
+    TransDelSessionConnById(channelId);
+    TransSrvDelDataBufNode(channelId);
+}
+
 static int32_t OnDataEvent(int events, int fd)
 {
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
@@ -183,15 +203,12 @@ static int32_t OnDataEvent(int events, int fd)
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
         ret = TransTdcSrvRecvData(conn->channelId);
-        if (ret != SOFTBUS_DATA_NOT_ENOUGH) {
-            DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
-            CloseTcpFd(fd);
-            if (ret != SOFTBUS_OK) {
-                NotifyChannelOpenFailed(conn->channelId);
-            }
-            TransDelSessionConnById(conn->channelId);
-            TransSrvDelDataBufNode(conn->channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Trans Srv Recv Data ret %d. ", ret);
+        if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
+            SoftBusFree(conn);
+            return SOFTBUS_OK;
         }
+        TransProcDataRes(ret, conn->channelId, fd);
     } else if (events == SOFTBUS_SOCKET_OUT) {
         if (conn->serverSide == true) {
             SoftBusFree(conn);
