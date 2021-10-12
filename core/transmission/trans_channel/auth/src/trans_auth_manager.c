@@ -474,6 +474,7 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
 
 void TransAuthDeinit()
 {
+    AuthTransDataUnRegCallback();
     g_channelId = 1;
     g_cb = NULL;
 }
