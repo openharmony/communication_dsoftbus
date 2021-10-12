@@ -64,6 +64,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
             ClientTransProxyCloseChannel(channelId);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
+            TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             break;
         case CHANNEL_TYPE_UDP:
