@@ -71,10 +71,6 @@ static LNNLocalConfigInit g_lnnLocalConfigInit = {
     },
 };
 
-void __attribute__ ((weak)) LnnLanesInit(void)
-{
-}
-
 static void LnnInitLocalConfigLooper(void *para)
 {
     static int32_t retry = 0;
