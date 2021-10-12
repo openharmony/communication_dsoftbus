@@ -131,6 +131,7 @@ int32_t OpenAuthServer(void);
 void CloseAuthServer(void);
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb);
 int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb);
+void AuthTransDataUnRegCallback(void);
 
 int64_t AuthVerifyDevice(AuthModuleId moduleId, const ConnectionAddr *addr);
 
