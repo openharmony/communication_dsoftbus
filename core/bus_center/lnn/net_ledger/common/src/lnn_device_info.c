@@ -82,6 +82,7 @@ int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
 {
     *typeId = 0;
+    uint16_t tmp;
     for (int32_t i = 0; i < strlen(deviceType); i++) {
         if ((*(deviceType + i) <= '9') && (*(deviceType + i) >= '0')) {
             *typeId |= (*(deviceType + i) - '0');
@@ -92,7 +93,8 @@ static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
             continue;
         } else if ((*(deviceType + i) <= 'f') && (*(deviceType + i) >= 'a')) {
-            *typeId |= (*(deviceType + i) - 'a' + DIVIDE_NUMBER_AND_LETTERS);
+            tmp=(*(deviceType + i) - 'a' + DIVIDE_NUMBER_AND_LETTERS);
+            *typeId |= tmp;
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
             continue;
         } else {
