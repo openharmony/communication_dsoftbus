@@ -32,14 +32,15 @@ typedef enum {
     INFO_TYPE_OFFLINE,
     INFO_TYPE_P2P_INFO,
     INFO_TYPE_MASTER_ELECT,
+    INFO_TYPE_BSS_TRANS,
     INFO_TYPE_COUNT,
 } SyncItemType;
 
 typedef struct {
     char udid[UDID_BUF_LEN];
     SyncItemType type;
-    uint8_t *buf;
     uint32_t bufLen;
+    uint8_t buf[0];
 } SyncItemInfo;
 
 typedef struct {
@@ -51,6 +52,7 @@ typedef struct {
 int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType);
 int32_t LnnInitSyncLedgerItem(void);
 void LnnDeinitSyncLedgerItem(void);
+uint32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo);
 
 #ifdef __cplusplus
 }

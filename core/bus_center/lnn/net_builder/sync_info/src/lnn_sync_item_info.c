@@ -33,6 +33,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_transmission_interface.h"
+#include "softbus_wifi_api_adapter.h"
 
 #define MSG_HEAD_LEN 4
 #define MSG_MAX_COUNT 10
@@ -51,11 +52,15 @@ static SyncItemInfo *GetOfflineMsg(const char *networkId, DiscoveryType discover
 static SyncItemInfo *GetElectMsg(const char *networkId, DiscoveryType discoveryType);
 static int32_t ReceiveDeviceName(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
 static int32_t ReceiveElectMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
+static SyncItemInfo *GetTransReqMsg(const char *networkId, DiscoveryType discoveryType);
+static int32_t ReceiveTransReqMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
+static uint32_t ControlStaConnectTargetAp(const SyncItemInfo *itemInfo);
 
 static ItemFunc g_itemGetFunTable[] = {
     {INFO_TYPE_DEVICE_NAME, GetDeviceNameMsg, ReceiveDeviceName},
     {INFO_TYPE_OFFLINE, GetOfflineMsg, NULL},
-    {INFO_TYPE_MASTER_ELECT, GetElectMsg, ReceiveElectMsg}
+    {INFO_TYPE_MASTER_ELECT, GetElectMsg, ReceiveElectMsg},
+    {INFO_TYPE_BSS_TRANS, GetTransReqMsg, ReceiveTransReqMsg}
 };
 
 typedef enum {
@@ -152,7 +157,8 @@ static int32_t SaveMsgToMap(int32_t channelId, SyncItemInfo *itemInfo)
             itemInfo->type);
         (void)LnnMapErase(&g_syncLedgerItem.idMap, key);
     }
-    if (LnnMapSet(&g_syncLedgerItem.idMap, key, (void *)info, sizeof(SyncItemInfo)) != SOFTBUS_OK) {
+    if (LnnMapSet(&g_syncLedgerItem.idMap, key, (void *)itemInfo,
+        sizeof(SyncItemInfo) + itemInfo->bufLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnMapSet fail: %d", itemInfo->type);
         return SOFTBUS_ERR;
     }
@@ -339,6 +345,17 @@ static int32_t ReceiveElectMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *i
     return LnnNotifyMasterElect(info->udid, masterUdid, masterWeight);
 }
 
+static int32_t ReceiveTransReqMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info)
+{
+    msg[len - 1] = '\0';
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv trans req.");
+    if (ControlStaConnectTargetAp(info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "control sta connect target ap fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DispatchReceivedData(uint8_t *message, uint32_t len, SyncItemInfo *info)
 {
     uint32_t i;
@@ -468,7 +485,6 @@ static int32_t FillSyncItemInfo(const char *networkId, SyncItemInfo *info, SyncI
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid fail");
         return SOFTBUS_ERR;
     }
-    info->buf = (uint8_t *)info + sizeof(SyncItemInfo);
     if (memcpy_s(info->buf, MSG_HEAD_LEN, &info->type, MSG_HEAD_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy item info type fail");
         return SOFTBUS_ERR;
@@ -600,6 +616,154 @@ static SyncItemInfo *GetElectMsg(const char *networkId, DiscoveryType discoveryT
     return itemInfo;
 }
 
+static SyncItemInfo *GetTransReqMsg(const char *networkId, DiscoveryType discoveryType)
+{
+    SyncItemInfo *itemInfo = NULL;
+    uint32_t len;
+
+    (void)discoveryType;
+    const NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local node info fail");
+        return NULL;
+    }
+    len = sizeof(BssTransInfo) + MSG_HEAD_LEN;
+    itemInfo = SoftBusMalloc(sizeof(SyncItemInfo) + len);
+    if (itemInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc sync item info for bss trans req fail");
+        return NULL;
+    }
+
+    itemInfo->bufLen = len;
+    if (FillSyncItemInfo(networkId, itemInfo, INFO_TYPE_BSS_TRANS,
+        (const uint8_t *)&(info->bssTransInfo), sizeof(info->bssTransInfo)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill sync item info fail");
+        SoftBusFree(itemInfo);
+        return NULL;
+    }
+    return itemInfo;
+}
+
+static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char *ssid,
+                                    const SoftBusWifiDevConf *conWifiConf, SoftBusWifiDevConf *targetWifiConf)
+{
+    if (strcpy_s(targetWifiConf->ssid, sizeof(targetWifiConf->ssid), ssid) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (memcpy_s(targetWifiConf->bssid, sizeof(targetWifiConf->bssid),
+                 targetBssid, sizeof(targetWifiConf->bssid)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(targetWifiConf->preSharedKey, sizeof(targetWifiConf->preSharedKey),
+        conWifiConf->preSharedKey) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        return SOFTBUS_ERR;
+    }
+
+    targetWifiConf->securityType = conWifiConf->securityType;
+    targetWifiConf->isHiddenSsid = conWifiConf->isHiddenSsid;
+    return SOFTBUS_OK;
+}
+
+static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const char *ssid)
+{
+    SoftBusWifiDevConf *result = NULL;
+    uint32_t wifiConfigSize;
+    int32_t retVal;
+    SoftBusWifiDevConf targetDeviceConf;
+    uint32_t i;
+
+    result = SoftBusMalloc(sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
+    if (result == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
+    (void)memset_s(result, sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE, 0,
+                   sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
+    retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
+    if (retVal != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get wifi device config fail");
+        SoftBusFree(result);
+        return SOFTBUS_ERR;
+    }
+
+    if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi device config size is invalid.");
+        SoftBusFree(result);
+        return SOFTBUS_ERR;
+    }
+
+    for (i = 0; i < wifiConfigSize; i++) {
+        if (strcmp(ssid, (result + i)->ssid) != 0) {
+            continue;
+        }
+        if (FillTargetWifiConfig(targetBssid, ssid, &targetDeviceConf, result + i) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill device config failed.");
+            SoftBusFree(result);
+            return SOFTBUS_ERR;
+        }
+        break;
+    }
+    if (SoftBusDisconnectDevice() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dis connect device failed.");
+        SoftBusFree(result);
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusConnectToDevice(&targetDeviceConf) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connect to target ap failed.");
+        SoftBusFree(result);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(result);
+    return SOFTBUS_OK;
+}
+
+static uint32_t ControlStaConnectTargetAp(const SyncItemInfo *itemInfo)
+{
+    BssTransInfo *bssTranInfo = NULL;
+    if (itemInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para iteminfo is  null");
+        return SOFTBUS_ERR;
+    }
+
+    bssTranInfo = (BssTransInfo*)(itemInfo->buf + MSG_HEAD_LEN);
+    if (WifiConnectToTargetAp(bssTranInfo->targetBssid, bssTranInfo->ssid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi connect to target ap failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+uint32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo)
+{
+    if ((peerNetWorkId == NULL) || (transInfo == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para peerNetWorkId or tansInfo is  null");
+        return SOFTBUS_ERR;
+    }
+
+    NodeInfo *info = LnnGetNodeInfoById(peerNetWorkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local node info fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (memcpy_s(&(info->bssTransInfo), sizeof(BssTransInfo), transInfo, sizeof(BssTransInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy trans info fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (LnnSyncLedgerItemInfo(peerNetWorkId, DISCOVERY_TYPE_UNKNOWN, INFO_TYPE_BSS_TRANS) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync trans item info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 static SyncItemInfo *GetItemInfoMsg(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType)
 {
     uint32_t i;

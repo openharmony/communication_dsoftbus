@@ -26,7 +26,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define WIFI_SSID_LEN 32
+#define WIFI_MAC_LEN 6
 typedef enum {
     ROLE_UNKNOWN = 0,
     ROLE_CONTROLLER,
@@ -48,6 +49,11 @@ typedef enum {
 } DiscoveryType;
 
 typedef struct {
+    char ssid[WIFI_SSID_LEN + 1];
+    unsigned char targetBssid[WIFI_MAC_LEN];
+} BssTransInfo;
+
+typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
     char versionType[VERSION_MAX_LEN]; // compatible nearby
     char uuid[UUID_BUF_LEN]; // compatible nearby
@@ -64,6 +70,7 @@ typedef struct {
     ConnectInfo connectInfo;
     int64_t authSeqNum;
     int32_t authChannelId;
+    BssTransInfo bssTransInfo;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
