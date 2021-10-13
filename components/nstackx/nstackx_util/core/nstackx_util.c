@@ -20,7 +20,7 @@
 #include "securec.h"
 
 #define TAG "nStackXUtil"
-#define DEFAULT_NEW_PATH_AUTHORITY 0755
+#define DEFAULT_NEW_PATH_AUTHORITY 0750
 
 int32_t GetTargetFileSize(const char *dir, uint64_t *size)
 {
