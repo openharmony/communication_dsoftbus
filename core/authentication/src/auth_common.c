@@ -44,6 +44,9 @@ int64_t GetSeq(AuthSideFlag flag)
     }
     integer += INTERVAL_VALUE;
     uint64_t temp = integer;
+    if (flag == SERVER_SIDE_FLAG) {
+        temp += 1;
+    }
     temp = ((g_uniqueId << OFFSET_BITS) | (temp & LOW_24_BITS));
     int64_t seq = 0;
     if (memcpy_s(&seq, sizeof(int64_t), &temp, sizeof(uint64_t)) != EOK) {
@@ -87,26 +90,30 @@ int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectO
         return SOFTBUS_ERR;
     }
     switch (option->type) {
-        case CONNECT_BR: {
+        case CONNECT_BR:
             if (strncpy_s(key, size, option->info.brOption.brMac, BT_MAC_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = BT_MAC_LEN;
             break;
-        }
-        case CONNECT_TCP: {
+        case CONNECT_BLE:
+            if (strncpy_s(key, size, option->info.bleOption.bleMac, BT_MAC_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+                return SOFTBUS_ERR;
+            }
+            *len = BT_MAC_LEN;
+            break;
+        case CONNECT_TCP:
             if (strncpy_s(key, size, option->info.ipOption.ip, IP_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = IP_LEN;
             break;
-        }
-        default: {
+        default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type");
             return SOFTBUS_ERR;
-        }
     }
     return SOFTBUS_OK;
 }
@@ -126,6 +133,14 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
             }
             break;
         }
+        case CONNECT_BLE:
+            if (strncpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac,
+                BT_MAC_LEN) != EOK || strncpy_s(option->info.bleOption.deviceIdHash, DEV_ID_HASH_LEN,
+                connInfo->info.bleInfo.deviceIdHash, DEV_ID_HASH_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+                return SOFTBUS_ERR;
+            }
+            break;
         case CONNECT_TCP: {
             if (strncpy_s(option->info.ipOption.ip, IP_LEN, connInfo->info.ipInfo.ip, IP_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
