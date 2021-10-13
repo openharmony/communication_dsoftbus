@@ -220,6 +220,29 @@ static VerifyCallback *GetDefaultAuthCallback(void)
     return &g_verifyCallback[LNN];
 }
 
+static AuthManager *GetAuthByConnectionId(uint32_t connectionId, AuthSideFlag side)
+{
+    if (pthread_mutex_lock(&g_authLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return NULL;
+    }
+    AuthManager *item = NULL;
+    ListNode *head = &g_authServerHead;
+    if (side == CLIENT_SIDE_FLAG) {
+        head = &g_authClientHead;
+    }
+    LIST_FOR_EACH_ENTRY(item, head, AuthManager, node) {
+        if (item->connectionId == connectionId) {
+            (void)pthread_mutex_unlock(&g_authLock);
+            return item;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_authLock);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
+        "cannot find auth by connectionId: %u, side: %d", connectionId, side);
+    return NULL;
+}
+
 AuthManager *AuthGetManagerByRequestId(uint32_t requestId)
 {
     if (pthread_mutex_lock(&g_authLock) != 0) {
@@ -538,19 +561,25 @@ void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
     VerifyDeviceDevLvl(auth);
 }
 
-static void ReceiveCloseAck(uint32_t connectionId)
+static void ReceiveCloseAck(uint32_t connectionId, AuthSideFlag side)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth receive close connection ack");
-    AuthSendCloseAck(connectionId);
-    ListNode *item = NULL;
-    ListNode *tmp = NULL;
-    LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
-        AuthManager *auth = LIST_ENTRY(item, AuthManager, node);
-        if (auth->connectionId == connectionId && auth->option.type != CONNECT_TCP) {
+    AuthManager *auth = GetAuthByConnectionId(connectionId, side);
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "no auth manager process close ack");
+        return;
+    }
+    if (auth->status == AUTH_PASSED) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth receive close connection ack");
+        AuthSendCloseAck(auth->connectionId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connection type: %d", auth->option.type);
+        if (auth->option.type != CONNECT_TCP) {
             EventRemove(auth->authId);
             auth->cb->onDeviceVerifyPass(auth->authId);
-            return;
         }
+        auth->status = RECV_CLSOE_ACK;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "receive close ack firstly, need wait peer info");
+        auth->status = WAIT_PEER_DEV_INFO;
     }
 }
 
@@ -591,10 +620,16 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         return;
     }
     auth->cb->onRecvSyncDeviceInfo(auth->authId, auth->side, auth->peerUuid, data, len);
-    auth->status = AUTH_PASSED;
-    if (auth->option.type == CONNECT_TCP) {
+    if (auth->status == WAIT_PEER_DEV_INFO || auth->option.type == CONNECT_TCP) {
+        if (auth->option.type != CONNECT_TCP) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send close ack");
+            AuthSendCloseAck(auth->connectionId);
+        }
         auth->cb->onDeviceVerifyPass(auth->authId);
         EventRemove(auth->authId);
+    } else {
+        auth->status = AUTH_PASSED;
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "receive peer device info firstly, need wait close ack");
     }
 }
 
@@ -708,7 +743,7 @@ static void HandleReceiveData(uint32_t connectionId, AuthDataInfo *authDataInfo,
             break;
         }
         case DATA_TYPE_CLOSE_ACK: {
-            ReceiveCloseAck(connectionId);
+            ReceiveCloseAck(connectionId, side);
             break;
         }
         default: {
