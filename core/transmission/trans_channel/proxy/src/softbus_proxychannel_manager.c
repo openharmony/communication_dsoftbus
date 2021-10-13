@@ -165,22 +165,20 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
     return SOFTBUS_ERR;
 }
 
-static void TransProxyAddChanItem(ProxyChannelInfo *chan)
+static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
     if (g_proxyChannelList == NULL) {
-        SoftBusFree(chan);
-        return;
+        return SOFTBUS_ERR;
     }
 
     if (pthread_mutex_lock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        SoftBusFree(chan);
-        return;
+        return SOFTBUS_ERR;
     }
     ListAdd(&(g_proxyChannelList->list), &(chan->node));
     g_proxyChannelList->cnt++;
     (void)pthread_mutex_unlock(&g_proxyChannelList->lock);
-    return;
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
@@ -638,7 +636,12 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
     chan->chiperSide = msg->chiperSide;
-    TransProxyAddChanItem(chan);
+    if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");
+        OnProxyChannelClosed(newChanId, &(chan->appInfo));
+        SoftBusFree(chan);
+        return;
+    }
     if (TransProxyAckHandshake(msg->connId, chan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AckHandshake fail");
         OnProxyChannelClosed(newChanId, &(chan->appInfo));
@@ -805,7 +808,10 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     }
 
     (void)memcpy_s(&(chan->appInfo), sizeof(chan->appInfo), appInfo, sizeof(AppInfo));
-    TransProxyAddChanItem(chan);
+    if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
