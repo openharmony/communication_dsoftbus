@@ -14,5 +14,5 @@
 import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_test") {
-  features = []
+  features = [ "sdk/discovery/unittest:DiscSdkTest" ]
 }
