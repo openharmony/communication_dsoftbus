@@ -82,6 +82,7 @@ int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
 {
     *typeId = 0;
+    uint16_t tmp;
     for (int32_t i = 0; i < strlen(deviceType); i++) {
         if ((*(deviceType + i) <= '9') && (*(deviceType + i) >= '0')) {
             *typeId |= (*(deviceType + i) - '0');
@@ -92,7 +93,8 @@ static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
             continue;
         } else if ((*(deviceType + i) <= 'f') && (*(deviceType + i) >= 'a')) {
-            *typeId |= (*(deviceType + i) - 'a' + DIVIDE_NUMBER_AND_LETTERS);
+            tmp=(*(deviceType + i) - 'a' + DIVIDE_NUMBER_AND_LETTERS);
+            *typeId |= tmp;
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
             continue;
         } else {
@@ -104,7 +106,7 @@ static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
     return *typeId;
 }
 
-static uint16_t InterceptTypeId(uint16_t typeId, int32_t i)
+static uint16_t InterceptTypeId(uint16_t typeId, uint32_t i)
 {
     return (typeId >> (HEX_OF_BINARY_BITS * i)) % LAST_FOUR_BINARY_DIGITS;
 }
@@ -112,7 +114,7 @@ static uint16_t InterceptTypeId(uint16_t typeId, int32_t i)
 static char *ConvertIntToHexString(uint16_t typeId)
 {
     int32_t j = 0;
-    for (int32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
+    for (uint32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
         if ((j == 0) && (InterceptTypeId(typeId, i) == 0)) {
             continue;
         } else if (InterceptTypeId(typeId, i) < DIVIDE_NUMBER_AND_LETTERS) {
