@@ -516,6 +516,7 @@ bool VtpStreamSocket::Accept()
 int VtpStreamSocket::EpollTimeout(int fd, int timeout)
 {
     struct SpungeEpollEvent events[MAX_EPOLL_NUM];
+    (void)memset_s(events, sizeof(events), 0, sizeof(events));
     while (true) {
         FILLP_INT fdNum = FtEpollWait(epollFd_, events, MAX_EPOLL_NUM, timeout);
         if (fdNum <= 0) {
@@ -887,7 +888,7 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
 
 StreamAttr VtpStreamSocket::GetVtpStackConfig(int type) const
 {
-    int intVal;
+    int intVal = -1;
     int configFd = (streamFd_ == -1) ? FILLP_CONFIG_ALL_SOCKET : streamFd_;
     int ret = FtConfigGet(type, &intVal, &configFd);
     if (ret != 0) {
