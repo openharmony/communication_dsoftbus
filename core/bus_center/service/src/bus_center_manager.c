@@ -20,20 +20,21 @@
 
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_network_manager.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
-#include "lnn_lane_manager.h"
+#include "lnn_lane_info.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define DELAY_LEN 1000
+#define DEFAULT_DELAY_LEN 0
 #define RETRY_MAX 10
 
 typedef int32_t (*LnnInitDelayImpl)(void);
@@ -52,6 +53,7 @@ typedef struct {
 
 typedef struct {
     InitDelayImpl initDelayImpl[INIT_DELAY_MAX_TYPE];
+    int32_t delayLen;
 } LNNLocalConfigInit;
 
 static LNNLocalConfigInit g_lnnLocalConfigInit = {
@@ -70,6 +72,16 @@ static LNNLocalConfigInit g_lnnLocalConfigInit = {
         },
     },
 };
+
+static void LnnGetUdidDelayLenInit(void)
+{
+    if (SoftbusGetConfig(SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
+        (unsigned char*)&g_lnnLocalConfigInit.delayLen, sizeof(g_lnnLocalConfigInit.delayLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn udid delay len fail, use default value");
+        g_lnnLocalConfigInit.delayLen = DEFAULT_DELAY_LEN;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn udid delay len is %u", g_lnnLocalConfigInit.delayLen);
+}
 
 static void LnnInitLocalConfigLooper(void *para)
 {
@@ -96,7 +108,7 @@ static void LnnInitLocalConfigLooper(void *para)
     if (ret != SOFTBUS_OK) {
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-        ret = LnnAsyncCallbackDelayHelper(looper, LnnInitLocalConfigLooper, NULL, DELAY_LEN);
+        ret = LnnAsyncCallbackDelayHelper(looper, LnnInitLocalConfigLooper, NULL, g_lnnLocalConfigInit.delayLen);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitLocalConfigLooper LnnAsyncCallbackDelayHelper fail");
         }
@@ -106,7 +118,7 @@ static void LnnInitLocalConfigLooper(void *para)
 static int32_t LnnInitLocalConfigDelay(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnInitLocalConfigLooper, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnInitLocalConfigLooper, NULL, g_lnnLocalConfigInit.delayLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitLocalConfigDelay LnnAsyncCallbackDelayHelper fail");
     }
@@ -148,6 +160,7 @@ int32_t BusCenterServerInit(void)
         return SOFTBUS_ERR;
     }
     LnnTimeSyncInit(LnnNotifyTimeSyncResult);
+    LnnGetUdidDelayLenInit();
     if (LnnInitLocalConfigDelay() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local config delay fail!");
         return SOFTBUS_ERR;
