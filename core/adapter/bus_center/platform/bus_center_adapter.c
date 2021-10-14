@@ -37,6 +37,7 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
             sn = GetSerial();
             if (sn == NULL) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSerial failed!");
+                return SOFTBUS_ERR;
             }
             if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
                 return SOFTBUS_ERR;
