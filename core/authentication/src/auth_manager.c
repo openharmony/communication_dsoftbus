@@ -355,6 +355,7 @@ static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOp
         return NULL;
     }
     (void)pthread_mutex_unlock(&g_authLock);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create auth as client side");
     return auth;
 }
 
@@ -945,6 +946,15 @@ int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
         g_transCallback[moduleId].onAuthChannelClose = cb->onAuthChannelClose;
     }
     return SOFTBUS_OK;
+}
+
+void AuthTransDataUnRegCallback(void)
+{
+    if (g_transCallback != NULL) {
+        SoftBusFree(g_transCallback);
+        g_transCallback = NULL;
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth trans data callback deinit succ!");
 }
 
 static int32_t AuthCallbackInit(uint32_t moduleNum)

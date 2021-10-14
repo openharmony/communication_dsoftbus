@@ -616,6 +616,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 void TransUdpChannelDeinit(void)
 {
     TransUdpChannelMgrDeinit();
+    AuthTransDataUnRegCallback();
     g_channelCb = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
 }
