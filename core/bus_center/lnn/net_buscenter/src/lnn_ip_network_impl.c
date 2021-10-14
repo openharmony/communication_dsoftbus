@@ -325,7 +325,7 @@ static int32_t LnnInitAutoNetworking(void)
     if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
         (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
-        return SOFTBUS_ERR;        
+        return SOFTBUS_ERR;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
         DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
