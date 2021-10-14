@@ -15,7 +15,6 @@
 
 #include "softbus_wifi_api_adapter.h"
 #include <stdlib.h>
-#include "stddef.h"
 #include "string.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -56,7 +55,7 @@ static int32_t ConvertWifiDevConfFromSoftBusWifiConf(const SoftBusWifiDevConf *r
     }
 
     if (memcpy_s(wifiConf->bssid, sizeof(wifiConf->bssid),
-                 result->bssid, sizeof(result->bssid)) != EOK) {
+        result->bssid, sizeof(result->bssid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
         return SOFTBUS_ERR;
     }
