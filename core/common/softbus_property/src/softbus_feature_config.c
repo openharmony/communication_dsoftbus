@@ -38,6 +38,7 @@
 #ifndef DEFAULT_STORAGE_PATH
 #define DEFAULT_STORAGE_PATH "/data/data"
 #endif
+#define LNN_UDID_INIT_DELAY_LEN 0
 
 #ifdef __LITEOS_M__
 #define DEFAULT_SElECT_INTERVAL 100000
@@ -72,6 +73,7 @@ typedef struct {
     int32_t maxLnnSupportCap;
     int32_t adapterLogLevel;
     char storageDir[MAX_STORAGE_PATH_LEN];
+    int32_t lnnUdidInitDelayLen;
 } ConfigItem;
 
 typedef struct {
@@ -93,6 +95,7 @@ ConfigItem g_config = {
     LNN_SUPPORT_CAPBILITY,
     ADAPTER_LOG_LEVEL,
     DEFAULT_STORAGE_PATH,
+    LNN_UDID_INIT_DELAY_LEN,
 };
 
 typedef struct {
@@ -184,6 +187,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL,
         (unsigned char*)&(g_tranConfig.selectInterval),
         sizeof(g_tranConfig.selectInterval)
+    },
+    {
+        SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
+        (unsigned char*)&(g_config.lnnUdidInitDelayLen),
+        sizeof(g_config.lnnUdidInitDelayLen)
     },
 };
 
