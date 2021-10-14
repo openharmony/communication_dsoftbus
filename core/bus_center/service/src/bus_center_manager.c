@@ -73,6 +73,7 @@ static LNNLocalConfigInit g_lnnLocalConfigInit = {
 
 static void LnnInitLocalConfigLooper(void *para)
 {
+    (void)para;
     static int32_t retry = 0;
     if (retry > RETRY_MAX) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try LnnInitLocalConfigLooper max times");
