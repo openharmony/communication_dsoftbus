@@ -293,7 +293,7 @@ static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoni
     (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
 }
 
-static int32_t LnnInitAutoNetworking()
+static int32_t LnnInitAutoNetworking(void)
 {
     char ifName[NET_IF_NAME_LEN] = {0};
     if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
