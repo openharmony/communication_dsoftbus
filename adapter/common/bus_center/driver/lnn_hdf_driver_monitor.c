@@ -63,10 +63,12 @@ static void ProcessLwipEvent(const LnnMoniterData *monitorData)
         info->event, info->ifName);
     if (strncmp(info->ifName, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
+        g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
         return;
     }
     if (strncmp(info->ifName, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
+        g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
 
