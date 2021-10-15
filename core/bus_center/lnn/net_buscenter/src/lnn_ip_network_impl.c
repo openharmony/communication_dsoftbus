@@ -356,7 +356,7 @@ int32_t LnnInitIpNetwork(void)
     if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
         (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
-        return SOFTBUS_ERR;        
+        return SOFTBUS_ERR;
     }
 
     (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
