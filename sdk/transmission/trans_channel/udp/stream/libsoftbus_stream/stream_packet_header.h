@@ -133,7 +133,6 @@ public:
             tl.length = ntohs(*tmp++);
 
             if (tl.length <= 0 || tl.length > MAX_STREAM_LEN) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Depacketize error, tl.length = %d", tl.length);
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
