@@ -14,5 +14,11 @@
 import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_test") {
-  features = []
+  if (ohos_kernel_type == "liteos_m") {
+    features = []
+  } else {
+    if (ohos_build_type == "debug") {
+      features = [ "sdk/discovery/unittest:DiscSdkTest" ]
+    }
+  }
 }

@@ -18,9 +18,7 @@
 #include <gtest/gtest.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include "client_disc_manager.h"
-#include "softbus_common.h"
-#include "softbus_log.h"
+#include "discovery_service.h"
 
 using namespace testing::ext;
 
@@ -112,27 +110,27 @@ static SubscribeInfo g_sInfo1 = {
 
 static void TestDeviceFound(const DeviceInfo *device)
 {
-    LOG_INFO("[client]TestDeviceFound\n");
+    printf("[client]TestDeviceFound\n");
 }
 
 static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
 {
-    LOG_INFO("[client]TestDiscoverFailed\n");
+    printf("[client]TestDiscoverFailed\n");
 }
 
 static void TestDiscoverySuccess(int subscribeId)
 {
-    LOG_INFO("[client]TestDiscoverySuccess\n");
+    printf("[client]TestDiscoverySuccess\n");
 }
 
 static void TestPublishSuccess(int publishId)
 {
-    LOG_INFO("[client]TestPublishSuccess\n");
+    printf("[client]TestPublishSuccess\n");
 }
 
 static void TestPublishFail(int publishId, PublishFailReason reason)
 {
-    LOG_INFO("[client]TestPublishFail\n");
+    printf("[client]TestPublishFail\n");
 }
 
 static IDiscoveryCallback g_subscribeCb = {
@@ -189,11 +187,6 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capability = "test";
-    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.capability = "dvKit";
-
     testInfo.capabilityData = NULL;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
@@ -238,8 +231,6 @@ HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level1)
     g_pInfo.publishId = GetPublishId();
     ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
-    ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
 }
 /**
  * @tc.name: StartDiscoveryTest001
@@ -289,11 +280,6 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capability = "test";
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.capability = "dvKit";
-
     testInfo.capabilityData = NULL;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret != 0);
@@ -336,8 +322,6 @@ HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level1)
     g_sInfo.subscribeId = GetSubscribeId();
     ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
-    ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret != 0);
 }
 /**
  * @tc.name: UnPublishServiceTest001
@@ -393,8 +377,6 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level1)
     PublishService(g_pkgName, &g_pInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
-    ret = UnPublishService(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
 }
 /**
  * @tc.name: StopDiscoveryTest001
@@ -450,7 +432,5 @@ HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level1)
     StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
-    ret = StopDiscovery(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
 }
 }
