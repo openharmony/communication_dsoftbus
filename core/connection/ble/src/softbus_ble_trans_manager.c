@@ -45,6 +45,40 @@ static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
     return SOFTBUS_OK;
 }
 
+static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleTransHeader *header, int *canIndex)
+{
+    int32_t availableIndex = -1;
+    int32_t i;
+    for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
+        if (targetNode->recvCache[i].isUsed == 0) {
+            availableIndex = (availableIndex > -1) ? availableIndex : i;
+            continue;
+        }
+        if (targetNode->recvCache[i].seq == header->seq) {
+            break;
+        }
+    }
+    if ((i == MAX_CACHE_NUM_PER_CONN) && (availableIndex == -1)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv no availed cache");
+        return SOFTBUS_ERR;
+    }
+    if (i == MAX_CACHE_NUM_PER_CONN) {
+        targetNode->recvCache[availableIndex].isUsed = 1;
+        targetNode->recvCache[availableIndex].currentSize = 0;
+        targetNode->recvCache[availableIndex].seq = header->seq;
+        if (targetNode->recvCache[availableIndex].cache == NULL) {
+            targetNode->recvCache[availableIndex].cache = (char *)SoftBusCalloc(MAX_DATA_LEN);
+            if (targetNode->recvCache[availableIndex].cache == NULL) {
+                targetNode->recvCache[availableIndex].isUsed = 0;
+                return SOFTBUS_ERR;
+            }
+        }
+        i = availableIndex;
+    }
+    *canIndex = i;
+    return SOFTBUS_OK;
+}
+
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
 {
     if (value == NULL) {
@@ -67,49 +101,27 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
         *index = -1;
         return value + sizeof(BleTransHeader);
     }
-    int availableIndex = -1;
-    int i;
-    for (i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
-        if (targetNode->recvCache[i].isUsed == 0) {
-            availableIndex = availableIndex > -1 ? availableIndex : i;
-            continue;
-        }
-        if (targetNode->recvCache[i].seq == header.seq) {
-            break;
-        }
-    }
-    if ((i == MAX_CACHE_NUM_PER_CONN) && (availableIndex == -1)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv no availed cache");
+
+    int32_t canIndex;
+    if (FindAvailableCacheIndex(targetNode, &header, &canIndex) != SOFTBUS_OK) {
         return NULL;
     }
-    if (i == MAX_CACHE_NUM_PER_CONN) {
-        targetNode->recvCache[availableIndex].isUsed = 1;
-        targetNode->recvCache[availableIndex].currentSize = 0;
-        targetNode->recvCache[availableIndex].seq = header.seq;
-        if (targetNode->recvCache[availableIndex].cache == NULL) {
-            targetNode->recvCache[availableIndex].cache = (char *)SoftBusCalloc(MAX_DATA_LEN);
-            if (targetNode->recvCache[availableIndex].cache == NULL) {
-                targetNode->recvCache[availableIndex].isUsed = 0;
-                return NULL;
-            }
-        }
-        i = availableIndex;
-    }
-    if (memcpy_s(targetNode->recvCache[i].cache + header.offset, MAX_DATA_LEN - header.offset,
+
+    if (memcpy_s(targetNode->recvCache[canIndex].cache + header.offset, MAX_DATA_LEN - header.offset,
         value + sizeof(BleTransHeader), header.size) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv memcpy_s failed");
-        targetNode->recvCache[i].isUsed = 0;
+        targetNode->recvCache[canIndex].isUsed = 0;
         return NULL;
     }
-    targetNode->recvCache[i].currentSize += header.size;
-    if (targetNode->recvCache[i].currentSize == header.total) {
+    targetNode->recvCache[canIndex].currentSize += header.size;
+    if (targetNode->recvCache[canIndex].currentSize == header.total) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransRecv a part pack, build complete");
         *outLen = header.total;
-        *index = i;
-        return targetNode->recvCache[i].cache;
+        *index = canIndex;
+        return targetNode->recvCache[canIndex].cache;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransRecv a part pack, wait next one, total:%d, current:%d",
-        header.total, targetNode->recvCache[i].currentSize);
+        header.total, targetNode->recvCache[canIndex].currentSize);
     return NULL;
 }
 

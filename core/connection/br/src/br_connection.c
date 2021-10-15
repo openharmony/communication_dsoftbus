@@ -33,6 +33,7 @@
 #include "time.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
+#include "softbus_utils.h"
 
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
@@ -171,38 +172,6 @@ static void ClientOnBrDisconnect(int32_t socketFd, int32_t value);
 static void ClearSendItemByConnId(uint32_t connectionId);
 
 static void ClearReceiveQueueByConnId(uint32_t connectionId);
-
-static int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
-        &binMac[0], &binMac[1], &binMac[2], &binMac[3], &binMac[4], &binMac[5]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
-        binMac[0], binMac[1], binMac[2], binMac[3], binMac[4], binMac[5]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
 
 static SppSocketEventCallback g_sppSocketClientCallback = {
     .OnEvent = ClientOnEvent,

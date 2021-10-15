@@ -37,6 +37,13 @@
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
 
+#define MAC_BIT_ZERO 0
+#define MAC_BIT_ONE 1
+#define MAC_BIT_TWO 2
+#define MAC_BIT_THREE 3
+#define MAC_BIT_FOUR 4
+#define MAC_BIT_FIVE 5
+
 #ifndef PACKET_CHECK_LENGTH
 #define PACKET_CHECK_LENGTH(len) \
     if (len >= 0) { \
@@ -237,38 +244,6 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
         return ret;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
-        &binMac[0], &binMac[1], &binMac[2], &binMac[3], &binMac[4], &binMac[5]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen)
-{
-    int32_t ret;
-
-    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
-        binMac[0], binMac[1], binMac[2], binMac[3], binMac[4], binMac[5]);
-    if (ret < 0) {
-        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
