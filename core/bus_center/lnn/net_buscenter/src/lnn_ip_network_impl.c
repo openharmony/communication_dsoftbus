@@ -171,7 +171,7 @@ static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, ui
 
 static int32_t GetUpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen, bool isWifiDisc)
 {
-    if (!isWifiDisc && LnnGetLocalIp(ipAddr, ipAddrLen, ifName, ifNameLen, CONNECTION_ADDR_ETH) == SOFTBUS_OK) {
+    if (LnnGetLocalIp(ipAddr, ipAddrLen, ifName, ifNameLen, CONNECTION_ADDR_ETH) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get eth ip success\n");
         return SOFTBUS_OK;
     }
@@ -293,11 +293,23 @@ static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoni
     (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
 }
 
-int32_t LnnInitIpNetwork(void)
+static int32_t UpdateLocalLedgerIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
+{
+    if (GetUpdateLocalIp(ipAddr, ipAddrLen, ifName, ifNameLen, false) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
+        return SOFTBUS_ERR;
+    }
+    if (SetLocalIpInfo(ipAddr, ifName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed\n");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnInitAutoNetworking(void)
 {
     char ipAddr[IP_LEN] = {0};
     char ifName[NET_IF_NAME_LEN] = {0};
-
     if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed\n");
         return SOFTBUS_ERR;
@@ -310,13 +322,8 @@ int32_t LnnInitIpNetwork(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
-    if (GetUpdateLocalIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN, false) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new ip info failed\n");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
-        return SOFTBUS_ERR;
-    }
-    if (SetLocalIpInfo(ipAddr, ifName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed\n");
+    if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
         (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
@@ -335,6 +342,37 @@ int32_t LnnInitIpNetwork(void)
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
     (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitIpNetwork(void)
+{
+    char ipAddr[IP_LEN] = {0};
+    char ifName[NET_IF_NAME_LEN] = {0};
+    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+    if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        return SOFTBUS_ERR;
+    }
+
+    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitIpNetworkDelay(void)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!\n");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitAutoNetworking() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitAutoNetworking error!\n");
+    }
     return SOFTBUS_OK;
 }
 
