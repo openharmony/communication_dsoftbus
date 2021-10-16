@@ -143,15 +143,17 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
         }
     }
     if (strlen(deviceType) <= DEVICE_TYPE_MAX_LENGTH) {
-        mstRet = memset_s(g_stringTypeId, strlen(g_stringTypeId), '0', DEVICE_TYPE_MAX_LENGTH);
+        mstRet = memset_s(g_stringTypeId, sizeof(g_stringTypeId), 0, DEVICE_TYPE_MAX_LENGTH);
         if (mstRet != EOK) {
             *typeId = TYPE_UNKNOW_ID;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId memset_s fail.");
             return SOFTBUS_ERR;
         }
         *typeId = ConvertStringToInt(deviceType, typeId);
         if (*typeId != TYPE_UNKNOW_ID) {
             return SOFTBUS_OK;
         }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert string to int fail.");
     }
     *typeId = TYPE_UNKNOW_ID;
     return SOFTBUS_ERR;
