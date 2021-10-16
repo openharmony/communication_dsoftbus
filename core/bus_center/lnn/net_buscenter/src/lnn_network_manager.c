@@ -25,11 +25,13 @@ typedef enum {
 
 typedef struct {
     int32_t (*InitNetworkImpl)(void);
+    int32_t (*InitNetworkDelayImpl)(void);
 } NetworkImpl;
 
 static NetworkImpl g_networkImpl[LNN_NETWORK_IMPL_TYPE_MAX] = {
     [LNN_NETWORK_IMPL_TYPE_IP] = {
         .InitNetworkImpl = LnnInitIpNetwork,
+        .InitNetworkDelayImpl = LnnInitIpNetworkDelay,
     },
 };
 
@@ -43,6 +45,22 @@ int32_t LnnInitNetworkManager(void)
         }
         if (g_networkImpl[i].InitNetworkImpl() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network impl(%d) failed\n", i);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitNetworkManagerDelay(void)
+{
+    uint32_t i;
+
+    for (i = 0; i < LNN_NETWORK_IMPL_TYPE_MAX; ++i) {
+        if (g_networkImpl[i].InitNetworkDelayImpl == NULL) {
+            continue;
+        }
+        if (g_networkImpl[i].InitNetworkDelayImpl() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network delay impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
     }

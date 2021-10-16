@@ -64,6 +64,10 @@ static int32_t LlGetDeviceUdid(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device udid fail");
         return SOFTBUS_ERR;
     }
+    if (strlen(udid) <= 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid invaild!\n");
+        return SOFTBUS_ERR;
+    }
     if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
@@ -244,7 +248,11 @@ static int32_t LlGetAuthPort(void *buf, uint32_t len)
     if (buf == NULL || len != NUM_BUF_SIZE) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = LnnGetAuthPort(info);
+    int32_t port = LnnGetAuthPort(info);
+    if (port <= 0) {
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = port;
     return SOFTBUS_OK;
 }
 
@@ -337,10 +345,6 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     (void)memset_s(info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
 
     // get device info
-    if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, info->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
-        return SOFTBUS_ERR;
-    }
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, info->deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVNAME failed");
         return SOFTBUS_ERR;
@@ -692,6 +696,17 @@ int32_t LnnInitLocalLedger()
 EXIT:
     g_localNetLedger.status = LL_INIT_FAIL;
     return SOFTBUS_ERR;
+}
+
+int32_t LnnInitLocalLedgerDelay(void)
+{
+    NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
+    DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 void LnnDeinitLocalLedger()

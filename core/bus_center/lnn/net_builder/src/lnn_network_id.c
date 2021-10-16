@@ -42,13 +42,10 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid id fail");
             return SOFTBUS_ERR;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate uuid: %s", id);
         if (SoftBusWriteFile(uuidFilePath, id, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write uuid to file failed");
             return SOFTBUS_ERR;
         }
-    } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read uuid %s", id);
     }
     if (id[len - 1] != '\0' || strlen(id) != (len - 1)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid is invalid format");

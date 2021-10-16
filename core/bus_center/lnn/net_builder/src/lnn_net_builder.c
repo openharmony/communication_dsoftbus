@@ -1117,7 +1117,6 @@ static int32_t ConifgLocalLedger(void)
 {
     char uuid[UUID_BUF_LEN] = {0};
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    char udid[UDID_BUF_LEN] = {0};
 
     // set local uuid and networkId
     if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK ||
@@ -1127,11 +1126,6 @@ static int32_t ConifgLocalLedger(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
-
-    // set master weight and master udid
-    LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
-    LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
-    LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
     return SOFTBUS_OK;
 }
 
@@ -1173,6 +1167,19 @@ int32_t LnnInitNetBuilder(void)
     g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
     g_netBuilder.isInit = true;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder success");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitNetBuilderDelay(void)
+{
+    char udid[UUID_BUF_LEN] = {0};
+    // set master weight and master udid
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!\n");
+        return SOFTBUS_ERR;
+    }
+    LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
+    LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
     return SOFTBUS_OK;
 }
 
