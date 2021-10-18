@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "lwip/inet.h"
+#include <arpa/inet.h>
+
 #include "nstackx_epoll.h"
 #include "nstackx_error.h"
 #include "nstackx_list.h"
@@ -83,7 +84,7 @@ static void EpollFdEventAdd(EpollSet *epollSetPtr, uint32_t events, EpollTask *t
 static void EpollFdEventDel(EpollSet *epollSetPtr, uint32_t events, EpollTask *task);
 static void EpollFdEventMod(EpollSet *epollSetPtr, uint32_t events, EpollTask *task);
 
-static int32_t CtlEpollDesc(EpollTask *task, int op, uint32_t events)
+static int32_t CtlEpollDesc(EpollTask *task, int32_t op, uint32_t events)
 {
     struct EpollEvent event;
 #ifdef NSTACKX_DEBUG
@@ -425,14 +426,29 @@ EpollDesc CreateEpollDesc(void)
         goto FAIL_FREE;
     }
 
-    epollSetPtr->epollfd.recvFd = -1;
-    epollSetPtr->epollfd.sendFd = -1;
-
-    if (EpollEventRecordAdd(epollSetPtr) != NSTACKX_EOK) {
+#ifdef ENABLE_COAP_ACTIVATE_DISCOVER
+    if (CreateEpollFdPair(&(epollSetPtr->epollfd)) != NSTACKX_EOK) {
+        LOGE(TAG, "Create Epoll failed");
         goto FAIL_MUTEX;
     }
 
+    FD_SET(epollSetPtr->epollfd.recvFd, &epollSetPtr->readfds);
+    FD_SET(epollSetPtr->epollfd.recvFd, &epollSetPtr->exceptfds);
+    epollSetPtr->maxfd = epollSetPtr->epollfd.recvFd;
+#else
+    epollSetPtr->epollfd.recvFd = -1;
+    epollSetPtr->epollfd.sendFd = -1;
+#endif
+    if (EpollEventRecordAdd(epollSetPtr) != NSTACKX_EOK) {
+        goto FAIL_CLOSE;
+    }
+
     return &(epollSetPtr->epollfd);
+FAIL_CLOSE:
+#ifdef ENABLE_COAP_ACTIVATE_DISCOVER
+    close(epollSetPtr->epollfd.recvFd);
+    close(epollSetPtr->epollfd.sendFd);
+#endif
 FAIL_MUTEX:
     if (pthread_mutex_destroy(&(epollSetPtr->mutex)) != 0) {
         LOGE(TAG, "pthread mutex destroy error: %d", errno);
@@ -445,8 +461,8 @@ FAIL_FREE:
 static int32_t RearZeroBitNum(unsigned long x)
 {
     int32_t n = 1;
-    int bitMov = TYPE_BITS_NUM(x) >> 1;
-    int bitNum = bitMov;
+    int32_t bitMov = TYPE_BITS_NUM(x) >> 1;
+    int32_t bitNum = bitMov;
 
     /* through binarySearch */
     while (bitNum > 1) {
@@ -454,7 +470,7 @@ static int32_t RearZeroBitNum(unsigned long x)
             n = n + bitNum;
             x = x >> bitNum;
         }
-        bitNum = (int)(((uint32_t)bitNum) >> 1);
+        bitNum = (int32_t)(((uint32_t)bitNum) >> 1);
         bitMov += bitNum;
     }
 
@@ -464,9 +480,9 @@ static int32_t RearZeroBitNum(unsigned long x)
 
 static int32_t PreZeroBitNum(unsigned long x)
 {
-    int n = 1;
-    int bitMov = TYPE_BITS_NUM(x) >> 1;
-    int bitNum = bitMov;
+    int32_t n = 1;
+    int32_t bitMov = TYPE_BITS_NUM(x) >> 1;
+    int32_t bitNum = bitMov;
 
     /* through binarySearch */
     while (bitNum > 1) {
@@ -474,7 +490,7 @@ static int32_t PreZeroBitNum(unsigned long x)
             n = n + bitNum;
             x = x << bitNum;
         }
-        bitNum = (int)(((uint32_t)bitNum) >> 1);
+        bitNum = (int32_t)(((uint32_t)bitNum) >> 1);
         bitMov += bitNum;
     }
 
@@ -676,7 +692,7 @@ static void EpollFdEventRun(EpollSet *epollSetPtr, uint32_t events, EpollTask *t
     EpollTaskEventHandle(events, task);
 }
 
-static void EpollFdEventOpHandle(EpollSet *epollSetPtr, int op, uint32_t events, EpollTask *task)
+static void EpollFdEventOpHandle(EpollSet *epollSetPtr, int32_t op, uint32_t events, EpollTask *task)
 {
     switch (op) {
         case EPOLL_CTL_ADD:

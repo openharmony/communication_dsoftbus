@@ -35,10 +35,13 @@
 
 #define MAXT_WAIT_COUNT 6
 #define WIFI_CONFIG_INTERVAL 10
-#define TEST_COUNT_INTREVAL 180
+#define TEST_COUNT_INTREVAL 10
 #define MAX_TEST_COUNT 20
+#define TEST_DISCOVERY_INTERVAL 10
+#define TEST_DISCOVERY_COUNT 10
 
 static char *g_capData = NULL;
+static int32_t g_onDeviceFoundCnt = 0;
 
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
@@ -63,6 +66,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         }
         printf("deviceType = %d.\n", nstackxDeviceInfo->deviceType);
         printf("reservedInfo = %s.\n", nstackxDeviceInfo->reservedInfo);
+        g_onDeviceFoundCnt++;
     }
 }
 
@@ -244,8 +248,9 @@ static void NstackxTestEntry(void)
 {
     char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
     int32_t testCnt = 0;
-
+    int32_t discTestCnt = 0;
     while (testCnt < MAX_TEST_COUNT) {
+        discTestCnt = 0;
         if (TestInit() != SOFTBUS_OK) {
             printf("init failed\n");
             return;
@@ -277,14 +282,25 @@ static void NstackxTestEntry(void)
             return;
         }
 
-        if (NSTACKX_StartDeviceFind() != 0) {
-            printf("start device find failed\n");
-            return;
+        while (discTestCnt < TEST_DISCOVERY_COUNT) {
+            if (NSTACKX_StartDeviceFind() != 0) {
+                printf("start device find failed\n");
+                return;
+            }
+            sleep(TEST_DISCOVERY_INTERVAL);
+            if (NSTACKX_StopDeviceFind() != 0) {
+                printf("stop device find failed\n");
+                return;
+            }
+            printf("disc test cnt = %d / %d\n", discTestCnt, TEST_DISCOVERY_COUNT);
         }
+
         testCnt++;
         sleep(TEST_COUNT_INTREVAL);
         TestDeinit();
+        printf("test cnt = %d / %d\n", testCnt, MAX_TEST_COUNT);
     }
+    printf("ondevice found cnt = %d / %d\n", g_onDeviceFoundCnt, MAX_TEST_COUNT * TEST_DISCOVERY_COUNT);
 }
 
 SYS_SERVICE_INIT_PRI(NstackxTestEntry, 4);

@@ -23,28 +23,30 @@ extern "C" {
 #endif
 
 #define COAP_MAX_OPTION 16
+#define DISCOVERY_MSG_URI_HOST 3
+#define DISCOVERY_MSG_URI_PATH 11
+
+#define COAP_RESPONSE_CODE(N) ((((N) / 100) << 5) | ((N) % 100))
 
 enum CoapProtocolTypeEnum {
     COAP_UDP = 0,
     COAP_TCP
 };
 
-enum CoapMethodTypeEnum {
+typedef enum CoapMethodTypeEnum {
     COAP_METHOD_GET = 1,
     COAP_METHOD_POST = 2,
     COAP_METHOD_PUT = 3,
-    COAP_METHOD_DELETE = 4
-};
+    COAP_METHOD_DELETE = 4,
+    COAP_RESPONSE_201 = 201
+} CoapMethodTypeEnum;
 
-enum CoapMsgTypeEnum {
+typedef enum CoapMsgTypeEnum {
     COAP_TYPE_CON = 0,
     COAP_TYPE_NONCON = 1,
     COAP_TYPE_ACK = 2,
     COAP_TYPE_RESET = 3
-};
-
-#define DISCOVERY_MSG_URI_HOST 3
-#define DISCOVERY_MSG_URI_PATH 11
+} CoapMsgTypeEnum;
 
 typedef struct {
     uint32_t ver : 2;

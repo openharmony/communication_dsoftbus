@@ -16,7 +16,6 @@
 #ifndef NSTACKX_UTIL_H
 #define NSTACKX_UTIL_H
 
-#include "nstackx_dev.h"
 #include "sys_util.h"
 
 #ifdef __cplusplus
@@ -26,11 +25,11 @@ extern "C" {
 NSTACKX_EXPORT void ClockGetTime(clockid_t id, struct timespec *tp);
 
 /* pthread series */
-NSTACKX_EXPORT void SemGetValue(sem_t *sem, int *sval);
+NSTACKX_EXPORT void SemGetValue(sem_t *sem, int32_t *sval);
 NSTACKX_EXPORT void SemPost(sem_t *sem);
 NSTACKX_EXPORT void SemWait(sem_t *sem);
 NSTACKX_EXPORT void SemDestroy(sem_t *sem);
-NSTACKX_EXPORT int32_t SemInit(sem_t *sem, int pshared, uint32_t value);
+NSTACKX_EXPORT int32_t SemInit(sem_t *sem, int32_t pshared, uint32_t value);
 NSTACKX_EXPORT int32_t PthreadMutexInit(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
 NSTACKX_EXPORT void PthreadMutexDestroy(pthread_mutex_t *mutex);
 NSTACKX_EXPORT int32_t PthreadMutexLock(pthread_mutex_t *mutex);

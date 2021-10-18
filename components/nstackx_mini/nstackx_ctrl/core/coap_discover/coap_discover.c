@@ -30,7 +30,7 @@
 #define TAG "nStackXCoAP"
 
 #define COAP_URI_BUFFER_LENGTH 64 /* the size of the buffer or variable used to save uri. */
-#define COAP_MAX_NUM_SUBSCRIBE_MODULE_COUNT 32 /* the maximum count of subscribed module */
+#define DEFAULT_NETMASK "255.255.255.0"
 
 /*
  * 1st discover interval: 100ms
@@ -43,8 +43,6 @@
 #define COAP_FIRST_DISCOVER_INTERVAL 100
 #define COAP_SECOND_DISCOVER_INTERVAL 200
 #define COAP_LAST_DISCOVER_INTERVAL 500
-#define COAP_RECV_COUNT_INTERVAL 1000
-#define COAP_DISVOCER_MAX_RATE 200
 
 static Timer *g_discoverTimer = NULL;
 static uint32_t g_discoverCount;
@@ -52,8 +50,6 @@ static uint32_t g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
 static uint32_t g_coapDiscoverTargetCount;
 static uint8_t g_userRequest;
 static uint8_t g_forceUpdate;
-static Timer *g_recvRecountTimer = NULL;
-static uint32_t g_recvDiscoverMsgNum;
 
 static int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
@@ -91,24 +87,12 @@ L_COAP_ERR:
     return NSTACKX_EFAILED;
 }
 
-static void IncreaseRecvDiscoverNum(void)
-{
-    if (g_recvDiscoverMsgNum < UINT32_MAX) {
-        g_recvDiscoverMsgNum++;
-    }
-}
-
 static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char **remoteUrl, DeviceInfo *deviceInfo)
 {
-    IncreaseRecvDiscoverNum();
-    if (g_recvDiscoverMsgNum > COAP_DISVOCER_MAX_RATE) {
-        return NSTACKX_EFAILED;
-    }
-
-    (void)memset_s(deviceInfo, sizeof(*deviceInfo), 0, sizeof(*deviceInfo));
     if (GetServiceDiscoverInfo(buf, size, deviceInfo, remoteUrl) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
+
     if (deviceInfo->mode == PUBLISH_MODE_UPLINE || deviceInfo->mode == PUBLISH_MODE_OFFLINE) {
         LOGD(TAG, "peer is not DISCOVER_MODE");
         size_t deviceListLen = sizeof(NSTACKX_DeviceInfo) * PUBLISH_DEVICE_NUM;
@@ -126,6 +110,21 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
     return NSTACKX_EOK;
 }
 
+void GetBuildCoapParam(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp, CoapBuildParam *param)
+{
+    param->remoteIp = remoteIp;
+    param->uriPath = COAP_DEVICE_DISCOVER_URI;
+    if (remoteUrl != NULL) {
+        param->msgType = COAP_TYPE_CON;
+        param->methodType = COAP_METHOD_POST;
+        param->msgId = CoapSoftBusMsgId();
+    } else {
+        param->msgType = COAP_TYPE_ACK;
+        param->methodType = COAP_RESPONSE_201;
+        param->msgId = pkt->header.varSection.msgId;
+    }
+}
+
 void HndPostServiceDiscover(const CoapPacket *pkt)
 {
     if (pkt == NULL) {
@@ -139,37 +138,33 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
     }
     (void)memset_s(deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     if (HndPostServiceDiscoverInner(pkt->payload.buffer, pkt->payload.len, &remoteUrl, deviceInfo) != NSTACKX_EOK) {
-        free(remoteUrl);
-        free(deviceInfo);
-        return;
+        goto FAIL;
     }
     if (GetModeInfo() == PUBLISH_MODE_UPLINE || GetModeInfo() == PUBLISH_MODE_OFFLINE) {
         LOGD(TAG, "local is not DISCOVER_MODE");
-        free(remoteUrl);
-        free(deviceInfo);
-        return;
+        goto FAIL;
     }
     if (UpdateDeviceDb(deviceInfo, g_forceUpdate) != NSTACKX_EOK) {
-        free(remoteUrl);
-        free(deviceInfo);
-        return;
+        goto FAIL;
     }
     if (g_forceUpdate) {
         g_forceUpdate = NSTACKX_FALSE;
     }
     if (deviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
         LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
-        free(remoteUrl);
-        free(deviceInfo);
-        return;
+        goto FAIL;
     }
+    char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    CoapBuildParam param = {0};
+    (void)inet_ntop(AF_INET, &(deviceInfo->netChannelInfo.wifiApInfo.ip), wifiIpAddr, sizeof(wifiIpAddr));
+    GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
     if (remoteUrl != NULL) {
-        char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
-        (void)memset_s(wifiIpAddr, sizeof(wifiIpAddr), 0, sizeof(wifiIpAddr));
-        (void)inet_ntop(AF_INET, &(deviceInfo->netChannelInfo.wifiApInfo.ip), wifiIpAddr, sizeof(wifiIpAddr));
-        CoapResponseService(pkt, remoteUrl, wifiIpAddr);
-        free(remoteUrl);
+        (void)CoapSendMessage(&param, NSTACKX_FALSE, false);
+    } else {
+        (void)CoapSendMessage(&param, NSTACKX_FALSE, true);
     }
+FAIL:
+    free(remoteUrl);
     free(deviceInfo);
 }
 
@@ -194,37 +189,38 @@ static void CoapServiceDiscoverStop(void)
     g_userRequest = NSTACKX_FALSE;
 }
 
-static int32_t CoapSendRequest(void)
-{
-    LOGI(TAG, "not support active discovery in mini system.");
-    return NSTACKX_EOK;
-}
-
 static int32_t CoapPostServiceDiscover(void)
 {
-    char ifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    char discoverUri[COAP_URI_BUFFER_LENGTH] = {0};
-    char *data = NULL;
-
-    if (GetLocalInterfaceName(ifName, sizeof(ifName)) != NSTACKX_EOK) {
+    if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-
-    if (GetIfBroadcastIp(ifName, ipString, sizeof(ipString)) != NSTACKX_EOK) {
+    struct in_addr localAddr = {0};
+    struct in_addr netMaskAddr = {0};
+    if (inet_pton(AF_INET, ipString, &localAddr) != 1) {
+        LOGE(TAG, "inet_pton failed, errno = %d", errno);
         return NSTACKX_EFAILED;
     }
-
-    if (sprintf_s(discoverUri, sizeof(discoverUri), "coap://%s/%s", ipString, COAP_DEVICE_DISCOVER_URI) < 0) {
+    if (inet_pton(AF_INET, DEFAULT_NETMASK, &netMaskAddr) != 1) {
+        LOGE(TAG, "inet_pton failed, errno = %d", errno);
         return NSTACKX_EFAILED;
     }
-    data = PrepareServiceDiscover(NSTACKX_TRUE);
-    if (data == NULL) {
-        LOGE(TAG, "failed to prepare coap data");
+    struct in_addr broadCastAddr = {0};
+    broadCastAddr.s_addr = localAddr.s_addr | ~(netMaskAddr.s_addr);
+    if (inet_ntop(AF_INET, &broadCastAddr, ipString, sizeof(ipString)) == NULL) {
         return NSTACKX_EFAILED;
     }
-
-    return CoapSendRequest();
+    CoapBuildParam param = {0};
+    param.remoteIp = ipString;
+    param.uriPath = COAP_DEVICE_DISCOVER_URI;
+    param.msgType = COAP_TYPE_NONCON;
+    param.methodType = COAP_METHOD_POST;
+    param.msgId = CoapSoftBusMsgId();
+    if (CoapSendMessage(&param, NSTACKX_TRUE, false) != NSTACKX_EOK) {
+        LOGE(TAG, "coap broadcast failed");
+        return NSTACKX_EFAILED;
+    }
+    return NSTACKX_EOK;
 }
 
 static void CoapServiceDiscoverTimerHandle(void *argument)
@@ -359,23 +355,19 @@ uint8_t CoapDiscoverRequestOngoing(void)
     return (g_discoverCount > 0 && g_userRequest);
 }
 
-static void CoapRecvRecountTimerHandle(void *argument)
-{
-    (void)argument;
-    if (g_recvDiscoverMsgNum > COAP_DISVOCER_MAX_RATE) {
-        LOGI(TAG, "received %u discover msg in this interval", g_recvDiscoverMsgNum);
-    }
-    g_recvDiscoverMsgNum = 0;
-    return;
-}
-
 int32_t CoapDiscoverInit(EpollDesc epollfd)
 {
     (void)epollfd;
+    if (g_discoverTimer == NULL) {
+        g_discoverTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapServiceDiscoverTimerHandle, NULL);
+    }
+    if (g_discoverTimer == NULL) {
+        LOGE(TAG, "failed to start timer for service discover");
+        return NSTACKX_EFAILED;
+    }
     CoapSoftBusInitMsgId();
     g_userRequest = NSTACKX_FALSE;
     g_forceUpdate = NSTACKX_FALSE;
-    g_recvDiscoverMsgNum = 0;
     g_discoverCount = 0;
     return NSTACKX_EOK;
 }
@@ -386,10 +378,6 @@ void CoapDiscoverDeinit(void)
         TimerDelete(g_discoverTimer);
         g_discoverTimer = NULL;
     }
-    if (g_recvRecountTimer != NULL) {
-        TimerDelete(g_recvRecountTimer);
-        g_recvRecountTimer = NULL;
-    }
 }
 
 void ResetCoapDiscoverTaskCount(uint8_t isBusy)
@@ -399,11 +387,5 @@ void ResetCoapDiscoverTaskCount(uint8_t isBusy)
             LOGI(TAG, "in this busy interval: g_discoverTimer task count %llu", g_discoverTimer->task.count);
         }
         g_discoverTimer->task.count = 0;
-    }
-    if (g_recvRecountTimer != NULL) {
-        if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_recvRecountTimer task count %llu", g_recvRecountTimer->task.count);
-        }
-        g_recvRecountTimer->task.count = 0;
     }
 }

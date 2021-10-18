@@ -18,6 +18,7 @@
 
 #include <arpa/inet.h>
 
+#include "coap_adapter.h"
 #include "coap_def.h"
 #include "nstackx_epoll.h"
 
@@ -31,7 +32,8 @@ extern "C" {
 int32_t CoapServerInit(const struct in_addr *ip);
 void CoapServerDestroy(void);
 void ResetCoapSocketTaskCount(uint8_t isBusy);
-int CoapResponseService(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp);
+int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool isAckMsg);
+
 #ifdef __cplusplus
 }
 #endif
