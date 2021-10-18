@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "lwip/sockets.h"
+#include <fcntl.h>
+
 #include "nstackx_error.h"
 #include "nstackx_log.h"
 #include "nstackx_util.h"
@@ -29,12 +30,12 @@ void ClockGetTime(clockid_t id, struct timespec *tp)
     }
 }
 
-int32_t SemInit(sem_t *sem, int pshared, uint32_t value)
+int32_t SemInit(sem_t *sem, int32_t pshared, uint32_t value)
 {
     return sem_init(sem, pshared, value);
 }
 
-void SemGetValue(sem_t *sem, int *sval)
+void SemGetValue(sem_t *sem, int32_t *sval)
 {
     if (sem_getvalue(sem, sval) != 0) {
         LOGE(TAG, "sem get error: %d", errno);
