@@ -812,11 +812,14 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());
             if (err < 0) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to set socket binding to device");
+                freeifaddrs(ifList);
                 return false;
             }
             break;
         }
     }
+    freeifaddrs(ifList);
+
     return true;
 }
 
