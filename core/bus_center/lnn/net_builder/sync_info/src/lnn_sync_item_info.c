@@ -653,7 +653,7 @@ static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char
     }
 
     if (memcpy_s(targetWifiConf->bssid, sizeof(targetWifiConf->bssid),
-                 targetBssid, sizeof(targetWifiConf->bssid)) != EOK) {
+        targetBssid, sizeof(targetWifiConf->bssid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
         return SOFTBUS_ERR;
     }
