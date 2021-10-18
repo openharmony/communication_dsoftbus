@@ -19,11 +19,11 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
-#include "softbus_common.h"
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
