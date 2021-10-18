@@ -15,13 +15,11 @@
 # limitations under the License.
 #
 
-import os
+import subprocess
 import sys
 
-
 def main():
-    return os.WEXITSTATUS(os.system(' '.join(sys.argv[1:])))
-
+    return subprocess.run(' '.join(sys.argv[1:]), shell=True).returncode
 
 if __name__ == '__main__':
     sys.exit(main())
