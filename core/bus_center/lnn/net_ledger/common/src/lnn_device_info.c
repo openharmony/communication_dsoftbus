@@ -114,7 +114,7 @@ static uint16_t InterceptTypeId(uint16_t typeId, uint32_t i)
 static char *ConvertIntToHexString(uint16_t typeId)
 {
     int32_t j = 0;
-    for (uint32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
+    for (int32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
         if ((j == 0) && (InterceptTypeId(typeId, i) == 0)) {
             continue;
         } else if (InterceptTypeId(typeId, i) < DIVIDE_NUMBER_AND_LETTERS) {
