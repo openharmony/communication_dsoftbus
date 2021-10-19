@@ -28,12 +28,12 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+#include "softbus_utils.h"
 #include "stdbool.h"
 #include "string.h"
 #include "time.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
-#include "softbus_utils.h"
 
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
