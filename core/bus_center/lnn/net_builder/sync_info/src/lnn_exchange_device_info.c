@@ -42,7 +42,6 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
             return SOFTBUS_ERR;
         }
     }
-
     if (!AddStringToJsonObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !AddStringToJsonObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
@@ -58,7 +57,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
 static void UnPackCommon(const cJSON* json, NodeInfo *info, SoftBusVersion version)
 {
     char deviceType[DEVICE_TYPE_BUF_LEN] = {0};
-    uint8_t typeId;
+    uint16_t typeId;
     if (json == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return;
