@@ -42,6 +42,8 @@ private:
     int32_t NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply);
     int32_t CloseChannelInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CheckOpenSessionPremission(const SessionParam *param);
+    int32_t CheckCloseChannelPremission(int32_t channelId, int32_t channelType);
 
     int32_t JoinLNNInner(MessageParcel &data, MessageParcel &reply);
     int32_t LeaveLNNInner(MessageParcel &data, MessageParcel &reply);
