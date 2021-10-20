@@ -105,6 +105,13 @@ int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
         IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
         return SOFTBUS_PERMISSION_DENIED;
     }
+    if (CheckTransSecLevel(param.sessionName, param.peerSessionName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerOpenSession sec level check failed");
+        transSerializer.ret = SOFTBUS_PERMISSION_DENIED;
+        IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
     int32_t ret = TransOpenSession(&param, &(transSerializer.transInfo));
     transSerializer.ret = ret;
     IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
