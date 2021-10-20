@@ -39,14 +39,14 @@ extern "C" {
 typedef struct {
     char deviceName[DEVICE_NAME_BUF_LEN];
     char deviceUdid[UDID_BUF_LEN];
-    uint8_t deviceTypeId;
+    uint16_t deviceTypeId;
 } DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);
 const char *LnnGetDeviceName(const DeviceBasicInfo *info);
-int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId);
-int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint8_t *typeId);
-char *LnnConvertIdToDeviceType(uint8_t typeId);
+int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId);
+int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId);
+char *LnnConvertIdToDeviceType(uint16_t typeId);
 
 #ifdef __cplusplus
 }
