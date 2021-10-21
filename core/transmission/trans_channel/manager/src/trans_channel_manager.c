@@ -352,12 +352,19 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
     }
     switch ((ChannelType)info->channelType) {
         case CHANNEL_TYPE_PROXY:
-            return TransProxyGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+            if (TransProxyGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen) != SOFTBUS_OK) {
+                return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+            }
         case CHANNEL_TYPE_UDP:
-            return TransUdpGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+            if (TransUdpGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen) != SOFTBUS_OK) {
+                return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
+            }
         case CHANNEL_TYPE_AUTH:
-            return TransAuthGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+            if (TransAuthGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen) != SOFTBUS_OK) {
+                return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
+            }
         default:
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_TRANS_INVALID_CLOSE_CHANNEL_ID;
     }
+    return SOFTBUS_OK;
 }
