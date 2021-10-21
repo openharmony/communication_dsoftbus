@@ -274,7 +274,8 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         socklen_t addrLen = sizeof(addr);
         int32_t cfd = TEMP_FAILURE_RETRY(accept(fd, (struct sockaddr *)&addr, &addrLen));
         if (cfd < 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, cfd=%d, errno=%d", cfd, errno);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "accept failed, cfd=%d, errno=%d, module=%d, fd=%d", cfd, errno, module, fd);
             return SOFTBUS_TCP_SOCKET_ERR;
         }
         char ip[IP_LEN] = {0};
