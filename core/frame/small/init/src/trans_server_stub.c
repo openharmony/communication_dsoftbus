@@ -80,8 +80,8 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
 
-    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    pid_t callingUid = GetCallingUid();
+    pid_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession no permission");
         return SOFTBUS_PERMISSION_DENIED;
@@ -119,7 +119,7 @@ int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
         IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
         return ret;
     }
-    
+
     ret = TransOpenSession(&param, &(transSerializer.transInfo));
     transSerializer.ret = ret;
     IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
