@@ -54,7 +54,6 @@
 
 -   组网设备需在同一局域网中。
 -   组网之前，需先完成设备绑定，绑定流程参见安全子系统中说明。
--   只能和一个设备进行组网。
 
 ## 说明<a name="section1312121216216"></a>
 
@@ -62,6 +61,8 @@
 
 >**须知：** 
 >使用跨设备通信时，必须添加权限ohos.permission.DISTRIBUTED\_DATASYNC，该权限类型为 _**dangerous**_ 。
+
+>设备主动发现手机时,手机需打开超级终端的允许被“附近设备”发现开关（设置-超级终端-我的设备-允许被发现-附近设备），才能被设备发现。
 
 **1、发现**
 
@@ -177,7 +178,7 @@
     typedef struct {
         char networkId[NETWORK_ID_BUF_LEN];
         char deviceName[DEVICE_NAME_BUF_LEN];
-        uint8_t deviceTypeId;
+        uint16_t deviceTypeId;
     } NodeBasicInfo;
     
     // 节点状态事件回调
