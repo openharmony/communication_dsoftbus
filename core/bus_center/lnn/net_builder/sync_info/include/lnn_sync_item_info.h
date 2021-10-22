@@ -31,6 +31,7 @@ typedef enum {
     INFO_TYPE_SCREEN_STATUS,
     INFO_TYPE_OFFLINE,
     INFO_TYPE_P2P_INFO,
+    INFO_TYPE_CHANNEL_NOISE_INFO,
     INFO_TYPE_MASTER_ELECT,
     INFO_TYPE_BSS_TRANS,
     INFO_TYPE_COUNT,
@@ -50,6 +51,7 @@ typedef struct {
 } ItemFunc;
 
 int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType);
+int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, SyncItemType itemType);
 int32_t LnnInitSyncLedgerItem(void);
 void LnnDeinitSyncLedgerItem(void);
 uint32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo);

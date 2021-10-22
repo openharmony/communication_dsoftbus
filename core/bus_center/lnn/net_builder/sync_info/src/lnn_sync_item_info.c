@@ -820,6 +820,35 @@ int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType
     return SOFTBUS_OK;
 }
 
+int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, SyncItemType itemType)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnSyncLedgerItemInfo type=%d", itemType);
+    if (networkId == NULL || buf == NULL || itemType != INFO_TYPE_CHANNEL_NOISE_INFO) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network id = null or buf = null, type=%d", itemType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SyncItemInfo *itemInfo = SoftBusCalloc(sizeof(SyncItemInfo) + len + MSG_HEAD_LEN);
+    if (itemInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc fail!");
+        return SOFTBUS_ERR;
+    }
+    itemInfo->bufLen = len + MSG_HEAD_LEN;
+    if (FillSyncItemInfo(networkId, itemInfo, itemType, buf, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill sync item info fail");
+        SoftBusFree(itemInfo);
+        return SOFTBUS_ERR;
+    }
+    int32_t channelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OpenNetWorkingChannel channelId =%d!", channelId);
+    if (SaveMsgToMap(channelId, itemInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save message to buffer fail, type=%d", itemType);
+        SoftBusFree(itemInfo);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(itemInfo);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitSyncLedgerItem(void)
 {
     if (g_syncLedgerItem.status == SYNC_INIT_SUCCESS) {
