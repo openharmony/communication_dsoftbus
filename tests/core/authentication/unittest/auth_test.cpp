@@ -187,7 +187,7 @@ HWTEST_F(AuthTest, AUTH_SET_SESSIONKEY_Test_002, TestSize.Level0)
 HWTEST_F(AuthTest, AUTH_ENCRYPT_AND_DECRYPT_Test_001, TestSize.Level0)
 {
     int32_t ret;
-    AuthSideFlag clientSide;
+    AuthSideFlag clientSide = AUTH_SIDE_ANY;
     ConnectOption option;
     option.type = CONNECT_BR;
 
