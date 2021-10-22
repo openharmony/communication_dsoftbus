@@ -345,8 +345,8 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "00000OpenAuthSessionInner addrInfo.type=%d!", addrInfo->type);
-	SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "11111OpenAuthSessionInner addrInfo.ip=%s!", addrInfo->info.ip.ip);
-	SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "22222OpenAuthSessionInner addrInfo.port=%d!", addrInfo->info.ip.port);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "11111OpenAuthSessionInner addrInfo.ip=%s!", addrInfo->info.ip.ip);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "22222OpenAuthSessionInner addrInfo.port=%d!", addrInfo->info.ip.port);
 	
     retReply = CheckOpenSessionPermission(sessionName, sessionName);
     if (retReply != SOFTBUS_OK) {

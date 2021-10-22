@@ -352,7 +352,8 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
     }
     switch ((ChannelType)info->channelType) {
         case CHANNEL_TYPE_PROXY:
-            if (TransProxyGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen) != SOFTBUS_OK) {
+            if (TransProxyGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen)
+                != SOFTBUS_OK) {
                 return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
             }
         case CHANNEL_TYPE_UDP:

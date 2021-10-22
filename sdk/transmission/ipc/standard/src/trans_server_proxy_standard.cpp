@@ -199,7 +199,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     if (!data.WriteCString(sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
-    }  
+    }
     if (!data.WriteRawData((void *)addrInfo, sizeof(ConnectionAddr))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write ConnectionAddr failed!");
         return SOFTBUS_ERR;
