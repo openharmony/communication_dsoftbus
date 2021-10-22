@@ -327,7 +327,7 @@ void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId;
     int32_t type;
-	SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess.......");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess.......");
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");

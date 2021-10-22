@@ -115,11 +115,12 @@ int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
 
     ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
     if (ret != SOFTBUS_OK) {
-        goto EXIT;
+        transSerializer.ret = ret;
+        IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
+        return ret;
     }
+    
     ret = TransOpenSession(&param, &(transSerializer.transInfo));
-
-EXIT:
     transSerializer.ret = ret;
     IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
     return ret;
@@ -203,16 +204,15 @@ int32_t ServerCloseChannel(const void *origin, IpcIo *req, IpcIo *reply)
     ret = TransGetNameByChanId(&info, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerCloseChannel invalid channel info");
-        goto EXIT;
+        return ret;
     }
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
-        ret = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+        IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
+        return SOFTBUS_PERMISSION_DENIED;
     }
     ret = TransCloseChannel(channelId, channelType);
 
-EXIT:
     IpcIoPushInt32(reply, ret);
     return ret;
 }
