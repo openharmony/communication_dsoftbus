@@ -176,7 +176,7 @@ int32_t DiscBleGetDeviceName(char *deviceName)
 uint8_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN];
-    uint8_t typeId;
+    uint16_t typeId;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local device type failed.");
         return TYPE_UNKNOW_ID;
