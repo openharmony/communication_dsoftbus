@@ -335,14 +335,11 @@ void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen)
     pthread_mutex_unlock(&g_sessionConnList->lock);
 }
 
-uint64_t TransTdcGetNewSeqId(bool serverSide)
+uint64_t TransTdcGetNewSeqId(void)
 {
 #define TRANS_SEQ_STEP 2
     static uint64_t seq = 0;
     seq += TRANS_SEQ_STEP;
-    if (serverSide) {
-        return seq + 1;
-    }
     return seq;
 }
 
