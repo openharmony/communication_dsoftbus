@@ -57,6 +57,7 @@ ohos_shared_library("softbus_server") {
     "$dsoftbus_root_path/core/bus_center:dsoftbus_bus_center_server",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/common/message_handler:message_handler",
+    "$dsoftbus_root_path/core/common/network:softbus_network_utils",
     "$dsoftbus_root_path/core/common/security/permission:softbus_permission",
     "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
     "$dsoftbus_root_path/core/common/utils:softbus_utils",
