@@ -169,7 +169,7 @@ static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthDecrypt err.");
         return SOFTBUS_ERR;
     }
-	if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
+    if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
         packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
     }
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
