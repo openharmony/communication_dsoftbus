@@ -32,7 +32,7 @@
 #define AUTH_PORT_LEN 6
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR "0.0.0.0"
-#define DEFAULT_DEVICE_TYPE 11
+#define DEFAULT_DEVICE_TYPE 0xAF
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
