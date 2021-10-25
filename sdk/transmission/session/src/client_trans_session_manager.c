@@ -905,6 +905,8 @@ int32_t ClientGetSessionSide(int32_t sessionId)
                 continue;
             }
             side = sessionNode->isServer ? IS_SERVER : IS_CLIENT;
+            (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
+            return side;
         }
     }
     (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
