@@ -20,5 +20,6 @@ lite_component("softbus_core_common") {
     "softbus_property:softbus_property",
     "message_handler:message_handler",
     "log:softbus_log",
+    "network:softbus_network_utils",
   ]
 }
