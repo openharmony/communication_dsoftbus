@@ -122,7 +122,7 @@ bool AuthIsSeqInKeyList(int32_t seq)
     return false;
 }
 
-static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
+static SessionKeyList *AuthGetSessionKey(const NecessaryDevInfo *devInfo)
 {
     if (devInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
@@ -136,14 +136,23 @@ static SessionKeyList *AuthGetLastSessionKey(const NecessaryDevInfo *devInfo)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_sessionKeyListHead) {
         sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        if (sessionKeyList->type == devInfo->type &&
-            strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-                "auth get last session key succ, seq is:%d", sessionKeyList->seq);
-            return sessionKeyList;
+        if (devInfo->side != AUTH_SIDE_ANY) {
+            if (sessionKeyList->side == devInfo->side && sessionKeyList->type == devInfo->type &&
+                strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+                    "auth get session key succ, seq is:%d, side is %d", sessionKeyList->seq, devInfo->side);
+                return sessionKeyList;
+            }
+        } else {
+            if (sessionKeyList->type == devInfo->type &&
+                strncmp(sessionKeyList->deviceKey, devInfo->deviceKey, devInfo->deviceKeyLen) == 0) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+                    "auth get last session key succ, seq is:%d", sessionKeyList->seq);
+                return sessionKeyList;
+            }
         }
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get last session key failed");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get session key failed");
     return NULL;
 }
 
@@ -206,7 +215,7 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
 
     sessionKeyList = AuthGetSessionKeyBySeq(seq);
     if (sessionKeyList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetLastSessionKey failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Auth Get SessionKey by seq failed");
         return SOFTBUS_ENCRYPT_ERR;
     }
     *side = sessionKeyList->side;
@@ -216,7 +225,7 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
         return SOFTBUS_ENCRYPT_ERR;
     }
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
@@ -248,9 +257,10 @@ int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *da
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetDeviceKey failed");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    sessionKeyList = AuthGetLastSessionKey(&devInfo);
+    devInfo.side = *side;
+    sessionKeyList = AuthGetSessionKey(&devInfo);
     if (sessionKeyList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetLastSessionKey failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetSessionKey failed");
         return SOFTBUS_ENCRYPT_ERR;
     }
     *side = sessionKeyList->side;
@@ -260,7 +270,7 @@ int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *da
         return SOFTBUS_ENCRYPT_ERR;
     }
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
@@ -305,7 +315,7 @@ int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *dat
     }
 
     AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ENCRYPT_ERR;
