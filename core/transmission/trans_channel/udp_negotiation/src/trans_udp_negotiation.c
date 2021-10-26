@@ -562,7 +562,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
 static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
     if (option == NULL || info == NULL || info->module != MODULE_UDP_INFO) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpModuleCb invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp module callback enter.");
