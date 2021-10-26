@@ -47,7 +47,7 @@ void TransSdkStreamTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level1)
+HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
 {
     int ret;
     int sessionId = 1;
