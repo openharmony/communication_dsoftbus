@@ -72,12 +72,13 @@ int32_t ServerRemoveSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
     IpcIoPushInt32(reply, ret);
     return ret;
 }
+
 static int32_t CheckOpenSessionPremission(const void *origin, const char *sessionName, const char *peerSessionName)
 {
     char pkgName[PKG_NAME_SIZE_MAX];
     if (TransGetPkgNameBySessionName(sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession TransGetPkgNameBySessionName failed");
-        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t callingUid = GetCallingUid(origin);
@@ -93,6 +94,7 @@ static int32_t CheckOpenSessionPremission(const void *origin, const char *sessio
     }
     return SOFTBUS_OK;
 }
+
 int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
