@@ -319,7 +319,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner get param failed!");
         return SOFTBUS_ERR;
     }
-	SessionParam param;
+    SessionParam param;
     param.sessionName = sessionName;
     param.peerSessionName = sessionName;
     retReply = CheckOpenSessionPermission(&param);
