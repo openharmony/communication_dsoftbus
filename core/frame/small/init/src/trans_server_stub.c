@@ -72,7 +72,8 @@ int32_t ServerRemoveSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
     IpcIoPushInt32(reply, ret);
     return ret;
 }
-static int32_t CheckOpenSessionPremission(const char *sessionName, const char *peerSessionName)
+
+static int32_t CheckOpenSessionPremission(const void *origin, const char *sessionName, const char *peerSessionName)
 {
     char pkgName[PKG_NAME_SIZE_MAX];
     if (TransGetPkgNameBySessionName(sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
@@ -80,8 +81,8 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
 
-    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t callingUid = GetCallingUid(origin);
+    int32_t callingPid = GetCallingPid(origin);
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession no permission");
         return SOFTBUS_PERMISSION_DENIED;
@@ -93,6 +94,7 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
     }
     return SOFTBUS_OK;
 }
+
 int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
@@ -113,13 +115,14 @@ int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply)
     param.groupId = (const char *)IpcIoPopString(req, &size);
     param.attr = (SessionAttribute *)IpcIoPopFlatObj(req, &size);
 
-    ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
+    ret = CheckOpenSessionPremission(origin, param.sessionName, param.peerSessionName);
     if (ret != SOFTBUS_OK) {
-        goto EXIT;
+        transSerializer.ret = ret;
+        IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
+        return ret;
     }
     ret = TransOpenSession(&param, &(transSerializer.transInfo));
 
-EXIT:
     transSerializer.ret = ret;
     IpcIoPushFlatObj(reply, (void *)&transSerializer, sizeof(TransSerializer));
     return ret;
@@ -142,7 +145,7 @@ int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reply)
         IpcIoPushInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
-    ret = CheckOpenSessionPremission(sessionName, sessionName);
+    ret = CheckOpenSessionPremission(origin, sessionName, sessionName);
     if (ret != SOFTBUS_OK) {
         IpcIoPushInt32(reply, ret);
         return ret;
