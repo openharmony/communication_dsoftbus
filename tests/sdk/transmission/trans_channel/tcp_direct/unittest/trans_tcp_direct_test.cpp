@@ -86,7 +86,7 @@ static ISessionListener g_sessionlistener = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
 {
     int ret;
     ret = CreateSessionServer(NULL, g_sessionName, &g_sessionlistener);
@@ -111,7 +111,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level0)
 {
     int ret;
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
@@ -127,7 +127,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level0)
 {
     int ret;
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
@@ -146,7 +146,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
 {
     int ret, i;
     char const *sessionName[MAX_SESSION_SERVER_NUMBER + 1] = {
@@ -180,7 +180,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level0)
 {
     int ret;
     ret = RemoveSessionServer(NULL, g_sessionName);
@@ -196,7 +196,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level0)
 {
     int ret;
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
@@ -215,7 +215,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level0)
 {
     int ret;
     g_sessionAttr.dataType = TYPE_BYTES;
@@ -247,7 +247,7 @@ HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
 {
     int ret;
     int sessionId = 1;
@@ -279,7 +279,7 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
 {
     int ret;
     int sessionId = 1;
