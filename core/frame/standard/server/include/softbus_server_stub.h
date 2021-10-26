@@ -43,7 +43,6 @@ private:
     int32_t CloseChannelInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
     int32_t CheckOpenSessionPermission(const SessionParam *param);
-    int32_t CheckOpenSessionPermission(const char *sessionName, const char *peerSessionName);
     int32_t CheckCloseChannelPermission(int32_t channelId, int32_t channelType);
 
     int32_t JoinLNNInner(MessageParcel &data, MessageParcel &reply);

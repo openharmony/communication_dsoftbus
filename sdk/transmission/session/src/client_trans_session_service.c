@@ -327,7 +327,7 @@ void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId;
     int32_t type;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess.......");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess sessionId:%d", sessionId);
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
@@ -335,12 +335,15 @@ void NotifyAuthSuccess(int sessionId)
     }
 	
     int32_t isServer = 0;
-    if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession isServer=%d", isServer);
-        if (isServer) {
-            return;
-        }
+    if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get isServer failed");
+        return;
     }
+    if (isServer) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is service side, no notification");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is client side");
 
     if (ServerIpcNotifyAuthSuccess(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess err");
