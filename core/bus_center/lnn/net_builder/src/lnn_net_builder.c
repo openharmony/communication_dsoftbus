@@ -87,7 +87,7 @@ typedef struct {
 } AuthKeyGeneratedMsgPara;
 
 typedef struct {
-    bool isSuccess;
+    int32_t retCode;
     int64_t authId;
 } AuthResultMsgPara;
 
@@ -505,7 +505,7 @@ static int32_t ProcessAuthDone(const void *para)
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth done: %llu",
             connFsm->id, msgPara->authId);
-        if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->isSuccess) != SOFTBUS_OK) {
+        if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send auth result to connection fsm[id=%u] failed",
                 connFsm->id);
             break;
@@ -960,35 +960,30 @@ static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVer
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth key generated: %lld", authId);
 }
 
-static void OnAuthFailed(int64_t authId)
+static void OnAuthDone(int64_t authId, int32_t retCode)
 {
     AuthResultMsgPara *para = SoftBusMalloc(sizeof(AuthResultMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth result fail");
         return;
     }
-    para->isSuccess = false;
+    para->retCode = retCode;
     para->authId = authId;
     if (PostMessageToHandler(MSG_TYPE_AUTH_DONE, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth fail message failed");
         SoftBusFree(para);
     }
+}
+
+static void OnAuthFailed(int64_t authId, int32_t reason)
+{
+    OnAuthDone(authId, reason);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth failed: %lld", authId);
 }
 
 static void OnAuthPassed(int64_t authId)
 {
-    AuthResultMsgPara *para = SoftBusMalloc(sizeof(AuthResultMsgPara));
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth result fail");
-        return;
-    }
-    para->isSuccess = true;
-    para->authId = authId;
-    if (PostMessageToHandler(MSG_TYPE_AUTH_DONE, para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth passed message failed");
-        SoftBusFree(para);
-    }
+    OnAuthDone(authId, SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth passed: %lld", authId);
 }
 
@@ -1204,7 +1199,7 @@ int32_t LnnServerJoin(ConnectionAddr *addr)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnServerJoin enter!");
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     para = CreateConnectionAddrMsgPara(addr);
     if (para == NULL) {
@@ -1226,7 +1221,7 @@ int32_t LnnServerLeave(const char *networkId)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnServerLeave enter!");
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     para = CreateNetworkIdMsgPara(networkId);
     if (para == NULL) {
