@@ -91,7 +91,7 @@ typedef enum  {
     LINK_TYPE_WIFI_WLAN_2G = 2,
     LINK_TYPE_WIFI_P2P = 3,
     LINK_TYPE_BR = 4,
-    LINK_TYPE_MAX
+    LINK_TYPE_MAX = 4,
 } LinkType;
 
 /**
