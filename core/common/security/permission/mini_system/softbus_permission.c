@@ -33,7 +33,14 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     (void)pkgName;
     (void)sessionName;
     (void)actions;
-    return SOFTBUS_PERMISSION_DENIED;
+    return SOFTBUS_OK;
+}
+
+int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
+{
+    (void)mySessionName;
+    (void)peerSessionName;
+    return SOFTBUS_OK;
 }
 
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName)

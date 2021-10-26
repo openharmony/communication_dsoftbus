@@ -35,7 +35,8 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
-int32_t ServerIpcOpenSession(const SessionParam* param, TransInfo* info)
+int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
+{
     return TransOpenSession(param, info);
 }
 

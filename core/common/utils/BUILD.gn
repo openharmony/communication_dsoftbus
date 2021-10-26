@@ -17,6 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   common_include = [
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$softbus_adapter_common/include",
     "$libsec_include_path",
     "$hilog_lite_include_path",
@@ -53,6 +54,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_utils") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
     ]
     sources = [ "softbus_utils.c" ]
