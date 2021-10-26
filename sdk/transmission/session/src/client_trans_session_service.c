@@ -336,7 +336,7 @@ void NotifyAuthSuccess(int sessionId)
     int32_t isServer = 0;
     if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get isServer failed");
-	    return;
+        return;
     }
     if (isServer) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is service side, no notification");
