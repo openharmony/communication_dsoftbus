@@ -87,10 +87,11 @@ typedef enum  {
 } StreamType;
 
 typedef enum  {
-    LINK_TYPE_WIFI_WLAN_5G = 0,
-    LINK_TYPE_WIFI_WLAN_2G = 1,
-    LINK_TYPE_WIFI_P2P = 2,
-    LINK_TYPE_BR = 3,
+    LINK_TYPE_WIFI_WLAN_5G = 1,
+    LINK_TYPE_WIFI_WLAN_2G = 2,
+    LINK_TYPE_WIFI_P2P = 3,
+    LINK_TYPE_BR = 4,
+    LINK_TYPE_MAX = 4,
 } LinkType;
 
 /**
@@ -104,8 +105,8 @@ typedef enum  {
 typedef struct {
     /** @brief dataType{@link SessionType} */
     int dataType;
-    int lintTypeNum;
-    int *lintType;
+    int linkTypeNum;
+    LinkType linkType[LINK_TYPE_MAX];
     bool unique;
     union {
         struct StreamAttr {
