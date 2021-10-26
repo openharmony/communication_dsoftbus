@@ -25,13 +25,13 @@ extern "C" {
 #endif
 #endif
 
-int ChannelToFrequency(int channel);
+int SoftBusChannelToFrequency(int channel);
 
-int FrequencyToChannel(int frequency);
+int SoftBusFrequencyToChannel(int frequency);
 
-bool Is5GBand(int frequency);
+bool SoftBusIs5GBand(int frequency);
 
-bool Is2GBand(int frequency);
+bool SoftBusIs2GBand(int frequency);
 
 #ifdef __cplusplus
 #if __cplusplus

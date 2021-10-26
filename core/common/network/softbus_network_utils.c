@@ -29,7 +29,7 @@
 #define FREQUENCY_INVALID  (-1)
 #define CHANNEL_INVALID    (-1)
 
-int ChannelToFrequency(int channel)
+int SoftBusChannelToFrequency(int channel)
 {
     if (channel >= CHANNEL_2G_FIRST && channel <= CHANNEL_2G_LAST) {
         return (channel - CHANNEL_2G_FIRST) * FREQUENCY_STEP + FREQUENCY_2G_FIRST;
@@ -40,7 +40,7 @@ int ChannelToFrequency(int channel)
     }
 }
 
-int FrequencyToChannel(int frequency)
+int SoftBusFrequencyToChannel(int frequency)
 {
     if (frequency >= FREQUENCY_2G_FIRST && frequency <= FREQUENCY_2G_LAST) {
         return (frequency - FREQUENCY_2G_FIRST) / FREQUENCY_STEP + CHANNEL_2G_FIRST;
@@ -51,7 +51,7 @@ int FrequencyToChannel(int frequency)
     }
 }
 
-bool Is5GBand(int frequency)
+bool SoftBusIs5GBand(int frequency)
 {
     if (frequency >= FREQUENCY_5G_FIRST && frequency <= FREQUENCY_5G_LAST) {
         return true;
@@ -59,7 +59,7 @@ bool Is5GBand(int frequency)
     return false;
 }
 
-bool Is2GBand(int frequency)
+bool SoftBusIs2GBand(int frequency)
 {
     if (frequency >= FREQUENCY_2G_FIRST && frequency <= FREQUENCY_2G_LAST) {
         return true;
