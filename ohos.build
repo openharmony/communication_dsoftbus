@@ -7,7 +7,8 @@
                 "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
             ],
             "test_list": [
-                "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest"
+                "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
+                "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest"
             ],
             "inner_kits": [
                 {
