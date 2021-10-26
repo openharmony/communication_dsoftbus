@@ -245,7 +245,7 @@ static uint8_t *GetEncryptData(const char *data, const ConnectOption *opt, uint3
     }
     buf.buf = encryptData;
     buf.bufLen = len;
-    AuthSideFlag side;
+    AuthSideFlag side = AUTH_SIDE_ANY;
     if (AuthEncrypt(opt, &side, (uint8_t *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthEncrypt error.");
         SoftBusFree(encryptData);

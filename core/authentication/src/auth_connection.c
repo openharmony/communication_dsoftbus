@@ -384,6 +384,8 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
 {
     AuthManager *auth = NULL;
     AuthDataHead head;
+
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%lld, len=%u", authId, len);
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
     if (auth == NULL) {
