@@ -358,7 +358,6 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
         case CHANNEL_TYPE_AUTH:
             return TransAuthGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
         default:
-            return SOFTBUS_TRANS_INVALID_CLOSE_CHANNEL_ID;
+            return SOFTBUS_INVALID_PARAM;
     }
-    return SOFTBUS_OK;
 }
