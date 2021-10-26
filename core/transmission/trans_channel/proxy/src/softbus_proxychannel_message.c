@@ -113,7 +113,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
     int32_t bufLen;
     int32_t connHeadLen;
     connHeadLen = ConnGetHeadSize();
-    AuthSideFlag isServer = CLIENT_SIDE_FLAG;
+    AuthSideFlag isServer = AUTH_SIDE_ANY;
 
     if (msg->chiper == 0) {
         bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen;
