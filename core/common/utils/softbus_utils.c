@@ -19,10 +19,20 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+
+#define MAC_BIT_ZERO 0
+#define MAC_BIT_ONE 1
+#define MAC_BIT_TWO 2
+#define MAC_BIT_THREE 3
+#define MAC_BIT_FOUR 4
+#define MAC_BIT_FIVE 5
+
+#define BT_ADDR_LEN 6
 
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
@@ -214,4 +224,36 @@ bool IsValidString(const char *input, uint32_t maxLen)
     }
 
     return true;
+}
+
+int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *binMac, int32_t binMacLen)
+{
+    int32_t ret;
+
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = sscanf_s(strMac, "%02x:%02x:%02x:%02x:%02x:%02x",
+        &binMac[MAC_BIT_ZERO], &binMac[MAC_BIT_ONE], &binMac[MAC_BIT_TWO],
+        &binMac[MAC_BIT_THREE], &binMac[MAC_BIT_FOUR], &binMac[MAC_BIT_FIVE]);
+    if (ret < 0) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen, const uint8_t *binMac, int32_t binMacLen)
+{
+    int32_t ret;
+
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
+        binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
+        binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
+    if (ret < 0) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }

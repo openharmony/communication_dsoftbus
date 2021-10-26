@@ -15,8 +15,8 @@
 
 #include "disc_manager.h"
 #include "common_list.h"
-#include "disc_coap.h"
 #include "disc_ble.h"
+#include "disc_coap.h"
 #include "securec.h"
 #include "softbus.h"
 #include "softbus_adapter_mem.h"

@@ -63,9 +63,6 @@ typedef enum {
     TYPE_BUTT,
 } SessionType;
 
-#define IS_SERVER 0
-#define IS_CLIENT 1
-
 typedef enum  {
     INVALID = -1,
     /*
@@ -106,7 +103,6 @@ typedef struct {
     int dataType;
     int lintTypeNum;
     int *lintType;
-    bool unique;
     union {
         struct StreamAttr {
             int streamType;
