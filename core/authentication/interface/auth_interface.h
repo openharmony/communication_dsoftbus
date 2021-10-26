@@ -111,7 +111,7 @@ typedef struct {
 
 typedef struct {
     void (*onKeyGenerated)(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion);
-    void (*onDeviceVerifyFail)(int64_t authId);
+    void (*onDeviceVerifyFail)(int64_t authId, int32_t reason);
     void (*onRecvSyncDeviceInfo)(int64_t authId, AuthSideFlag side, const char *peerUuid, uint8_t *data, uint32_t len);
     void (*onDeviceVerifyPass)(int64_t authId);
     void (*onDeviceNotTrusted)(const char *peerUdid);
