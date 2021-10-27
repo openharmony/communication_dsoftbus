@@ -178,6 +178,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitSyncLedgerItem();
     LnnDeinitEventMonitor();
     LnnTimeSyncDeinit();
-    LnnDeInitNetworkManager();
+    LnnDeinitNetworkManager();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }
