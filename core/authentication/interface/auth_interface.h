@@ -76,6 +76,7 @@ typedef enum {
 typedef enum {
     CLIENT_SIDE_FLAG = 0,
     SERVER_SIDE_FLAG = 1,
+    AUTH_SIDE_ANY,
 } AuthSideFlag;
 
 typedef enum {

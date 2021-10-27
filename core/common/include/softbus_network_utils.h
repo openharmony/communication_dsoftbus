@@ -12,11 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SOFTBUS_NETWORK_UTILS_H
+#define SOFTBUS_NETWORK_UTILS_H
 
-#include "softbus_errcode.h"
+#include <stdint.h>
 
-int ClientProvideInterfaceImplInit(const char *name)
-{
-    (void)name;
-    return SOFTBUS_OK;
+#include "stdbool.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+int SoftBusChannelToFrequency(int channel);
+
+int SoftBusFrequencyToChannel(int frequency);
+
+bool SoftBusIs5GBand(int frequency);
+
+bool SoftBusIs2GBand(int frequency);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* SOFTBUS_NETWORK_UTILS_H */
