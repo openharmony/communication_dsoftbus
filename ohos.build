@@ -1,6 +1,11 @@
 {
     "parts": {
         "dsoftbus_standard": {
+            "version": "1.0.0",
+            "interface-version": {
+                "ext-interface": "1.0",
+                "inter-device-interface": "1.0"
+            },
             "module_list": [
                 "//foundation/communication/dsoftbus/core/frame/standard/server:softbus_server",
                 "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
