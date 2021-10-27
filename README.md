@@ -54,7 +54,6 @@ The main code directory structure of DSoftBus is as follows:
 
 -   The devices between which you want to set up a connection must be in the same LAN.
 -   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see relevant descriptions in the Security subsystem readme file.
--   A device can only be connected to another one device.
 
 ## Usage<a name="section1312121216216"></a>
 
@@ -62,6 +61,8 @@ The main code directory structure of DSoftBus is as follows:
 
 >**NOTICE:** 
 >To use RPC across devices, you must have the  **ohos.permission.DISTRIBUTED\_DATASYNC**  permission \(which is a dangerous one\).
+
+>A device can proactively discover a smartphone only when the smartphone has the Visible to all nearby devices feature enabled. (This feature is available in Settings > Super Device > Visible to > All nearby devices.)
 
 >A device can proactively discover a smartphone only when the smartphone has the Visible to all nearby devices feature enabled. (This feature is available in Settings > Super Device > Visible to > All nearby devices.)
 
@@ -179,7 +180,7 @@ The main code directory structure of DSoftBus is as follows:
     typedef struct {
         char networkId[NETWORK_ID_BUF_LEN];
         char deviceName[DEVICE_NAME_BUF_LEN];
-        uint8_t deviceTypeId;
+        uint16_t deviceTypeId;
     } NodeBasicInfo;
     
     // Device state event callbacks
