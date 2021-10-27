@@ -353,7 +353,7 @@ static bool MatchDeviceFilter(const DeviceInfo *deviceInfo)
 static int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t count, const DeviceInfo *devInfo)
 {
     char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
-    int ret  = NSTACKX_EFAILED;
+    int32_t ret  = NSTACKX_EFAILED;
     if (deviceList == NULL) {
         LOGE(TAG, "deviceList or devInfo is null");
         return NSTACKX_EINVAL;
@@ -474,6 +474,7 @@ static void DeviceListChangeHandle(void)
     if (CoapDiscoverRequestOngoing()) {
         NotifyDeviceFound(deviceList, count);
     }
+    free(deviceList);
 }
 
 DeviceInfo *GetDeviceInfoById(const char *deviceId, const void *db)
@@ -582,7 +583,7 @@ static int32_t UpdateLocalNetworkInterface(const NetworkInterfaceInfo *interface
         TimerSetTimeout(g_offlineDeferredTimer, NSTACKX_OFFLINE_DEFERRED_DURATION, NSTACKX_FALSE);
     } else {
         TimerSetTimeout(g_offlineDeferredTimer, 0, NSTACKX_FALSE);
-        int ret = memcpy_s(g_networkType, sizeof(g_networkType), interfaceInfo->name, sizeof(interfaceInfo->name));
+        int32_t ret = memcpy_s(g_networkType, sizeof(g_networkType), interfaceInfo->name, sizeof(interfaceInfo->name));
         if (ret != EOK) {
             LOGE(TAG, "memcpy_s error");
             return NSTACKX_EFAILED;
@@ -832,7 +833,7 @@ int32_t BackupDeviceDB(void)
         LOGE(TAG, "clear backupDB error");
     }
 
-    for (int i = 0; i < NSTACKX_MAX_DEVICE_NUM; i++) {
+    for (int32_t i = 0; i < NSTACKX_MAX_DEVICE_NUM; i++) {
         deviceInfo = DatabaseGetNextRecord(db, &idx);
         if (deviceInfo == NULL) {
             break;

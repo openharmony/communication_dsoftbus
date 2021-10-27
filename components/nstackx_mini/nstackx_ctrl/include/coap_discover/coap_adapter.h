@@ -16,6 +16,8 @@
 #ifndef COAP_ADAPTER_H
 #define COAP_ADAPTER_H
 
+#include <stdbool.h>
+
 #include "coap_def.h"
 
 #ifdef __cplusplus
@@ -42,6 +44,14 @@ typedef struct {
     uint32_t len;
     uint32_t size;
 } CoapReadWriteBuffer;
+
+typedef struct {
+    char *remoteIp;
+    char *uriPath;
+    CoapMsgTypeEnum msgType;
+    CoapMethodTypeEnum methodType;
+    uint16_t msgId;
+} CoapBuildParam;
 
 enum ErrorTypeEnum {
     DISCOVERY_ERR_SUCCESS                      = 0,
@@ -70,12 +80,10 @@ enum ErrorTypeEnum {
     DISCOVERY_ERR_BLOCK_NO_PAYLOAD             = 23
 };
 
-int CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen);
-int CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *token,
-    const CoapBuffer *payload, CoapReadWriteBuffer *buf);
+int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen);
+int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff, bool isAck);
 void CoapSoftBusInitMsgId(void);
-int BuildSendPkt(const CoapPacket *pkt, const char *remoteIp,
-    const char *pktPayload, CoapReadWriteBuffer *sndPktBuff);
+uint16_t CoapSoftBusMsgId(void);
 
 #ifdef __cplusplus
 }
