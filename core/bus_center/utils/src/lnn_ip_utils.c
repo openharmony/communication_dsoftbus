@@ -48,7 +48,10 @@ typedef struct {
     char ifName[NET_IF_NAME_LEN];
 } LnnNetIfNameConfig;
 
-static ListNode *g_netIfNameList = NULL;
+static ListNode g_netIfNameList = {
+    .prev = &g_netIfNameList,
+    .next = &g_netIfNameList,
+};
 
 static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, uint32_t len)
 {
@@ -92,7 +95,7 @@ static int32_t AddNetConfigInfo(LnnNetIfNameType type, const char *netIfName, in
         return SOFTBUS_ERR;
     }
     info->type = type;
-    ListTailInsert(g_netIfNameList, &info->node);
+    ListTailInsert(&g_netIfNameList, &info->node);
     return SOFTBUS_OK;
 }
 
@@ -131,12 +134,6 @@ static int32_t SetIfNameDefaultVal(void)
 int32_t LnnReadNetConfigList(void)
 {
     char netIfName[LNN_MAX_IF_NAME_LEN] = {0};
-    g_netIfNameList = (ListNode *)SoftBusMalloc(sizeof(ListNode));
-    if (g_netIfNameList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc g_netIfNameList");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    ListInit(g_netIfNameList);
     if (SoftbusGetConfig(SOFTBUS_STR_LNN_NET_IF_NAME,
         (unsigned char*)netIfName, sizeof(netIfName)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn net ifname fail, use default value");
@@ -158,7 +155,7 @@ int32_t LnnClearNetConfigList(void)
     LnnNetIfNameConfig *item = NULL;
     LnnNetIfNameConfig *next = NULL;
 
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_netIfNameList, LnnNetIfNameConfig, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netIfNameList, LnnNetIfNameConfig, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
     }
@@ -171,12 +168,8 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, Connection
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
         return SOFTBUS_ERR;
     }
-    if (g_netIfNameList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_netIfNameList is null!");
-        return SOFTBUS_ERR;
-    }
     LnnNetIfNameConfig *info = NULL;
-    LIST_FOR_EACH_ENTRY(info, g_netIfNameList, LnnNetIfNameConfig, node) {
+    LIST_FOR_EACH_ENTRY(info, &g_netIfNameList, LnnNetIfNameConfig, node) {
         if (strncmp(ifName, info->ifName, ifNameLen) == 0) {
             if (info->type == LNN_ETH_TYPE) {
                 *type = CONNECTION_ADDR_ETH;
@@ -196,10 +189,6 @@ int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ip or ifName buffer is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (g_netIfNameList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_netIfNameList is null!");
-        return SOFTBUS_ERR;
-    }
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open socket failed");
@@ -208,7 +197,7 @@ int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen)
     struct ifreq ifr;
     LnnNetIfNameConfig *info = NULL;
     int32_t ret = SOFTBUS_ERR;
-    LIST_FOR_EACH_ENTRY(info, g_netIfNameList, LnnNetIfNameConfig, node) {
+    LIST_FOR_EACH_ENTRY(info, &g_netIfNameList, LnnNetIfNameConfig, node) {
         if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), info->ifName, strlen(info->ifName)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy netIfName:%s fail", info->ifName);
             continue;
