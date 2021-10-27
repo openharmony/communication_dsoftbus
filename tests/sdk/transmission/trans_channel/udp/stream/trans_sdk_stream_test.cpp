@@ -51,9 +51,8 @@ HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
 {
     int ret;
     int sessionId = 1;
-    char *data = const_cast<char *>("testdata");
-    const StreamData streamData = {data, strlen(data)};
-    const StreamData ext = {data, strlen(data)};
+    const StreamData streamData = {0};
+    const StreamData ext = {0};
     const FrameInfo param = {0};
 
     ret = SendStream(-1, &streamData, &ext, &param);
