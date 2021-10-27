@@ -41,7 +41,7 @@ typedef enum {
 } SocketEventType;
 
 typedef struct {
-    int cliendFd;
+    int32_t cliendFd;
     struct sockaddr_in dstAddr;
 } SocketInfo;
 
@@ -57,30 +57,41 @@ static EpollTask g_task;
 static uint8_t g_ctxSocketErrFlag = NSTACKX_FALSE;
 static uint64_t g_socketEventNum[SOCKET_END_EVENT];
 
-static int32_t CoapSocketRecv(int socketFd, uint8_t *buffer, size_t length)
+static bool IsLoopBackPacket(struct sockaddr_in *remoteAddr)
 {
-    if (buffer == NULL || socketFd < 0) {
-        return NSTACKX_EFAILED;
+    struct in_addr localAddr = {0};
+    char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
+        LOGE(TAG, "get local ip string failed");
+        return false;
     }
-
-    struct sockaddr_in addr;
-    socklen_t len = sizeof(struct sockaddr_in);
-    (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
-    int ret = recvfrom(socketFd, buffer, length, 0, (struct sockaddr *)&addr, &len);
-    return ret;
+    if (inet_pton(AF_INET, ipString, &localAddr) != 1) {
+        LOGE(TAG, "inet_pton failed, errno = %d", errno);
+        return false;
+    }
+    if (remoteAddr->sin_addr.s_addr == localAddr.s_addr) {
+        LOGE(TAG, "drop loopback packet");
+        return true;
+    }
+    return false;
 }
 
 static void HandleReadEvent(int32_t fd)
 {
-    int32_t socketFd = fd;
     uint8_t *recvBuffer = calloc(1, COAP_MAX_PDU_SIZE + 1);
     if (recvBuffer == NULL) {
         return;
     }
-    ssize_t nRead;
-    nRead = CoapSocketRecv(socketFd, recvBuffer, COAP_MAX_PDU_SIZE);
-    if ((nRead == 0) || (nRead < 0 && errno != EAGAIN &&
-        errno != EWOULDBLOCK && errno != EINTR)) {
+    struct sockaddr_in remoteAddr = {0};
+    socklen_t len = sizeof(struct sockaddr_in);
+    ssize_t nRead = recvfrom(fd, recvBuffer, COAP_MAX_PDU_SIZE, 0, (struct sockaddr *)&remoteAddr, &len);
+    if ((nRead == 0) || (nRead < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)) {
+        free(recvBuffer);
+        LOGE(TAG, "receive from remote packet failed");
+        return;
+    }
+
+    if (IsLoopBackPacket(&remoteAddr)) {
         free(recvBuffer);
         return;
     }
@@ -93,111 +104,134 @@ static void HandleReadEvent(int32_t fd)
     free(recvBuffer);
 }
 
-static int CoapCreateUdpClient(const struct sockaddr_in *sockAddr)
+static int32_t CoapCreateUdpClient(const struct sockaddr_in *sockAddr, uint8_t isBroadCast)
 {
-    if (sockAddr == NULL) {
+    (void)sockAddr;
+    int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        LOGE(TAG, "create socket failed, errno = %d", fd);
         return NSTACKX_EFAILED;
     }
 
-    struct sockaddr_in tmpAddr;
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        return NSTACKX_EFAILED;
+    int32_t optVal = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)) != 0) {
+        LOGE(TAG, "set sock opt failed, errno = %d", errno);
+        goto CLOSE_FD;
     }
 
-    int ret = connect(sockfd, (struct sockaddr *)sockAddr, sizeof(struct sockaddr));
-    if (ret != 0) {
-        close(sockfd);
-        return NSTACKX_EFAILED;
+    char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
+        LOGE(TAG, "get local ip string failed");
+        goto CLOSE_FD;
     }
 
-    socklen_t srcAddrLen = sizeof(struct sockaddr_in);
-    (void)memset_s(&tmpAddr, sizeof(tmpAddr), 0, sizeof(tmpAddr));
-    ret = getsockname(sockfd, (struct sockaddr *)&tmpAddr, &srcAddrLen);
-    if (ret != 0) {
-        close(sockfd);
-        return NSTACKX_EFAILED;
+    struct sockaddr_in localAddr;
+    (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
+    localAddr.sin_family = AF_INET;
+    localAddr.sin_addr.s_addr = inet_addr(ipString);
+    localAddr.sin_port = htons(COAP_SRV_DEFAULT_PORT);
+
+    if (bind(fd, (struct sockaddr *)&localAddr, sizeof(struct sockaddr_in)) == -1) {
+        LOGE(TAG, "bind local addr failed, errno = %d", errno);
+        goto CLOSE_FD;
     }
 
-    return sockfd;
+    if (isBroadCast && setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &optVal, sizeof(optVal)) != 0) {
+        LOGE(TAG, "set sock opt broadcast failed, errno = %d", errno);
+        goto CLOSE_FD;
+    }
+
+    return fd;
+CLOSE_FD:
+    close(fd);
+    return NSTACKX_EFAILED;
 }
 
-static int CoapSocketSend(const SocketInfo *socket, const uint8_t *buffer, size_t length)
+static int32_t CoapSocketSend(const SocketInfo *socket, const uint8_t *buffer, size_t length)
 {
     if (buffer == NULL || socket == NULL) {
         return NSTACKX_EFAILED;
     }
 
     socklen_t dstAddrLen = sizeof(struct sockaddr_in);
-    int ret = sendto(socket->cliendFd, buffer, length, 0, (struct sockaddr *)&socket->dstAddr, dstAddrLen);
+    int32_t ret = sendto(socket->cliendFd, buffer, length, 0, (struct sockaddr *)&socket->dstAddr, dstAddrLen);
+    if (ret != length) {
+        LOGE(TAG, "sendto failed, ret = %d, errno = %d", ret, errno);
+    }
     return ret;
 }
 
-static int CoapSendRequest(const CoapRequest *coapRequest)
+static int32_t CoapSendMsg(const CoapRequest *coapRequest, uint8_t isBroadcast)
 {
-    if (coapRequest == NULL || coapRequest->remoteUrl == NULL) {
+    if (coapRequest == NULL || coapRequest->remoteIp == NULL) {
         return NSTACKX_EFAILED;
     }
 
     struct sockaddr_in sockAddr = {0};
-    if (coapRequest->remoteIp == NULL) {
-        return NSTACKX_EFAILED;
-    }
-
     sockAddr.sin_addr.s_addr = inet_addr(coapRequest->remoteIp);
     sockAddr.sin_port = htons(COAP_SRV_DEFAULT_PORT);
     sockAddr.sin_family = AF_INET;
 
-    int udpClientFd = CoapCreateUdpClient(&sockAddr);
-    if (udpClientFd == NSTACKX_EFAILED) {
+    int32_t fd = CoapCreateUdpClient(&sockAddr, isBroadcast);
+    if (fd == NSTACKX_EFAILED) {
         return NSTACKX_EFAILED;
     }
+
     SocketInfo socket = {0};
-    socket.cliendFd = udpClientFd;
+    socket.cliendFd = fd;
     socket.dstAddr = sockAddr;
     if (CoapSocketSend(&socket, (uint8_t *)coapRequest->data, coapRequest->dataLength) == -1) {
         LOGE(TAG, "Coap socket send response message failed");
-        close(udpClientFd);
+        close(fd);
         return NSTACKX_EFAILED;
     }
-    close(udpClientFd);
+    close(fd);
     return NSTACKX_EOK;
 }
 
-int CoapResponseService(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp)
+int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool isAckMsg)
 {
-    int ret;
-    CoapRequest coapRequest;
-    (void)memset_s(&coapRequest, sizeof(coapRequest), 0, sizeof(coapRequest));
-    coapRequest.remoteUrl = remoteUrl;
-    coapRequest.remoteIp = remoteIp;
-    char *payload = PrepareServiceDiscover(NSTACKX_FALSE);
-    if (payload == NULL) {
+    if (param == NULL) {
+        LOGE(TAG, "coap build param is null");
         return NSTACKX_EFAILED;
     }
 
+    int32_t ret;
+    char *payload = NULL;
+    CoapRequest coapRequest = {0};
+    coapRequest.remoteIp = param->remoteIp;
     CoapReadWriteBuffer sndPktBuff = {0};
     sndPktBuff.readWriteBuf = calloc(1, COAP_MAX_PDU_SIZE);
     if (sndPktBuff.readWriteBuf == NULL) {
-        cJSON_free(payload);
         return NSTACKX_EFAILED;
     }
     sndPktBuff.size = COAP_MAX_PDU_SIZE;
     sndPktBuff.len = 0;
+    if (!isAckMsg) {
+        payload = PrepareServiceDiscover(isBroadcast);
+        if (payload == NULL) {
+            free(sndPktBuff.readWriteBuf);
+            LOGE(TAG, "prepare payload data failed");
+            return NSTACKX_EFAILED;
+        }
+    }
 
-    ret = BuildSendPkt(pkt, remoteIp, payload, &sndPktBuff);
-    cJSON_free(payload);
+    ret = BuildCoapPkt(param, payload, &sndPktBuff, isAckMsg);
+    if (payload != NULL) {
+        cJSON_free(payload);
+        payload = NULL;
+    }
     if (ret != DISCOVERY_ERR_SUCCESS) {
         free(sndPktBuff.readWriteBuf);
         sndPktBuff.readWriteBuf = NULL;
+        LOGE(TAG, "build coap packet failed, ret = %d", ret);
         return ret;
     }
     coapRequest.data = sndPktBuff.readWriteBuf;
     coapRequest.dataLength = sndPktBuff.len;
-    ret = CoapSendRequest(&coapRequest);
+    ret = CoapSendMsg(&coapRequest, isBroadcast);
     free(sndPktBuff.readWriteBuf);
     sndPktBuff.readWriteBuf = NULL;
-
     return ret;
 }
 
@@ -206,7 +240,6 @@ static void DeRegisteCoAPEpollTaskCtx(void)
     DeRegisterEpollTask(&g_task);
     CloseDesc(g_task.taskfd);
     g_task.taskfd = -1;
-    g_coapListenFd = -1;
 }
 
 static void DeRegisterCoAPEpollTask(void)
@@ -246,6 +279,8 @@ static void CoAPEpollErrorHandle(void *data)
     g_ctxSocketErrFlag = NSTACKX_TRUE;
     LOGE(TAG, "coap socket error occurred and close it");
     DeRegisterCoAPEpollTask();
+    CloseDesc(task->taskfd);
+    task->taskfd = -1;
 }
 
 static uint32_t RegisterCoAPEpollTask(EpollDesc epollfd)
@@ -273,8 +308,15 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
 {
     struct sockaddr_in localAddr;
     socklen_t len = sizeof(localAddr);
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
+    int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return NSTACKX_FALSE;
+    }
+
+    int32_t optVal = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)) != 0) {
+        LOGE(TAG, "set sock opt failed, errno = %d", errno);
+        close(fd);
         return NSTACKX_FALSE;
     }
 
@@ -283,16 +325,16 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
     localAddr.sin_port = htons(port);
     localAddr.sin_addr.s_addr = inet_addr(ipAddr);
 
-    if (bind(sockfd, (struct sockaddr *)&localAddr, len) == -1) {
-        close(sockfd);
+    if (bind(fd, (struct sockaddr *)&localAddr, len) == -1) {
+        close(fd);
         return NSTACKX_FALSE;
     }
 
-    if (getsockname(sockfd, (struct sockaddr *)&localAddr, &len) == -1) {
-        close(sockfd);
+    if (getsockname(fd, (struct sockaddr *)&localAddr, &len) == -1) {
+        close(fd);
         return NSTACKX_FALSE;
     }
-    return sockfd;
+    return fd;
 }
 
 static int32_t CoapGetContext(const char *node, int32_t port, uint8_t needBind, const struct in_addr *ip)
@@ -353,6 +395,7 @@ void CoapServerDestroy(void)
     }
     DeRegisterCoAPEpollTask();
     g_ctxSocketErrFlag = NSTACKX_FALSE;
+    g_coapListenFd = -1;
 }
 
 void ResetCoapSocketTaskCount(uint8_t isBusy)

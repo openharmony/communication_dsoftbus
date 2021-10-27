@@ -42,8 +42,7 @@ typedef struct {
 
 static uint16_t g_msgId = 0;
 
-static int CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos, uint8_t *headerLen,
-    uint32_t bufLen)
+static int32_t CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos, uint8_t *headerLen, uint32_t bufLen)
 {
     if (*value == COAP_EXTEND_DELTA_VALUE_UINT8) {
         (*headerLen)++;
@@ -80,14 +79,13 @@ static int CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos, ui
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapParseOption(CoapOption *option, uint16_t *runningDelta, const uint8_t **buf,
-    uint32_t bufLen)
+static int32_t CoapParseOption(CoapOption *option, uint16_t *runningDelta, const uint8_t **buf, uint32_t bufLen)
 {
     const uint8_t *dataPos = NULL;
     uint8_t headLen;
     uint16_t len;
     uint16_t delta;
-    int ret;
+    int32_t ret;
 
     if (bufLen < 1)  {
         return DISCOVERY_ERR_OPT_INVALID_SHORT_FOR_HEADER;
@@ -119,8 +117,7 @@ static int CoapParseOption(CoapOption *option, uint16_t *runningDelta, const uin
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf,
-    uint32_t buflen)
+static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, uint32_t buflen)
 {
     uint8_t optionIndex = 0;
     uint16_t delta = 0;
@@ -132,7 +129,7 @@ static int CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf,
     }
 
     while ((dataPos < end) && (*dataPos != 0xFF) && (optionIndex < COAP_MAX_OPTION)) {
-        int ret = CoapParseOption(&((pkt->options)[optionIndex]), &delta, &dataPos, end - dataPos);
+        int32_t ret = CoapParseOption(&((pkt->options)[optionIndex]), &delta, &dataPos, end - dataPos);
         if (ret != DISCOVERY_ERR_SUCCESS) {
             return ret;
         }
@@ -158,7 +155,7 @@ static int CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf,
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
+static int32_t CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     if (bufLen < HEADER_LEN) {
         return DISCOVERY_ERR_HEADER_INVALID_SHORT;
@@ -173,9 +170,9 @@ static int CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
     return DISCOVERY_ERR_SUCCESS;
 }
 
-int CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
+int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
-    int ret;
+    int32_t ret;
     if (pkt == NULL || buf == NULL) {
         return -1;
     }
@@ -224,7 +221,7 @@ int CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
+static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
 {
     if (buf->len != 0) {
         return DISCOVERY_ERR_INVALID_ARGUMENT;
@@ -245,7 +242,7 @@ static int CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, Co
 
     pkt->header.type = (uint32_t)pktParam->type & 0x03;
     pkt->header.ver = COAP_VERSION;
-    pkt->header.code = pktParam->code;
+    pkt->header.code = COAP_RESPONSE_CODE(pktParam->code);
 
     if (pkt->protocol == COAP_UDP) {
         pkt->header.varSection.msgId = pktParam->msgId;
@@ -262,7 +259,7 @@ static int CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, Co
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapAddData(CoapPacket *pkt, const CoapBuffer *payload, CoapReadWriteBuffer *buf)
+static int32_t CoapAddData(CoapPacket *pkt, const CoapBuffer *payload, CoapReadWriteBuffer *buf)
 {
     if ((payload->len == 0) && (payload->buffer == NULL)) {
         return DISCOVERY_ERR_INVALID_ARGUMENT;
@@ -332,7 +329,7 @@ static uint16_t CoapGetOptionLength(const CoapOption *opt, uint16_t runningDelta
     return optionLen + opt->len;
 }
 
-static int CoapCheckOption(const CoapPacket *pkt, const CoapOption *option, const CoapReadWriteBuffer *buf)
+static int32_t CoapCheckOption(const CoapPacket *pkt, const CoapOption *option, const CoapReadWriteBuffer *buf)
 {
     uint16_t optionLen;
     uint16_t runningDelta = 0;
@@ -361,7 +358,7 @@ static int CoapCheckOption(const CoapPacket *pkt, const CoapOption *option, cons
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapReadWriteBuffer *buf)
+static int32_t CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapReadWriteBuffer *buf)
 {
     uint8_t delta;
     uint8_t len;
@@ -414,7 +411,7 @@ static int CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapReadWrit
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWriteBuffer *buf)
+static int32_t CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWriteBuffer *buf)
 {
     if ((token->len != 0) && (token->buffer == NULL)) {
         return DISCOVERY_ERR_INVALID_ARGUMENT;
@@ -453,11 +450,11 @@ static int CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWriteB
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int CoapCreateBody(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *token,
+static int32_t CoapCreateBody(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *token,
     const CoapBuffer *payload, CoapReadWriteBuffer *buf)
 {
-    int i;
-    int ret;
+    int32_t i;
+    int32_t ret;
 
     if (token != NULL) {
         ret = CoapAddToken(pkt, token, buf);
@@ -489,10 +486,10 @@ static int CoapCreateBody(CoapPacket *pkt, const CoapPacketParam *param, const C
     return DISCOVERY_ERR_SUCCESS;
 }
 
-int CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *token,
-    const CoapBuffer *payload, CoapReadWriteBuffer *buf)
+int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *payload,
+    CoapReadWriteBuffer *buf)
 {
-    int ret;
+    int32_t ret;
 
     if (pkt == NULL || param == NULL || buf == NULL || buf->readWriteBuf == NULL) {
         return DISCOVERY_ERR_INVALID_EMPTY_MSG;
@@ -503,7 +500,7 @@ int CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapB
         return ret;
     }
 
-    if ((param->code == 0) && ((token != NULL) || (param->options != NULL) || (payload != NULL))) {
+    if ((param->code == 0) && ((param->options != NULL) || (payload != NULL))) {
         return DISCOVERY_ERR_INVALID_EMPTY_MSG;
     }
 
@@ -528,111 +525,88 @@ uint16_t CoapSoftBusMsgId(void)
     return g_msgId;
 }
 
-static int CoapBuildResponseParam(const CoapPacket *req, const CoapResponseInfo *resqInfo, CoapBuffer *inToken)
+static int32_t CoapSoftBusBuildMessage(const CoapResponseInfo *resqInfo, CoapReadWriteBuffer *sndPktBuff)
 {
-    if (req == NULL || resqInfo == NULL) {
-        return DISCOVERY_ERR_NOT_SUPPORTED;
+    if (resqInfo == NULL || resqInfo->pkt == NULL || resqInfo->param == NULL || sndPktBuff->readWriteBuf == NULL ||
+        sndPktBuff->size == 0 || resqInfo->payloadLen >= sndPktBuff->size) {
+        return DISCOVERY_ERR_BAD_REQ;
     }
-    inToken->buffer = req->token.buffer;
-    inToken->len = req->token.len;
-    resqInfo->param->protocol = req->protocol;
-    resqInfo->param->type = COAP_TYPE_NONCON;
-    resqInfo->param->code = (uint8_t)COAP_METHOD_POST;
-    resqInfo->param->msgId = CoapSoftBusMsgId();
-    return DISCOVERY_ERR_SUCCESS;
-}
 
-static int CoapSoftBusBuildMessage(const CoapPacket *req, const CoapResponseInfo *resqInfo,
-    char *buf, uint32_t *len)
-{
-    int ret;
+    int32_t ret;
     CoapReadWriteBuffer outBuf;
     CoapBuffer inPayload;
-    CoapBuffer inToken;
-
-    if (resqInfo == NULL || resqInfo->pkt == NULL
-        || resqInfo->param == NULL || buf == NULL
-        || len == NULL) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-
-    if (*len == 0) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-
     (void)memset_s(&outBuf, sizeof(CoapReadWriteBuffer), 0, sizeof(CoapReadWriteBuffer));
     (void)memset_s(&inPayload, sizeof(CoapBuffer), 0, sizeof(CoapBuffer));
-    (void)memset_s(&inToken, sizeof(CoapBuffer), 0, sizeof(CoapBuffer));
-
-    outBuf.readWriteBuf = buf;
-    outBuf.size = *len;
+    outBuf.readWriteBuf = sndPktBuff->readWriteBuf;
+    outBuf.size = sndPktBuff->size;
     inPayload.buffer = resqInfo->payload;
     inPayload.len = resqInfo->payloadLen;
-    if (resqInfo->payloadLen >= *len) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-
-    ret = CoapBuildResponseParam(req, resqInfo, &inToken);
-    if (ret != DISCOVERY_ERR_SUCCESS) {
-        return ret;
-    }
 
     if ((resqInfo->payload == NULL) || (resqInfo->payloadLen == 0)) {
-        ret = CoapSoftBusEncode(resqInfo->pkt, resqInfo->param, &inToken, NULL, &outBuf);
+        ret = CoapSoftBusEncode(resqInfo->pkt, resqInfo->param, NULL, &outBuf);
     } else {
-        ret = CoapSoftBusEncode(resqInfo->pkt, resqInfo->param, &inToken, &inPayload, &outBuf);
+        ret = CoapSoftBusEncode(resqInfo->pkt, resqInfo->param, &inPayload, &outBuf);
     }
 
     if (ret != DISCOVERY_ERR_SUCCESS) {
         return DISCOVERY_ERR_BAD_REQ;
     }
 
-    *len = outBuf.len;
+    sndPktBuff->len = outBuf.len;
     return ret;
 }
 
-int BuildSendPkt(const CoapPacket *pkt, const char *remoteIp, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff)
+static void BuildCoapPktParam(const CoapBuildParam *buildParam, CoapPacketParam *outParam)
 {
-    CoapPacket respPkt;
-    CoapPacketParam respPktPara;
+    outParam->protocol = COAP_UDP;
+    outParam->options[outParam->optionsNum].num = DISCOVERY_MSG_URI_HOST;
+    outParam->options[outParam->optionsNum].optionBuf = (uint8_t *)(buildParam->remoteIp);
+    outParam->options[outParam->optionsNum].len = strlen(buildParam->remoteIp);
+    outParam->optionsNum++;
+
+    outParam->options[outParam->optionsNum].num = DISCOVERY_MSG_URI_PATH;
+    outParam->options[outParam->optionsNum].optionBuf = (uint8_t *)(buildParam->uriPath);
+    outParam->options[outParam->optionsNum].len = strlen(buildParam->uriPath);
+    outParam->optionsNum++;
+
+    outParam->type = buildParam->msgType;
+    outParam->code = buildParam->methodType;
+    outParam->msgId = buildParam->msgId;
+}
+
+int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff, bool isAck)
+{
+    if (param == NULL || sndPktBuff == NULL || sndPktBuff->readWriteBuf == NULL) {
+        return DISCOVERY_ERR_BAD_REQ;
+    }
+
+    if (!isAck && (pktPayload == NULL)) {
+        return DISCOVERY_ERR_BAD_REQ;
+    }
+
     CoapOption options[COAP_MAX_OPTION] = {0};
+    CoapPacketParam outParam = {0};
+    outParam.options = options;
+    BuildCoapPktParam(param, &outParam);
 
-    if (pkt == NULL || remoteIp == NULL || pktPayload == NULL || sndPktBuff == NULL) {
+    CoapPacket respPkt = {0};
+    if (isAck && CoapCreateHeader(&respPkt, &outParam, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
+        return DISCOVERY_ERR_BAD_REQ;
+    } else {
+        CoapResponseInfo respInfo = {0};
+        respInfo.pkt = &respPkt;
+        respInfo.param = &outParam;
+        respInfo.payload = (uint8_t *)pktPayload;
+        respInfo.payloadLen = strlen(pktPayload) + 1;
+
+        if (CoapSoftBusBuildMessage(&respInfo, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
+            return DISCOVERY_ERR_BAD_REQ;
+        }
+    }
+
+    if (sndPktBuff->len >= sndPktBuff->size) {
         return DISCOVERY_ERR_BAD_REQ;
     }
 
-    char *buf = sndPktBuff->readWriteBuf;
-    uint32_t len = sndPktBuff->size;
-
-    if (buf == NULL) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-
-    (void)memset_s(&respPkt, sizeof(CoapPacket), 0, sizeof(CoapPacket));
-    (void)memset_s(&respPktPara, sizeof(CoapPacketParam), 0, sizeof(CoapPacketParam));
-    respPktPara.options = options;
-    respPktPara.options[respPktPara.optionsNum].num = DISCOVERY_MSG_URI_HOST;
-    respPktPara.options[respPktPara.optionsNum].optionBuf = (uint8_t *)remoteIp;
-    respPktPara.options[respPktPara.optionsNum].len = strlen(remoteIp);
-    respPktPara.optionsNum++;
-
-    respPktPara.options[respPktPara.optionsNum].num = DISCOVERY_MSG_URI_PATH;
-    respPktPara.options[respPktPara.optionsNum].optionBuf = (uint8_t *)"device_discover";
-    respPktPara.options[respPktPara.optionsNum].len = strlen("device_discover");
-    respPktPara.optionsNum++;
-
-    (void)memset_s(buf, COAP_MAX_PDU_SIZE, 0, COAP_MAX_PDU_SIZE);
-    CoapResponseInfo respInfo = {&respPkt, &respPktPara, NULL, 0};
-    respInfo.payload = (uint8_t *)pktPayload;
-    respInfo.payloadLen = strlen(pktPayload) + 1;
-    int ret = CoapSoftBusBuildMessage(pkt, &respInfo, buf, &len);
-    if (ret != DISCOVERY_ERR_SUCCESS) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-
-    if (len >= sndPktBuff->size) {
-        return DISCOVERY_ERR_BAD_REQ;
-    }
-    sndPktBuff->len = len;
     return DISCOVERY_ERR_SUCCESS;
 }

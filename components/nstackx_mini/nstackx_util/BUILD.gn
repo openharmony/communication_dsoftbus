@@ -23,14 +23,12 @@ config("nstackx_util_header") {
 
 static_library("nstackx_util.open") {
   sources = [
-    "core/nstackx_dev.c",
     "core/nstackx_event.c",
     "core/nstackx_log.c",
     "core/nstackx_timer.c",
   ]
 
   sources += [
-    "platform/liteos/sys_dev.c",
     "platform/liteos/sys_epoll.c",
     "platform/liteos/sys_event.c",
     "platform/liteos/sys_log.c",
@@ -40,6 +38,7 @@ static_library("nstackx_util.open") {
   defines = [
     "NSTACKX_WITH_LITEOS",
     "LWIP_LITEOS_A_COMPAT",
+    "ENABLE_COAP_ACTIVATE_DISCOVER",
   ]
   public_configs = [ ":nstackx_util_header" ]
 }
