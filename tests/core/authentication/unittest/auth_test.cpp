@@ -72,9 +72,9 @@ void OnKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVe
     LOG_INFO("%s: authId=%lld", __func__, authId);
 }
 
-void OnDeviceVerifyFail(int64_t authId)
+void OnDeviceVerifyFail(int64_t authId, int32_t reason)
 {
-    LOG_INFO("%s: authId=%lld", __func__, authId);
+    LOG_INFO("%s: authId=%lld, reason=%d", __func__, authId, reason);
 }
 
 void OnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUdid, uint8_t *data, uint32_t len)
