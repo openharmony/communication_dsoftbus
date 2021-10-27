@@ -370,7 +370,7 @@ int32_t LnnInitIpNetworkDelay(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeInitIpNetwork(void)
+int32_t LnnDeinitIpNetwork(void)
 {
     if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
