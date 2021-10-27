@@ -28,12 +28,13 @@
 #include <unistd.h>
 
 #include "bus_center_info_key.h"
+#include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "netif.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_utils.h"
 
 #define LNN_MAX_IF_NAME_LEN 256
 #define LNN_DELIMITER_OUTSIDE ","
