@@ -90,17 +90,22 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
     char name[IFNAMSIZ];
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
 
     if (if_indextoname(ifa->ifa_index, name) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid iface index");
         return;
     }
-    if (strncmp(name, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
+    if (LnnGetAddrTypeByIfName(name, strlen(name), &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
+        return;
+    }
+    if (type == CONNECTION_ADDR_ETH) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
         return;
     }
-    if (strncmp(name, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
+    if (type == CONNECTION_ADDR_WLAN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
@@ -112,6 +117,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     int len;
     struct rtattr *tb[IFLA_MAX + 1] = {NULL};
     struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
 
     len = nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
     ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
@@ -120,12 +126,16 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
         return;
     }
-    if (strncmp(RTA_DATA(tb[IFLA_IFNAME]), LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
+    if (LnnGetAddrTypeByIfName(RTA_DATA(tb[IFLA_IFNAME]), strlen(RTA_DATA(tb[IFLA_IFNAME])), &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
+        return;
+    }
+    if (type == CONNECTION_ADDR_ETH) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth link status changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
         return;
     }
-    if (strncmp(RTA_DATA(tb[IFLA_IFNAME]), LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
+    if (type == CONNECTION_ADDR_WLAN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan link status changed");
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }

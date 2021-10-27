@@ -33,6 +33,7 @@ if (defined(ohos_lite)) {
         "src/lnn_ip_utils_lite.c",
       ]
       include_dirs = [
+        "$dsoftbus_root_path/core/bus_center/interface",
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/common/softbus_property/include",
         "$dsoftbus_root_path/core/common/message_handler/include",
@@ -67,6 +68,7 @@ if (defined(ohos_lite)) {
         "src/lnn_ip_utils.c",
       ]
       include_dirs = [
+        "$dsoftbus_root_path/core/bus_center/interface",
         "$dsoftbus_root_path/core/connection/interface",
         "$dsoftbus_root_path/core/common/message_handler/include",
         "$dsoftbus_root_path/core/common/softbus_property/include",
@@ -103,6 +105,7 @@ if (defined(ohos_lite)) {
       "src/lnn_ip_utils.c",
     ]
     include_dirs = [
+      "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/common/message_handler/include",
       "$dsoftbus_root_path/core/common/softbus_property/include",

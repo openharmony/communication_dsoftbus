@@ -127,7 +127,7 @@ if (defined(ohos_lite)) {
       "network/lnn_lwip_monitor_virtual.c",
       "network/lnn_netlink_monitor.c",
       "platform/lnn_product_monitor_virtual.c",
-      "wlan/lnn_wifiservice_monitor.cpp",
+      "wlan/lnn_wifiservice_monitor_virtual.cpp",
     ]
     include_dirs = [
       "$softbus_adapter_common/include",
