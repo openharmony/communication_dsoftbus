@@ -327,7 +327,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
 
     if (!g_busCenterClient.isInit) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join lnn not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (pthread_mutex_lock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join lnn cb list in join");
@@ -336,6 +336,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     do {
         if (FindJoinLNNCbItem(target, cb) != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");
+            rc = SOFTBUS_ALREADY_EXISTED;
             break;
         }
         rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
@@ -357,7 +358,7 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
 
     if (!g_busCenterClient.isInit) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : leave lnn not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if (pthread_mutex_lock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock leave lnn cb list in leave");

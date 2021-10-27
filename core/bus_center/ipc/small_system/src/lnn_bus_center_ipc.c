@@ -107,7 +107,7 @@ static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         SoftBusFree(info);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     info->addr = *addr;
     ListAdd(&list->list, &info->node);
@@ -161,7 +161,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
     (void)addrTypeLen;
     if (pkgName == NULL || connAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_lnnRequestInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerJoin get lock");
@@ -171,13 +171,13 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
         if (g_lnnRequestInfo.joinLNNRequestInfo == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init fail : joinLNNRequestInfo = null!");
             (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
-            return false;
+            return SOFTBUS_MALLOC_ERR;
         }
     }
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ALREADY_EXISTED;
     }
     int32_t ret = LnnServerJoin(connAddr);
     if (ret == SOFTBUS_OK) {
@@ -193,7 +193,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 {
     if (pkgName == NULL || networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&g_lnnRequestInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerLeave get lock");
@@ -203,13 +203,13 @@ int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
         if (g_lnnRequestInfo.leaveLNNRequestInfo == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init fail : leaveLNNRequestInfo = null!");
             (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
-            return false;
+            return SOFTBUS_INVALID_PARAM;
         }
     }
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
         (void)pthread_mutex_unlock(&g_lnnRequestInfo.lock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ALREADY_EXISTED;
     }
     int32_t ret = LnnServerLeave(networkId);
     if (ret == SOFTBUS_OK) {
