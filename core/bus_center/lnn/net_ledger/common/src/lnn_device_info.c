@@ -22,10 +22,16 @@
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#define DEVICE_TYPE_MAX_LENGTH 3
+#define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)
+#define HEX_OF_BINARY_BITS 4
+#define LAST_FOUR_BINARY_DIGITS 16
+#define DIVIDE_NUMBER_AND_LETTERS 10
+#define ONE_BIT_MAX_HEX 15
 
 typedef struct {
     char *type;
-    uint8_t id;
+    uint16_t id;
 } TypeToId;
 
 static TypeToId g_typeToIdMap[] = {
@@ -38,6 +44,8 @@ static TypeToId g_typeToIdMap[] = {
     {TYPE_WATCH, TYPE_WATCH_ID},
     {TYPE_IPCAMERA, TYPE_IPCAMERA_ID},
 };
+
+static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
 
 const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {
@@ -61,7 +69,7 @@ int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId)
+int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 {
     if (info == NULL || typeId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceTypeId para error.");
@@ -71,30 +79,96 @@ int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint8_t *typeId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint8_t *typeId)
+static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
 {
+    *typeId = 0;
+    uint16_t tmp;
+    for (int32_t i = 0; i < strlen(deviceType); i++) {
+        if ((*(deviceType + i) <= '9') && (*(deviceType + i) >= '0')) {
+            *typeId |= (*(deviceType + i) - '0');
+            *typeId = (*typeId << HEX_OF_BINARY_BITS);
+            continue;
+        } else if ((*(deviceType + i) <= 'F') && (*(deviceType + i) >= 'A')) {
+            *typeId |= (*(deviceType + i) - 'A' + DIVIDE_NUMBER_AND_LETTERS);
+            *typeId = (*typeId << HEX_OF_BINARY_BITS);
+            continue;
+        } else if ((*(deviceType + i) <= 'f') && (*(deviceType + i) >= 'a')) {
+            tmp=(*(deviceType + i) - 'a' + DIVIDE_NUMBER_AND_LETTERS);
+            *typeId |= tmp;
+            *typeId = (*typeId << HEX_OF_BINARY_BITS);
+            continue;
+        } else {
+            *typeId = TYPE_UNKNOW_ID;
+            return *typeId;
+        }
+    }
+    *typeId = (*typeId >> HEX_OF_BINARY_BITS);
+    return *typeId;
+}
+
+static uint16_t InterceptTypeId(uint16_t typeId, uint32_t i)
+{
+    return (typeId >> (HEX_OF_BINARY_BITS * i)) % LAST_FOUR_BINARY_DIGITS;
+}
+
+static char *ConvertIntToHexString(uint16_t typeId)
+{
+    int32_t j = 0;
+    for (int32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
+        if ((j == 0) && (InterceptTypeId(typeId, i) == 0)) {
+            continue;
+        } else if (InterceptTypeId(typeId, i) < DIVIDE_NUMBER_AND_LETTERS) {
+            g_stringTypeId[j] = InterceptTypeId(typeId, i) + '0';
+        } else if (InterceptTypeId(typeId, i) >= DIVIDE_NUMBER_AND_LETTERS) {
+            g_stringTypeId[j] = InterceptTypeId(typeId, i) - DIVIDE_NUMBER_AND_LETTERS + 'A';
+        }
+        j++;
+    }
+    g_stringTypeId[j] = '\0';
+    return g_stringTypeId;
+}
+
+int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
+{
+    int mstRet;
     if (deviceType == NULL || typeId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId para error.");
         return SOFTBUS_INVALID_PARAM;
     }
     int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
-    for (int i = 0; i < count; i++) {
+    for (int32_t i = 0; i < count; i++) {
         if (strcmp(g_typeToIdMap[i].type, deviceType) == 0) {
             *typeId = g_typeToIdMap[i].id;
             return SOFTBUS_OK;
         }
     }
+    if (strlen(deviceType) <= DEVICE_TYPE_MAX_LENGTH) {
+        mstRet = memset_s(g_stringTypeId, sizeof(g_stringTypeId), 0, DEVICE_TYPE_MAX_LENGTH);
+        if (mstRet != EOK) {
+            *typeId = TYPE_UNKNOW_ID;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId memset_s fail.");
+            return SOFTBUS_ERR;
+        }
+        *typeId = ConvertStringToInt(deviceType, typeId);
+        if (*typeId != TYPE_UNKNOW_ID) {
+            return SOFTBUS_OK;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert string to int fail.");
+    }
     *typeId = TYPE_UNKNOW_ID;
     return SOFTBUS_ERR;
 }
 
-char *LnnConvertIdToDeviceType(uint8_t typeId)
+char *LnnConvertIdToDeviceType(uint16_t typeId)
 {
     int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
-    for (int i = 0; i < count; i++) {
+    for (int32_t i = 0; i < count; i++) {
         if (g_typeToIdMap[i].id == typeId) {
             return g_typeToIdMap[i].type;
         }
+    }
+    if ((typeId <= ONE_BIT_MAX_HEX << LEFT_SHIFT_DEVICE_TYPE_LENGTH) && (typeId > 0)) {
+        return ConvertIntToHexString(typeId);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "typeId not exist");
     return NULL;
