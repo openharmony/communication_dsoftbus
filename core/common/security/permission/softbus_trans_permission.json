@@ -106,5 +106,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.dsoftbus.demo.JtOnOpenSession*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "normal_app",
+        "PKG_NAME": "com.dsoftbus.demo",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
