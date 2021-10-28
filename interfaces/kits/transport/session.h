@@ -43,7 +43,6 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -62,9 +61,6 @@ typedef enum {
     TYPE_STREAM,
     TYPE_BUTT,
 } SessionType;
-
-#define IS_SERVER 0
-#define IS_CLIENT 1
 
 typedef enum  {
     INVALID = -1,
@@ -107,7 +103,6 @@ typedef struct {
     int dataType;
     int linkTypeNum;
     LinkType linkType[LINK_TYPE_MAX];
-    bool unique;
     union {
         struct StreamAttr {
             int streamType;
