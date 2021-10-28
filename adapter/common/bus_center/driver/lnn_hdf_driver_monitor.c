@@ -66,13 +66,8 @@ static void ProcessLwipEvent(const LnnMoniterData *monitorData)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessLwipEvent LnnGetAddrTypeByIfName error");
         return;
     }
-    if (type == CONNECTION_ADDR_ETH) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
-        g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-        return;
-    }
-    if (type == CONNECTION_ADDR_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "network addr changed, type:%d", type);
         g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
