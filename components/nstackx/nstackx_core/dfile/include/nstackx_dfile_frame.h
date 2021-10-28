@@ -160,6 +160,7 @@ typedef struct {
     uint16_t mtu;
     uint16_t connType;
     uint32_t dFileVersion;
+    uint32_t abmCapability;
     uint32_t capability;
 } SettingFrame;
 
