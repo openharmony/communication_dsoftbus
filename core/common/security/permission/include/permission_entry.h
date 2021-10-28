@@ -70,6 +70,7 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
 int32_t IsValidPkgName(int32_t uid, const char *pkgName);
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions);
+bool PermIsSecLevelPublic(const char *sessionName);
 
 #ifdef __cplusplus
 #if __cplusplus

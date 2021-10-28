@@ -34,31 +34,12 @@ using namespace OHOS::Security::Permission;
 
 namespace {
     const std::string PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
-    const std::string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
-    const std::string BIND_DISCOVER_SERVICE = "com.huawei.hwddmp.permission.BIND_DISCOVER_SERVICE";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
-
-#ifdef PERMISSION_TEST
-    const int32_t TEST_UID = 1000;
-    const int32_t TEST_PID = 1;
-#endif
-
-    int32_t CheckSystemPermission(const std::string &pkgName, const std::string &permission)
-    {
-        auto bundleObj =
-        OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-        if (bundleObj == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "failed to get bundle manager service");
-            return SOFTBUS_ERR;
-        }
-        OHOS::sptr<IBundleMgr> bmgr = OHOS::iface_cast<IBundleMgr>(bundleObj);
-        return bmgr->CheckPermission(std::string(pkgName), std::string(permission));
-    }
 }
 
-int32_t TransPermissionInit()
+int32_t TransPermissionInit(void)
 {
     return LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
 }
@@ -68,28 +49,42 @@ void TransPermissionDeinit(void)
     DeinitPermissionJson();
 }
 
-int32_t CheckTransPermission(const char *sessionName, const char *pkgName, uint32_t actions)
+int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+    const char *pkgName, const char *sessionName, uint32_t actions)
 {
     if (sessionName == nullptr || pkgName == nullptr) {
         return SOFTBUS_PERMISSION_DENIED;
     }
-#ifdef PERMISSION_TEST
-    int32_t callingUid = TEST_UID;
-    int32_t callingPid = TEST_PID;
-#else
-    int32_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    int32_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-#endif
     SoftBusPermissionItem *pItem = CreatePermissionItem(NATIVE_APP, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
     int32_t ret = CheckPermissionEntry(sessionName, pItem);
     SoftBusFree(pItem);
-    return ret;
+    if (ret >= SYSTEM_APP) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool CheckDiscPermission(const char *pkgName)
+int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
+{
+    if (mySessionName == nullptr || peerSessionName == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(mySessionName, peerSessionName) == 0) {
+        return SOFTBUS_OK;
+    }
+    if (!PermIsSecLevelPublic(mySessionName)) {
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (!PermIsSecLevelPublic(peerSessionName)) {
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
+bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg;
     if (pkgName != nullptr) {
@@ -97,21 +92,13 @@ bool CheckDiscPermission(const char *pkgName)
     } else {
         return false;
     }
-#ifdef PERMISSION_TEST
-    int32_t callingUid = TEST_UID;
-#else
-    int32_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-#endif
     if (callingUid == SYSTEM_UID || callingUid % MULTE_USER_RADIX == SYSTEM_UID) {
-        return true;
-    }
-    if (CheckSystemPermission(pkg, BIND_DISCOVER_SERVICE) == PERMISSION_GRANTED) {
         return true;
     }
     return false;
 }
 
-bool CheckBusCenterPermission(const char *pkgName)
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg;
     if (pkgName != nullptr) {
@@ -119,19 +106,7 @@ bool CheckBusCenterPermission(const char *pkgName)
     } else {
         return false;
     }
-
-#ifdef PERMISSION_TEST
-    int32_t callingUid = TEST_UID;
-#else
-    int32_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
-#endif
     if (callingUid == SYSTEM_UID || callingUid % MULTE_USER_RADIX == SYSTEM_UID) {
-        return true;
-    }
-    if (CheckSystemPermission(pkg, SYSTEM_APP_PERMISSION) == PERMISSION_GRANTED) {
-        return true;
-    }
-    if (CheckSystemPermission(pkg, DANGER_APP_PERMISSION) == PERMISSION_GRANTED) {
         return true;
     }
     return false;

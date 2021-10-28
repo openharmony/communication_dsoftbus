@@ -24,9 +24,57 @@
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
+#include "softbus_permission.h"
 #include "softbus_server.h"
+#include "trans_channel_manager.h"
+#include "trans_session_manager.h"
 
 namespace OHOS {
+int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
+{
+    char pkgName[PKG_NAME_SIZE_MAX];
+    if (TransGetPkgNameBySessionName(param->sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession TransGetPkgNameBySessionName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    if (CheckTransPermission(callingUid, callingPid, pkgName, param->sessionName, ACTION_OPEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession no permission");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    if (CheckTransSecLevel(param->sessionName, param->peerSessionName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession sec level invalid");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::CheckCloseChannelPermission(int32_t channelId, int32_t channelType)
+{
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    TransInfo info;
+    int32_t ret;
+
+    info.channelId = channelId;
+    info.channelType = channelType;
+    ret = TransGetNameByChanId(&info, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerCloseChannel invalid channel info");
+        return ret;
+    }
+
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
 SoftBusServerStub::SoftBusServerStub()
 {
     memberFuncMap_[SERVER_START_DISCOVERY] =
@@ -179,17 +227,23 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t retReply;
+    pid_t callingUid;
+    pid_t callingPid;
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CreateSessionServerInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
     const char *sessionName = data.ReadCString();
-    if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CreateSessionServerInner read sessionName failed!");
-        return SOFTBUS_ERR;
+    if (pkgName == nullptr || sessionName == nullptr) {
+        retReply = SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
-    int32_t retReply = CreateSessionServer(pkgName, sessionName);
+    callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
+    retReply = CreateSessionServer(pkgName, sessionName);
+EXIT:
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CreateSessionServerInner write reply failed!");
         return SOFTBUS_ERR;
@@ -199,17 +253,26 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
 
 int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t retReply;
+    pid_t callingUid;
+    pid_t callingPid;
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveSessionServerInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
     const char *sessionName = data.ReadCString();
-    if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveSessionServerInner read sessionName failed!");
-        return SOFTBUS_ERR;
+    if (pkgName == nullptr || sessionName == nullptr) {
+        retReply = SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
-    int32_t retReply = RemoveSessionServer(pkgName, sessionName);
+
+    callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveSessionServerInner check perm failed");
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
+
+    retReply = RemoveSessionServer(pkgName, sessionName);
+EXIT:
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveSessionServerInner write reply failed!");
         return SOFTBUS_ERR;
@@ -219,34 +282,26 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t retReply;
     SessionParam param;
     TransSerializer transSerializer;
     param.sessionName = data.ReadCString();
-    if (param.sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read my session name failed!");
-        return SOFTBUS_ERR;
-    }
     param.peerSessionName = data.ReadCString();
-    if (param.peerSessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read peer session name failed!");
-        return SOFTBUS_ERR;
-    }
     param.peerDeviceId = data.ReadCString();
-    if (param.peerDeviceId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read peeer deviceid failed!");
-        return SOFTBUS_ERR;
-    }
     param.groupId = data.ReadCString();
-    if (param.groupId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read group id failed!");
-        return SOFTBUS_ERR;
+    param.attr = (SessionAttribute *)data.ReadRawData(sizeof(SessionAttribute));
+    if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
+        param.groupId == nullptr || param.attr == nullptr) {
+        retReply = SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
-    param.attr = (SessionAttribute*)data.ReadRawData(sizeof(SessionAttribute));
-    if (param.attr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner read SessionAttribute failed!");
-        return SOFTBUS_ERR;
+    if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
     }
-    int32_t retReply = OpenSession(&param, &(transSerializer.transInfo));
+    retReply = OpenSession(&param, &(transSerializer.transInfo));
+
+EXIT:
     transSerializer.ret = retReply;
     if (!reply.WriteRawData(&transSerializer, sizeof(TransSerializer))) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner write reply failed!");
@@ -257,35 +312,23 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 
 int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t retReply;
     const char *sessionName = data.ReadCString();
-    if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner read session name failed!");
+    ConnectionAddr *addrInfo = (ConnectionAddr *)data.ReadRawData(sizeof(ConnectionAddr));
+    if (sessionName == nullptr || addrInfo == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner get param failed!");
         return SOFTBUS_ERR;
     }
-    ConnectionAddr addrInfo;
-    addrInfo.type = static_cast<ConnectionAddrType>(data.ReadInt32());
-    const char *addr = data.ReadCString();
-    if (addr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenAuthSessionInner read type failed!");
-        return SOFTBUS_ERR;
+    SessionParam param;
+    param.sessionName = sessionName;
+    param.peerSessionName = sessionName;
+    retReply = CheckOpenSessionPermission(&param);
+    if (retReply != SOFTBUS_OK) {
+        goto EXIT;
     }
-    if (addrInfo.type == CONNECTION_ADDR_ETH || addrInfo.type == CONNECTION_ADDR_WLAN) {
-        if (memcpy_s(addrInfo.info.ip.ip, IP_LEN, addr, IP_LEN) != EOK) {
-            return SOFTBUS_MEM_ERR;
-        }
-        addrInfo.info.ip.port = static_cast<uint16_t>(data.ReadInt16());
-    } else if (addrInfo.type == CONNECTION_ADDR_BLE) {
-        if (memcpy_s(addrInfo.info.ble.bleMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            return SOFTBUS_MEM_ERR;
-        }
-    } else if (addrInfo.type == CONNECTION_ADDR_BR) {
-        if (memcpy_s(addrInfo.info.br.brMac, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
-        return SOFTBUS_ERR;
-    }
-    int32_t retReply = OpenAuthSession(sessionName, &addrInfo);
+    retReply = OpenAuthSession(sessionName, addrInfo);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OpenAuthSession retReply:%d!", retReply);
+EXIT:
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSessionInner write reply failed!");
         return SOFTBUS_ERR;
@@ -320,7 +363,13 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CloseChannelInner read channel channel type failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = CloseChannel(channelId, channelType);
+
+    int32_t retReply = CheckCloseChannelPermission(channelId, channelType);
+    if (retReply != SOFTBUS_OK) {
+        goto EXIT;
+    }
+    retReply = CloseChannel(channelId, channelType);
+EXIT:
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CloseChannelInner write reply failed!");
         return SOFTBUS_ERR;

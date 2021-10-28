@@ -30,6 +30,8 @@
 #define ID_USED 1
 #define SHIFT_3 3
 #define SESSION_MAP_COUNT ((MAX_SESSION_ID + 0x7) >> SHIFT_3)
+#define IS_SERVER 0
+#define IS_CLIENT 1
 
 static uint8_t g_idFlagBitmap[SESSION_MAP_COUNT];
 

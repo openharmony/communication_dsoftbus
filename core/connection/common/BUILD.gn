@@ -75,6 +75,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("conn_common") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/softbus_property/include",
       "$dsoftbus_root_path/core/connection/common/include",
       "$dsoftbus_root_path/core/connection/interface",
       "$softbus_adapter_common/include",
@@ -87,6 +88,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common/log:softbus_log",
+      "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
       "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {

@@ -23,6 +23,7 @@ if (enable_connection_br == false) {
     "$dsoftbus_root_path/core/adapter/br/mock:br_adapter",
     "$dsoftbus_root_path/core/common/log:softbus_log",
     "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+    "$dsoftbus_root_path/core/common/utils:softbus_utils",
   ]
 }
 
