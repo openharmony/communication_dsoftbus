@@ -33,6 +33,7 @@
 #include "trans_lane_manager.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 
 int32_t TransChannelInit(void)
@@ -224,7 +225,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
-int32_t TransOpenChannel(const SessionParam* param, TransInfo* transInfo)
+int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
     transInfo->channelId = INVALID_CHANNEL_ID;
@@ -341,4 +342,22 @@ void TransChannelDeathCallback(const char *pkgName)
 {
     TransProxyDeathCallback(pkgName);
     TransTdcDeathCallback(pkgName);
+}
+
+int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
+    uint16_t pkgLen, uint16_t sessionNameLen)
+{
+    if (info == NULL || pkgName == NULL || sessionName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch ((ChannelType)info->channelType) {
+        case CHANNEL_TYPE_PROXY:
+            return TransProxyGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+        case CHANNEL_TYPE_UDP:
+            return TransUdpGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+        case CHANNEL_TYPE_AUTH:
+            return TransAuthGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+        default:
+            return SOFTBUS_INVALID_PARAM;
+    }
 }

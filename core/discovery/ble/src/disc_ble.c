@@ -18,10 +18,10 @@
 #include <stdlib.h>
 
 #include "common_list.h"
-#include "discovery_service.h"
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
 #include "disc_manager.h"
+#include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "message_handler.h"
 #include "pthread.h"
@@ -125,6 +125,15 @@ typedef struct {
     int32_t stateListenerId;
     int32_t scanListenerId;
 } DiscBleListener;
+
+typedef struct {
+    uint32_t *optionCapBitMap;
+    unsigned char *custData;
+    uint32_t custDataLen;
+    uint32_t freq;
+    bool isSameAccount;
+    bool isWakeRemote;
+} BleOption;
 
 static ScanSetting g_scanTable[FREQ_BUTT] = {
     {60, 3000},
@@ -748,32 +757,31 @@ static int32_t GetScannerParam(int32_t freq, SoftBusBleScanParams *scanParam)
     return SOFTBUS_OK;
 }
 
-static int32_t StartScaner(void)
+static void StartScaner(void)
 {
     if (!CheckScanner()) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "no need to start scanner");
         (void)StopScaner();
-        return SOFTBUS_ERR;
+        return;
     }
     if (g_isScanning) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "scanner already start");
         if (StopScaner() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "stop scanner failed");
-            return SOFTBUS_ERR;
+            return;
         }
     }
     SoftBusBleScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
     if (GetScannerParam(maxFreq, &scanParam) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetScannerParam failed");
-        return SOFTBUS_ERR;
+        return;
     }
     if (SoftBusStartScan(g_bleListener.scanListenerId, &scanParam) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start scan failed");
-        return SOFTBUS_ERR;
+        return;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartScanner success");
-    return SOFTBUS_OK;
 }
 
 static int32_t StopScaner(void)
@@ -790,33 +798,40 @@ static int32_t StopScaner(void)
     return SOFTBUS_OK;
 }
 
+static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
+{
+    if (option->publishOption != NULL) {
+        bleOption->optionCapBitMap = option->publishOption->capabilityBitmap;
+        bleOption->custDataLen = option->publishOption->dataLen;
+        bleOption->custData = option->publishOption->capabilityData;
+        bleOption->isSameAccount = false;
+        bleOption->isWakeRemote = false;
+        bleOption->freq = option->publishOption->freq;
+    } else {
+        bleOption->optionCapBitMap = option->subscribeOption->capabilityBitmap;
+        bleOption->custDataLen = option->subscribeOption->dataLen;
+        bleOption->custData = option->subscribeOption->capabilityData;
+        bleOption->isSameAccount = option->subscribeOption->isSameAccount;
+        bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
+        bleOption->freq = option->subscribeOption->freq;
+    }
+    bleOption->optionCapBitMap[0] = ConvertCapBitMap(bleOption->optionCapBitMap[0]);
+}
+
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
 {
     if (info == NULL || option == NULL || (option->publishOption == NULL && option->subscribeOption == NULL) ||
         (option->publishOption != NULL && option->subscribeOption != NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t *optionCapBitMap;
-    uint32_t custDataLen;
-    unsigned char *custData;
-    bool isSameAccount = false;
-    bool isWakeRemote = false;
-    int32_t freq;
-    if (option->publishOption != NULL) {
-        optionCapBitMap = option->publishOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
-        custDataLen = option->publishOption->dataLen;
-        custData = option->publishOption->capabilityData;
-        freq = option->publishOption->freq;
-    } else {
-        optionCapBitMap = option->subscribeOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
-        custDataLen = option->subscribeOption->dataLen;
-        custData = option->subscribeOption->capabilityData;
-        isSameAccount = option->subscribeOption->isSameAccount;
-        isWakeRemote = option->subscribeOption->isWakeRemote;
-        freq = option->subscribeOption->freq;
-    }
+    BleOption bleOption;
+    GetBleOption(&bleOption, option);
+    uint32_t *optionCapBitMap = bleOption.optionCapBitMap;
+    uint32_t custDataLen = bleOption.custDataLen;
+    uint32_t freq = bleOption.freq;
+    unsigned char *custData = bleOption.custData;
+    bool isSameAccount = bleOption.isSameAccount;
+    bool isWakeRemote = bleOption.isWakeRemote;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos)) {
             continue;
@@ -830,19 +845,17 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
         info->freq[pos] = freq;
+        info->capDataLen[pos] = 0;
         if (custData == NULL) {
-            info->capDataLen[pos] = 0;
             continue;
         }
         if (info->capabilityData[pos] == NULL) {
             info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
             if (info->capabilityData[pos] == NULL) {
-                info->capDataLen[pos] = 0;
                 return SOFTBUS_MALLOC_ERR;
             }
         }
         if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
-            info->capDataLen[pos] = 0;
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;
@@ -1015,8 +1028,8 @@ static DiscoveryFuncInterface g_discBleFuncInterface = {
 
 static int32_t InitAdvertiser(void)
 {
-    int conAdvId = SoftBusGetAdvChannel(&g_advCallback);
-    int nonAdvId = SoftBusGetAdvChannel(&g_advCallback);
+    int32_t conAdvId = SoftBusGetAdvChannel(&g_advCallback);
+    int32_t nonAdvId = SoftBusGetAdvChannel(&g_advCallback);
     if (conAdvId < 0 || nonAdvId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "SoftBusGetAdvChannel failed");
         (void)SoftBusReleaseAdvChannel(conAdvId);
@@ -1097,7 +1110,7 @@ static void StartPassivePublish(SoftBusMessage *msg)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UpdateAdvertiser %d", NON_ADV_ID);
         UpdateAdvertiser(NON_ADV_ID);
     }
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartPassivePublish finish");
 }
 
@@ -1108,7 +1121,7 @@ static void StartActiveDiscovery(SoftBusMessage *msg)
         return;
     }
     if (StartAdvertiser(CON_ADV_ID) == SOFTBUS_OK) {
-        (void)StartScaner();
+        StartScaner();
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartActiveDiscovery finish");
 }
@@ -1119,7 +1132,7 @@ static void StartPassiveDiscovery(SoftBusMessage *msg)
     if (msg == NULL || msg->what != START_PASSIVE_DISCOVERY) {
         return;
     }
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StartPassiveDiscovery finish");
 }
 
@@ -1131,7 +1144,7 @@ static void Recovery(SoftBusMessage *msg)
     }
     (void)StartAdvertiser(CON_ADV_ID);
     (void)StartAdvertiser(NON_ADV_ID);
-    (void)StartScaner();
+    StartScaner();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recovery finish");
 }
 
@@ -1348,7 +1361,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
                 UpdateAdvertiser(NON_ADV_ID);
             }
-            (void)StartScaner();
+            StartScaner();
             break;
         case START_ACTIVE_DISCOVERY:
             StartActiveDiscovery(msg);

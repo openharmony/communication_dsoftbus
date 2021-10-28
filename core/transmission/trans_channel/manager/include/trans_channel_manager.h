@@ -40,6 +40,9 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
 void TransChannelDeathCallback(const char *pkgName);
+
+int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
+    uint16_t pkgLen, uint16_t sessionNameLen);
 #ifdef __cplusplus
 }
 #endif

@@ -30,6 +30,7 @@ if (enable_connection_ble == false) {
     "$dsoftbus_root_path/core/common/message_handler:message_handler",
     "$dsoftbus_root_path/core/common/queue:softbus_queue",
     "$dsoftbus_root_path/core/common/softbus_property:softbus_property",
+    "$dsoftbus_root_path/core/common/utils:softbus_utils",
   ]
 }
 

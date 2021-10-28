@@ -133,7 +133,7 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
-int32_t TransServerProxy::OpenSession(const SessionParam* param, TransInfo* info)
+int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
     if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
         param->peerDeviceId == nullptr || param->groupId == nullptr) {
@@ -162,6 +162,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam* param, TransInfo* info
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
+    
     if (!data.WriteRawData(param->attr, sizeof(SessionAttribute))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
@@ -172,7 +173,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam* param, TransInfo* info
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
         return SOFTBUS_ERR;
     }
-    TransSerializer* transSerializer = (TransSerializer*)reply.ReadRawData(sizeof(TransSerializer));
+    TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
     if (transSerializer == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSession read TransSerializer failed!");
         return SOFTBUS_ERR;
@@ -187,48 +188,21 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     if (sessionName == nullptr || addrInfo == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenAuthSession begin");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s ServerIpcOpenAuthSession begin", sessionName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
+    
     MessageParcel data;
     if (!data.WriteCString(sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteInt32(addrInfo->type)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+    if (!data.WriteRawData((void *)addrInfo, sizeof(ConnectionAddr))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write ConnectionAddr failed!");
         return SOFTBUS_ERR;
-    }
-    switch (addrInfo->type) {
-        case CONNECTION_ADDR_WLAN:
-        case CONNECTION_ADDR_ETH:
-            if (!data.WriteCString(addrInfo->info.ip.ip)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
-                return SOFTBUS_ERR;
-            }
-            if (!data.WriteInt16(addrInfo->info.ip.port)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
-                return SOFTBUS_ERR;
-            }
-            break;
-        case CONNECTION_ADDR_BR:
-            if (!data.WriteCString(addrInfo->info.br.brMac)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
-                return SOFTBUS_ERR;
-            }
-            break;
-        case CONNECTION_ADDR_BLE:
-            if (!data.WriteCString(addrInfo->info.ble.bleMac)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
-                return SOFTBUS_ERR;
-            }
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "addrInfo type error");
-            return SOFTBUS_ERR;
     }
 
     MessageParcel reply;

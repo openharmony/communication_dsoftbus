@@ -58,10 +58,6 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr);
 int32_t GenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const unsigned char *data, uint32_t dataLen);
 int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data, uint32_t dataLen);
-int32_t ConvertBtMacToBinary(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen);
-int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen,
-    const uint8_t *binMac, int32_t binMacLen);
 
 #ifdef __cplusplus
 #if __cplusplus
