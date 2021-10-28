@@ -100,13 +100,8 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
         return;
     }
-    if (type == CONNECTION_ADDR_ETH) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
-        g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-        return;
-    }
-    if (type == CONNECTION_ADDR_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network addr changed, type:%d", type);
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
@@ -130,13 +125,8 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
         return;
     }
-    if (type == CONNECTION_ADDR_ETH) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth link status changed");
-        g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-        return;
-    }
-    if (type == CONNECTION_ADDR_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan link status changed");
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "link status changed, type:%d", type);
         g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
