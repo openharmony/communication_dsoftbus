@@ -296,6 +296,7 @@ void EncodeSettingFrame(uint8_t *buffer, size_t length, size_t *frameLength, con
     settingFrame->mtu = htons(settingFramePara->mtu);
     settingFrame->connType = htons(settingFramePara->connType);
     settingFrame->dFileVersion = htonl(NSTACKX_DFILE_VERSION);
+    settingFrame->abmCapability = 0;
     settingFrame->header.length = htons(*frameLength - DFILE_FRAME_HEADER_LEN);
     settingFrame->capability = htonl(settingFramePara->capability);
 }
@@ -529,6 +530,11 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
         return NSTACKX_TRUE;
     }
 
+    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion)) {
+        return NSTACKX_TRUE;
+    }
+
     /*
      * From dfile with the same version with local dfile.
      */
@@ -564,7 +570,7 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
     }
     uint16_t payloadLength = ntohs(netSettingFrame->header.length);
     if (!IsSettingFrameLengthValid(hostSettingFrame, payloadLength)) {
-        LOGE(TAG, "illegal setting frame");
+        LOGE(TAG, "illegal setting frame %u", payloadLength);
         return NSTACKX_EFAILED;
     }
     if (!IsSettingFrameMtuAndTypeValid(netSettingFrame)) {
@@ -582,9 +588,17 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
          */
         LOGI(TAG, "this setting frame is from an old version whose setting frame doesn't have the member dFileVersion");
         hostSettingFrame->dFileVersion = 0;
+    } else if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion)) {
+        hostSettingFrame->dFileVersion = ntohl(netSettingFrame->dFileVersion);
+        hostSettingFrame->abmCapability = 0;
     } else {
         hostSettingFrame->dFileVersion = ntohl(netSettingFrame->dFileVersion);
-        hostSettingFrame->capability = ntohl(netSettingFrame->capability);
+        hostSettingFrame->abmCapability = ntohl(netSettingFrame->abmCapability);
+        if (payloadLength > (sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+            sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability))) {
+            hostSettingFrame->capability = ntohl(netSettingFrame->capability);
+        }
     }
     LOGI(TAG, "local dfile version is %u, remote dfile version is %u capability 0x%x",
          NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability);
