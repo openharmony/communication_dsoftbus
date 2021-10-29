@@ -803,6 +803,9 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
 
     struct ifaddrs *ifa = nullptr;
     for (ifa = ifList; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr) {
+            continue;
+        }
         if (ifa->ifa_addr->sa_family != AF_INET) {
             continue;
         }
