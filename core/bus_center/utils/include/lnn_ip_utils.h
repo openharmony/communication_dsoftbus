@@ -26,10 +26,22 @@ extern "C" {
 
 #define LNN_LOOPBACK_IP "127.0.0.1"
 #define LNN_LOOPBACK_IFNAME "lo"
-#define LNN_WLAN_IF_NAME_PREFIX "wlan"
-#define LNN_ETH_IF_NAME_PREFIX  "eth"
+#define LNN_IF_NAME_WLAN "wlan0"
+#define LNN_IF_NAME_ETH  "eth0"
 
-int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, ConnectionAddrType type);
+typedef enum {
+    LNN_ETH_TYPE = 0,
+    LNN_WLAN_TYPE,
+    LNN_MAX_NUM_TYPE,
+} LnnNetIfNameType;
+
+int32_t LnnReadNetConfigList(void);
+
+int32_t LnnClearNetConfigList(void);
+
+int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen);
+
+int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, ConnectionAddrType *type);
 
 #ifdef __cplusplus
 }

@@ -42,6 +42,7 @@ typedef enum {
     SOFTBUS_INT_SUPPORT_TCP_PROXY, /* the l0 devices val is 0 , others is 1 */
     SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, /* the l0 devices val is 100000us , others is 10000us */
     SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN, /* the default val is 0 */
+    SOFTBUS_STR_LNN_NET_IF_NAME, /* the default val is 0:eth0,1:wlan0 */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

@@ -29,11 +29,15 @@ extern "C" {
 
 int32_t LnnInitNetworkManager(void);
 
+void LnnDeinitNetworkManager(void);
+
 int32_t LnnInitNetworkManagerDelay(void);
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 
 int32_t __attribute__ ((weak)) LnnInitIpNetwork(void);
+
+int32_t __attribute__ ((weak)) LnnDeinitIpNetwork(void);
 
 int32_t __attribute__ ((weak)) LnnInitIpNetworkDelay(void);
 

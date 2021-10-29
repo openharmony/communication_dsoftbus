@@ -27,24 +27,137 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "bus_center_info_key.h"
+#include "common_list.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "netif.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-#define WLAN "wlan0"
+#define LNN_MAX_IF_NAME_LEN 256
+#define LNN_DELIMITER_OUTSIDE ","
+#define LNN_DELIMITER_INSIDE ":"
 
-static const char *GetIfNamePrefix(ConnectionAddrType type)
+typedef struct {
+    ListNode node;
+    LnnNetIfNameType type;
+    char ifName[NET_IF_NAME_LEN];
+} LnnNetIfNameConfig;
+
+static ListNode g_netIfNameList = {
+    .prev = &g_netIfNameList,
+    .next = &g_netIfNameList,
+};
+
+static int32_t AddNetConfigInfo(LnnNetIfNameType type, const char *netIfName, int32_t netIfNameLen)
 {
-    if (type == CONNECTION_ADDR_WLAN) {
-        return LNN_WLAN_IF_NAME_PREFIX;
-    } else if (type == CONNECTION_ADDR_ETH) {
-        return LNN_ETH_IF_NAME_PREFIX;
-    } else {
-        return NULL;
+    if (netIfName == NULL || type < LNN_ETH_TYPE || type >= LNN_MAX_NUM_TYPE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invaild!");
+        return SOFTBUS_ERR;
     }
+    LnnNetIfNameConfig *info = (LnnNetIfNameConfig *)SoftBusMalloc(sizeof(LnnNetIfNameConfig));
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc LnnNetIfNameConfig");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&info->node);
+    if (strncpy_s(info->ifName, NET_IF_NAME_LEN, netIfName, netIfNameLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy netIfName fail");
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
+    }
+    info->type = type;
+    ListTailInsert(&g_netIfNameList, &info->node);
+    return SOFTBUS_OK;
 }
 
-int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, ConnectionAddrType type)
+static int32_t ParseIfNameConfig(char *buf)
+{
+    char *outerPtr = NULL;
+    char *innerPtr = NULL;
+    char *value1 = NULL;
+    char *value2 = NULL;
+    char *key = strtok_r(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
+    while (key != NULL) {
+        value1 = strtok_r(key, LNN_DELIMITER_INSIDE, &innerPtr);
+        value2 = strtok_r(NULL, LNN_DELIMITER_INSIDE, &innerPtr);
+        if (AddNetConfigInfo(atoi(value1), value2, strlen(value2)) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddNetConfigInfo fail");
+            return SOFTBUS_ERR;
+        }
+        key = strtok_r(NULL, LNN_DELIMITER_OUTSIDE, &outerPtr);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SetIfNameDefaultVal(void)
+{
+    if (AddNetConfigInfo(LNN_ETH_TYPE, LNN_IF_NAME_ETH, strlen(LNN_IF_NAME_ETH)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddNetConfigInfo fail");
+        return SOFTBUS_ERR;
+    }
+    if (AddNetConfigInfo(LNN_WLAN_TYPE, LNN_IF_NAME_WLAN, strlen(LNN_IF_NAME_WLAN)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddNetConfigInfo fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnReadNetConfigList(void)
+{
+    char netIfName[LNN_MAX_IF_NAME_LEN] = {0};
+    if (SoftbusGetConfig(SOFTBUS_STR_LNN_NET_IF_NAME,
+        (unsigned char*)netIfName, sizeof(netIfName)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn net ifname fail, use default value");
+        if (SetIfNameDefaultVal() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "default value set fail");
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    if (ParseIfNameConfig(netIfName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifname str parse fail!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnClearNetConfigList(void)
+{
+    LnnNetIfNameConfig *item = NULL;
+    LnnNetIfNameConfig *next = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netIfNameList, LnnNetIfNameConfig, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, ConnectionAddrType *type)
+{
+    if (ifName == NULL || type == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
+        return SOFTBUS_ERR;
+    }
+    LnnNetIfNameConfig *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_netIfNameList, LnnNetIfNameConfig, node) {
+        if (strncmp(ifName, info->ifName, ifNameLen) == 0) {
+            if (info->type == LNN_ETH_TYPE) {
+                *type = CONNECTION_ADDR_ETH;
+            }
+            if (info->type == LNN_WLAN_TYPE) {
+                *type = CONNECTION_ADDR_WLAN;
+            }
+            break;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen)
 {
     struct netif *netif = NULL;
     char *ipStr = NULL;
@@ -56,30 +169,28 @@ int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ip or ifName buffer is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
-    const char *prefix = GetIfNamePrefix(type);
-    if (prefix == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get ifname prefix failed!");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LnnNetIfNameConfig *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_netIfNameList, LnnNetIfNameConfig, node) {
+        if (info->type == LNN_WLAN_TYPE) {
+            netif = netif_find(info->ifName);
+            if (netif == NULL) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netif is NULL!");
+                continue;
+            }
+            netifapi_netif_get_addr(netif, &ipAddr, &netMask, &gw);
+            if (strncpy_s(ifName, ifNameLen, info->ifName, IFNAMSIZ) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ifname failed!");
+                continue;
+            }
+            ipStr = ip4addr_ntoa(&ipAddr);
+            if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip failed!");
+                continue;
+            }
 
-    if (prefix == LNN_WLAN_IF_NAME_PREFIX) {
-        netif = netif_find(WLAN);
-        if (netif == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netif is NULL!");
-            return SOFTBUS_ERR;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnGetLocalIp success.");
+            return SOFTBUS_OK;
         }
-        netifapi_netif_get_addr(netif, &ipAddr, &netMask, &gw);
-        if (strncpy_s(ifName, ifNameLen, WLAN, IFNAMSIZ) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ifname failed!");
-        }
-        ipStr = ip4addr_ntoa(&ipAddr);
-        if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip failed!");
-        }
-
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnGetLocalIp success. ip = %s", ip);
-        return SOFTBUS_OK;
-    } else {
-        return SOFTBUS_ERR;
     }
+    return SOFTBUS_ERR;
 }

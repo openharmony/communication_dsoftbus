@@ -21,6 +21,7 @@
 #include "softbus_feature_config.h"
 
 #define MAX_STORAGE_PATH_LEN 256
+#define MAX_NET_IF_NAME_LEN 256
 
 #define MAX_BYTES_LENGTH 4194304
 #define MAX_MESSAGE_LENGTH 4096
@@ -39,6 +40,7 @@
 #define DEFAULT_STORAGE_PATH "/data/data"
 #endif
 #define LNN_UDID_INIT_DELAY_LEN 0
+#define LNN_NET_IF_NAME "0:eth0,1:wlan0"
 
 #ifdef __LITEOS_M__
 #define DEFAULT_SElECT_INTERVAL 100000
@@ -74,6 +76,7 @@ typedef struct {
     int32_t adapterLogLevel;
     char storageDir[MAX_STORAGE_PATH_LEN];
     int32_t lnnUdidInitDelayLen;
+    char lnnNetIfName[MAX_NET_IF_NAME_LEN];
 } ConfigItem;
 
 typedef struct {
@@ -96,6 +99,7 @@ ConfigItem g_config = {
     ADAPTER_LOG_LEVEL,
     DEFAULT_STORAGE_PATH,
     LNN_UDID_INIT_DELAY_LEN,
+    LNN_NET_IF_NAME,
 };
 
 typedef struct {
@@ -192,6 +196,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
         (unsigned char*)&(g_config.lnnUdidInitDelayLen),
         sizeof(g_config.lnnUdidInitDelayLen)
+    },
+    {
+        SOFTBUS_STR_LNN_NET_IF_NAME,
+        (unsigned char*)&(g_config.lnnNetIfName),
+        sizeof(g_config.lnnNetIfName)
     },
 };
 
