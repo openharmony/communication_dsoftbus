@@ -344,10 +344,12 @@ static void OnGroupCreated(const char *groupId)
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifname error!\n");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip invaild now, stop group create");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
