@@ -84,6 +84,7 @@ typedef enum {
     TRANS_UDP_DATA,
     TRANS_AUTH_CHANNEL,
     TRANS_TIME_SYNC_CHANNEL,
+    BUSCENTER_MONITOR,
     MODULE_NUM,
 } AuthModuleId;
 
@@ -116,6 +117,8 @@ typedef struct {
     void (*onDeviceVerifyPass)(int64_t authId);
     void (*onDeviceNotTrusted)(const char *peerUdid);
     void (*onDisconnect)(int64_t authId);
+    void (*onGroupCreated)(const char *groupId);
+    void (*onGroupDeleted)(const char *groupId);
 } VerifyCallback;
 
 typedef struct {
