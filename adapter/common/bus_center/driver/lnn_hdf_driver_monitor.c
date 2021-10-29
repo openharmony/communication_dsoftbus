@@ -53,6 +53,7 @@ static HdfDriverEventCtrl g_driverCtrl;
 static void ProcessLwipEvent(const LnnMoniterData *monitorData)
 {
     const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)monitorData->value;
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
 
     if (monitorData->len != sizeof(LwipMonitorReportInfo)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor not correct size: %d<->%d",
@@ -61,13 +62,12 @@ static void ProcessLwipEvent(const LnnMoniterData *monitorData)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor event(%d) for %s",
         info->event, info->ifName);
-    if (strncmp(info->ifName, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "eth network addr changed");
-        g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+    if (LnnGetAddrTypeByIfName(info->ifName, strlen(info->ifName), &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessLwipEvent LnnGetAddrTypeByIfName error");
         return;
     }
-    if (strncmp(info->ifName, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan network addr changed");
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "network addr changed, type:%d", type);
         g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
     }
 }
