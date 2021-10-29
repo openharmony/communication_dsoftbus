@@ -334,6 +334,43 @@ static int32_t LnnInitAutoNetworking(void)
     return SOFTBUS_OK;
 }
 
+static void OnGroupCreated(const char *groupId)
+{
+    (void)groupId;
+    char ifName[NET_IF_NAME_LEN] = {0};
+    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifname error!\n");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        return;
+    }
+    if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip invaild now, stop group create");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
+    LnnStopDiscovery();
+    if (LnnStartDiscovery() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
+    }
+    SetCallLnnStatus(true);
+    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+}
+
+static void OnGroupDeleted(const char *groupId)
+{
+    (void)groupId;
+}
+
+static VerifyCallback g_verifyCb = {
+    .onGroupCreated = OnGroupCreated,
+    .onGroupDeleted = OnGroupDeleted,
+};
+
 int32_t LnnInitIpNetwork(void)
 {
     char ipAddr[IP_LEN] = {0};
@@ -345,6 +382,11 @@ int32_t LnnInitIpNetwork(void)
     if (LnnReadNetConfigList() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read net config list error!");
         (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        return SOFTBUS_ERR;
+    }
+
+    if (AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
         return SOFTBUS_ERR;
     }
 
