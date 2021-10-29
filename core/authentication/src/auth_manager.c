@@ -280,7 +280,8 @@ static void DeleteAuth(AuthManager *auth)
 
 static void HandleAuthFail(AuthManager *auth, int32_t reason)
 {
-    if (auth == NULL) {
+    if (auth == NULL || auth->cb->onDeviceVerifyFail == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth is NULL or device verify fail Callback is NULL!");
         return;
     }
     EventRemove(auth->authId);
@@ -522,6 +523,10 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
     AuthSetLocalSessionKey(&devInfo, auth->peerUdid, sessionKey, sessionKeyLen);
     auth->status = IN_SYNC_PROGRESS;
     (void)pthread_mutex_unlock(&g_authLock);
+    if (auth->cb->onKeyGenerated == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth Key Generated Callback is NULL!");
+        return;
+    }
     if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG) {
         if (auth->encryptInfoStatus == INITIAL_STATE) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "wait client send encrypt dev info");
@@ -575,7 +580,9 @@ static void ReceiveCloseAck(uint32_t connectionId, AuthSideFlag side)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connection type: %d", auth->option.type);
         if (auth->option.type != CONNECT_TCP) {
             EventRemove(auth->authId);
-            auth->cb->onDeviceVerifyPass(auth->authId);
+            if (auth->cb->onDeviceVerifyPass != NULL) {
+                auth->cb->onDeviceVerifyPass(auth->authId);
+            }
         }
         auth->status = RECV_CLSOE_ACK;
     } else {
@@ -592,11 +599,10 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
     }
 
     if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
-        auth->encryptInfoStatus == KEY_GENERATEG_STATE) {
+        auth->encryptInfoStatus == KEY_GENERATEG_STATE && auth->cb->onKeyGenerated != NULL) {
         auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
     }
     auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
-
     if (AuthIsSeqInKeyList((int32_t)(auth->authId)) == false ||
         auth->status == IN_SYNC_PROGRESS) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth saved encrypted data first");
@@ -620,13 +626,17 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         auth->encryptLen = len;
         return;
     }
-    auth->cb->onRecvSyncDeviceInfo(auth->authId, auth->side, auth->peerUuid, data, len);
+    if (auth->cb->onRecvSyncDeviceInfo != NULL) {
+        auth->cb->onRecvSyncDeviceInfo(auth->authId, auth->side, auth->peerUuid, data, len);
+    }
     if (auth->status == WAIT_PEER_DEV_INFO || auth->option.type == CONNECT_TCP) {
         if (auth->option.type != CONNECT_TCP) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send close ack");
             AuthSendCloseAck(auth->connectionId);
         }
-        auth->cb->onDeviceVerifyPass(auth->authId);
+        if (auth->cb->onDeviceVerifyPass != NULL) {
+            auth->cb->onDeviceVerifyPass(auth->authId);
+        }
         EventRemove(auth->authId);
     } else {
         auth->status = AUTH_PASSED;
@@ -842,11 +852,48 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     (void)info;
 }
 
+static void AuthOnGroupCreated(const char *groupInfo)
+{
+    if (groupInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain transmit invalid parameter");
+        return;
+    }
+    cJSON *msg = cJSON_Parse(groupInfo);
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "json parse failed");
+        return;
+    }
+    char groupId[GROUPID_BUF_LEN] = {0};
+    if (!GetJsonObjectStringItem(msg, FIELD_GROUP_ID, groupId, GROUPID_BUF_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get groupId tag failed");
+        cJSON_Delete(msg);
+        return;
+    }
+    int32_t groupType;
+    if (!GetJsonObjectNumberItem(msg, FIELD_GROUP_TYPE, &groupType)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get groupType tag failed");
+        cJSON_Delete(msg);
+        return;
+    }
+    cJSON_Delete(msg);
+    if (groupType == IDENTICAL_ACCOUNT_GROUP) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth group count create, groupType = %d", groupType);
+        if (g_verifyCallback[BUSCENTER_MONITOR].onGroupCreated != NULL) {
+            g_verifyCallback[BUSCENTER_MONITOR].onGroupCreated(groupId);
+        }
+    }
+}
+
+static void AuthOnGroupDeleted(const char *groupInfo)
+{
+    (void)groupInfo;
+}
+
 static void AuthOnDeviceNotTrusted(const char *peerUdid)
 {
     AuthManager *auth = NULL;
     auth = GetAuthByPeerUdid(peerUdid);
-    if (auth == NULL) {
+    if (auth == NULL || auth->cb->onDeviceNotTrusted == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetAuthByPeerUdid failed");
         return;
     }
@@ -877,6 +924,8 @@ static int32_t HichainServiceInit(void)
     g_hichainCallback.onRequest = AuthOnRequest;
 
     (void)memset_s(&g_hichainListener, sizeof(DataChangeListener), 0, sizeof(DataChangeListener));
+    g_hichainListener.onGroupCreated = AuthOnGroupCreated;
+    g_hichainListener.onGroupDeleted = AuthOnGroupDeleted;
     g_hichainListener.onDeviceNotTrusted = AuthOnDeviceNotTrusted;
     if (g_hichainGmInstance->regDataChangeListener(AUTH_APPID, &g_hichainListener) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth RegDataChangeListener failed");
@@ -901,7 +950,9 @@ static void AuthTimeout(SoftBusMessage *msg)
             return;
         }
     }
-    auth->cb->onDeviceVerifyFail(auth->authId, SOFTBUS_AUTH_TIMEOUT);
+    if (auth->cb->onDeviceVerifyFail != NULL) {
+        auth->cb->onDeviceVerifyFail(auth->authId, SOFTBUS_AUTH_TIMEOUT);
+    }
 }
 
 void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len)
@@ -974,9 +1025,7 @@ static int32_t AuthCallbackInit(uint32_t moduleNum)
 
 int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb)
 {
-    if (cb == NULL || cb->onKeyGenerated == NULL || cb->onDeviceVerifyFail == NULL ||
-        cb->onRecvSyncDeviceInfo == NULL || cb->onDeviceNotTrusted == NULL ||
-        cb->onDeviceVerifyPass == NULL || cb->onDisconnect == NULL || moduleId >= MODULE_NUM) {
+    if (cb == NULL || moduleId >= MODULE_NUM) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -993,6 +1042,8 @@ int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb)
     g_verifyCallback[moduleId].onDeviceVerifyPass = cb->onDeviceVerifyPass;
     g_verifyCallback[moduleId].onDeviceNotTrusted = cb->onDeviceNotTrusted;
     g_verifyCallback[moduleId].onDisconnect = cb->onDisconnect;
+    g_verifyCallback[moduleId].onGroupCreated = cb->onGroupCreated;
+    g_verifyCallback[moduleId].onGroupDeleted = cb->onGroupDeleted;
     return SOFTBUS_OK;
 }
 
@@ -1126,7 +1177,7 @@ void AuthNotifyLnnDisconn(const AuthManager *auth)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth no need to notify lnn disconn");
         (void)AuthHandleLeaveLNN(auth->authId);
     } else {
-        if (auth->cb != NULL) {
+        if (auth->cb != NULL && auth->cb->onDisconnect != NULL) {
             auth->cb->onDisconnect(auth->authId);
         }
     }
@@ -1159,7 +1210,9 @@ void AuthIpChanged(ConnectType type)
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->option.type == CONNECT_TCP) {
             EventRemove(auth->authId);
-            auth->cb->onDisconnect(auth->authId);
+            if (auth->cb->onDisconnect != NULL) {
+                auth->cb->onDisconnect(auth->authId);
+            }
         }
     }
     LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
@@ -1172,7 +1225,9 @@ void AuthIpChanged(ConnectType type)
                 (void)AuthHandleLeaveLNN(auth->authId);
                 (void)pthread_mutex_lock(&g_authLock);
             } else {
-                auth->cb->onDisconnect(auth->authId);
+                if (auth->cb->onDisconnect != NULL) {
+                    auth->cb->onDisconnect(auth->authId);
+                }
             }
         }
     }
