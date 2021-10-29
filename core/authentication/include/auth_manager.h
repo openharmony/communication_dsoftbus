@@ -39,6 +39,12 @@ extern "C" {
 /* auth data max length */
 #define AUTH_MAX_DATA_LEN (64 * 1024)
 
+/* the length of the groupID */
+#define GROUPID_BUF_LEN 65
+
+/* group type */
+#define IDENTICAL_ACCOUNT_GROUP 1
+
 /* auth status */
 #define INIT_STATE 0
 #define WAIT_CONNECTION_ESTABLISHED 1
