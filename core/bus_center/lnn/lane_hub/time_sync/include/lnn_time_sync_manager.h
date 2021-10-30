@@ -27,7 +27,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period);
 int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId);
 
-int32_t LnnTimeSyncInit(LnnOnTimeSyncResult notifyCallback);
+int32_t LnnTimeSyncInit(LnnOnTimeSyncCallBack notifyCallback);
 void LnnTimeSyncDeinit(void);
 
 #ifdef __cplusplus
