@@ -80,7 +80,7 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
 
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
 {
-    if ((data == NULL) || (ext == 0) || (param == NULL)) {
+    if ((data == NULL) || (ext == NULL) || (param == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
