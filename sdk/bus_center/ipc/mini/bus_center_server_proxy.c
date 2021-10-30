@@ -53,3 +53,13 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     return LnnIpcServerLeave(pkgName, networkId);
 }
+
+int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+{
+    return LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+}
+
+int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return LnnIpcStopTimeSync(pkgName, targetNetworkId);
+}
