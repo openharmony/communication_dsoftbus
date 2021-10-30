@@ -243,30 +243,12 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
 
 int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
-    if (pkgName == NULL || targetNetworkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
-        return SOFTBUS_ERR;
-    }
-    TimeSyncAccuracy acc = (TimeSyncAccuracy)accuracy;
-    TimeSyncPeriod per = (TimeSyncPeriod)period;
-    int32_t ret = LnnStartTimeSync(pkgName, targetNetworkId, acc, per);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStartTimeSync fail from %s", pkgName);
-    }
-    return ret;
+    return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
-    if (pkgName == NULL || targetNetworkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = LnnStopTimeSync(pkgName, targetNetworkId);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnStopTimeSync fail from %s", pkgName);
-    }
-    return ret;
+    return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
@@ -335,15 +317,7 @@ int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
 
 int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
-    if (pkgName == NULL || info == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult fail from %s", pkgName);
-    }
-    return ret;
+    return ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
 }
 
 void BusCenterServerDeathCallback(const char *pkgName)
