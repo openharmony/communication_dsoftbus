@@ -17,8 +17,9 @@ lite_component("softbus_test") {
   if (ohos_kernel_type == "liteos_m") {
     features = []
   } else {
+    features = []
     if (ohos_build_type == "debug") {
-      features = [ "sdk/discovery/unittest:DiscSdkTest" ]
+      features += [ "sdk/discovery/unittest:DiscSdkTest" ]
     }
   }
 }
