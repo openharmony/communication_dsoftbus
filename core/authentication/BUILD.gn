@@ -31,10 +31,6 @@ common_src = [
   "src/auth_socket.c",
 ]
 
-if (enable_auth_account == true) {
-  defines = [ "AUTH_ACCOUNT" ]
-}
-
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
@@ -65,6 +61,9 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
       "//third_party/cJSON",
     ]
+    if (enable_auth_account == true) {
+      defines = [ "AUTH_ACCOUNT" ]
+    }
     cflags = [
       "-Wall",
       "-fPIC",
