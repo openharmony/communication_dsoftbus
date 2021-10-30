@@ -57,7 +57,7 @@ typedef struct {
     ListNode reqList;
     SoftBusLooper *looper;
     SoftBusHandler handler;
-    LnnOnTimeSyncResult notifyCallback;
+    LnnOnTimeSyncCallBack notifyCallback;
 } TimeSyncCtrl;
 
 typedef struct {
@@ -461,7 +461,7 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
     return true;
 }
 
-int32_t LnnTimeSyncInit(LnnOnTimeSyncResult notifyCallback)
+int32_t LnnTimeSyncInit(LnnOnTimeSyncCallBack notifyCallback)
 {
     if (notifyCallback == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "null time sync result callback");
