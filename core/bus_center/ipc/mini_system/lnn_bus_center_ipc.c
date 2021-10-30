@@ -20,6 +20,7 @@
 
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
+#include "lnn_time_sync_manager.h"
 
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
@@ -52,6 +53,16 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
 {
     (void)pkgName;
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
+}
+
+int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+{
+    return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
+}
+
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
