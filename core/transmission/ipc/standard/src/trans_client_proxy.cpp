@@ -15,16 +15,16 @@
 
 #include "trans_client_proxy.h"
 
+#include "softbus_client_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_server_data.h"
 #include "trans_client_proxy_standard.h"
 
 using namespace OHOS;
 
 static sptr<TransClientProxy> GetClientProxy(const char *pkgName)
 {
-    sptr<IRemoteObject> clientObject = SoftBusServerData::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     return clientProxy;
 }

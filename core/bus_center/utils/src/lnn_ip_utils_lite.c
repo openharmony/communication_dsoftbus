@@ -31,7 +31,7 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "netif.h"
+#include "lwip/netif.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
