@@ -266,13 +266,13 @@ static EpollTask *EpollSetFindTaskByFd(const EpollSet *epollSetPtr, int32_t fd)
 static int32_t ConnectPeerFd(int32_t localFd, int32_t peerFd)
 {
     struct sockaddr_in addr = {0};
-    socklen_t addr_len = sizeof(addr);
+    socklen_t addrLen = sizeof(addr);
 
-    if (getsockname(peerFd, (struct sockaddr *)&addr, &addr_len) != 0) {
+    if (getsockname(peerFd, (struct sockaddr *)&addr, &addrLen) != 0) {
         LOGE(TAG, "getsockname failed: %d", errno);
         return NSTACKX_EFAILED;
     }
-    if (connect(localFd, (struct sockaddr *)&addr, addr_len) != 0) {
+    if (connect(localFd, (struct sockaddr *)&addr, addrLen) != 0) {
         LOGE(TAG, "connect failed: %d", errno);
         return NSTACKX_EFAILED;
     }
@@ -285,13 +285,13 @@ static int32_t GetLoopbackFd(int32_t peerFd)
     int32_t fd;
     struct sockaddr_in addr = {0};
     struct sockaddr *sockaddr = NULL;
-    socklen_t addr_len;
+    socklen_t addrLen;
 
     addr.sin_family = AF_INET;
     addr.sin_port = 0;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     sockaddr = (struct sockaddr *)&addr;
-    addr_len = sizeof(addr);
+    addrLen = sizeof(addr);
 
     fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (fd < 0) {
@@ -305,7 +305,7 @@ static int32_t GetLoopbackFd(int32_t peerFd)
         return -1;
     }
 
-    if (bind(fd, sockaddr, addr_len) != 0) {
+    if (bind(fd, sockaddr, addrLen) != 0) {
         LOGE(TAG, "bind failed: %d", errno);
         close(fd);
         return -1;
