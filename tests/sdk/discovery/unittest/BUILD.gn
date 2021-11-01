@@ -46,9 +46,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/discovery/manager/include",
     ]
     deps = [
-      "$dsoftbus_root_path/core/frame/standard/client:softbus_client",
-      "$dsoftbus_root_path/sdk/discovery:dsoftbus_disc_manager_sdk",
-      "$dsoftbus_root_path/sdk/discovery/service:dsoftbus_disc_service_sdk",
+      "$dsoftbus_root_path/sdk:softbus_client",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
       "//utils/native/base:utils",

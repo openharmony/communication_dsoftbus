@@ -53,7 +53,7 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger:dsoftbus_bus_center_ledger",
     "$dsoftbus_root_path/core/bus_center/utils:dsoftbus_bus_center_utils",
     "$dsoftbus_root_path/core/common/utils:softbus_utils",
-    "$dsoftbus_root_path/core/connection/manager:conn_manager",
+    "$dsoftbus_root_path/core/connection:conn_manager",
     "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
     "//base/security/deviceauth/services:deviceauth_sdk",
     "//third_party/googletest:gtest_main",

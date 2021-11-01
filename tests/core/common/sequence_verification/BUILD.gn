@@ -21,15 +21,12 @@ if (defined(ohos_lite)) {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = [ "unittest/sequence_verification_test.cpp" ]
-      include_dirs = [
-        "$dsoftbus_root_path/core/common/security/sequence_verification/include",
-        "$dsoftbus_root_path/core/common/include",
-      ]
+      include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
       ldflags = [
         "-lstdc++",
         "-Wl,-rpath-link=$ohos_root_path/$root_out_dir",
       ]
-      deps = [ "$dsoftbus_root_path/core/common/security/sequence_verification:softbus_seq_verification" ]
+      deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
     }
   }
 } else {
@@ -41,10 +38,7 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [ "unittest/sequence_verification_test.cpp" ]
 
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/security/sequence_verification/include",
-      "$dsoftbus_root_path/core/common/include",
-    ]
+    include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
 
     deps = [ "$dsoftbus_root_path/core/frame/standard/server:softbus_server" ]
   }
