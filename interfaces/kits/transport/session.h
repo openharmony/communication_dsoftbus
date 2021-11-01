@@ -63,9 +63,6 @@ typedef enum {
     TYPE_BUTT,
 } SessionType;
 
-#define IS_SERVER 0
-#define IS_CLIENT 1
-
 typedef enum  {
     INVALID = -1,
     /*
@@ -107,7 +104,6 @@ typedef struct {
     int dataType;
     int linkTypeNum;
     LinkType linkType[LINK_TYPE_MAX];
-    bool unique;
     union {
         struct StreamAttr {
             int streamType;
