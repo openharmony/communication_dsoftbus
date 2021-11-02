@@ -387,6 +387,7 @@ int32_t LnnInitIpNetwork(void)
 
     if (AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
+        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
 
