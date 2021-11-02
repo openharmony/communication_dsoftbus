@@ -839,10 +839,15 @@ int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, 
         return SOFTBUS_ERR;
     }
     int32_t channelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OpenNetWorkingChannel channelId =%d!", channelId);
+    if (channelId < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OpenNetWorkingChannel failed");
+        SoftBusFree(itemInfo);
+        return SOFTBUS_ERR;
+    }
     if (SaveMsgToMap(channelId, itemInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save message to buffer fail, type=%d", itemType);
         SoftBusFree(itemInfo);
+        TransCloseNetWorkingChannel(channelId);
         return SOFTBUS_ERR;
     }
     SoftBusFree(itemInfo);
