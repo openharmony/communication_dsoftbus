@@ -132,6 +132,9 @@ int32_t GetSoftBusClientName(char *name, uint32_t len)
 
 int32_t CheckPackageName(const char *pkgName)
 {
+#ifdef __LITEOS_M__
+    return SOFTBUS_OK;
+#endif
     char clientPkgName[PKG_NAME_SIZE_MAX] = {0};
     if (GetSoftBusClientName(clientPkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftBusClientName err");
