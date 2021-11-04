@@ -134,31 +134,52 @@ void TransSrvDelDataBufNode(int channelId)
     pthread_mutex_unlock(&g_tcpSrvDataList->lock);
 }
 
-static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *packetHead, uint8_t *buffer,
-    uint32_t bufLen)
+static int32_t GetAuthConnectOption(int32_t channelId, ConnectOption *option)
 {
-#define AUTH_CONN_SERVER_SIDE 0x01
-    ConnectOption option = {0};
-    option.type = CONNECT_TCP;
-    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
         return SOFTBUS_ERR;
     }
-
     if (GetSessionConnById(channelId, conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(option.info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
+    if (strcpy_s(option->info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-    option.info.ipOption.port = conn->appInfo.peerData.port;
+
+    option->type = CONNECT_TCP;
+    option->info.ipOption.port = conn->appInfo.peerData.port;
     SoftBusFree(conn);
-    AuthSideFlag side;
+    return SOFTBUS_OK;
+}
+
+static AuthSideFlag GetAuthSideFlag(uint64_t seq, uint32_t flags)
+{
+#define AUTH_CONN_SERVER_SEQ_MASK 0x01
+    AuthSideFlag side = AUTH_SIDE_ANY;
+    if (flags == FLAG_REPLY) {
+        side = ((seq & AUTH_CONN_SERVER_SEQ_MASK) != 0) ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthSideFlag: flags=%d, side=%d, seq=%lld", flags, side, seq);
+    return side;
+}
+
+static int32_t PackBytes(int32_t channelId, const uint8_t *data, TdcPacketHead *packetHead, uint8_t *buffer,
+    uint32_t bufLen)
+{
+#define AUTH_CONN_SERVER_SIDE 0x01
+    ConnectOption option = {0};
+    if (GetAuthConnectOption(channelId, &option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PackBytes get conn option err");
+        return SOFTBUS_ERR;
+    }
+
+    AuthSideFlag side = GetAuthSideFlag(packetHead->seq, packetHead->flags);
     uint32_t len = packetHead->dataLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN;
     OutBuf outbuf = {0};
     outbuf.buf = buffer + DC_MSG_PACKET_HEAD_SIZE;

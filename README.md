@@ -64,8 +64,6 @@ The main code directory structure of DSoftBus is as follows:
 
 >A device can proactively discover a smartphone only when the smartphone has the Visible to all nearby devices feature enabled. (This feature is available in Settings > Super Device > Visible to > All nearby devices.)
 
->A device can proactively discover a smartphone only when the smartphone has the Visible to all nearby devices feature enabled. (This feature is available in Settings > Super Device > Visible to > All nearby devices.)
-
 **1. Discovery**
 
 -   **Publishing process**
