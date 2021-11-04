@@ -326,14 +326,6 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
         cJSON_Delete(msg);
         return NULL;
     }
-#ifdef AUTH_ACCOUNT
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "in account auth mode");
-    if (!AddStringToJsonObject(msg, FIELD_UID_HASH, auth->peerUid)) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
-        cJSON_Delete(msg);
-        return NULL;
-    }
-#endif
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
@@ -392,6 +384,8 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
 {
     AuthManager *auth = NULL;
     AuthDataHead head;
+
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%lld, len=%u", authId, len);
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
     if (auth == NULL) {
