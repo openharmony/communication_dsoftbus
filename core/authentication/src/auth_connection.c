@@ -25,10 +25,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int32_t __attribute__ ((weak)) AuthSocketSendData(AuthManager *auth,
     const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
@@ -409,7 +405,3 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
     head.flag = auth->side;
     return AuthPostData(&head, data, len) == SOFTBUS_OK;
 }
-
-#ifdef __cplusplus
-}
-#endif
