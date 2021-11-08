@@ -75,11 +75,11 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
 
 int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId);
 
-int32_t ClientDeleteSessionServer(SoftBusSecType type, const char* sessionName);
+int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName);
 
 int32_t ClientDeleteSession(int32_t sessionId);
 
-int32_t ClientGetSessionDataById(int32_t sessionId, char* data, uint16_t len, SessionKey key);
+int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, SessionKey key);
 
 int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey key);
 
@@ -91,12 +91,12 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
 
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId);
 
-int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener* callback);
+int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callback);
 
 int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener *callback);
 
 int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
-    const ISessionListener* listener);
+    const ISessionListener *listener);
 
 int32_t ClientGetSessionSide(int32_t sessionId);
 

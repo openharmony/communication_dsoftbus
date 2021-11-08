@@ -1,0 +1,72 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+bus_center_service_sdk_src =
+    [ "$dsoftbus_root_path/sdk/bus_center/service/src/client_bus_center.c" ]
+bus_center_service_sdk_inc =
+    [ "$dsoftbus_root_path/sdk/bus_center/service/include" ]
+
+bus_center_manager_sdk_src = []
+bus_center_manager_sdk_inc =
+    [ "$dsoftbus_root_path/sdk/bus_center/manager/include" ]
+bus_center_manager_sdk_deps = []
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    bus_center_manager_sdk_inc += [
+      "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+      "$dsoftbus_root_path/core/adapter/kernel/include",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/ipc/include",  # todo
+    ]
+    bus_center_manager_sdk_src += [
+      "$dsoftbus_root_path/sdk/bus_center/ipc/mini/bus_center_server_proxy.c",  # todo
+      "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
+    ]
+  } else {
+    bus_center_manager_sdk_inc += [
+      "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+      "$dsoftbus_root_path/core/bus_center/interface",
+    ]
+    bus_center_manager_sdk_src += [
+      "$dsoftbus_root_path/sdk/bus_center/ipc/small/bus_center_server_proxy.c",
+      "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
+    ]
+    bus_center_manager_sdk_deps += [
+      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+    ]
+  }
+} else {
+  bus_center_manager_sdk_inc += [
+    "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "//utils/system/safwk/native/include",
+  ]
+  bus_center_manager_sdk_src += [
+    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/src/bus_center_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/src/bus_center_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
+  ]
+  bus_center_manager_sdk_deps += [ "//utils/native/base:utils" ]
+}
+
+bus_center_sdk_src = bus_center_service_sdk_src + bus_center_manager_sdk_src
+bus_center_sdk_inc = bus_center_service_sdk_inc + bus_center_manager_sdk_inc
+bus_center_sdk_deps = bus_center_manager_sdk_deps
