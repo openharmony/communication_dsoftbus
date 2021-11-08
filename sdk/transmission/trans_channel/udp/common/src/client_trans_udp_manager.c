@@ -37,7 +37,7 @@ static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
     }
 
     if (channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAddUdpChannel invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (pthread_mutex_lock(&(g_udpChannelMgr->lock)) != 0) {

@@ -15,7 +15,7 @@
 
 #include "lnn_event_monitor_impl.h"
 
-#include "netif.h"
+#include "lwip/netif.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
