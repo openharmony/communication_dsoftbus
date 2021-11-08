@@ -131,8 +131,15 @@ static int32_t DiscInterfaceByMedium(const DiscInfo *info, const InterfaceFuncTy
         case BLE:
             return DiscInterfaceProcess(&(info->option), g_discBleInterface, info->mode, type);
         case AUTO: {
-            int32_t ret = DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
-            if (ret == SOFTBUS_OK) {
+            int32_t ret1 = DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
+            if (ret1 != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscInterfaceByMedium coap failed");
+            }
+            int32_t ret2 = DiscInterfaceProcess(&(info->option), g_discBleInterface, info->mode, type);
+            if (ret2 != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscInterfaceByMedium ble failed");
+            }
+            if (ret1 == SOFTBUS_OK || ret2 == SOFTBUS_OK) {
                 return SOFTBUS_OK;
             }
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
