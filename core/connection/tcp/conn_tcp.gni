@@ -11,19 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare_args() {
-  enable_discovery_ble = false
-  enable_discovery_coap = true
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-  enable_connection_tcp = true
-  enable_connection_br = false
-  enable_connection_ble = false
-
-  enable_trans_udp = false
-  enable_trans_udp_stream = false
-  enable_trans_udp_file = false
-  enable_auth_account = false
-
-  enable_auto_networking = true
-  enable_build_shared_sdk = false
+if (enable_connection_tcp == true) {
+  tcp_connection_src = [
+    "$dsoftbus_root_path/core/connection/tcp/src/softbus_tcp_connect_manager.c",
+  ]
+} else {
+  tcp_connection_src = [
+    "$dsoftbus_root_path/core/connection/tcp/src/softbus_tcp_connect_virtual.c",
+  ]
 }
+
+tcp_connection_inc = [ "$dsoftbus_root_path/core/connection/tcp/include" ]

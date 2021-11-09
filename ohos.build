@@ -2,8 +2,8 @@
     "parts": {
         "dsoftbus_standard": {
             "module_list": [
-                "//foundation/communication/dsoftbus/core/frame/standard/server:softbus_server",
-                "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
+                "//foundation/communication/dsoftbus/core:softbus_server",
+                "//foundation/communication/dsoftbus/sdk:softbus_client",
                 "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
             ],
             "test_list": [
@@ -12,7 +12,7 @@
             "inner_kits": [
                 {
                     "type": "so",
-                    "name": "//foundation/communication/dsoftbus/core/frame/standard/client:softbus_client",
+                    "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
                     "header": {
                         "header_files": [
                         "bus_center/softbus_bus_center.h",

@@ -1,0 +1,45 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import(
+    "$dsoftbus_sdk_path/transmission/trans_channel/udp/stream/libsoftbus_stream/libsoftbus_stream.gni")
+
+dsoftbus_stream_sdk_path =
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream"
+
+trans_dstream_src = []
+trans_dstream_inc = []
+trans_dstream_deps = []
+if (enable_trans_udp == true) {
+  if (enable_trans_udp_stream == true) {
+    trans_dstream_inc += [
+      "$dsoftbus_stream_sdk_path/adaptor/include",
+      "$dsoftbus_stream_sdk_path/include",
+    ]
+    trans_dstream_inc += libsoftbus_stream_inc
+
+    trans_dstream_src += [
+      "$dsoftbus_stream_sdk_path/adaptor/src/client_trans_udp_stream_interface.cpp",
+      "$dsoftbus_stream_sdk_path/adaptor/src/stream_adaptor.cpp",
+      "$dsoftbus_stream_sdk_path/src/client_trans_stream.c",
+    ]
+    trans_dstream_src += libsoftbus_stream_src
+
+    trans_dstream_deps += libsoftbus_stream_deps
+  } else {
+    trans_dstream_src +=
+        [ "$dsoftbus_stream_sdk_path/src/client_trans_stream_virtual.c" ]
+    trans_dstream_inc += [ "$dsoftbus_stream_sdk_path/include" ]
+  }
+}

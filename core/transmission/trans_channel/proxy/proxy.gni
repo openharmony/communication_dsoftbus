@@ -1,0 +1,29 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+dsoftbus_trans_proxy_channel_path =
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy"
+trans_proxy_channel_src = [
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_callback.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_control.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_listener.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_manager.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_message.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_network.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_session.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_transceiver.c",
+]
+trans_proxy_channel_inc = [ "$dsoftbus_trans_proxy_channel_path/include" ]
+trans_proxy_channel_deps = []

@@ -11,13 +11,86 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-lite_component("softbus_client") {
-  features = [
-    "discovery/service:dsoftbus_disc_service_sdk",
-    "transmission/session:dsoftbus_trans_session_sdk",
-    "bus_center/service:dsoftbus_bus_center_service_sdk",
+import("//foundation/communication/dsoftbus/sdk/bus_center/bus_center_sdk.gni")
+import("//foundation/communication/dsoftbus/sdk/discovery/disc_sdk.gni")
+import("//foundation/communication/dsoftbus/sdk/frame/frame_sdk.gni")
+import("//foundation/communication/dsoftbus/sdk/transmission/trans_sdk.gni")
+
+common_client_src = bus_center_sdk_src + disc_sdk_src +
+                    softbus_client_frame_src + trans_session_manager_sdk_src
+common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
+                    softbus_client_frame_inc + trans_session_manager_sdk_inc
+common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
+
+common_client_deps += [
+  "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
+]
+
+if (defined(ohos_lite)) {
+  if (enable_build_shared_sdk == true) {
+    build_type = "shared_library"
+  } else {
+    build_type = "static_library"
+  }
+  if (ohos_kernel_type != "liteos_m") {
+    common_client_deps += [
+      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
+  }
+} else {
+  if (enable_build_shared_sdk == true) {
+    build_type = "ohos_shared_library"
+  } else {
+    build_type = "ohos_static_library"
+  }
+  common_client_deps += [
+    "//utils/native/base:utils",
+    "//utils/native/base:utilsecurec_shared",
   ]
+}
+
+config("dsoftbus_sdk_interface") {
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+  ]
+}
+
+target(build_type, "softbus_client") {
+  sources = common_client_src
+  include_dirs = common_client_inc
+  deps = common_client_deps
+  public_configs = [ ":dsoftbus_sdk_interface" ]
+  defines = TRANS_SDK_DEFINES
+
+  if (defined(ohos_lite)) {
+    configs -= [ "//build/lite/config:language_cpp" ]
+    cflags = [ "-fPIC" ]
+    cflags_cc = [
+      "-std=c++14",
+      "-fPIC",
+    ]
+    ldflags = [ "-lstdc++" ]
+  } else {
+    cflags = [ "-fPIC" ]
+    cflags_cc = [ "-std=c++14" ]
+    if (is_standard_system) {
+      external_deps = [
+        "hiviewdfx_hilog_native:libhilog",
+        "ipc:ipc_single",
+      ]
+    }
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
 }

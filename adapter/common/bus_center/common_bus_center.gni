@@ -1,0 +1,71 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+bus_center_monitor_inc = [ "$softbus_adapter_common/bus_center/include" ]
+bus_center_monitor_deps = []
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    bus_center_monitor_src = [
+      "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor.c",
+      "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
+    ]      
+    bus_center_monitor_inc += [
+      "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
+    ]
+  } else if (ohos_kernel_type == "linux") {
+    bus_center_monitor_src = [
+      "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor.c",
+      "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
+    ]
+  } else if (ohos_kernel_type == "liteos_a") {
+    bus_center_monitor_inc += [
+      "//drivers/adapter/uhdf/posix/include",
+      "//drivers/framework/include/utils",
+      "//drivers/framework/include/core",
+      "//drivers/framework/ability/sbuf/include",
+    ]
+    bus_center_monitor_src = [
+      "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/platform/lnn_product_monitor.c",
+      "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
+    ]
+    bus_center_monitor_deps += [
+      "//drivers/adapter/uhdf/manager:hdf_core",
+      "//drivers/adapter/uhdf/platform:hdf_platform",
+      "//drivers/adapter/uhdf/posix:hdf_posix_osal",
+    ]
+  } 
+} else {
+  bus_center_monitor_src = [
+    "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
+    "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor.c",
+    "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
+    "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor.cpp",
+  ] 
+  bus_center_monitor_inc += [
+    "//utils/native/base/include",
+    "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
+    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
+  ]
+  bus_center_monitor_deps = [
+    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
+    "//utils/native/base:utils",
+  ]
+  bus_center_monitor_external_deps = [ "ces_standard:cesfwk_innerkits" ]
+}
