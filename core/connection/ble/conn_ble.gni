@@ -13,16 +13,17 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (defined(ohos_lite)) {
-  lite_component("softbus_server") {
-    if (ohos_kernel_type == "liteos_m") {
-      features = [ "frame:softbus_server_frame" ]
-    } else {
-      features = [ "frame:softbus_server" ]
-    }
-  }
+ble_connection_deps = []
+if (enable_connection_ble == false) {
+  ble_connection_src = [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection_virtual.c" ]
+  ble_connection_inc = [ "$dsoftbus_root_path/core/connection/ble/include" ]
 } else {
-  group("softbus_server") {
-    deps = [ "frame:softbus_server" ]
-  }
+  ble_connection_src = [
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_trans_manager.c",
+  ]
+  ble_connection_inc = [
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/ble/src",
+  ]
 }

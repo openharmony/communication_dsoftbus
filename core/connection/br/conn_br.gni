@@ -11,18 +11,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (defined(ohos_lite)) {
-  lite_component("softbus_server") {
-    if (ohos_kernel_type == "liteos_m") {
-      features = [ "frame:softbus_server_frame" ]
-    } else {
-      features = [ "frame:softbus_server" ]
-    }
-  }
+br_connection_deps = []
+if (enable_connection_br == false) {
+  br_connection_src =
+      [ "$dsoftbus_root_path/core/connection/br/src/br_connection_virtual.c" ]
+  br_connection_inc = [
+    "$dsoftbus_root_path/core/connection/br/include",
+    "//third_party/cJSON",
+  ]
 } else {
-  group("softbus_server") {
-    deps = [ "frame:softbus_server" ]
-  }
+  br_connection_src = br_adapter_src
+  br_connection_inc = br_adapter_inc
+  br_connection_src +=
+      [ "$dsoftbus_root_path/core/connection/br/src/br_connection.c" ]
+  br_connection_inc += [
+    "$dsoftbus_root_path/core/connection/br/include",
+    "//third_party/cJSON",
+  ]
 }

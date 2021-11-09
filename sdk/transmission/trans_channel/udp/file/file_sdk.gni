@@ -1,0 +1,52 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+dsoftbus_file_sdk_path =
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file"
+
+trans_file_sdk_inc = [ "$dsoftbus_file_sdk_path/include" ]
+trans_file_sdk_src = []
+trans_file_sdk_deps = []
+
+if (enable_trans_udp_file == true) {
+  trans_file_sdk_src += [
+    "$dsoftbus_file_sdk_path/src/client_trans_file.c",
+    "$dsoftbus_file_sdk_path/src/client_trans_file_listener.c",
+    "$dsoftbus_file_sdk_path/src/file_adapter.c",
+  ]
+
+  native_source_path = rebase_path("$dsoftbus_root_path")
+  dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
+  enhanced = exec_script(
+          "$dsoftbus_root_path/run_shell_cmd.py",
+          [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
+          "value")
+  if (enhanced) {
+    trans_file_sdk_inc += [
+      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface",
+    ]
+    trans_file_sdk_deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+  } else {
+    trans_file_sdk_inc += [
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+    ]
+    trans_file_sdk_deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+  }
+} else {
+  trans_file_sdk_src +=
+      [ "$dsoftbus_file_sdk_path/src/client_trans_file_virtual.c" ]
+}

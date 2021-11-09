@@ -1,0 +1,28 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import(
+    "//foundation/communication/dsoftbus/sdk/transmission/ipc/trans_ipc_sdk.gni")
+import(
+    "//foundation/communication/dsoftbus/sdk/transmission/session/trans_session_sdk.gni")
+import(
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/trans_channel_sdk.gni")
+
+trans_session_manager_sdk_inc =
+    trans_ipc_proxy_sdk_inc + trans_session_sdk_inc + trans_channel_sdk_inc
+trans_session_manager_sdk_src =
+    trans_ipc_proxy_sdk_src + trans_session_sdk_src + trans_channel_sdk_src
+trans_session_manager_sdk_deps = trans_channel_sdk_deps
+
+TRANS_SDK_DEFINES = [ "FILLP_LINUX" ]

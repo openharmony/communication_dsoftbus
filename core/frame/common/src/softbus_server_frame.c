@@ -17,15 +17,25 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
+#include "softbus_conn_interface.h"
 #include "ohos_init.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 #include "trans_session_manager.h"
+#include "trans_session_service.h"
 
 static bool g_isInit = false;
+
+int32_t __attribute__((weak)) ServerStubInit(void)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus server stub init(weak function).");
+    return SOFTBUS_OK;
+}
 
 static void ServerModuleDeinit(void)
 {
@@ -92,6 +102,13 @@ ERR_EXIT:
     ServerModuleDeinit();
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus framework init failed.");
     return;
+}
+
+void ClientDeathCallback(const char *pkgName)
+{
+    DiscServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName);
+    BusCenterServerDeathCallback(pkgName);
 }
 
 #if defined(__LITEOS_M__)
