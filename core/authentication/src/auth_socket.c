@@ -109,12 +109,14 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             HandleReceiveDeviceId(auth, (uint8_t *)data);
             break;
         }
-        case MODULE_AUTH_SDK:
+        case MODULE_AUTH_SDK: {
             HandleReceiveAuthData(auth, head->module, (uint8_t *)data, head->len);
             break;
-        case MODULE_AUTH_CONNECTION:
+        }
+        case MODULE_AUTH_CONNECTION: {
             AuthHandlePeerSyncDeviceInfo(auth, (uint8_t *)data, head->len);
             break;
+        }
         case MODULE_UDP_INFO:
             AuthHandleTransInfo(auth, head, data, head->len);
             break;
@@ -127,9 +129,10 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             AuthHandleTransInfo(auth, head, data, head->len);
             break;
         }
-        default:
+        default: {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown data type");
             break;
+        }
     }
 }
 
