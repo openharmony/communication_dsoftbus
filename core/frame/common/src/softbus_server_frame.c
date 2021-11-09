@@ -15,7 +15,7 @@
 
 #include "softbus_server_frame.h"
 
-#include "auth_manager.h"
+#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "message_handler.h"
 #include "ohos_init.h"
