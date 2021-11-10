@@ -60,9 +60,14 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
         return SOFTBUS_INVALID_PARAM;
     }
     softbusService = HdfIoServiceBind(DRIVER_SERVICE_NAME);
-    if (softbusService == NULL || softbusService->dispatcher == NULL ||
+    if (softbusService == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind hdf softbus fail for module %d", moduleId);
+        return SOFTBUS_ERR;
+    }
+    if (softbusService->dispatcher == NULL ||
         softbusService->dispatcher->Dispatch == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind hdf softbus fail for module %d", moduleId);
+        HdfIoServiceRecycle(softbusService);
         return SOFTBUS_ERR;
     }
     reqData = HdfSBufObtainDefaultSize();
