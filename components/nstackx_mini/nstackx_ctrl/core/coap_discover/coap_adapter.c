@@ -590,8 +590,10 @@ int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapRe
     BuildCoapPktParam(param, &outParam);
 
     CoapPacket respPkt = {0};
-    if (isAck && CoapCreateHeader(&respPkt, &outParam, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
-        return DISCOVERY_ERR_BAD_REQ;
+    if (isAck) {
+        if (CoapCreateHeader(&respPkt, &outParam, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
+            return DISCOVERY_ERR_BAD_REQ;
+        }
     } else {
         CoapResponseInfo respInfo = {0};
         respInfo.pkt = &respPkt;
