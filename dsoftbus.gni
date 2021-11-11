@@ -23,23 +23,21 @@ declare_args() {
 }
 
 if (defined(ohos_lite)) {
-  libsec_include_path = "//third_party/bounds_checking_function/include"
+  import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
     import("$softbus_adapter_config/feature_config/mini/config.gni")
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
     hilog_lite_deps_path =
         "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
-
-    libsec_deps_path = "//third_party/bounds_checking_function:libsec_static"
   } else {
     import("$softbus_adapter_config/feature_config/small/config.gni")
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
     hilog_lite_deps_path =
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared"
-    libsec_deps_path = "//third_party/bounds_checking_function:libsec_shared"
   }
 } else {
+  import("//build/ohos.gni")
   import("$softbus_adapter_config/feature_config/standard/config.gni")
 }
