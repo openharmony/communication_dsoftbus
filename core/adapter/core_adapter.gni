@@ -10,20 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+br_adapter_src =
+    [ "$dsoftbus_root_path/core/adapter/br/mock/wrapper_br_interface.c" ]
 
-declare_args() {
-  enable_discovery_ble = false
-  enable_discovery_coap = true
-
-  enable_connection_tcp = true
-  enable_connection_br = false
-  enable_connection_ble = false
-
-  enable_trans_udp = false
-  enable_trans_udp_stream = false
-  enable_trans_udp_file = false
-  enable_auth_account = false
-
-  enable_auto_networking = true
-  enable_build_shared_sdk = false
-}
+br_adapter_inc = [ "$dsoftbus_root_path/core/adapter/br/include" ]

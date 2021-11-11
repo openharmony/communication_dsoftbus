@@ -27,9 +27,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "lwip/netif.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "netif.h"
 
 #define WLAN "wlan0"
 

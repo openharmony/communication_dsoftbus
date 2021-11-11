@@ -11,19 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare_args() {
-  enable_discovery_ble = false
-  enable_discovery_coap = true
-
-  enable_connection_tcp = true
-  enable_connection_br = false
-  enable_connection_ble = false
-
-  enable_trans_udp = false
-  enable_trans_udp_stream = false
-  enable_trans_udp_file = false
-  enable_auth_account = false
-
-  enable_auto_networking = true
-  enable_build_shared_sdk = false
-}
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+trans_common_inc = [
+  "$dsoftbus_root_path/core/transmission/common/include",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+]
+trans_common_src = [
+  "$dsoftbus_root_path/core/transmission/common/src/softbus_message_open_channel.c",
+  "$dsoftbus_root_path/core/transmission/common/src/trans_pending_pkt.c",
+]
+trans_common_deps = []

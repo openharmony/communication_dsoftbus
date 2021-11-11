@@ -1,0 +1,94 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import(
+    "//foundation/communication/dsoftbus/adapter/common/bus_center/common_bus_center.gni")
+
+import(
+    "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_hub.gni")
+import(
+    "//foundation/communication/dsoftbus/core/bus_center/lnn/net_ledger/net_ledger.gni")
+import(
+    "//foundation/communication/dsoftbus/core/bus_center/utils/bus_center_utils.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+bus_center_server_src =
+    bus_center_monitor_src + bus_center_hub_src + bus_center_ledger_src +
+    bus_center_utils_src
+bus_center_server_inc =
+    bus_center_monitor_inc + bus_center_hub_inc + bus_center_ledger_inc +
+    bus_center_utils_inc
+bus_center_server_deps =
+    bus_center_monitor_deps + bus_center_hub_deps + bus_center_ledger_deps +
+    bus_center_utils_deps
+
+bus_center_server_src += [
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_discovery_manager.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_id.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_state_machine.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/src/lnn_exchange_device_info.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/src/lnn_sync_item_info.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_ip_network_impl.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_network_manager.c",
+  "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c",
+  "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
+  "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+]
+bus_center_server_inc += [
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+  "$dsoftbus_root_path/core/bus_center/monitor/include",
+  "$dsoftbus_root_path/core/bus_center/service/include",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
+]
+
+if (enable_auto_networking == true) {
+  bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_coap_discovery_impl.c" ]
+}
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/ipc/mini_system/lnn_bus_center_ipc.c" ]
+  } else {
+    bus_center_server_src += [
+      "$dsoftbus_root_path/core/bus_center/ipc/small_system/src/bus_center_client_proxy.c",
+      "$dsoftbus_root_path/core/bus_center/ipc/small_system/src/lnn_bus_center_ipc.c",
+    ]
+
+    bus_center_server_inc +=
+        [ "$dsoftbus_root_path/core/bus_center/ipc/small_system/include" ]
+    bus_center_server_deps += [
+      "//build/lite/config/component/cJSON:cjson_shared",
+      "//foundation/communication/ipc_lite:liteipc_adapter",
+    ]
+  }
+} else {
+  bus_center_server_src += [
+    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/bus_center_client_proxy.cpp",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/bus_center_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/lnn_bus_center_ipc.cpp",
+  ]
+
+  bus_center_server_inc += [
+    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/include",
+    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "//utils/system/safwk/native/include",
+  ]
+  bus_center_server_deps += [ "//utils/native/base:utils" ]
+  bus_center_server_external_deps = bus_center_monitor_external_deps
+}

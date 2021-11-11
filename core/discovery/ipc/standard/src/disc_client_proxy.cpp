@@ -16,15 +16,15 @@
 #include "disc_client_proxy.h"
 
 #include "disc_client_proxy_standard.h"
+#include "softbus_client_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_server_data.h"
 
 using namespace OHOS;
 
 static sptr<DiscClientProxy> GetClientProxy(const char *pkgName)
 {
-    sptr<IRemoteObject> clientObject = SoftBusServerData::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
     sptr<DiscClientProxy> clientProxy = new (std::nothrow) DiscClientProxy(clientObject);
     return clientProxy;
 }

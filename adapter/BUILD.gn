@@ -11,34 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import(
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/net_bluetooth.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
+if (enable_connection_ble == true || enable_discovery_ble == true) {
+  net_bluetooth_src = adapter_ble_src
+  net_bluetooth_inc = adapter_ble_inc
+  net_bluetooth_deps = adapter_ble_deps
+} else {
+  net_bluetooth_src = []
+  net_bluetooth_inc = []
+  net_bluetooth_deps = []
+}
 
+if (defined(ohos_lite)) {
   config("dsoftbus_adapter_common_interface") {
     include_dirs = [
       "$softbus_adapter_common/include",
       "$softbus_adapter_config/spec_config",
+      "$dsoftbus_root_path/core/common/include",
+      "$hilog_lite_include_path",
     ]
   }
 
   common_include = [
-    "$dsoftbus_root_path/core/common/include",
-    "$hilog_lite_include_path",
-    "$libsec_include_path",
-    "//third_party/mbedtls/include",
-    "//utils/native/base/include",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "//third_party/mbedtls/include",
+    "//utils/native/base/include",
     "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
-      include_dirs = common_include
+      include_dirs = common_include + net_bluetooth_inc
       include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
-      cflags = [ "-Wall" ]
+      cflags = [
+        "-Wall",
+        "-fPIC",
+      ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
@@ -48,15 +60,22 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
+      sources += net_bluetooth_src
+      deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+      deps += net_bluetooth_deps
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
     shared_library("softbus_adapter") {
-      include_dirs = common_include
+      include_dirs = common_include + net_bluetooth_inc
       cflags = [
         "-Wall",
+        "-Werror",
         "-fPIC",
+        "-fno-builtin",
+        "-std=c99",
       ]
+      cflags_cc = [ "-fPIC" ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
@@ -66,19 +85,18 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
+      sources += net_bluetooth_src
       deps = [
         "$hilog_lite_deps_path",
-        "$libsec_deps_path",
         "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
       deps += [ "//third_party/mbedtls:mbedtls_shared" ]
+      deps += net_bluetooth_deps
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
 } else {
-  import("//build/ohos.gni")
-
   config("config_adapter_common") {
     include_dirs = [
       "$softbus_adapter_common/include",
@@ -95,6 +113,7 @@ if (defined(ohos_lite)) {
       "//third_party/mbedtls/include",
       "//utils/native/base/include",
     ]
+    include_dirs += net_bluetooth_inc
     sources = [
       "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
@@ -104,10 +123,12 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
       "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
+    sources += net_bluetooth_src
+    deps = net_bluetooth_deps
     public_deps = [
-      "$dsoftbus_root_path/components/mbedtls:mbedtls_shared",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/mbedtls:mbedtls_shared",
       "//utils/native/base:utils",
     ]
     public_configs = [ ":config_adapter_common" ]
