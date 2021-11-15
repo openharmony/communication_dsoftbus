@@ -119,5 +119,16 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "ohos.security.dpms_channel",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "ohos.security.distributed_permission",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
