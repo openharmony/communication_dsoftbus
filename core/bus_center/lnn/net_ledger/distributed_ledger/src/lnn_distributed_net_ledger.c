@@ -917,6 +917,7 @@ int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     if (!IsValidString(uuid, ID_MAX_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "uuid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
