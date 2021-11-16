@@ -47,8 +47,6 @@ int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *val
                 HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDevUdid failed!");
                 return SOFTBUS_ERR;
             }
-            printf("xiaoqiang:GetDevUdid success!localUdid = %s\n", localUdid);
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDevUdid success!localUdid = %s", localUdid);
             if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {
                 return SOFTBUS_ERR;
             }
