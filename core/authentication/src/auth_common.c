@@ -22,11 +22,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define DEFAULT_AUTH_ABILITY_COLLECTION 0
 #define AUTH_SUPPORT_SERVER_SIDE_MASK 0x01
 #define INTERVAL_VALUE 2
@@ -156,7 +151,3 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
     }
     return SOFTBUS_OK;
 }
-
-#ifdef __cplusplus
-}
-#endif
