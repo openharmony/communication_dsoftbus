@@ -29,10 +29,6 @@
 #define AUTH_DEFAULT_PORT (-1)
 #define AUTH_HEART_TIME (10 * 60)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static SoftbusBaseListener g_ethListener = {0};
 
 int32_t OpenTcpChannel(const ConnectOption *option)
@@ -331,7 +327,3 @@ void CloseAuthServer(void)
     }
     DestroyBaseListener(AUTH);
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -30,10 +30,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static ListNode g_authClientHead;
 static ListNode g_authServerHead;
 static VerifyCallback *g_verifyCallback = NULL;
@@ -1316,7 +1312,3 @@ int32_t AuthInit(void)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth init succ!");
     return SOFTBUS_OK;
 }
-
-#ifdef __cplusplus
-}
-#endif
