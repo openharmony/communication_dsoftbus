@@ -28,6 +28,7 @@ common_client_deps += [
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
 ]
+common_client_ldflags = []
 
 if (defined(ohos_lite)) {
   if (enable_build_shared_sdk == true) {
@@ -41,6 +42,7 @@ if (defined(ohos_lite)) {
       "//foundation/distributedschedule/samgr_lite/samgr:samgr",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
+    common_client_ldflags = trans_file_sdk_ldflags + trans_dstream_ldflags
   }
 } else {
   if (enable_build_shared_sdk == true) {
@@ -81,9 +83,11 @@ target(build_type, "softbus_client") {
       "-fPIC",
     ]
     ldflags = [ "-lstdc++" ]
+    ldflags += common_client_ldflags
   } else {
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]
+    ldflags = common_client_ldflags
     if (is_standard_system) {
       external_deps = [
         "hiviewdfx_hilog_native:libhilog",

@@ -21,6 +21,8 @@ dsoftbus_stream_sdk_path =
 trans_dstream_src = []
 trans_dstream_inc = []
 trans_dstream_deps = []
+trans_dstream_ldflags = []
+
 if (enable_trans_udp == true) {
   if (enable_trans_udp_stream == true) {
     trans_dstream_inc += [
@@ -37,6 +39,7 @@ if (enable_trans_udp == true) {
     trans_dstream_src += libsoftbus_stream_src
 
     trans_dstream_deps += libsoftbus_stream_deps
+    trans_dstream_ldflags += libsoftbus_stream_ldflags
   } else {
     trans_dstream_src +=
         [ "$dsoftbus_stream_sdk_path/src/client_trans_stream_virtual.c" ]
