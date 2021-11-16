@@ -30,6 +30,8 @@ libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/vtp_instance.cpp",
   "$libsoftbus_stream_sdk_path/vtp_stream_socket.cpp",
 ]
+libsoftbus_stream_ldflags = [ "-lFillpSo" ]
+
 if (defined(ohos_lite)) {
   libsoftbus_stream_deps =
       [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
