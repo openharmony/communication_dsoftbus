@@ -126,7 +126,7 @@
     "APP_INFO": [
       {
         "TYPE": "system_app",
-        "PKG_NAME": "security.distributed_permission",
+        "PKG_NAME": "ohos.security.distributed_permission",
         "ACTIONS": "create,open"
       }
     ]
