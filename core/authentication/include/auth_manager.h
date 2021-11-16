@@ -78,7 +78,6 @@ typedef struct {
     uint8_t *encryptDevData;
     uint32_t encryptLen;
 
-    pthread_mutex_t lock;
     ListNode node;
 } AuthManager;
 

@@ -22,10 +22,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static ListNode g_sessionKeyListHead;
 
 void AuthSessionKeyListInit(void)
@@ -370,7 +366,3 @@ void AuthClearAllSessionKey(void)
     }
     ListInit(&g_sessionKeyListHead);
 }
-
-#ifdef __cplusplus
-}
-#endif
