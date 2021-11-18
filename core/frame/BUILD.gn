@@ -100,6 +100,7 @@ if (defined(ohos_lite)) {
         "-std=c99",
       ]
       cflags_cc = cflags
+      ldflags = bus_center_hub_ldflags
       deps = dsoftbus_server_common_deps
       deps += [
         ":permission_json",
