@@ -11,38 +11,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  import("//build/lite/config/test.gni")
+  import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/transmission"
-
-ohos_unittest("TransSdkTest") {
-  module_out_path = module_output_path
-  sources = [
-    "tcp_direct/unittest/trans_tcp_direct_test.cpp",
-    "udp/stream/trans_sdk_stream_test.cpp",
-  ]
-
-  include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
-  ]
-
-  if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps = [ "hilog:libhilog" ]
+  if (ohos_build_type == "debug") {
+    unittest("TransSdkTest") {
+      output_extension = "bin"
+      output_dir = "$root_out_dir/test/unittest/dsoftbus"
+      sources = [
+        "tcp_direct/unittest/trans_tcp_direct_test.cpp",
+        "udp/stream/trans_sdk_stream_test.cpp",
+      ]
+      include_dirs = [
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/common/softbus_property/include",
+        "$dsoftbus_root_path/interfaces/kits/transport",
+        "$softbus_adapter_config/spec_config",
+      ]
+      deps = [
+        "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/sdk:softbus_client",
+        "$hilog_lite_deps_path",
+      ]
+    }
   }
-}
+} else {
+  import("//build/test.gni")
+  import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-group("unittest") {
-  testonly = true
-  deps = [ ":TransSdkTest" ]
+  module_output_path = "dsoftbus_standard/transmission"
+
+  ohos_unittest("TransSdkTest") {
+    module_out_path = module_output_path
+    sources = [
+      "tcp_direct/unittest/trans_tcp_direct_test.cpp",
+      "udp/stream/trans_sdk_stream_test.cpp",
+    ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "//third_party/googletest:gtest_main",
+      "//utils/native/base:utils",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+  group("unittest") {
+    testonly = true
+    deps = [ ":TransSdkTest" ]
+  }
 }
