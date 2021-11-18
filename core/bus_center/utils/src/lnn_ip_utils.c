@@ -32,6 +32,7 @@
 
 #include "bus_center_info_key.h"
 #include "common_list.h"
+#include "lnn_linkwatch.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -204,6 +205,10 @@ int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen)
         }
         if (GetNetworkIfIp(fd, &ifr, ip, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetworkIfIp ifName:%s fail", info->ifName);
+            continue;
+        }
+        if (!LnnIsLinkReady(info->ifName, strlen(info->ifName))) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetworkIfIp ifName:%s link not ready", info->ifName);
             continue;
         }
         if (strncpy_s(ifName, ifNameLen, ifr.ifr_name, strlen(ifr.ifr_name)) != EOK) {
