@@ -23,21 +23,18 @@
 #define __MUSL__
 #endif
 
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
 #include <securec.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #define NETLINK_BUF_LEN 1024
-
-#define NLMSG_TAIL(nmsg) \
-    ((struct rtattr *) (((void *) (nmsg)) + NLMSG_ALIGN((nmsg)->nlmsg_len)))
 
 static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
     const uint8_t *data, uint32_t attrLen)
@@ -49,7 +46,7 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddAttr ERROR: message exceeded bound of %d\n", maxLen);
         return SOFTBUS_ERR;
     }
-    rta = NLMSG_TAIL(nlMsgHdr);
+    rta = ((struct rtattr *) (((void *) (nlMsgHdr)) + NLMSG_ALIGN((nmsg)->nlmsg_len)));
     rta->rta_type = type;
     rta->rta_len = len;
     if (memcpy_s(RTA_DATA(rta), rta->rta_len, data, attrLen) != EOK) {
@@ -68,7 +65,7 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     int32_t len;
 
     fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    if(fd < 0){
+    if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink_socket failed");
         return SOFTBUS_ERR;
     }
@@ -91,7 +88,7 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "EOF on netlink\n");
             return SOFTBUS_ERR;
         }
-        for (hdr = (struct nlmsghdr *)answer; status >= (int32_t)sizeof(*hdr); ) {
+        for (hdr = (struct nlmsghdr *)answer; status >= (int32_t)sizeof(*hdr);) {
             len = hdr->nlmsg_len;
             if ((hdr->nlmsg_len - sizeof(*hdr)) < 0 || len > status) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malformed message: len=%d", len);
@@ -114,14 +111,15 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
 
 static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t *value, uint32_t valueLen)
 {
-    while (RTA_OK(rta, len)) {
-        if (rta->rta_type != type) {
-            rta = RTA_NEXT(rta, len);
+    struct rtattr *attr = rta;
+    while (RTA_OK(attr, len)) {
+        if (attr->rta_type != type) {
+            attr = RTA_NEXT(attr, len);
             continue;
         }
-        if (memcpy_s(value, valueLen, RTA_DATA(rta), RTA_PAYLOAD(rta)) != EOK) {
+        if (memcpy_s(value, valueLen, RTA_DATA(attr), RTA_PAYLOAD(attr)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get attr fail: %d, %d",
-                valueLen, RTA_PAYLOAD(rta));
+                valueLen, RTA_PAYLOAD(attr));
             break;
         }
         return SOFTBUS_OK;
@@ -150,6 +148,9 @@ bool LnnIsLinkReady(const char *iface, uint32_t len)
     uint8_t carrier;
     int32_t seq = time(NULL);
 
+    if (seq < 0) {
+        seq = 0;
+    }
     req.hdr.nlmsg_seq = ++seq;
     (void)memset_s(&answer, sizeof(answer), 0, sizeof(answer));
     if (AddAttr(&req.hdr, sizeof(req), IFLA_IFNAME, (const uint8_t *)iface, len + 1) != SOFTBUS_OK) {
