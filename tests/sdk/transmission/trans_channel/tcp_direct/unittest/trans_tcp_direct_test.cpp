@@ -24,8 +24,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-const char *g_pkgName = "com.dsoftbus.demo";
-const char *g_sessionName = "com.dsoftbus.demo.JtOnOpenSession";
+const char *g_pkgName = "dms";
+const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 const char *g_groupid = "TEST_GROUP_ID";
 static SessionAttribute g_sessionAttr = {
@@ -150,15 +150,15 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
 {
     int ret, i;
     char const *sessionName[MAX_SESSION_SERVER_NUMBER + 1] = {
-        "com.dsoftbus.demo.JtOnOpenSession0",
-        "com.dsoftbus.demo.JtOnOpenSession1",
-        "com.dsoftbus.demo.JtOnOpenSession2",
-        "com.dsoftbus.demo.JtOnOpenSession3",
-        "com.dsoftbus.demo.JtOnOpenSession4",
-        "com.dsoftbus.demo.JtOnOpenSession5",
-        "com.dsoftbus.demo.JtOnOpenSession6",
-        "com.dsoftbus.demo.JtOnOpenSession7",
-        "com.dsoftbus.demo.JtOnOpenSession8"
+        "ohos.distributedschedule.dms.test0",
+        "ohos.distributedschedule.dms.test1",
+        "ohos.distributedschedule.dms.test2",
+        "ohos.distributedschedule.dms.test3",
+        "ohos.distributedschedule.dms.test4",
+        "ohos.distributedschedule.dms.test5",
+        "ohos.distributedschedule.dms.test6",
+        "ohos.distributedschedule.dms.test7",
+        "ohos.distributedschedule.dms.test8"
     };
 
     for (i = 0; i < MAX_SESSION_SERVER_NUMBER; i++) {
