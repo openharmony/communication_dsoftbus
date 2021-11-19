@@ -20,7 +20,6 @@
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
-#include "ohos_init.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -110,8 +109,3 @@ void ClientDeathCallback(const char *pkgName)
     TransServerDeathCallback(pkgName);
     BusCenterServerDeathCallback(pkgName);
 }
-
-#if defined(__LITEOS_M__)
-// 4 stand for pri
-SYS_SERVICE_INIT_PRI(InitSoftBusServer, 4);
-#endif
