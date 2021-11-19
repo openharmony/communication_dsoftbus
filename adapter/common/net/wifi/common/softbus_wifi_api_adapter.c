@@ -14,8 +14,10 @@
  */
 
 #include "softbus_wifi_api_adapter.h"
+
 #include <stdlib.h>
-#include "string.h"
+#include <string.h>
+
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
