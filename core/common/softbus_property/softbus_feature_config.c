@@ -41,6 +41,7 @@
 #endif
 #define LNN_UDID_INIT_DELAY_LEN 0
 #define LNN_NET_IF_NAME "0:eth0,1:wlan0"
+#define LNN_MAX_CONCURENT_NUM 2
 
 #ifdef __LITEOS_M__
 #define DEFAULT_SElECT_INTERVAL 100000
@@ -77,6 +78,7 @@ typedef struct {
     char storageDir[MAX_STORAGE_PATH_LEN];
     int32_t lnnUdidInitDelayLen;
     char lnnNetIfName[MAX_NET_IF_NAME_LEN];
+    int32_t lnnMaxConcurentNum;
 } ConfigItem;
 
 typedef struct {
@@ -100,6 +102,7 @@ ConfigItem g_config = {
     DEFAULT_STORAGE_PATH,
     LNN_UDID_INIT_DELAY_LEN,
     LNN_NET_IF_NAME,
+    LNN_MAX_CONCURENT_NUM,
 };
 
 typedef struct {
@@ -201,6 +204,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_STR_LNN_NET_IF_NAME,
         (unsigned char*)&(g_config.lnnNetIfName),
         sizeof(g_config.lnnNetIfName)
+    },
+    {
+        SOFTBUS_INT_LNN_MAX_CONCURENT_NUM,
+        (unsigned char*)&(g_config.lnnMaxConcurentNum),
+        sizeof(g_config.lnnMaxConcurentNum)
     },
 };
 
