@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "lnn_linkwatch.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -106,6 +107,10 @@ int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen, 
             continue;
         }
         if (GetNetworkIfIp(fd, &req[i], ip, len) != SOFTBUS_OK) {
+            continue;
+        }
+        if (!LnnIsLinkReady(req[i].ifr_name, strlen(req[i].ifr_name))) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName:%s link not ready", req[i].ifr_name);
             continue;
         }
         if (strncpy_s(ifName, ifNameLen, req[i].ifr_name, strlen(req[i].ifr_name)) != EOK) {

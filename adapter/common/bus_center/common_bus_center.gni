@@ -21,13 +21,13 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
-    ]      
-    bus_center_monitor_inc += [
-      "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip",
     ]
+    bus_center_monitor_inc +=
+        [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include/lwip" ]
   } else if (ohos_kernel_type == "linux") {
     bus_center_monitor_src = [
       "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
+      "$softbus_adapter_common/bus_center/network/lnn_linkwatch.c",
       "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor.c",
       "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
@@ -40,6 +40,7 @@ if (defined(ohos_lite)) {
       "//drivers/framework/ability/sbuf/include",
     ]
     bus_center_monitor_src = [
+      "$softbus_adapter_common/bus_center/network/lnn_linkwatch_virtual.c",
       "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/platform/lnn_product_monitor.c",
@@ -50,14 +51,15 @@ if (defined(ohos_lite)) {
       "//drivers/adapter/uhdf/platform:hdf_platform",
       "//drivers/adapter/uhdf/posix:hdf_posix_osal",
     ]
-  } 
+  }
 } else {
   bus_center_monitor_src = [
+    "$softbus_adapter_common/bus_center/network/lnn_linkwatch.c",
     "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor_virtual.c",
     "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor.c",
     "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
     "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor.cpp",
-  ] 
+  ]
   bus_center_monitor_inc += [
     "//utils/native/base/include",
     "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
