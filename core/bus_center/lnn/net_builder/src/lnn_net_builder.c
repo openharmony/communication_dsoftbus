@@ -66,10 +66,17 @@ typedef enum {
 typedef int32_t (*NetBuilderMessageProcess)(const void *para);
 
 typedef struct {
+    ListNode node;
+    ConnectionAddr addr;
+    bool needReportFailure;
+} PendingJoiinRequestNode;
+
+typedef struct {
     NodeType nodeType;
 
     /* connection fsm list */
     ListNode fsmList;
+    ListNode pendingList;
     /* connection count */
     int32_t connCount;
 
@@ -77,6 +84,7 @@ typedef struct {
     SoftBusHandler handler;
 
     int32_t maxConnCount;
+    int32_t maxConcurentCount;
     bool isInit;
 } NetBuilder;
 
@@ -112,7 +120,13 @@ static void NetBuilderConfigInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max connection count fail, use default value");
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn max connection count is %u", g_netBuilder.maxConnCount);
+    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURENT_NUM,
+        (unsigned char*)&g_netBuilder.maxConcurentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max conncurent count fail, use default value");
+        g_netBuilder.maxConcurentCount = 0;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn config is %d,%d",
+        g_netBuilder.maxConnCount, g_netBuilder.maxConcurentCount);
 }
 
 static SoftBusMessage *CreateNetBuilderMessage(int32_t msgType, void *para)
@@ -273,17 +287,56 @@ static void SendElectMessageToAll(const char *skipNetworkId)
     }
 }
 
-static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReportFailure)
+static bool NeedPendingJoinRequest(void)
 {
-    LnnConnectionFsm *connFsm = NULL;
+    int32_t count = 0;
+    LnnConnectionFsm *item = NULL;
+
+    if (g_netBuilder.maxConcurentCount == 0) { // do not limit concurent
+        return false;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (item->isDead) {
+            continue;
+        }
+        if ((item->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
+            continue;
+        }
+        ++count;
+        if (count >= g_netBuilder.maxConcurentCount) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool tryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFailure)
+{
+    PendingJoiinRequestNode *request = NULL;
+
+    if (!NeedPendingJoinRequest()) {
+        return false;
+    }
+    request = SoftBusCalloc(sizeof(PendingJoiinRequestNode));
+    if (request == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc pending join request fail, go on it");
+        return false;
+    }
+    ListInit(&request->node);
+    request->addr = *addr;
+    request->needReportFailure = needReportFailure;
+    ListTailInsert(&g_netBuilder.pendingList, &request->node);
+    return true;
+}
+
+static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr, bool needReportFailure)
+{
     int32_t rc = SOFTBUS_OK;
     bool isCreate = false;
 
-    if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is null");
-        return SOFTBUS_INVALID_PARAM;
+    if (connFsm == NULL) {
+        connFsm = FindConnectionFsmByAddr(addr);
     }
-    connFsm = FindConnectionFsmByAddr(addr);
     if (connFsm == NULL || connFsm->isDead) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create and start a new connection fsm");
         connFsm = StartNewConnectionFsm(addr);
@@ -303,6 +356,45 @@ static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReport
         connFsm->connInfo.flag |=
             (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
     }
+    return rc;
+}
+
+static void TryRemovePendingJoinRequest(void)
+{
+    PendingJoiinRequestNode *item = NULL;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "try remove pending join request");
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.pendingList, PendingJoiinRequestNode, node) {
+        if (NeedPendingJoinRequest()) {
+            return;
+        }
+        ListDelete(&item->node);
+        if (PostJoinRequestToConnFsm(NULL, &item->addr, item->needReportFailure) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "post pending join request failed");
+        }
+        SoftBusFree(item);
+        break;
+    }
+}
+
+static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReportFailure)
+{
+    LnnConnectionFsm *connFsm = NULL;
+    int32_t rc;
+
+    if (addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    connFsm = FindConnectionFsmByAddr(addr);
+    if (connFsm == NULL || connFsm->isDead) {
+        if (tryPendingJoinRequest(addr, needReportFailure)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join request is pending");
+            SoftBusFree((void *)addr);
+            return SOFTBUS_OK;
+        }
+    }
+    rc = PostJoinRequestToConnFsm(connFsm, addr, needReportFailure);
     SoftBusFree((void *)addr);
     return rc;
 }
@@ -442,6 +534,7 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
         tryInitiateNewNetworkOnline(connFsm);
         tryDisconnectAllConnection(connFsm);
         tryNotifyAllTypeOffline(connFsm);
+        TryRemovePendingJoinRequest();
         rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)para);
@@ -794,6 +887,9 @@ static int32_t ProcessNodeStateChanged(const void *para)
         rc = isOnline ? TryElectMasterNodeOnline(connFsm) : TryElectMasterNodeOffline(connFsm);
     } while (false);
     SoftBusFree((void *)addr);
+    if (isOnline) {
+        TryRemovePendingJoinRequest();
+    }
     return rc;
 }
 
@@ -1162,6 +1258,7 @@ int32_t LnnInitNetBuilder(void)
     }
 
     ListInit(&g_netBuilder.fsmList);
+    ListInit(&g_netBuilder.pendingList);
     g_netBuilder.nodeType = NODE_TYPE_L;
     g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_netBuilder.looper == NULL) {
