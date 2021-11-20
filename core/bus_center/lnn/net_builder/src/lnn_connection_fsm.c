@@ -184,6 +184,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
+        LnnNotifyNodeStateChanged(&connInfo->addr);
     } else {
         NotifyJoinResult(connFsm, networkId, retCode);
         (void)AuthHandleLeaveLNN(connInfo->authId);
@@ -241,6 +242,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
     if (retCode == SOFTBUS_OK) {
         needReportOffline = UpdateLeaveToLedger(connFsm, networkId, &basic);
+        LnnNotifyNodeStateChanged(&connInfo->addr);
     }
     NotifyLeaveResult(connFsm, networkId, retCode);
     if (needReportOffline) {
