@@ -942,6 +942,7 @@ static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVer
     }
     if (GetCurrentConnectType(&type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType failed");
+        SoftBusFree(para);
         return;
     }
     if (!LnnConvertOptionToAddr(&para->addr, option, type)) {
