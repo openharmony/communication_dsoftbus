@@ -150,7 +150,7 @@ static IPublishCallback g_publishCb = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level1)
+HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level0)
 {
     int ret;
     PublishInfo testInfo = {
@@ -206,7 +206,7 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, PublishServiceTest002, TestSize.Level1)
+HWTEST_F(Disc_Test, PublishServiceTest002, TestSize.Level0)
 {
     int ret;
 
@@ -224,7 +224,7 @@ HWTEST_F(Disc_Test, PublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level1)
+HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level0)
 {
     int ret;
 
@@ -238,7 +238,7 @@ HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level1)
+HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -296,7 +296,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level1)
+HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level0)
 {
     int ret;
 
@@ -315,7 +315,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level1)
+HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level0)
 {
     int ret;
 
@@ -329,7 +329,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, UnPublishServiceTest001, TestSize.Level1)
+HWTEST_F(Disc_Test, UnPublishServiceTest001, TestSize.Level0)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -347,7 +347,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, UnPublishServiceTest002, TestSize.Level1)
+HWTEST_F(Disc_Test, UnPublishServiceTest002, TestSize.Level0)
 {
     int ret;
     int tmpId1 = GetPublishId();
@@ -368,7 +368,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level1)
+HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level0)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -384,7 +384,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StopDiscoveryTest001, TestSize.Level1)
+HWTEST_F(Disc_Test, StopDiscoveryTest001, TestSize.Level0)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -402,7 +402,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StopDiscoveryTest002, TestSize.Level1)
+HWTEST_F(Disc_Test, StopDiscoveryTest002, TestSize.Level0)
 {
     int ret;
     int tmpId1 = GetSubscribeId();
@@ -423,7 +423,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level1)
+HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level0)
 {
     int ret;
     int tmpId = GetSubscribeId();
