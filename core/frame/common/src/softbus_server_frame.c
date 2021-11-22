@@ -20,7 +20,6 @@
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
-#include "ohos_init.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
