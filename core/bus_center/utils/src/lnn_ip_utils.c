@@ -14,20 +14,16 @@
  */
 
 #include "lnn_ip_utils.h"
+#include "lnn_ip_utils_adapter.h"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
 
-#include <arpa/inet.h>
-#include <net/if.h>
 #include <securec.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "bus_center_info_key.h"
@@ -53,30 +49,6 @@ static ListNode g_netIfNameList = {
     .prev = &g_netIfNameList,
     .next = &g_netIfNameList,
 };
-
-static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, uint32_t len)
-{
-    if (ioctl(fd, SIOCGIFFLAGS, (char*)req) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ioctl SIOCGIFFLAGS fail, errno = %d", errno);
-        return SOFTBUS_ERR;
-    }
-    if (!((uint16_t)req->ifr_flags & IFF_UP)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "interface is not up");
-        return SOFTBUS_ERR;
-    }
-
-    /* get IP of this interface */
-    if (ioctl(fd, SIOCGIFADDR, (char*)req) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ioctl SIOCGIFADDR fail, errno = %d", errno);
-        return SOFTBUS_ERR;
-    }
-    struct sockaddr_in *sockAddr = (struct sockaddr_in *)&(req->ifr_addr);
-    if (inet_ntop(sockAddr->sin_family, &sockAddr->sin_addr, ip, len) == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert ip addr to string failed");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
 
 static int32_t AddNetConfigInfo(LnnNetIfNameType type, const char *netIfName, int32_t netIfNameLen)
 {
@@ -187,38 +159,27 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, Connection
 int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen)
 {
     if (ip == NULL || ifName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ip or ifName buffer is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ip or ifName buffer is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open socket failed");
-        return SOFTBUS_ERR;
-    }
-    struct ifreq ifr;
     LnnNetIfNameConfig *info = NULL;
     int32_t ret = SOFTBUS_ERR;
     LIST_FOR_EACH_ENTRY(info, &g_netIfNameList, LnnNetIfNameConfig, node) {
-        if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), info->ifName, strlen(info->ifName)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy netIfName:%s fail", info->ifName);
-            continue;
-        }
-        if (GetNetworkIfIp(fd, &ifr, ip, len) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetworkIfIp ifName:%s fail", info->ifName);
+        if (GetNetworkIpByIfName(info->ifName, ip, NULL, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get network IP by ifName failed!");
             continue;
         }
         if (!LnnIsLinkReady(info->ifName, strlen(info->ifName))) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetworkIfIp ifName:%s link not ready", info->ifName);
             continue;
         }
-        if (strncpy_s(ifName, ifNameLen, ifr.ifr_name, strlen(ifr.ifr_name)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ifname:%s failed", info->ifName);
+        if (strncpy_s(ifName, ifNameLen, info->ifName, strlen(info->ifName)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ifname failed!");
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetNetworkIfIp ifName:%s ok!", info->ifName);
         ret = SOFTBUS_OK;
         break;
     }
-    close(fd);
     return ret;
 }
