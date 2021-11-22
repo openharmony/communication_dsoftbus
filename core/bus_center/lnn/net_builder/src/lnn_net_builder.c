@@ -1015,13 +1015,7 @@ static int32_t GetCurrentConnectType(ConnectionAddrType *type)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalStrInfo getCurrentConnectType failed");
         return SOFTBUS_ERR;
     }
-    if (strlen(ifCurrentName) >= strlen(LNN_WLAN_IF_NAME_PREFIX) &&
-        memcmp(ifCurrentName, LNN_WLAN_IF_NAME_PREFIX, strlen(LNN_WLAN_IF_NAME_PREFIX)) == SOFTBUS_OK) {
-        *type = CONNECTION_ADDR_WLAN;
-    } else if (strlen(ifCurrentName) >= strlen(LNN_ETH_IF_NAME_PREFIX) &&
-               memcmp(ifCurrentName, LNN_ETH_IF_NAME_PREFIX, strlen(LNN_ETH_IF_NAME_PREFIX)) == SOFTBUS_OK) {
-        *type = CONNECTION_ADDR_ETH;
-    } else {
+    if (LnnGetAddrTypeByIfName(ifCurrentName, strlen(ifCurrentName), type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType unknown connect type");
         return SOFTBUS_ERR;
     }
@@ -1031,7 +1025,7 @@ static int32_t GetCurrentConnectType(ConnectionAddrType *type)
 static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
 {
     AuthKeyGeneratedMsgPara *para = NULL;
-    ConnectionAddrType type;
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
     para = SoftBusMalloc(sizeof(AuthKeyGeneratedMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth key generated msg para fail");
