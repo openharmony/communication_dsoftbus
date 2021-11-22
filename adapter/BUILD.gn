@@ -53,13 +53,17 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include + net_bluetooth_inc
-      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
+      include_dirs += [
+        "//kernel/liteos_m/kal/cmsis",
+        "$hispark_pegasus_sdk_path/third_party/lwip_sack/include",
+      ]
       cflags = [
         "-Wall",
         "-fPIC",
       ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
+        "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
@@ -85,6 +89,7 @@ if (defined(ohos_lite)) {
       cflags_cc = [ "-fPIC" ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
+        "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
@@ -123,6 +128,7 @@ if (defined(ohos_lite)) {
     include_dirs += net_bluetooth_inc
     sources = [
       "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
+      "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
