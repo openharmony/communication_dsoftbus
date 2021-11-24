@@ -44,9 +44,9 @@
 #define LNN_MAX_CONCURENT_NUM 2
 
 #ifdef __LITEOS_M__
-#define DEFAULT_SElECT_INTERVAL 100000
+#define DEFAULT_SELECT_INTERVAL 100000
 #else
-#define DEFAULT_SElECT_INTERVAL 10000
+#define DEFAULT_SELECT_INTERVAL 10000
 #endif
 
 #ifdef SOFTBUS_STANDARD_SYSTEM
@@ -243,7 +243,7 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
 static void SoftbusConfigSetTransDefaultVal(void)
 {
     g_tranConfig.isSupportTcpProxy = DEFAULT_IS_SUPPORT_TCP_PROXY;
-    g_tranConfig.selectInterval = DEFAULT_SElECT_INTERVAL;
+    g_tranConfig.selectInterval = DEFAULT_SELECT_INTERVAL;
     g_tranConfig.maxBytesLen = DEFAULT_MAX_BYTES_LEN;
     g_tranConfig.maxMessageLen = DEFAULT_MAX_MESSAGE_LEN;
 }
