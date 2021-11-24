@@ -199,7 +199,7 @@ static int32_t CoapStartScan(const PublishOption *option)
     return SOFTBUS_OK;
 }
 
-static int32_t CoapStoptScan(const PublishOption *option)
+static int32_t CoapStopScan(const PublishOption *option)
 {
     if (option == NULL || g_publishMgr == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -364,7 +364,7 @@ static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .Publish = CoapPublish,
     .StartScan = CoapStartScan,
     .Unpublish = CoapUnPublish,
-    .StopScan = CoapStoptScan,
+    .StopScan = CoapStopScan,
     .StartAdvertise = CoapStartAdvertise,
     .Subscribe = CoapSubscribe,
     .StopAdvertise = CoapStopAdvertise,
