@@ -132,7 +132,7 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length = 0) {
+            if (tl.length == 0) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
