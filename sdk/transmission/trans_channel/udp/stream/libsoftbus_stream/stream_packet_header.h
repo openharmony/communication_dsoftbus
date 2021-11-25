@@ -132,6 +132,9 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
+            if (tl.length = 0) {
+                return;
+            }
             ext_ = std::make_unique<char[]>(tl.length);
             int ret = memcpy_s(ext_.get(), tl.length, reinterpret_cast<void *>(tmp), tl.length);
             if (ret == 0) {
