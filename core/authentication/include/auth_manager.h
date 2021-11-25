@@ -70,6 +70,7 @@ typedef struct {
     int64_t authId;
     AuthSideFlag side;
     uint8_t status;
+    uint16_t id;
     int32_t fd;
     ConnectOption option;
     int32_t encryptInfoStatus;
@@ -91,6 +92,7 @@ typedef struct {
 
 AuthManager *AuthGetManagerByRequestId(uint32_t requestId);
 AuthManager *AuthGetManagerByAuthId(int64_t authId, AuthSideFlag side);
+AuthManager *AuthGetManagerByConnId(uint16_t id, AuthSideFlag side);
 AuthManager *AuthGetManagerByFd(int32_t fd);
 int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
