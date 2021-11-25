@@ -47,6 +47,12 @@ int64_t GetSeq(AuthSideFlag flag)
     return seq;
 }
 
+uint16_t AuthGetNextConnectionId(void)
+{
+    static uint16_t authConnId = 0;
+    return ++authConnId;
+}
+
 AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq)
 {
     /* even odd check */
