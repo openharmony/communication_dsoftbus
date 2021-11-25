@@ -44,7 +44,6 @@ if (defined(ohos_lite)) {
               [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
               "value")
       if (enhanced) {
-        bus_center_hub_ldflags += [ "-ldsoftbus_time_sync_impl" ]
         bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
       } else {
         bus_center_hub_src +=
