@@ -132,7 +132,7 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length <= 0 || tl.length > MAX_STREAM_LEN) {
+            if (tl.length = 0) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
