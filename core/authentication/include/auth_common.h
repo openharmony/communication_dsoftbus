@@ -26,6 +26,7 @@ extern "C" {
 #endif
 
 int64_t GetSeq(AuthSideFlag flag);
+uint16_t AuthGetNextConnectionId(void);
 void UniqueIdInit(void);
 void AuthGetAbility(void);
 bool AuthIsSupportServerSide(void);

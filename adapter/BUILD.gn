@@ -30,6 +30,7 @@ if (defined(ohos_lite)) {
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
   } else {
+    defines = [ "SOFTBUS_PRINTF" ]
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
   }
