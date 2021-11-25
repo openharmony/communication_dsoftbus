@@ -277,7 +277,6 @@ static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
         (void)StopScaner();
         return SOFTBUS_ERR;
     }
-    (void)pthread_mutex_unlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
 
@@ -530,9 +529,14 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
         return SOFTBUS_INVALID_PARAM;
     }
     advData->advData = (unsigned char *)SoftBusCalloc(ADV_DATA_MAX_LEN + ADV_HEAD_LEN);
-    advData->scanRspData = (unsigned char *)SoftBusCalloc(RESP_DATA_MAX_LEN + RSP_HEAD_LEN);
-    if (advData->advData == NULL || advData->scanRspData == NULL) {
+    if (advData->advData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    advData->scanRspData = (unsigned char *)SoftBusCalloc(RESP_DATA_MAX_LEN + RSP_HEAD_LEN);
+    if (advData->scanRspData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed");
+        SoftBusFree(advData->advData);
         return SOFTBUS_MALLOC_ERR;
     }
     unsigned short advLength = (boardcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : boardcastData->dataLen;
