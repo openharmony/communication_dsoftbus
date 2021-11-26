@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,37 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef LNN_IP_UTILS_H
-#define LNN_IP_UTILS_H
+#ifndef LNN_IP_UTILS_ADAPTER_H
+#define LNN_IP_UTILS_ADAPTER_H
 
-#include <stdbool.h>
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
-#include "softbus_bus_center.h"
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <securec.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "softbus_adapter_log.h"
+#include "softbus_def.h"
+#include "softbus_errcode.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define LNN_LOOPBACK_IP "127.0.0.1"
-#define LNN_LOOPBACK_IFNAME "lo"
-#define LNN_IF_NAME_WLAN "wlan0"
-#define LNN_IF_NAME_ETH  "eth0"
-
-typedef enum {
-    LNN_ETH_TYPE = 0,
-    LNN_WLAN_TYPE,
-    LNN_MAX_NUM_TYPE,
-} LnnNetIfNameType;
-
-int32_t LnnReadNetConfigList(void);
-
-int32_t LnnClearNetConfigList(void);
-
-int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen);
-
-int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, ConnectionAddrType *type);
+int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_IP_UTILS_H */
+#endif // LNN_IP_UTILS_ADAPTER_H
