@@ -29,9 +29,13 @@ extern "C" {
 
 int32_t LnnInitNetworkManager(void);
 
+void LnnDeinitNetworkManager(void);
+
 void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 
 int32_t __attribute__ ((weak)) LnnInitIpNetwork(void);
+
+int32_t __attribute__ ((weak)) LnnDeinitIpNetwork(void);
 
 void __attribute__ ((weak)) LnnCallIpDiscovery(void);
 
