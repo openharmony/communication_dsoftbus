@@ -303,7 +303,8 @@ int32_t AuthHandleLeaveLNN(int64_t authId)
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found, AuthHandleLeaveLNN failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found, AuthHandleLeaveLNN failed",
+                authId);
             return SOFTBUS_ERR;
         }
     }
@@ -512,7 +513,8 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found on sessionkey returned",
+                authId);
             return;
         }
     }
@@ -804,7 +806,8 @@ static void AuthOnError(int64_t authId, int operationCode, int errorCode, const 
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found, AuthPostData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found, AuthOnError failed",
+                authId);
             return;
         }
     }
@@ -818,7 +821,8 @@ static char *AuthOnRequest(int64_t authReqId, int authForm, const char *reqParam
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authReqId, CLIENT_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found, AuthPostData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found, AuthOnRequest failed",
+                authReqId);
             return NULL;
         }
     }

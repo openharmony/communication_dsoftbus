@@ -195,7 +195,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]join failed, ready clean", connFsm->id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]join failed, ready clean", connFsm->id);
         connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
     }
@@ -218,12 +218,12 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
         needReportOffline = true;
         (void)memset_s(basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
         if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]get basic info fail", connFsm->id);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]get basic info fail", connFsm->id);
             needReportOffline = false;
         }
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]remove node", connFsm->id);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]remove node", connFsm->id);
             LnnRemoveNode(udid);
         }
     }
@@ -659,6 +659,9 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
             break;
         case FSM_MSG_TYPE_INITIATE_ONLINE:
             LnnFsmTransactState(&connFsm->fsm, g_states + STATE_ONLINE_INDEX);
+            break;
+        case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
+            OnJoinFail(connFsm, SOFTBUS_NETWORK_JOIN_TIMEOUT);
             break;
         default:
             FreeUnhandledMessage(msgType, para);

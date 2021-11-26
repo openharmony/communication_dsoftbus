@@ -141,7 +141,7 @@ static void *LoopTask(void *arg)
             ListDelete(item);
             SoftBusFree(itemNode);
             context->msgSize--;
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
                 context->name, msg->handler->name, msg->what, context->msgSize);
         } else {
 #ifdef __LITEOS_M__
@@ -164,7 +164,7 @@ static void *LoopTask(void *arg)
         }
         context->currentMsg = msg;
         (void)pthread_mutex_unlock(&context->lock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "LoopTask[%s], HandleMessage message. handle=%s,what=%d",
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], HandleMessage message. handle=%s,what=%d",
             context->name, msg->handler->name, msg->what);
 
         if (msg->handler->HandleMessage != NULL) {
@@ -236,7 +236,7 @@ void DumpLooper(const SoftBusLooper *looper)
 
 static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime what =%d time=%lld us",
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=%lld us",
         looper->context->name, msgPost->what, msgPost->time);
     if (msgPost->handler == NULL) {
         FreeSoftBusMsg(msgPost);
@@ -282,7 +282,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
         ListTailInsert(&(context->msgHead), &(newNode->node));
     }
     context->msgSize++;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime. insert", context->name);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime. insert", context->name);
     DumpLooperLocked(context);
 
     pthread_cond_broadcast(&context->cond);
