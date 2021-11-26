@@ -113,7 +113,8 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(head->authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found, AuthPostData failed");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%llu), AuthPostData failed",
+                head->authId);
             return SOFTBUS_ERR;
         }
     }
@@ -395,7 +396,7 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
     if (auth == NULL) {
         auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
         if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found", authId);
             return false;
         }
     }

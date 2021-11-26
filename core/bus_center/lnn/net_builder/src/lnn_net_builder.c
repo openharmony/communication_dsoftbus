@@ -310,7 +310,7 @@ static bool NeedPendingJoinRequest(void)
     return false;
 }
 
-static bool tryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFailure)
+static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFailure)
 {
     PendingJoiinRequestNode *request = NULL;
 
@@ -338,7 +338,6 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
         connFsm = FindConnectionFsmByAddr(addr);
     }
     if (connFsm == NULL || connFsm->isDead) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create and start a new connection fsm");
         connFsm = StartNewConnectionFsm(addr);
         isCreate = true;
     }
@@ -363,16 +362,16 @@ static void TryRemovePendingJoinRequest(void)
 {
     PendingJoiinRequestNode *item = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "try remove pending join request");
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.pendingList, PendingJoiinRequestNode, node) {
         if (NeedPendingJoinRequest()) {
             return;
         }
         ListDelete(&item->node);
         if (PostJoinRequestToConnFsm(NULL, &item->addr, item->needReportFailure) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "post pending join request failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post pending join request failed");
         }
         SoftBusFree(item);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove a pending join request");
         break;
     }
 }
@@ -388,7 +387,7 @@ static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReport
     }
     connFsm = FindConnectionFsmByAddr(addr);
     if (connFsm == NULL || connFsm->isDead) {
-        if (tryPendingJoinRequest(addr, needReportFailure)) {
+        if (TryPendingJoinRequest(addr, needReportFailure)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join request is pending");
             SoftBusFree((void *)addr);
             return SOFTBUS_OK;
@@ -409,10 +408,31 @@ static int32_t ProcessDevDiscoveryRequest(const void *para)
     return TrySendJoinLNNRequest((const ConnectionAddr *)para, false);
 }
 
-static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
+static void InitiateNewNetworkOnline(ConnectionAddrType addrType, const char *networkId)
 {
     LnnConnectionFsm *item = NULL;
     int32_t rc;
+
+    // find target connfsm, then notify it online
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(networkId, item->connInfo.peerNetworkId) != 0) {
+            continue;
+        }
+        if (item->isDead) {
+            continue;
+        }
+        if (addrType != CONNECTION_ADDR_MAX && addrType != item->connInfo.addr.type) {
+            continue;
+        }
+        rc = LnnSendNewNetworkOnlineToConnFsm(item);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "initiate new network online to connection fsm[id=%u], rc=%d", item->id, rc);
+    }
+}
+
+static void TryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
+{
+    LnnConnectionFsm *item = NULL;
     LnnInvalidCleanInfo *cleanInfo = connFsm->connInfo.cleanInfo;
 
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
@@ -431,24 +451,10 @@ static void tryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
             "[id=%u]wait last connfsm clean, then initiate new network online", connFsm->id);
         return;
     }
-    // find target connfsm, then notify it online
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (strcmp(cleanInfo->networkId, item->connInfo.peerNetworkId) != 0) {
-            continue;
-        }
-        if (item->isDead) {
-            continue;
-        }
-        if (cleanInfo->addrType != CONNECTION_ADDR_MAX && cleanInfo->addrType != item->connInfo.addr.type) {
-            continue;
-        }
-        rc = LnnSendNewNetworkOnlineToConnFsm(item);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]initiate new network online to connection fsm[id=%u], rc=%d", connFsm->id, item->id, rc);
-    }
+    InitiateNewNetworkOnline(cleanInfo->addrType, cleanInfo->networkId);
 }
 
-static void tryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
+static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
 {
     LnnConnectionFsm *item = NULL;
     const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
@@ -477,7 +483,7 @@ static void tryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
     }
 }
 
-static void tryNotifyAllTypeOffline(const LnnConnectionFsm *connFsm)
+static void TryNotifyAllTypeOffline(const LnnConnectionFsm *connFsm)
 {
     LnnConnectionFsm *item = NULL;
     const ConnectionAddr *addr1 = &connFsm->connInfo.addr;
@@ -527,13 +533,13 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
     do {
         connFsm = FindConnectionFsmByConnFsmId(connFsmId);
         if (connFsm == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "can not find connection fsm");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm");
             break;
         }
         StopConnectionFsm(connFsm);
-        tryInitiateNewNetworkOnline(connFsm);
-        tryDisconnectAllConnection(connFsm);
-        tryNotifyAllTypeOffline(connFsm);
+        TryInitiateNewNetworkOnline(connFsm);
+        TryDisconnectAllConnection(connFsm);
+        TryNotifyAllTypeOffline(connFsm);
         TryRemovePendingJoinRequest();
         rc = SOFTBUS_OK;
     } while (false);
@@ -706,7 +712,7 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
             continue;
         }
         if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send leave LNN msg to connection fsm[id=%u] failed",
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send leave LNN msg to connection fsm[id=%u] failed",
                 item->id);
         } else {
             rc = SOFTBUS_OK;
@@ -746,10 +752,16 @@ static int32_t ProcessSyncOfflineFinish(const void *para)
 
 static bool IsInvalidConnectionFsm(const LnnConnectionFsm *connFsm, const LeaveInvalidConnMsgPara *msgPara)
 {
-    if (strcmp(msgPara->oldNetworkId, connFsm->connInfo.peerNetworkId) != 0 || connFsm->isDead) {
+    if (strcmp(msgPara->oldNetworkId, connFsm->connInfo.peerNetworkId) != 0) {
+        return false;
+    }
+    if (connFsm->isDead) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection is dead", connFsm->id);
         return false;
     }
     if (msgPara->addrType != CONNECTION_ADDR_MAX && msgPara->addrType != connFsm->connInfo.addr.type) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection type not match %d,%d",
+            msgPara->addrType, connFsm->connInfo.addr.type);
         return false;
     }
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
@@ -767,6 +779,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
 {
     LnnConnectionFsm *item = NULL;
     int32_t rc = SOFTBUS_OK;
+    int32_t count = 0;
     const LeaveInvalidConnMsgPara *msgPara = (const LeaveInvalidConnMsgPara *)para;
 
     if (msgPara == NULL) {
@@ -777,6 +790,8 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         if (!IsInvalidConnectionFsm(item, msgPara)) {
             continue;
         }
+        // The new connFsm should timeout when following errors occur
+        ++count;
         item->connInfo.cleanInfo = SoftBusMalloc(sizeof(LnnInvalidCleanInfo));
         if (item->connInfo.cleanInfo == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]malloc invalid clena info failed", item->id);
@@ -802,6 +817,9 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "send leave LNN msg to invalid connection fsm[id=%u] result: %d", item->id, rc);
     }
+    if (count == 0) {
+        InitiateNewNetworkOnline(msgPara->addrType, msgPara->newNetworkId);
+    }
     SoftBusFree((void *)msgPara);
     return rc;
 }
@@ -824,7 +842,7 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
                         peerMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
         LnnGetDLNumInfo(connFsm->connInfo.peerNetworkId, NUM_KEY_MASTER_NODE_WEIGHT,
                         &peerMasterWeight) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer node info(%u) is not found", connFsm->id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node info(%u) is not found", connFsm->id);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer master(%u) weight=%d", connFsm->id, peerMasterWeight);
@@ -962,7 +980,7 @@ static int32_t ProcessLeaveByAddrType(const void *para)
             continue;
         }
         rc = LnnSendLeaveRequestToConnFsm(item);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
         }
@@ -1005,7 +1023,7 @@ static void NetBuilderMessageHandler(SoftBusMessage *msg)
         return;
     }
     ret = g_messageProcessor[msg->what](msg->obj);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "net builder process msg(%d) done, ret=%d", msg->what, ret);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net builder process msg(%d) done, ret=%d", msg->what, ret);
 }
 
 static int32_t GetCurrentConnectType(ConnectionAddrType *type)

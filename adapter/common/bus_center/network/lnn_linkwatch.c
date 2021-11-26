@@ -57,12 +57,37 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
     return SOFTBUS_OK;
 }
 
+static int32_t ProcessNetlinkAnswer(struct nlmsghdr *answer, int32_t bufLen, uint32_t seq)
+{
+    struct nlmsghdr *hdr = NULL;
+    uint32_t len;
+    int32_t remain = bufLen;
+
+    for (hdr = (struct nlmsghdr *)answer; remain >= (int32_t)sizeof(*hdr);) {
+        len = hdr->nlmsg_len;
+        if ((hdr->nlmsg_len - sizeof(*hdr)) < 0 || len > (uint32_t)remain) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malformed message: len=%d", len);
+            return SOFTBUS_ERR;
+        }
+        if (hdr->nlmsg_seq != seq) {
+            // skip that message
+            remain -= NLMSG_ALIGN(len);
+            hdr = (struct nlmsghdr *)((char *)hdr + NLMSG_ALIGN(len));
+            continue;
+        }
+        if (hdr->nlmsg_type == NLMSG_ERROR) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ERROR netlink msg");
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer, int32_t maxlen)
 {
     int32_t status;
-    struct nlmsghdr *hdr = NULL;
     int32_t fd;
-    int32_t len;
 
     fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (fd < 0) {
@@ -73,6 +98,7 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     status = send(fd, nlMsgHdr, nlMsgHdr->nlmsg_len, 0);
     if (status != (int32_t)(nlMsgHdr->nlmsg_len)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot talk to rtnetlink");
+        close(fd);
         return SOFTBUS_ERR;
     }
 
@@ -82,30 +108,16 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
             if (errno == EINTR || errno == EAGAIN)
                 continue;
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink receive error (%d)", errno);
+            close(fd);
             return SOFTBUS_ERR;
         }
         if (status == 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "EOF on netlink\n");
+            close(fd);
             return SOFTBUS_ERR;
         }
-        for (hdr = (struct nlmsghdr *)answer; status >= (int32_t)sizeof(*hdr);) {
-            len = hdr->nlmsg_len;
-            if ((hdr->nlmsg_len - sizeof(*hdr)) < 0 || len > status) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malformed message: len=%d", len);
-                return SOFTBUS_ERR;
-            }
-            if (hdr->nlmsg_seq != nlMsgHdr->nlmsg_seq) {
-                // skip that message
-                status -= NLMSG_ALIGN(len);
-                hdr = (struct nlmsghdr *)((char *)hdr + NLMSG_ALIGN(len));
-                continue;
-            }
-            if (hdr->nlmsg_type == NLMSG_ERROR) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ERROR netlink msg");
-                return SOFTBUS_ERR;
-            }
-            return SOFTBUS_OK;
-        }
+        close(fd);
+        return ProcessNetlinkAnswer(answer, status, nlMsgHdr->nlmsg_seq);
     }
 }
 
