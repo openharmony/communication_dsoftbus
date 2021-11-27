@@ -284,7 +284,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         return SOFTBUS_MALLOC_ERR;
     }
 
-    int32_t fd = OpenTcpClientSocket(option->info.ipOption.ip, "0.0.0.0", (uint16_t)option->info.ipOption.port);
+    int32_t fd = OpenTcpClientSocket(option->info.ipOption.ip, "0.0.0.0", (uint16_t)option->info.ipOption.port, false);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
         SoftBusFree(tcpConnInfoNode);
