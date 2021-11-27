@@ -174,11 +174,11 @@ static int32_t TrySyncDeviceUuid(int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth failed in TrySyncDeviceUuid");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %llu", auth->authId);
     if (auth->side != CLIENT_SIDE_FLAG || auth->status != WAIT_CONNECTION_ESTABLISHED) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %llu", auth->authId);
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %llu", auth->authId);
     (void)DelTrigger(AUTH, fd, WRITE_TRIGGER);
     if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
