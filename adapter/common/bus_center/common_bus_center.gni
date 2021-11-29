@@ -18,6 +18,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     bus_center_monitor_src = [
       "$softbus_adapter_common/bus_center/network/lnn_lwip_monitor.c",
+      "$softbus_adapter_common/bus_center/network/lnn_linkwatch_virtual.c",
       "$softbus_adapter_common/bus_center/network/lnn_netlink_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/platform/lnn_product_monitor_virtual.c",
       "$softbus_adapter_common/bus_center/wlan/lnn_wifiservice_monitor_virtual.cpp",
