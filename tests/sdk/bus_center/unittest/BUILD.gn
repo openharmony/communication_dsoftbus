@@ -29,7 +29,7 @@ ohos_unittest("BusCenterSdkTest") {
   ]
 
   deps = [
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "$dsoftbus_root_path/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

@@ -25,6 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_feature_config.h"
 
 static const int CONN_HEAD_SIZE = 24;
 static const int SHIFT_BITS = 16;
@@ -196,6 +197,7 @@ public:
 
 void SoftbusConnmangerFuncTest::SetUpTestCase(void)
 {
+    SoftbusConfigInit();
     ConnServerInit();
 }
 

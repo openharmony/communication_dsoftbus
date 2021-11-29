@@ -124,17 +124,4 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
     ret = TransOpenTcpDirectChannel(&appInfo, &connInfo, NULL);
     TEST_ASSERT_TRUE(ret != 0);
 }
-
-/**
- * @tc.name: CloseTcpDirectChannelTest001
- * @tc.desc: extern module active publish, close channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectTest, CloseTcpDirectChannelTest001, TestSize.Level1)
-{
-    int ret = 0;
-    ret = TransCloseDirectChannel(-1);
-    TEST_ASSERT_TRUE(ret != 0);
-}
 }
