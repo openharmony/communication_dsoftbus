@@ -33,9 +33,9 @@
 ```
 /foundation/communication/dsoftbus
 ├── interfaces            # 接口代码
+├── adapter               # 适配层代码
 ├── core                  # 核心代码
 │   ├── common            # 通用代码
-│   ├── adapter           # 适配层代码
 │   ├── authentication    # 认证代码
 │   ├── bus_center        # 组网代码
 │   ├── connection        # 连接代码
