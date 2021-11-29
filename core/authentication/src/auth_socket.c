@@ -38,12 +38,12 @@ int32_t OpenTcpChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get local ip failed");
         return SOFTBUS_ERR;
     }
-    int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port);
+    int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port, true);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpClientSocket failed");
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
@@ -68,10 +68,6 @@ int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
         return SOFTBUS_ERR;
     }
     auth->fd = fd;
-    if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSyncDeviceUuid failed");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
@@ -171,9 +167,42 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
     SoftBusFree(ipData);
 }
 
+static int32_t TrySyncDeviceUuid(int32_t fd)
+{
+    AuthManager *auth = auth = AuthGetManagerByFd(fd);
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth failed in TrySyncDeviceUuid");
+        return SOFTBUS_ERR;
+    }
+    if (auth->side != CLIENT_SIDE_FLAG || auth->status != WAIT_CONNECTION_ESTABLISHED) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %llu", auth->authId);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %llu", auth->authId);
+    (void)DelTrigger(AUTH, fd, WRITE_TRIGGER);
+    if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
+        AuthHandleFail(auth, SOFTBUS_CONN_FAIL);
+        return SOFTBUS_ERR;
+    }
+    if (ConnToggleNonBlockMode(fd, false) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set socket to block mode failed");
+        AuthHandleFail(auth, SOFTBUS_CONN_FAIL);
+        return SOFTBUS_ERR;
+    }
+    if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSyncDeviceUuid failed");
+        AuthHandleFail(auth, SOFTBUS_AUTH_SYNC_DEVID_FAILED);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
 {
-    if (events != SOFTBUS_SOCKET_IN) {
+    if (events == SOFTBUS_SOCKET_OUT) {
+        return TrySyncDeviceUuid(fd);
+    } else if (events != SOFTBUS_SOCKET_IN) {
         return SOFTBUS_ERR;
     }
     uint32_t headSize = sizeof(ConnPktHead);
@@ -198,7 +227,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
         return SOFTBUS_ERR;
     }
-    if (head.magic != MAGIC_NUMBER) {
+    if ((uint32_t)head.magic != MAGIC_NUMBER) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv invalid packet head");
         return SOFTBUS_ERR;
     }
