@@ -602,6 +602,26 @@ static void ReceiveCloseAck(uint32_t connectionId, AuthSideFlag side)
     }
 }
 
+static void AuthReportSyncDeviceInfoResults(AuthManager *auth, uint8_t *data, uint32_t len)
+{
+    if (auth->cb->onRecvSyncDeviceInfo != NULL) {
+        auth->cb->onRecvSyncDeviceInfo(auth->authId, auth->side, auth->peerUuid, data, len);
+    }
+    if (auth->status == WAIT_PEER_DEV_INFO || auth->option.type == CONNECT_TCP) {
+        if (auth->option.type != CONNECT_TCP) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send close ack");
+            AuthSendCloseAck(auth->connectionId);
+        }
+        if (auth->cb->onDeviceVerifyPass != NULL) {
+            auth->cb->onDeviceVerifyPass(auth->authId);
+        }
+        EventRemove(auth->id);
+    } else {
+        auth->status = AUTH_PASSED;
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "receive peer device info firstly, need wait close ack");
+    }
+}
+
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len)
 {
     if (auth == NULL || data == NULL || len == 0 || len > AUTH_MAX_DATA_LEN) {
@@ -609,11 +629,6 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         return;
     }
 
-    if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
-        auth->encryptInfoStatus == KEY_GENERATEG_STATE && auth->cb->onKeyGenerated != NULL) {
-        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
-    }
-    auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
     if (AuthIsSeqInKeyList((int32_t)(auth->authId)) == false ||
         auth->status == IN_SYNC_PROGRESS) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth saved encrypted data first");
@@ -635,24 +650,15 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
             return;
         }
         auth->encryptLen = len;
+    }
+    if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
+        auth->encryptInfoStatus == KEY_GENERATEG_STATE && auth->cb->onKeyGenerated != NULL) {
+        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
+        auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
         return;
     }
-    if (auth->cb->onRecvSyncDeviceInfo != NULL) {
-        auth->cb->onRecvSyncDeviceInfo(auth->authId, auth->side, auth->peerUuid, data, len);
-    }
-    if (auth->status == WAIT_PEER_DEV_INFO || auth->option.type == CONNECT_TCP) {
-        if (auth->option.type != CONNECT_TCP) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send close ack");
-            AuthSendCloseAck(auth->connectionId);
-        }
-        if (auth->cb->onDeviceVerifyPass != NULL) {
-            auth->cb->onDeviceVerifyPass(auth->authId);
-        }
-        EventRemove(auth->id);
-    } else {
-        auth->status = AUTH_PASSED;
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "receive peer device info firstly, need wait close ack");
-    }
+
+    AuthReportSyncDeviceInfoResults(auth, data, len);
 }
 
 static int32_t ServerAuthInit(AuthManager *auth, int64_t authId, uint64_t connectionId)
