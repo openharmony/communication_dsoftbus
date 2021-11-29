@@ -29,18 +29,23 @@ ohos_unittest("AuthTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/frame/standard/server/include",
+    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/adapter/common/include/",
     "//utils/native/base/include",
     "//third_party/cJSON",
     "unittest/common/",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
+    "//utils/native/base:utilsecurec_shared",
   ]
 
   if (is_standard_system) {
