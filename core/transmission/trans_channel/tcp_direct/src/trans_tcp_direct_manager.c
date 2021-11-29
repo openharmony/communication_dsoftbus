@@ -342,15 +342,37 @@ uint64_t TransTdcGetNewSeqId(void)
     return seq;
 }
 
-SoftBusList *GetTdcInfoList(void)
+void TransTdcStopSessionProc(void)
 {
-    return g_sessionConnList;
+    if (g_sessionConnList != NULL) {
+        SessionConn *removeNode = NULL;
+        SessionConn *nextNode = NULL;
+        if (pthread_mutex_lock(&g_sessionConnList->lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+            return;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_sessionConnList->list, SessionConn, node) {
+            OnSesssionTimeOutProc(removeNode);
+            ListDelete(&removeNode->node);
+            g_sessionConnList->cnt--;
+            SoftBusFree(removeNode);
+        }
+        (void)pthread_mutex_unlock(&g_sessionConnList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransTdcStopSessionProc remove SessionConn finished.");
+    }
+    return;
 }
 
-void SetTdcInfoList(SoftBusList *sessionConnList)
+static int32_t CreatSessionConnList(void)
 {
-    g_sessionConnList = sessionConnList;
-    return;
+    if (g_sessionConnList == NULL) {
+        g_sessionConnList = CreateSoftBusList();
+        if (g_sessionConnList == NULL) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSoftBusList fail.");
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
@@ -365,6 +387,10 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     }
     if (RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RegisterTimeoutCallback failed");
+        return SOFTBUS_ERR;
+    }
+    if (CreatSessionConnList() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatSessionConnList failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
