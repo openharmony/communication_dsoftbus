@@ -33,9 +33,9 @@ The main code directory structure of DSoftBus is as follows:
 ```
 /foundation/communication/dsoftbus
 ├── interfaces            # APIs
+├── adapter               # Adapter code
 ├── core                  # Core code
 │   ├── common            # Common code
-│   ├── adapter           # Adaptation code
 │   ├── authentication    # Authentication code
 │   ├── bus_center        # Networking code
 │   ├── connection        # Connection code
