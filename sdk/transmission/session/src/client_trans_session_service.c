@@ -333,7 +333,7 @@ void NotifyAuthSuccess(int sessionId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
         return;
     }
-	
+
     int32_t isServer = 0;
     if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get isServer failed");

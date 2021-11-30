@@ -180,7 +180,7 @@ static SubscribeInfo g_sInfo1 = {
 
 /**
  * @tc.name: DiscPublishTest001
- * @tc.desc: inner module active publish，The module is not initialized.
+ * @tc.desc: inner module active publish,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -193,7 +193,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscPublishTest002
- * @tc.desc: inner module active publish，use the wrong parameter.
+ * @tc.desc: inner module active publish,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,7 +244,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscPublishTest003
- * @tc.desc: inner module active publish，use the normal parameter.
+ * @tc.desc: inner module active publish,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,7 +264,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscPublishTest004
- * @tc.desc: inner module active publish，use the same parameter again.
+ * @tc.desc: inner module active publish,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,7 +284,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest004, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartScanTest001
- * @tc.desc: inner module passive publish，The module is not initialized.
+ * @tc.desc: inner module passive publish,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -297,7 +297,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartScanTest002
- * @tc.desc: inner module passive publish，use the wrong parameter.
+ * @tc.desc: inner module passive publish,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -348,7 +348,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartScanTest003
- * @tc.desc: inner module passive publish，use the normal parameter.
+ * @tc.desc: inner module passive publish,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -368,7 +368,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartScanTest004
- * @tc.desc: inner module passive publish，use the same parameter again.
+ * @tc.desc: inner module passive publish,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -388,7 +388,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest004, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartAdvertiseTest001
- * @tc.desc: inner module active discover，The module is not initialized.
+ * @tc.desc: inner module active discover,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -401,7 +401,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartAdvertiseTest002
- * @tc.desc: inner module active discover，use the wrong parameter.
+ * @tc.desc: inner module active discover,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -454,7 +454,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartAdvertiseTest003
- * @tc.desc: inner module active discover，use the normal parameter.
+ * @tc.desc: inner module active discover,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -474,7 +474,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscStartAdvertiseTest004
- * @tc.desc: inner module active discover，use the same parameter again.
+ * @tc.desc: inner module active discover,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -494,7 +494,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
 
 /**
  * @tc.name: DiscSubscribeTest001
- * @tc.desc: inner module passive discover，The module is not initialized.
+ * @tc.desc: inner module passive discover,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -507,7 +507,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscSubscribeTest002
- * @tc.desc: inner module passive discover，use the wrong parameter.
+ * @tc.desc: inner module passive discover,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -560,7 +560,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscSubscribeTest003
- * @tc.desc: inner module passive discover，use the normal parameter.
+ * @tc.desc: inner module passive discover,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -580,7 +580,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscSubscribeTest004
- * @tc.desc: inner module passive discover，use the same parameter again.
+ * @tc.desc: inner module passive discover,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -600,7 +600,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest004, TestSize.Level1)
 
 /**
  * @tc.name: DiscUnpublishTest001
- * @tc.desc: inner module stop publish，The module is not initialized.
+ * @tc.desc: inner module stop publish,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -613,7 +613,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscUnpublishTest002
- * @tc.desc: inner module stop publish，use the wrong parameter.
+ * @tc.desc: inner module stop publish,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -631,7 +631,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscUnpublishTest003
- * @tc.desc: inner module stop publish，use the normal parameter.
+ * @tc.desc: inner module stop publish,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -653,7 +653,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscUnpublishTest004
- * @tc.desc: inner module stop publish，release the same parameter again.
+ * @tc.desc: inner module stop publish,release the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -674,7 +674,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest004, TestSize.Level1)
 
 /**
  * @tc.name: DiscStopAdvertiseTest001
- * @tc.desc: inner module stop discover，The module is not initialized.
+ * @tc.desc: inner module stop discover,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -687,7 +687,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
 
 /**
  * @tc.name: DiscStopAdvertiseTest002
- * @tc.desc: inner module stop discover，use the wrong parameter.
+ * @tc.desc: inner module stop discover,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -705,7 +705,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
 
 /**
  * @tc.name: DiscStopAdvertiseTest003
- * @tc.desc: inner module stop discover，use the normal parameter.
+ * @tc.desc: inner module stop discover,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -727,7 +727,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
 
 /**
  * @tc.name: DiscStopAdvertiseTest004
- * @tc.desc: inner module stop discover，release the same parameter again.
+ * @tc.desc: inner module stop discover,release the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -748,7 +748,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest001
- * @tc.desc: extern module publish，The module is not initialized.
+ * @tc.desc: extern module publish,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -761,7 +761,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest001, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest002
- * @tc.desc: extern module publish，use the wrong parameter.
+ * @tc.desc: extern module publish,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -827,7 +827,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest002, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest003
- * @tc.desc: extern module publish，use the normal parameter.
+ * @tc.desc: extern module publish,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -850,7 +850,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest003, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest004
- * @tc.desc: extern module publish，use the same parameter again.
+ * @tc.desc: extern module publish,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -870,7 +870,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest004, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest001
- * @tc.desc: extern module discover，The module is not initialized.
+ * @tc.desc: extern module discover,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -883,7 +883,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest001, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest002
- * @tc.desc: extern module discover，use the wrong parameter.
+ * @tc.desc: extern module discover,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -951,7 +951,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest002, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest003
- * @tc.desc: extern module discover，use the normal parameter.
+ * @tc.desc: extern module discover,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -974,7 +974,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest003, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest004
- * @tc.desc: extern module discover，use the same parameter again.
+ * @tc.desc: extern module discover,use the same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -994,7 +994,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest004, TestSize.Level1)
 
 /**
  * @tc.name: UnPublishServiceTest001
- * @tc.desc: extern module stop publish，The module is not initialized.
+ * @tc.desc: extern module stop publish,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1007,7 +1007,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest001, TestSize.Level1)
 
 /**
  * @tc.name: UnPublishServiceTest002
- * @tc.desc: extern module stop publish，use the wrong parameter.
+ * @tc.desc: extern module stop publish,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1031,7 +1031,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest002, TestSize.Level1)
 
 /**
  * @tc.name: UnPublishServiceTest003
- * @tc.desc: extern module stop publish，use the normal parameter.
+ * @tc.desc: extern module stop publish,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1057,7 +1057,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest003, TestSize.Level1)
 
 /**
  * @tc.name: UnPublishServiceTest004
- * @tc.desc: extern module stop publish，release the same parameter again,
+ * @tc.desc: extern module stop publish,release the same parameter again,
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1078,7 +1078,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest004, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest001
- * @tc.desc: extern module stop discover，The module is not initialized.
+ * @tc.desc: extern module stop discover,The module is not initialized.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1091,7 +1091,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest001, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest002
- * @tc.desc: extern module stop discover，use the wrong parameter.
+ * @tc.desc: extern module stop discover,use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1115,7 +1115,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest002, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest003
- * @tc.desc: extern module stop discover，use the normal parameter.
+ * @tc.desc: extern module stop discover,use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1141,7 +1141,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest003, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest004
- * @tc.desc: extern module stop discover，release the same parameter again,
+ * @tc.desc: extern module stop discover,release the same parameter again,
  * @tc.type: FUNC
  * @tc.require:
  */
