@@ -93,7 +93,7 @@ typedef enum  {
 /**
  * @brief session attribute.
  *
- * control the attribute of session。
+ * control the attribute of session
  *
  * @since 1.0
  * @version 1.0
