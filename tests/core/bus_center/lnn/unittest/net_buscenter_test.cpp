@@ -107,7 +107,7 @@ void NetBusCenterTest::TearDown()
 {
 }
 
-static int SetIpaddr(const std:string ip)
+static int SetIpaddr(const std::string ip)
 {
     int sockFd  = -1;
     struct sockaddr_in addr;

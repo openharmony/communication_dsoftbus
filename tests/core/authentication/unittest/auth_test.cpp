@@ -34,8 +34,9 @@ using namespace testing::ext;
 constexpr char SERVER_MAC[BT_MAC_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
 constexpr char CLIENT_MAC[BT_MAC_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x07};
 constexpr uint8_t ENCRYPT_DATA[] = "auth_encrypt_data_test.";
-constexpr uint8_t SESSION_KEY[4] = {'a', 'b', 'c', 'd'};
-constexpr uint32_t SESSION_KEY_LEN = 4;
+constexpr uint8_t SESSION_KEY[32] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+    'h', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+constexpr uint32_t SESSION_KEY_LEN = 32; // must be 16, 24 or 32, it is limited by the third party lib mbedtls
 constexpr uint64_t DEFAULT_SEQ = 123456789;
 constexpr char UUID[] = "B4FE52C465D0A53D5AECE2ED9498F28BEA87C8FE3F1581CFFC673425B11F6608";
 constexpr char UDID[] = "AE3017B79036A7EE19991538BBE303E8826CEB2B5B6CC5130BD74C83BF63137F";
