@@ -75,7 +75,7 @@ ohos_unittest("TransTcpDirectCoreTest") {
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/frame/standard/server:softbus_server",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

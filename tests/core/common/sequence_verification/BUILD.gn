@@ -19,7 +19,7 @@ if (defined(ohos_lite)) {
   if (ohos_build_type == "debug") {
     unittest("seq_verification_test") {
       output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
+      output_dir = "$root_out_dir/tests/unittest/dsoftbus"
       sources = [ "unittest/sequence_verification_test.cpp" ]
       include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
       ldflags = [
@@ -33,14 +33,17 @@ if (defined(ohos_lite)) {
   import("//build/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-  module_output_path = "softbus_L2/sequence_verification"
+  module_output_path = "dsoftbus_standard/common"
   ohos_unittest("seq_verification_test") {
     module_out_path = module_output_path
     sources = [ "unittest/sequence_verification_test.cpp" ]
 
     include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
 
-    deps = [ "$dsoftbus_root_path/core/frame/standard/server:softbus_server" ]
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+    ]
   }
 
   group("unittest") {
