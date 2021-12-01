@@ -1509,7 +1509,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(para, typeLen, type, typeLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcopy monitor data fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcopy para fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }
