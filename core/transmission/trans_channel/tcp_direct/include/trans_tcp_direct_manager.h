@@ -80,8 +80,7 @@ int32_t TransTdcAddSessionConn(SessionConn *conn);
 
 void TransDelSessionConnById(int32_t channelId);
 
-SoftBusList *GetTdcInfoList(void);
-void SetTdcInfoList(SoftBusList *sessionConnList);
+void TransTdcStopSessionProc(void);
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 void TransTcpDirectDeinit(void);
 void TransTdcDeathCallback(const char *pkgName);
