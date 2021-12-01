@@ -980,7 +980,7 @@ static int32_t ProcessLeaveByAddrType(const void *para)
             continue;
         }
         rc = LnnSendLeaveRequestToConnFsm(item);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "leave connFsm[id=%u] by addr type rc=%d", item->id, rc);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
         }
