@@ -263,14 +263,8 @@ int32_t TransTdcStartSessionListener(const char *ip, const int port)
 
 int32_t TransTdcStopSessionListener(void)
 {
-    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, &g_sessionListener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
-        return ret;
-    }
-
     TransTdcStopSessionProc();
-    ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
+    int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
     DestroyBaseListener(DIRECT_CHANNEL_SERVER);
     return ret;
 }
