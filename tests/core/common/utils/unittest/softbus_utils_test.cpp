@@ -187,8 +187,10 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
     int32_t ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    // const unsigned char *expect = "ABCD";
-    // EXPECT_STREQ(expect, outBuf);
+    const unsigned char *expect = "ABCD";
+    for (int i = 0; i < 5; i++) {
+        EXPECT_EQ(expect[i], outBuf[i]);
+    }
 }
 
 /**
@@ -199,25 +201,24 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSize.Level1)
 {
-    unsigned char *outBuf = NULL;
+    char *outBuf = NULL;
     uint32_t outBufLen = 0;
-    const char *inBuf = "ABCD";
+    const unsigned char *inBuf = "ABCD";
     int32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    outBuf = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    char outBufArray[5] = "\0";
+    outBuf = outBufArray;
+    outBufLen = 4;
+    inLen = 8;
+    ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
     outBufLen = 9;
     inBuf = NULL;
     inLen = 0;
     ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    outBuf = { 0, 0, 0 };
-    outBufLen = 3;
-    inBuf = "41424344";
-    inLen = 8;
-    ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -229,14 +230,14 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_002, TestSize.Level1)
 {
-    unsigned char outBuf[9] = "\0";
+    char outBuf[9] = "\0";
     uint32_t outBufLen = 9;
-    const char *inBuf = "abcd";
+    unsigned char inBuf[5] = "abcd";
     int32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    const unsigned char *expect = "61626364";
+    const char *expect = "61626364";
     EXPECT_STREQ(expect, outBuf);
 }
 
