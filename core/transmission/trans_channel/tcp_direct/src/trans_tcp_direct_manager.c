@@ -46,9 +46,9 @@ int32_t GenerateTdcChannelId(void)
     return channelId;
 }
 
-static void OnSesssionTimeOutProc(const SessionConn *node)
+static void OnSesssionOpenErrProc(const SessionConn *node)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionTimeOutProc: channelId = %d, side = %d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionOpenErrProc: channelId = %d, side = %d",
         node->channelId, node->serverSide);
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->channelId) != SOFTBUS_OK) {
@@ -82,7 +82,7 @@ static void TransTdcTimerProc(void)
         if (removeNode->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
             if (removeNode->timeout >= HANDSHAKE_TIMEOUT) {
                 removeNode->status = TCP_DIRECT_CHANNEL_STATUS_TIMEOUT;
-                OnSesssionTimeOutProc(removeNode);
+                OnSesssionOpenErrProc(removeNode);
 
                 ListDelete(&removeNode->node);
                 g_sessionConnList->cnt--;
@@ -352,7 +352,7 @@ void TransTdcStopSessionProc(void)
             return;
         }
         LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_sessionConnList->list, SessionConn, node) {
-            OnSesssionTimeOutProc(removeNode);
+            OnSesssionOpenErrProc(removeNode);
             ListDelete(&removeNode->node);
             g_sessionConnList->cnt--;
             SoftBusFree(removeNode);
