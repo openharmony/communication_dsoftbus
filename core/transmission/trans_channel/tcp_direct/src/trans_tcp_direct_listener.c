@@ -30,7 +30,7 @@
 #include "softbus_tcp_socket.h"
 #include "trans_tcp_direct_message.h"
 
-static SoftbusBaseListener *g_sessionListener = NULL;
+static SoftbusBaseListener g_sessionListener;
 
 static int32_t StartVerifySession(SessionConn *conn)
 {
@@ -248,64 +248,23 @@ int32_t TransTdcStartSessionListener(const char *ip, const int port)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (g_sessionListener == NULL) {
-        g_sessionListener = (SoftbusBaseListener *)SoftBusCalloc(sizeof(SoftbusBaseListener));
-        if (g_sessionListener == NULL) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to create listener");
-            return SOFTBUS_ERR;
-        }
-    }
 
-    g_sessionListener->onConnectEvent = OnConnectEvent;
-    g_sessionListener->onDataEvent = OnDataEvent;
+    g_sessionListener.onConnectEvent = OnConnectEvent;
+    g_sessionListener.onDataEvent = OnDataEvent;
 
-    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, g_sessionListener);
+    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, &g_sessionListener);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
-        SoftBusFree(g_sessionListener);
-        g_sessionListener = NULL;
         return ret;
     }
-
-    if (GetTdcInfoList() == NULL) {
-        SetTdcInfoList(CreateSoftBusList());
-        if (GetTdcInfoList() == NULL) {
-            SoftBusFree(g_sessionListener);
-            g_sessionListener = NULL;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetTdcInfoList is null.");
-            return SOFTBUS_MALLOC_ERR;
-        }
-    }
-
     int serverPort = StartBaseListener(DIRECT_CHANNEL_SERVER, ip, port, SERVER_MODE);
     return serverPort;
 }
 
 int32_t TransTdcStopSessionListener(void)
 {
-    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, g_sessionListener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
-        return ret;
-    }
-
-    if (g_sessionListener != NULL) {
-        SoftBusFree(g_sessionListener);
-        g_sessionListener = NULL;
-    }
-
-    if (GetTdcInfoList() != NULL) {
-        DestroySoftBusList(GetTdcInfoList());
-        SetTdcInfoList(NULL);
-    }
-
-    ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
+    TransTdcStopSessionProc();
+    int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
     DestroyBaseListener(DIRECT_CHANNEL_SERVER);
     return ret;
 }
-
-SoftbusBaseListener *TransTdcGetSessionListener(void)
-{
-    return g_sessionListener;
-}
-
