@@ -177,13 +177,13 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isN
     if ((peerIp == NULL) || (port <= 0)) {
         return -1;
     }
-    int32_t type = SOCK_STREAM;
-    if (isNonBlock) {
-        type |= SOCK_NONBLOCK;
-    }
-    int fd = socket(AF_INET, type, 0);
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
+        return -1;
+    }
+    if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set nonblock failed, fd=%d", fd);
         return -1;
     }
 
