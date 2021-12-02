@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-
 #include "softbus_utils.h"
 
 using namespace testing::ext;
@@ -187,7 +186,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
     int32_t ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    const unsigned char *expect = "ABCD";
+    const unsigned char expect[5] = "ABCD";
     for (int i = 0; i < 5; i++) {
         EXPECT_EQ(expect[i], outBuf[i]);
     }
@@ -203,7 +202,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
 {
     char *outBuf = NULL;
     uint32_t outBufLen = 0;
-    const unsigned char *inBuf = "ABCD";
+    const unsigned char inBuf[5] = "ABCD";
     int32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -216,9 +215,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     outBufLen = 9;
-    inBuf = NULL;
+    const unsigned char *inBuf2 = NULL;
     inLen = 0;
-    ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
+    ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf2, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -258,22 +257,6 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_001, TestSize.Leve
     len = 1;
     ret = GenerateRandomStr(str2, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/**
- * @tc.name: SoftBusUtilsTest_GenerateRandomStr_002
- * @tc.desc: Normal generate random string.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_002, TestSize.Level1)
-{
-    char str[5] = "\0";
-    uint32_t len = 4;
-    int32_t ret = GenerateRandomStr(str, len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-    // const char expect[5] = "\0";
-    // EXPECT_STRNE(expect, str);
 }
 
 /**
@@ -318,16 +301,53 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
 }
 
 /**
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_002
+ * @tc.desc: Parameter error when convert binary to bt mac.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.Level1)
+{
+    const char strMac[18] = "65:66:67:68:69:6a";
+    int32_t strMacLen = 18;
+    uint8_t binMac[6] = { 0, 0, 0, 0, 0, 0 };
+    int32_t binMacLen = 6;
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    const uint8_t expect[6] = { 101, 102, 103, 104, 105, 106 };
+    for (int i = 0; i <= 6; i++) {
+        EXPECT_EQ(expect[i], binMac[i]);
+    }
+}
+
+/**
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_001
- * @tc.desc: Normal convert binary to bt mac.
+ * @tc.desc: Normal convert bt mac to binary.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Level1)
 {
+    char *strMac = NULL;
+    int32_t strMacLen = 0;
+    const uint8_t *binMac = NULL;
+    int32_t binMacLen = 0;
+    int32_t ret = ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_002
+ * @tc.desc: Normal convert binary to bt mac.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Level1)
+{
     char strMac[19] = "\0";
     int32_t strMacLen = 18;
-    uint8_t binMac[6] = { 101, 102, 103, 104, 105, 106 };
+    const uint8_t binMac[6] = { 101, 102, 103, 104, 105, 106 };
     int32_t binMacLen = 6;
     int32_t ret = ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
