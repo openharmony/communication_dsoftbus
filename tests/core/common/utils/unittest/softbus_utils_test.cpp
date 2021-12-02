@@ -310,13 +310,13 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.L
 {
     const char strMac[18] = "65:66:67:68:69:6a";
     int32_t strMacLen = 18;
-    uint8_t binMac[6] = { 0, 0, 0, 0, 0, 0 };
-    int32_t binMacLen = 6;
+    uint8_t binMac[7] = { 0, 0, 0, 0, 0, 0, 255 };
+    int32_t binMacLen = 7;
     int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    const uint8_t expect[6] = { 101, 102, 103, 104, 105, 106 };
-    for (int i = 0; i <= 6; i++) {
+    const uint8_t expect[7] = { 101, 102, 103, 104, 105, 106, 255 };
+    for (int i = 0; i <= 7; i++) {
         EXPECT_EQ(expect[i], binMac[i]);
     }
 }
