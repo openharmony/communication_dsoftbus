@@ -316,7 +316,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     const uint8_t expect[7] = { 101, 102, 103, 104, 105, 106, 255 };
-    for (int i = 0; i <= 7; i++) {
+    for (int i = 0; i < 7; i++) {
         EXPECT_EQ(expect[i], binMac[i]);
     }
 }
@@ -355,5 +355,4 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Leve
     const char *expect = "65:66:67:68:69:6a";
     EXPECT_STREQ(expect, strMac);
 }
-
-}
+} // OHOS
