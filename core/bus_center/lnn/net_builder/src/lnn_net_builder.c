@@ -1493,11 +1493,11 @@ int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t m
 
 int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
 {
+    bool *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid typeLen");
         return SOFTBUS_ERR;
     }
-    bool *para = NULL;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnRequestLeaveByAddrType");
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
@@ -1508,7 +1508,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc leave by addr type msg para failed");
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(para, typeLen, type, typeLen) != EOK) {
+    if (memcpy_s(para, sizeof(bool) * typeLen, type, sizeof(bool) * typeLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcopy para fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;
