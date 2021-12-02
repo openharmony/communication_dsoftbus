@@ -286,7 +286,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
 
 /**
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_001
- * @tc.desc: Normal convert bt mac to binary.
+ * @tc.desc: Parameter error when convert bt mac to binary.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -302,7 +302,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
 
 /**
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_002
- * @tc.desc: Parameter error when convert binary to bt mac.
+ * @tc.desc: Normal convert bt mac to binary.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -323,7 +323,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.L
 
 /**
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_001
- * @tc.desc: Normal convert bt mac to binary.
+ * @tc.desc: Parameter error when convert binary to bt mac.
  * @tc.type: FUNC
  * @tc.require:
  */
