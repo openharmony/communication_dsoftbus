@@ -40,9 +40,7 @@ if (defined(ohos_lite)) {
 
     include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
 
-    deps = [
-      "$dsoftbus_root_path/core/common:softbus_utils",
-    ]
+    deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
   }
 
   group("unittest") {
