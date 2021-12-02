@@ -651,6 +651,9 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
         case FSM_MSG_TYPE_INITIATE_ONLINE:
             LnnFsmTransactState(&connFsm->fsm, g_states + STATE_ONLINE_INDEX);
             break;
+        case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
+            OnJoinFail(connFsm);
+            break;
         default:
             FreeUnhandledMessage(msgType, para);
             return false;
