@@ -21,7 +21,6 @@ ohos_unittest("LNNTest") {
   sources = [
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/net_builder_test.cpp",
-    "unittest/net_buscenter_test.cpp",
   ]
 
   include_dirs = [
