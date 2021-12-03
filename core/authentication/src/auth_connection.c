@@ -109,14 +109,11 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(head->authId, CLIENT_SIDE_FLAG);
+    auth = AuthGetManagerByAuthId(head->authId);
     if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(head->authId, SERVER_SIDE_FLAG);
-        if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%llu), AuthPostData failed",
-                head->authId);
-            return SOFTBUS_ERR;
-        }
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%llu), AuthPostData failed",
+            head->authId);
+        return SOFTBUS_ERR;
     }
 
     if (auth->option.type == CONNECT_TCP) {
@@ -392,13 +389,10 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
 
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%lld, len=%u", authId, len);
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
-    auth = AuthGetManagerByAuthId(authId, CLIENT_SIDE_FLAG);
+    auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
-        auth = AuthGetManagerByAuthId(authId, SERVER_SIDE_FLAG);
-        if (auth == NULL) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found", authId);
-            return false;
-        }
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found", authId);
+        return false;
     }
     head.dataType = DATA_TYPE_AUTH;
     head.module = AUTH_SDK;

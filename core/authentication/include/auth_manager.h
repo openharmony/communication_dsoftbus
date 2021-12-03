@@ -91,8 +91,8 @@ typedef struct {
 } AuthManager;
 
 AuthManager *AuthGetManagerByRequestId(uint32_t requestId);
-AuthManager *AuthGetManagerByAuthId(int64_t authId, AuthSideFlag side);
-AuthManager *AuthGetManagerByConnId(uint16_t id, AuthSideFlag side);
+AuthManager *AuthGetManagerByAuthId(int64_t authId);
+AuthManager *AuthGetManagerByConnId(uint16_t id);
 AuthManager *AuthGetManagerByFd(int32_t fd);
 int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
