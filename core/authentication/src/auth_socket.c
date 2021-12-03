@@ -31,19 +31,19 @@
 
 static SoftbusBaseListener g_ethListener = {0};
 
-int32_t OpenTcpChannel(const ConnectOption *option)
+int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
 {
     char localIp[IP_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_MAX_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get local ip failed");
         return SOFTBUS_ERR;
     }
-    int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port, true);
+    int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port, isNonBlock);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpClientSocket failed");
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(AUTH, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH, fd, isNonBlock ? WRITE_TRIGGER : READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
@@ -62,9 +62,9 @@ int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    int fd = OpenTcpChannel(option);
+    int fd = AuthOpenTcpChannel(option, true);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AuthOpenTcpChannel failed");
         return SOFTBUS_ERR;
     }
     auth->fd = fd;
