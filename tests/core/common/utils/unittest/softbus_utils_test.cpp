@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "softbus_errcode.h"
 #include "softbus_utils.h"
 
 using namespace testing::ext;
@@ -298,27 +299,6 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
     int32_t binMacLen = 0;
     int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/**
- * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_002
- * @tc.desc: Normal convert bt mac to binary.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.Level1)
-{
-    const char strMac[18] = "65:66:67:68:69:6a";
-    int32_t strMacLen = 18;
-    uint8_t binMac[7] = { 0, 0, 0, 0, 0, 0, 255 };
-    int32_t binMacLen = 7;
-    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    const uint8_t expect[7] = { 101, 102, 103, 104, 105, 106, 255 };
-    for (int i = 0; i < 7; i++) {
-        EXPECT_EQ(expect[i], binMac[i]);
-    }
 }
 
 /**
