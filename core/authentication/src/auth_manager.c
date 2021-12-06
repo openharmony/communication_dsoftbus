@@ -1115,14 +1115,13 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         return SOFTBUS_ERR;
     }
 
-    if (InitNewAuthManager(auth, MODULE_NUM, CLIENT_SIDE_FLAG) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth open channel init AuthManager failed");
-        (void)pthread_mutex_unlock(&g_authLock);
-        SoftBusFree(auth);
-        return SOFTBUS_ERR;
-    }
+    auth->side = CLIENT_SIDE_FLAG;
+    auth->authId = GetSeq(CLIENT_SIDE_FLAG);
+    auth->softbusVersion = SOFT_BUS_NEW_V1;
     auth->option = *option;
     auth->fd = fd;
+    auth->hichain = g_hichainGaInstance;
+    auth->id = AuthGetNextConnectionId();
     ListNodeInsert(&g_authClientHead, &auth->node);
     (void)pthread_mutex_unlock(&g_authLock);
     return auth->authId;
