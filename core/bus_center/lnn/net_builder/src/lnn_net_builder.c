@@ -959,7 +959,7 @@ static int32_t ProcessMasterElect(const void *para)
 
 static int32_t ProcessLeaveByAddrType(const void *para)
 {
-    ConnectionAddrType type;
+    bool *addrType = NULL;
     LnnConnectionFsm *item = NULL;
     int32_t rc;
     bool notify = true;
@@ -969,9 +969,9 @@ static int32_t ProcessLeaveByAddrType(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    type = *(ConnectionAddrType *)para;
+    addrType = (bool *)para;
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (item->connInfo.addr.type != type) {
+        if (!addrType[item->connInfo.addr.type]) {
             continue;
         }
         // if there are any same addr type, let last one send notify
@@ -986,7 +986,7 @@ static int32_t ProcessLeaveByAddrType(const void *para)
         }
     }
     if (notify) {
-        (void)LnnNotifyAllTypeOffline(type);
+        (void)LnnNotifyAllTypeOffline(CONNECTION_ADDR_MAX);
     }
     SoftBusFree((void *)para);
     return SOFTBUS_OK;
@@ -1491,20 +1491,28 @@ int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t m
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveByAddrType(ConnectionAddrType type)
+int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
 {
-    ConnectionAddrType *para = NULL;
+    bool *para = NULL;
+    if (typeLen != CONNECTION_ADDR_MAX) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid typeLen");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnRequestLeaveByAddrType");
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;
     }
-    para = SoftBusMalloc(sizeof(ConnectionAddrType));
+    para = SoftBusMalloc(sizeof(bool) * typeLen);
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc leave by addr type msg para failed");
         return SOFTBUS_MEM_ERR;
     }
-    *para = type;
+    if (memcpy_s(para, sizeof(bool) * typeLen, type, sizeof(bool) * typeLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcopy para fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
     if (PostMessageToHandler(MSG_TYPE_LEAVE_BY_ADDR_TYPE, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave by addr type message failed");
         SoftBusFree(para);
