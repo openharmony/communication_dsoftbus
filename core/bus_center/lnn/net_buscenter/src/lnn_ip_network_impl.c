@@ -190,14 +190,21 @@ static int32_t GetUpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, 
 static void LeaveOldIpNetwork(const char *ifCurrentName)
 {
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
+    bool addrType[CONNECTION_ADDR_MAX] = {0};
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, strlen(ifCurrentName), &type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveOldIpNetwork LnnGetAddrTypeByIfName error");
         return;
     }
 
+    if (type == CONNECTION_ADDR_MAX) {
+        addrType[CONNECTION_ADDR_WLAN] = true;
+        addrType[CONNECTION_ADDR_ETH] = true;
+    } else {
+        addrType[type] = true;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN start leave ip network\n");
-    if (LnnRequestLeaveByAddrType(type) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave ip network fail\n");
     }
 }
