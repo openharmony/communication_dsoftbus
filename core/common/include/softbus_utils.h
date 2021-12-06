@@ -17,7 +17,6 @@
 #define SOFTBUS_UTILS_H
 
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 
 #ifdef __cplusplus
 #if __cplusplus
