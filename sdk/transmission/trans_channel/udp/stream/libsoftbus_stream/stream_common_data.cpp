@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "STREAM_COMM_DATA"
-
 #include "stream_common_data.h"
 #include "common_inner.h"
 
