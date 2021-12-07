@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "STREAM_MANAGER"
 #include "stream_manager.h"
 
 #include "vtp_stream_socket.h"
