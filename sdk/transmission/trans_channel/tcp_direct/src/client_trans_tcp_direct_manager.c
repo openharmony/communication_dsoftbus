@@ -182,11 +182,11 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         goto EXIT_ERR;
     }
 
-    int32_t ret = SetTcpKeepAlive(channel->fd, HEART_TIME);
+    int32_t ret = ConnSetTcpKeepAlive(channel->fd, HEART_TIME);
     if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
         SoftBusFree(item);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetTcpKeepAlive failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnSetTcpKeepAlive failed.");
         goto EXIT_ERR;
     }
 
