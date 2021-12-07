@@ -33,29 +33,18 @@ void AuthSetLocalSessionKey(const NecessaryDevInfo *devInfo, const char *peerUdi
     const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     uint32_t listSize = 0;
+    ListNode *item = NULL;
+    SessionKeyList *sessionKeyList = NULL;
+    SessionKeyList *sessionKeyListTail = NULL;
     if (devInfo == NULL || peerUdid == NULL || sessionKey == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
-    SessionKeyList *sessionKeyList = NULL;
-    ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_sessionKeyListHead) {
-        listSize++;
-    }
-    if (listSize == MAX_KEY_LIST_SIZE) {
-        item = GET_LIST_TAIL(&g_sessionKeyListHead);
-        sessionKeyList = LIST_ENTRY(item, SessionKeyList, node);
-        (void)memset_s(sessionKeyList->sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-        ListDelete(&sessionKeyList->node);
-        SoftBusFree(sessionKeyList);
-        sessionKeyList = NULL;
-    }
-    sessionKeyList = (SessionKeyList *)SoftBusMalloc(sizeof(SessionKeyList));
+    sessionKeyList = (SessionKeyList *)SoftBusCalloc(sizeof(SessionKeyList));
     if (sessionKeyList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusCalloc failed");
         return;
     }
-    (void)memset_s(sessionKeyList, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     sessionKeyList->type = devInfo->type;
     sessionKeyList->side = devInfo->side;
     sessionKeyList->seq = devInfo->seq;
@@ -76,8 +65,20 @@ void AuthSetLocalSessionKey(const NecessaryDevInfo *devInfo, const char *peerUdi
         return;
     }
     sessionKeyList->sessionKeyLen = sessionKeyLen;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth add sessionkey, seq is:%d", sessionKeyList->seq);
     ListNodeInsert(&g_sessionKeyListHead, &sessionKeyList->node);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth add sessionkey, seq is:%d", sessionKeyList->seq);
+
+    LIST_FOR_EACH(item, &g_sessionKeyListHead) {
+        listSize++;
+    }
+    if (listSize == MAX_KEY_LIST_SIZE) {
+        item = GET_LIST_TAIL(&g_sessionKeyListHead);
+        sessionKeyListTail = LIST_ENTRY(item, SessionKeyList, node);
+        (void)memset_s(sessionKeyListTail->sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        ListDelete(&sessionKeyListTail->node);
+        SoftBusFree(sessionKeyListTail);
+        sessionKeyListTail = NULL;
+    }
 }
 
 bool AuthIsDeviceVerified(uint32_t type, const char *deviceKey, uint32_t deviceKeyLen)
