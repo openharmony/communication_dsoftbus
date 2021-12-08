@@ -169,7 +169,7 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
 
 static int32_t TrySyncDeviceUuid(int32_t fd)
 {
-    AuthManager *auth = auth = AuthGetManagerByFd(fd);
+    AuthManager *auth = AuthGetManagerByFd(fd);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth failed in TrySyncDeviceUuid");
         return SOFTBUS_ERR;
