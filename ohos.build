@@ -17,6 +17,7 @@
                 "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
                 "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
                 "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
+                "//foundation/communication/dsoftbus/tests/core/common/utils:unittest",
                 "//foundation/communication/dsoftbus/tests/core/common/sequence_verification:unittest",
                 "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
                 "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
