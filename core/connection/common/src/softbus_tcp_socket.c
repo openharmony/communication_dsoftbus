@@ -340,11 +340,11 @@ void TcpShutDown(int fd)
     }
 }
 
-int32_t SetTcpKeepAlive(int32_t fd, int32_t seconds)
+int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 {
 #define KEEP_ALIVE_COUNT 5
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetTcpKeepAlive invalid param");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnSetTcpKeepAlive invalid param");
         return -1;
     }
 
