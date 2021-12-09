@@ -14,7 +14,6 @@
  */
 
 #include "vtp_stream_socket.h"
-#define LOG_TAG "VTP_STREAM_SOCKET"
 
 #include <ifaddrs.h>
 #include <memory>
