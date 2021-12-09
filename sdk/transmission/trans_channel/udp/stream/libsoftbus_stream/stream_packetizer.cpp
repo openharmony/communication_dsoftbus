@@ -20,9 +20,6 @@
 #include "stream_common.h"
 #include "stream_packet_header.h"
 
-
-#define LOG_TAG "STREAM_PACKETIZER"
-
 namespace Communication {
 namespace SoftBus {
 ssize_t StreamPacketizer::CalculateHeaderSize() const

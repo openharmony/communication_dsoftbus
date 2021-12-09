@@ -18,8 +18,6 @@
 #include "common_inner.h"
 #include "i_stream.h"
 
-#define LOG_TAG "STREAM-DEPACKETTIZER"
-
 namespace Communication {
 namespace SoftBus {
 void StreamDepacketizer::DepacketizeHeader(const char *header)

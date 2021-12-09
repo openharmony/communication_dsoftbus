@@ -235,7 +235,7 @@ int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *bin
         return SOFTBUS_INVALID_PARAM;
     }
     char *token = strtok((char *)strMac, BT_ADDR_DELIMITER);
-    char *endptr;
+    char *endptr = NULL;
     for (int i = 0; i < BT_ADDR_LEN; i++) {
         if (token == NULL) {
             return SOFTBUS_ERR;
