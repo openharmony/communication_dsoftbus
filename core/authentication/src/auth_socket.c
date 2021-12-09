@@ -48,7 +48,7 @@ int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
     }
-    if (SetTcpKeepAlive(fd, AUTH_HEART_TIME) != SOFTBUS_OK) {
+    if (ConnSetTcpKeepAlive(fd, AUTH_HEART_TIME) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth set tcp keep alive failed");
         AuthCloseTcpFd(fd);
         return SOFTBUS_ERR;
