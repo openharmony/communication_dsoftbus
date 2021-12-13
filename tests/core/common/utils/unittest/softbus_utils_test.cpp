@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
@@ -28,18 +29,6 @@ public:
 
 void MockSoftBusTimer(void)
 {
-}
-
-/**
- * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Normal create softbus list test.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_CreateSoftBusList_001, TestSize.Level1)
-{
-    SoftBusList *list = CreateSoftBusList();
-    EXPECT_TRUE(NULL != list);
 }
 
 /**
