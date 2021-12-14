@@ -184,6 +184,7 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isN
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set nonblock failed, fd=%d", fd);
+        close(fd);
         return -1;
     }
 
