@@ -261,9 +261,6 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
     ret = SendBytes(sessionId, NULL, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SendBytes(sessionId, data, -1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     ret = SendBytes(sessionId, data, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
@@ -291,9 +288,6 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
 
     ret = SendMessage(sessionId, NULL, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = SendMessage(sessionId, data, -1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = SendMessage(sessionId, data, 0);

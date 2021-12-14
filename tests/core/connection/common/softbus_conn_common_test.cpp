@@ -313,7 +313,6 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
 {
     int fd = OpenTcpServerSocket("127.0.0.1", g_port);
     int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_OK);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int port = GetTcpSockPort(fd);
     EXPECT_EQ(port, g_port);
