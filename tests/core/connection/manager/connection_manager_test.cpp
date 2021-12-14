@@ -24,8 +24,8 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_feature_config.h"
+#include "softbus_log.h"
 
 static const int CONN_HEAD_SIZE = 24;
 static const int SHIFT_BITS = 16;
@@ -286,6 +286,8 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger003, TestSize.Level1)
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
         data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
         ret = ConnPostBytes(g_connId, &data);
         EXPECT_EQ(SOFTBUS_OK, ret);
         if (data.buf != nullptr) {
@@ -330,6 +332,8 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger004, TestSize.Level1)
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
         data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
         ret = ConnPostBytes(g_connId, &data);
         EXPECT_EQ(SOFTBUS_OK, ret);
         ret = ConnDisconnectDevice(g_connId);

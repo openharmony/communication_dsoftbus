@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <sys/time.h>
 #include <unistd.h>
+
 #include "discovery_service.h"
 
 using namespace testing::ext;
