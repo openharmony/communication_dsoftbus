@@ -195,6 +195,7 @@ static int32_t Invoke(const IServerProxy *iProxy, int funcId, const void *origin
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
     if (GetServerIsInit() == false) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
+        IpcIoPushInt32(reply, SOFTBUS_SERVER_NOT_INIT);
         return SOFTBUS_ERR;
     }
     int tblSize = sizeof(g_serverInvokeCmdTbl) / sizeof(ServerInvokeCmd);
