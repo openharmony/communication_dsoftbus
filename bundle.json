@@ -1,0 +1,59 @@
+{
+    "name": "@ohos/communication_dsoftbus",
+    "version": "",
+    "description": "设备通信方式多种多样(USB/WIFI/BT等)，不同通信方式使用差异很大且繁琐，同时通信链路的融合共享和冲突无法处理，通信安全问题也不好保证。本项目致力于实现近场设备间统一的分布式通信能力管理，提供不区分链路的设备发现和传输接口。",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "Apache V2",
+    "repository": "https://gitee.com/openharmony/communication_dsoftbus",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "foundation"
+    ],
+    "keywords": [
+        "communication",
+        "dsoftbus"
+    ],
+    "envs": [],
+    "dirs": [],
+    "author": {
+        "name": "",
+        "email": "",
+        "url": ""
+    },
+    "contributors": [
+        {
+            "name": "",
+            "email": "",
+            "url": ""
+        }
+    ],
+    "segment": {
+        "destPath": "foundation/communication/dsoftbus"
+    },
+    "component": {
+        "name": "dsoftbus",
+        "subsystem": "communication",
+        "syscap": [
+            "SystemCapability.Communication.SoftBus"
+        ],
+        "features": [],
+        "adated_system_type": [
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
