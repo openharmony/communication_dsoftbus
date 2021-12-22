@@ -15,9 +15,8 @@
 
 #include "lnn_ip_utils_adapter.h"
 
-#include "softbus_adapter_mem.h"
 #include "lwip/netif.h"
-
+#include "softbus_adapter_mem.h"
 
 int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len)
 {

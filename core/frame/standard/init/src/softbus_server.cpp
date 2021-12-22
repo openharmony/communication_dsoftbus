@@ -24,6 +24,7 @@
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
 #include "system_ability_definition.h"
@@ -203,6 +204,11 @@ int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetw
 int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     return LnnIpcStopTimeSync(pkgName, targetNetworkId);
+}
+
+int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    return QosReportExecute(channelId, chanType, appType, quality);
 }
 
 void SoftBusServer::OnStart()

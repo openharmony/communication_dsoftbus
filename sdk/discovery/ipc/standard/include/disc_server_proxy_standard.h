@@ -51,7 +51,7 @@ public:
     int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
         int32_t period) override;
     int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
-
+    int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
 private:
     static inline BrokerDelegator<DiscServerProxy> delegator_;
 };

@@ -150,3 +150,12 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
 
     return g_serverProxy->SendMessage(channelId, channelType, data, len, msgType);
 }
+
+int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    return g_serverProxy->QosReport(channelId, chanType, appType, quality);
+}

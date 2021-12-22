@@ -19,6 +19,7 @@
 
 #include "lnn_bus_center_ipc.h"
 #include "softbus_log.h"
+#include "softbus_qos.h"
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
@@ -27,6 +28,7 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s", (isOnline == true) ? "online" : "offline");
+    SetDefaultQdisc();
     LnnIpcNotifyOnlineState(isOnline, info, sizeof(NodeBasicInfo));
 }
 

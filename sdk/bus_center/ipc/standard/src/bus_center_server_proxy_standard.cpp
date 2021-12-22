@@ -107,6 +107,11 @@ int32_t BusCenterServerProxy::SendMessage(int32_t channelId, int32_t channelType
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int quality)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     if (pkgName == nullptr || addr == nullptr) {

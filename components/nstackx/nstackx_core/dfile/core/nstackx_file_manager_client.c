@@ -15,6 +15,10 @@
 
 #include "nstackx_file_manager_client.h"
 
+#include "securec.h"
+
+#include "nstackx_dev.h"
+#include "nstackx_dfile_mp.h"
 #include "nstackx_dfile_session.h"
 #include "nstackx_error.h"
 #include "nstackx_event.h"
@@ -25,8 +29,6 @@
 #include "nstackx_openssl.h"
 #endif
 #include "nstackx_util.h"
-#include "nstackx_dev.h"
-#include "securec.h"
 
 #define TAG "nStackXDFile"
 
@@ -784,7 +786,7 @@ L_ERR_FILE_MANAGER:
     return NULL;
 }
 
-static uint32_t GetTargetSendBlockListIdx(const FileManager *fileManager, uint8_t socketIndex)
+static uint32_t GetTargetSendBlockListIdx(const FileManager *fileManager)
 {
     uint32_t ret = 0;
     uint32_t bindingNum = NSTACKX_MAX_PROCESSING_TASK_NUM;
@@ -830,13 +832,13 @@ int32_t FileManagerSendFileTask(FileManager *fileManager, const SendFileListInfo
         ClearSendFileList(fileManager, fmFileList);
         return NSTACKX_EFAILED;
     }
-    PeerInfo *peerinfo = ClientGetPeerInfoByTransId(fileListInfo->transId, (DFileSession *)fileManager->context);
+    PeerInfo *peerinfo = ClientGetPeerInfoByTransId((DFileSession *)fileManager->context);
     if (!peerinfo) {
         ClearSendFileList(fileManager, fmFileList);
         return NSTACKX_EFAILED;
     }
     fmFileList->socketIndex = peerinfo->socketIndex;
-    fmFileList->bindedSendBlockListIdx = GetTargetSendBlockListIdx(fileManager, peerinfo->socketIndex);
+    fmFileList->bindedSendBlockListIdx = GetTargetSendBlockListIdx(fileManager);
     if (MutexListAddNode(&fileManager->taskList, &fmFileList->list, NSTACKX_FALSE) != NSTACKX_EOK) {
         LOGE(TAG, "Add tast to list error");
         ClearSendFileList(fileManager, fmFileList);
@@ -945,7 +947,7 @@ L_ERR_FILE_MANAGER:
     return NSTACKX_EFAILED;
 }
 
-static SendBlockFrameListPara *GetSendBlockFrameListPara(FileManager *fileManager, uint32_t tid, uint8_t socketIndex)
+static SendBlockFrameListPara *GetSendBlockFrameListPara(FileManager *fileManager, uint32_t tid)
 {
     SendBlockFrameListPara *para = NULL;
 
@@ -1011,7 +1013,7 @@ static int32_t GetDataFrameFromSendList(SendBlockFrameListPara *para, BlockFrame
     return ret;
 }
 
-int32_t FileManagerFileRead(FileManager *fileManager, uint32_t tid, uint8_t socketIdx, BlockFrame **block, int32_t nr)
+int32_t FileManagerFileRead(FileManager *fileManager, uint32_t tid, BlockFrame **block, int32_t nr)
 {
     int32_t ret;
     SendBlockFrameListPara *para = NULL;
@@ -1022,7 +1024,7 @@ int32_t FileManagerFileRead(FileManager *fileManager, uint32_t tid, uint8_t sock
         return NSTACKX_EINVAL;
     }
 
-    para = GetSendBlockFrameListPara(fileManager, tid, socketIdx);
+    para = GetSendBlockFrameListPara(fileManager, tid);
     if (para == NULL || ListIsEmpty(&para->sendBlockFrameList.head)) {
         return 0;
     }
@@ -1078,7 +1080,7 @@ uint32_t GetMaxSendListSize(uint16_t connType)
     }
 }
 
-uint16_t GetSendListNum(uint16_t connType, const DFileSession *session)
+uint16_t GetSendListNum(void)
 {
     return 1;
 }
@@ -1245,7 +1247,7 @@ uint8_t FileManagerHasPendingDataInner(FileManager *fileManager)
     return hasPendingData;
 }
 
-uint8_t FileManagerHasPendingData(FileManager *fileManager, uint8_t socketIndex)
+uint8_t FileManagerHasPendingData(FileManager *fileManager)
 {
     return FileManagerHasPendingDataInner(fileManager);
 }

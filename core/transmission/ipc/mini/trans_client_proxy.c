@@ -17,6 +17,7 @@
 
 #include "client_trans_channel_callback.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
 
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
 {
@@ -41,4 +42,11 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
 {
     (void)pkgName;
     return TransOnChannelMsgReceived(channelId, channelType, data, len, type);
+}
+
+int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+{
+    (void)pkgName;
+    (void)param;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }

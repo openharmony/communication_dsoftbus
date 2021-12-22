@@ -44,6 +44,12 @@ int32_t DiscClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channel
     return SOFTBUS_OK;
 }
 
+int32_t DiscClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+    const QosTv *tvList)
+{
+    return SOFTBUS_OK;
+}
+
 void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
 {
     sptr<IRemoteObject> remote = Remote();

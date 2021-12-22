@@ -69,7 +69,7 @@ typedef struct {
     ListNode node;
     ConnectionAddr addr;
     bool needReportFailure;
-} PendingJoiinRequestNode;
+} PendingJoinRequestNode;
 
 typedef struct {
     NodeType nodeType;
@@ -84,7 +84,7 @@ typedef struct {
     SoftBusHandler handler;
 
     int32_t maxConnCount;
-    int32_t maxConcurentCount;
+    int32_t maxConcurrentCount;
     bool isInit;
 } NetBuilder;
 
@@ -121,12 +121,12 @@ static void NetBuilderConfigInit(void)
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURENT_NUM,
-        (unsigned char*)&g_netBuilder.maxConcurentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
+        (unsigned char*)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max conncurent count fail, use default value");
-        g_netBuilder.maxConcurentCount = 0;
+        g_netBuilder.maxConcurrentCount = 0;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn config is %d,%d",
-        g_netBuilder.maxConnCount, g_netBuilder.maxConcurentCount);
+        g_netBuilder.maxConnCount, g_netBuilder.maxConcurrentCount);
 }
 
 static SoftBusMessage *CreateNetBuilderMessage(int32_t msgType, void *para)
@@ -292,7 +292,7 @@ static bool NeedPendingJoinRequest(void)
     int32_t count = 0;
     LnnConnectionFsm *item = NULL;
 
-    if (g_netBuilder.maxConcurentCount == 0) { // do not limit concurent
+    if (g_netBuilder.maxConcurrentCount == 0) { // do not limit concurent
         return false;
     }
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
@@ -303,7 +303,7 @@ static bool NeedPendingJoinRequest(void)
             continue;
         }
         ++count;
-        if (count >= g_netBuilder.maxConcurentCount) {
+        if (count >= g_netBuilder.maxConcurrentCount) {
             return true;
         }
     }
@@ -312,12 +312,12 @@ static bool NeedPendingJoinRequest(void)
 
 static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFailure)
 {
-    PendingJoiinRequestNode *request = NULL;
+    PendingJoinRequestNode *request = NULL;
 
     if (!NeedPendingJoinRequest()) {
         return false;
     }
-    request = SoftBusCalloc(sizeof(PendingJoiinRequestNode));
+    request = SoftBusCalloc(sizeof(PendingJoinRequestNode));
     if (request == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc pending join request fail, go on it");
         return false;
@@ -360,9 +360,9 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
 
 static void TryRemovePendingJoinRequest(void)
 {
-    PendingJoiinRequestNode *item = NULL;
+    PendingJoinRequestNode *item = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.pendingList, PendingJoiinRequestNode, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.pendingList, PendingJoinRequestNode, node) {
         if (NeedPendingJoinRequest()) {
             return;
         }
