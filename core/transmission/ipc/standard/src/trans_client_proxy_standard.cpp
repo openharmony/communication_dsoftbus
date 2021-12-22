@@ -211,6 +211,51 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
     return serverRet;
 }
 
+int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+    const QosTv *tvList)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel id failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(eventId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(tvCount)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write tv count failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(tvList, sizeof(QosTv) * tvCount)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write tv list failed");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_CHANNEL_QOSEVENT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelQosEvent send request failed");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelQosEvent read serverRet failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 void TransClientProxy::OnDeviceFound(const DeviceInfo *device)
 {
 }

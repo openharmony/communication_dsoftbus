@@ -21,6 +21,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
+#include "softbus_qos.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
@@ -42,6 +43,10 @@ int32_t TransServerInit(void)
     }
     if (TransChannelInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransChannelInit failed");
+        return SOFTBUS_ERR;
+    }
+    if (InitQos() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosInit Failed");
         return SOFTBUS_ERR;
     }
     g_transSessionInitFlag = true;

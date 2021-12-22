@@ -210,6 +210,23 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     return SOFTBUS_OK;
 }
 
+int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+{
+    int32_t sessionId;
+    ISessionListener listener = {0};
+    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session callback failed");
+        return ret;
+    }
+    if (listener.OnQosEvent == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "listener OnQosEvent is NULL");
+        return SOFTBUS_ERR;
+    }
+    listener.OnQosEvent(sessionId, eventId, tvCount, tvList);
+    return SOFTBUS_OK;
+}
+
 IClientSessionCallBack *GetClientSessionCb(void)
 {
     g_sessionCb.OnSessionOpened = TransOnSessionOpened;
@@ -218,5 +235,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnDataReceived = TransOnDataReceived;
     g_sessionCb.OnStreamReceived = TransOnOnStreamRecevied;
     g_sessionCb.OnGetSessionId = ClientGetSessionIdByChannelId;
+    g_sessionCb.OnQosEvent = TransOnQosEvent;
     return &g_sessionCb;
 }

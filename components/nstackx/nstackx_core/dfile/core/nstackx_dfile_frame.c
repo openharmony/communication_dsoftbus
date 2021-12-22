@@ -299,6 +299,8 @@ void EncodeSettingFrame(uint8_t *buffer, size_t length, size_t *frameLength, con
     settingFrame->abmCapability = 0;
     settingFrame->header.length = htons(*frameLength - DFILE_FRAME_HEADER_LEN);
     settingFrame->capability = htonl(settingFramePara->capability);
+    settingFrame->dataFrameSize = htonl(settingFramePara->dataFrameSize);
+    settingFrame->capsCheck = htonl(settingFramePara->capsCheck);
 }
 
 /* Caller should make sure that "length" can cover the minimum header length */
@@ -535,6 +537,23 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
         return NSTACKX_TRUE;
     }
 
+    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability)) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+        sizeof(hostSettingFrame->capability)) {
+        return NSTACKX_TRUE;
+    }
+
+    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+        sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize)) {
+        return NSTACKX_TRUE;
+    }
+
     /*
      * From dfile with the same version with local dfile.
      */
@@ -542,9 +561,6 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
         return NSTACKX_TRUE;
     }
 
-    if (payloadLength == sizeof(SettingFrame) - DFILE_FRAME_HEADER_LEN - sizeof(hostSettingFrame->capability)) {
-        return NSTACKX_TRUE;
-    }
     return NSTACKX_FALSE;
 }
 
@@ -570,7 +586,7 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
     }
     uint16_t payloadLength = ntohs(netSettingFrame->header.length);
     if (!IsSettingFrameLengthValid(hostSettingFrame, payloadLength)) {
-        LOGE(TAG, "illegal setting frame %u", payloadLength);
+        LOGE(TAG, "illegal setting frame length %u", payloadLength);
         return NSTACKX_EFAILED;
     }
     if (!IsSettingFrameMtuAndTypeValid(netSettingFrame)) {
@@ -599,9 +615,20 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
             sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability))) {
             hostSettingFrame->capability = ntohl(netSettingFrame->capability);
         }
+        if (payloadLength > (sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+            sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+            sizeof(hostSettingFrame->capability))) {
+            hostSettingFrame->dataFrameSize = ntohl(netSettingFrame->dataFrameSize);
+        }
+        if (payloadLength > (sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+            sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+            sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize))) {
+            hostSettingFrame->capsCheck = ntohl(netSettingFrame->capsCheck);
+        }
     }
-    LOGI(TAG, "local dfile version is %u, remote dfile version is %u capability 0x%x",
-         NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability);
+    LOGI(TAG, "local dfile version is %u, remote dfile version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x",
+         NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability,
+         hostSettingFrame->dataFrameSize, hostSettingFrame->capsCheck);
     return NSTACKX_EOK;
 }
 

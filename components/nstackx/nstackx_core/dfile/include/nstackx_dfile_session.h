@@ -139,6 +139,8 @@ struct DFileSession {
     List freeIovList[NSTACKX_MAX_CLIENT_SEND_THREAD_NUM];
     uint8_t transFlag;
     uint32_t capability;
+    uint32_t internalCaps;
+    uint32_t capsCheck;
     MutexList tranIdStateList;
     uint32_t wlanCatagory;
     TransSlot transSlot[NSTACKX_FILE_MANAGER_THREAD_NUM];
@@ -147,6 +149,8 @@ struct DFileSession {
     uint8_t acceptFlag;
     uint8_t sendRemain;
     int32_t allTaskCount;
+    pthread_mutex_t backPressLock;
+    uint32_t stopSendCnt[NSTACKX_MAX_CLIENT_SEND_THREAD_NUM];
 };
 
 PeerInfo *CreatePeerInfo(DFileSession *session, const struct sockaddr_in *peerAddr,
@@ -168,7 +172,6 @@ void UpdateAllTransRetryCount(DFileSession *session, PeerInfo *peerInfo);
 void CalculateSessionTransferRatePrepare(DFileSession *session);
 
 void DestroyQueueNode(QueueNode *queueNode);
-PeerInfo *ClientGetPeerInfoByTransId(uint16_t transId, DFileSession *session);
 PeerInfo *ClientGetPeerInfoBySocketIndex(uint8_t socketIndex, const DFileSession *session);
 void NoticeSessionProgress(DFileSession *session);
 int32_t DFileSessionHandleReadBuffer(DFileSession *session, const uint8_t *buf, size_t bufLen,
@@ -179,6 +182,7 @@ int32_t WaitSocketEvent(const DFileSession *session, SocketDesc fd, uint32_t tim
     uint8_t *canRead, uint8_t *canWrite);
 
 int32_t CheckFdSetSize(SocketDesc sock);
+void DestroyReceiverPipe(DFileSession *session);
 
 #define DFILE_SESSION_TERMINATE_FLAG 0x01
 #define DFILE_SESSION_FATAL_FLAG     0x02
@@ -219,7 +223,7 @@ static inline bool CapsLinkSeq(const struct DFileSession *session)
 
 static inline bool CapsNoRW(const struct DFileSession *session)
 {
-    return session->capability & NSTACKX_CAPS_NORW;
+    return session->internalCaps & NSTACKX_INTERNAL_CAPS_NORW;
 }
 
 static inline bool CapsTcp(const struct DFileSession *session)
@@ -229,7 +233,7 @@ static inline bool CapsTcp(const struct DFileSession *session)
 
 static inline bool CapsRecvFeedback(const struct DFileSession *session)
 {
-    return session->capability & NSTACKX_CAPS_RECV_FEEDBACK;
+    return session->capsCheck & NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
 }
 
 #ifdef __cplusplus

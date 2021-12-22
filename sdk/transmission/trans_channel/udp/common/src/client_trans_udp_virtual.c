@@ -74,3 +74,12 @@ void TransUdpDeleteFileListener(const char *sessionName)
 {
     (void)sessionName;
 }
+
+int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+{
+    (void)channelId;
+    (void)eventId;
+    (void)tvCount;
+    (void)tvList;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
