@@ -316,7 +316,7 @@ static void CheckTransDone(DFileSession *session, struct DFileTrans *dFileTrans,
         ((PeerInfo *)dFileTrans->context)->currentTransCount--;
         ListRemoveNode(&dFileTrans->list);
         uint64_t totalBytes = DFileTransGetTotalBytes(dFileTrans);
-        DFileTransDestroy(dFileTrans, NSTACKX_FALSE);
+        DFileTransDestroy(dFileTrans);
         if (session->sessionType == DFILE_SESSION_TYPE_CLIENT) {
             if (flag == NSTACKX_TRUE && session->smallListProcessingCnt > 0) {
                 session->smallListProcessingCnt--;
@@ -449,7 +449,8 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
     settingFramePara.connType = peerInfo->connType;
     settingFramePara.mtu = peerInfo->localMtu;
     settingFramePara.capability = peerInfo->session->capability & NSTACKX_CAPS_LINK_SEQUENCE;
-    settingFramePara.capability |= NSTACKX_CAPS_RECV_FEEDBACK;
+    settingFramePara.dataFrameSize = 0;
+    settingFramePara.capsCheck = NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
     EncodeSettingFrame(buf, NSTACKX_DEFAULT_FRAME_SIZE, &frameLen, &settingFramePara);
     int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
     if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
@@ -626,12 +627,12 @@ static void HandleLinkSeqCap(DFileSession *session, SettingFrame *hostSettingFra
         session->capability &= ~NSTACKX_CAPS_LINK_SEQUENCE;
     }
 
-    if (hostSettingFrame->capability & NSTACKX_CAPS_RECV_FEEDBACK) {
+    if (hostSettingFrame->capability & NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK) {
         LOGI(TAG, "client support recv feedback");
-        session->capability |= NSTACKX_CAPS_RECV_FEEDBACK;
+        session->capsCheck |= NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
     } else {
         LOGI(TAG, "client do not support recv feedback");
-        session->capability &= ~NSTACKX_CAPS_RECV_FEEDBACK;
+        session->capsCheck &= ~NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
     }
 }
 
@@ -764,6 +765,33 @@ static void DFileSessionHandleRst(DFileSession *session, DFileFrame *dFileFrame,
     }
 }
 
+static void DFileSessionResolveBackPress(DFileSession *session, DataBackPressure backPress, uint32_t count)
+{
+    uint32_t index;
+
+    if (PthreadMutexLock(&session->backPressLock) != 0) {
+        LOGE(TAG, "pthread backPressLock mutex lock failed");
+        return;
+    }
+
+    if (backPress.recvListOverIo == 1) {
+        for (index = 0; index < count; index++) {
+            session->stopSendCnt[index]++;
+        }
+    } else {
+        for (index = 0; index < count; index++) {
+            session->stopSendCnt[index] = 0;
+        }
+    }
+
+    if (PthreadMutexUnlock(&session->backPressLock) != 0) {
+        LOGE(TAG, "pthread backPressLock mutex unlock failed");
+        return;
+    }
+
+    return;
+}
+
 static void DFileSessionHandleBackPressure(DFileSession *session, const DFileFrame *dFileFrame,
     const struct sockaddr_in *peerAddr)
 {
@@ -778,13 +806,11 @@ static void DFileSessionHandleBackPressure(DFileSession *session, const DFileFra
         return;
     }
 
-    peerInfo->backPress.recvListOverIo = backPress.recvListOverIo;
-    peerInfo->backPress.recvBufThreshold = backPress.recvBufThreshold;
-    peerInfo->backPress.stopSendPeriod = backPress.stopSendPeriod;
+    DFileSessionResolveBackPress(session, backPress, session->clientSendThreadNum);
 
     LOGI(TAG, "handle back pressure recvListOverIo %u recvBufThreshold %u stopSendPeriod %u",
-         peerInfo->backPress.recvListOverIo, peerInfo->backPress.recvBufThreshold,
-         peerInfo->backPress.stopSendPeriod);
+         backPress.recvListOverIo, backPress.recvBufThreshold,
+         backPress.stopSendPeriod);
 
     return;
 }
@@ -1096,6 +1122,9 @@ static void DFileRecvCalculateRate(DFileSession *session, DFileFrame *dFileFrame
             NSTACKX_MICRO_TICKS / measureElapse / DFILE_KILOBYTES);
         session->fileManager->iowCount = session->fileManager->iowBytes / peerInfo->dataFrameSize *
             (NSTACKX_MILLI_TICKS * timeOut - peerInfo->rateStateInterval) / measureElapse;
+        if (session->fileManager->iowRate > session->fileManager->iowMaxRate) {
+            session->fileManager->iowMaxRate = session->fileManager->iowRate;
+        }
         LOGI(TAG, "measureElapse %llu iowBytes %llu iowCount %llu IO write rate : %u KB/s", measureElapse,
              session->fileManager->iowBytes, session->fileManager->iowCount, session->fileManager->iowRate);
         session->fileManager->iowBytes = 0;
@@ -1213,7 +1242,7 @@ static void *DFileAddiSenderHandle(void *arg)
     BindClientSendThreadToTargetCpu(threadIdx + 1);
     ListInitHead(&unsent);
     while (!session->addiSenderCloseFlag) {
-        if (ListIsEmpty(&unsent) && !FileManagerHasPendingData(session->fileManager, 0)) {
+        if (ListIsEmpty(&unsent) && !FileManagerHasPendingData(session->fileManager)) {
             NSTACKX_ATOM_FETCH_INC(&session->noPendingDataTimes);
             SemWait(&session->sendThreadPara[threadIdx].sendWait);
             if (session->addiSenderCloseFlag) {
@@ -1424,7 +1453,7 @@ static int32_t DFileSessionSendFrame(DFileSession *session, QueueNode **preQueue
 
 static void WaitNewSendData(const QueueNode *queueNode, const List *unsent, DFileSession *session, uint8_t socketIndex)
 {
-    if (queueNode == NULL && ListIsEmpty(unsent) && !FileManagerHasPendingData(session->fileManager, socketIndex) &&
+    if (queueNode == NULL && ListIsEmpty(unsent) && !FileManagerHasPendingData(session->fileManager) &&
         !session->outboundQueueSize) {
         NSTACKX_ATOM_FETCH_INC(&session->noPendingDataTimes);
         SemWait(&session->outboundQueueWait[socketIndex]);
@@ -1838,7 +1867,7 @@ static int32_t DFileStartTransInner(DFileSession *session, FileListInfo *fileLis
         transId = 1;
     }
 
-    PeerInfo *peerInfo = TransSelectPeerInfo(transId, session);
+    PeerInfo *peerInfo = TransSelectPeerInfo(session);
     DFileTrans *trans = CreateTrans(transId, session, peerInfo, NSTACKX_TRUE);
     if (trans == NULL) {
         LOGE(TAG, "CreateTrans error");
@@ -1849,12 +1878,12 @@ static int32_t DFileStartTransInner(DFileSession *session, FileListInfo *fileLis
         LOGE(TAG, "set trans mtu failed");
     }
     if (RealPathFileName(fileListInfo) != NSTACKX_EOK) {
-        DFileTransDestroy(trans, NSTACKX_TRUE);
+        DFileTransDestroy(trans);
         return NSTACKX_EFAILED;
     }
     int32_t ret = DFileTransSendFiles(trans, fileListInfo);
     if (ret != NSTACKX_EOK) {
-        DFileTransDestroy(trans, NSTACKX_TRUE);
+        DFileTransDestroy(trans);
         LOGE(TAG, "DFileTransSendFiles fail, error: %d", ret);
         return ret;
     }
@@ -1862,7 +1891,7 @@ static int32_t DFileStartTransInner(DFileSession *session, FileListInfo *fileLis
                                  fileListInfo->userData);
     if (ret != NSTACKX_EOK) {
         LOGE(TAG, "DFileTransAddExtraInfo fail");
-        DFileTransDestroy(trans, NSTACKX_TRUE);
+        DFileTransDestroy(trans);
         return NSTACKX_EFAILED;
     }
     trans->fileList->tarFlag = fileListInfo->tarFlag;
@@ -1988,5 +2017,17 @@ int32_t CreateFileManager(DFileSession *session, const uint8_t *key, uint32_t ke
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
+}
+
+void DestroyReceiverPipe(DFileSession *session)
+{
+    if (session->receiverPipe[PIPE_OUT] != INVALID_PIPE_DESC) {
+        CloseDesc(session->receiverPipe[PIPE_OUT]);
+        session->receiverPipe[PIPE_OUT] = INVALID_PIPE_DESC;
+    }
+    if (session->receiverPipe[PIPE_IN] != INVALID_PIPE_DESC) {
+        CloseDesc(session->receiverPipe[PIPE_IN]);
+        session->receiverPipe[PIPE_IN] = INVALID_PIPE_DESC;
+    }
 }
 

@@ -64,7 +64,7 @@ AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq)
 
 void AuthGetAbility(void)
 {
-    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, 
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
         (unsigned char*)&g_authAbility, sizeof(g_authAbility)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Cannot get auth ability from config file");
         g_authAbility = DEFAULT_AUTH_ABILITY_COLLECTION;

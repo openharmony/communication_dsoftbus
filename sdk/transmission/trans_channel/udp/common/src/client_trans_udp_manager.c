@@ -309,6 +309,18 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
     return CloseUdpChannel(channelId, false);
 }
 
+int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+{
+    UdpChannel channel = {0};
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (g_sessionCb->OnQosEvent != NULL) {
+        g_sessionCb->OnQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, tvList);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientTransCloseUdpChannel(int32_t channelId)
 {
     return CloseUdpChannel(channelId, true);

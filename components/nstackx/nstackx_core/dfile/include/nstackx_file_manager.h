@@ -53,6 +53,8 @@ extern "C" {
 #define KILO_BYTES_TRANSFER_NOTICE_THRESHOLD 20480
 #define FILE_RECV_LIST_LEAST_SIZE 10
 #define FILE_RECV_LIST_IO_WRITE_THRESHOLD 0.8
+#define FILE_RECV_LIST_SLOW_START_RATE 2
+
 #ifdef NSTACKX_WITH_LITEOS
 #define FILE_RECV_LIST_MEM_THRESHOLD_WARNING (64 * 1024 * 1024)
 #else
@@ -251,6 +253,7 @@ typedef struct {
     uint64_t iowBytes;
     uint32_t iorRate;
     uint32_t iowRate;
+    uint32_t iowMaxRate;
     uint32_t sendListFullTimes;
     uint8_t transFlag;
     uint64_t iowCount; /* io write count in NSTACKX_WLAN_MAX_CONTROL_FRAME_TIMEOUT second */
@@ -365,7 +368,7 @@ int32_t FileManagerSendFileTask(FileManager *fileManager, const SendFileListInfo
 int32_t FileManagerResetSendOutSet(FileManager *fileManager, uint16_t fileId, uint32_t blockSequence, uint16_t transId);
 
 /* Not thread safe */
-int32_t FileManagerFileRead(FileManager *fileManager, uint32_t tid, uint8_t socketIdx, BlockFrame **block, int32_t nr);
+int32_t FileManagerFileRead(FileManager *fileManager, uint32_t tid, BlockFrame **block, int32_t nr);
 
 /* Not thread safe */
 int32_t FileManagerRecvFileTask(FileManager *fileManager, RecvFileListInfo *fileListInfo, FileListMsgPara *msgPara);
@@ -386,7 +389,7 @@ int32_t FileManagerStopTask(FileManager *fileManager, uint16_t transId, TaskStop
 uint8_t FileManagerIsLastBlockRead(FileManager *fileManager, uint16_t transId);
 
 /* Not thread safe */
-uint8_t FileManagerHasPendingData(FileManager *fileManager, uint8_t socketIndex);
+uint8_t FileManagerHasPendingData(FileManager *fileManager);
 
 /* Not thread safe */
 int32_t FileManagerGetLastSequence(FileManager *fileManager, uint16_t transId, uint16_t fileId, uint32_t *sequence);

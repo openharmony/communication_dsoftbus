@@ -267,7 +267,6 @@ typedef struct PeerInfo {
     uint32_t lastTimes;
     uint32_t duplicateCount;
     uint32_t currentTransCount;
-    DataBackPressure backPress;
 } PeerInfo;
 
 static inline void ClearPeerinfoStats(PeerInfo *peerInfo)
@@ -287,7 +286,7 @@ int64_t DFileTransGetTimeout(DFileTrans *dFileTrans);
 int32_t DFileTransSetMtu(DFileTrans *dFileTrans, uint16_t mtu);
 
 DFileTrans *DFileTransCreate(const DFileTransPara *para);
-void DFileTransDestroy(DFileTrans *dFileTrans, uint8_t isForce);
+void DFileTransDestroy(DFileTrans *dFileTrans);
 void DFileTransDestroyInner(DFileTrans *dFileTrans);
 uint64_t DFileTransGetTotalBytes(const DFileTrans *dFileTrans);
 void FileManagerReceiverMsgHandler(uint16_t fileId, FileManagerMsgType msgType, FileManagerMsg *msg,

@@ -18,7 +18,9 @@
 
 #include <stdint.h>
 
+#include "session.h"
 #include "softbus_def.h"
+#include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -32,6 +34,7 @@ typedef struct {
     int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t channelId, int32_t channelType);
     int32_t (*OnDataReceived)(const char *pkgName, int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t type);
+    int32_t (*OnQosEvent)(const char *pkgName, const QosParam *param);
     int32_t (*GetPkgNameBySessionName)(const char *sessionName, char *pkgName, uint16_t len);
     int32_t (*GetUidAndPidBySessionName)(const char *sessionName, int32_t *uid, int32_t *pid);
 } IServerChannelCallBack;

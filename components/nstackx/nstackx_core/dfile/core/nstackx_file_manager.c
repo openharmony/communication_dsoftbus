@@ -1371,13 +1371,11 @@ static int32_t InitAllCacheList(FileManager *fileManager)
 static int32_t FileManagerInit(FileManager *fileManager, FileManagerMsgPara *msgPara, const uint8_t *key,
                                uint32_t keyLen, uint16_t connType)
 {
-    DFileSession *session = (DFileSession *)msgPara->context;
-
     fileManager->runStatus = FILE_MANAGE_RUN;
     fileManager->errCode = FILE_MANAGER_EOK;
     fileManager->transFlag = NSTACKX_FALSE;
     if (fileManager->isSender) {
-        fileManager->sendFrameListNum = GetSendListNum(connType, session);
+        fileManager->sendFrameListNum = GetSendListNum();
         fileManager->maxSendBlockListSize = GetMaxSendListSize(connType);
         if (fileManager->maxSendBlockListSize == 0 || fileManager->sendFrameListNum == 0) {
             LOGE(TAG, "can't get valid send frame list num or size");
