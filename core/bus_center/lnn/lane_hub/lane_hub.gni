@@ -25,7 +25,6 @@ bus_center_hub_src = [
   "$core_lane_hub_path/lane_manager/src/lnn_smart_communication.c",
 ]
 bus_center_hub_deps = []
-bus_center_hub_ldflags = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

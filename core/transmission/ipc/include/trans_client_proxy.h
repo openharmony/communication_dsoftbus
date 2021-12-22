@@ -16,7 +16,9 @@
 #ifndef TRANS_CLIENT_PROXY_H
 #define TRANS_CLIENT_PROXY_H
 
+#include "session.h"
 #include "softbus_def.h"
+#include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +29,7 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
 int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType);
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, const void *data,
     uint32_t len, int32_t type);
+int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param);
 
 #ifdef __cplusplus
 }

@@ -131,6 +131,24 @@ typedef struct {
     TV *tvList;
 } FrameInfo;
 
+typedef enum {
+    QOS_IMPROVE = 0,
+    QOS_RECOVER = 1
+} QosQuality;
+
+typedef enum {
+    TRANS_STREAM_QUALITY_EVENT = 1,
+    TRANS_CHANNEL_QUALITY_EVENT,
+    TRANS_CAN_DELAY_EVENT,
+    TRANS_CANT_DELAY_EVENT,
+    QOS_EVENT_MAX
+} QosEvent;
+
+typedef struct {
+    int type;
+    void *value;
+} QosTv;
+
 /**
  * @brief Defines session callbacks.
  *
@@ -193,6 +211,8 @@ typedef struct {
     void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
 
     void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
+
+    void (*OnQosEvent)(int sessionId, int eventId, int tvCount, const QosTv *tvList);
 } ISessionListener;
 
 typedef struct {
@@ -338,6 +358,9 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
 int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
 
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+
+int QosReport(int sessionId, int appType, int quality);
+
 #ifdef __cplusplus
 }
 #endif

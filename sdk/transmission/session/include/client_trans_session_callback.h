@@ -32,6 +32,8 @@ typedef struct {
     int32_t (*OnStreamReceived)(int32_t channelId, int32_t channelType,
         const StreamData *data, const StreamData *ext, const FrameInfo *param);
     int32_t (*OnGetSessionId)(int32_t channelId, int32_t channelType, int32_t *sessionId);
+    int32_t (*OnQosEvent)(int32_t channelId, int32_t channelType, int32_t eventId,
+        int32_t tvCount, const QosTv *tvList);
 } IClientSessionCallBack;
 
 IClientSessionCallBack *GetClientSessionCb(void);

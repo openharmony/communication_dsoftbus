@@ -24,6 +24,9 @@
 extern "C" {
 #endif
 
+#define IS_SERVER 0
+#define IS_CLIENT 1
+
 typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
@@ -103,6 +106,7 @@ int32_t ClientGetSessionSide(int32_t sessionId);
 int TransClientInit(void);
 void TransClientDeinit(void);
 
+int32_t ReCreateSessionServerToServer(void);
 void ClientTransRegLnnOffline(void);
 #ifdef __cplusplus
 }

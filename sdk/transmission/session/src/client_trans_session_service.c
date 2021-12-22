@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "client_qos_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
@@ -585,4 +586,29 @@ int32_t DisableSessionListener(int32_t sessionId)
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientDisableSessionListener(channelId);
+}
+
+int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
+{
+    if (quality != QOS_IMPROVE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
+        return SOFTBUS_ERR;
+    }
+    if (ClientGetSessionSide(sessionId) != IS_CLIENT) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "qos report sessionId[%d] not exist or not client side", sessionId);
+        return SOFTBUS_ERR;
+    }
+    if ((ret = ClientQosReport(channelId, type, appType, quality)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report sessionId[%d] failed", sessionId);
+    }
+    return ret;
 }

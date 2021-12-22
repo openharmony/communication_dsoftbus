@@ -141,8 +141,10 @@ static void *LoopTask(void *arg)
             ListDelete(item);
             SoftBusFree(itemNode);
             context->msgSize--;
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
-                context->name, msg->handler->name, msg->what, context->msgSize);
+            if (looper->dumpable) {
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
+                    context->name, msg->handler->name, msg->what, context->msgSize);
+            }
         } else {
 #ifdef __LITEOS_M__
             uint64_t diff = time - now;
@@ -164,14 +166,19 @@ static void *LoopTask(void *arg)
         }
         context->currentMsg = msg;
         (void)pthread_mutex_unlock(&context->lock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], HandleMessage message. handle=%s,what=%d",
-            context->name, msg->handler->name, msg->what);
+        if (looper->dumpable) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], HandleMessage message. handle=%s,what=%d",
+                context->name, msg->handler->name, msg->what);
+        }
 
         if (msg->handler->HandleMessage != NULL) {
             msg->handler->HandleMessage(msg);
         }
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "LoopTask[%s], after HandleMessage message. handle=%s,what=%d",
-            context->name, msg->handler->name, msg->what);
+        if (looper->dumpable) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+                "LoopTask[%s], after HandleMessage message. handle=%s,what=%d",
+                context->name, msg->handler->name, msg->what);
+        }
         (void)pthread_mutex_lock(&context->lock);
         FreeSoftBusMsg(msg);
         context->currentMsg = NULL;
@@ -230,14 +237,18 @@ void DumpLooper(const SoftBusLooper *looper)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    DumpLooperLocked(context);
+    if (looper->dumpable) {
+        DumpLooperLocked(context);
+    }
     (void)pthread_mutex_unlock(&context->lock);
 }
 
 static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=%lld us",
-        looper->context->name, msgPost->what, msgPost->time);
+    if (looper->dumpable) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=%lld us",
+            looper->context->name, msgPost->what, msgPost->time);
+    }
     if (msgPost->handler == NULL) {
         FreeSoftBusMsg(msgPost);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. msg handler is null",
@@ -282,9 +293,10 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
         ListTailInsert(&(context->msgHead), &(newNode->node));
     }
     context->msgSize++;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime. insert", context->name);
-    DumpLooperLocked(context);
-
+    if (looper->dumpable) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime. insert", context->name);
+        DumpLooperLocked(context);
+    }
     pthread_cond_broadcast(&context->cond);
     (void)pthread_mutex_unlock(&context->lock);
 }
@@ -344,6 +356,14 @@ static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandle
     LoopRemoveMessageCustom(looper, handler, WhatRemoveFunc, (void*)(intptr_t)what);
 }
 
+void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
+{
+    if (loop == NULL) {
+        return;
+    }
+    loop->dumpable = dumpable;
+}
+
 SoftBusLooper *CreateNewLooper(const char *name)
 {
     SoftBusLooper *looper = (SoftBusLooper *)SoftBusCalloc(sizeof(SoftBusLooper));
@@ -371,6 +391,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
 
     // init looper
     looper->context = context;
+    looper->dumpable = true;
     looper->PostMessage = LooperPostMessage;
     looper->PostMessageDelay = LooperPostMessageDelay;
     looper->RemoveMessage = LooperRemoveMessage;

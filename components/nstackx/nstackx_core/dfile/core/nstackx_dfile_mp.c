@@ -66,19 +66,17 @@ int32_t DFileSocketRecvSP(DFileSession *session)
     return ret;
 }
 
-PeerInfo *TransSelectPeerInfo(uint16_t transId, DFileSession *session)
+PeerInfo *TransSelectPeerInfo(DFileSession *session)
 {
-    PeerInfo *peerInfo = NULL;
-
-    peerInfo = (PeerInfo *)ListGetFront(&session->peerInfoChain);
+    PeerInfo *peerInfo = (PeerInfo *)ListGetFront(&session->peerInfoChain);
     return peerInfo;
 }
 
 /* only for client */
-PeerInfo *ClientGetPeerInfoByTransId(uint16_t transId, DFileSession *session)
+PeerInfo *ClientGetPeerInfoByTransId(DFileSession *session)
 {
-        PeerInfo *peerInfo = (PeerInfo *)ListGetFront(&session->peerInfoChain);
-        return peerInfo;
+    PeerInfo *peerInfo = (PeerInfo *)ListGetFront(&session->peerInfoChain);
+    return peerInfo;
 }
 
 /* only for client */

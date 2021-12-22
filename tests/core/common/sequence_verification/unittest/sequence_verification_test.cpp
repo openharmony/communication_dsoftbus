@@ -77,7 +77,8 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_003, Te
     seqInfo.minSeq = INT32_MAX - 2;
     seqInfo.maxSeq = INT32_MAX - 2;
     int32_t recvSeq = INT32_MAX - 2;
-    for (int i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
+
+    for (volatile int i = 0; i < MAX_RECEIVE_SEQUENCE; i++) {
         bool ret = IsPassSeqCheck(&seqInfo, recvSeq++);
         EXPECT_EQ(ret, true);
     }

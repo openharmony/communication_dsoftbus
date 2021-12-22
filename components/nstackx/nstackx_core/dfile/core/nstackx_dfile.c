@@ -866,6 +866,11 @@ static int32_t DFileSessionMutexInit(DFileSession *session)
     if (PthreadMutexInit(&session->transIdLock, NULL) != 0) {
         goto L_ERR_TRANS_ID_LOCK;
     }
+
+    if (PthreadMutexInit(&session->backPressLock, NULL) != 0) {
+        goto L_ERR_BACKPRESS_LOCK;
+    }
+
     if (MutexListInit(&session->transferDoneAckList, MAX_TRANSFERDONE_ACK_NODE_COUNT) != NSTACKX_EOK) {
         LOGE(TAG, "transferDoneAckList InitList error");
         goto L_ERR_TRANS_DONE_ACK_LOCK;
@@ -879,6 +884,8 @@ static int32_t DFileSessionMutexInit(DFileSession *session)
 L_ERR_TRANS_STATE_LOCK:
     MutexListDestory(&session->transferDoneAckList);
 L_ERR_TRANS_DONE_ACK_LOCK:
+    PthreadMutexDestroy(&session->backPressLock);
+L_ERR_BACKPRESS_LOCK:
     PthreadMutexDestroy(&session->transIdLock);
 L_ERR_TRANS_ID_LOCK:
     PthreadMutexDestroy(&session->inboundQueueLock);
@@ -986,6 +993,7 @@ static void DFileSessionClean(DFileSession *session)
     PthreadMutexDestroy(&session->inboundQueueLock);
     PthreadMutexDestroy(&session->outboundQueueLock);
     PthreadMutexDestroy(&session->transIdLock);
+    PthreadMutexDestroy(&session->backPressLock);
     DFileClearTransferDoneAckList(session);
     MutexListDestory(&session->transferDoneAckList);
     MutexListDestory(&session->tranIdStateList);
@@ -1040,18 +1048,6 @@ static void DFileRecverDestory(DFileSession *session)
     CloseSocket(session->socket[1]);
     session->socket[0] = NULL;
     session->socket[1] = NULL;
-}
-
-static void DestroyReceiverPipe(DFileSession *session)
-{
-    if (session->receiverPipe[PIPE_OUT] != INVALID_PIPE_DESC) {
-        CloseDesc(session->receiverPipe[PIPE_OUT]);
-        session->receiverPipe[PIPE_OUT] = INVALID_PIPE_DESC;
-    }
-    if (session->receiverPipe[PIPE_IN] != INVALID_PIPE_DESC) {
-        CloseDesc(session->receiverPipe[PIPE_IN]);
-        session->receiverPipe[PIPE_IN] = INVALID_PIPE_DESC;
-    }
 }
 
 static int32_t StartDFileThreads(DFileSession *session)
@@ -1284,7 +1280,7 @@ static inline void InitSockaddr(const struct sockaddr_in *inSockAddr, struct soc
     sockAddr->sin_addr.s_addr = htonl(inSockAddr->sin_addr.s_addr);
 }
 
-static uint16_t GetClientSendThreadNum(const DFileSession *session, uint16_t connType)
+static uint16_t GetClientSendThreadNum(uint16_t connType)
 {
     if (connType == CONNECT_TYPE_WLAN) {
         return NSTACKX_WLAN_CLIENT_SEND_THREAD_NUM;
@@ -1353,7 +1349,7 @@ int32_t NSTACKX_DFileClientWithTargetDev(NSTACKX_SessionPara *para)
         goto L_ERR_FILE_MANAGER;
     }
 
-    if (StartSessionRunning(session, GetClientSendThreadNum(session, type)) != NSTACKX_EOK) {
+    if (StartSessionRunning(session, GetClientSendThreadNum(type)) != NSTACKX_EOK) {
         goto L_ERR_THREAD;
     }
 
@@ -1428,7 +1424,7 @@ static inline void ClearTransChain(DFileSession *session)
 {
     while (!ListIsEmpty(&session->dFileTransChain)) {
         DFileTrans *trans = (DFileTrans *)ListPopFront(&session->dFileTransChain);
-        DFileTransDestroy(trans, NSTACKX_TRUE);
+        DFileTransDestroy(trans);
     }
 }
 
@@ -1574,6 +1570,8 @@ int32_t NSTACKX_DFileSetCapabilities(uint32_t capabilities, uint32_t value)
     /* EaglEye test */
     Coverity_Tainted_Set((void *)&capabilities);
     Coverity_Tainted_Set((void *)&value);
-
+    /* unused para */
+    (void)(capabilities);
+    (void)(value);
     return NSTACKX_EOK;
 }

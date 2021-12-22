@@ -33,6 +33,14 @@ typedef struct {
 typedef struct {
     int32_t channelId;
     int32_t channelType;
+    int32_t eventId;
+    int32_t tvCount;
+    const QosTv *tvList;
+} QosParam;
+
+typedef struct {
+    int32_t channelId;
+    int32_t channelType;
 } TransInfo;
 
 typedef struct {

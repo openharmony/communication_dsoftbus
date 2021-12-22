@@ -321,6 +321,45 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
     return serverRet;
 }
 
+int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport channelId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(chanType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport chanType failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(appType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport appType failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(quality)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport quality failed!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_QOS_REPORT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
 int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     return SOFTBUS_OK;

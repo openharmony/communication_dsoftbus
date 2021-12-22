@@ -107,3 +107,16 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 }
+
+int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
+    int32_t tvCount, const QosTv *tvList)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnQosEvent: channelId=%d, channelType=%d eventId=%d",
+        channelId, channelType, eventId);
+    switch (channelType) {
+        case CHANNEL_TYPE_UDP:
+            return TransOnUdpChannelQosEvent(channelId, eventId, tvCount, tvList);
+        default:
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+}
