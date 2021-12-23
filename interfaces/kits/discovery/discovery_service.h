@@ -245,31 +245,6 @@ typedef enum {
 } DiscoveryFailReason;
 
 /**
- * @brief Enumerates device types.
- *
- */
-typedef enum {
-    /* Smart speaker */
-    SMART_SPEAKER = 0x00,
-    /* PC */
-    DESKTOP_PC,
-    /* Laptop */
-    LAPTOP,
-    /* Mobile phone */
-    SMART_PHONE,
-    /* Tablet */
-    SMART_PAD,
-    /* Smart watch */
-    SMART_WATCH,
-    /* Smart car */
-    SMART_CAR,
-    /* Kids' watch */
-    CHILDREN_WATCH,
-    /* Smart TV */
-    SMART_TV,
-} DeviceType;
-
-/**
  * @brief Defines the device information returned by <b>IDiscoveryCallback</b>.
  *
  */
@@ -279,7 +254,7 @@ typedef struct {
     /** Account hash code. Its maximum length is specified by {@link MAX_ACCOUNT_HASH_LEN}. */
     char hwAccountHash[MAX_ACCOUNT_HASH_LEN];
     /** Device type. For details, see {@link DeviceType}. */
-    DeviceType devType;
+    unsigned int devType;
     /** Device name. Its maximum length is specified by {@link DISC_MAX_DEVICE_NAME_LEN}. */
     char devName[DISC_MAX_DEVICE_NAME_LEN];
     /** Number of available connections */
