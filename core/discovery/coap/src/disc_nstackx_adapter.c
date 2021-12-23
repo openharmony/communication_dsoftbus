@@ -344,7 +344,7 @@ static int32_t SetLocalDeviceInfo(void)
         return SOFTBUS_ERR;
     }
     deviceType = DEFAULT_DEVICE_TYPE;
-    g_localDeviceInfo->deviceType = (uint8_t)deviceType;
+    g_localDeviceInfo->deviceType = deviceType;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name,
                            sizeof(g_localDeviceInfo->name)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
