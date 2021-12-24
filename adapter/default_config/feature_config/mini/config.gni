@@ -28,4 +28,5 @@ declare_args() {
   enable_dsoftbus_driver = false
 
   enable_build_shared_sdk = false
+  enable_qos = false
 }

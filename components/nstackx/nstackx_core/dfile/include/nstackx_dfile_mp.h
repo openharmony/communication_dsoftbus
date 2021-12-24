@@ -71,8 +71,8 @@ typedef struct {
 } VFilePara;
 
 int32_t DFileSocketRecvSP(DFileSession *session);
-PeerInfo *TransSelectPeerInfo(uint16_t transId, DFileSession *session);
-PeerInfo *ClientGetPeerInfoByTransId(uint16_t transId, DFileSession *session);
+PeerInfo *TransSelectPeerInfo(DFileSession *session);
+PeerInfo *ClientGetPeerInfoByTransId(DFileSession *session);
 PeerInfo *ClientGetPeerInfoBySocketIndex(uint8_t socketIndex, const DFileSession *session);
 int32_t CreateSenderThread(DFileSession *session);
 int32_t RebuildFilelist(const char *files[], const char *remotePath[], uint32_t fileNum,

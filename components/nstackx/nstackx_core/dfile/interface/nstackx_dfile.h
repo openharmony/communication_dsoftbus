@@ -58,6 +58,8 @@ extern "C" {
 #define NSTACKX_VTRANS_STEP_SIZE (5 * 1024 * 1024)
 #define NSTACKX_VTRANS_MAX_SIZE (1024 * 1024 * 1024)
 
+#define CAPS_MULTIPATH 4
+
 typedef struct DFileSession DFileSession;
 
 /* DFile session message type list. */
@@ -80,6 +82,8 @@ enum {
     CAPS_UDP_GSO = 0,
     CAPS_LINK_SEQUENCE,
     CAPS_WLAN_CATAGORY,
+    CAPS_NO_RTT,
+    CAPS_RESERVED, /* for multipath check of old version */
     /* add more capability here */
     CAPS_MAX,
 };
@@ -95,6 +99,9 @@ enum {
 #define NSTACKX_CAPS_UDP_GSO                NBITS(CAPS_UDP_GSO)
 #define NSTACKX_CAPS_LINK_SEQUENCE          NBITS(CAPS_LINK_SEQUENCE)
 #define NSTACKX_CAPS_WLAN_CATAGORY          NBITS(CAPS_WLAN_CATAGORY)
+#define NSTACKX_CAPS_MULTIPATH              NBITS(CAPS_MULTIPATH)
+
+#define NSTACKX_CAPS_MASK                   (NBITS(CAPS_MAX) - 1)
 
 /*
  * DFile session message data. User should fetch corresponding member variable based on message type:

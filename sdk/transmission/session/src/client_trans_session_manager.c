@@ -30,8 +30,6 @@
 #define ID_USED 1
 #define SHIFT_3 3
 #define SESSION_MAP_COUNT ((MAX_SESSION_ID + 0x7) >> SHIFT_3)
-#define IS_SERVER 0
-#define IS_CLIENT 1
 
 static uint8_t g_idFlagBitmap[SESSION_MAP_COUNT];
 
@@ -958,6 +956,31 @@ static INodeStateCb g_transLnnCb = {
     .events = EVENT_NODE_STATE_OFFLINE,
     .onNodeOffline = ClientTransLnnOfflineProc,
 };
+
+int32_t ReCreateSessionServerToServer(void)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ReCreateSessionServerToServer");
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        int32_t ret = ServerIpcCreateSessionServer(serverNode->pkgName, serverNode->sessionName);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session name [%s], pkg name [%s], ret [%d]",
+            serverNode->sessionName, serverNode->pkgName, ret);
+    }
+
+    (void)pthread_mutex_unlock(&g_clientSessionServerList->lock);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ReCreateSessionServerToServer ok");
+    return SOFTBUS_OK;
+}
+
 
 void ClientTransRegLnnOffline(void)
 {

@@ -31,6 +31,6 @@
 #define TRANSFER_ALL_RETRY_COUNT_MIN_NUM 5000
 #define TRANSFER_ALL_RETRY_COUNT_MAX_NUM 10000
 
-void SendFileDataAck(DFileTrans *dFileTrans, DFileReceiveState *nextState, int32_t flag);
+void SendFileDataAck(DFileTrans *dFileTrans, DFileReceiveState *nextState);
 
 #endif /* NSTACKX_DFILE_RETRANSMISSION_H */

@@ -269,8 +269,9 @@ void TearDownTestCase()
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0100
- * @tc.desc   : Test limiation of SendByte
+ * @tc.number : SUB_Softbus_Trans_SendByte_Func_0100
+ * @tc.name   : SendByte_数据包大小1B，发送-接收成功
+ * @tc.desc   : 测试SendByte发送数据规格
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -288,8 +289,9 @@ void TransFuncTest001(void)
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0200
- * @tc.desc   : Test up limitation data size of SendByte
+ * @tc.number : SUB_Softbus_Trans_SendByte_Func_0200
+ * @tc.name   : SendByte_数据包大小2K，发送-接收成功
+ * @tc.desc   : 测试SendByte发送数据规格
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -307,8 +309,9 @@ void TransFuncTest002(void)
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0300
- * @tc.desc   : Test up limitation data size of SendByte
+ * @tc.number : SUB_Softbus_Trans_SendByte_Func_0300
+ * @tc.name   : SendByte_数据包大小Max，发送-接收成功
+ * @tc.desc   : 测试SendByte发送数据规格
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -326,8 +329,9 @@ void TransFuncTest003(void)
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0100
- * @tc.desc   : Test the minimum data size of SendMessage
+ * @tc.number : SUB_Softbus_Trans_SendMessage_Func_0100
+ * @tc.name   : SendMessage_数据包大小1B，发送-接收成功
+ * @tc.desc   : 测试SendMessage发送数据规格
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -345,8 +349,9 @@ void TransFuncTest004(void)
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0200
- * @tc.desc   : Test send 1000 Byte data size via function SendMessage
+ * @tc.number : SUB_Softbus_Trans_SendMessage_Func_0200
+ * @tc.name   : SendMessage_数据包大小1000B，发送-接收成功
+ * @tc.desc   : 测试SendMessage发送数据规格
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -364,8 +369,9 @@ void TransFuncTest005(void)
 }
 
 /**
- * @tc.name   : SUB_Softbus_Trans_Session_Func_0100
- * @tc.desc   : Test the maximum number of sessions that can be create by function CreateSessionServer
+ * @tc.number : SUB_Softbus_Trans_Session_Func_0100
+ * @tc.name   : 1个Client_创建SessionServer_Max个，成功
+ * @tc.desc   : 测试会话管理
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
