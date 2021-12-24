@@ -39,7 +39,6 @@ static TypeToId g_typeToIdMap[] = {
     {TYPE_PHONE, TYPE_PHONE_ID},
     {TYPE_PAD, TYPE_PAD_ID},
     {TYPE_TV, TYPE_TV_ID},
-    {TYPE_PC, TYPE_PC_ID},
     {TYPE_CAR, TYPE_CAR_ID},
     {TYPE_WATCH, TYPE_WATCH_ID},
     {TYPE_IPCAMERA, TYPE_IPCAMERA_ID},
