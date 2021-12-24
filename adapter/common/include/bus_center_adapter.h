@@ -34,7 +34,6 @@ typedef enum {
 #define TYPE_PHONE "PHONE"
 #define TYPE_PAD "PAD"
 #define TYPE_TV "TV"
-#define TYPE_PC "PC"
 #define TYPE_CAR "CAR"
 #define TYPE_WATCH "WATCH"
 #define TYPE_IPCAMERA "WiFiCamara"
