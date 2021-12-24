@@ -45,7 +45,7 @@ static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceW
 
     wifiConf->securityType = sourceWifiConf->securityType;
     wifiConf->isHiddenSsid = sourceWifiConf->isHiddenSsid;
-    
+
     return SOFTBUS_OK;
 }
 
@@ -70,7 +70,7 @@ static int32_t ConvertWifiDevConfFromSoftBusWifiConf(const SoftBusWifiDevConf *r
 
     wifiConf->securityType = result->securityType;
     wifiConf->isHiddenSsid = result->isHiddenSsid;
-    
+
     return SOFTBUS_OK;
 }
 
@@ -80,7 +80,7 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
     uint32_t wifiConfigSize;
     int32_t retVal;
     uint32_t i;
-    
+
     if (configList == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para configList is NULL");
         return SOFTBUS_ERR;
@@ -126,18 +126,18 @@ int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
     if (wifiConfig == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para wifiConfig is NULL");
         return SOFTBUS_ERR;
-}
+    }
     (void)memset_s(&wifiDevConfig, sizeof(WifiDeviceConfig), 0, sizeof(WifiDeviceConfig));
     if (ConvertWifiDevConfFromSoftBusWifiConf(wifiConfig, &wifiDevConfig) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert wifi config failed.");
         return SOFTBUS_ERR;
     }
-    
+
     if (ConnectToDevice(&wifiDevConfig) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connect to wifi failed.");
         return SOFTBUS_ERR;
     }
-    
+
     return SOFTBUS_OK;
 }
 

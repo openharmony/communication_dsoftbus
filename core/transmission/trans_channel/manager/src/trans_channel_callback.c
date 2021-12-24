@@ -22,6 +22,8 @@
 #include "trans_lane_manager.h"
 #include "trans_session_manager.h"
 
+#include "softbus_qos.h"
+
 static IServerChannelCallBack g_channelCallBack;
 
 static int32_t TransServerOnChannelOpened(const char *pkgName, const char *sessionName,
@@ -31,6 +33,11 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, const char *sessi
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (channel->isServer == false && channel->channelType == CHANNEL_TYPE_UDP &&
+        NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
+        return SOFTBUS_ERR;
+    }
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel);
 }
 
@@ -43,6 +50,7 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t channelId
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
+    NotifyQosChannelClosed(channelId, channelType);
     if (ClientIpcOnChannelClosed(pkgName, channelId, channelType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
@@ -81,12 +89,26 @@ static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t channelId, 
     return SOFTBUS_OK;
 }
 
+static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
+{
+    if (pkgName == NULL || param == NULL || param->tvCount <= 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (ClientIpcOnChannelQosEvent(pkgName, param) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientIpcOnChannelQosEvent fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 IServerChannelCallBack *TransServerGetChannelCb(void)
 {
     g_channelCallBack.OnChannelOpened = TransServerOnChannelOpened;
     g_channelCallBack.OnChannelClosed = TransServerOnChannelClosed;
     g_channelCallBack.OnChannelOpenFailed = TransServerOnChannelOpenFailed;
     g_channelCallBack.OnDataReceived = TransServerOnMsgReceived;
+    g_channelCallBack.OnQosEvent = TransServerOnQosEvent;
     g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
     g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
     return &g_channelCallBack;

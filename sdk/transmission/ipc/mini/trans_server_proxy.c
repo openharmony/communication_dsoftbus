@@ -49,3 +49,12 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
 {
     return TransSendMsg(channelId, channelType, data, len, msgType);
 }
+
+int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    (void)channelId;
+    (void)chanType;
+    (void)appType;
+    (void)quality;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

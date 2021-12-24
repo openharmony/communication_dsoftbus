@@ -48,6 +48,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnChannelClosedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_MSGRECEIVED] =
         &SoftBusClientStub::OnChannelMsgReceivedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_QOSEVENT] =
+        &SoftBusClientStub::OnChannelQosEventInner;
     memberFuncMap_[CLIENT_ON_JOIN_RESULT] =
         &SoftBusClientStub::OnJoinLNNResultInner;
     memberFuncMap_[CLIENT_ON_LEAVE_RESULT] =
@@ -163,6 +165,12 @@ int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, int32_t chann
     uint32_t len, int32_t type)
 {
     return TransOnChannelMsgReceived(channelId, channelType, data, len, static_cast<SessionPktType>(type));
+}
+
+int32_t SoftBusClientStub::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
+    int32_t tvCount, const QosTv *tvList)
+{
+    return TransOnChannelQosEvent(channelId, channelType, eventId, tvCount, tvList);
 }
 
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
@@ -317,6 +325,43 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
     bool res = reply.WriteInt32(ret);
     if (!res) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessageParcel &reply)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnChannelQosEventInner");
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read channel id failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t eventId;
+    if (!data.ReadInt32(eventId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read eventId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t tvCount;
+    if (!data.ReadInt32(tvCount)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv count failed!");
+        return SOFTBUS_ERR;
+    }
+    QosTv *tvList = (QosTv *)data.ReadRawData(sizeof(QosTv) * tvCount);
+    if (tvList == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv list failed!");
+        return SOFTBUS_ERR;
+    }
+    int ret = OnChannelQosEvent(channelId, channelType, eventId, tvCount, tvList);
+    bool res = reply.WriteInt32(ret);
+    if (!res) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

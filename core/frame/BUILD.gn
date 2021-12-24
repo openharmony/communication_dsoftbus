@@ -100,7 +100,6 @@ if (defined(ohos_lite)) {
         "-std=c99",
       ]
       cflags_cc = cflags
-      ldflags = bus_center_hub_ldflags
       deps = dsoftbus_server_common_deps
       deps += [
         ":permission_json",
@@ -122,13 +121,9 @@ if (defined(ohos_lite)) {
 } else {
   ohos_prebuilt_etc("softbus_server.rc") {
     relative_install_dir = "init"
-    if (use_musl) {
-      source =
-          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
-    } else {
-      source =
-          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.rc"
-    }
+    source =
+        "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
+
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"
   }
@@ -149,7 +144,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/include",
-      "//utils/native/lite/include",
     ]
     sources = dsoftbus_server_common_src
     sources += [

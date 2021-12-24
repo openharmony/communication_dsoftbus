@@ -166,3 +166,10 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
     SoftBusFree(tmpData);
     return ans;
 }
+
+int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+{
+    (void)pkgName;
+    (void)param;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

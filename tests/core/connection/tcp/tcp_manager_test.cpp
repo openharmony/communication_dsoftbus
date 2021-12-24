@@ -305,9 +305,6 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
 
     ConnPktHead head = {0};
     head.len = strlen(g_data);
-    char data[sizeof(head) + head.len];
-    (void)memcpy_s(&data, sizeof(head), (void*)&head, sizeof(head));
-    (void)memcpy_s(&data[sizeof(head)], head.len, g_data, head.len);
 
     pthread_create(&pid, nullptr, (void *(*)(void *))CreateServer, nullptr);
     sleep(1);
@@ -315,6 +312,12 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     EXPECT_EQ(1, TcpGetConnNum());
     for (int i = 0; i < 3; i++) {
+        char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
+        if (data == NULL) {
+            continue;
+        }
+        (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
+        (void)memcpy_s(data + sizeof(head), head.len, g_data, head.len);
         EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0));
         sleep(1);
         EXPECT_EQ(int(sizeof(ConnPktHead) + head.len), g_receivedDatalength);
@@ -396,9 +399,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     printf("maxDataLen: %d\n", maxDataLen);
     ConnPktHead head = {0};
     head.len = maxDataLen + 1;
-    char data[sizeof(head) + maxDataLen];
-    (void)memcpy_s(&data, sizeof(head), (void*)&head, sizeof(head));
-    (void)memset_s(&data[sizeof(head)], head.len, 0x1, head.len);
+
+    char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
+    if (data == NULL) {
+        printf("Failed to assign memory to data.");
+        return;
+    }
+    (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
+    (void)memset_s(data + sizeof(head), head.len, 0x1, head.len);
 
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));

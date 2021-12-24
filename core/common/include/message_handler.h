@@ -16,6 +16,7 @@
 #ifndef MESSAGE_HANDLER_H
 #define MESSAGE_HANDLER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -29,6 +30,7 @@ typedef struct SoftBusLooper SoftBusLooper;
 
 struct SoftBusLooper {
     SoftBusLooperContext *context;
+    bool dumpable;
     void (*PostMessage)(const SoftBusLooper *looper, SoftBusMessage *msg);
     void (*PostMessageDelay)(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis);
     void (*RemoveMessage)(const SoftBusLooper *looper, const SoftBusHandler *handler, int32_t what);
@@ -75,6 +77,8 @@ void DumpLooper(const SoftBusLooper *looper);
 SoftBusLooper *CreateNewLooper(const char *name);
 
 void DestroyLooper(SoftBusLooper *looper);
+
+void SetLooperDumpable(SoftBusLooper *loop, bool dumpable);
 
 #ifdef __cplusplus
 }

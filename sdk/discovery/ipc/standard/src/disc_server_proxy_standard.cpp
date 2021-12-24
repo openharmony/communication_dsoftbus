@@ -236,6 +236,7 @@ int32_t DiscServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, uin
 {
     return SOFTBUS_OK;
 }
+
 int32_t DiscServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
     uint32_t len)
 {
@@ -249,6 +250,11 @@ int32_t DiscServerProxy::StartTimeSync(const char *pkgName, const char *targetNe
 }
 
 int32_t DiscServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     return SOFTBUS_OK;
 }

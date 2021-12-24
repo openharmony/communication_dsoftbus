@@ -187,18 +187,9 @@ static int32_t CheckUnsentList(List *unsent, List *head, int32_t maxCount)
     return cnt;
 }
 
-static int32_t GetMaxSendCount(const DFileSession *session, const PeerInfo *peerInfo)
+static int32_t GetMaxSendCount(void)
 {
     return 1;
-}
-
-static bool CheckSendByBackPress(DataBackPressure *backPress)
-{
-    if (backPress->recvListOverIo == 1) {
-        return true;
-    }
-
-    return false;
 }
 
 static int32_t DoSendDataFrame(DFileSession *session, List *head, int32_t count, uint32_t tid, uint8_t socketIndex)
@@ -209,11 +200,11 @@ static int32_t DoSendDataFrame(DFileSession *session, List *head, int32_t count,
     if (!peerInfo) {
         return NSTACKX_EFAILED;
     }
-    int32_t maxCount = GetMaxSendCount(session, peerInfo);
+    int32_t maxCount = GetMaxSendCount();
     int32_t flag;
     do {
-        while (count < maxCount && FileManagerHasPendingData(session->fileManager, socketIndex)) {
-            ret = FileManagerFileRead(session->fileManager, tid, socketIndex, &block, maxCount - count);
+        while (count < maxCount && FileManagerHasPendingData(session->fileManager)) {
+            ret = FileManagerFileRead(session->fileManager, tid, &block, maxCount - count);
             if (ret < 0) {
                 LOGE(TAG, "FileManagerFileRead failed %d", ret);
                 break;
@@ -242,11 +233,61 @@ static int32_t DoSendDataFrame(DFileSession *session, List *head, int32_t count,
         }
 
         count = 0;
-        maxCount = GetMaxSendCount(session, peerInfo);
+        maxCount = GetMaxSendCount();
         flag = CapsTcp(session) ? (session->sendRemain ? 0 : 1) :
             (peerInfo->intervalSendCount < (uint16_t)peerInfo->amendSendRate && !session->closeFlag);
-    } while (flag && !CheckSendByBackPress(&peerInfo->backPress));
+    } while (flag && (session->stopSendCnt[tid] == 0));
     return ret;
+}
+
+
+/*
+ *  * if backpress frame count is not zero then sleep one ack interval and update stopSendCnt
+ *   * if backpress frame count is zero then send packet normally
+ *    */
+static void CheckSendByBackPress(DFileSession *session, uint32_t tid, uint8_t socketIndex)
+{
+    uint32_t fileProcessCnt;
+    uint32_t sleepTime;
+    uint32_t stopCnt;
+    PeerInfo *peerInfo = ClientGetPeerInfoBySocketIndex(socketIndex, session);
+    if (peerInfo == NULL) {
+        return;
+    }
+
+    if (session->stopSendCnt[tid] != 0) {
+        if (PthreadMutexLock(&session->backPressLock) != 0) {
+            LOGE(TAG, "pthread backPressLock mutex lock failed");
+            return;
+        }
+
+        stopCnt = session->stopSendCnt[tid];
+        if (stopCnt == 0) {
+            if (PthreadMutexUnlock(&session->backPressLock) != 0) {
+                LOGE(TAG, "pthread backPressLock mutex unlock failed");
+            }
+            return;
+        }
+
+        /* fileProcessCnt corresponds to trans one-to-one, one ack interval recv fileProcessCnt backpress frame */
+        fileProcessCnt = session->fileListProcessingCnt + session->smallListProcessingCnt;
+
+        session->stopSendCnt[tid] = (session->stopSendCnt[tid] > fileProcessCnt) ? (session->stopSendCnt[tid] -
+            fileProcessCnt) : 0;
+
+        if (PthreadMutexUnlock(&session->backPressLock) != 0) {
+            LOGE(TAG, "pthread backPressLock mutex unlock failed");
+            return;
+        }
+
+        sleepTime = CapsTcp(session) ? NSTACKX_INIT_RATE_STAT_INTERVAL : peerInfo->rateStateInterval;
+
+#ifndef NSTACKX_WITH_LITEOS
+        LOGI(TAG, "tid %u sleep %u us fileProCnt %u Interval %u lastStopCnt %u stopSendCnt %u", tid, sleepTime,
+             fileProcessCnt, peerInfo->rateStateInterval, stopCnt, session->stopSendCnt[tid]);
+#endif
+        (void)usleep(sleepTime);
+    }
 }
 
 int32_t SendDataFrame(DFileSession *session, List *unsent, uint32_t tid, uint8_t socketIndex)
@@ -258,11 +299,13 @@ int32_t SendDataFrame(DFileSession *session, List *unsent, uint32_t tid, uint8_t
     if (peerInfo == NULL) {
         return NSTACKX_EFAILED;
     }
-    if ((peerInfo->amendSendRate == 0) || CheckSendByBackPress(&(peerInfo->backPress))) {
+    if (peerInfo->amendSendRate == 0) {
         return ret;
     }
 
-    int32_t maxCount = GetMaxSendCount(session, peerInfo);
+    CheckSendByBackPress(session, tid, socketIndex);
+
+    int32_t maxCount = GetMaxSendCount();
     int32_t count = CheckUnsentList(unsent, &tmpq, maxCount);
     ret = DoSendDataFrame(session, &tmpq, count, tid, socketIndex);
     if (ret == NSTACKX_EAGAIN) {

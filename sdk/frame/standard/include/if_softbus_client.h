@@ -20,6 +20,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "session.h"
 #include "softbus_def.h"
 
 namespace OHOS {
@@ -37,6 +38,8 @@ public:
     virtual int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t type) = 0;
     virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+        const QosTv *tvList) = 0;
     virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) = 0;
     virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode) = 0;
     virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
