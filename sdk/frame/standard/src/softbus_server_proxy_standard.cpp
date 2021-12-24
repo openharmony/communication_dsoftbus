@@ -170,4 +170,9 @@ int32_t SoftBusServerProxyFrame::StopTimeSync(const char *pkgName, const char *t
 {
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    return SOFTBUS_OK;
+}
 }

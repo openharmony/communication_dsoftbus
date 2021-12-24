@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_CHANNEL_CALLBACK_H
 #define CLIENT_TRANS_CHANNEL_CALLBACK_H
 
+#include "session.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
@@ -30,6 +31,9 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType);
 
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, unsigned int len, SessionPktType type);
+
+int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
+    int32_t tvCount, const QosTv *tvList);
 
 #ifdef __cplusplus
 }

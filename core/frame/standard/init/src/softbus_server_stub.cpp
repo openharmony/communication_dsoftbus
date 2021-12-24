@@ -115,6 +115,8 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::StartTimeSyncInner;
     memberFuncMap_[SERVER_STOP_TIME_SYNC] =
         &SoftBusServerStub::StopTimeSyncInner;
+    memberFuncMap_[SERVER_QOS_REPORT] =
+        &SoftBusServerStub::QosReportInner;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -618,6 +620,37 @@ int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel 
     int32_t retReply = StopTimeSync(pkgName, targetNetworkId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner read channel Id failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner read channel channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t appType;
+    if (!data.ReadInt32(appType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner read channel appType failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t quality;
+    if (!data.ReadInt32(quality)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner read quality failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t retReply = QosReport(channelId, channelType, appType, quality);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

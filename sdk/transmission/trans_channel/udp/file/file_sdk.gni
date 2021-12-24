@@ -19,7 +19,6 @@ dsoftbus_file_sdk_path =
 trans_file_sdk_inc = [ "$dsoftbus_file_sdk_path/include" ]
 trans_file_sdk_src = []
 trans_file_sdk_deps = []
-trans_file_sdk_ldflags = []
 
 if (enable_trans_udp_file == true) {
   trans_file_sdk_src += [
@@ -39,7 +38,6 @@ if (enable_trans_udp_file == true) {
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface",
     ]
-    trans_file_sdk_ldflags += [ "-lnstackx_dfile" ]
     trans_file_sdk_deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
   } else {
     trans_file_sdk_inc += [

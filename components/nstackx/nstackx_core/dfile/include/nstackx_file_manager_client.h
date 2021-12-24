@@ -31,7 +31,7 @@ int32_t InitSendBlockLists(FileManager *fileManager);
 
 uint32_t GetMaxSendListSize(uint16_t connType);
 
-uint16_t GetSendListNum(uint16_t connType, const DFileSession *session);
+uint16_t GetSendListNum(void);
 
 void ClearSendFrameList(FileManager *fileManager);
 

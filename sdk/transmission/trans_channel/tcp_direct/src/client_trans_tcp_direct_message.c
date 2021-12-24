@@ -14,7 +14,6 @@
  */
 
 #include "client_trans_tcp_direct_message.h"
-
 #include <arpa/inet.h>
 #include <securec.h>
 
@@ -34,6 +33,9 @@
 #define ACK_SIZE 4
 #define DATA_EXTEND_LEN (DC_DATA_HEAD_SIZE + OVERHEAD_LEN)
 #define MIN_BUF_LEN (1024 + DATA_EXTEND_LEN)
+
+#define BYTE_TOS 0x60
+#define MESSAGE_TOS 0xC0
 
 typedef struct {
     ListNode node;
@@ -137,6 +139,10 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     if (buf == NULL || outLen != len + OVERHEAD_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
         return SOFTBUS_ENCRYPT_ERR;
+    }
+    uint8_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
+    if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
+        return SOFTBUS_TCP_SOCKET_ERR;
     }
     uint32_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != outLen + DC_DATA_HEAD_SIZE) {

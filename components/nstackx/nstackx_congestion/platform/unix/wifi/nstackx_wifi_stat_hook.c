@@ -53,7 +53,6 @@ int32_t GetWifiInfoFromHook(const char *devName, WifiStationInfo *wifiStationInf
 
 int32_t CongestionInitGetWifiHook(GetWifiInfoHook getWifiInfoHook)
 {
-    LOGI(TAG, "CongestionInitFromAndroid callback ok");
     g_getWifiInfoHook = getWifiInfoHook;
     return NSTACKX_EOK;
 }

@@ -1116,7 +1116,7 @@ static void ReceiverFsm(DFileTrans *dFileTrans)
                 ReceiveFileDataOngoing(dFileTrans, &nextState);
                 break;
             case STATE_SEND_FILE_DATA_ACK:
-                SendFileDataAck(dFileTrans, &nextState, 0);
+                SendFileDataAck(dFileTrans, &nextState);
                 break;
             case STATE_SEND_FILE_TRANSFER_DONE:
                 SendFileTransferDoneFrame(dFileTrans, &nextState);
@@ -1256,7 +1256,7 @@ static void UpdateTransParam(DFileTrans *dFileTrans, uint8_t endFlag, uint16_t f
     if (endFlag && fileId == maxFileId) {
         DFileReceiveState nextState;
         LOGI(TAG, "send all retry packets");
-        SendFileDataAck(dFileTrans, &nextState, 1 << NSTACKX_RETRY_MAX_COUNT_BIT);
+        SendFileDataAck(dFileTrans, &nextState);
     }
     dFileTrans->receivedDataFrameCnt++;
     dFileTrans->bytesTransferred += len;
@@ -1538,10 +1538,9 @@ DFileTrans *DFileTransCreate(const DFileTransPara *para)
     return dFileTrans;
 }
 
-void DFileTransDestroy(DFileTrans *dFileTrans, uint8_t isForce)
+void DFileTransDestroy(DFileTrans *dFileTrans)
 {
     dFileTrans->session->allTaskCount--;
-
     DFileTransDestroyInner(dFileTrans);
 }
 

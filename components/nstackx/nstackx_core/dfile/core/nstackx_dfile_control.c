@@ -14,8 +14,11 @@
  */
 
 #include "nstackx_dfile_control.h"
-#include "nstackx_dfile_config.h"
+
 #include "securec.h"
+
+#include "nstackx_dfile_config.h"
+#include "nstackx_dfile_mp.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
 
@@ -58,7 +61,7 @@ void DFileSendTransferDoneAck(DFileSession *session)
         LOGI(TAG, "transferDoneAckList transId %u send num %u",
             transferDoneAckNode->transId, transferDoneAckNode->sendNum);
         if (transferDoneAckNode->sendNum > 0) {
-            peerInfo = ClientGetPeerInfoByTransId(transferDoneAckNode->transId, session);
+            peerInfo = ClientGetPeerInfoByTransId(session);
             if (!peerInfo) {
                 if (PthreadMutexUnlock(&session->transferDoneAckList.lock) != 0) {
                     LOGE(TAG, "pthread mutex unlock error");

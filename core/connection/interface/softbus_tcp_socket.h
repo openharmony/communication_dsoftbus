@@ -57,6 +57,7 @@ ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void CloseTcpFd(int32_t fd);
 void TcpShutDown(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
+int32_t SetIpTos(int fd, uint8_t tos);
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 
 #ifdef __cplusplus
