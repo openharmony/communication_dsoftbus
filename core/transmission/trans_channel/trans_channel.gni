@@ -14,16 +14,18 @@
 import(
     "//foundation/communication/dsoftbus/core/transmission/trans_channel/proxy/proxy.gni")
 import(
+    "//foundation/communication/dsoftbus/core/transmission/trans_channel/qos/qos.gni")
+import(
     "//foundation/communication/dsoftbus/core/transmission/trans_channel/tcp_direct/tcp_direct.gni")
 import(
     "//foundation/communication/dsoftbus/core/transmission/trans_channel/udp_negotiation/udp_negotiation.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-trans_channel_src =
-    trans_proxy_channel_src + trans_direct_channel_src + trans_udp_channel_src
-trans_channel_inc =
-    trans_proxy_channel_inc + trans_direct_channel_inc + trans_udp_channel_inc
-trans_channel_deps = trans_proxy_channel_deps
+trans_channel_src = trans_proxy_channel_src + trans_direct_channel_src +
+                    trans_udp_channel_src + trans_qos_src
+trans_channel_inc = trans_proxy_channel_inc + trans_direct_channel_inc +
+                    trans_udp_channel_inc + trans_qos_inc
+trans_channel_deps = trans_proxy_channel_deps + trans_qos_deps
 
 trans_channel_src += [
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",

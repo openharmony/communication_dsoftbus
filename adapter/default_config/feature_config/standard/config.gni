@@ -26,7 +26,8 @@ declare_args() {
 
   enable_auto_networking = true
   enable_time_sync = true
-  enable_dsoftbus_driver = true
+  enable_qos = true
+  enable_dsoftbus_driver = false
 
   enable_build_shared_sdk = true
 }

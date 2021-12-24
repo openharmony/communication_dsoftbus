@@ -149,6 +149,24 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info)
     return SOFTBUS_OK;
 }
 
+int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp qos eventId[%d].", eventId);
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    int32_t ret = g_channelCb->GetPkgNameBySessionName(info->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
+        return SOFTBUS_ERR;
+    }
+    QosParam param;
+    param.channelId = (int32_t)(info->myData.channelId);
+    param.channelType = CHANNEL_TYPE_UDP;
+    param.eventId = eventId;
+    param.tvCount = tvCount;
+    param.tvList = tvList;
+    return g_channelCb->OnQosEvent(pkgName, &param);
+}
+
 static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
 {
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));

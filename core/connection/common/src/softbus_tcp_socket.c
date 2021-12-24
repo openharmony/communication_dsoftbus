@@ -151,6 +151,16 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
     return SOFTBUS_OK;
 }
 
+int32_t SetIpTos(int fd, uint8_t tos)
+{
+    int rc = setsockopt(fd, IPPROTO_IP, IP_TOS, &tos, sizeof(tos));
+    if (rc != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set tos failed");
+        return SOFTBUS_TCP_SOCKET_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int OpenTcpServerSocket(const char *ip, int port)
 {
     if (ip == NULL || port < 0) {

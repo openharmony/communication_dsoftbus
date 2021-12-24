@@ -17,6 +17,7 @@
 
 #include <mutex>
 #include <unistd.h>
+#include "client_trans_session_manager.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -59,6 +60,11 @@ static int InnerRegisterService(void)
     int ret = serverProxyFrame->SoftbusRegisterService(clientName, nullptr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerIpcRegisterService failed!\n");
+        return ret;
+    }
+    ret = ReCreateSessionServerToServer();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus server register service success!\n");
