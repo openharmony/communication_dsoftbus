@@ -30,7 +30,6 @@ extern "C" {
 #define TYPE_PHONE_ID 0x0E
 #define TYPE_PAD_ID 0x11
 #define TYPE_TV_ID 0x9C
-#define TYPE_PC_ID 0x0C
 #define TYPE_AUDIO_ID 0x0A
 #define TYPE_CAR_ID 0x83
 #define TYPE_WATCH_ID 0x6D
