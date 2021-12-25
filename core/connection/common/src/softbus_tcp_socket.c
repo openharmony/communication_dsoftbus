@@ -167,7 +167,7 @@ int OpenTcpServerSocket(const char *ip, int port)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
         TcpShutDown(fd);
-        return -1;P
+        return -1;
     }
     return fd;
 }
