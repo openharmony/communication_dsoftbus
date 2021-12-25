@@ -265,14 +265,15 @@ static void DeleteAuth(AuthManager *auth)
     (void)pthread_mutex_unlock(&g_authLock);
 }
 
-static void HandleAuthFail(AuthManager *auth)
+void AuthHandleFail(AuthManager *auth, int32_t reason)
 {
-    if (auth == NULL) {
+    if (auth == NULL || auth->cb->onDeviceVerifyFail == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth is NULL or device verify fail Callback is NULL!");
         return;
     }
     EventRemove(auth->id);
-    auth->cb->onDeviceVerifyFail(auth->authId);
-}
+    auth->cb->onDeviceVerifyFail(auth->authId, reason);
+
 
 int32_t AuthHandleLeaveLNN(int64_t authId)
 {
@@ -416,7 +417,7 @@ void AuthOnConnectSuccessful(uint32_t requestId, uint32_t connectionId, const Co
     }
     auth->connectionId = connectionId;
     if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
-        HandleAuthFail(auth);
+        AuthHandleFail(auth, SOFTBUS_AUTH_SYNC_DEVID_FAILED);
     }
 }
 
@@ -428,7 +429,7 @@ void AuthOnConnectFailed(uint32_t requestId, int reason)
     if (auth == NULL) {
         return;
     }
-    HandleAuthFail(auth);
+    AuthHandleFail(auth, reason);
 }
 
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen)
@@ -440,7 +441,7 @@ void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uin
     if (module == MODULE_AUTH_SDK) {
         if (auth->hichain->processData(auth->authId, data, dataLen, &g_hichainCallback) != 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Hichain process data failed");
-            HandleAuthFail(auth);
+            AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_PROCESS_FAILED);
         }
     } else {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown auth data module");
@@ -464,7 +465,7 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
     if (auth->hichain->authDevice(auth->authId, authParams, &g_hichainCallback) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authDevice failed");
         cJSON_free(authParams);
-        HandleAuthFail(auth);
+        AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_AUTH_DEVICE_FAILED)
         return;
     }
     cJSON_free(authParams);
@@ -533,17 +534,17 @@ void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data)
     }
     if (AuthUnpackDeviceInfo(auth, data) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthUnpackDeviceInfo failed");
-        HandleAuthFail(auth);
+        AuthHandleFail(auth, SOFTBUS_AUTH_UNPACK_DEVID_FAILED);
         return;
     }
     if (auth->side == SERVER_SIDE_FLAG) {
         if (EventInLooper(auth->id) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth EventInLooper failed");
-            HandleAuthFail(auth);
+            AuthHandleFail(auth, SOFTBUS_MALLOC_ERR);
             return;
         }
         if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
-            HandleAuthFail(auth);
+            AuthHandleFail(auth, SOFTBUS_AUTH_SYNC_DEVID_FAILED);
         }
         return;
     }
@@ -590,13 +591,13 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         auth->encryptDevData = (uint8_t *)SoftBusMalloc(len);
         if (auth->encryptDevData == NULL) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
-            HandleAuthFail(auth);
+            AuthHandleFail(auth, SOFTBUS_MALLOC_ERR);
             return;
         }
         (void)memset_s(auth->encryptDevData, len, 0, len);
         if (memcpy_s(auth->encryptDevData, len, data, len) != EOK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
-            HandleAuthFail(auth);
+            AuthHandleFail(auth, SOFTBUS_MEM_ERR);
             return;
         }
         auth->encryptLen = len;
@@ -765,7 +766,7 @@ static void AuthOnError(int64_t authId, int operationCode, int errorCode, const 
             return;
         }
     }
-    HandleAuthFail(auth);
+    AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
 static char *AuthOnRequest(int64_t authReqId, int authForm, const char *reqParams)
@@ -1065,9 +1066,9 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         return SOFTBUS_ERR;
     }
     int32_t fd;
-    fd = OpenTcpChannel(option);
+    fd = AuthOpenTcpChannel(option, false);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AuthOpenTcpChannel failed");
         return SOFTBUS_ERR;
     }
     AuthManager *auth = (AuthManager *)SoftBusCalloc(sizeof(AuthManager));

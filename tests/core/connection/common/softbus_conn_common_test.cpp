@@ -337,22 +337,22 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
 {
-    int fd = OpenTcpClientSocket("127.0.0.1", "194.0.0.1", g_port);
+    int fd = OpenTcpClientSocket("127.0.0.1", "194.0.0.1", g_port, false);
     int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     int port = GetTcpSockPort(fd);
     EXPECT_EQ(port, -1);
     CloseTcpFd(fd);
 
-    fd = OpenTcpClientSocket(nullptr, "127.0.0.1", g_port);
+    fd = OpenTcpClientSocket(nullptr, "127.0.0.1", g_port, false);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(fd);
-    fd = OpenTcpClientSocket("127.0.0.1", nullptr, g_port);
+    fd = OpenTcpClientSocket("127.0.0.1", nullptr, g_port, false);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(fd);
-    fd = OpenTcpClientSocket("127.0.0.1", "127.0.0.1", -1);
+    fd = OpenTcpClientSocket("127.0.0.1", "127.0.0.1", -1, false);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(fd);
@@ -380,7 +380,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket004, TestSize.Level1)
 {
-    int clientFd = OpenTcpClientSocket("127.0.0.1", "127.5.0.1", g_port);
+    int clientFd = OpenTcpClientSocket("127.0.0.1", "127.5.0.1", g_port, false);
     int ret = (clientFd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ssize_t bytes = SendTcpData(clientFd, "Hello world", 11, 0);
