@@ -172,7 +172,7 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
 
 static int32_t TrySyncDeviceUuid(int32_t fd)
 {
-    AuthManager *auth = auth = AuthGetManagerByFd(fd);
+    AuthManager *auth = AuthGetManagerByFd(fd);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth failed in TrySyncDeviceUuid");
         return SOFTBUS_ERR;
@@ -185,17 +185,17 @@ static int32_t TrySyncDeviceUuid(int32_t fd)
     (void)DelTrigger(AUTH, fd, WRITE_TRIGGER);
     if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
-        AuthHandleFail(auth, SOFTBUS_CONN_FAIL);
+        HandleAuthFail(auth);
         return SOFTBUS_ERR;
     }
     if (ConnToggleNonBlockMode(fd, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set socket to block mode failed");
-        AuthHandleFail(auth, SOFTBUS_CONN_FAIL);
+        HandleAuthFail(auth);
         return SOFTBUS_ERR;
     }
     if (AuthSyncDeviceUuid(auth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSyncDeviceUuid failed");
-        AuthHandleFail(auth, SOFTBUS_AUTH_SYNC_DEVID_FAILED);
+        HandleAuthFail(auth);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
