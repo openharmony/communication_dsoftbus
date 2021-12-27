@@ -92,6 +92,7 @@ void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uin
 void AuthNotifyLnnDisconn(const AuthManager *auth);
 void AuthNotifyTransDisconn(int64_t authId);
 void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len);
+void HandleAuthFail(AuthManager *auth);
 
 #ifdef __cplusplus
 }

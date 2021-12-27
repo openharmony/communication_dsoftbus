@@ -255,7 +255,7 @@ static void DeleteAuth(AuthManager *auth)
     (void)pthread_mutex_unlock(&g_authLock);
 }
 
-static void HandleAuthFail(AuthManager *auth)
+void HandleAuthFail(AuthManager *auth)
 {
     if (auth == NULL) {
         return;
@@ -1043,9 +1043,9 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         return SOFTBUS_ERR;
     }
     int32_t fd;
-    fd = OpenTcpChannel(option);
+    fd = AuthOpenTcpChannel(option, false);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpChannel failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AuthOpenTcpChannel failed");
         return SOFTBUS_ERR;
     }
     AuthManager *auth = (AuthManager *)SoftBusCalloc(sizeof(AuthManager));
