@@ -16,6 +16,7 @@
 #include "trans_client_stub.h"
 
 #include "client_trans_channel_callback.h"
+#include "liteipc_adapter.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
@@ -26,7 +27,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
         FreeBuffer(ctx, ipcMsg);
         return;
     }
-    int32_t size = 0;
+    size_t size = 0;
     ChannelInfo channel = {0};
     const char *sessionName = (const char *)IpcIoPopString(reply, &size);
     channel.channelId = IpcIoPopInt32(reply);
@@ -51,7 +52,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     }
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         channel.businessType = IpcIoPopInt32(reply);
-        channel.myIp = IpcIoPopString(reply, &size);
+        channel.myIp = (char *)IpcIoPopString(reply, &size);
         if (channel.isServer) {
             int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
             IpcIo ret;
@@ -62,7 +63,7 @@ void ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
             return;
         }
         channel.peerPort = IpcIoPopInt32(reply);
-        channel.peerIp = IpcIoPopString(reply, &size);
+        channel.peerIp = (char *)IpcIoPopString(reply, &size);
     }
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
