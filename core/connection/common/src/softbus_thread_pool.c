@@ -22,7 +22,7 @@
 #include "softbus_log.h"
 
 #ifndef MIN_STACK_SIZE
-#define MIN_STACK_SIZE 0x2000
+#define MIN_STACK_SIZE 0x4000
 #define THREAD_PRIORITY 20
 #endif
 #define THREAD_POOL_NAME "THREAD_POOL_WORKER"
