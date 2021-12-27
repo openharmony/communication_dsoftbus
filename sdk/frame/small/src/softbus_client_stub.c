@@ -35,7 +35,7 @@ static unsigned int g_deathCbId = INVALID_CB_ID;
 static SvcIdentity g_svcIdentity = {0};
 
 struct SoftBusIpcClientCmd {
-    uint32_t code;
+    enum SoftBusFuncId code;
     void (*func)(IpcIo *io, const IpcContext *ctx, void *ipcMsg);
 };
 

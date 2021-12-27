@@ -15,6 +15,10 @@
 
 #include "client_trans_session_service.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <unistd.h>
 
 #include "client_qos_manager.h"
