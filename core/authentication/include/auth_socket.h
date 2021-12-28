@@ -16,6 +16,8 @@
 #ifndef AUTH_SOCKET_H
 #define AUTH_SOCKET_H
 
+#include <stdbool.h>
+
 #include "auth_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
@@ -24,7 +26,7 @@
 extern "C" {
 #endif
 
-int32_t OpenTcpChannel(const ConnectOption *option);
+int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock);
 int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option);
 void AuthCloseTcpFd(int32_t fd);
 int32_t OpenAuthServer(void);
