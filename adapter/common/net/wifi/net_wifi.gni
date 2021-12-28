@@ -14,7 +14,8 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 adapter_wifi_deps = []
-if (defined(ohos_lite)) {
+if (defined(ohos_lite) ||
+    (defined(device_name) && device_name == "qemu-arm-linux")) {
   adapter_wifi_src = [ "$softbus_adapter_common/net/wifi/common/softbus_wifi_api_adapter_virtual.c" ]
   adapter_wifi_inc = [ "$softbus_adapter_common/net/wifi/include" ]
 } else {
