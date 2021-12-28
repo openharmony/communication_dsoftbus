@@ -48,7 +48,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_core_path/common/security/permission/standard_system/softbus_permission.cpp",
   ]
   softbus_permission_deps = [
-    "//foundation/appexecfwk/standard/kits:appkit_native",
     "//third_party/cJSON:cjson_static",
     "//utils/native/base:utils",
   ]
