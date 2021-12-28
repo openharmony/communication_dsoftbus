@@ -17,6 +17,7 @@
 #define SOFTBUS_TCP_SOCKET_H
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -49,13 +50,14 @@ enum {
 };
 
 int32_t OpenTcpServerSocket(const char *ip, int32_t port);
-int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port);
+int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, bool isNonBlock);
 int32_t GetTcpSockPort(int32_t fd);
 ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout);
 ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void CloseTcpFd(int32_t fd);
 void TcpShutDown(int32_t fd);
 int32_t SetTcpKeepAlive(int32_t fd, int32_t seconds);
+int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 
 #ifdef __cplusplus
 #if __cplusplus

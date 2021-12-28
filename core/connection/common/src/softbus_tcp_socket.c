@@ -17,6 +17,7 @@
 
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <securec.h>
@@ -171,7 +172,7 @@ int OpenTcpServerSocket(const char *ip, int port)
     return fd;
 }
 
-int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port)
+int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isNonBlock)
 {
     if ((peerIp == NULL) || (port <= 0)) {
         return -1;
@@ -179,6 +180,10 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port)
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
+        return -1;
+    }
+    if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set nonblock failed, fd=%d", fd);
         return -1;
     }
 
@@ -206,6 +211,29 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port)
         return -1;
     }
     return fd;
+}
+
+int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
+{
+    if (fd < 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t flags = fcntl(fd, F_GETFL, 0);
+    if (flags < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
+        return SOFTBUS_ERR;
+    }
+    if (isNonBlock && (flags & O_NONBLOCK) == 0) {
+        flags |= O_NONBLOCK;
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to nonblock", fd);
+    } else if (!isNonBlock && (flags & O_NONBLOCK) != 0) {
+        flags = flags & ~O_NONBLOCK;
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to block", fd);
+    } else {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);
+        return SOFTBUS_OK;
+    }
+    return fcntl(fd, F_SETFL, flags);
 }
 
 int GetTcpSockPort(int fd)
