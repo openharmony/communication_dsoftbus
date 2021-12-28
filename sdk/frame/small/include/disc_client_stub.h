@@ -24,11 +24,11 @@ extern "C" {
 #endif
 #endif
 
-void ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnDiscoverFailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnPublishSuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnPublishFail(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnDiscoverFailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnPublishSuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnPublishFail(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 
 #ifdef __cplusplus
 #if __cplusplus
