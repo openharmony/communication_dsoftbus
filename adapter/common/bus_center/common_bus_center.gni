@@ -87,10 +87,7 @@ if (defined(ohos_lite)) {
     "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
   ]
-  bus_center_monitor_deps = [
-    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
-    "//utils/native/base:utils",
-  ]
+  bus_center_monitor_deps = [ "//utils/native/base:utils" ]
 
   if (enable_dsoftbus_driver) {
     bus_center_monitor_src += [
@@ -105,5 +102,5 @@ if (defined(ohos_lite)) {
     ]
   }
 
-  bus_center_monitor_external_deps = [ "ces_standard:cesfwk_innerkits" ]
+  bus_center_monitor_external_deps = []
 }
