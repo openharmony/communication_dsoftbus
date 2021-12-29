@@ -29,15 +29,15 @@ ssize_t StreamPacketizer::CalculateHeaderSize() const
     return total;
 }
 
-ssize_t StreamPacketizer::CalculateExtSize(ssize_t size) const
+ssize_t StreamPacketizer::CalculateExtSize(ssize_t extSize) const
 {
     auto total = 0;
 
     // 如果携带额外信息，需要计算二级TLV大小, 此处暂时只需要传输extbuf
-    if (size > 0) {
+    if (extSize > 0) {
         total += TwoLevelsTlv::HEADER_LEN + TwoLevelsTlv::NUMS_LEN; // 1级头
         total += TwoLevelsTlv::HEADER_LEN + TwoLevelsTlv::NUMS_LEN; // 2级头
-        total += Align(size, SHIFT);                                // 四字节对齐数据
+        total += Align(extSize, SHIFT);                             // 四字节对齐数据
         total += TwoLevelsTlv::CHECK_SUM_LEN;                       // 校验尾
     }
 
