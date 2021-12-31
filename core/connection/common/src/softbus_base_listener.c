@@ -510,6 +510,68 @@ static SoftbusBaseListenerInfo *CreateNewListenerInfo(void)
     return listenerInfo;
 }
 
+static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (pthread_mutex_lock(&g_fdSetLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+    switch (triggerType) {
+        case READ_TRIGGER:
+            FD_SET(fd, &g_readSet);
+            break;
+        case WRITE_TRIGGER:
+            FD_SET(fd, &g_writeSet);
+            break;
+        case EXCEPT_TRIGGER:
+            FD_SET(fd, &g_exceptSet);
+            break;
+        case RW_TRIGGER:
+            FD_SET(fd, &g_readSet);
+            FD_SET(fd, &g_writeSet);
+            break;
+        default:
+            ret = SOFTBUS_INVALID_PARAM;
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
+            break;
+    }
+    pthread_mutex_unlock(&g_fdSetLock);
+
+    return ret;
+}
+
+static int32_t DelTriggerFromSet(int32_t fd, TriggerType triggerType)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (pthread_mutex_lock(&g_fdSetLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+    switch (triggerType) {
+        case READ_TRIGGER:
+            FD_CLR(fd, &g_readSet);
+            break;
+        case WRITE_TRIGGER:
+            FD_CLR(fd, &g_writeSet);
+            break;
+        case EXCEPT_TRIGGER:
+            FD_CLR(fd, &g_exceptSet);
+            break;
+        case RW_TRIGGER:
+            FD_CLR(fd, &g_readSet);
+            FD_CLR(fd, &g_writeSet);
+            break;
+        default:
+            ret = SOFTBUS_INVALID_PARAM;
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
+            break;
+    }
+    pthread_mutex_unlock(&g_fdSetLock);
+
+    return ret;
+}
+
 int32_t StartBaseClient(ListenerModule module)
 {
     if (CheckModule(module) != SOFTBUS_OK) {
@@ -582,7 +644,8 @@ int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, M
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StartBaseListener success");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StartBaseListener success, fd = %d, module = %d",
+        g_listenerList[module].info->listenPort, module);
 
     return g_listenerList[module].info->listenPort;
 }
@@ -649,12 +712,15 @@ int32_t StopBaseListener(ListenerModule module)
     }
     listenerInfo->status = LISTENER_IDLE;
     if (listenerInfo->listenFd > 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del listen fd from readSet, fd = %d, module = %d.",
+            listenerInfo->listenFd, module);
+        DelTriggerFromSet(listenerInfo->listenFd, READ_TRIGGER);
         TcpShutDown(listenerInfo->listenFd);
+        UpdateMaxFd();
     }
     listenerInfo->listenFd = -1;
     pthread_mutex_unlock(&g_listenerList[module].lock);
 
-    UpdateMaxFd();
     return SOFTBUS_OK;
 }
 
@@ -677,68 +743,6 @@ void DestroyBaseListener(ListenerModule module)
         g_listenerList[module].listener = NULL;
     }
     pthread_mutex_unlock(&g_listenerList[module].lock);
-}
-
-static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
-{
-    int32_t ret = SOFTBUS_OK;
-    if (pthread_mutex_lock(&g_fdSetLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-        return SOFTBUS_ERR;
-    }
-    switch (triggerType) {
-        case READ_TRIGGER:
-            FD_SET(fd, &g_readSet);
-            break;
-        case WRITE_TRIGGER:
-            FD_SET(fd, &g_writeSet);
-            break;
-        case EXCEPT_TRIGGER:
-            FD_SET(fd, &g_exceptSet);
-            break;
-        case RW_TRIGGER:
-            FD_SET(fd, &g_readSet);
-            FD_SET(fd, &g_writeSet);
-            break;
-        default:
-            ret = SOFTBUS_INVALID_PARAM;
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
-            break;
-    }
-    pthread_mutex_unlock(&g_fdSetLock);
-
-    return ret;
-}
-
-static int32_t DelTriggerFromSet(int32_t fd, TriggerType triggerType)
-{
-    int32_t ret = SOFTBUS_OK;
-    if (pthread_mutex_lock(&g_fdSetLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-        return SOFTBUS_ERR;
-    }
-    switch (triggerType) {
-        case READ_TRIGGER:
-            FD_CLR(fd, &g_readSet);
-            break;
-        case WRITE_TRIGGER:
-            FD_CLR(fd, &g_writeSet);
-            break;
-        case EXCEPT_TRIGGER:
-            FD_CLR(fd, &g_exceptSet);
-            break;
-        case RW_TRIGGER:
-            FD_CLR(fd, &g_readSet);
-            FD_CLR(fd, &g_writeSet);
-            break;
-        default:
-            ret = SOFTBUS_INVALID_PARAM;
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
-            break;
-    }
-    pthread_mutex_unlock(&g_fdSetLock);
-
-    return ret;
 }
 
 static bool CheckFdIsExist(SoftbusBaseListenerInfo *info, int32_t fd)
@@ -854,15 +858,15 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     if (FD_ISSET(fd, &g_writeSet) || FD_ISSET(fd, &g_readSet) || FD_ISSET(fd, &g_exceptSet)) {
         pthread_mutex_unlock(&g_listenerList[module].lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-            "DelTrigger [fd:%d] success, current fdcount:%d, triggerType:%d",
-            fd, info->fdCount, triggerType);
+            "DelTrigger [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
+            fd, info->fdCount, module, triggerType);
         return SOFTBUS_OK;
     }
 
     DelFdNode(info, fd);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "DelTrigger and node [fd:%d] success, current fdcount:%d, triggerType:%d",
-        fd, info->fdCount, triggerType);
+        "DelTrigger and node [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
+        fd, info->fdCount, module, triggerType);
     pthread_mutex_unlock(&g_listenerList[module].lock);
     UpdateMaxFd();
 
