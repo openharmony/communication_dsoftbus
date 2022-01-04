@@ -741,7 +741,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId && sessionNode->channelType == channelType) {
+            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
                 *sessionId = sessionNode->sessionId;
                 (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
                 return SOFTBUS_OK;
@@ -780,7 +780,8 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if ((sessionNode->channelId == channel->channelId) && (sessionNode->channelType == channel->channelType)) {
+            if ((sessionNode->channelId == channel->channelId) &&
+                (sessionNode->channelType == (ChannelType)(channel->channelType))) {
                 sessionNode->peerPid = channel->peerPid;
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;

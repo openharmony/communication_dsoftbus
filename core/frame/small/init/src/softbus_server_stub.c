@@ -19,16 +19,19 @@
 #include "disc_server_stub.h"
 #include "iproxy_server.h"
 #include "liteipc_adapter.h"
+#include "lnn_bus_center_ipc.h"
 #include "samgr_lite.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
+#include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "trans_server_stub.h"
+#include "trans_session_service.h"
 
 #define STACK_SIZE 0x800
 #define QUEUE_SIZE 20
@@ -84,18 +87,18 @@ static void ComponentDeathCallback(const char *pkgName)
     BusCenterServerDeathCallback(pkgName);
 }
 
-static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
+static int32_t ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
 {
     if (arg == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName((const char *)arg, &svcId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found client by package name.");
         SoftBusFree(arg);
         arg = NULL;
-        return;
+        return SOFTBUS_ERR;
     }
     SERVER_UnregisterService((const char *)arg);
     ComponentDeathCallback((const char *)arg);
@@ -109,16 +112,17 @@ static void ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, 
     sid.token = svcId.token;
     sid.cookie = svcId.cookie;
     UnregisterDeathCallback(sid, svcId.cbId);
+    return SOFTBUS_OK;
 }
 
-static int ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
+static int32_t ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "register service ipc server pop.");
     size_t len = 0;
     int ret = SOFTBUS_ERR;
     struct CommonScvId svcId = {0};
 
-    uint8_t *name = IpcIoPopString(req, &len);
+    const char *name = (const char*)IpcIoPopString(req, &len);
     SvcIdentity *svc = IpcIoPopSvc(req);
     if (name == NULL || svc == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get data fail");
@@ -144,7 +148,7 @@ static int ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
         goto EXIT;
     }
-    if (strcpy_s(pkgName, len + 1, (const char *)name) != EOK) {
+    if (strcpy_s(pkgName, len + 1, name) != EOK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus strcpy_s failed!");
         SoftBusFree(pkgName);
         goto EXIT;
@@ -152,7 +156,7 @@ static int ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
     uint32_t cbId = 0;
     RegisterDeathCallback(NULL, sid, ClientDeathCb, pkgName, &cbId);
     svcId.cbId = cbId;
-    ret = SERVER_RegisterService((const char *)name, &svcId);
+    ret = SERVER_RegisterService(name, &svcId);
 EXIT:
 #ifdef __LINUX__
     if (svc != NULL) {
@@ -166,7 +170,7 @@ EXIT:
 
 typedef struct {
     enum SoftBusFuncId id;
-    int (*func)(const void *origin, IpcIo *req, IpcIo *reply);
+    int32_t (*func)(const void *origin, IpcIo *req, IpcIo *reply);
 } ServerInvokeCmd;
 
 ServerInvokeCmd g_serverInvokeCmdTbl[] = {
@@ -191,8 +195,7 @@ ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_SESSION_SENDMSG, ServerSendSessionMsg },
 };
 
-static int32_t Invoke(const IServerProxy *iProxy, int funcId, const void *origin,
-    const IpcIo *req, const IpcIo *reply)
+static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
     if (GetServerIsInit() == false) {

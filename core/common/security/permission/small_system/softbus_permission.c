@@ -15,6 +15,7 @@
 
 #include "softbus_permission.h"
 
+#include <string.h>
 #include <unistd.h>
 
 #include "liteipc_adapter.h"

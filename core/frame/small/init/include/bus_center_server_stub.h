@@ -25,13 +25,13 @@ extern "C" {
 #endif
 #endif
 
-int32_t ServerJoinLNN(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerLeaveLNN(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetAllOnlineNodeInfo(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStartTimeSync(void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerJoinLNN(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerLeaveLNN(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerGetAllOnlineNodeInfo(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStartTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

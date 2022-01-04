@@ -44,7 +44,7 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
 {
     IpcIo reply;
-    uintptr_t ptr = NULL;
+    uintptr_t ptr = 0;
     int32_t ans = SendRequest(NULL, *svc, CLIENT_ON_CHANNEL_OPENED, io, &reply, LITEIPC_FLAG_DEFAULT, &ptr);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened SendRequest failed");

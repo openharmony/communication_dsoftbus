@@ -90,7 +90,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     IpcIoPushFlatObj(&request, (void*)&publishSerializer, sizeof(PublishSerializer));
     IpcIoPushString(&request, info->capability);
     if (info->dataLen != 0) {
-        IpcIoPushString(&request, info->capabilityData);
+        IpcIoPushString(&request, (const char *)(info->capabilityData));
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_SERVICE, &request, NULL, NULL);
@@ -156,7 +156,7 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     IpcIoPushFlatObj(&request, (void*)&subscribeSerializer, sizeof(SubscribeSerializer));
     IpcIoPushString(&request, info->capability);
     if (info->dataLen != 0) {
-        IpcIoPushString(&request, info->capabilityData);
+        IpcIoPushString(&request, (const char *)(info->capabilityData));
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
