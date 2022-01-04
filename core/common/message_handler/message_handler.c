@@ -54,7 +54,7 @@ static uint64_t UptimeMicros(void)
 {
     uint64_t when;
     struct timespec t = {0};
-    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+    (void)clock_gettime(CLOCK_BOOTTIME, &t);
     when = t.tv_sec * TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER + t.tv_nsec / TIME_THOUSANDS_MULTIPLIER;
     return when;
 }
