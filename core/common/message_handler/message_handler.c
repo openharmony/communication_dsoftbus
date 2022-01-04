@@ -52,12 +52,10 @@ struct SoftBusLooperContext {
 
 static uint64_t UptimeMicros(void)
 {
-    struct timeval t;
-    t.tv_sec = 0;
-    t.tv_usec = 0;
-    gettimeofday(&t, NULL);
-    uint64_t when = ((uint64_t)(t.tv_sec)) * TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER +
-        (uint64_t)t.tv_usec;
+    uint64_t when;
+    struct timespec t = {0};
+    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+    when = t.tv_sec * TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER + t.tv_nsec / TIME_THOUSANDS_MULTIPLIER;
     return when;
 }
 
