@@ -26,6 +26,7 @@ ohos_unittest("BusCenterSdkTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "//utils/native/base/include",
     "unittest/common/",
+    "$dsoftbus_root_path/adapter/common/include",
   ]
 
   deps = [

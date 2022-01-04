@@ -24,6 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 static bool g_isInited = false;
 static SoftBusList *g_publishInfoList = NULL;
@@ -247,7 +248,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
         }
-        if (pthread_mutex_lock(&(g_discoveryInfoList->lock)) != 0) {
+        if (SoftBusThreadMutexLock(&(g_discoveryInfoList->lock)) != 0) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
             return;
         }
@@ -255,7 +256,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "find callback:id = %d", infoNode->id);
             InnerDeviceFound(infoNode, device);
         }
-        (void)pthread_mutex_unlock(&(g_discoveryInfoList->lock));
+        (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
     }
     return;
 }
@@ -595,7 +596,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
     DiscItem *itemNode = NULL;
     DiscInfo *infoNode = NULL;
 
-    if (pthread_mutex_lock(&(serviceList->lock)) != 0) {
+    if (SoftBusThreadMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -607,7 +608,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
             if (infoNode->id == info->id) {
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "id already exsisted");
-                (void)pthread_mutex_unlock(&(serviceList->lock));
+                (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
@@ -624,7 +625,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         itemNode = CreateNewItem(serviceList, packageName, cb, type);
         if (itemNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "itemNode create failed");
-            (void)pthread_mutex_unlock(&(serviceList->lock));
+            (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
         itemNode->infoNum++;
@@ -632,14 +633,14 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         ListTailInsert(&(itemNode->InfoList), &(info->node));
         AddInfoToCapability(info, type);
     }
-    (void)pthread_mutex_unlock(&(serviceList->lock));
+    (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
     return SOFTBUS_OK;
 }
 
 static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packageName, const int32_t id,
     const ServiceType type)
 {
-    if (pthread_mutex_lock(&(serviceList->lock)) != 0) {
+    if (SoftBusThreadMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return NULL;
     }
@@ -656,7 +657,7 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
             serviceList->cnt--;
             ListDelete(&(itemNode->node));
             SoftBusFree(itemNode);
-            (void)pthread_mutex_unlock(&(serviceList->lock));
+            (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
             return NULL;
         }
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
@@ -676,7 +677,7 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
         }
         break;
     }
-    (void)pthread_mutex_unlock(&(serviceList->lock));
+    (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
     if (isIdExist == false) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "can not find publishId");
         return NULL;
@@ -687,12 +688,12 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
 static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
     int32_t ret;
-    
     ret = AddInfoToList(g_publishInfoList, packageName, NULL, info, type);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add list fail");
         return ret;
     }
+
     ret = DiscInterfaceByMedium(info, PUBLISH_FUNC);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "interface fail");
@@ -700,6 +701,7 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
         ListDelete(&(info->node));
         return ret;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -783,7 +785,7 @@ static char *ModuleIdToPackageName(DiscModule moduleId)
 
 static int32_t InnerSetDiscoverCallback(const char *packageName, const DiscInnerCallback *cb)
 {
-    if (pthread_mutex_lock(&(g_discoveryInfoList->lock)) != 0) {
+    if (SoftBusThreadMutexLock(&(g_discoveryInfoList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -804,11 +806,11 @@ static int32_t InnerSetDiscoverCallback(const char *packageName, const DiscInner
         itemNode = CreateNewItem(g_discoveryInfoList, packageName, &callback, SUBSCRIBE_INNER_SERVICE);
         if (itemNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "itemNode create failed");
-            (void)pthread_mutex_unlock(&(g_discoveryInfoList->lock));
+            (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
     }
-    (void)pthread_mutex_unlock(&(g_discoveryInfoList->lock));
+    (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
     return SOFTBUS_OK;
 }
 
@@ -1044,7 +1046,6 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
 int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 {
     int32_t ret;
-
     if ((packageName == NULL) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1053,25 +1054,23 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-
     if (g_isInited == false) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "not init");
         ret = SOFTBUS_DISCOVER_MANAGER_NOT_INIT;
         return ret;
     }
-
     DiscInfo *infoNode = CreateNewPublishInfoNode(info);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "infoNode create failed");
         ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE;
         return ret;
     }
-
     ret = InnerPublishService(packageName, infoNode, PUBLISH_SERVICE);
     if (ret != SOFTBUS_OK) {
         ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
         return ret;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -1196,7 +1195,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
     DiscInfo *infoNode = NULL;
     DiscInfo *infoNodeNext = NULL;
 
-    if (pthread_mutex_lock(&(itemList->lock)) != 0) {
+    if (SoftBusThreadMutexLock(&(itemList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -1214,7 +1213,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
         ListDelete(&(itemNode->node));
         SoftBusFree(itemNode);
     }
-    (void)pthread_mutex_unlock(&(itemList->lock));
+    (void)SoftBusThreadMutexUnlock(&(itemList->lock));
 }
 
 void DiscMgrDeinit(void)

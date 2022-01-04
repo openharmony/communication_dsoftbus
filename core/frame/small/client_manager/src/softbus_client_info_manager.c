@@ -45,7 +45,7 @@ int SERVER_InitClient(void)
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (pthread_mutex_init(&g_clientInfoList->lock, NULL) != 0) {
+    if (SoftBusMutexInit(&g_clientInfoList->lock, NULL) != SOFTBUS_OK) {
         SoftBusFree(g_clientInfoList);
         g_clientInfoList = NULL;
         return SOFTBUS_LOCK_ERR;
@@ -87,7 +87,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
     clientInfo->ipcCtx = svcId->ipcCtx;
     ListInit(&clientInfo->node);
 
-    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_clientInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         SoftBusFree(clientInfo);
         return SOFTBUS_ERR;
@@ -96,7 +96,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
     ListAdd(&(g_clientInfoList->list), &(clientInfo->node));
     g_clientInfoList->cnt++;
 
-    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -112,7 +112,7 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
         return SOFTBUS_ERR;
     }
 
-    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_clientInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -124,13 +124,13 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
             svcId->token = clientInfo->token;
             svcId->cookie = clientInfo->cookie;
             svcId->ipcCtx = clientInfo->ipcCtx;
-            (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
             return SOFTBUS_OK;
         }
     }
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found");
-    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -141,12 +141,12 @@ int SERVER_GetClientInfoNodeNum(int *num)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
-    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_clientInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
     *num = g_clientInfoList->cnt;
-    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -161,7 +161,7 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_ERR;
     }
-    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_clientInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -175,7 +175,7 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
             i++;
         }
     }
-    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -185,7 +185,7 @@ void SERVER_UnregisterService(const char *name)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server info list not init");
         return;
     }
-    if (pthread_mutex_lock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_clientInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -199,5 +199,5 @@ void SERVER_UnregisterService(const char *name)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_clientInfoList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_clientInfoList->lock);
 }

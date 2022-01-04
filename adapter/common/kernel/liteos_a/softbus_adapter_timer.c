@@ -27,6 +27,7 @@
 #include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_adapter_socket.h"
 
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000
@@ -103,8 +104,22 @@ int SoftBusSleepMs(unsigned int ms)
     tm.tv_usec = (ms % MS_PER_SECOND) * US_PER_MSECOND;
 
     do {
-        ret = select(0, NULL, NULL, NULL, &tm);
+        ret = SoftBusSocketSelect(0, NULL, NULL, NULL, &tm);
     } while ((ret == -1) && (errno == EINTR));
 
     return SOFTBUS_ERR;
+}
+
+int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
+{
+    if (sysTime == NULL) {
+        HILOG_INFO(SOFTBUS_HILOG_ID, "sysTime is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct timeval time = {0};
+    gettimeofday(&time, NULL);
+
+    sysTime->sec = time.tv_sec;
+    sysTime->usec = time.tv_usec;
+    return SOFTBUS_OK;
 }

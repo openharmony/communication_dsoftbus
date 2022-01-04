@@ -27,6 +27,7 @@
 #include "softbus_log.h"
 #include "softbus_server_proxy.h"
 #include "trans_client_stub.h"
+#include "softbus_adapter_thread.h"
 
 #define INVALID_CB_ID 0xFF
 
@@ -136,40 +137,20 @@ static void *DeathProcTask(void *arg)
 static int StartDeathProcTask(void)
 {
     int ret;
-    pthread_t tid;
-    pthread_attr_t attr;
-
-    ret = pthread_attr_init(&attr);
+    SoftBusThreadAttr threadAttr;
+    SoftBusThread tid;
+    ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread_attr_init failed, ret[%d]", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Thread attr init failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
-    ret = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread set detached attr failed, ret[%d]", ret);
-        ret = SOFTBUS_ERR;
-        goto EXIT;
-    }
-
-    ret = pthread_attr_setschedpolicy(&attr, SCHED_RR);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pthread set sched failed, ret[%d]", ret);
-        ret = SOFTBUS_ERR;
-        goto EXIT;
-    }
-
-    ret = pthread_create(&tid, &attr, DeathProcTask, NULL);
+    threadAttr.detachState = SOFTBUS_THREAD_DETACH;
+    threadAttr.policy = SOFTBUS_SCHED_RR;
+    ret = SoftBusThreadCreate(&tid, &threadAttr, DeathProcTask, NULL);
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create DeathProcTask failed, ret[%d]", ret);
-        ret = SOFTBUS_ERR;
-    }
-
-    ret = SOFTBUS_OK;
-EXIT:
-    if (pthread_attr_destroy(&attr) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "destroy pthread attr failed, ret[%d]", ret);
-        ret = SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
 
     return ret;

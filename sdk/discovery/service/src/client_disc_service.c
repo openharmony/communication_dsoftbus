@@ -136,21 +136,17 @@ int32_t StartDiscovery(const char *packageName, const SubscribeInfo *info, const
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
-
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     return StartDiscoveryInner(packageName, info, cb);
 }
 

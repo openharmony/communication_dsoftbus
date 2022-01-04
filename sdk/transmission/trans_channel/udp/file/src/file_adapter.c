@@ -26,12 +26,13 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_adapter_socket.h"
 
 static int SetReuseAddr(int fd, int on)
 {
-    int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-    if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR : %s.", strerror(errno));
+    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR error");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -39,9 +40,9 @@ static int SetReuseAddr(int fd, int on)
 
 static int SetReusePort(int fd, int on)
 {
-    int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEPORT : %s.", strerror(errno));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEPORT error");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -60,18 +61,18 @@ static int OpenTcpServer(const char *ip, int port)
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
 
-    errno = 0;
-    int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s", strerror(errno));
+    int fd;
+    int ret = SoftBusSocketCreate(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, &fd);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Create error");
         return SOFTBUS_ERR;
     }
+
     (void)SetReuseAddr(fd, 1);
     (void)SetReusePort(fd, 1);
-    errno = 0;
-    rc = TEMP_FAILURE_RETRY(bind(fd, (struct sockaddr *)&addr, sizeof(addr)));
-    if (rc < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d:%s", rc, strerror(errno));
+    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (struct sockaddr *)&addr, sizeof(addr)));
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Bind error");
         TcpShutDown(fd);
         return SOFTBUS_ERR;
     }

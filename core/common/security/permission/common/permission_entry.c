@@ -27,6 +27,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_permission.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 #define ENFORCING 1
 
@@ -420,14 +421,14 @@ void DeinitPermissionJson(void)
     if (g_permissionEntryList == NULL) {
         return;
     }
-    pthread_mutex_lock(&g_permissionEntryList->lock);
+    SoftBusThreadMutexLock(&g_permissionEntryList->lock);
     while (!IsListEmpty(&g_permissionEntryList->list)) {
         SoftBusPermissionEntry *item = LIST_ENTRY((&g_permissionEntryList->list)->next, SoftBusPermissionEntry, node);
         ClearAppInfo(&item->appInfo);
         ListDelete(&item->node);
         SoftBusFree(item);
     }
-    pthread_mutex_unlock(&g_permissionEntryList->lock);
+    SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
     DestroySoftBusList(g_permissionEntryList);
 }
 
@@ -453,37 +454,37 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     int permType;
     SoftBusPermissionEntry *pe = NULL;
-    (void)pthread_mutex_lock(&g_permissionEntryList->lock);
+    (void)SoftBusThreadMutexLock(&g_permissionEntryList->lock);
     LIST_FOR_EACH_ENTRY(pe, &g_permissionEntryList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
             if (CheckDBinder(sessionName)) {
-                (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+                (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
                 return GRANTED_APP;
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
-                (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+                (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
-            (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
             return permType;
         }
     }
     if (pItem->permType != NORMAL_APP) {
-        (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+        (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
-            (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
-            (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
     }
-    (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
@@ -494,7 +495,7 @@ bool PermIsSecLevelPublic(const char *sessionName)
     }
     SoftBusPermissionEntry *pe = NULL;
     bool ret = false;
-    if (pthread_mutex_lock(&g_permissionEntryList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_permissionEntryList->lock) != 0) {
         return false;
     }
     LIST_FOR_EACH_ENTRY(pe, &g_permissionEntryList->list, SoftBusPermissionEntry, node) {
@@ -505,7 +506,7 @@ bool PermIsSecLevelPublic(const char *sessionName)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_permissionEntryList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_permissionEntryList->lock);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PermIsSecLevelPublic: %s is %d", sessionName, ret);
     return ret;
 }
