@@ -49,12 +49,12 @@ typedef struct {
 
 static LNNRequestInfo g_lnnRequestInfo;
 
-int32_t LnnIpcInit (void) 
+int32_t LnnIpcInit (void)
 {
     g_lnnRequestInfo.joinLNNRequestInfo = NULL;
     g_lnnRequestInfo.leaveLNNRequestInfo = NULL;
     if (SoftBusMutexInit(&g_lnnRequestInfo.lock, NULL) != SOFTBUS_OK) {
-         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_lnnRequestInfo.lock init fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_lnnRequestInfo.lock init fail");
         return SOFTBUS_ERR;
     }
 

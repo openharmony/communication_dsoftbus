@@ -126,7 +126,7 @@ int SoftBusSocketConnect(int socketFd, const struct sockaddr *addr, int addrLen)
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "connect :%{pbulic}s", strerror(errno));
         return SOFTBUS_ERR;
-    } 
+    }
     return SOFTBUS_OK;
 }
 
