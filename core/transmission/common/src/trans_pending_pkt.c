@@ -24,7 +24,6 @@
 #include "softbus_utils.h"
 
 #define TIME_OUT 2
-#define USECTONSEC 1000
 
 static SoftBusList *g_pendingList[PENDING_TYPE_BUTT] = {NULL, NULL};
 
@@ -91,11 +90,11 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     pendingList->cnt++;
     pthread_mutex_unlock(&pendingList->lock);
 
-    struct timespec outtime;
-    struct timeval now;
-    gettimeofday(&now, NULL);
+    struct timespec outtime = {0};
+    struct timespec now = {0};
+    (void)clock_gettime(CLOCK_BOOTTIME, &now);
     outtime.tv_sec = now.tv_sec + TIME_OUT;
-    outtime.tv_nsec = now.tv_usec * USECTONSEC;
+    outtime.tv_nsec = now.tv_nsec;
 
     pthread_mutex_lock(&item->lock);
     pthread_cond_timedwait(&item->cond, &item->lock, &outtime);
