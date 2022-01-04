@@ -20,6 +20,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 #define MAX_SESSION_SERVER_NUM 32
 
@@ -30,7 +31,9 @@ int TransSessionMgrInit(void)
     if (g_sessionServerList != NULL) {
         return SOFTBUS_OK;
     }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransSessionMgrInit 1");
     g_sessionServerList = CreateSoftBusList();
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransSessionMgrInit 1");
     if (g_sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }
@@ -57,19 +60,19 @@ bool TransSessionServerIsExist(const char *sessionName)
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return false;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", sessionName);
-            (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
             return true;
         }
     }
 
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
     return false;
 }
 
@@ -83,12 +86,12 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         return SOFTBUS_NO_INIT;
     }
 
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     if (g_sessionServerList->cnt >= MAX_SESSION_SERVER_NUM) {
-        (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+        (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
         return SOFTBUS_INVALID_NUM;
     }
     SessionServer  *pos = NULL;
@@ -96,14 +99,14 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", newNode->sessionName);
-            (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_SERVER_NAME_REPEATED;
         }
     }
 
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
     g_sessionServerList->cnt++;
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
 
     return SOFTBUS_OK;
 }
@@ -120,7 +123,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     bool isFind = false;
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
@@ -135,7 +138,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destroy session server [%s]", sessionName);
         SoftBusFree(pos);
     }
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
 }
 
@@ -147,7 +150,7 @@ void TransDelItemByPackageName(const char *pkgName)
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -160,7 +163,7 @@ void TransDelItemByPackageName(const char *pkgName)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
 }
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
@@ -175,14 +178,14 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
-            (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
             if (ret != 0) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s error ret, [%d]", ret);
                 return SOFTBUS_ERR;
@@ -191,7 +194,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
         }
     }
 
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -207,7 +210,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
@@ -217,12 +220,12 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
             *pid = pos->pid;
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransGetUidAndPid: sessionName=%s, uid=%d, pid=%d",
                 sessionName, pos->uid, pos->pid);
-            (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
     }
 
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_sessionServerList->lock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s", sessionName);
     return SOFTBUS_ERR;
 }

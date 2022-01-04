@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+#include "softbus_adapter_thread.h"
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -42,7 +43,6 @@ static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 
 SoftBusList *CreateSoftBusList(void)
 {
-    pthread_mutexattr_t attr;
     SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     if (list == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed");
@@ -50,9 +50,9 @@ SoftBusList *CreateSoftBusList(void)
     }
     (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
 
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    if (pthread_mutex_init(&list->lock, &attr) != 0) {
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&list->lock, &mutexAttr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init lock failed");
         SoftBusFree(list);
         return NULL;
@@ -65,7 +65,7 @@ SoftBusList *CreateSoftBusList(void)
 void DestroySoftBusList(SoftBusList *list)
 {
     ListDelInit(&list->list);
-    pthread_mutex_destroy(&list->lock);
+    SoftBusThreadMutexDestroy(&list->lock);
     SoftBusFree(list);
     return;
 }

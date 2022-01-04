@@ -25,12 +25,13 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 typedef struct {
     LnnLaneInfo laneInfo;
     int32_t laneId;
     bool isUse;
-    pthread_mutex_t lock;
+    SoftBusMutex lock;
     int32_t score;
 } LaneInfoImpl;
 
@@ -44,7 +45,7 @@ int32_t LNNGetLaneScore(int32_t laneId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLaneCount failed");
         return SOFTBUS_ERR;
     }
-    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -53,7 +54,7 @@ int32_t LNNGetLaneScore(int32_t laneId)
     } else {
         g_lanes[laneId].score = PASSING_LANE_QUALITY_SCORE;
     }
-    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+    (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
     return g_lanes[laneId].score;
 }
 
@@ -72,7 +73,7 @@ int32_t LnnLanesInit(void)
     uint32_t firstLaneId = LNN_LINK_TYPE_WLAN_5G;
     for (uint32_t i = firstLaneId; i < LNN_LINK_TYPE_BUTT; i++) {
         g_lanes[i].laneId = firstLaneId++;
-        (void)pthread_mutex_init(&g_lanes[i].lock, NULL);
+        (void)SoftBusMutexInit(&g_lanes[i].lock, NULL);
         g_lanes[i].score = MAX_LANE_QUALITY_SCORE;
     }
     g_callback = NULL;
@@ -95,16 +96,16 @@ static bool IsValidLaneId(int32_t laneId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. laneId = %d", laneId);
         return false;
     }
-    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return false;
     }
     if (!g_lanes[laneId].isUse) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "The laneId cannot be used. laneId: %d.", laneId);
-        (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+        (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
         return false;
     }
-    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+    (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
     return true;
 }
 
@@ -113,12 +114,12 @@ void LnnReleaseLane(int32_t laneId)
     if (laneId < LNN_LINK_TYPE_WLAN_5G || laneId >= LNN_LINK_TYPE_BUTT) {
         return;
     }
-    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     g_lanes[laneId].isUse = false;
-    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+    (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
 }
 
 ConnectionAddrType LnnGetLaneType(int32_t laneId)
@@ -187,12 +188,12 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
         return false;
     }
     if (!g_lanes[type].isUse) {
-        if (pthread_mutex_lock(&g_lanes[type].lock) != 0) {
+        if (SoftBusThreadMutexLock(&g_lanes[type].lock) != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
             return false;
         }
         if (g_lanes[type].isUse) {
-            (void)pthread_mutex_unlock(&g_lanes[type].lock);
+            (void)SoftBusThreadMutexUnlock(&g_lanes[type].lock);
             return true;
         }
     }
@@ -210,7 +211,7 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
             break;
     }
     g_lanes[type].isUse = true;
-    (void)pthread_mutex_unlock(&g_lanes[type].lock);
+    (void)SoftBusThreadMutexUnlock(&g_lanes[type].lock);
     return ret;
 }
 
@@ -222,7 +223,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. laneId = %d", laneId);
         return;
     }
-    if (pthread_mutex_lock(&g_lanes[laneId].lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -230,11 +231,11 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         ret = LnnGetRemoteNumInfo(netWorkId, NUM_KEY_AUTH_PORT, &port);
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo error, ret = %d.", ret);
-            (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+            (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
             return;
         }
         g_lanes[laneId].laneInfo.conOption.info.ip.port = (uint16_t)port;
     }
     g_lanes[laneId].laneInfo.isSupportUdp = isSupport;
-    (void)pthread_mutex_unlock(&g_lanes[laneId].lock);
+    (void)SoftBusThreadMutexUnlock(&g_lanes[laneId].lock);
 }

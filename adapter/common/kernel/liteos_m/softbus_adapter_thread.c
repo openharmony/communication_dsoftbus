@@ -13,34 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_ADAPTER_TIMER_H
-#define SOFTBUS_ADAPTER_TIMER_H
-#include <stdint.h>
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
+#include "softbus_adapter_thread.h"
+
+void *SoftBusMalloc(unsigned int size)
+{
+    if (size > MAX_MALLOC_SIZE) {
+        return NULL;
+    }
+
+#if defined(OHOS_MEM)
+    void *tmp = OhosMalloc(MEM_TYPE_SOFTBUS_LSRAM, size);
+#else
+    void *tmp = malloc(size);
 #endif
-#endif
-
-typedef struct {
-    int64_t sec;
-    int64_t usec;
-}SoftBusSysTime;
-
-/* Timer */
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type);
-int SoftBusStartTimer(void *timerId, unsigned int tickets);
-int SoftBusDeleteTimer(void *timerId);
-
-/* Sleep */
-int SoftBusSleepMs(unsigned int ms);
-
-int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
-
-#ifdef __cplusplus
-#if __cplusplus
+    return tmp;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif

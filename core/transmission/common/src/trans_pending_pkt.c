@@ -22,6 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 #define TIME_OUT 2
 #define USECTONSEC 1000
@@ -67,52 +68,51 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         return SOFTBUS_ERR;
     }
 
-    pthread_mutex_lock(&pendingList->lock);
+    SoftBusThreadMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
-            pthread_mutex_unlock(&pendingList->lock);
+            SoftBusThreadMutexUnlock(&pendingList->lock);
             return SOFTBUS_ERR;
         }
     }
     item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
-        pthread_mutex_unlock(&pendingList->lock);
+        SoftBusThreadMutexUnlock(&pendingList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
-    pthread_mutex_init(&item->lock, NULL);
-    pthread_cond_init(&item->cond, NULL);
+    SoftBusMutexInit(&item->lock, NULL);
+    SoftBusCondInit(&item->cond);
     item->channelId = channelId;
     item->seq = seqNum;
     item->finded = false;
 
     ListAdd(&pendingList->list, &item->node);
     pendingList->cnt++;
-    pthread_mutex_unlock(&pendingList->lock);
+    SoftBusThreadMutexUnlock(&pendingList->lock);
 
-    struct timespec outtime;
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    outtime.tv_sec = now.tv_sec + TIME_OUT;
-    outtime.tv_nsec = now.tv_usec * USECTONSEC;
-
-    pthread_mutex_lock(&item->lock);
-    pthread_cond_timedwait(&item->cond, &item->lock, &outtime);
+    SoftBusSysTime outtime;
+    SoftBusSysTime now;
+    SoftBusGetTime(&now);
+    outtime.sec = now.sec + TIME_OUT;
+    outtime.usec = now.usec * USECTONSEC;
+    SoftBusThreadMutexLock(&item->lock);
+    SoftBusCondWait(&item->cond, &item->lock, &outtime);
 
     int32_t ret = SOFTBUS_OK;
     if (item->finded != true) {
         ret = SOFTBUS_TIMOUT;
     }
-    pthread_mutex_unlock(&item->lock);
+    SoftBusThreadMutexUnlock(&item->lock);
 
-    pthread_mutex_lock(&pendingList->lock);
+    SoftBusThreadMutexLock(&pendingList->lock);
     ListDelete(&item->node);
-    pthread_mutex_destroy(&item->lock);
-    pthread_cond_destroy(&item->cond);
+    SoftBusThreadMutexDestroy(&item->lock);
+    SoftBusCondDestroy(&item->cond);
     SoftBusFree(item);
     pendingList->cnt--;
-    pthread_mutex_unlock(&pendingList->lock);
+    SoftBusThreadMutexUnlock(&pendingList->lock);
 
     return ret;
 }
@@ -131,16 +131,16 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     }
 
     PendingPktInfo *item = NULL;
-    pthread_mutex_lock(&pendingList->lock);
+    SoftBusThreadMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
             item->finded = true;
-            pthread_cond_signal(&item->cond);
-            pthread_mutex_unlock(&pendingList->lock);
+            SoftBusCondSignal(&item->cond);
+            SoftBusThreadMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    pthread_mutex_unlock(&pendingList->lock);
+    SoftBusThreadMutexUnlock(&pendingList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -156,15 +156,15 @@ int32_t DelPendingPacket(int32_t channelId, int type)
     }
 
     PendingPktInfo *item = NULL;
-    pthread_mutex_lock(&pendingList->lock);
+    SoftBusThreadMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->channelId == channelId) {
-            pthread_cond_signal(&item->cond);
-            pthread_mutex_unlock(&pendingList->lock);
+            SoftBusCondSignal(&item->cond);
+            SoftBusThreadMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    pthread_mutex_unlock(&pendingList->lock);
+    SoftBusThreadMutexUnlock(&pendingList->lock);
     return SOFTBUS_OK;
 }
 

@@ -28,6 +28,7 @@
 #include "softbus_log.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
 static SoftBusList *g_listenerList = NULL;
@@ -88,13 +89,13 @@ static int32_t GetAllListener(ConnListenerNode **node)
         return cnt;
     }
 
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return 0;
     }
     *node = SoftBusCalloc(g_listenerList->cnt * sizeof(ConnListenerNode));
     if (*node == NULL) {
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
         return cnt;
     }
     LIST_FOR_EACH_ENTRY(listenerNode, &g_listenerList->list, ConnListenerNode, node) {
@@ -103,7 +104,7 @@ static int32_t GetAllListener(ConnListenerNode **node)
         }
         cnt++;
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
     return cnt;
 }
 
@@ -115,7 +116,7 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
         return SOFTBUS_ERR;
     }
     int ret = SOFTBUS_OK;
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -124,11 +125,11 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
             if (memcpy_s(node, sizeof(ConnListenerNode), listenerNode, sizeof(ConnListenerNode)) != EOK) {
                 ret = SOFTBUS_ERR;
             }
-            (void)pthread_mutex_unlock(&g_listenerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
             return ret;
         }
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -140,35 +141,40 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
     if (g_listenerList == NULL) {
         return SOFTBUS_ERR;
     }
-
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 1");
+    if (SoftBusThreadMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 2");
     LIST_FOR_EACH_ENTRY(listNode, &g_listenerList->list, ConnListenerNode, node) {
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 2.0");
         if (listNode->moduleId == moduleId) {
-            (void)pthread_mutex_unlock(&g_listenerList->lock);
+            (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
             return SOFTBUS_ERR;
         }
     }
-
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3");
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.1");
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.2");
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.3");
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.4");
     item = (ConnListenerNode *)SoftBusCalloc(sizeof(ConnListenerNode));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc fail");
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
-
+SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 4");
     item->moduleId = moduleId;
     if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != 0) {
         SoftBusFree(item);
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_listenerList->list), &(item->node));
     g_listenerList->cnt++;
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
     return SOFTBUS_OK;
 }
 
@@ -180,7 +186,7 @@ static void DelListener(ConnModule moduleId)
         return;
     }
 
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -193,7 +199,7 @@ static void DelListener(ConnModule moduleId)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
     return;
 }
 
@@ -279,6 +285,8 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ConnSetConnectCallback 0.");
+
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -292,6 +300,8 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
         (callback->OnDataReceived == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ConnSetConnectCallback 1.");
+
     return AddListener(moduleId, callback);
 }
 

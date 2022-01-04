@@ -36,6 +36,7 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_thread.h"
 
 #define SEND_QUEUE_UNIT_NUM 128
 #define CONNECT_REF_INCRESE 1
@@ -88,8 +89,8 @@ typedef enum {
 } BleConnLoopMsg;
 
 typedef struct {
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
+    SoftBusMutex lock;
+    SoftBusCond cond;
     LockFreeQueue *queue;
 } BleQueue;
 
@@ -132,7 +133,7 @@ static SoftBusHandler g_bleAsyncHandler = {
 };
 static ConnectFuncInterface g_bleInterface = { 0 };
 static SoftBusGattsCallback g_bleGattsCallback = { 0 };
-static pthread_mutex_t g_connectionLock;
+static SoftBusMutex g_connectionLock;
 static SoftBusGattService g_gattService = {
     .state = BLE_GATT_SERVICE_INITIAL,
     .svcId = -1,
@@ -164,7 +165,7 @@ static int32_t AllocBleConnectionIdLocked()
 {
     static int16_t nextConnectionId = 0;
     uint32_t tempId;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return 0;
     }
@@ -181,7 +182,7 @@ static int32_t AllocBleConnectionIdLocked()
         }
         break;
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     return tempId;
 }
 
@@ -219,7 +220,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
@@ -229,7 +230,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     return itemNode;
 }
 
@@ -237,7 +238,7 @@ BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
@@ -247,7 +248,7 @@ BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     return itemNode;
 }
 
@@ -257,7 +258,7 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
     BleConnectionInfo *itemNode = NULL;
     bool findServer = false;
     bool findClient = false;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
@@ -276,7 +277,7 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
             }
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
 
@@ -305,10 +306,10 @@ static int BleDequeueBlock(void **msg)
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
-    (void)pthread_mutex_lock(&g_sendQueue.lock);
+    (void)SoftBusThreadMutexLock(&g_sendQueue.lock);
     if (QueueIsEmpty(g_sendQueue.queue) == 0) {
-        pthread_cond_wait(&g_sendQueue.cond, &g_sendQueue.lock);
-        (void)pthread_mutex_unlock(&g_sendQueue.lock);
+        SoftBusCondWait(&g_sendQueue.cond, &g_sendQueue.lock, NULL);
+        (void)SoftBusThreadMutexUnlock(&g_sendQueue.lock);
     }
     return QueueSingleConsumerDequeue(g_sendQueue.queue, msg);
 }
@@ -341,9 +342,9 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         return ret;
     }
-    (void)pthread_mutex_lock(&g_sendQueue.lock);
-    pthread_cond_signal(&g_sendQueue.cond);
-    (void)pthread_mutex_unlock(&g_sendQueue.lock);
+    (void)SoftBusThreadMutexLock(&g_sendQueue.lock);
+    SoftBusCondSignal(&g_sendQueue.cond);
+    (void)SoftBusThreadMutexUnlock(&g_sendQueue.lock);
     return SOFTBUS_OK;
 }
 
@@ -375,9 +376,9 @@ static int32_t BlePostBytesInner(uint32_t connectionId, ConnPostData *data)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         return ret;
     }
-    (void)pthread_mutex_lock(&g_sendQueue.lock);
-    pthread_cond_signal(&g_sendQueue.cond);
-    (void)pthread_mutex_unlock(&g_sendQueue.lock);
+    (void)SoftBusThreadMutexLock(&g_sendQueue.lock);
+    SoftBusCondSignal(&g_sendQueue.cond);
+    (void)SoftBusThreadMutexUnlock(&g_sendQueue.lock);
     return SOFTBUS_OK;
 }
 
@@ -456,7 +457,7 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
     ListNode *item = NULL;
     BleConnectionInfo *targetNode = NULL;
     int refCount;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -469,7 +470,7 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     if (targetNode == NULL) {
         return;
     }
@@ -484,7 +485,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
     ListNode *item = NULL;
     BleConnectionInfo *targetNode = NULL;
     int myRefCount;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -499,10 +500,10 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
     }
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Not find OnPackResponse device");
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return;
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
     if (peerRef > 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[remote device Ref is > 0, do not reply]");
@@ -542,7 +543,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
             return;
         }
-        (void)pthread_mutex_lock(&g_connectionLock);
+        (void)SoftBusThreadMutexLock(&g_connectionLock);
         ListNode *item = NULL;
         LIST_FOR_EACH(item, &g_conection_list) {
             BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
@@ -554,7 +555,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
                 break;
             }
         }
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     }
 }
 
@@ -602,7 +603,7 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
 static int32_t BleGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     int32_t result = SOFTBUS_ERR;
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -612,21 +613,21 @@ static int32_t BleGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         if (itemNode->connId == connectionId) {
             if (memcpy_s(info, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo)) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGetConnInfo scpy error");
-                (void)pthread_mutex_unlock(&g_connectionLock);
+                (void)SoftBusThreadMutexUnlock(&g_connectionLock);
                 return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
             }
             result = SOFTBUS_OK;
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     return result;
 }
 
 static int32_t BleStartLocalListening(const LocalListenerInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattsStartService enter");
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
@@ -634,7 +635,7 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
         (g_gattService.state == BLE_GATT_SERVICE_STARTING)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
             "BleStartLocalListening service already started or is starting");
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return SOFTBUS_OK;
     }
     if (g_gattService.state == BLE_GATT_SERVICE_ADDED) {
@@ -644,10 +645,10 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsStartService failed");
             g_gattService.state = BLE_GATT_SERVICE_ADDED;
         }
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
         "BleStartLocalListening wrong service state:%d", g_gattService.state);
     return SOFTBUS_ERR;
@@ -655,7 +656,7 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
 
 static int32_t BleStopLocalListening(const LocalListenerInfo *info)
 {
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
@@ -663,7 +664,7 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
         (g_gattService.state == BLE_GATT_SERVICE_STOPPING)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
             "BleStopLocalListening service already stopped or is stopping");
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return SOFTBUS_OK;
     }
     if (g_gattService.state == BLE_GATT_SERVICE_STARTED) {
@@ -672,10 +673,10 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
         if (ret != SOFTBUS_OK) {
             g_gattService.state = BLE_GATT_SERVICE_STARTED;
         }
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
         "BleStopLocalListening wrong service state:%d", g_gattService.state);
     return SOFTBUS_ERR;
@@ -686,7 +687,7 @@ static void UpdateGattService(SoftBusGattService *service, int status)
     if (service == NULL) {
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -728,7 +729,7 @@ static void UpdateGattService(SoftBusGattService *service, int status)
         default:
             break;
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
 }
 
 static void ResetGattService(SoftBusGattService *service)
@@ -736,7 +737,7 @@ static void ResetGattService(SoftBusGattService *service)
     if (service == NULL) {
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -754,7 +755,7 @@ static void ResetGattService(SoftBusGattService *service)
     service->bleConnDesId = -1;
     service->bleNetCharaId = -1;
     service->bleNetDesId = -1;
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
 }
 
 static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle)
@@ -771,18 +772,18 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
             return;
         }
-        if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
-            (void)pthread_mutex_unlock(&g_connectionLock);
+            (void)SoftBusThreadMutexUnlock(&g_connectionLock);
             return;
         }
         g_gattService.svcId = srvcHandle;
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_CHARA_MSG,
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
@@ -829,16 +830,16 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
             return;
         }
-        if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService state not equal BLE_GATT_SERVICE_ADDING");
-            (void)pthread_mutex_unlock(&g_connectionLock);
+            (void)SoftBusThreadMutexUnlock(&g_connectionLock);
             return;
         }
         g_gattService.bleNetCharaId = characteristicHandle;
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return;
     }
     if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLECONN_UUID, uuid->uuidLen) == 0)) {
@@ -847,15 +848,15 @@ static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int sr
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
             return;
         }
-        if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            (void)pthread_mutex_unlock(&g_connectionLock);
+            (void)SoftBusThreadMutexUnlock(&g_connectionLock);
             return;
         }
         g_gattService.bleConnCharaId = characteristicHandle;
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_DESCRIPTOR_MSG, 0,
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID);
         if (msg == NULL) {
@@ -882,14 +883,14 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
             return;
         }
-        if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
-            (void)pthread_mutex_unlock(&g_connectionLock);
+            (void)SoftBusThreadMutexUnlock(&g_connectionLock);
             return;
         }
         if (g_gattService.bleNetDesId == -1) {
@@ -898,7 +899,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
             g_gattService.bleConnDesId = descriptorHandle;
             UpdateGattService(&g_gattService, 0);
         }
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     } else {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDescriptorAddCallback unknown srvcHandle or uuid");
     }
@@ -950,7 +951,7 @@ static void BleConnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -959,7 +960,7 @@ static void BleConnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->halConnId == connId) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectServerCallback exist same connId, exit");
-            (void)pthread_mutex_unlock(&g_connectionLock);
+            (void)SoftBusThreadMutexUnlock(&g_connectionLock);
             return;
         }
     }
@@ -968,19 +969,19 @@ static void BleConnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
     if (memcpy_s(newNode->btBinaryAddr.addr, BT_ADDR_LEN, btAddr->addr, BT_ADDR_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectServerCallback memcpy_s error");
         SoftBusFree(newNode);
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return;
     }
     if (memcpy_s(newNode->info.info.bleInfo.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectServerCallback memcpy_s error");
         SoftBusFree(newNode);
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return;
     }
     newNode->info.isServer = 1;
     newNode->state = BLE_CONNECTION_STATE_CONNECTED;
     ListTailInsert(&g_conection_list, &(newNode->node));
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     g_connectCallback->OnConnected(newNode->connId, &(newNode->info));
 }
 
@@ -993,7 +994,7 @@ static void BleDisconnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -1010,7 +1011,7 @@ static void BleDisconnectServerCallback(int connId, const SoftBusBtAddr *btAddr)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectServerCallback unknown halconnId:%d", connId);
         return;
@@ -1101,14 +1102,14 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived invalid data");
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived unknown device");
-        (void)pthread_mutex_unlock(&g_connectionLock);
+        (void)SoftBusThreadMutexUnlock(&g_connectionLock);
         return;
     }
     if (handle == g_gattService.bleConnCharaId) {
@@ -1118,7 +1119,7 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
             data = cJSON_Parse(value + sizeof(ConnPktHead));
             if (data == NULL) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[receive data invalid]");
-                (void)pthread_mutex_unlock(&g_connectionLock);
+                (void)SoftBusThreadMutexUnlock(&g_connectionLock);
                 return;
             }
             RecvConnectedComd(targetNode->connId, (const cJSON*)data);
@@ -1138,14 +1139,14 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
             g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, (char *)value, len);
         } else {
             if (PeerBasicInfoParse(targetNode, value, len) != SOFTBUS_OK) {
-                (void)pthread_mutex_unlock(&g_connectionLock);
+                (void)SoftBusThreadMutexUnlock(&g_connectionLock);
                 return;
             }
             targetNode->state = BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED;
             SendSelfBasicInfo(targetNode->connId);
         }
     }
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
 }
 
 static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
@@ -1304,15 +1305,15 @@ static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call GattsRegisterCallback");
     int32_t ret = GattsRegisterCallback();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed: %d", ret);
         return;
     }
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+    if (SoftBusThreadMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
     g_gattService.state = BLE_GATT_SERVICE_ADDING;
-    (void)pthread_mutex_unlock(&g_connectionLock);
+    (void)SoftBusThreadMutexUnlock(&g_connectionLock);
     SoftBusBtUuid uuid;
     uuid.uuid = (char *)msg->obj;
     uuid.uuidLen = BT_UUID_LEN;
@@ -1387,10 +1388,10 @@ static int BleQueueInit(void)
         g_sendQueue.queue = NULL;
         return SOFTBUS_ERR;
     }
-    pthread_mutex_init(&g_sendQueue.lock, NULL);
-    pthread_cond_init(&g_sendQueue.cond, NULL);
-    pthread_t tid;
-    if (pthread_create(&tid, NULL, BleSendTask, NULL) != 0) {
+    SoftBusMutexInit(&g_sendQueue.lock, NULL);
+    SoftBusCondInit(&g_sendQueue.cond);
+    SoftBusThread tid;
+    if (SoftBusThreadCreate(&tid, NULL, BleSendTask, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create BleSendTask failed");
         SoftBusFree(g_sendQueue.queue);
         g_sendQueue.queue = NULL;
@@ -1421,26 +1422,25 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
     int32_t ret;
     ret = BleConnLooperInit();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnLoopInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnLoopInit failed: %d", ret);
         return NULL;
     }
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&g_connectionLock, &attr);
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&g_connectionLock, &mutexAttr);
     ret = BleQueueInit();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit failed: %d", ret);
         return NULL;
     }
     ret = SoftBusAddBtStateListener(&g_bleConnStateListener);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed: %d", ret);
         return NULL;
     }
     ret = SoftBusEnableBt();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed: %d", ret);
         return NULL;
     }
     g_connectCallback = (ConnectCallback*)callback;

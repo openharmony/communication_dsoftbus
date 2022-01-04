@@ -33,17 +33,17 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_tcp_direct_listener.h"
+#include "softbus_adapter_thread.h"
 
 #define IP_DEFAULT_PORT 0
 
 typedef struct {
     bool isIpLinkClosed;
-    pthread_mutex_t lock;
+    SoftBusMutex lock;
 } LNNIpNetworkInfo;
 
 static LNNIpNetworkInfo g_lnnIpNetworkInfo = {
     .isIpLinkClosed = true,
-    .lock = PTHREAD_MUTEX_INITIALIZER,
 };
 
 static int32_t OpenAuthPort(void)
@@ -250,17 +250,17 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const LnnMoniter
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event: %d\n", event);
         return;
     }
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (UpdateLocalIp(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     LeaveOldIpNetwork(ifCurrentName);
     g_lnnIpNetworkInfo.isIpLinkClosed = true;
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
 }
 
 static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoniterData *para)
@@ -272,17 +272,17 @@ static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoni
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event: %d\n", event);
         return;
     }
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (UpdateLocalIp(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     LeaveOldIpNetwork(ifCurrentName);
     g_lnnIpNetworkInfo.isIpLinkClosed = true;
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
 }
 
 static int32_t UpdateLocalLedgerIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
@@ -310,13 +310,13 @@ static int32_t LnnInitAutoNetworking(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register wifi state change event handler failed\n");
         return SOFTBUS_ERR;
     }
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
     if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
@@ -333,7 +333,7 @@ static int32_t LnnInitAutoNetworking(void)
     } else {
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -341,18 +341,18 @@ static void OnGroupCreated(const char *groupId)
 {
     (void)groupId;
     char ifName[NET_IF_NAME_LEN] = {0};
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifname error!\n");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip invaild now, stop group create");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
@@ -361,7 +361,7 @@ static void OnGroupCreated(const char *groupId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
     }
     SetCallLnnStatus(true);
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
 }
 
 static void OnGroupDeleted(const char *groupId)
@@ -378,28 +378,34 @@ int32_t LnnInitIpNetwork(void)
 {
     char ipAddr[IP_LEN] = {0};
     char ifName[NET_IF_NAME_LEN] = {0};
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+
+    if (SoftBusMutexInit(&g_lnnIpNetworkInfo.lock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
     if (LnnReadNetConfigList() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read net config list error!");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
 
     if (AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
 
     if (UpdateLocalLedgerIp(ipAddr, IP_LEN, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "update local ledger ipaddr error!");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -418,18 +424,18 @@ int32_t LnnInitIpNetworkDelay(void)
 
 int32_t LnnDeinitIpNetwork(void)
 {
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "clear net config list error!");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
     }
 
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -438,17 +444,17 @@ void LnnCallIpDiscovery(void)
     char ipCurrentAddr[IP_LEN] = {0};
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
 
-    if (pthread_mutex_lock(&g_lnnIpNetworkInfo.lock) != 0) {
+    if (SoftBusThreadMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (!g_lnnIpNetworkInfo.isIpLinkClosed) {
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     if (GetLocalIpInfo(ipCurrentAddr, IP_LEN, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get current ip info failed\n");
-        (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+        (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
     if (strncmp(ifCurrentName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
@@ -463,6 +469,6 @@ void LnnCallIpDiscovery(void)
         SetCallLnnStatus(true);
         g_lnnIpNetworkInfo.isIpLinkClosed = false;
     }
-    (void)pthread_mutex_unlock(&g_lnnIpNetworkInfo.lock);
+    (void)SoftBusThreadMutexUnlock(&g_lnnIpNetworkInfo.lock);
 }
 

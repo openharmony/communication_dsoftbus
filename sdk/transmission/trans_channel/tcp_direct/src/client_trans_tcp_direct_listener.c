@@ -27,9 +27,26 @@
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "trans_pending_pkt.h"
+#include "softbus_adapter_thread.h"
 
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+typedef struct {
+    SoftBusMutex lock;
+    bool lockInit;
+} SoftBusTcpListenerLock;
+static SoftBusTcpListenerLock g_lock = {
+    .lockInit = false,
+};
 
+static void TdcLockInit(void)
+{
+    if (g_lock.lockInit == false) {
+        if (SoftBusMutexInit(&g_lock.lock, NULL) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TDC  lock init failed");
+            return;
+        }
+        g_lock.lockInit = true;
+    }
+}
 static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 {
     (void)events;
@@ -71,23 +88,24 @@ static SoftbusBaseListener g_listener = {
 int32_t TransTdcCreateListener(int32_t fd)
 {
     static bool isInitedFlag = false;
-    pthread_mutex_lock(&g_lock);
+    TdcLockInit();
+    SoftBusThreadMutexLock(&g_lock.lock);
     if (isInitedFlag == false) {
         isInitedFlag = true;
 
         if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &g_listener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
-            pthread_mutex_unlock(&g_lock);
+            SoftBusThreadMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         if (StartBaseClient(DIRECT_CHANNEL_CLIENT) < SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client start base listener failed.");
-            pthread_mutex_unlock(&g_lock);
+            SoftBusThreadMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create sdk listener success.");
     }
-    pthread_mutex_unlock(&g_lock);
+    SoftBusThreadMutexUnlock(&g_lock.lock);
 
     return AddTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
 }
