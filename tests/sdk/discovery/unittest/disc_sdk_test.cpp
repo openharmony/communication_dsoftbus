@@ -67,20 +67,20 @@ static int GetPublishId(void)
 
 static SubscribeInfo g_sInfo = {
     .subscribeId = 1,
-    .medium = COAP,
     .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3"),
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = sizeof("capdata3")
 };
 
 static PublishInfo g_pInfo = {
     .publishId = 1,
-    .medium = COAP,
     .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata4",
@@ -102,11 +102,11 @@ static SubscribeInfo g_sInfo1 = {
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = NULL,
-    .dataLen = 0,
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = 0
 };
 
 static void TestDeviceFound(const DeviceInfo *device)
@@ -244,14 +244,14 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
     int ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
-        .medium = COAP,
         .mode = DISCOVER_MODE_ACTIVE,
+        .medium = COAP,
         .freq = MID,
+        .isSameAccount = true,
+        .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .isSameAccount = true,
-        .isWakeRemote = false
+        .dataLen = sizeof("capdata3")
     };
 
     ret = StartDiscovery(NULL, &testInfo, &g_subscribeCb);

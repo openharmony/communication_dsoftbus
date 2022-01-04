@@ -28,6 +28,7 @@
 #include "trans_auth_manager.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
+#include "trans_session_service.h"
 
 int32_t ServerCreateSessionServer(const void *origin, IpcIo *req, IpcIo *reply)
 {
