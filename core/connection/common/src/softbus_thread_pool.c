@@ -43,14 +43,12 @@ static void ThreadPoolWorker(void *arg);
 
 static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId)
 {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateThreadPool %d", __LINE__);
     SoftBusThreadAttr threadAttrInfo;
     SoftBusThreadAttrInit(&threadAttrInfo);
 
     threadAttrInfo.stackSize = (attr->stackSize | MIN_STACK_SIZE);
     threadAttrInfo.prior = attr->priority;
     int32_t errCode = SoftBusThreadCreate((SoftBusThread *)threadId, &threadAttrInfo, run, argv);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateThreadPool %d", __LINE__);
 
     return errCode;
 }

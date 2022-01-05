@@ -368,9 +368,6 @@ void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
 
 SoftBusLooper *CreateNewLooper(const char *name)
 {
-printf("CreateNewLooper 1");
-
-SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 1");
     SoftBusLooper *looper = (SoftBusLooper *)SoftBusCalloc(sizeof(SoftBusLooper));
     if (looper == NULL) {
         return NULL;
@@ -381,7 +378,6 @@ SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 1");
         SoftBusFree(looper);
         return NULL;
     }
-SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 2");
 
     if (memcpy_s(context->name, sizeof(context->name), name, strlen(name)) != EOK) {
         SoftBusFree(looper);
@@ -390,18 +386,9 @@ SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 2");
     }
     ListInit(&context->msgHead);
     // init context
-SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 3");
-
     SoftBusMutexInit(&context->lock, NULL);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 4");
-
     SoftBusCondInit(&context->cond);
-
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 5");
-
     SoftBusCondInit(&context->condRunning);
-SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 6");
-
     // init looper
     looper->context = context;
     looper->dumpable = true;
@@ -410,8 +397,6 @@ SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 6");
     looper->RemoveMessage = LooperRemoveMessage;
     looper->RemoveMessageCustom = LoopRemoveMessageCustom;
     int ret = StartNewLooperThread(looper);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CreateNewLooper 7");
-
     if (ret != 0) {
         SoftBusFree(looper);
         SoftBusFree(context);
