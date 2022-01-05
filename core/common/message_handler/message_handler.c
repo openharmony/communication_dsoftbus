@@ -241,7 +241,9 @@ void DumpLooper(const SoftBusLooper *looper)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    DumpLooperLocked(context);
+    if (looper->dumpable) {
+        DumpLooperLocked(context);
+    }
     (void)SoftBusThreadMutexUnlock(&context->lock);
 }
 

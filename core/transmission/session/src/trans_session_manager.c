@@ -31,9 +31,7 @@ int TransSessionMgrInit(void)
     if (g_sessionServerList != NULL) {
         return SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransSessionMgrInit 1");
     g_sessionServerList = CreateSoftBusList();
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransSessionMgrInit 1");
     if (g_sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }

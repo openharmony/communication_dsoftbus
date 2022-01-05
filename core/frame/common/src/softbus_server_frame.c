@@ -60,11 +60,9 @@ void InitSoftBusServer(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server stub init failed.");
         return;
     }
-    
     if (SoftBusTimerInit() == SOFTBUS_ERR) {
         return;
     }
-    
     if (LooperInit() == -1) {
         return;
     }

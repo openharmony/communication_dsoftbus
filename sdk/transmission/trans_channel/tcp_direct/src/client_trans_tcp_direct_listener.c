@@ -46,6 +46,7 @@ static void TdcLockInit(void)
         }
         g_lock.lockInit = true;
     }
+    return;
 }
 static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 {
