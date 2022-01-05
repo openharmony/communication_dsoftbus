@@ -33,36 +33,36 @@ extern "C" {
 #endif
 
 typedef struct sockaddr SoftBusSockAddr;
-int SoftBusSocketCreate(int domain, int type, int protocol, int *socketFd);
-int SoftBusSocketSetOpt(int socketFd, int level, int optName,  const void *optVal, int optLen);
-int SoftBusSocketGetOpt(int socketFd, int level, int optName,  void *optVal, int *optLen);
-int SoftBusSocketGetLocalName(int socketFd, struct sockaddr *addr, int *addrLen);
-int SoftBusSocketGetPeerName(int socketFd, struct sockaddr *addr, int *addrLen);
+int SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
+int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName,  const void *optVal, int32_t optLen);
+int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  void *optVal, int32_t *optLen);
+int32_t SoftBusSocketGetLocalName(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen);
+int32_t SoftBusSocketGetPeerName(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen);
 
-int SoftBusSocketBind(int socketFd, struct sockaddr *addr, int addrLen);
-int SoftBusSocketListen(int socketFd, int backLog);
-int SoftBusSocketAccept(int socketFd, struct sockaddr *addr, int *addrLen, int *acceptFd);
-int SoftBusSocketConnect(int socketFd, const struct sockaddr *addr, int addrLen);
+int32_t SoftBusSocketBind(int32_t socketFd, struct sockaddr *addr, int32_t addrLen);
+int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog);
+int32_t SoftBusSocketAccept(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen, int32_t *acceptFd);
+int32_t SoftBusSocketConnect(int32_t socketFd, const struct sockaddr *addr, int32_t addrLen);
 
 void SoftBusSocketFdZero(fd_set *set);
-void SoftBusSocketFdSet(int socketFd, fd_set *set);
-void SoftBusSocketFdClr(int socketFd, fd_set *set);
-int SoftBusSocketFdIsset(int socketFd, fd_set *set);
+void SoftBusSocketFdSet(int32_t socketFd, fd_set *set);
+void SoftBusSocketFdClr(int32_t socketFd, fd_set *set);
+int32_t SoftBusSocketFdIsset(int32_t socketFd, fd_set *set);
 
-int SoftBusSocketSelect(int nfds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeOut);
-int SoftBusSocketIoctl(int socketFd, long cmd, void *argp);
+int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeOut);
+int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 
-int SoftBusSocketSend(int socketFd, const void *buf, unsigned int len, int flags);
-int SoftBusSocketSendTo(int socketFd, const void *buf, unsigned int len, int flags, const struct sockaddr
-    *toAddr, int toAddrLen);
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, unsigned int32_t len, int32_t flags);
+int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, unsigned int32_t len, int32_t flags, const struct sockaddr
+    *toAddr, int32_t toAddrLen);
 
-int SoftBusSocketRecv(int socketFd, void *buf, unsigned int len, int flags);
-int SoftBusSocketRecvFrom(int socketFd, void *buf, unsigned int len, int flags, struct sockaddr 
-    *fromAddr, int *fromAddrLen);
+int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, unsigned int32_t len, int32_t flags);
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, unsigned int32_t len, int32_t flags, struct sockaddr 
+    *fromAddr, int32_t *fromAddrLen);
 
 
-int SoftBusSocketShutDown(int socketFd, int how);
-int SoftBusSocketClose(int socketFd);
+int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how);
+int32_t SoftBusSocketClose(int32_t socketFd);
 #ifdef __cplusplus
 #if __cplusplus
 }
