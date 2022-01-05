@@ -141,31 +141,22 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
     if (g_listenerList == NULL) {
         return SOFTBUS_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 1");
     if (SoftBusThreadMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 2");
     LIST_FOR_EACH_ENTRY(listNode, &g_listenerList->list, ConnListenerNode, node) {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 2.0");
         if (listNode->moduleId == moduleId) {
             (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
             return SOFTBUS_ERR;
         }
     }
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3");
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.1");
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.2");
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.3");
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 3.4");
     item = (ConnListenerNode *)SoftBusCalloc(sizeof(ConnListenerNode));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc fail");
         (void)SoftBusThreadMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddListener 4");
     item->moduleId = moduleId;
     if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != 0) {
         SoftBusFree(item);
@@ -285,8 +276,6 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ConnSetConnectCallback 0.");
-
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -300,8 +289,6 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
         (callback->OnDataReceived == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ConnSetConnectCallback 1.");
-
     return AddListener(moduleId, callback);
 }
 
