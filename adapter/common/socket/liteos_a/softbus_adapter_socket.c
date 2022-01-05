@@ -195,7 +195,7 @@ int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp)
     return ret;
 }
 
-int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, unsigned int32_t len, int32_t flags)
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags)
 {
     int32_t ret = send(socketFd, buf, len, flags);
     if (ret < 0) {
@@ -206,7 +206,7 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, unsigned int32_t le
     return ret;
 }
 
-int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, unsigned int32_t len, int32_t flags, const struct sockaddr
+int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const struct sockaddr
     *toAddr, int32_t toAddrLen)
 {
     int32_t ret = sendto(socketFd, buf, len, flags, toAddr, toAddrLen);
@@ -218,7 +218,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, unsigned int32_t 
     return ret;
 }
 
-int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, unsigned int32_t len, int32_t flags)
+int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t flags)
 {
     int32_t ret = recv(socketFd, buf, len, flags);
     if (ret < 0) {
@@ -229,7 +229,7 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, unsigned int32_t len, int
     return ret;
 }
 
-int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, unsigned int32_t len, int32_t flags, struct sockaddr
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, struct sockaddr
     *fromAddr, int32_t *fromAddrLen)
 {
     int32_t ret = recvfrom(socketFd, buf, len, flags, fromAddr, (socklen_t *)fromAddrLen);
