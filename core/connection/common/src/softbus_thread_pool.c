@@ -23,7 +23,6 @@
 
 #ifndef MIN_STACK_SIZE
 #define MIN_STACK_SIZE 0x2000
-#define THREAD_PRIORITY 20
 #endif
 #define THREAD_POOL_NAME "THREAD_POOL"
 
@@ -33,7 +32,7 @@ typedef struct ThreadAttr ThreadAttr;
 struct ThreadAttr {
     const char *name;
     uint32_t stackSize;
-    uint8_t priority;
+    SoftBusThreadPriority priority;
 };
 
 static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId);
@@ -119,7 +118,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
 
     int32_t countSuccess = 0;
     for (int32_t i = 0; i < pool->threadNum; ++i) {
-        ThreadAttr attr = {"ThreadPoolWorker", 0, THREAD_PRIORITY};
+        ThreadAttr attr = {"ThreadPoolWorker", 0, SOFTBUS_PRIORITY_LOWEST};
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "create pthread now.");
         if (CreateThread((Runnable)ThreadPoolWorker, (void *)pool, &attr, (uint32_t *)&(pool->pthreads[i])) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create pthreads no. [%d] failed\n", i);
