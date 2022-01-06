@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#include "softbus_thread_pool.h"
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
-#include <sys/prctl.h>
+#include "softbus_thread_pool.h"
 
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #ifndef MIN_STACK_SIZE
-#define MIN_STACK_SIZE 0x2000
+#define MIN_STACK_SIZE 0x4000
 #endif
 #define THREAD_POOL_NAME "THREAD_POOL"
 
