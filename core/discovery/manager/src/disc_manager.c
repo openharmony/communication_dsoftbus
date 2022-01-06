@@ -248,7 +248,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
         }
-        if (SoftBusThreadMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+        if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
             return;
         }
@@ -256,7 +256,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "find callback:id = %d", infoNode->id);
             InnerDeviceFound(infoNode, device);
         }
-        (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
+        (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
     }
     return;
 }
@@ -596,7 +596,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
     DiscItem *itemNode = NULL;
     DiscInfo *infoNode = NULL;
 
-    if (SoftBusThreadMutexLock(&(serviceList->lock)) != 0) {
+    if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -608,7 +608,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
             if (infoNode->id == info->id) {
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "id already exsisted");
-                (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
+                (void)SoftBusMutexUnlock(&(serviceList->lock));
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
@@ -625,7 +625,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         itemNode = CreateNewItem(serviceList, packageName, cb, type);
         if (itemNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "itemNode create failed");
-            (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
+            (void)SoftBusMutexUnlock(&(serviceList->lock));
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
         itemNode->infoNum++;
@@ -633,14 +633,14 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         ListTailInsert(&(itemNode->InfoList), &(info->node));
         AddInfoToCapability(info, type);
     }
-    (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
+    (void)SoftBusMutexUnlock(&(serviceList->lock));
     return SOFTBUS_OK;
 }
 
 static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packageName, const int32_t id,
     const ServiceType type)
 {
-    if (SoftBusThreadMutexLock(&(serviceList->lock)) != 0) {
+    if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return NULL;
     }
@@ -657,7 +657,7 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
             serviceList->cnt--;
             ListDelete(&(itemNode->node));
             SoftBusFree(itemNode);
-            (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
+            (void)SoftBusMutexUnlock(&(serviceList->lock));
             return NULL;
         }
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
@@ -677,7 +677,7 @@ static DiscInfo *DeleteInfoFromList(SoftBusList *serviceList, const char *packag
         }
         break;
     }
-    (void)SoftBusThreadMutexUnlock(&(serviceList->lock));
+    (void)SoftBusMutexUnlock(&(serviceList->lock));
     if (isIdExist == false) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "can not find publishId");
         return NULL;
@@ -785,7 +785,7 @@ static char *ModuleIdToPackageName(DiscModule moduleId)
 
 static int32_t InnerSetDiscoverCallback(const char *packageName, const DiscInnerCallback *cb)
 {
-    if (SoftBusThreadMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -806,11 +806,11 @@ static int32_t InnerSetDiscoverCallback(const char *packageName, const DiscInner
         itemNode = CreateNewItem(g_discoveryInfoList, packageName, &callback, SUBSCRIBE_INNER_SERVICE);
         if (itemNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "itemNode create failed");
-            (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
+            (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&(g_discoveryInfoList->lock));
+    (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
     return SOFTBUS_OK;
 }
 
@@ -1195,7 +1195,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
     DiscInfo *infoNode = NULL;
     DiscInfo *infoNodeNext = NULL;
 
-    if (SoftBusThreadMutexLock(&(itemList->lock)) != 0) {
+    if (SoftBusMutexLock(&(itemList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -1213,7 +1213,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
         ListDelete(&(itemNode->node));
         SoftBusFree(itemNode);
     }
-    (void)SoftBusThreadMutexUnlock(&(itemList->lock));
+    (void)SoftBusMutexUnlock(&(itemList->lock));
 }
 
 void DiscMgrDeinit(void)

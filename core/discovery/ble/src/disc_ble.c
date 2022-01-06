@@ -245,11 +245,11 @@ static void BleAdvUpdateCallback(int advId, int status)
 
 static bool CheckScanner(void)
 {
-    (void)SoftBusThreadMutexLock(&g_bleInfoLock);
+    (void)SoftBusMutexLock(&g_bleInfoLock);
     uint32_t scanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
-    (void)SoftBusThreadMutexUnlock(&g_bleInfoLock);
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     if (scanCapBit == 0x0) {
         return false;
     }
@@ -292,13 +292,13 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceInfoFromDisAdvData failed");
         return;
     }
-    (void)SoftBusThreadMutexLock(&g_bleInfoLock);
+    (void)SoftBusMutexLock(&g_bleInfoLock);
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "don't match passive publish capBitMap");
-        (void)SoftBusThreadMutexUnlock(&g_bleInfoLock);
+        (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
-    (void)SoftBusThreadMutexUnlock(&g_bleInfoLock);
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     char key[SHA_HASH_LEN];
     if (GenerateStrHash(advData, advLen, key) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
@@ -316,16 +316,16 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, D
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceInfoFromDisAdvData failed");
         return;
     }
-    (void)SoftBusThreadMutexLock(&g_bleInfoLock);
+    (void)SoftBusMutexLock(&g_bleInfoLock);
     uint32_t subscribeCap = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
                             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
     if (subscribeCap & (foundInfo->capabilityBitmap[0] == 0x0)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Capbitmap unmatch");
-        (void)SoftBusThreadMutexUnlock(&g_bleInfoLock);
+        (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
-    (void)SoftBusThreadMutexUnlock(&g_bleInfoLock);
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     g_discBleInnerCb->OnDeviceFound(foundInfo);
 }
 
@@ -702,9 +702,9 @@ static int32_t StopAdvertiser(int32_t adv)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "stop advertiser advId:%d failed.", adv);
     }
     if (adv == NON_ADV_ID) {
-        (void)SoftBusThreadMutexLock(&g_recvMessageInfo.lock);
+        (void)SoftBusMutexLock(&g_recvMessageInfo.lock);
         ClearRecvMessage();
-        (void)SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+        (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     }
     return SOFTBUS_OK;
 }
@@ -922,24 +922,24 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         regOption.subscribeOption = (SubscribeOption *)option;
     }
     unsigned char index = publishFlags | activeFlags;
-    if (SoftBusThreadMutexLock(&g_bleInfoLock) != 0) {
+    if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
     if (isStart) {
         if (RegisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RegisterCapability failed.");
-            SoftBusThreadMutexUnlock(&g_bleInfoLock);
+            SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
     } else {
         if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
-            SoftBusThreadMutexUnlock(&g_bleInfoLock);
+            SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
     }
-    SoftBusThreadMutexUnlock(&g_bleInfoLock);
+    SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
 
@@ -1207,7 +1207,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     if (capBitMap == NULL || publishInfoMap == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    (void)SoftBusThreadMutexLock(&g_recvMessageInfo.lock);
+    (void)SoftBusMutexLock(&g_recvMessageInfo.lock);
     RecvMessage *msg;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recv message cnt: %d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
@@ -1215,7 +1215,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
             capBitMap[index] = msg->capBitMap[index] & publishInfoMap[index];
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+    (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -1226,16 +1226,16 @@ static void StartTimeout(const char *key)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "key is null");
         return;
     }
-    if (SoftBusThreadMutexLock(&g_recvMessageInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (GetRecvMessage(key) == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "key is not exists");
-        SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         return;
     }
-    SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     SoftBusMessage *msg = CreateBleHandlerMsg(PROCESS_TIME_OUT, (uint64_t)key, 0, NULL);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc msg failed");
@@ -1251,16 +1251,16 @@ static void RemoveTimeout(const char *key)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "key is null");
         return;
     }
-    if (SoftBusThreadMutexLock(&g_recvMessageInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     if (GetRecvMessage(key) == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "key is not in recv message");
-        SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         return;
     }
-    SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     g_discBleHandler.looper->RemoveMessageCustom(g_discBleHandler.looper, &g_discBleHandler,
         RemoveRecvMsgFunc, (void *)key);
 }
@@ -1272,7 +1272,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "AddRecvMessage input param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusThreadMutexLock(&g_recvMessageInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1282,13 +1282,13 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         recvMsg = SoftBusCalloc(sizeof(RecvMessage));
         if (recvMsg == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc recv msg failed");
-            SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+            SoftBusMutexUnlock(&g_recvMessageInfo.lock);
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(&recvMsg->key, SHA_HASH_LEN, key, SHA_HASH_LEN) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Copy key to create recv msg failed");
             SoftBusFree(recvMsg);
-            SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+            SoftBusMutexUnlock(&g_recvMessageInfo.lock);
             return SOFTBUS_MEM_ERR;
         }
         for (uint32_t index = 0; index < CAPABILITY_NUM; index++) {
@@ -1298,9 +1298,9 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         g_recvMessageInfo.numNeedBrMac++;
         g_recvMessageInfo.numNeedResp++;
         ListTailInsert(&g_recvMessageInfo.node, &recvMsg->node);
-        SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     } else {
-        SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
         RemoveTimeout(recvMsg->key);
     }
     StartTimeout(recvMsg->key);
@@ -1310,7 +1310,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
 static void RemoveRecvMessage(uint64_t key)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "RemoveRecvMessage");
-    if (SoftBusThreadMutexLock(&g_recvMessageInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -1328,7 +1328,7 @@ static void RemoveRecvMessage(uint64_t key)
     } else {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "recvMsg is not find.");
     }
-    SoftBusThreadMutexUnlock(&g_recvMessageInfo.lock);
+    SoftBusMutexUnlock(&g_recvMessageInfo.lock);
 }
 
 static void ClearRecvMessage(void)
@@ -1478,10 +1478,10 @@ EXIT:
 
 static bool CheckLockInit(SoftBusMutex *lock)
 {
-    if (SoftBusThreadMutexLock(lock) != 0) {
+    if (SoftBusMutexLock(lock) != 0) {
         return false;
     }
-    SoftBusThreadMutexUnlock(lock);
+    SoftBusMutexUnlock(lock);
     return true;
 }
 
@@ -1489,7 +1489,7 @@ static void RecvMessageDeinit(void)
 {
     ClearRecvMessage();
     if (CheckLockInit(&g_recvMessageInfo.lock)) {
-        (void)SoftBusThreadMutexDestroy(&g_recvMessageInfo.lock);
+        (void)SoftBusMutexDestroy(&g_recvMessageInfo.lock);
     }
     g_recvMessageInfo.numNeedBrMac = 0;
     g_recvMessageInfo.numNeedResp = 0;

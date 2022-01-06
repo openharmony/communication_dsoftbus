@@ -35,7 +35,7 @@ static int32_t g_tdcChannelId = 0;
 int32_t GenerateTdcChannelId(void)
 {
     int32_t channelId;
-    if (SoftBusThreadMutexLock(&g_tdcChannelLock) != 0) {
+    if (SoftBusMutexLock(&g_tdcChannelLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id lock failed");
         return INVALID_CHANNEL_ID;
     }
@@ -43,7 +43,7 @@ int32_t GenerateTdcChannelId(void)
     if (g_tdcChannelId < 0) {
         g_tdcChannelId = 0;
     }
-    SoftBusThreadMutexUnlock(&g_tdcChannelLock);
+    SoftBusMutexUnlock(&g_tdcChannelLock);
     return channelId;
 }
 
@@ -73,7 +73,7 @@ static void TransTdcTimerProc(void)
     if (g_sessionConnList == NULL || g_sessionConnList->cnt == 0) {
         return;
     }
-    if (SoftBusThreadMutexLock(&g_sessionConnList->lock) != 0) {
+    if (SoftBusMutexLock(&g_sessionConnList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -91,7 +91,7 @@ static void TransTdcTimerProc(void)
             }
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
 }
 
 static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
@@ -119,11 +119,11 @@ int32_t TransTdcAddSessionConn(SessionConn *conn)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     ListInit(&conn->node);
     ListTailInsert(&g_sessionConnList->list, &conn->node);
     g_sessionConnList->cnt++;
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     return SOFTBUS_OK;
 }
@@ -137,17 +137,17 @@ void TransDelSessionConnById(int32_t channelId)
 
     SessionConn *item = NULL;
     SessionConn *next = NULL;
-    SoftBusThreadMutexLock(&g_sessionConnList->lock);
+    SoftBusMutexLock(&g_sessionConnList->lock);
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
             SoftBusFree(item);
             g_sessionConnList->cnt--;
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get tdc info is null");
 }
@@ -232,17 +232,17 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
         return NULL;
     }
     SessionConn *connInfo = NULL;
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
             if (conn != NULL) {
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return connInfo;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
     return NULL;
@@ -255,15 +255,15 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
     SessionConn *connInfo = NULL;
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
             (void)memcpy_s(&connInfo->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
     return SOFTBUS_ERR;
@@ -276,15 +276,15 @@ int32_t SetSessionConnStatusById(int32_t channelId, int32_t status)
         return SOFTBUS_ERR;
     }
     SessionConn *connInfo = NULL;
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == channelId) {
             connInfo->status = status;
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
     return SOFTBUS_ERR;
@@ -297,17 +297,17 @@ SessionConn *GetSessionConnByFd(int fd, SessionConn *conn)
         return NULL;
     }
     SessionConn *connInfo = NULL;
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->appInfo.fd == fd) {
             if (conn != NULL) {
                 (void)memcpy_s(conn, sizeof(SessionConn), connInfo, sizeof(SessionConn));
             }
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return connInfo;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 
     return NULL;
 }
@@ -319,20 +319,20 @@ void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen)
         return;
     }
     SessionConn *connInfo = NULL;
-    SoftBusThreadMutexLock(&(g_sessionConnList->lock));
+    SoftBusMutexLock(&(g_sessionConnList->lock));
     LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
         if (connInfo->channelId == chanId) {
             if (memcpy_s(connInfo->appInfo.sessionKey, sizeof(connInfo->appInfo.sessionKey), sessionKey,
                 keyLen) != EOK) {
-                SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+                SoftBusMutexUnlock(&g_sessionConnList->lock);
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy error.");
                 return;
             }
-            SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+            SoftBusMutexUnlock(&g_sessionConnList->lock);
             return;
         }
     }
-    SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    SoftBusMutexUnlock(&g_sessionConnList->lock);
 }
 
 uint64_t TransTdcGetNewSeqId(void)
@@ -348,7 +348,7 @@ void TransTdcStopSessionProc(void)
     if (g_sessionConnList != NULL) {
         SessionConn *removeNode = NULL;
         SessionConn *nextNode = NULL;
-        if (SoftBusThreadMutexLock(&g_sessionConnList->lock) != 0) {
+        if (SoftBusMutexLock(&g_sessionConnList->lock) != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
             return;
         }
@@ -358,7 +358,7 @@ void TransTdcStopSessionProc(void)
             g_sessionConnList->cnt--;
             SoftBusFree(removeNode);
         }
-        (void)SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+        (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransTdcStopSessionProc remove SessionConn finished.");
     }
 }
@@ -416,7 +416,7 @@ void TransTdcDeathCallback(const char *pkgName)
     SessionConn *conn = NULL;
     SessionConn *next = NULL;
 
-    if (SoftBusThreadMutexLock(&(g_sessionConnList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_sessionConnList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -429,5 +429,5 @@ void TransTdcDeathCallback(const char *pkgName)
             continue;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_sessionConnList->lock);
+    (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
 }

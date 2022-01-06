@@ -110,14 +110,14 @@ AuthManager *AuthGetManagerByAuthId(int64_t authId)
 {
     ListNode *item = NULL;
     AuthManager *auth = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->authId == authId) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
@@ -125,11 +125,11 @@ AuthManager *AuthGetManagerByAuthId(int64_t authId)
     LIST_FOR_EACH(item, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->authId == authId) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return NULL;
 }
 
@@ -137,14 +137,14 @@ AuthManager *AuthGetManagerByConnId(uint16_t id)
 {
     ListNode *item = NULL;
     AuthManager *auth = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->id == id) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
@@ -152,11 +152,11 @@ AuthManager *AuthGetManagerByConnId(uint16_t id)
     LIST_FOR_EACH(item, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->id == id) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return NULL;
 }
 
@@ -164,14 +164,14 @@ AuthManager *AuthGetManagerByFd(int32_t fd)
 {
     ListNode *item = NULL;
     AuthManager *auth = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->fd == fd) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
@@ -179,11 +179,11 @@ AuthManager *AuthGetManagerByFd(int32_t fd)
     LIST_FOR_EACH(item, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->fd == fd) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return NULL;
 }
 
@@ -191,14 +191,14 @@ static AuthManager *GetAuthByPeerUdid(const char *peerUdid)
 {
     ListNode *item = NULL;
     AuthManager *auth = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
@@ -206,11 +206,11 @@ static AuthManager *GetAuthByPeerUdid(const char *peerUdid)
     LIST_FOR_EACH(item, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
         if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return NULL;
 }
 
@@ -238,7 +238,7 @@ static VerifyCallback *GetDefaultAuthCallback(void)
 
 static AuthManager *GetAuthByConnectionId(uint32_t connectionId, AuthSideFlag side)
 {
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
@@ -249,36 +249,36 @@ static AuthManager *GetAuthByConnectionId(uint32_t connectionId, AuthSideFlag si
     }
     LIST_FOR_EACH_ENTRY(item, head, AuthManager, node) {
         if (item->connectionId == connectionId) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return item;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return NULL;
 }
 
 AuthManager *AuthGetManagerByRequestId(uint32_t requestId)
 {
     ListNode *item = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         AuthManager *auth = LIST_ENTRY(item, AuthManager, node);
         if (auth->requestId == requestId) {
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "cannot find auth by requestId, requestId is %u", requestId);
     return NULL;
 }
 
 static void DeleteAuth(AuthManager *auth)
 {
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -289,7 +289,7 @@ static void DeleteAuth(AuthManager *auth)
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "delete auth manager, authId is %lld", auth->authId);
     SoftBusFree(auth);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
 }
 
 void AuthHandleFail(AuthManager *auth, int32_t reason)
@@ -312,12 +312,12 @@ int32_t AuthHandleLeaveLNN(int64_t authId)
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth handle leave LNN, authId is %lld", authId);
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     AuthClearSessionKeyBySeq((int32_t)authId);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     if (auth->option.type == CONNECT_TCP) {
         AuthCloseTcpFd(auth->fd);
     }
@@ -353,13 +353,13 @@ static int32_t InitNewAuthManager(AuthManager *auth, uint32_t moduleId, AuthSide
 static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOption *option,
     const ConnectionAddr *addr)
 {
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     AuthManager *auth = (AuthManager *)SoftBusMalloc(sizeof(AuthManager));
     if (auth == NULL) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return NULL;
     }
@@ -368,19 +368,19 @@ static AuthManager *InitClientAuthManager(AuthModuleId moduleId, const ConnectOp
     auth->requestId = ConnGetNewRequestId(MODULE_DEVICE_AUTH);
     auth->option = *option;
     if (memcpy_s(auth->peerUid, MAX_ACCOUNT_HASH_LEN, addr->peerUid, MAX_ACCOUNT_HASH_LEN) != 0) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s faield");
         SoftBusFree(auth);
         return NULL;
     }
     if (InitNewAuthManager(auth, moduleId, CLIENT_SIDE_FLAG) != SOFTBUS_OK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "client side, auth init new AuthManager failed");
         SoftBusFree(auth);
         return NULL;
     }
     ListNodeInsert(&g_authClientHead, &auth->node);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create auth as client side");
     return auth;
 }
@@ -519,7 +519,7 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get device key failed");
         return;
     }
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -528,7 +528,7 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
     devInfo.seq = (int32_t)((uint64_t)authId & LOW_32_BIT);
     AuthSetLocalSessionKey(&devInfo, auth->peerUdid, sessionKey, sessionKeyLen);
     auth->status = IN_SYNC_PROGRESS;
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     if (auth->cb->onKeyGenerated == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth Key Generated Callback is NULL!");
         return;
@@ -676,13 +676,13 @@ static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
 static AuthManager *CreateServerAuth(uint32_t connectionId, AuthDataInfo *authDataInfo)
 {
     AuthManager *auth = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
     auth = (AuthManager *)SoftBusMalloc(sizeof(AuthManager));
     if (auth == NULL) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return NULL;
     }
@@ -690,20 +690,20 @@ static AuthManager *CreateServerAuth(uint32_t connectionId, AuthDataInfo *authDa
     auth->authId = authDataInfo->authId;
     auth->connectionId = connectionId;
     if (InitNewAuthManager(auth, MODULE_NUM, SERVER_SIDE_FLAG) != SOFTBUS_OK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "br server create auth failed");
         SoftBusFree(auth);
         return NULL;
     }
     ConnectionInfo connInfo;
     if (memset_s(&connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption)) != EOK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memset_s connInfo fail!");
         SoftBusFree(auth);
         return NULL;
     }
     if (ConnGetConnectionInfo(connectionId, &connInfo) != SOFTBUS_OK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnGetConnectionInfo failed");
         SoftBusFree(auth);
         return NULL;
@@ -711,14 +711,14 @@ static AuthManager *CreateServerAuth(uint32_t connectionId, AuthDataInfo *authDa
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (AuthConvertConnInfo(&option, &connInfo) != SOFTBUS_OK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthConvertConnInfo failed");
         SoftBusFree(auth);
         return NULL;
     }
     auth->option = option;
     ListNodeInsert(&g_authServerHead, &auth->node);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create auth as server side, authId is %lld", auth->authId);
     return auth;
 }
@@ -1056,13 +1056,13 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
 {
     AuthManager *auth = NULL;
 
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     auth = (AuthManager *)SoftBusMalloc(sizeof(AuthManager));
     if (auth == NULL) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return SOFTBUS_ERR;
     }
@@ -1072,7 +1072,7 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     auth->authId = cfd;
     auth->encryptInfoStatus = INITIAL_STATE;
     if (InitNewAuthManager(auth, MODULE_NUM, SERVER_SIDE_FLAG) != SOFTBUS_OK) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ServerIpAuthInit failed");
         SoftBusFree(auth);
         return SOFTBUS_ERR;
@@ -1081,7 +1081,7 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_TCP;
     if (strncpy_s(option.info.ipOption.ip, IP_LEN, ip, strlen(ip))) {
-        (void)SoftBusThreadMutexUnlock(&g_authLock);
+        (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
         SoftBusFree(auth);
         return SOFTBUS_ERR;
@@ -1089,7 +1089,7 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     option.info.ipOption.port = port;
     auth->option = option;
     ListNodeInsert(&g_authServerHead, &auth->node);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create ip auth as server side");
     return SOFTBUS_OK;
 }
@@ -1106,7 +1106,7 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AuthOpenTcpChannel failed");
         return SOFTBUS_ERR;
     }
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -1124,7 +1124,7 @@ int64_t AuthOpenChannel(const ConnectOption *option)
     auth->hichain = g_hichainGaInstance;
     auth->id = AuthGetNextConnectionId();
     ListNodeInsert(&g_authClientHead, &auth->node);
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     return auth->authId;
 }
 
@@ -1169,7 +1169,7 @@ void AuthIpChanged(ConnectType type)
     AuthManager *auth = NULL;
     ListNode *item = NULL;
     ListNode *tmp = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -1188,9 +1188,9 @@ void AuthIpChanged(ConnectType type)
             EventRemove(auth->id);
             if (auth->status < IN_SYNC_PROGRESS) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth no need to notify lnn");
-                (void)SoftBusThreadMutexUnlock(&g_authLock);
+                (void)SoftBusMutexUnlock(&g_authLock);
                 (void)AuthHandleLeaveLNN(auth->authId);
-                (void)SoftBusThreadMutexLock(&g_authLock);
+                (void)SoftBusMutexLock(&g_authLock);
             } else {
                 if (auth->cb->onDisconnect != NULL) {
                     auth->cb->onDisconnect(auth->authId);
@@ -1198,7 +1198,7 @@ void AuthIpChanged(ConnectType type)
             }
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
 }
 
 int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
@@ -1206,7 +1206,7 @@ int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
     AuthManager *auth = NULL;
     ListNode *item = NULL;
     ListNode *tmp = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -1216,7 +1216,7 @@ int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
             strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
             strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
             *authId = auth->authId;
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
     }
@@ -1226,11 +1226,11 @@ int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
             strlen(auth->option.info.ipOption.ip)) == 0) || (option->type == CONNECT_BR &&
             strncmp(auth->option.info.brOption.brMac, option->info.brOption.brMac, BT_MAC_LEN) == 0)) {
             *authId = auth->authId;
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get id by option failed");
     return SOFTBUS_ERR;
 }
@@ -1240,7 +1240,7 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     AuthManager *auth = NULL;
     ListNode *item = NULL;
     ListNode *tmp = NULL;
-    if (SoftBusThreadMutexLock(&g_authLock) != 0) {
+    if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -1254,11 +1254,11 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
                 break;
             }
             if (strncpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
-                (void)SoftBusThreadMutexUnlock(&g_authLock);
+                (void)SoftBusMutexUnlock(&g_authLock);
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
                 return SOFTBUS_ERR;
             }
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
     }
@@ -1272,15 +1272,15 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
                 break;
             }
             if (strncpy_s(buf, bufLen, auth->peerUuid, strlen(auth->peerUuid)) != EOK) {
-                (void)SoftBusThreadMutexUnlock(&g_authLock);
+                (void)SoftBusMutexUnlock(&g_authLock);
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
                 return SOFTBUS_ERR;
             }
-            (void)SoftBusThreadMutexUnlock(&g_authLock);
+            (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_authLock);
+    (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get uuid by option failed");
     return SOFTBUS_ERR;
 }
@@ -1335,7 +1335,7 @@ int32_t AuthDeinit(void)
     DestroyDeviceAuthService();
     ClearAuthManager();
     AuthClearAllSessionKey();
-    SoftBusThreadMutexDestroy(&g_authLock);
+    SoftBusMutexDestroy(&g_authLock);
     g_isAuthInit = false;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth deinit succ!");
     return SOFTBUS_OK;
