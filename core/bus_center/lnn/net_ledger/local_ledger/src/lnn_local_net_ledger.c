@@ -543,7 +543,7 @@ int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusThreadMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -551,12 +551,12 @@ int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].getInfo != NULL) {
                 ret = g_localKeyTable[i].getInfo((void *)info, len);
-                SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
         }
     }
-    SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY NOT exist.");
     return SOFTBUS_ERR;
 }
@@ -573,7 +573,7 @@ int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusThreadMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -581,12 +581,12 @@ int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info)
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].getInfo != NULL) {
                 ret = g_localKeyTable[i].getInfo((void *)info, NUM_BUF_SIZE);
-                SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
         }
     }
-    SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY NOT exist.");
     return SOFTBUS_ERR;
 }
@@ -608,7 +608,7 @@ int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusThreadMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -616,15 +616,15 @@ int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].setInfo != NULL && JudgeString(info, g_localKeyTable[i].maxLen)) {
                 ret = g_localKeyTable[i].setInfo((void *)info);
-                SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key=%d not support or info format error", key);
-            SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+            SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
     }
-    SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
 }
@@ -637,7 +637,7 @@ int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusThreadMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -645,15 +645,15 @@ int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].setInfo != NULL) {
                 ret = g_localKeyTable[i].setInfo((void *)&info);
-                SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key=%d not support", key);
-            SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+            SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_ERR;
         }
     }
-    SoftBusThreadMutexUnlock(&g_localNetLedger.lock);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
 }
@@ -713,7 +713,7 @@ int32_t LnnInitLocalLedgerDelay(void)
 void LnnDeinitLocalLedger()
 {
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
-        SoftBusThreadMutexDestroy(&g_localNetLedger.lock);
+        SoftBusMutexDestroy(&g_localNetLedger.lock);
     }
     g_localNetLedger.status = LL_INIT_UNKNOWN;
 }

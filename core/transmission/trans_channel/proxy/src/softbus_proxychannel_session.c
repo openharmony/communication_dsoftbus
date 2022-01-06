@@ -689,14 +689,14 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxySubPacketProc not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusThreadMutexLock(&g_channelSliceProcessorList->lock) != 0) {
+    if (SoftBusMutexLock(&g_channelSliceProcessorList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock err");
         return SOFTBUS_ERR;
     }
 
     ChannelSliceProcessor *channelProcessor = TransProxyGetChannelSliceProcessor(channelId);
     if (channelProcessor == NULL) {
-        SoftBusThreadMutexUnlock(&g_channelSliceProcessorList->lock);
+        SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
         return SOFTBUS_ERR;
     }
 
@@ -711,7 +711,7 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
 
-    SoftBusThreadMutexUnlock(&g_channelSliceProcessorList->lock);
+    SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Proxy SubPacket Proc end");
     if (ret != SOFTBUS_OK) {
         TransProxyClearProcessor(processor);
@@ -754,7 +754,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusThreadMutexLock(&g_channelSliceProcessorList->lock) != 0) {
+    if (SoftBusMutexLock(&g_channelSliceProcessorList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock err");
         return SOFTBUS_ERR;
     }
@@ -766,11 +766,11 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
             ListDelete(&(node->head));
             SoftBusFree(node);
             g_channelSliceProcessorList->cnt--;
-            (void)SoftBusThreadMutexUnlock(&g_channelSliceProcessorList->lock);
+            (void)SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_channelSliceProcessorList->lock);
+    (void)SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     return SOFTBUS_OK;
 }
 
@@ -784,7 +784,7 @@ static void TransProxySliceTimerProc(void)
         return;
     }
 
-    if (SoftBusThreadMutexLock(&g_channelSliceProcessorList->lock) != 0) {
+    if (SoftBusMutexLock(&g_channelSliceProcessorList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxySliceTimerProc lock mutex fail!");
         return;
     }
@@ -799,7 +799,7 @@ static void TransProxySliceTimerProc(void)
             }
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_channelSliceProcessorList->lock);
+    (void)SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     return;
 }
 

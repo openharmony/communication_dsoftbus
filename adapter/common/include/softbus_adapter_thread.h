@@ -72,9 +72,9 @@ typedef uintptr_t SoftBusCond;
 /* mutex */
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr);
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr);
-int32_t SoftBusThreadMutexLock(SoftBusMutex *mutex);
-int32_t SoftBusThreadMutexUnlock(SoftBusMutex *mutex);
-int32_t SoftBusThreadMutexDestroy(SoftBusMutex *mutex);
+int32_t SoftBusMutexLock(SoftBusMutex *mutex);
+int32_t SoftBusMutexUnlock(SoftBusMutex *mutex);
+int32_t SoftBusMutexDestroy(SoftBusMutex *mutex);
 
 /* pthread */
 int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr);

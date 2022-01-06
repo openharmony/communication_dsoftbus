@@ -70,27 +70,27 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpConnInfoNode *temp = NULL;
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if ((int32_t)g_tcpConnInfoList->cnt >= g_tcpMaxConnNum) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Tcp out of max conn num.");
-        (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(temp, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (temp->connectionId == item->connectionId) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "ConnectionId:%08x ready in ConnectionInfoList.", item->connectionId);
-            (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             return SOFTBUS_ERR;
         }
     }
     ListInit(&item->node);
     ListAdd(&g_tcpConnInfoList->list, &item->node);
     g_tcpConnInfoList->cnt++;
-    (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -100,7 +100,7 @@ int32_t DelTcpConnInfo(uint32_t connectionId, ConnectionInfo *info)
         return SOFTBUS_ERR;
     }
     TcpConnInfoNode *item = NULL;
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -110,7 +110,7 @@ int32_t DelTcpConnInfo(uint32_t connectionId, ConnectionInfo *info)
                 if (memcpy_s((void *)info, sizeof(ConnectionInfo), (void *)&item->info,
                     sizeof(ConnectionInfo)) != EOK) {
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
-                    (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+                    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
                     return SOFTBUS_MEM_ERR;
                 }
             }
@@ -118,11 +118,11 @@ int32_t DelTcpConnInfo(uint32_t connectionId, ConnectionInfo *info)
             ListDelete(&item->node);
             SoftBusFree(item);
             g_tcpConnInfoList->cnt--;
-            (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
         "DelTcpConnInfo failed. ConnectionId:%08x not found.", connectionId);
     return SOFTBUS_OK;
@@ -238,7 +238,7 @@ static void DelAllConnInfo(void)
     if (g_tcpConnInfoList == NULL) {
         return;
     }
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -257,7 +257,7 @@ static void DelAllConnInfo(void)
         g_tcpConnInfoList->cnt--;
     }
     ListInit(&g_tcpConnInfoList->list);
-    SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
 }
 
 uint32_t CalTcpConnectionId(int32_t fd)
@@ -333,7 +333,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     if (g_tcpConnInfoList == NULL) {
         return SOFTBUS_ERR;
     }
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -357,7 +357,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     if (g_tcpConnInfoList->cnt == 0) {
         ListInit(&g_tcpConnInfoList->list);
     }
-    SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     return SOFTBUS_OK;
 }
 
@@ -373,7 +373,7 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
         return SOFTBUS_ERR;
     }
     int32_t fd = -1;
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
@@ -384,7 +384,7 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
             break;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
         SoftBusFree((void*)data);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
@@ -409,14 +409,14 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpConnInfoNode *item = NULL;
-    if (SoftBusThreadMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->connectionId == connectionId) {
             int32_t ret = memcpy_s(info, sizeof(ConnectionInfo), &item->info, sizeof(ConnectionInfo));
-            (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+            (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             if (ret != EOK) {
                 return SOFTBUS_MEM_ERR;
             }
@@ -424,7 +424,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         }
     }
     info->isAvailable = false;
-    (void)SoftBusThreadMutexUnlock(&g_tcpConnInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectionId:%08x is not exists.", connectionId);
     return SOFTBUS_ERR;
 }

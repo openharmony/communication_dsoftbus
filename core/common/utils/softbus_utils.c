@@ -65,7 +65,7 @@ SoftBusList *CreateSoftBusList(void)
 void DestroySoftBusList(SoftBusList *list)
 {
     ListDelInit(&list->list);
-    SoftBusThreadMutexDestroy(&list->lock);
+    SoftBusMutexDestroy(&list->lock);
     SoftBusFree(list);
     return;
 }

@@ -73,7 +73,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusThreadMutexLock(SoftBusMutex *mutex)
+int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
     if (mutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
@@ -83,13 +83,13 @@ int32_t SoftBusThreadMutexLock(SoftBusMutex *mutex)
     int ret;
     ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusThreadMutexLock failed, ret[%{public}d]", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexLock failed, ret[%{public}d]", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusThreadMutexUnlock(SoftBusMutex *mutex)
+int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 {
     if (mutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
@@ -99,14 +99,14 @@ int32_t SoftBusThreadMutexUnlock(SoftBusMutex *mutex)
     int ret;
     ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusThreadMutexUnlock failed, ret[%{public}d]", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexUnlock failed, ret[%{public}d]", ret);
         return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusThreadMutexDestroy(SoftBusMutex *mutex)
+int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
     if (mutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
@@ -116,7 +116,7 @@ int32_t SoftBusThreadMutexDestroy(SoftBusMutex *mutex)
     int ret;
     ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusThreadMutexDestroy failed, ret[%{public}d]", ret);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexDestroy failed, ret[%{public}d]", ret);
         SoftBusFree(mutex);
         return SOFTBUS_ERR;
     }

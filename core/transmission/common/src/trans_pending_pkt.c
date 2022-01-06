@@ -68,17 +68,17 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         return SOFTBUS_ERR;
     }
 
-    SoftBusThreadMutexLock(&pendingList->lock);
+    SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
-            SoftBusThreadMutexUnlock(&pendingList->lock);
+            SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_ERR;
         }
     }
     item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
-        SoftBusThreadMutexUnlock(&pendingList->lock);
+        SoftBusMutexUnlock(&pendingList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -90,29 +90,29 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
     ListAdd(&pendingList->list, &item->node);
     pendingList->cnt++;
-    SoftBusThreadMutexUnlock(&pendingList->lock);
+    SoftBusMutexUnlock(&pendingList->lock);
 
     SoftBusSysTime outtime;
     SoftBusSysTime now;
     SoftBusGetTime(&now);
     outtime.sec = now.sec + TIME_OUT;
     outtime.usec = now.usec * USECTONSEC;
-    SoftBusThreadMutexLock(&item->lock);
+    SoftBusMutexLock(&item->lock);
     SoftBusCondWait(&item->cond, &item->lock, &outtime);
 
     int32_t ret = SOFTBUS_OK;
     if (item->finded != true) {
         ret = SOFTBUS_TIMOUT;
     }
-    SoftBusThreadMutexUnlock(&item->lock);
+    SoftBusMutexUnlock(&item->lock);
 
-    SoftBusThreadMutexLock(&pendingList->lock);
+    SoftBusMutexLock(&pendingList->lock);
     ListDelete(&item->node);
-    SoftBusThreadMutexDestroy(&item->lock);
+    SoftBusMutexDestroy(&item->lock);
     SoftBusCondDestroy(&item->cond);
     SoftBusFree(item);
     pendingList->cnt--;
-    SoftBusThreadMutexUnlock(&pendingList->lock);
+    SoftBusMutexUnlock(&pendingList->lock);
 
     return ret;
 }
@@ -131,16 +131,16 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     }
 
     PendingPktInfo *item = NULL;
-    SoftBusThreadMutexLock(&pendingList->lock);
+    SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
             item->finded = true;
             SoftBusCondSignal(&item->cond);
-            SoftBusThreadMutexUnlock(&pendingList->lock);
+            SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusThreadMutexUnlock(&pendingList->lock);
+    SoftBusMutexUnlock(&pendingList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -156,15 +156,15 @@ int32_t DelPendingPacket(int32_t channelId, int type)
     }
 
     PendingPktInfo *item = NULL;
-    SoftBusThreadMutexLock(&pendingList->lock);
+    SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->channelId == channelId) {
             SoftBusCondSignal(&item->cond);
-            SoftBusThreadMutexUnlock(&pendingList->lock);
+            SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusThreadMutexUnlock(&pendingList->lock);
+    SoftBusMutexUnlock(&pendingList->lock);
     return SOFTBUS_OK;
 }
 

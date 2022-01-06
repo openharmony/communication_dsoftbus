@@ -45,35 +45,35 @@ static SoftBusMutex g_udpNegLock;
 
 static int32_t GenerateUdpChannelId(void)
 {
-    if (SoftBusThreadMutexLock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udp channel id lock failed");
         return INVALID_ID;
     }
     for (uint32_t id = 0; id < MAX_CHANNEL_ID_COUNT; id++) {
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
-            SoftBusThreadMutexUnlock(&g_udpNegLock);
+            SoftBusMutexUnlock(&g_udpNegLock);
             return (int32_t)id;
         }
     }
-    SoftBusThreadMutexUnlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
     return INVALID_ID;
 }
 
 void ReleaseUdpChannelId(int32_t channelId)
 {
-    if (SoftBusThreadMutexLock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "release udp channel id lock failed");
         return;
     }
     uint32_t id = (uint32_t)channelId;
     g_channelIdFlagBitsMap &= (~(ID_USED << id));
-    SoftBusThreadMutexUnlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
 }
 
 static int64_t GenerateSeq(bool isServer)
 {
-    if (SoftBusThreadMutexLock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate seq lock failed");
         return IVALID_SEQ;
     }
@@ -85,7 +85,7 @@ static int64_t GenerateSeq(bool isServer)
     if (isServer) {
         seq++;
     }
-    SoftBusThreadMutexUnlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
     return seq;
 }
 

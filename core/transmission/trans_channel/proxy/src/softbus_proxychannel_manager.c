@@ -51,18 +51,18 @@ static int32_t MyIdIsValid(int16_t myId)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_ERR;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_OK;
 }
 
@@ -96,7 +96,7 @@ int16_t TransProxyGetNewMyId(void)
 #define MYID_MAX_NUM 100
     static int16_t myId = 0;
     int32_t cnt = MYID_MAX_NUM;
-    if (SoftBusThreadMutexLock(&g_myIdLock) != 0) {
+    if (SoftBusMutexLock(&g_myIdLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -107,11 +107,11 @@ int16_t TransProxyGetNewMyId(void)
         int16_t ret = myId % MYID_MAX_NUM + 1;
         ret = EndianSwap16(ret);
         if (MyIdIsValid(ret) == SOFTBUS_OK) {
-            SoftBusThreadMutexUnlock(&g_myIdLock);
+            SoftBusMutexUnlock(&g_myIdLock);
             return ret;
         }
     }
-    SoftBusThreadMutexUnlock(&g_myIdLock);
+    SoftBusMutexUnlock(&g_myIdLock);
     return INVALID_CHANNEL_ID;
 }
 
@@ -151,7 +151,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -164,11 +164,11 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
             (void)memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -178,13 +178,13 @@ static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_proxyChannelList->list), &(chan->node));
     g_proxyChannelList->cnt++;
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_OK;
 }
 
@@ -197,7 +197,7 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -205,11 +205,11 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == chanId) {
             (void)memcpy_s(chan, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -222,7 +222,7 @@ void TransProxyDelChanByReqId(int32_t reqId)
         return;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -236,7 +236,7 @@ void TransProxyDelChanByReqId(int32_t reqId)
             g_proxyChannelList->cnt--;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return;
 }
 
@@ -249,7 +249,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
         return;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -260,11 +260,11 @@ void TransProxyDelChanByChanId(int32_t chanlId)
             SoftBusFree(item);
             g_proxyChannelList->cnt--;
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del chan info!");
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return;
 }
 
@@ -276,7 +276,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         return;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -289,7 +289,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
             TransProxyPostHandshakeMsgToLoop(item->channelId);
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return;
 }
 
@@ -302,7 +302,7 @@ void TransProxyDelByConnId(uint32_t connId)
         return;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -320,7 +320,7 @@ void TransProxyDelByConnId(uint32_t connId)
             g_proxyChannelList->cnt--;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return;
 }
 
@@ -333,7 +333,7 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -346,11 +346,11 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -363,7 +363,7 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -374,11 +374,11 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 
     return SOFTBUS_ERR;
 }
@@ -391,7 +391,7 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -402,11 +402,11 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
                 item->timeout = 0;
             }
             (void)memcpy_s(chanInfo, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -418,7 +418,7 @@ static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -430,11 +430,11 @@ static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
                 item->status = PROXY_CHANNEL_STATUS_COMPLETED;
             }
             (void)memcpy_s(chanInfo, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -446,7 +446,7 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -457,11 +457,11 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
                 item->timeout = 0;
             }
             (void)memcpy_s(chanInfo, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -474,7 +474,7 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
         return seq;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return seq;
     }
@@ -483,11 +483,11 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
         if (item->channelId == channelId) {
             seq = item->seq;
             item->seq++;
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return seq;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return seq;
 }
 
@@ -499,7 +499,7 @@ int32_t TransProxySetChiperSide(int32_t channelId, int32_t side)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -507,11 +507,11 @@ int32_t TransProxySetChiperSide(int32_t channelId, int32_t side)
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             item->chiperSide = side;
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -523,7 +523,7 @@ int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -531,11 +531,11 @@ int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side)
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             *side = item->chiperSide;
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -547,7 +547,7 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -560,14 +560,14 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int
             if (memcpy_s(sessionKey, sessionKeySize, item->appInfo.sessionKey,
                 sizeof(item->appInfo.sessionKey)) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s fail!");
-                (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 return SOFTBUS_ERR;
             }
-            (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -966,7 +966,7 @@ void TransProxyTimerProc(void)
     if (g_proxyChannelList == 0 || g_proxyChannelList->cnt == 0) {
         return;
     }
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -1003,7 +1003,7 @@ void TransProxyTimerProc(void)
             }
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     TransProxyTimerItemProc(&proxyProcList);
 }
 
@@ -1083,7 +1083,7 @@ void TransProxyDeathCallback(const char *pkgName)
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    if (SoftBusThreadMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
@@ -1097,5 +1097,5 @@ void TransProxyDeathCallback(const char *pkgName)
             continue;
         }
     }
-    (void)SoftBusThreadMutexUnlock(&g_proxyChannelList->lock);
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 }

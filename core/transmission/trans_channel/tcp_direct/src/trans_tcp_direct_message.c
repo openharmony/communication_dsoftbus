@@ -64,14 +64,14 @@ static void TransSrvDestroyDataBuf(void)
 
     ServerDataBuf *item = NULL;
     ServerDataBuf *next = NULL;
-    SoftBusThreadMutexLock(&g_tcpSrvDataList->lock);
+    SoftBusMutexLock(&g_tcpSrvDataList->lock);
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         ListDelete(&item->node);
         SoftBusFree(item->data);
         SoftBusFree(item);
         g_tcpSrvDataList->cnt--;
     }
-    SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 
     return;
 }
@@ -105,11 +105,11 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
     }
     node->w = node->data;
 
-    SoftBusThreadMutexLock(&(g_tcpSrvDataList->lock));
+    SoftBusMutexLock(&(g_tcpSrvDataList->lock));
     ListInit(&node->node);
     ListTailInsert(&g_tcpSrvDataList->list, &node->node);
     g_tcpSrvDataList->cnt++;
-    SoftBusThreadMutexUnlock(&(g_tcpSrvDataList->lock));
+    SoftBusMutexUnlock(&(g_tcpSrvDataList->lock));
 
     return SOFTBUS_OK;
 }
@@ -122,7 +122,7 @@ void TransSrvDelDataBufNode(int channelId)
 
     ServerDataBuf *item = NULL;
     ServerDataBuf *next = NULL;
-    SoftBusThreadMutexLock(&g_tcpSrvDataList->lock);
+    SoftBusMutexLock(&g_tcpSrvDataList->lock);
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
@@ -132,7 +132,7 @@ void TransSrvDelDataBufNode(int channelId)
             break;
         }
     }
-    SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 }
 
 static int32_t GetAuthConnectOption(int32_t channelId, ConnectOption *option)
@@ -487,10 +487,10 @@ static int32_t ProcessReceivedData(int32_t channelId)
     uint32_t inLen, flags, outLen;
     uint64_t seq;
 
-    SoftBusThreadMutexLock(&g_tcpSrvDataList->lock);
+    SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (GetPktHeadInfoByDatabuf(node, &inLen, &seq, &flags) != SOFTBUS_OK) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_ERR;
     }
 
@@ -498,25 +498,25 @@ static int32_t ProcessReceivedData(int32_t channelId)
     char *out = (char *)SoftBusCalloc(inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1);
     if (out == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: malloc fail.");
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
     if (DecryptMessage(channelId, in, inLen, out, &outLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: decrypt message err.");
         SoftBusFree(out);
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_ERR;
     }
     char *end = node->data + sizeof(TdcPacketHead) + inLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
         SoftBusFree(out);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_MEM_ERR;
     }
     node->w = node->w - sizeof(TdcPacketHead) - inLen;
-    SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
     out[outLen] = 0;
     cJSON *packet = cJSON_Parse(out);
     if (packet == NULL) {
@@ -535,63 +535,63 @@ static int32_t ProcessReceivedData(int32_t channelId)
 
 static int32_t TransTdcSrvProcData(int32_t channelId)
 {
-    SoftBusThreadMutexLock(&g_tcpSrvDataList->lock);
+    SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv can not get buf node.");
         return SOFTBUS_ERR;
     }
 
     uint32_t bufLen = node->w - node->data;
     if (bufLen < DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srv head not enough, recv next time.");
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
 
     TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
     if (pktHead->magicNumber != MAGIC_NUMBER) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv recv invalid packet head");
         return SOFTBUS_ERR;
     }
 
     uint32_t dataLen = pktHead->dataLen;
     if (dataLen > node->size - DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv out of recv buf size[%d]", dataLen);
         return SOFTBUS_ERR;
     }
 
     if (bufLen < dataLen + DC_MSG_PACKET_HEAD_SIZE) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srv data not enough, recv next time.[%d][%d][%d]",
             bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     DelTrigger(DIRECT_CHANNEL_SERVER, node->fd, READ_TRIGGER);
-    SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
     return ProcessReceivedData(channelId);
 }
 
 int32_t TransTdcSrvRecvData(int32_t channelId)
 {
-    SoftBusThreadMutexLock(&g_tcpSrvDataList->lock);
+    SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv can not find data buf node.");
         return SOFTBUS_ERR;
     }
     int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
     if (ret <= 0) {
-        SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
         return SOFTBUS_ERR;
     }
     node->w += ret;
-    SoftBusThreadMutexUnlock(&g_tcpSrvDataList->lock);
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 
     return TransTdcSrvProcData(channelId);
 }

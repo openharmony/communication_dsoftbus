@@ -90,23 +90,23 @@ int32_t TransTdcCreateListener(int32_t fd)
 {
     static bool isInitedFlag = false;
     TdcLockInit();
-    SoftBusThreadMutexLock(&g_lock.lock);
+    SoftBusMutexLock(&g_lock.lock);
     if (isInitedFlag == false) {
         isInitedFlag = true;
 
         if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &g_listener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
-            SoftBusThreadMutexUnlock(&g_lock.lock);
+            SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         if (StartBaseClient(DIRECT_CHANNEL_CLIENT) < SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client start base listener failed.");
-            SoftBusThreadMutexUnlock(&g_lock.lock);
+            SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create sdk listener success.");
     }
-    SoftBusThreadMutexUnlock(&g_lock.lock);
+    SoftBusMutexUnlock(&g_lock.lock);
 
     return AddTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
 }

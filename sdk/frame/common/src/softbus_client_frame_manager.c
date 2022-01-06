@@ -88,35 +88,35 @@ int32_t InitSoftBus(const char *pkgName)
         return SOFTBUS_LOCK_ERR;
     }
 
-    if (SoftBusThreadMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_isInited == true) {
-        SoftBusThreadMutexUnlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
 
     if (strcpy_s(g_pkgName, sizeof(g_pkgName), pkgName) != EOK) {
-        SoftBusThreadMutexUnlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_MEM_ERR;
     }
 
     if (ClientModuleInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
-        SoftBusThreadMutexUnlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     if (ClientStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
-        SoftBusThreadMutexUnlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     g_isInited = true;
-    SoftBusThreadMutexUnlock(&g_isInitedLock);
+    SoftBusMutexUnlock(&g_isInitedLock);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 }
