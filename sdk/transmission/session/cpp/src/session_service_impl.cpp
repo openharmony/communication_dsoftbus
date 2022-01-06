@@ -54,8 +54,11 @@ int SessionServiceImpl::CreateSessionServer(const std::string &pkgName, const st
     }
 
     std::lock_guard<std::mutex> autoLock(listenerMutex_);
-    listenerMap_.insert(std::pair<std::string, std::shared_ptr<ISessionListener>>(sessionName, listener));
-    return CreateSessionServerInner(pkgName.c_str(), sessionName.c_str());
+    int ret = CreateSessionServerInner(pkgName.c_str(), sessionName.c_str());
+    if (ret == SOFTBUS_OK) {
+        listenerMap_.insert(std::pair<std::string, std::shared_ptr<ISessionListener>>(sessionName, listener));
+    }
+    return ret;
 }
 
 int SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, const std::string &sessionName)
