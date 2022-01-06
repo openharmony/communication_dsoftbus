@@ -17,6 +17,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdio.h>
+#include <securec.h>
 
 #include "softbus_adapter_log.h"
 #include "softbus_def.h"
@@ -167,7 +168,7 @@ static int32_t SoftbusSetThreadPeriority (SoftBusThreadAttr *threadAttr, pthread
 #define PTHREAD_PERIOR_HIGHEST (99)
 
     struct sched_param periorityParam;
-    memset_s(&periorityParam, sizeof(pthread_attr_setschedparam), 0, sizeof(pthread_attr_setschedparam));
+    (void)memset_s(&periorityParam, sizeof(pthread_attr_setschedparam), 0, sizeof(pthread_attr_setschedparam));
     switch (threadAttr->prior) {
         case SOFTBUS_PRIORITY_DEFAULT : {
             periorityParam.sched_priority = PTHREAD_PERIOR_DEFAULT;
