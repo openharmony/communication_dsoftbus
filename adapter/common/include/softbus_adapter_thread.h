@@ -80,7 +80,7 @@ int32_t SoftBusThreadMutexDestroy(SoftBusMutex *mutex);
 int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr);
 int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)(void *),
     void *arg);
-int32_t SoftBusThreadJoin (SoftBusThread thread, void **value);
+int32_t SoftBusThreadJoin(SoftBusThread thread, void **value);
 int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name);
 SoftBusThread SoftBusThreadGetSelf(void);
 

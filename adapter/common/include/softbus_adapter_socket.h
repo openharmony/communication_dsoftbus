@@ -16,15 +16,15 @@
 #ifndef SOFTBUS_ADAPTER_SOCKET_H
 #define SOFTBUS_ADAPTER_SOCKET_H
 
-#include <stdint.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/select.h>
-#include <sys/types.h>
 #include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef __cplusplus
 #if __cplusplus
