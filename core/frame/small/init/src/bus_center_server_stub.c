@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include "liteipc_adapter.h"
 #include "lnn_bus_center_ipc.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -25,7 +26,7 @@
 #include "softbus_log.h"
 #include "softbus_permission.h"
 
-int32_t ServerJoinLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerJoinLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerJoinLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -59,7 +60,7 @@ int32_t ServerJoinLNN(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerLeaveLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerLeaveLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerLeaveLNN ipc server pop.");
     size_t len;
@@ -87,7 +88,7 @@ int32_t ServerLeaveLNN(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerGetAllOnlineNodeInfo(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerGetAllOnlineNodeInfo(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerGetAllOnlineNodeInfo ipc server pop.");
     void *nodeInfo = NULL;
@@ -123,7 +124,7 @@ int32_t ServerGetAllOnlineNodeInfo(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerGetLocalDeviceInfo ipc server pop.");
     void *nodeInfo = NULL;
@@ -158,7 +159,7 @@ int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerGetNodeKeyInfo ipc server pop.");
     size_t length;
@@ -198,7 +199,7 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStartTimeSync(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStartTimeSync(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStartTimeSync ipc server pop.");
     size_t length;
@@ -230,7 +231,7 @@ int32_t ServerStartTimeSync(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStopTimeSync(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopTimeSync ipc server pop.");
     size_t length;

@@ -36,8 +36,8 @@ static unsigned int g_deathCbId = INVALID_CB_ID;
 static SvcIdentity g_svcIdentity = {0};
 
 struct SoftBusIpcClientCmd {
-    uint32_t code;
-    void (*func)(IpcIo *io, const IpcContext *ctx, void *ipcMsg);
+    enum SoftBusFuncId code;
+    int32_t (*func)(IpcIo *io, const IpcContext *ctx, void *ipcMsg);
 };
 
 static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
@@ -72,8 +72,7 @@ static int ClientIpcInterfaceMsgHandle(const IpcContext *ctx, void *ipcMsg, IpcI
     unsigned int num = sizeof(g_softBusIpcClientCmdTbl) / sizeof(struct SoftBusIpcClientCmd);
     for (unsigned int i = 0; i < num; i++) {
         if (code == g_softBusIpcClientCmdTbl[i].code) {
-            g_softBusIpcClientCmdTbl[i].func(io, ctx, ipcMsg);
-            return SOFTBUS_OK;
+            return g_softBusIpcClientCmdTbl[i].func(io, ctx, ipcMsg);
         }
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not support code(%u)", code);
