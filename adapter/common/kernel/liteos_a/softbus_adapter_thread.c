@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
 #include "softbus_adapter_thread.h"
 #include <pthread.h>
@@ -22,10 +25,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
 
 /* mutex */
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
@@ -191,10 +190,10 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
 
     struct sched_param periorityParam;
     (void)memset_s(&periorityParam, sizeof(pthread_attr_setschedparam), 0, sizeof(pthread_attr_setschedparam));
+    struct sched_param defaultPeri;
+    pthread_attr_getschedparam(attr, &defaultPeri);
     switch (threadAttr->prior) {
         case SOFTBUS_PRIORITY_DEFAULT : {
-            struct sched_param defaultPeri;
-            pthread_attr_getschedparam(attr, &defaultPeri);
             periorityParam.sched_priority = defaultPeri.sched_priority;
             break;
         }
@@ -215,7 +214,8 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
             break;
         }
         default: {
-            periorityParam.sched_priority = PTHREAD_PERIOR_DEFAULT;
+            periorityParam.sched_priority = defaultPeri.sched_priority;
+            break;
         }
     }
     pthread_attr_setschedparam(attr, &periorityParam);
