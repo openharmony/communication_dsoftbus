@@ -21,13 +21,13 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_client_event_manager.h"
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_adapter_thread.h"
 
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;

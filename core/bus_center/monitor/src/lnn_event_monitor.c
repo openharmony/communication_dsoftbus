@@ -20,9 +20,9 @@
 #include "common_list.h"
 #include "lnn_event_monitor_impl.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_thread.h"
 
 typedef enum {
     MONITOR_IMPL_NETLINK_TYPE = 0,

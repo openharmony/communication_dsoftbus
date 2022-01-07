@@ -22,6 +22,7 @@
 #include "lnn_net_builder.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -29,7 +30,6 @@
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_session_manager.h"
-#include "softbus_adapter_thread.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1

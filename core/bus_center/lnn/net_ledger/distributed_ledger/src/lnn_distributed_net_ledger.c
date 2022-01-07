@@ -24,11 +24,11 @@
 #include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_thread.h"
 
 #define NUM_BUF_SIZE 4
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \

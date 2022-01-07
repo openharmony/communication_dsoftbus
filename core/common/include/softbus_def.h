@@ -16,9 +16,10 @@
 #define SOFTBUS_DEF_H
 
 #include  <pthread.h>
-#include "stdint.h"
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
+#include "stdint.h"
+
 
 #ifdef __cplusplus
 #if __cplusplus

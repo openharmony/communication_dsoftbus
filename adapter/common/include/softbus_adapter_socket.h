@@ -16,14 +16,8 @@
 #ifndef SOFTBUS_ADAPTER_SOCKET_H
 #define SOFTBUS_ADAPTER_SOCKET_H
 
-#include <arpa/inet.h>
 #include <errno.h>
-#include <netinet/in.h>
 #include <stdint.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
@@ -32,8 +26,7 @@ extern "C" {
 #endif
 #endif
 
-typedef struct sockaddr SoftBusSockAddr;
-int SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
+int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
 int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName,  const void *optVal, int32_t optLen);
 int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  void *optVal, int32_t *optLen);
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen);

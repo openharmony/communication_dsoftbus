@@ -21,11 +21,11 @@
 #include "common_list.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 #include "unistd.h"
-#include "softbus_adapter_thread.h"
 
 #define LOOP_NAME_LEN 16
 #define TIME_THOUSANDS_MULTIPLIER 1000LL

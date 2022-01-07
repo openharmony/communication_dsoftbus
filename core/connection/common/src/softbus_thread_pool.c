@@ -49,6 +49,7 @@ static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, ui
 
     threadAttrInfo.stackSize = (attr->stackSize | MIN_STACK_SIZE);
     threadAttrInfo.prior = attr->priority;
+    threadAttrInfo.policy = SOFTBUS_SCHED_RR;
     int32_t errCode = SoftBusThreadCreate((SoftBusThread *)threadId, &threadAttrInfo, run, argv);
 
     return errCode;

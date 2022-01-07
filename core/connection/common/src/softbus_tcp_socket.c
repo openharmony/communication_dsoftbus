@@ -26,9 +26,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_socket.h"
 
 #define SEND_BUF_SIZE 0x200000  // 2M
 #define RECV_BUF_SIZE 0x100000  // 1M

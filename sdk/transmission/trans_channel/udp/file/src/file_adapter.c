@@ -23,10 +23,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
-#include "softbus_adapter_socket.h"
+
 
 static int SetReuseAddr(int fd, int on)
 {

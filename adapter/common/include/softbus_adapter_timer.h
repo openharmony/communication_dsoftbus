@@ -25,7 +25,7 @@ extern "C" {
 typedef struct {
     int64_t sec;
     int64_t usec;
-}SoftBusSysTime;
+} SoftBusSysTime;
 
 /* Timer */
 void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type);

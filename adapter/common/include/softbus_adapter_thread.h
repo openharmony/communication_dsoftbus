@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_ADAPTER_THREAD_H
 #define SOFTBUS_ADAPTER_THREAD_H
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
 #include <stdint.h>
 #include "softbus_adapter_timer.h"
 
@@ -60,7 +56,7 @@ typedef struct {
 typedef enum {
     SOFTBUS_MUTEX_NORMAL,
     SOFTBUS_MUTEX_RECURSIVE
-}SoftBusMutexType;
+} SoftBusMutexType;
 
 typedef struct {
     SoftBusMutexType type;

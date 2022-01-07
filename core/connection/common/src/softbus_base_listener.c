@@ -23,13 +23,13 @@
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_socket.h"
 
 #define MAX_LISTEN_EVENTS 1024
 #define TIMEOUT           10000

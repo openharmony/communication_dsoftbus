@@ -22,6 +22,7 @@
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -33,7 +34,6 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
-#include "softbus_adapter_thread.h"
 
 #define PROXY_CHANNEL_CONTROL_TIMEOUT 19
 #define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240 // 4min

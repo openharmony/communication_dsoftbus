@@ -23,13 +23,13 @@
 #include "cJSON.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_tcp_socket.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
-#include "softbus_adapter_thread.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 

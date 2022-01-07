@@ -21,6 +21,7 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
@@ -31,7 +32,7 @@
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_thread.h"
+
 
 #define INVALID_DATA (-1)
 
