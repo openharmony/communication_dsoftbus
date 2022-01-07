@@ -20,6 +20,7 @@
 #include "br_connection.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_ble_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
@@ -28,7 +29,6 @@
 #include "softbus_log.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_thread.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
 static SoftBusList *g_listenerList = NULL;

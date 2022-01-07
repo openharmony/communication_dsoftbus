@@ -29,11 +29,11 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_ip_utils.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_tcp_direct_listener.h"
-#include "softbus_adapter_thread.h"
 
 #define IP_DEFAULT_PORT 0
 

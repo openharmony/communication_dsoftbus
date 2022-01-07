@@ -21,12 +21,12 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
-#include "softbus_adapter_thread.h"
 
 #define MAX_CHANNEL_ID_COUNT 20
 #define ID_NOT_USED 0

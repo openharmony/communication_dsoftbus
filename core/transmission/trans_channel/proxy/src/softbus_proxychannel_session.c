@@ -20,6 +20,7 @@
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_property.h"
@@ -30,7 +31,6 @@
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
-#include "softbus_adapter_thread.h"
 
 #define MSG_SLICE_HEAD_LEN (sizeof(SliceHead) + sizeof(ProxyMessageHead))
 #define PROXY_ACK_SIZE 4

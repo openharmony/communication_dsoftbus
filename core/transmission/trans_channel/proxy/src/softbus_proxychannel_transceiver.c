@@ -19,6 +19,7 @@
 
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -27,7 +28,6 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_thread.h"
 
 static SoftBusList *g_proxyConnectionList = NULL;
 char *g_transProxyLoopName = "transProxyLoopName";

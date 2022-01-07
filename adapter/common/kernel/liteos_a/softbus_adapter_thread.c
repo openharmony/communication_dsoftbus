@@ -18,12 +18,14 @@
 #include <securec.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
 /* mutex */
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
@@ -143,7 +145,6 @@ int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr)
     return SOFTBUS_OK;
 }
 
-
 static int32_t SoftbusSetThreadPolicy(SoftBusThreadAttr *threadAttr, pthread_attr_t *attr)
 {
     if (threadAttr->policy == SOFTBUS_SCHED_OTHER) {
@@ -174,18 +175,27 @@ static int32_t SoftbusSetThreadDetachState(SoftBusThreadAttr *threadAttr, pthrea
 
 static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_attr_t *attr)
 {
-    /* periorityParam is between 1 and 99 in liteos_a */
-#define PTHREAD_PERIOR_LOWEST (25)
-#define PTHREAD_PERIOR_LOW (50)
-#define PTHREAD_PERIOR_DEFAULT (0)
-#define PTHREAD_PERIOR_HIGH (75)
-#define PTHREAD_PERIOR_HIGHEST (99)
+#ifdef __linux__
+    /* periorityParam is between 1 and 99 in linux */
+    #define PTHREAD_PERIOR_LOWEST (1)
+    #define PTHREAD_PERIOR_LOW (33)
+    #define PTHREAD_PERIOR_HIGH (66)
+    #define PTHREAD_PERIOR_HIGHEST (99)
+#else
+    /* periorityParam is between 0 and 31 in liteOS */
+    #define PTHREAD_PERIOR_LOWEST (30)
+    #define PTHREAD_PERIOR_LOW (20)
+    #define PTHREAD_PERIOR_HIGH (10)
+    #define PTHREAD_PERIOR_HIGHEST (0)
+#endif
 
     struct sched_param periorityParam;
     (void)memset_s(&periorityParam, sizeof(pthread_attr_setschedparam), 0, sizeof(pthread_attr_setschedparam));
     switch (threadAttr->prior) {
         case SOFTBUS_PRIORITY_DEFAULT : {
-            periorityParam.sched_priority = PTHREAD_PERIOR_DEFAULT;
+            struct sched_param defaultPeri;
+            pthread_attr_getschedparam(attr, &defaultPeri);
+            periorityParam.sched_priority = defaultPeri.sched_priority;
             break;
         }
         case SOFTBUS_PRIORITY_LOWEST : {
@@ -252,6 +262,11 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
     (void *), void *arg)
 {
     HILOG_INFO(SOFTBUS_HILOG_ID, "Wherecome to ThreadCreate");
+    if (thread == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret;
     if (threadAttr == NULL) {
         ret = pthread_create((pthread_t *)thread, NULL, threadEntry, arg);

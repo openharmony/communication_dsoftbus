@@ -21,13 +21,13 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_type_def.h"
 #include "trans_pending_pkt.h"
-#include "softbus_adapter_thread.h"
 
 typedef struct {
     SoftBusMutex lock;

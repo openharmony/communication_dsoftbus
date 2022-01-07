@@ -25,9 +25,9 @@
 
 #include "securec.h"
 #include "softbus_adapter_log.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_adapter_socket.h"
 
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000

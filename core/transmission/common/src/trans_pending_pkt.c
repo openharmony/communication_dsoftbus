@@ -19,10 +19,10 @@
 #include <unistd.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_thread.h"
 
 #define TIME_OUT 2
 #define USECTONSEC 1000

@@ -18,6 +18,7 @@
 #include "iproxy_client.h"
 #include "liteipc_adapter.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_client_context_manager.h"
 #include "softbus_client_event_manager.h"
 #include "softbus_client_frame_manager.h"
@@ -27,7 +28,6 @@
 #include "softbus_log.h"
 #include "softbus_server_proxy.h"
 #include "trans_client_stub.h"
-#include "softbus_adapter_thread.h"
 
 #define INVALID_CB_ID 0xFF
 
