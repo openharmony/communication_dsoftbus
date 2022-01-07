@@ -17,7 +17,10 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <errno.h>
+#include <netinet/in.h>
 #include <stdint.h>
+#include <sys/select.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
