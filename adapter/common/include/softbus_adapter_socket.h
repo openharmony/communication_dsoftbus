@@ -45,7 +45,8 @@ void SoftBusSocketFdSet(int32_t socketFd, fd_set *set);
 void SoftBusSocketFdClr(int32_t socketFd, fd_set *set);
 int32_t SoftBusSocketFdIsset(int32_t socketFd, fd_set *set);
 
-int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeOut);
+int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set
+    *exceptFds, struct timeval *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
@@ -53,7 +54,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int
     *toAddr, int32_t toAddrLen);
 
 int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t flags);
-int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, struct sockaddr 
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, struct sockaddr
     *fromAddr, int32_t *fromAddrLen);
 
 
