@@ -102,7 +102,7 @@ static int32_t OpenConnTcp(AppInfo *appInfo, const ConnectOption *connInfo)
     char *ip = (char*)connInfo->info.ipOption.ip;
     char *myIp = NULL;
     int sessionPort = connInfo->info.ipOption.port;
-    int fd = OpenTcpClientSocket(ip, myIp, sessionPort);
+    int fd = OpenTcpClientSocket(ip, myIp, sessionPort, false);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Open socket err.");
         return SOFTBUS_ERR;
