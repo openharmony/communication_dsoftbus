@@ -667,6 +667,7 @@ int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *liste
         }
     } else {
         SoftBusFree(listener);
+        return SOFTBUS_ERR;
     }
     pthread_mutex_unlock(&g_listenerList[module].lock);
     return SOFTBUS_OK;
