@@ -60,3 +60,10 @@ int SoftBusSleepMs(unsigned int ms)
     osDelay(ms * osKernelGetTickFreq() / MS_PER_SECOND);
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
+{
+    (void)sysTime;
+    return SOFTBUS_OK;
+}
+

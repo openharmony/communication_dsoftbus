@@ -63,6 +63,8 @@ if (defined(ohos_lite)) {
       ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
+        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
+        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
