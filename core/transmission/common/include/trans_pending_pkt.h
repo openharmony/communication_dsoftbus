@@ -36,8 +36,8 @@ enum {
 
 typedef struct {
     ListNode node;
-    pthread_cond_t cond;
-    pthread_mutex_t lock;
+    SoftBusCond cond;
+    SoftBusMutex lock;
     int32_t channelId;
     int32_t seq;
     bool finded;

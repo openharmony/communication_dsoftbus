@@ -19,6 +19,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "softbus_adapter_thread.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,7 +36,7 @@ struct Job {
     void *arg;
     struct Job *next;
     JobMode jobMode;
-    pthread_mutex_t mutex;
+    SoftBusMutex mutex;
     uintptr_t handle;
     bool runnable;
 };
@@ -47,11 +48,11 @@ typedef struct {
     int32_t queueMaxNum;
     Job *head;
     Job *tail;
-    pthread_t *pthreads;
-    pthread_mutex_t mutex;
-    pthread_cond_t queueEmpty;
-    pthread_cond_t queueNotEmpty;
-    pthread_cond_t queueNotFull;
+    SoftBusThread *pthreads;
+    SoftBusMutex mutex;
+    SoftBusCond queueEmpty;
+    SoftBusCond queueNotEmpty;
+    SoftBusCond queueNotFull;
     int32_t queueCurNum;
     int32_t queueClose;
     int32_t poolClose;

@@ -232,6 +232,12 @@ void __attribute__((weak)) HOS_SystemInit(void)
 int ServerStubInit(void)
 {
     HOS_SystemInit();
+
+    if (LnnIpcInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Center Ipc init failed.");
+        return SOFTBUS_ERR;
+    }
+
     if (SERVER_InitClient() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client manager init failed.");
         return SOFTBUS_ERR;

@@ -55,19 +55,18 @@ bool GetServerIsInit(void)
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-
+    
     if (ServerStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server stub init failed.");
         return;
     }
-
     if (SoftBusTimerInit() == SOFTBUS_ERR) {
         return;
     }
-
     if (LooperInit() == -1) {
         return;
     }
+
     if (ConnServerInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus conn server init failed.");
         goto ERR_EXIT;

@@ -21,6 +21,7 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -28,8 +29,25 @@
 #include "softbus_type_def.h"
 #include "trans_pending_pkt.h"
 
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+typedef struct {
+    SoftBusMutex lock;
+    bool lockInit;
+} SoftBusTcpListenerLock;
+static SoftBusTcpListenerLock g_lock = {
+    .lockInit = false,
+};
 
+static void TdcLockInit(void)
+{
+    if (g_lock.lockInit == false) {
+        if (SoftBusMutexInit(&g_lock.lock, NULL) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TDC  lock init failed");
+            return;
+        }
+        g_lock.lockInit = true;
+    }
+    return;
+}
 static int32_t OnConnectEvent(int events, int cfd, const char *ip)
 {
     (void)events;
@@ -71,23 +89,24 @@ static SoftbusBaseListener g_listener = {
 int32_t TransTdcCreateListener(int32_t fd)
 {
     static bool isInitedFlag = false;
-    pthread_mutex_lock(&g_lock);
+    TdcLockInit();
+    SoftBusMutexLock(&g_lock.lock);
     if (isInitedFlag == false) {
         isInitedFlag = true;
 
         if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &g_listener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
-            pthread_mutex_unlock(&g_lock);
+            SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         if (StartBaseClient(DIRECT_CHANNEL_CLIENT) < SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client start base listener failed.");
-            pthread_mutex_unlock(&g_lock);
+            SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create sdk listener success.");
     }
-    pthread_mutex_unlock(&g_lock);
+    SoftBusMutexUnlock(&g_lock.lock);
 
     return AddTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
 }

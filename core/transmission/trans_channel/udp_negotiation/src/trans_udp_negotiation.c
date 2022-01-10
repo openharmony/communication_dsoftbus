@@ -21,6 +21,7 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -40,39 +41,39 @@
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
 static IServerChannelCallBack *g_channelCb = NULL;
-static pthread_mutex_t g_udpNegLock = PTHREAD_MUTEX_INITIALIZER;
+static SoftBusMutex g_udpNegLock;
 
 static int32_t GenerateUdpChannelId(void)
 {
-    if (pthread_mutex_lock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udp channel id lock failed");
         return INVALID_ID;
     }
     for (uint32_t id = 0; id < MAX_CHANNEL_ID_COUNT; id++) {
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
-            pthread_mutex_unlock(&g_udpNegLock);
+            SoftBusMutexUnlock(&g_udpNegLock);
             return (int32_t)id;
         }
     }
-    pthread_mutex_unlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
     return INVALID_ID;
 }
 
 void ReleaseUdpChannelId(int32_t channelId)
 {
-    if (pthread_mutex_lock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "release udp channel id lock failed");
         return;
     }
     uint32_t id = (uint32_t)channelId;
     g_channelIdFlagBitsMap &= (~(ID_USED << id));
-    pthread_mutex_unlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
 }
 
 static int64_t GenerateSeq(bool isServer)
 {
-    if (pthread_mutex_lock(&g_udpNegLock) != 0) {
+    if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate seq lock failed");
         return IVALID_SEQ;
     }
@@ -84,7 +85,7 @@ static int64_t GenerateSeq(bool isServer)
     if (isServer) {
         seq++;
     }
-    pthread_mutex_unlock(&g_udpNegLock);
+    SoftBusMutexUnlock(&g_udpNegLock);
     return seq;
 }
 
@@ -616,6 +617,11 @@ static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthT
 int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 {
     g_channelCb = callback;
+
+    if (SoftBusMutexInit(&g_udpNegLock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "g_udpNegLock init failed.");
+        return SOFTBUS_ERR;
+    }
     if (TransUdpChannelMgrInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans udp channel manager init failed.");
         return SOFTBUS_ERR;

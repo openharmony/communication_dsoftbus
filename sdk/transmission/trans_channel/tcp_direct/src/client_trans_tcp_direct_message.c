@@ -232,10 +232,10 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
     }
     node->w = node->data;
 
-    pthread_mutex_lock(&g_tcpDataList->lock);
+    SoftBusMutexLock(&g_tcpDataList->lock);
     ListAdd(&g_tcpDataList->list, &node->node);
     g_tcpDataList->cnt++;
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    SoftBusMutexUnlock(&g_tcpDataList->lock);
     return SOFTBUS_OK;
 }
 
@@ -247,7 +247,7 @@ int32_t TransDelDataBufNode(int32_t channelId)
 
     ClientDataBuf *item = NULL;
     ClientDataBuf *next = NULL;
-    pthread_mutex_lock(&g_tcpDataList->lock);
+    SoftBusMutexLock(&g_tcpDataList->lock);
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpDataList->list, ClientDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
@@ -257,7 +257,7 @@ int32_t TransDelDataBufNode(int32_t channelId)
             break;
         }
     }
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     return SOFTBUS_OK;
 }
@@ -270,14 +270,14 @@ static int32_t TransDestroyDataBuf(void)
 
     ClientDataBuf *item = NULL;
     ClientDataBuf *next = NULL;
-    pthread_mutex_lock(&g_tcpDataList->lock);
+    SoftBusMutexLock(&g_tcpDataList->lock);
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpDataList->list, ClientDataBuf, node) {
         ListDelete(&item->node);
         SoftBusFree(item->data);
         SoftBusFree(item);
         g_tcpDataList->cnt--;
     }
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     return SOFTBUS_OK;
 }
@@ -324,7 +324,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
         return SOFTBUS_ERR;
     }
 
-    pthread_mutex_lock(&g_tcpDataList->lock);
+    SoftBusMutexLock(&g_tcpDataList->lock);
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "node is null.");
@@ -337,7 +337,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail.");
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -347,17 +347,17 @@ static int32_t TransTdcProcessData(int32_t channelId)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt fail.");
         SoftBusFree(plain);
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_DECRYPT_ERR;
     }
     char *end = node->data + DC_DATA_HEAD_SIZE + dataLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MEM_ERR;
     }
     node->w = node->w - DC_DATA_HEAD_SIZE - dataLen;
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     ret = TransTdcProcessDataByFlag(flag, seqNum, &channel, plain, plainLen);
     if (ret != SOFTBUS_OK) {
@@ -392,40 +392,40 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
 static int32_t TransTdcProcAllData(int32_t channelId)
 {
     while (1) {
-        pthread_mutex_lock(&g_tcpDataList->lock);
+        SoftBusMutexLock(&g_tcpDataList->lock);
         ClientDataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {
-            pthread_mutex_unlock(&g_tcpDataList->lock);
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find data buf node.");
             return SOFTBUS_ERR;
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen < DC_DATA_HEAD_SIZE) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head not enough, recv biz head next time.");
-            pthread_mutex_unlock(&g_tcpDataList->lock);
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
 
         TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
         if (pktHead->magicNumber != MAGIC_NUMBER) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid data packet head");
-            pthread_mutex_unlock(&g_tcpDataList->lock);
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
 
         uint32_t pkgLen = pktHead->dataLen + DC_DATA_HEAD_SIZE;
         if (pkgLen > g_dataBufferMaxLen) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv data buf size[%d]", pkgLen);
-            pthread_mutex_unlock(&g_tcpDataList->lock);
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
 
         if (pkgLen > node->size && pkgLen <= g_dataBufferMaxLen) {
             int32_t ret = TransResizeDataBuffer(node, pkgLen);
-            pthread_mutex_unlock(&g_tcpDataList->lock);
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             return ret;
         }
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
 
         if (bufLen < pkgLen) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "data not enough, recv biz data next time.");
@@ -441,21 +441,21 @@ static int32_t TransTdcProcAllData(int32_t channelId)
 
 int32_t TransTdcRecvData(int32_t channelId)
 {
-    pthread_mutex_lock(&g_tcpDataList->lock);
+    SoftBusMutexLock(&g_tcpDataList->lock);
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find data buf node.");
         return SOFTBUS_ERR;
     }
     int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
     if (ret <= 0) {
-        pthread_mutex_unlock(&g_tcpDataList->lock);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
         return SOFTBUS_ERR;
     }
     node->w += ret;
-    pthread_mutex_unlock(&g_tcpDataList->lock);
+    SoftBusMutexUnlock(&g_tcpDataList->lock);
 
     return TransTdcProcAllData(channelId);
 }

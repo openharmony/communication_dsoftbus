@@ -30,11 +30,13 @@ static DiscInfo *g_discInfo = NULL;
 int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
 {
     g_discInfo->publishCb = *cb;
+
     int32_t ret = ServerIpcPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server PublishService failed, ret = %d", ret);
         return ret;
     }
+
     return SOFTBUS_OK;
 }
 
