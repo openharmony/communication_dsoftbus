@@ -20,6 +20,7 @@
 #include "br_connection.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_ble_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
@@ -88,13 +89,13 @@ static int32_t GetAllListener(ConnListenerNode **node)
         return cnt;
     }
 
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return 0;
     }
     *node = SoftBusCalloc(g_listenerList->cnt * sizeof(ConnListenerNode));
     if (*node == NULL) {
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusMutexUnlock(&g_listenerList->lock);
         return cnt;
     }
     LIST_FOR_EACH_ENTRY(listenerNode, &g_listenerList->list, ConnListenerNode, node) {
@@ -103,7 +104,7 @@ static int32_t GetAllListener(ConnListenerNode **node)
         }
         cnt++;
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusMutexUnlock(&g_listenerList->lock);
     return cnt;
 }
 
@@ -115,7 +116,7 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
         return SOFTBUS_ERR;
     }
     int ret = SOFTBUS_OK;
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
@@ -124,11 +125,11 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
             if (memcpy_s(node, sizeof(ConnListenerNode), listenerNode, sizeof(ConnListenerNode)) != EOK) {
                 ret = SOFTBUS_ERR;
             }
-            (void)pthread_mutex_unlock(&g_listenerList->lock);
+            (void)SoftBusMutexUnlock(&g_listenerList->lock);
             return ret;
         }
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusMutexUnlock(&g_listenerList->lock);
     return SOFTBUS_ERR;
 }
 
@@ -140,35 +141,31 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
     if (g_listenerList == NULL) {
         return SOFTBUS_ERR;
     }
-
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-
     LIST_FOR_EACH_ENTRY(listNode, &g_listenerList->list, ConnListenerNode, node) {
         if (listNode->moduleId == moduleId) {
-            (void)pthread_mutex_unlock(&g_listenerList->lock);
+            (void)SoftBusMutexUnlock(&g_listenerList->lock);
             return SOFTBUS_ERR;
         }
     }
-
     item = (ConnListenerNode *)SoftBusCalloc(sizeof(ConnListenerNode));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc fail");
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
-
     item->moduleId = moduleId;
     if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != 0) {
         SoftBusFree(item);
-        (void)pthread_mutex_unlock(&g_listenerList->lock);
+        (void)SoftBusMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_listenerList->list), &(item->node));
     g_listenerList->cnt++;
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusMutexUnlock(&g_listenerList->lock);
     return SOFTBUS_OK;
 }
 
@@ -180,7 +177,7 @@ static void DelListener(ConnModule moduleId)
         return;
     }
 
-    if (pthread_mutex_lock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -193,7 +190,7 @@ static void DelListener(ConnModule moduleId)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_listenerList->lock);
+    (void)SoftBusMutexUnlock(&g_listenerList->lock);
     return;
 }
 

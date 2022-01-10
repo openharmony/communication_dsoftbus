@@ -16,8 +16,10 @@
 #define SOFTBUS_DEF_H
 
 #include  <pthread.h>
-#include "stdint.h"
 #include "common_list.h"
+#include "softbus_adapter_thread.h"
+#include "stdint.h"
+
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,7 +56,7 @@ extern "C" {
 #define WAIT_SERVER_READY_INTERVAL 200
 
 typedef struct {
-    pthread_mutex_t lock;
+    SoftBusMutex lock;
     unsigned int cnt;
     ListNode list;
 } SoftBusList;

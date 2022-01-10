@@ -13,34 +13,4 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_ADAPTER_TIMER_H
-#define SOFTBUS_ADAPTER_TIMER_H
-#include <stdint.h>
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-typedef struct {
-    int64_t sec;
-    int64_t usec;
-} SoftBusSysTime;
-
-/* Timer */
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type);
-int SoftBusStartTimer(void *timerId, unsigned int tickets);
-int SoftBusDeleteTimer(void *timerId);
-
-/* Sleep */
-int SoftBusSleepMs(unsigned int ms);
-
-int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif
+#include "softbus_adapter_thread.h"

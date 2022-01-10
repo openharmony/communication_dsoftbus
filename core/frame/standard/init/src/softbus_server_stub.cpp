@@ -182,11 +182,13 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
     pubInfo.freq = (ExchangeFreq)data.ReadInt32();
     pubInfo.capability = data.ReadCString();
     pubInfo.dataLen = data.ReadUint32();
+
     if (pubInfo.dataLen != 0) {
         pubInfo.capabilityData = (unsigned char *)data.ReadCString();
     } else {
         pubInfo.capabilityData = NULL;
     }
+
     int32_t retReply = PublishService(pkgName, &pubInfo);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner write reply failed!");

@@ -170,7 +170,6 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "invalid param.");
         return;
     }
-
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     if (discDeviceInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "malloc device info failed.");
@@ -179,6 +178,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
+
         if (((nstackxDeviceInfo->update) & 0x1) == 0) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "duplicate  device is not reported.");
             continue;
@@ -188,6 +188,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "parse discovery device info failed.");
             continue;
         }
+
         if ((g_discCoapInnerCb != NULL) && (g_discCoapInnerCb->OnDeviceFound != NULL)) {
             g_discCoapInnerCb->OnDeviceFound(discDeviceInfo);
         }

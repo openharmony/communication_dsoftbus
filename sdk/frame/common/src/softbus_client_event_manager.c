@@ -17,6 +17,7 @@
 
 #include "softbus.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -87,21 +88,21 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
         return SOFTBUS_ERR;
     }
 
-    if (pthread_mutex_lock(&g_observerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_observerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
 
     if (g_observerList->cnt >= MAX_OBSERVER_CNT) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "observer count over limit");
-        (void)pthread_mutex_unlock(&g_observerList->lock);
+        (void)SoftBusMutexUnlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
 
     Observer *observer = SoftBusCalloc(sizeof(Observer));
     if (observer == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc observer failed");
-        (void)pthread_mutex_unlock(&g_observerList->lock);
+        (void)SoftBusMutexUnlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
 
@@ -112,7 +113,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
     ListInit(&observer->node);
     ListAdd(&g_observerList->list, &observer->node);
     g_observerList->cnt++;
-    (void)pthread_mutex_unlock(&g_observerList->lock);
+    (void)SoftBusMutexUnlock(&g_observerList->lock);
     return SOFTBUS_OK;
 }
 
@@ -129,7 +130,7 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
     }
 
     Observer *observer = NULL;
-    if (pthread_mutex_lock(&g_observerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_observerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -142,5 +143,5 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
         }
     }
 
-    (void)pthread_mutex_unlock(&g_observerList->lock);
+    (void)SoftBusMutexUnlock(&g_observerList->lock);
 }

@@ -25,9 +25,8 @@
 
 #ifndef MIN_STACK_SIZE
 #define MIN_STACK_SIZE 0x4000
-#define THREAD_PRIORITY 20
 #endif
-#define THREAD_POOL_NAME "THREAD_POOL_WORKER"
+#define THREAD_POOL_NAME "THREAD_POOL"
 
 typedef void *(*Runnable)(void *argv);
 typedef struct ThreadAttr ThreadAttr;
@@ -35,7 +34,7 @@ typedef struct ThreadAttr ThreadAttr;
 struct ThreadAttr {
     const char *name;
     uint32_t stackSize;
-    uint8_t priority;
+    SoftBusThreadPriority priority;
 };
 
 static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId);
@@ -45,13 +44,14 @@ static void ThreadPoolWorker(void *arg);
 
 static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId)
 {
-    pthread_attr_t threadAttr;
-    pthread_attr_init(&threadAttr);
-    pthread_attr_setstacksize(&threadAttr, (attr->stackSize | MIN_STACK_SIZE));
-    struct sched_param sched = {attr->priority};
-    pthread_attr_setschedparam(&threadAttr, &sched);
-    pthread_attr_setdetachstate(&threadAttr, PTHREAD_CREATE_JOINABLE);
-    int32_t errCode = pthread_create((pthread_t *)threadId, &threadAttr, run, argv);
+    SoftBusThreadAttr threadAttrInfo;
+    SoftBusThreadAttrInit(&threadAttrInfo);
+
+    threadAttrInfo.stackSize = (attr->stackSize | MIN_STACK_SIZE);
+    threadAttrInfo.prior = attr->priority;
+    threadAttrInfo.policy = SOFTBUS_SCHED_RR;
+    int32_t errCode = SoftBusThreadCreate((SoftBusThread *)threadId, &threadAttrInfo, run, argv);
+
     return errCode;
 }
 
@@ -71,22 +71,22 @@ static ThreadPool* CreateThreadPool(int32_t threadNum, int32_t queueMaxNum)
     pool->queueCurNum = 0;
     pool->head = NULL;
     pool->tail = NULL;
-    if (pthread_mutex_init(&(pool->mutex), NULL)) {
+    if (SoftBusMutexInit(&(pool->mutex), NULL) != SOFTBUS_OK) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to init mutex");
         return NULL;
     }
-    if (pthread_cond_init(&(pool->queueEmpty), NULL)) {
+    if (SoftBusCondInit(&(pool->queueEmpty)) != SOFTBUS_OK) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to init cond queueEmpty");
         return NULL;
     }
-    if (pthread_cond_init(&(pool->queueNotEmpty), NULL)) {
+    if (SoftBusCondInit(&(pool->queueNotEmpty)) != SOFTBUS_OK) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to init cond queueNotEmpty");
         return NULL;
     }
-    if (pthread_cond_init(&(pool->queueNotFull), NULL)) {
+    if (SoftBusCondInit(&(pool->queueNotFull)) != SOFTBUS_OK) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to init cond queueNotFull");
         return NULL;
@@ -106,7 +106,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
         return NULL;
     }
 
-    pool->pthreads = (pthread_t *)SoftBusCalloc(sizeof(pthread_t) * threadNum);
+    pool->pthreads = (SoftBusThread *)SoftBusCalloc(sizeof(SoftBusThread) * threadNum);
     if (pool->pthreads == NULL) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to malloc pthreads");
@@ -114,36 +114,38 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
     }
     pool->queueClose = 0;
     pool->poolClose = 0;
-    if (pthread_mutex_lock(&(pool->mutex)) != 0) {
+    if (SoftBusMutexLock(&(pool->mutex)) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         goto EXIT;
     }
+
     int32_t countSuccess = 0;
     for (int32_t i = 0; i < pool->threadNum; ++i) {
-        ThreadAttr attr = {"ThreadPoolWorker", 0, THREAD_PRIORITY};
+        ThreadAttr attr = {"ThreadPoolWorker", 0, SOFTBUS_PRIORITY_LOWEST};
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "create pthread now.");
         if (CreateThread((Runnable)ThreadPoolWorker, (void *)pool, &attr, (uint32_t *)&(pool->pthreads[i])) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create pthreads no. [%d] failed\n", i);
-            pool->pthreads[i] = (pthread_t)0;
+            pool->pthreads[i] = (SoftBusThread)0;
         } else {
             ++countSuccess;
         }
     }
+
     if (countSuccess < pool->threadNum) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to create %d threads", pool->threadNum - countSuccess);
     }
     if (countSuccess == 0) {
-        pthread_mutex_unlock(&pool->mutex);
+        SoftBusMutexUnlock(&pool->mutex);
         goto EXIT;
     }
-    pthread_mutex_unlock(&(pool->mutex));
+    SoftBusMutexUnlock(&(pool->mutex));
     return pool;
 
 EXIT:
-    pthread_mutex_destroy(&pool->mutex);
-    pthread_cond_destroy(&pool->queueEmpty);
-    pthread_cond_destroy(&pool->queueNotEmpty);
-    pthread_cond_destroy(&pool->queueNotFull);
+    SoftBusMutexDestroy(&pool->mutex);
+    SoftBusCondDestroy(&pool->queueEmpty);
+    SoftBusCondDestroy(&pool->queueNotEmpty);
+    SoftBusCondDestroy(&pool->queueNotFull);
     SoftBusFree(pool->pthreads);
     SoftBusFree(pool);
     return NULL;
@@ -179,46 +181,46 @@ static void ThreadPoolWorker(void *arg)
     }
     ThreadPool *pool = (ThreadPool *)arg;
     Job *job = NULL;
-    pthread_setname_np(pthread_self(), THREAD_POOL_NAME);
+    SoftBusThreadSetName(SoftBusThreadGetSelf(), THREAD_POOL_NAME);
     while (1) {
-        if (pthread_mutex_lock(&(pool->mutex)) != 0) {
+        if (SoftBusMutexLock(&(pool->mutex)) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
             return;
         }
         while ((pool->queueCurNum == 0) && !pool->poolClose) {
-            pthread_cond_wait(&(pool->queueNotEmpty), &(pool->mutex));
+            SoftBusCondWait(&(pool->queueNotEmpty), &(pool->mutex), NULL);
         }
         if (pool->poolClose || pool->queueCurNum <= 0) {
-            pthread_mutex_unlock(&(pool->mutex));
+            SoftBusMutexUnlock(&(pool->mutex));
             break;
         }
         pool->queueCurNum--;
         job = pool->head;
-        if (pthread_mutex_lock(&(job->mutex)) != 0) {
+        if (SoftBusMutexLock(&(job->mutex)) != 0) {
             pool->queueCurNum++;
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-            pthread_mutex_unlock(&(pool->mutex));
+            SoftBusMutexUnlock(&(pool->mutex));
             continue;
         }
         JobCheck(pool, job);
         if (pool->queueCurNum == 0) {
-            pthread_cond_signal(&(pool->queueEmpty));
+            SoftBusCondSignal(&(pool->queueEmpty));
         }
         if (pool->queueCurNum == pool->queueMaxNum - 1) {
-            pthread_cond_broadcast(&(pool->queueNotFull));
+            SoftBusCondBroadcast(&(pool->queueNotFull));
         }
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         if (job->runnable) {
             (void)(*(job->callbackFunction))(job->arg);
         }
         if (job->jobMode == ONCE || job->runnable == false) {
-            pthread_mutex_unlock(&(job->mutex));
-            pthread_mutex_destroy(&(job->mutex));
+            SoftBusMutexUnlock(&(job->mutex));
+            SoftBusMutexDestroy(&(job->mutex));
             SoftBusFree(job);
             job = NULL;
         }
         if (job != NULL) {
-            pthread_mutex_unlock(&(job->mutex));
+            SoftBusMutexUnlock(&(job->mutex));
         }
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Exit");
@@ -229,23 +231,23 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
     if (pool == NULL || callbackFunction == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&(pool->mutex)) != 0) {
+    if (SoftBusMutexLock(&(pool->mutex)) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (pool->queueCurNum == pool->queueMaxNum) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "queueCurNum equals queueMaxNum, just quit");
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
     while ((pool->queueCurNum == pool->queueMaxNum) && !(pool->queueClose || pool->poolClose)) {
-        pthread_cond_wait(&(pool->queueNotFull), &(pool->mutex));
+        SoftBusCondWait(&(pool->queueNotFull), &(pool->mutex), NULL);
     }
     if (pool->queueClose || pool->poolClose) {
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
-    // will call pthread_mutex_unlock in ThreadPoolAddJob
+    // will call SoftBusMutexUnlock in ThreadPoolAddJob
     return SOFTBUS_OK;
 }
 
@@ -259,14 +261,14 @@ int32_t ThreadPoolAddJob(ThreadPool *pool, int32_t (*callbackFunction)(void *arg
     Job* job = pool->head;
     while (job != NULL) {
         if (job->handle == handle && job->runnable == true) {
-            pthread_mutex_unlock(&(pool->mutex));
+            SoftBusMutexUnlock(&(pool->mutex));
             return SOFTBUS_ALREADY_EXISTED;
         }
         job = job->next;
     }
     job = (Job *)SoftBusCalloc(sizeof(Job));
     if (job == NULL) {
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         return SOFTBUS_MALLOC_ERR;
     }
     job->callbackFunction = callbackFunction;
@@ -275,20 +277,20 @@ int32_t ThreadPoolAddJob(ThreadPool *pool, int32_t (*callbackFunction)(void *arg
     job->handle = handle;
     job->runnable = true;
     job->next = NULL;
-    if (pthread_mutex_init(&(job->mutex), NULL)) {
+    if (SoftBusMutexInit(&(job->mutex), NULL)) {
         SoftBusFree(job);
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         return SOFTBUS_ERR;
     }
     if (pool->head == NULL) {
         pool->head = pool->tail = job;
-        pthread_cond_broadcast(&(pool->queueNotEmpty));
+        SoftBusCondBroadcast(&(pool->queueNotEmpty));
     } else {
         pool->tail->next = job;
         pool->tail = job;
     }
     pool->queueCurNum++;
-    pthread_mutex_unlock(&(pool->mutex));
+    SoftBusMutexUnlock(&(pool->mutex));
     return SOFTBUS_OK;
 }
 
@@ -298,7 +300,7 @@ int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ThreadPoolRemoveJob failed, pool == NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&(pool->mutex)) != 0) {
+    if (SoftBusMutexLock(&(pool->mutex)) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -310,15 +312,15 @@ int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
         job = job->next;
     }
     if (job != NULL && job->runnable == true && job->jobMode == PERSISTENT) {
-        if (pthread_mutex_lock(&(job->mutex)) != 0) {
+        if (SoftBusMutexLock(&(job->mutex)) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-            pthread_mutex_unlock(&(job->mutex));
+            SoftBusMutexUnlock(&(job->mutex));
             return SOFTBUS_LOCK_ERR;
         }
         job->runnable = false;
-        pthread_mutex_unlock(&(job->mutex));
+        SoftBusMutexUnlock(&(job->mutex));
     }
-    pthread_mutex_unlock(&(pool->mutex));
+    SoftBusMutexUnlock(&(pool->mutex));
     return SOFTBUS_OK;
 }
 
@@ -327,31 +329,31 @@ int32_t ThreadPoolDestroy(ThreadPool *pool)
     if (pool == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&(pool->mutex)) != 0) {
+    if (SoftBusMutexLock(&(pool->mutex)) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (pool->queueClose || pool->poolClose) {
-        pthread_mutex_unlock(&(pool->mutex));
+        SoftBusMutexUnlock(&(pool->mutex));
         return SOFTBUS_OK;
     }
     pool->queueClose = 1;
     while (pool->queueCurNum != 0) {
-        pthread_cond_wait(&(pool->queueEmpty), &(pool->mutex));
+        SoftBusCondWait(&(pool->queueEmpty), &(pool->mutex), NULL);
     }
     pool->poolClose = 1;
-    pthread_mutex_unlock(&(pool->mutex));
-    pthread_cond_broadcast(&(pool->queueNotEmpty));
-    pthread_cond_broadcast(&(pool->queueNotFull));
+    SoftBusMutexUnlock(&(pool->mutex));
+    SoftBusCondBroadcast(&(pool->queueNotEmpty));
+    SoftBusCondBroadcast(&(pool->queueNotFull));
     for (int32_t i = 0; i < pool->threadNum; ++i) {
         if (pool->pthreads != NULL) {
-            pthread_join(pool->pthreads[i], NULL);
+            SoftBusThreadJoin(pool->pthreads[i], NULL);
         }
     }
-    pthread_mutex_destroy(&(pool->mutex));
-    pthread_cond_destroy(&(pool->queueEmpty));
-    pthread_cond_destroy(&(pool->queueNotEmpty));
-    pthread_cond_destroy(&(pool->queueNotFull));
+    SoftBusMutexDestroy(&(pool->mutex));
+    SoftBusCondDestroy(&(pool->queueEmpty));
+    SoftBusCondDestroy(&(pool->queueNotEmpty));
+    SoftBusCondDestroy(&(pool->queueNotFull));
     SoftBusFree(pool->pthreads);
     Job* job = NULL;
     while (pool->head != NULL) {
