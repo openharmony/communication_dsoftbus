@@ -313,6 +313,11 @@ static int32_t AuthOnConnectEvent(int32_t events, int32_t cfd, const char *ip)
         AuthCloseTcpFd(cfd);
         return SOFTBUS_ERR;
     }
+    if (ConnSetTcpKeepAlive(cfd, AUTH_HEART_TIME) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth server set tcp keep alive failed");
+        AuthCloseTcpFd(cfd);
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
