@@ -102,6 +102,9 @@ ERR_EXIT:
     return;
 }
 
+#include "ohos_init.h"
+SYS_SERVICE_INIT_PRI(InitSoftBusServer, 4);
+
 void ClientDeathCallback(const char *pkgName)
 {
     DiscServerDeathCallback(pkgName);
