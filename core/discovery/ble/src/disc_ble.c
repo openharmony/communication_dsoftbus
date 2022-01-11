@@ -479,8 +479,8 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
     bool isSameAccount = false;
     bool isWakeRemote = false;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        isSameAccount |= g_bleInfoManager[infoIndex].isSameAccount[pos];
-        isWakeRemote |= g_bleInfoManager[infoIndex].isWakeRemote[pos];
+        isSameAccount = isSameAccount ? isSameAccount : g_bleInfoManager[infoIndex].isSameAccount[pos];
+        isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
     }
     (void)memset_s(info->hwAccountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
     if (isSameAccount) {
