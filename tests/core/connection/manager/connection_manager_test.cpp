@@ -228,7 +228,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ConnTypeIsSupport(CONNECT_BLE);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 };
 
 /*
