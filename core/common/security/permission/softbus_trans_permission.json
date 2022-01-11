@@ -117,5 +117,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "device.security.level",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "1000",
+        "PKG_NAME": "ohos.dslm",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
