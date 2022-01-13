@@ -16,9 +16,7 @@
 #include "softbus_base_listener.h"
 
 #include <arpa/inet.h>
-#include <errno.h>
 #include <securec.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #include "common_list.h"
@@ -181,13 +179,13 @@ static int32_t InitListenFd(ListenerModule module, const char *ip, int32_t port)
     }
     int32_t rc = OpenTcpServerSocket(ip, port);
     if (rc < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpServer failed, rc=%d errno=%d", rc, errno);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpServer failed, rc=%d", rc);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
     listenerInfo->listenFd = rc;
     rc = SoftBusSocketListen(listenerInfo->listenFd, DEFAULT_BACKLOG);
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listen failed, rc=%d errno=%d", rc, errno);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listen failed, rc=%d", rc);
         ResetBaseListener(module);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
@@ -274,22 +272,22 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         return SOFTBUS_ERR;
     }
     if (fd == listenerInfo->listenFd) {
-        struct sockaddr_in addr;
+        SoftBusSockAddrIn addr;
         if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
             return SOFTBUS_ERR;
         }
-        socklen_t addrLen = sizeof(addr);
+        SoftBusSockLen addrLen = sizeof(addr);
         int32_t cfd;
         int ret;
-        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (struct sockaddr *)&addr, (int *)&addrLen, &cfd));
+        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddrIn *)&addr, &addrLen, &cfd));
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "accept failed, cfd=%d, errno=%d, module=%d, fd=%d", cfd, errno, module, fd);
+                "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
             return SOFTBUS_TCP_SOCKET_ERR;
         }
         char ip[IP_LEN] = {0};
-        inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
+        SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, ip, sizeof(ip));
         if (listener->onConnectEvent != NULL) {
             listener->onConnectEvent(events, cfd, ip);
         } else {
@@ -442,7 +440,6 @@ static int32_t SelectThread(void)
 
     int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, &tv);
     if (nEvents < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "select failed, errno=%d", errno);
         return SOFTBUS_TCP_SOCKET_ERR;
     } else if (nEvents == 0) {
         return SOFTBUS_OK;
