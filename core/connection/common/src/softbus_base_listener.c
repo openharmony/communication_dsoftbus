@@ -280,7 +280,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         SoftBusSockLen addrLen = sizeof(addr);
         int32_t cfd;
         int ret;
-        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddrIn *)&addr, &addrLen, &cfd));
+        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, &addrLen, &cfd));
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
