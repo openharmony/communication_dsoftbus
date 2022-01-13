@@ -572,7 +572,7 @@ void VtpStreamSocket::InsertBufferLength(int num, int length, uint8_t *output) c
     }
 }
 
-std::unique_ptr<IStream> VtpStreamSocket::MakeStreamData(StreamData &data, const FrameInfo &info) const
+std::unique_ptr<IStream> VtpStreamSocket::MakeStreamData(StreamData &data, const StreamFrameInfo &info) const
 {
     std::unique_ptr<IStream> stream = nullptr;
     switch (streamType_) {
@@ -638,7 +638,7 @@ void VtpStreamSocket::DoStreamRecv()
         std::unique_ptr<char[]> dataBuffer = nullptr;
         std::unique_ptr<char[]> extBuffer = nullptr;
         int extLen = 0;
-        FrameInfo info = {};
+        StreamFrameInfo info = {};
         int dataLength = 0;
 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv stream");

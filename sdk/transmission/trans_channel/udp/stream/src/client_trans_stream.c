@@ -75,7 +75,8 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
     }
 }
 
-static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext,
+    const StreamFrameInfo *param)
 {
     if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnStreamReceived == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback on stream received is null.");
@@ -140,7 +141,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
     return SOFTBUS_OK;
 }
 
-int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     return SendVtpStream(channelId, data, ext, param);
 }

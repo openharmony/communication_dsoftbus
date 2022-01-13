@@ -109,7 +109,7 @@ private:
     int SetSocketEpollMode(int fd) override;
 
     void InsertBufferLength(int num, int length, uint8_t *output) const;
-    std::unique_ptr<IStream> MakeStreamData(StreamData &data, const FrameInfo &info) const;
+    std::unique_ptr<IStream> MakeStreamData(StreamData &data, const StreamFrameInfo &info) const;
     int RecvStreamLen();
     void DoStreamRecv();
     std::unique_ptr<char[]> RecvStream(int dataLength) override;

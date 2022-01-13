@@ -53,7 +53,7 @@ int32_t ClientTransCloseUdpChannel(int32_t channelId)
 }
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
-    const FrameInfo *param)
+    const StreamFrameInfo *param)
 {
     (void)channelId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
