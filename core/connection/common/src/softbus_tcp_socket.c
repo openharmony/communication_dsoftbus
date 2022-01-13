@@ -214,7 +214,7 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isN
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, peerIp, &addr.sinAddr);
     addr.sinPort = SoftBusHtoNs(port);
-    int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockLen *)&addr, sizeof(addr)));
+    int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
         TcpShutDown(fd);
@@ -343,7 +343,7 @@ void TcpShutDown(int fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);
-        SoftBusSocketShutDown(fd, SHUT_RDWR);
+        SoftBusSocketShutDown(fd, SOFTBUS_SHUT_RDWR);
         SoftBusSocketClose(fd);
     }
 }
