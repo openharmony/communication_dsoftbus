@@ -55,7 +55,7 @@ static int OpenTcpServer(const char *ip, int port)
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
     int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addr.sinAddr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d:%s", rc,);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d", rc);
         return SOFTBUS_ERR;
     }
     addr.sinFamily = SOFTBUS_AF_INET;
