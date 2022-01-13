@@ -31,8 +31,8 @@ struct StreamData {
     ssize_t extLen = 0;
 };
 
-// APP should update FrameInfo each time.
-struct FrameInfo {
+// APP should update StreamFrameInfo each time.
+struct StreamFrameInfo {
     uint32_t streamId = 0;
     uint32_t seqNum = 0;
     uint32_t level = 0;
@@ -46,10 +46,11 @@ public:
     IStream() = default;
     virtual ~IStream() = default;
 
-    static std::unique_ptr<IStream> MakeCommonStream(StreamData &data, const FrameInfo &info);
-    static std::unique_ptr<IStream> MakeSliceStream(StreamData &data, const FrameInfo &info);
-    static std::unique_ptr<IStream> MakeRawStream(StreamData &data, const FrameInfo &info);
-    static std::unique_ptr<IStream> MakeRawStream(const char *buf, ssize_t bufLen, const FrameInfo &info, int scene);
+    static std::unique_ptr<IStream> MakeCommonStream(StreamData &data, const StreamFrameInfo &info);
+    static std::unique_ptr<IStream> MakeSliceStream(StreamData &data, const StreamFrameInfo &info);
+    static std::unique_ptr<IStream> MakeRawStream(StreamData &data, const StreamFrameInfo &info);
+    static std::unique_ptr<IStream> MakeRawStream(const char *buf, ssize_t bufLen,
+        const StreamFrameInfo &info, int scene);
 
     virtual void SetTimeStamp(uint32_t timestamp) = 0;
     virtual uint32_t GetTimeStamp() const = 0;

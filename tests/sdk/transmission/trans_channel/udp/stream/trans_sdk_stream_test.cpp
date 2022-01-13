@@ -53,7 +53,7 @@ HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
     int sessionId = 1;
     const StreamData streamData = {0};
     const StreamData ext = {0};
-    const FrameInfo param = {0};
+    const StreamFrameInfo param = {0};
 
     ret = SendStream(-1, &streamData, &ext, &param);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
