@@ -16,6 +16,7 @@
 #include "softbus_adapter_socket.h"
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -222,6 +223,17 @@ int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp)
     return ret;
 }
 
+int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, void *argp)
+{
+    int32_t ret = fcntl(socketFd, cmd, argp);
+    if (ret < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fcntl : %{pbulic}s", strerror(errno));
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
+    return ret;
+}
+
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags)
 {
     int32_t ret = send(socketFd, buf, len, flags);
@@ -304,7 +316,7 @@ int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst)
     }
 }
 
-char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size)
+const char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size)
 {
     return (inet_ntop(af, src, dst, size));
 }

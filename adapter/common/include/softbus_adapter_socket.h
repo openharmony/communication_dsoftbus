@@ -49,6 +49,10 @@ extern "C" {
 #define SOFTBUS_TCP_KEEPINTVL (5)
 #define SOFTBUS_TCP_KEEPCNT (6)
 
+#define SOFTBUS_SHUT_RD (0)
+#define SOFTBUS_SHUT_WR (1)
+#define SOFTBUS_SHUT_RDWR (2)
+
 /* netinet/in.h */
 #define SOFTBUS_IPPROTO_IP (0)
 #define SOFTBUS_IPPROTO_TCP (6)
@@ -57,6 +61,12 @@ extern "C" {
 
 /* netinet/tcp.h */
 #define SOFTBUS_TCP_NODELAY (1)
+
+/* fcntl.h */
+#define SOFTBUS_F_GETFL (3)
+#define SOFTBUS_F_SETFL (4)
+
+#define SOFTBUS_O_NONBLOCK (04000)
 
 /* netinet/in.h */
 typedef uint32_t SoftBusSockLen;
@@ -96,6 +106,7 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, fd_set *set);
 int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set
     *exceptFds, struct timeval *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
+int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, void *argp);
 
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
@@ -110,7 +121,7 @@ int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how);
 int32_t SoftBusSocketClose(int32_t socketFd);
 
 int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst);
-char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size);
+const char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size);
 
 uint32_t SoftBusHtoNl(uint32_t hostlong);
 uint16_t SoftBusHtoNs(uint16_t hostshort);
