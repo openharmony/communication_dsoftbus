@@ -207,7 +207,7 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceId failed");
         return ret;
     }
-    ret = GenerateStrHash(devId, strlen(devId) + 1, hashResult);
+    ret = GenerateStrHash(devId, strlen(devId), hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;
