@@ -277,7 +277,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
             return SOFTBUS_ERR;
         }
-        SoftBusSockLen addrLen = sizeof(addr);
+        int32_t addrLen = sizeof(addr);
         int32_t cfd;
         int ret;
         ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, &addrLen, &cfd));

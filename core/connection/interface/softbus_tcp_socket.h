@@ -16,11 +16,12 @@
 #ifndef SOFTBUS_TCP_SOCKET_H
 #define SOFTBUS_TCP_SOCKET_H
 
-#include "softbus_errcode.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+
+#include "softbus_adapter_errcode.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

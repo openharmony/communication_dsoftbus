@@ -249,7 +249,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 int GetTcpSockPort(int fd)
 {
     SoftBusSockAddrIn addr;
-    SoftBusSockLen addrLen = sizeof(addr);
+    int32_t addrLen = sizeof(addr);
 
     int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr, &addrLen);
     if (rc != 0) {
