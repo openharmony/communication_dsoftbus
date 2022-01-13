@@ -34,7 +34,7 @@ void SetStatus(int channelId, int status)
     printf("[client]:channelID:%d, status:%d\n", channelId, status);
 }
 
-void OnStreamReceived(int channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+void OnStreamReceived(int channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     printf("[client]:OnStreamReceived, len:%d, extLen:%d", data->bufLen, ext->bufLen);
     printf("[client]:channelID:%d, streamBuf:%.*s\n", channelId, data->bufLen, data->buf);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         "oohoohooh\0",
         10,
     };
-    FrameInfo tmpf = {};
+    StreamFrameInfo tmpf = {};
 
     for (int i  = 0; i < LOOP_ROUND; i++) {
         ret = SendVtpStream(CHANNELID, &tmpData, NULL, &tmpf);
