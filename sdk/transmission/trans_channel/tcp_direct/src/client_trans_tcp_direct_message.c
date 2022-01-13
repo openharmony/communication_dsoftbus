@@ -22,6 +22,7 @@
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -107,7 +108,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     uint32_t tmpSeq;
     if (flags == FLAG_ACK) {
         finalSeq = *((int32_t *)data);
-        tmpSeq = htonl((uint32_t)finalSeq);
+        tmpSeq = SoftBusHtoNl((uint32_t)finalSeq);
         finalData = (char *)(&tmpSeq);
     }
 

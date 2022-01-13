@@ -16,8 +16,6 @@
 #include "softbus_tcp_connect_manager.h"
 
 #include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -190,7 +188,7 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
         ssize_t n = RecvTcpData(fd, data + headSize + recvLen, len - recvLen, g_tcpTimeOut);
         if (n < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "receiveData: error occurred![recvLen=%d][len=%d][errno=%d]", recvLen, len, errno);
+                "receiveData: error occurred![recvLen=%d][len=%d]", recvLen, len);
             goto EXIT;
         }
         recvLen += n;

@@ -15,6 +15,8 @@
 
 #include "softbus_adapter_socket.h"
 #include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/in.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -23,6 +25,28 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
+static int32_t GetErrorCode(void) {
+    int32_t errCode = SOFTBUS_ADAPTER_ERR;
+    switch (errno) {
+        case EINTR : {
+            errCode = SOFTBUS_ADAPTER_SOCKET_EINTR;
+            break;
+        }
+        case EINPROGRESS : {
+            errCode = SOFTBUS_ADAPTER_SOCKET_EINPROGRESS;
+            break;
+        }
+        case EAGAIN : {
+            errCode = SOFTBUS_ADAPTER_SOCKET_EAGAIN;
+            break;
+        }
+        default : {
+            errCode = SOFTBUS_ADAPTER_ERR;
+            break;
+        }
+    }
+    return errCode;
+}
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
 {
     if (socketFd == NULL) {
@@ -61,9 +85,9 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  v
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusSocketGetLocalName(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen)
+int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, SoftBusSockLen *addrLen)
 {
-    int32_t ret = getsockname(socketFd, addr, (socklen_t *)addrLen);
+    int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)addrLen);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockname : %{pbulic}s", strerror(errno));
         return SOFTBUS_ERR;
@@ -71,9 +95,9 @@ int32_t SoftBusSocketGetLocalName(int32_t socketFd, struct sockaddr *addr, int32
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusSocketGetPeerName(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen)
+int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, SoftBusSockLen *addrLen)
 {
-    int32_t ret = getpeername(socketFd, addr, (socklen_t *)addrLen);
+    int32_t ret = getpeername(socketFd, (struct sockaddr *)addr, (socklen_t *)addrLen);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "getpeername : %{pbulic}s", strerror(errno));
         return SOFTBUS_ERR;
@@ -81,15 +105,15 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, struct sockaddr *addr, int32_
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusSocketBind(int32_t socketFd, struct sockaddr *addr, int32_t addrLen)
+int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, SoftBusSockLen addrLen)
 {
-    int32_t ret = bind(socketFd, addr, addrLen);
+    int32_t ret = bind(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "bind : %{pbulic}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return GetErrorCode();
     }
 
-    return SOFTBUS_OK;
+    return SOFTBUS_ADAPTER_OK;
 }
 
 int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
@@ -103,31 +127,31 @@ int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusSocketAccept(int32_t socketFd, struct sockaddr *addr, int32_t *addrLen, int32_t *acceptFd)
+int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, SoftBusSockLen *addrLen, int32_t *acceptFd)
 {
     if (acceptFd == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "acceptFd is null");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
-    int32_t ret = accept(socketFd, addr, (socklen_t *)addrLen);
+    int32_t ret = accept(socketFd, (struct sockaddr *)addr, (socklen_t *)addrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "accept : %{pbulic}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return GetErrorCode();
     } else {
         *acceptFd = ret;
-        return SOFTBUS_OK;
+        return SOFTBUS_ADAPTER_OK;
     }
-    return SOFTBUS_OK;
+    return SOFTBUS_ADAPTER_OK;
 }
 
-int32_t SoftBusSocketConnect(int32_t socketFd, const struct sockaddr *addr, int32_t addrLen)
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, SoftBusSockLen addrLen)
 {
-    int32_t ret = connect(socketFd, addr, addrLen);
+    int32_t ret = connect(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "connect :%{pbulic}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return GetErrorCode();
     }
-    return SOFTBUS_OK;
+    return SOFTBUS_ADAPTER_OK;
 }
 
 void SoftBusSocketFdZero(fd_set *set)
@@ -178,6 +202,10 @@ int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_
     *timeOut)
 {
     int32_t ret = select(nfds, readFds, writeFds, exceptFds, timeOut);
+    if (ret < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{pbulic}s", strerror(errno));
+        return GetErrorCode();
+    }
 
     return ret;
 }
@@ -198,16 +226,16 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32
     int32_t ret = send(socketFd, buf, len, flags);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "send : %{pbulic}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return GetErrorCode();
     }
 
     return ret;
 }
 
-int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const struct sockaddr
+int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
     *toAddr, int32_t toAddrLen)
 {
-    int32_t ret = sendto(socketFd, buf, len, flags, toAddr, toAddrLen);
+    int32_t ret = sendto(socketFd, buf, len, flags, (struct sockaddr *)toAddr, toAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "sendto : %{pbulic}s", strerror(errno));
         return SOFTBUS_ERR;
@@ -221,16 +249,16 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
     int32_t ret = recv(socketFd, buf, len, flags);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "recv : %{pbulic}s", strerror(errno));
-        return SOFTBUS_ERR;
+        return GetErrorCode();
     }
 
     return ret;
 }
 
-int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, struct sockaddr
-    *fromAddr, int32_t *fromAddrLen)
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
+    *fromAddr, SoftBusSockLen *fromAddrLen)
 {
-    int32_t ret = recvfrom(socketFd, buf, len, flags, fromAddr, (socklen_t *)fromAddrLen);
+    int32_t ret = recvfrom(socketFd, buf, len, flags, (struct sockaddr *)fromAddr, (socklen_t *)fromAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "recvfrom : %{pbulic}s", strerror(errno));
         return SOFTBUS_ERR;
@@ -259,4 +287,43 @@ int32_t SoftBusSocketClose(int32_t socketFd)
     }
 
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst)
+{
+    int32_t ret = inet_pton(af, src, dst);
+    if (ret == 1) {
+        return SOFTBUS_ADAPTER_OK;
+    } else if (ret == 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid str input fromat");
+        return SOFTBUS_ADAPTER_INVALID_PARAM;
+    } else {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "inet_pton failed");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+}
+
+char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size)
+{
+    return (inet_ntop(af, src, dst, size));
+}
+
+uint32_t SoftBusHtoNl(uint32_t hostlong)
+{
+    return htonl(hostlong);
+}
+
+uint16_t SoftBusHtoNs(uint16_t hostshort)
+{
+    return htons(hostshort);
+}
+
+uint32_t SoftBusNtoHl(uint32_t netlong)
+{
+    return ntohl(netlong);
+}
+
+uint16_t SoftBusNtoHs(uint16_t netshort)
+{
+    return ntohs(netshort);
 }

@@ -16,12 +16,11 @@
 #ifndef SOFTBUS_TCP_SOCKET_H
 #define SOFTBUS_TCP_SOCKET_H
 
-#include <errno.h>
+#include "softbus_errcode.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/uio.h>
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -36,7 +35,7 @@ extern "C" {
     {   \
     long int __result; \
     do __result = (long int) (expression); \
-    while ((__result == -1L) && (errno == EINTR)); \
+    while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
     __result; \
     } \
     ) \
