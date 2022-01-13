@@ -15,7 +15,6 @@
 
 #include "file_adapter.h"
 
-#include <errno.h>
 #include <netinet/in.h>
 #include <securec.h>
 #include <sys/time.h>
