@@ -27,7 +27,8 @@ extern "C" {
 #endif
 
 typedef struct {
-    void (*OnStreamReceived)(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
+    void (*OnStreamReceived)(int32_t channelId, const StreamData *data, const StreamData *ext,
+        const StreamFrameInfo *param);
     int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
     void (*OnUdpChannelOpened)(int32_t channelId);
@@ -64,7 +65,7 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
 int32_t ClientTransCloseUdpChannel(int32_t channelId);
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
-    const FrameInfo *param);
+    const StreamFrameInfo *param);
 
 int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 

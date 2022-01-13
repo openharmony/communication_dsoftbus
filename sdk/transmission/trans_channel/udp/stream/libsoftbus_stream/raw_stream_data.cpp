@@ -22,7 +22,7 @@
 
 namespace Communication {
 namespace SoftBus {
-std::unique_ptr<IStream> IStream::MakeRawStream(StreamData &data, const FrameInfo &info)
+std::unique_ptr<IStream> IStream::MakeRawStream(StreamData &data, const StreamFrameInfo &info)
 {
     static_cast<void>(info);
     auto raw = std::make_unique<RawStreamData>();
@@ -31,7 +31,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(StreamData &data, const FrameInf
     return raw;
 }
 
-std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen, const FrameInfo &info, int scene)
+std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen, const StreamFrameInfo &info, int scene)
 {
     if (scene != COMPATIBLE_SCENE && scene != SOFTBUS_SCENE) {
         return nullptr;

@@ -35,7 +35,7 @@ namespace {
     std::mutex g_mutex;
 }
 
-int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamData *ext, const FrameInfo *param)
+int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (indata == nullptr || indata->buf == nullptr || param == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid argument!");
