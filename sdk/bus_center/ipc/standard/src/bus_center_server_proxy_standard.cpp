@@ -27,14 +27,13 @@
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();

@@ -16,6 +16,8 @@
 #ifndef SOFTBUS_IPC_DEF_H
 #define SOFTBUS_IPC_DEF_H
 
+#define SOFTBUS_SERVER_SA_ID_INNER 4700
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
