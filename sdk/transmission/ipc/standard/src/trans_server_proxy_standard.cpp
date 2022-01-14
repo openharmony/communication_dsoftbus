@@ -16,7 +16,6 @@
 #include "trans_server_proxy_standard.h"
 
 #include "ipc_skeleton.h"
-#include "system_ability_definition.h"
 
 #include "message_parcel.h"
 #include "softbus_errcode.h"
@@ -28,7 +27,7 @@ static uint32_t g_getSystemAbilityId = 2;
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
