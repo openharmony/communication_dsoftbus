@@ -342,3 +342,8 @@ uint16_t SoftBusNtoHs(uint16_t netshort)
 {
     return ntohs(netshort);
 }
+
+uint32_t SoftBusInetAddr(const char *cp)
+{
+    return inet_addr(cp);
+}

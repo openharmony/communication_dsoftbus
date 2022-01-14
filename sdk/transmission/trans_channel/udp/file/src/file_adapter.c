@@ -15,15 +15,11 @@
 
 #include "file_adapter.h"
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <securec.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <unistd.h>
 
-#include "softbus_adapter_socket.h"
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
@@ -102,7 +98,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_port = port;
-    localAddr.sin_addr.s_addr = ntohl(inet_addr(myIP));
+    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIP));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);
@@ -126,7 +122,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_port = peerPort;
-    localAddr.sin_addr.s_addr = ntohl(inet_addr(peerIp));
+    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(peerIp));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int32_t sessionId = NSTACKX_DFileClient(&localAddr, addrLen, key, keyLen, msgReceiver);

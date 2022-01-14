@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 #include <sys/select.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
@@ -128,6 +127,7 @@ uint16_t SoftBusHtoNs(uint16_t hostshort);
 uint32_t SoftBusNtoHl(uint32_t netlong);
 uint16_t SoftBusNtoHs(uint16_t netshort);
 
+uint32_t SoftBusInetAddr(const char *cp);
 
 #ifdef __cplusplus
 #if __cplusplus
