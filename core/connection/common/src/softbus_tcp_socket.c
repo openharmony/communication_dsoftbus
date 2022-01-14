@@ -21,8 +21,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "softbus_adapter_socket.h"
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -374,7 +374,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
         }
 
         int32_t keepAliveIntvl = 1;
-        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl, 
+        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl,
             sizeof(keepAliveIntvl));
         if (rc != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set TCP_KEEPINTVL");
