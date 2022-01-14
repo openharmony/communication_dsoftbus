@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 #define SA_DATA_SIZE (14)
+#define ADDR_IN_RESER_SIZE (8)
 
 /* sys/socket.h */
 #define SOFTBUS_PF_INET (2)
@@ -82,7 +83,7 @@ typedef struct {
     unsigned short sinFamily; /* address family */
     unsigned short sinPort; /* Port number */
     SoftBusInAddr sinAddr; /* Internet address */
-    unsigned char sinZero; /* Same size as struct sockaddr */
+    unsigned char sinZero[ADDR_IN_RESER_SIZE]; /* Same size as struct sockaddr */
 }SoftBusSockAddrIn;
 
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
