@@ -141,7 +141,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    uint8_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
+    uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
         return SOFTBUS_TCP_SOCKET_ERR;
     }
