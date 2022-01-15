@@ -72,18 +72,18 @@ extern "C" {
 typedef struct {
     unsigned short saFamily; /* address family */
     char saData[SA_DATA_SIZE];
-}SoftBusSockAddr;
+} SoftBusSockAddr;
 
 typedef struct {
     unsigned long sAddr;
-}SoftBusInAddr;
+} SoftBusInAddr;
 
 typedef struct {
     unsigned short sinFamily; /* address family */
     unsigned short sinPort; /* Port number */
     SoftBusInAddr sinAddr; /* Internet address */
     unsigned char sinZero[ADDR_IN_RESER_SIZE]; /* Same size as struct sockaddr */
-}SoftBusSockAddrIn;
+} SoftBusSockAddrIn;
 
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
 int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName,  const void *optVal, int32_t optLen);

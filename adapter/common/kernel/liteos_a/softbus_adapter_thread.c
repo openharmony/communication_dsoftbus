@@ -261,7 +261,6 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
 int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)
     (void *), void *arg)
 {
-    HILOG_INFO(SOFTBUS_HILOG_ID, "Wherecome to ThreadCreate");
     if (thread == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");
         return SOFTBUS_INVALID_PARAM;
@@ -301,7 +300,6 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
         }
     }
 
-    HILOG_INFO(SOFTBUS_HILOG_ID, "ThreadCreate is done");
     return SOFTBUS_OK;
 }
 

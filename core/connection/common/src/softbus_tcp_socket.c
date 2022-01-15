@@ -146,7 +146,7 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
     return SOFTBUS_OK;
 }
 
-int32_t SetIpTos(int fd, uint8_t tos)
+int32_t SetIpTos(int fd, uint32_t tos)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &tos, sizeof(tos));
     if (rc != 0) {
@@ -186,7 +186,7 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isN
     }
 
     int fd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOCK_STREAM, 0, &fd);
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
         return -1;
