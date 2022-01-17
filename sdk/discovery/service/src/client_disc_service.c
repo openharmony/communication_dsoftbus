@@ -93,7 +93,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t PublishService(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
+int PublishService(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
         return SOFTBUS_INVALID_PARAM;
@@ -116,7 +116,7 @@ int32_t PublishService(const char *packageName, const PublishInfo *info, const I
     return PublishServiceInner(packageName, info, cb);
 }
 
-int32_t UnPublishService(const char *packageName, int32_t publishId)
+int UnPublishService(const char *packageName, int publishId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid packageName");
@@ -131,7 +131,7 @@ int32_t UnPublishService(const char *packageName, int32_t publishId)
     return UnPublishServiceInner(packageName, publishId);
 }
 
-int32_t StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDiscoveryCallback *cb)
+int StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDiscoveryCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
         return SOFTBUS_INVALID_PARAM;
@@ -150,7 +150,7 @@ int32_t StartDiscovery(const char *packageName, const SubscribeInfo *info, const
     return StartDiscoveryInner(packageName, info, cb);
 }
 
-int32_t StopDiscovery(const char *packageName, int32_t subscribeId)
+int StopDiscovery(const char *packageName, int subscribeId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid packageName");

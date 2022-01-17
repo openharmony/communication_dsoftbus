@@ -29,7 +29,7 @@ int32_t BusCenterServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
-int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
+int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     return LnnIpcGetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
 }
@@ -44,12 +44,12 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     return LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
 
-int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     return LnnIpcServerJoin(pkgName, addr, addrTypeLen);
 }
 
-int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
+int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     return LnnIpcServerLeave(pkgName, networkId);
 }
