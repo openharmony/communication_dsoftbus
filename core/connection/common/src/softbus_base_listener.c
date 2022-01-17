@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <securec.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "common_list.h"
@@ -282,7 +283,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         socklen_t addrLen = sizeof(addr);
         int32_t cfd;
         int ret;
-        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (struct sockaddr *)&addr, (int *)&addrLen, &cfd));
+        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (struct sockaddr *)&addr, (int32_t *)&addrLen, &cfd));
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "accept failed, cfd=%d, errno=%d, module=%d, fd=%d", cfd, errno, module, fd);
@@ -461,7 +462,7 @@ static int32_t StartThread(ListenerModule module, ModeType modeType)
     listenerInfo->modeType = modeType;
     listenerInfo->status = LISTENER_RUNNING;
 
-    return ThreadPoolAddJob(g_threadPool, (int(*)(void *))SelectThread,
+    return ThreadPoolAddJob(g_threadPool, (int32_t(*)(void *))SelectThread,
         NULL, PERSISTENT, (uintptr_t)0);
 }
 

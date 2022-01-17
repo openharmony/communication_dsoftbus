@@ -65,7 +65,7 @@ void NotifyNetworkingMsgReceived(int32_t chanId, const char *data, uint32_t len)
 }
 
 
-int32_t TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
+int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
 {
     if (memcpy_s(&g_netChanlistener, sizeof(INetworkingListener),
         listener, sizeof(INetworkingListener)) != EOK) {
