@@ -38,7 +38,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 }
 
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, const void *data,
-                                      unsigned int len, int32_t type)
+                                      uint32_t len, int32_t type)
 {
     (void)pkgName;
     return TransOnChannelMsgReceived(channelId, channelType, data, len, type);
