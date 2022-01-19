@@ -56,8 +56,8 @@
 /* Defination of boardcast */
 
 #define BLE_VERSION 4
-#define NEARBY_BUSSINESS 0x1
-#define DISTRIBUTE_BUSSINESS 0x5
+#define NEARBY_BUSINESS 0x1
+#define DISTRIBUTE_BUSINESS 0x5
 #define BYTE_MASK 0xFF
 #define DEVICE_NAME_MAX_LEN 15
 
@@ -380,10 +380,10 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return;
     }
-    if ((advData[POS_BUSSINESS_EXTENSION + ADV_HEAD_LEN] & BIT_HEART_BIT) != 0) {
+    if ((advData[POS_BUSINESS_EXTENSION + ADV_HEAD_LEN] & BIT_HEART_BIT) != 0) {
         return;
     }
-    if ((advData[POS_BUSSINESS_EXTENSION + ADV_HEAD_LEN] & BIT_CON) != 0) {
+    if ((advData[POS_BUSINESS_EXTENSION + ADV_HEAD_LEN] & BIT_CON) != 0) {
         ProcessDisConPacket(advData, advLen, &foundInfo);
     } else {
         ProcessDisNonPacket(advData, advLen, &foundInfo);
@@ -404,9 +404,9 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     if (advData == NULL) {
         return;
     }
-    if ((advData[POS_BUSSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSSINESS) == DISTRIBUTE_BUSSINESS) {
+    if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSINESS) == DISTRIBUTE_BUSINESS) {
         ProcessDistributePacket(scanResultData);
-    } else if ((advData[POS_BUSSINESS + ADV_HEAD_LEN] & NEARBY_BUSSINESS) == NEARBY_BUSSINESS) {
+    } else if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & NEARBY_BUSINESS) == NEARBY_BUSINESS) {
         ProcessNearbyPacket(scanResultData);
     }
 }
@@ -616,7 +616,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     return SOFTBUS_OK;
 }
 
-static void DestoryBleConfigAdvData(SoftBusBleAdvData *advData)
+static void DestroyBleConfigAdvData(SoftBusBleAdvData *advData)
 {
     if (advData == NULL) {
         return;
@@ -637,12 +637,12 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
         return SOFTBUS_MEM_ERR;
     }
     boardcastData->data.data[POS_VERSION] = BLE_VERSION & BYTE_MASK;
-    boardcastData->data.data[POS_BUSSINESS] = DISTRIBUTE_BUSSINESS & BYTE_MASK;
-    boardcastData->data.data[POS_BUSSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
+    boardcastData->data.data[POS_BUSINESS] = DISTRIBUTE_BUSINESS & BYTE_MASK;
+    boardcastData->data.data[POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
     if (advId == CON_ADV_ID) {
-        boardcastData->data.data[POS_BUSSINESS_EXTENSION] |= BIT_CON;
+        boardcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_CON;
         if (isWakeRemote) {
-            boardcastData->data.data[POS_BUSSINESS_EXTENSION] |= BIT_WAKE_UP;
+            boardcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
         }
         if (memcpy_s(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
             info->hwAccountHash, SHORT_USER_ID_HASH_LEN) != EOK) {
@@ -714,7 +714,7 @@ static int32_t StartAdvertiser(int32_t adv)
     }
     SoftBusBleAdvData advData = {0};
     if (BuildBleConfigAdvData(&advData, &boardcastData) != SOFTBUS_OK) {
-        DestoryBleConfigAdvData(&advData);
+        DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BuildBleConfigAdvData failed");
         return SOFTBUS_ERR;
     }
@@ -722,16 +722,16 @@ static int32_t StartAdvertiser(int32_t adv)
     BuildAdvParam(&advParam);
     if (SoftBusSetAdvData(adv, &advData) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Set ble adv adv:%d data failed", adv);
-        DestoryBleConfigAdvData(&advData);
+        DestroyBleConfigAdvData(&advData);
         return SOFTBUS_ERR;
     }
     if (SoftBusStartAdv(advertiser->advId, &advParam) != SOFTBUS_OK) {
-        DestoryBleConfigAdvData(&advData);
+        DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start adv adv:%d failed", adv);
         return SOFTBUS_ERR;
     }
     ResetInfoUpdate(adv);
-    DestoryBleConfigAdvData(&advData);
+    DestroyBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
 
@@ -775,19 +775,19 @@ static int32_t UpdateAdvertiser(int32_t adv)
     }
     SoftBusBleAdvData advData = {0};
     if (BuildBleConfigAdvData(&advData, &boardcastData) != SOFTBUS_OK) {
-        DestoryBleConfigAdvData(&advData);
+        DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BuildBleConfigAdvData failed");
         return SOFTBUS_ERR;
     }
     SoftBusBleAdvParams advParam = {0};
     BuildAdvParam(&advParam);
     if (SoftBusUpdateAdv(advertiser->advId, &advData, &advParam) != SOFTBUS_OK) {
-        DestoryBleConfigAdvData(&advData);
+        DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UpdateAdv failed");
         return SOFTBUS_ERR;
     }
     ResetInfoUpdate(adv);
-    DestoryBleConfigAdvData(&advData);
+    DestroyBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
 

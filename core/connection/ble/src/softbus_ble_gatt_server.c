@@ -461,10 +461,10 @@ static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAd
     g_softBusBleConnCb->BleDisconnectCallback(halConnId, 1);
 }
 
-static void SoftBusGattServerOnDataRecieved(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
+static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
 {
     if (value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattServerOnDataRecieved invalid data");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattServerOnDataReceived invalid data");
         return;
     }
     bool isBleConn = handle == g_gattService.bleConnCharaId;
@@ -516,7 +516,7 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     if (value == NULL) {
         return;
     }
-    SoftBusGattServerOnDataRecieved(writeCbPara.attrHandle, writeCbPara.connId, len, (const char *)value);
+    SoftBusGattServerOnDataReceived(writeCbPara.attrHandle, writeCbPara.connId, len, (const char *)value);
     if (index != -1) {
         BleTransCacheFree(writeCbPara.connId, index);
     }

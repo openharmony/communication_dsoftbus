@@ -49,7 +49,7 @@
 extern "C" {
 #endif
 /**
- * @brief bussiness type of session
+ * @brief business type of session
  *
  * @since 1.0
  * @version 1.0
