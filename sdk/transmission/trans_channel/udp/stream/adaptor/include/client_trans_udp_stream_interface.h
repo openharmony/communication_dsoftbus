@@ -45,6 +45,7 @@ typedef struct {
     void (*OnStatusChange)(int32_t channelId, int32_t newStatus);
     void (*OnStreamReceived)(int32_t channelId, const StreamData *data, const StreamData *ext,
         const StreamFrameInfo *param);
+    void (*OnQosEvent)(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);
 } IStreamListener;
 
 typedef struct {
@@ -60,8 +61,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     const IStreamListener *callback);
 int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam *param,
     const IStreamListener *callback);
-int32_t SendVtpStream(int32_t channelId, const StreamData *data, const StreamData *ext,
-    const StreamFrameInfo *param);
+int32_t SendVtpStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName);
 
 #ifdef __cplusplus

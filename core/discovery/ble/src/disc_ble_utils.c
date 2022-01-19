@@ -59,7 +59,7 @@ int32_t GenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *h
         return SOFTBUS_INVALID_PARAM;
     }
     mbedtls_md_context_t ctx;
-    const mbedtls_md_info_t *info;
+    const mbedtls_md_info_t *info = NULL;
     mbedtls_md_init(&ctx);
     info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     if (mbedtls_md_setup(&ctx, info, 0) != 0) {
@@ -149,19 +149,19 @@ int32_t DiscBleGetHwAccount(char *hwAccount)
     if (hwAccount == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    const char *account = "";
+    const char *account = "1234567890";
     if (memcpy_s(hwAccount, strlen(account) + 1, account, strlen(account) + 1) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetDeviceUdid(char *devId)
+int32_t DiscBleGetDeviceUdid(char *devId, uint32_t len)
 {
     if (devId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, UDID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local dev Id failed.");
         return SOFTBUS_ERR;
     }
@@ -182,13 +182,13 @@ int32_t DiscBleGetDeviceName(char *deviceName)
 
 uint8_t DiscBleGetDeviceType(void)
 {
-    char type[DEVICE_TYPE_BUF_LEN];
+    char type[DEVICE_TYPE_BUF_LEN] = {0};
     uint8_t typeId;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local device type failed.");
         return TYPE_UNKNOW_ID;
     }
-    if (LnnConvertDeviceTypeToId(type, &typeId) != SOFTBUS_OK) {
+    if (LnnConvertDeviceTypeToId(type, (uint16_t *)&typeId) != SOFTBUS_OK) {
         return TYPE_UNKNOW_ID;
     }
     return typeId;
@@ -202,17 +202,17 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
     }
     char devId[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = DiscBleGetDeviceUdid(devId);
+    int32_t ret = DiscBleGetDeviceUdid(devId, sizeof(devId));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceId failed");
         return ret;
     }
-    ret = GenerateStrHash(devId, strlen(devId), hashResult);
+    ret = GenerateStrHash((const unsigned char *)devId, strlen(devId) + 1, (unsigned char *)hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;
     }
-    ret = ConvertBytesToHexString(hashStr, SHORT_DEVICE_ID_HASH_LENGTH + 1, hashResult,
+    ret = ConvertBytesToHexString((char *)hashStr, SHORT_DEVICE_ID_HASH_LENGTH + 1, (const unsigned char *)hashResult,
         SHORT_DEVICE_ID_HASH_LENGTH / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
@@ -229,17 +229,17 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr)
     }
     unsigned char account[MAX_ACCOUNT_HASH_LEN] = {0};
     unsigned char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = DiscBleGetHwAccount(account);
+    int32_t ret = DiscBleGetHwAccount((char *)account);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetHwAccount failed");
         return ret;
     }
-    ret = GenerateStrHash(account, strlen(account) + 1, hashResult);
+    ret = GenerateStrHash(account, strlen((const char *)account) + 1, hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;
     }
-    ret = ConvertBytesToHexString(hashStr, SHORT_USER_ID_HASH_LEN + 1, hashResult,
+    ret = ConvertBytesToHexString((char *)hashStr, SHORT_USER_ID_HASH_LEN + 1, hashResult,
         SHORT_USER_ID_HASH_LEN / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
@@ -259,6 +259,10 @@ int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const 
     boardcastData->data.data[boardcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
     boardcastData->dataLen += 1;
     uint32_t remainLen = BOARDCAST_MAX_LEN - boardcastData->dataLen;
+    if (remainLen == 0) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "tlv remainLen is 0.");
+        return SOFTBUS_ERR;
+    }
     uint32_t validLen = (len > remainLen) ? remainLen : len;
     if (memcpy_s(&(boardcastData->data.data[boardcastData->dataLen]), validLen, value, validLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "assemble tlv memcpy failed");
@@ -312,7 +316,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
     info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
     int32_t curLen = POS_TLV + ADV_HEAD_LEN;
     unsigned char devType;
-    int32_t len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_ID_HASH, curLen, info->devId);
+    int32_t len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_ID_HASH, curLen, (unsigned char *)info->devId);
     PACKET_CHECK_LENGTH(len);
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_TYPE, curLen, &devType);
     PACKET_CHECK_LENGTH(len);
@@ -320,7 +324,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_BR_MAC, curLen, (unsigned char *)info->addr[0].info.ble.bleMac);
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_CUST, curLen, (unsigned char *)info->custData);
     PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_NAME, curLen, info->devName);
+    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_NAME, curLen, (unsigned char *)info->devName);
     PACKET_CHECK_LENGTH(len);
     return SOFTBUS_OK;
 }

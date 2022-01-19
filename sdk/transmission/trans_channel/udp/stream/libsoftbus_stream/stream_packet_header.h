@@ -64,7 +64,7 @@ struct CommonHeader {
 
 struct TypeLength {
     uint16_t type = 0;
-    uint16_t length = 0;
+    uint32_t length = 0;
 };
 
 class TwoLevelsTlv {

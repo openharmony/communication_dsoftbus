@@ -49,8 +49,8 @@ public:
     static std::unique_ptr<IStream> MakeCommonStream(StreamData &data, const StreamFrameInfo &info);
     static std::unique_ptr<IStream> MakeSliceStream(StreamData &data, const StreamFrameInfo &info);
     static std::unique_ptr<IStream> MakeRawStream(StreamData &data, const StreamFrameInfo &info);
-    static std::unique_ptr<IStream> MakeRawStream(const char *buf, ssize_t bufLen,
-        const StreamFrameInfo &info, int scene);
+    static std::unique_ptr<IStream> MakeRawStream(const char *buf, ssize_t bufLen, const StreamFrameInfo &info,
+        int scene);
 
     virtual void SetTimeStamp(uint32_t timestamp) = 0;
     virtual uint32_t GetTimeStamp() const = 0;

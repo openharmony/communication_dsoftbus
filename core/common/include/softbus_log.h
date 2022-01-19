@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_LOG_H
 #define SOFTBUS_LOG_H
 
+#include <stdint.h>
 #include "softbus_adapter_log.h"
 
 #ifdef __cplusplus
@@ -35,6 +36,27 @@ typedef enum {
 } SoftBusLogModule;
 
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
+
+#define UUID_ANONYMIZED_LENGTH 4
+#define NETWORKID_ANONYMIZED_LENGTH 4
+#define UDID_ANONYMIZED_LENGTH 4
+
+const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength);
+
+inline const char *AnonymizesUUID(const char *input)
+{
+    return Anonymizes(input, UUID_ANONYMIZED_LENGTH);
+}
+
+inline const char *AnonymizesNetworkID(const char *input)
+{
+    return Anonymizes(input, NETWORKID_ANONYMIZED_LENGTH);
+}
+
+inline const char *AnonymizesUDID(const char *input)
+{
+    return Anonymizes(input, UDID_ANONYMIZED_LENGTH);
+}
 
 #ifdef __cplusplus
 #if __cplusplus

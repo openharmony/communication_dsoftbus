@@ -25,7 +25,13 @@
 
 #define MAX_BYTES_LENGTH 4194304
 #define MAX_MESSAGE_LENGTH 4096
+
+#ifdef SOFTBUS_STANDARD_SYSTEM
+#define CONN_BR_MAX_DATA_LENGTH (40 * 1000)
+#else
 #define CONN_BR_MAX_DATA_LENGTH 4096
+#endif
+
 #define CONN_RFCOM_SEND_MAX_LEN 990
 #define CONN_BR_RECEIVE_MAX_LEN 10
 #define CONN_TCP_MAX_LENGTH 3072
@@ -52,14 +58,20 @@
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
+#define DEFAULT_AUTH_MAX_BYTES_LEN (40000 - 8)
+#define DEFAULT_AUTH_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #elif defined SOFTBUS_SMALL_SYSTEM
 #define DEFAULT_MAX_BYTES_LEN (1 * 1024 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
+#define DEFAULT_AUTH_MAX_BYTES_LEN (4 * 1024)
+#define DEFAULT_AUTH_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #else
 #define DEFAULT_MAX_BYTES_LEN (2 * 1024)
 #define DEFAULT_MAX_MESSAGE_LEN (1 * 1024)
+#define DEFAULT_AUTH_MAX_BYTES_LEN (2 * 1024)
+#define DEFAULT_AUTH_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 0
 #endif
 
@@ -110,6 +122,8 @@ typedef struct {
     int32_t selectInterval;
     int32_t maxBytesLen;
     int32_t maxMessageLen;
+    int32_t maxAuthBytesLen;
+    int32_t maxAuthMessageLen;
 } TransConfigItem;
 
 static TransConfigItem g_tranConfig = {0};
@@ -210,6 +224,16 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         (unsigned char*)&(g_config.lnnMaxConcurentNum),
         sizeof(g_config.lnnMaxConcurentNum)
     },
+    {
+        SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH,
+        (unsigned char*)&(g_tranConfig.maxAuthBytesLen),
+        sizeof(g_tranConfig.maxAuthBytesLen)
+    },
+    {
+        SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH,
+        (unsigned char*)&(g_tranConfig.maxAuthMessageLen),
+        sizeof(g_tranConfig.maxAuthMessageLen)
+    },
 };
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
@@ -246,6 +270,8 @@ static void SoftbusConfigSetTransDefaultVal(void)
     g_tranConfig.selectInterval = DEFAULT_SELECT_INTERVAL;
     g_tranConfig.maxBytesLen = DEFAULT_MAX_BYTES_LEN;
     g_tranConfig.maxMessageLen = DEFAULT_MAX_MESSAGE_LEN;
+    g_tranConfig.maxAuthBytesLen = DEFAULT_AUTH_MAX_BYTES_LEN;
+    g_tranConfig.maxAuthMessageLen = DEFAULT_AUTH_MAX_MESSAGE_LEN;
 }
 
 static void SoftbusConfigSetDefaultVal(void)

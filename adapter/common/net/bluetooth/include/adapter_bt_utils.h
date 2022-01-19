@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_BLE_TRANS_MANAGER_H
-#define SOFTBUS_BLE_TRANS_MANAGER_H
+#ifndef ADAPTER_BT_UTILS_H
+#define ADAPTER_BT_UTILS_H
 
-#include "softbus_ble_connection_inner.h"
+#include "ohos_bt_def.h"
+#include "ohos_bt_gap.h"
+#include "ohos_bt_gatt.h"
+#include "softbus_adapter_ble_gatt.h"
+#include "softbus_adapter_bt_common.h"
 
-#define MAX_DATA_LEN 4096
-
-int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module);
-char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index);
-void BleTransCacheFree(int32_t halConnId, int32_t index);
+int BleOhosStatusToSoftBus(BtStatus status);
 
 #endif
