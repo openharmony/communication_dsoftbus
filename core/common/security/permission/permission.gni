@@ -37,7 +37,7 @@ if (defined(ohos_lite)) {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
-    "//foundation/appexecfwk/standard/kits/appkit/native/app/include",
+    "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//utils/system/safwk/native/include",
