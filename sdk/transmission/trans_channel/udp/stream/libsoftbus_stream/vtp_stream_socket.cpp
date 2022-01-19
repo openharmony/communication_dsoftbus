@@ -362,9 +362,9 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::
         self->DestroyStreamSocket();
     }).detach();
 
-    bool &isDestoryed = isDestoryed_;
-    std::thread([self, &isDestoryed]() {
-        while (isDestoryed == false) {
+    bool &isDestroyed = isDestroyed_;
+    std::thread([self, &isDestroyed]() {
+        while (isDestroyed == false) {
             self->FillpAppStatistics();
             std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
         }
@@ -379,8 +379,8 @@ void VtpStreamSocket::DestroyStreamSocket()
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamSocket start");
     std::lock_guard<std::mutex> guard(streamSocketLock_);
-    if (isDestoryed_) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamSocket is already destoryed");
+    if (isDestroyed_) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamSocket is already destroyed");
         return;
     }
     if (listenFd_ != -1) {
@@ -408,7 +408,7 @@ void VtpStreamSocket::DestroyStreamSocket()
 
     QuitStreamBuffer();
     vtpInstance_->UpdateSocketStreamCount(false);
-    isDestoryed_ = true;
+    isDestroyed_ = true;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamSocket end");
 }
 
@@ -459,9 +459,9 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
         self->DestroyStreamSocket();
     }).detach();
 
-    bool &isDestoryed = isDestoryed_;
-    std::thread([self, &isDestoryed]() {
-        while (isDestoryed == false) {
+    bool &isDestroyed = isDestroyed_;
+    std::thread([self, &isDestroyed]() {
+        while (isDestroyed == false) {
             self->FillpAppStatistics();
             std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
         }

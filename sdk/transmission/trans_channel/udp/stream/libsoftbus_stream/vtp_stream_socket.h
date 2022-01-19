@@ -189,7 +189,7 @@ private:
     std::mutex streamSocketLock_;
     int scene_ = UNKNOWN_SCENE;
     int streamHdrSize_ = 0;
-    bool isDestoryed_ = false;
+    bool isDestroyed_ = false;
 };
 } // namespace SoftBus
 } // namespace Communication

@@ -40,7 +40,7 @@
 #include "wrapper_br_interface.h"
 
 static pthread_mutex_t g_connectionLock;
-static LIST_HEAD(g_conection_list);
+static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static int16_t g_nextConnectionId = 0;
 
@@ -55,7 +55,7 @@ bool IsExitConnectionById(uint32_t connId)
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId != connId) {
             continue;
@@ -72,7 +72,7 @@ bool IsExitBrConnectByFd(int32_t socketFd)
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (socketFd == itemNode->socketFd) {
             (void)pthread_mutex_unlock(&g_connectionLock);
@@ -91,7 +91,7 @@ BrConnectionInfo *GetConnectionRef(uint32_t connId)
     }
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId == connId) {
             itemNode->infoObjRefCount++;
@@ -147,7 +147,7 @@ void ReleaseConnectionRefByConnId(uint32_t connId)
     }
     ListNode *item = NULL;
     BrConnectionInfo *connInfo = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId == connId) {
             connInfo = itemNode;
@@ -213,7 +213,7 @@ int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId == connectionId) {
             info->isAvailable = 1;
@@ -240,7 +240,7 @@ int32_t SetRefCountByConnId(int32_t delta, int32_t *refCount, uint32_t connectio
         return state;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId == connectionId) {
             itemNode->refCount += delta;
@@ -272,7 +272,7 @@ void SetBrConnStateByConnId(uint32_t connId, int32_t state)
     }
     ListNode *britem = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(britem, &g_conection_list) {
+    LIST_FOR_EACH(britem, &g_connection_list) {
         itemNode = LIST_ENTRY(britem, BrConnectionInfo, node);
         if (itemNode->connectionId == connId) {
             itemNode->state = state;
@@ -294,7 +294,7 @@ uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState
     }
     ListNode *britem = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(britem, &g_conection_list) {
+    LIST_FOR_EACH(britem, &g_connection_list) {
         itemNode = LIST_ENTRY(britem, BrConnectionInfo, node);
         if (itemNode->socketFd == socket) {
             if (perState != NULL) {
@@ -319,7 +319,7 @@ int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId == connId) {
             ListAdd(&itemNode->requestList, &requestInfo->node);
@@ -336,7 +336,7 @@ int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-    ListAdd(&g_conection_list, &newConnInfo->node);
+    ListAdd(&g_connection_list, &newConnInfo->node);
     (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
@@ -349,7 +349,7 @@ void RfcomCongestEvent(int32_t socketFd, int32_t value)
     }
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->socketFd == socketFd) {
             itemNode->conGestState = value;
@@ -392,7 +392,7 @@ int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *notifyList,
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
     RequestInfo *requestInfo = NULL;
-    LIST_FOR_EACH(britem, &g_conection_list) {
+    LIST_FOR_EACH(britem, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(britem, BrConnectionInfo, node);
         if (itemNode->connectionId == connId) {
             (void)InitConnectionInfo(connectionInfo, itemNode);
@@ -416,14 +416,14 @@ bool HasDiffMacDeviceExit(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return true;
     }
-    if (IsListEmpty(&g_conection_list)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[g_conection_list is empty, allow to connect device.]");
+    if (IsListEmpty(&g_connection_list)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[g_connection_list is empty, allow to connect device.]");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return false;
     }
     ListNode *item = NULL;
     bool res = false;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->sideType == BR_CLIENT_TYPE) {
             if (memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) != 0) {
@@ -443,7 +443,7 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCoun
         return BR_CONNECTION_STATE_CLOSED;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (strncmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
             if (outCountId != NULL) {
@@ -462,7 +462,7 @@ bool IsBrDeviceReady(uint32_t connId)
     (void)pthread_mutex_lock(&g_connectionLock);
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->connectionId != connId) {
             continue;
@@ -488,7 +488,7 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
 
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) {
             *socketFd = itemNode->socketFd;

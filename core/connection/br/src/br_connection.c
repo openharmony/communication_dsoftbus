@@ -1020,7 +1020,7 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
 {
     int32_t keyMethod = 0;
     int32_t keyDelta = 0;
-    int32_t keyRefernceNum = 0;
+    int32_t keyReferenceNum = 0;
 
     if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod)) {
         return;
@@ -1028,16 +1028,16 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
     if (keyMethod == METHOD_NOTIFY_REQUEST) {
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
             !GetJsonObjectSignedNumberItem(data, KEY_DELTA, &keyDelta) ||
-            !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyRefernceNum)) {
+            !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "REQUEST fail");
             return;
         }
-        OnPackResponse(keyDelta, keyRefernceNum, connectionId);
+        OnPackResponse(keyDelta, keyReferenceNum, connectionId);
     }
     if (keyMethod == METHOD_NOTIFY_RESPONSE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_RESPONSE");
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
-            !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyRefernceNum)) {
+            !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
             return;
         }

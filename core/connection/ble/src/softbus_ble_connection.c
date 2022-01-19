@@ -77,7 +77,7 @@ static const int BLE_GATT_ATT_MTU_MAX = 512;
 static const int BLE_ROLE_CLIENT = 1;
 static const int BLE_ROLE_SERVER = 2;
 
-static LIST_HEAD(g_conection_list);
+static LIST_HEAD(g_connection_list);
 static ConnectCallback *g_connectCallback = NULL;
 static ConnectFuncInterface g_bleInterface = { 0 };
 static pthread_mutex_t g_connectionLock;
@@ -97,7 +97,7 @@ static int32_t AllocBleConnectionIdLocked()
     while (1) {
         tempId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + nextConnectionId;
         ListNode *item = NULL;
-        LIST_FOR_EACH(item, &g_conection_list) {
+        LIST_FOR_EACH(item, &g_connection_list) {
             BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
             if (itemNode->connId == tempId) {
                 nextConnectionId++;
@@ -170,7 +170,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->connId == connectionId) {
             break;
@@ -188,7 +188,7 @@ BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return NULL;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->halConnId == halConnectionId) {
             break;
@@ -208,7 +208,7 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (memcmp(itemNode->info.info.bleInfo.bleMac, strAddr, BT_MAC_LEN) == 0) {
             if (itemNode->info.isServer) {
@@ -289,7 +289,7 @@ static int32_t BleConnectDeviceFristTime(const ConnectOption *option, uint32_t r
     newConnectionInfo->halConnId = clientId;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "new connection %d,clientId=%d",
         newConnectionInfo->connId, clientId);
-    ListAdd(&g_conection_list, &newConnectionInfo->node);
+    ListAdd(&g_connection_list, &newConnectionInfo->node);
     return SOFTBUS_OK;
 }
 
@@ -304,7 +304,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     int32_t ret = SOFTBUS_OK;
     ListNode *item = NULL;
     BleConnectionInfo *targetConnectionInfo = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->info.isServer != BLE_CLIENT_TYPE) {
             continue;
@@ -487,7 +487,7 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->connId == connectionId) {
             itemNode->refCount += delta;
@@ -523,7 +523,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->connId == connectionId) {
             targetNode = itemNode;
@@ -556,7 +556,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
 {
     int32_t keyMethod = 0;
     int32_t keyDelta = 0;
-    int32_t keyRefernceNum = 0;
+    int32_t keyReferenceNum = 0;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RecvConnectedComd ID=%u", connectionId);
 
     char *payload123 = cJSON_PrintUnformatted(data);
@@ -572,22 +572,22 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
     if (keyMethod == METHOD_NOTIFY_REQUEST) {
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
             !GetJsonObjectSignedNumberItem(data, KEY_DELTA, &keyDelta) ||
-            !GetJsonObjectNumberItem(data, KEY_REF_NUM, &keyRefernceNum)) {
+            !GetJsonObjectNumberItem(data, KEY_REF_NUM, &keyReferenceNum)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "REQUEST fail");
             return;
         }
-        OnPackResponse(keyDelta, keyRefernceNum, connectionId);
+        OnPackResponse(keyDelta, keyReferenceNum, connectionId);
     }
     if (keyMethod == METHOD_NOTIFY_RESPONSE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_RESPONSE");
         if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod) ||
-            !GetJsonObjectNumberItem(data, KEY_REF_NUM, &keyRefernceNum)) {
+            !GetJsonObjectNumberItem(data, KEY_REF_NUM, &keyReferenceNum)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
             return;
         }
         (void)pthread_mutex_lock(&g_connectionLock);
         ListNode *item = NULL;
-        LIST_FOR_EACH(item, &g_conection_list) {
+        LIST_FOR_EACH(item, &g_connection_list) {
             BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
             if (itemNode->connId == connectionId) {
                 if (itemNode->state == BLE_CONNECTION_STATE_CLOSING) {
@@ -643,7 +643,7 @@ static int32_t BleGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->connId == connectionId) {
             if (memcpy_s(info, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo)) != EOK) {
@@ -681,7 +681,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
     ListNode *bleItem = NULL;
     (void)pthread_mutex_lock(&g_connectionLock);
     int32_t connId = 0;
-    LIST_FOR_EACH(bleItem, &g_conection_list) {
+    LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
         if (itemNode->halConnId != halConnId) {
             continue;
@@ -731,7 +731,7 @@ static void BleServerConnectCallback(int32_t halConnId, const char *bleStrMac, c
         return;
     }
     ListNode *item = NULL;
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         if (itemNode->halConnId == halConnId) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectCallback exist same connId, exit");
@@ -760,7 +760,7 @@ static void BleServerConnectCallback(int32_t halConnId, const char *bleStrMac, c
     }
     newNode->info.isServer = BLE_SERVER_TYPE;
     newNode->state = BLE_CONNECTION_STATE_CONNECTED;
-    ListTailInsert(&g_conection_list, &(newNode->node));
+    ListTailInsert(&g_connection_list, &(newNode->node));
     (void)pthread_mutex_unlock(&g_connectionLock);
 }
 
@@ -814,7 +814,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectCallback mutex failed");
         return;
     }
-    LIST_FOR_EACH(bleItem, &g_conection_list) {
+    LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
         if (itemNode->halConnId == halConnId) {
             bleNode = itemNode;
