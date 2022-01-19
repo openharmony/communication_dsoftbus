@@ -188,6 +188,7 @@ int32_t OpenTcpServerSocket(const char *ip, int32_t port)
 int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, bool isNonBlock)
 {
     if ((peerIp == NULL) || (port <= 0)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClientSocket invalid para, port=%d", port);
         return -1;
     }
 
