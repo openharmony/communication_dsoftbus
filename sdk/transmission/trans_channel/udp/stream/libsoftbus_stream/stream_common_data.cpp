@@ -19,7 +19,7 @@
 
 namespace Communication {
 namespace SoftBus {
-std::unique_ptr<IStream> IStream::MakeCommonStream(StreamData &data, const FrameInfo &info)
+std::unique_ptr<IStream> IStream::MakeCommonStream(StreamData &data, const StreamFrameInfo &info)
 {
     auto stream = std::make_unique<StreamCommonData>(info.streamId, info.seqNum);
     stream->InitStreamData(std::move(data.buffer), data.bufLen, std::move(data.extBuffer), data.extLen);

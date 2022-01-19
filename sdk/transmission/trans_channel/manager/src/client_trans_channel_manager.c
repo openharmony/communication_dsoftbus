@@ -130,7 +130,7 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
 }
 
 int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data, const StreamData *ext,
-    const FrameInfo *param)
+    const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");

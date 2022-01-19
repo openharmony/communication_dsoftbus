@@ -327,7 +327,7 @@ int32_t ClientTransCloseUdpChannel(int32_t channelId)
 }
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
-    const FrameInfo *param)
+    const StreamFrameInfo *param)
 {
     UdpChannel channel = {0};
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
@@ -351,7 +351,8 @@ static void OnUdpChannelClosed(int32_t channelId)
     }
 }
 
-static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+static void OnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext,
+    const StreamFrameInfo *param)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnStreamReceived == NULL)) {
         return;
