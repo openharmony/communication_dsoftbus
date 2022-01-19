@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <sys/time.h>
 #include <unistd.h>
+
 #include "discovery_service.h"
 #include "inner_session.h"
 #include "session.h"
@@ -73,7 +74,7 @@ static PublishInfo g_pInfo = {
 static void TestDeviceFound(const DeviceInfo *device)
 {
     if (ConvertBtMacToStr(g_addr.info.ble.bleMac, 18, (const uint8_t *)&(device->addr[0].info.ble.bleMac[0]), 6) != 0) {
-        return; 
+        return;
     }
     if (strcmp(g_addr1.info.ble.bleMac, g_addr.info.ble.bleMac) != 0) {
         strcpy_s(g_addr1.info.ble.bleMac, BT_MAC_LEN, g_addr.info.ble.bleMac);
@@ -171,11 +172,9 @@ void DiscAccountTest::TearDownTestCase(void)
 static void Wait(void)
 {
     printf("[test]wait enter...\r\n");
-SLEEP:
-    sleep(1);
-    if (g_state == false) {
-        goto SLEEP;
-    }
+    do {
+        sleep(1);
+    } while (!g_state);
     printf("[test]wait end!\r\n");
     g_state = false;
 }

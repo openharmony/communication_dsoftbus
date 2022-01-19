@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: br transmission management module.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +104,7 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
 int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
     int32_t brSendPeerLen, const char *data, uint32_t len)
 {
+    const char *tempData = data;
     BrConnectionInfo *brConnInfo = GetConnectionRef(connId);
     if (brConnInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransSend] connId: %d, not fount failed", connId);
@@ -134,12 +134,12 @@ int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
         if (sendLenth > brSendPeerLen) {
             sendLenth = brSendPeerLen;
         }
-        writeRet = sppDriver->Write(socketFd, data, sendLenth);
+        writeRet = sppDriver->Write(socketFd, tempData, sendLenth);
         if (writeRet == -1) {
             ret = SOFTBUS_ERR;
             break;
         }
-        data += sendLenth;
+        tempData += sendLenth;
         tempLen -= sendLenth;
     }
     ReleaseConnectionRef(brConnInfo);
@@ -200,7 +200,7 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t 
         SoftBusFree(buf);
         return NULL;
     }
-    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1)) {
+    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);

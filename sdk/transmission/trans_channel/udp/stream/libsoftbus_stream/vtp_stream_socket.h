@@ -162,9 +162,9 @@ private:
 
     void GetCryptErrorReason(void) const;
 
-    bool EnableBwEstimationAlgo(int streamfd, bool isServer) const;
+    bool EnableBwEstimationAlgo(int streamFd, bool isServer) const;
 
-    bool EnableJitterDetectionAlgo(int streamfd) const;
+    bool EnableJitterDetectionAlgo(int streamFd) const;
 
     void RegisterMetricCallback(bool isServer); /* register the metric callback function */
 

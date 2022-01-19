@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: br connection test.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,11 +62,11 @@ void ConnectFailedCB(unsigned int requestId, int reason)
     return;
 }
 
-class SoftbusBleConnmangerFuncTest : public testing::Test {
+class ConnectionBleTest : public testing::Test {
 public:
-    SoftbusBleConnmangerFuncTest()
+    ConnectionBleTest()
     {}
-    ~SoftbusBleConnmangerFuncTest()
+    ~ConnectionBleTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -75,19 +74,19 @@ public:
     void TearDown();
 };
 
-void SoftbusBleConnmangerFuncTest::SetUpTestCase(void)
+void ConnectionBleTest::SetUpTestCase(void)
 {
     SoftbusConfigInit();
     ConnServerInit();
 }
 
-void SoftbusBleConnmangerFuncTest::TearDownTestCase(void)
+void ConnectionBleTest::TearDownTestCase(void)
 {}
 
-void SoftbusBleConnmangerFuncTest::SetUp(void)
+void ConnectionBleTest::SetUp(void)
 {}
 
-void SoftbusBleConnmangerFuncTest::TearDown(void)
+void ConnectionBleTest::TearDown(void)
 {}
 
 /*
@@ -96,7 +95,7 @@ void SoftbusBleConnmangerFuncTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger001, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, testConnmanger001, TestSize.Level1)
 {
     int ret;
     printf("testConnmanger001\r\n");
@@ -111,7 +110,7 @@ HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger002, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, testConnmanger002, TestSize.Level1)
 {
     printf("test begin testConnmanger002 \r\n");
     int ret;
@@ -134,7 +133,7 @@ HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger003, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, testConnmanger003, TestSize.Level1)
 {
     int ret;
     int reqId;
@@ -186,7 +185,7 @@ HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusBleConnmangerFuncTest, testConnmanger004, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, testConnmanger004, TestSize.Level1)
 {
     printf("test begin ConnManagerTest004 \r\n");
     int ret;

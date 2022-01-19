@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: br connection module.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +152,8 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
 
 static void DeviceConnectPackRequest(int32_t value, uint32_t connectionId)
 {
-    while (--value > 0) {
+    int32_t data = value;
+    while (--data > 0) {
         (void)PackRequest(CONNECT_REF_INCRESE, connectionId);
     }
 }

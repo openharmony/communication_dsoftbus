@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <sys/time.h>
 #include <unistd.h>
+
 #include "discovery_service.h"
 #include "inner_session.h"
 #include "session.h"
@@ -47,7 +48,7 @@ const char *g_testData = "{\"data\":\"open auth session test!!!\"}";
 bool g_state = false;
 int g_sessionId = -1;
 int g_testCount = 0;
-int g_testTimes = 0; 
+int g_testTimes = 0;
 static void Wait(void);
 static void Start(void);
 
@@ -113,7 +114,7 @@ static PublishInfo g_pInfo = {
 static void TestDeviceFound(const DeviceInfo *device)
 {
     if (ConvertBtMacToStr(g_addr.info.ble.bleMac, 18, (const uint8_t *)&(device->addr[0].info.ble.bleMac[0]), 6) != 0) {
-        return; 
+        return;
     }
     if (strcmp(g_addr1.info.ble.bleMac, g_addr.info.ble.bleMac) != 0) {
         EXPECT_TRUE(g_testCount == TEST_BEGIN);
@@ -201,11 +202,9 @@ static ISessionListener g_sessionlistener = {
 static void Wait(void)
 {
     printf("[test]wait enter...\r\n");
-SLEEP:
-    sleep(1);
-    if (g_state == false) {
-        goto SLEEP;
-    }
+    do {
+        sleep(1);
+    } while (!g_state);
     printf("[test]wait end!\r\n");
     g_state = false;
 }

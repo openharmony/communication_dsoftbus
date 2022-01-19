@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 module_output_path = "dsoftbus_standard/transmission"
 ohos_unittest("dsoftbus_auth_ble_board") {
   module_out_path = module_output_path
-  sources = [ "dsoftbus_auth_ble.cpp" ]
+  sources = [ "ble_auth_channel_test.cpp" ]
   include_dirs = [
     "$dsoftbus_root_path/core/common/inner_communication",
     "$dsoftbus_root_path/adapter/common/include",

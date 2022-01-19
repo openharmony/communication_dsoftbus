@@ -461,7 +461,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         SoftBusFree(buf);
         return;
     }
-    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1)) {
+    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);
@@ -671,7 +671,8 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
 
 static void BleDeviceConnectPackRequest(int32_t value, int32_t connId)
 {
-    while (--value > 0) {
+    int32_t data = value;
+    while (--data > 0) {
         (void)PackRequest(CONNECT_REF_INCRESE, connId);
     }
 }

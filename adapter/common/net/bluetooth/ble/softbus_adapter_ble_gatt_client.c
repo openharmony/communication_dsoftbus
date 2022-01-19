@@ -32,7 +32,7 @@ static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChangedCallback id=%d,state=%d,status=%d",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChangedCallback id=%d, state=%d, status=%d",
         clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcConnectionStateChangedCallback ignore");
@@ -48,56 +48,54 @@ static void GattcConnectParaUpdateCallback(int clientId, int interval, int laten
 
 static void GattcSearchServiceCompleteCallback(int clientId, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SearchServiceCompleteCallback, id=%d,status=%d",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SearchServiceCompleteCallback, id=%d, status=%d",
         clientId, status);
     g_softBusGattcCallback->ServiceCompleteCallback(clientId, status);
 }
 
 static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReadCharacteristicCallback,id=%d,status=%d",
-        clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReadCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WriteCharacteristicCallback, id=%d,status=%d", 
-        clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WriteCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReadDescriptorCallback,id=%d,status=%d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ReadDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WriteDescriptorCallback,id=%d,status=%d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WriteDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConfigureMtuSizeCallback,id=%d,mtusize=%d,status=%d",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConfigureMtuSizeCallback, id=%d, mtusize=%d, status=%d",
         clientId, mtuSize, status);
     g_softBusGattcCallback->ConfigureMtuSizeCallback(clientId, mtuSize, status);
 }
 
 static void GattcRegisterNotificationCallback(int clientId, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RegisterNotificationCallback,id=%d,status=%d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RegisterNotificationCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->RegistNotificationCallback(clientId, status);
 }
 
 static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcNotificationCallback,id=%d,status=%d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcNotificationCallback, id=%d, status=%d", clientId, status);
     SoftBusGattcNotify notify;
     notify.dataLen = notifyData->dataLen;
     notify.charaUuid.uuidLen = notifyData->attribute.characteristic.characteristicUuid.uuidLen;
     notify.data = notifyData->data;
     notify.charaUuid.uuid = notifyData->attribute.characteristic.characteristicUuid.uuid;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcNotificationCallback,id=%d,status=%d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcNotificationCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->NotificationReceiveCallback(clientId, &notify, status);
 }
 
