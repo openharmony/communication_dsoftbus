@@ -280,7 +280,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         int32_t addrLen = sizeof(addr);
         int32_t cfd;
         int ret;
-        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, &addrLen, &cfd));
+        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, &cfd));
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
@@ -458,7 +458,7 @@ static int32_t StartThread(ListenerModule module, ModeType modeType)
     listenerInfo->modeType = modeType;
     listenerInfo->status = LISTENER_RUNNING;
 
-    return ThreadPoolAddJob(g_threadPool, (int(*)(void *))SelectThread,
+    return ThreadPoolAddJob(g_threadPool, (int32_t(*)(void *))SelectThread,
         NULL, PERSISTENT, (uintptr_t)0);
 }
 
@@ -692,6 +692,7 @@ int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *liste
         }
     } else {
         SoftBusFree(listener);
+        return SOFTBUS_ERR;
     }
     SoftBusMutexUnlock(&g_listenerList[module].lock);
     return SOFTBUS_OK;

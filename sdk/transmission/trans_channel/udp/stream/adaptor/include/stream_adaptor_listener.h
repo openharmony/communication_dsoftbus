@@ -65,7 +65,7 @@ public:
                 extRetBuflen,
             };
 
-            FrameInfo tmpf = {};
+            StreamFrameInfo tmpf = {};
             adaptor_->GetListenerCallback()->OnStreamReceived(adaptor_->GetChannelId(),
                 &retStreamData, &extStreamData, &tmpf);
         }

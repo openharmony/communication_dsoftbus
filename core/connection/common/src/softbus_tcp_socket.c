@@ -156,14 +156,14 @@ int32_t SetIpTos(int fd, uint32_t tos)
     return SOFTBUS_OK;
 }
 
-int OpenTcpServerSocket(const char *ip, int port)
+int32_t OpenTcpServerSocket(const char *ip, int32_t port)
 {
     if (ip == NULL || port < 0) {
         return -1;
     }
 
     int fd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d", fd);
         return -1;
@@ -179,7 +179,7 @@ int OpenTcpServerSocket(const char *ip, int port)
     return fd;
 }
 
-int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isNonBlock)
+int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, bool isNonBlock)
 {
     if ((peerIp == NULL) || (port <= 0)) {
         return -1;
@@ -247,7 +247,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     return fcntl(fd, F_SETFL, flags);
 }
 
-int GetTcpSockPort(int fd)
+int32_t GetTcpSockPort(int32_t fd)
 {
     SoftBusSockAddrIn addr;
     int32_t addrLen = sizeof(addr);
@@ -260,7 +260,7 @@ int GetTcpSockPort(int fd)
     return ntohs(addr.sinPort);
 }
 
-ssize_t SendTcpData(int fd, const char *buf, size_t len, int timeout)
+ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d invalid params", fd);
@@ -304,7 +304,7 @@ ssize_t SendTcpData(int fd, const char *buf, size_t len, int timeout)
     return bytes;
 }
 
-static ssize_t OnRecvData(int fd, char *buf, size_t len, int timeout, int flags)
+static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int flags)
 {
     if (fd < 0 || buf == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd[%d] len[%d] invalid params", fd, len);
@@ -327,12 +327,12 @@ static ssize_t OnRecvData(int fd, char *buf, size_t len, int timeout, int flags)
     return rc;
 }
 
-ssize_t RecvTcpData(int fd, char *buf, size_t len, int timeout)
+ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout)
 {
     return OnRecvData(fd, buf, len, timeout, 0);
 }
 
-void CloseTcpFd(int fd)
+void CloseTcpFd(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close fd=%d", fd);
@@ -340,7 +340,7 @@ void CloseTcpFd(int fd)
     }
 }
 
-void TcpShutDown(int fd)
+void TcpShutDown(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);

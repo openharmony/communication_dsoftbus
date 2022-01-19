@@ -26,7 +26,7 @@
 
 static SoftBusList *g_sessionServerList = NULL;
 
-int TransSessionMgrInit(void)
+int32_t TransSessionMgrInit(void)
 {
     if (g_sessionServerList != NULL) {
         return SOFTBUS_OK;

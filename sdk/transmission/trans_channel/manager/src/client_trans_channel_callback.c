@@ -94,7 +94,7 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 }
 
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
-    const void *data, uint32_t len, SessionPktType type)
+    const void *data, unsigned int len, SessionPktType type)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
         channelId, channelType);

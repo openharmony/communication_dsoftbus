@@ -22,7 +22,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
+int SendBytes(int sessionId, const void *data, unsigned int len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendBytes: sessionId=%d", sessionId);
     if (data == NULL || len == 0) {
@@ -50,7 +50,7 @@ int32_t SendBytes(int32_t sessionId, const void *data, uint32_t len)
     return ClientTransChannelSendBytes(channelId, type, data, len);
 }
 
-int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
+int SendMessage(int sessionId, const void *data, unsigned int len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendMessage: sessionId=%d", sessionId);
     if (data == NULL || len == 0) {
@@ -77,7 +77,7 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
     return ClientTransChannelSendMessage(channelId, type, data, len);
 }
 
-int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const FrameInfo *param)
+int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");

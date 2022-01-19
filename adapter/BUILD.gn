@@ -26,6 +26,7 @@ if (enable_connection_ble == true || enable_discovery_ble == true) {
 }
 
 if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
     hilog_lite_include_path =
         "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
@@ -53,10 +54,11 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include + net_bluetooth_inc
-      include_dirs += [
-        "//kernel/liteos_m/kal/cmsis",
-        "$hispark_pegasus_sdk_path/third_party/lwip_sack/include",
-      ]
+      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
+      if (board_name == "hispark_pegasus") {
+        include_dirs +=
+            [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
+      }
       cflags = [
         "-Wall",
         "-fPIC",

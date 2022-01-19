@@ -22,11 +22,11 @@ bus_center_utils_src = [
 bus_center_utils_inc = [ "$dsoftbus_root_path/core/bus_center/utils/include" ]
 bus_center_utils_deps = []
 if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
-    bus_center_utils_inc +=
-        [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
-    if (ohos_third_party_dir == "$hispark_pegasus_sdk_path/third_party") {
-      #bus_center_utils_inc += []
+    if (board_name == "hispark_pegasus") {
+      bus_center_utils_inc +=
+          [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
     }
   }
 } else {

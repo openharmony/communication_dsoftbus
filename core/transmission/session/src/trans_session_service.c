@@ -28,7 +28,7 @@
 
 static bool g_transSessionInitFlag = false;
 
-int32_t TransServerInit(void)
+int TransServerInit(void)
 {
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;

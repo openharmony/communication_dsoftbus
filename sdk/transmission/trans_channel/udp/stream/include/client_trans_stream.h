@@ -32,7 +32,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
 int32_t TransCloseStreamChannel(int32_t channelId);
 
-int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const FrameInfo *param);
+int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
 #ifdef __cplusplus
 }
 #endif

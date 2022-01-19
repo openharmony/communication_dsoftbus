@@ -22,8 +22,8 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_errcode.h"
+#include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "system_ability_definition.h"
 
 using namespace OHOS;
 
@@ -36,7 +36,7 @@ std::mutex g_mutex;
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID);
+    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
