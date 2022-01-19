@@ -68,7 +68,7 @@ int TransClientInit(void)
     }
 
     ClientTransRegLnnOffline();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init succ");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init trans client success");
     return SOFTBUS_OK;
 }
 
