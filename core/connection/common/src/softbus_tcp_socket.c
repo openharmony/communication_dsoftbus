@@ -137,7 +137,7 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusInetPtoN rc=%d", rc);
         return SOFTBUS_ERR;
     }
-    addr.sinPort = SoftBusHtoNs(port);
+    addr.sinPort = htons(port);
     rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "bind fd=%d,rc=%d", fd, rc);
@@ -213,7 +213,8 @@ int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isN
     }
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, peerIp, &addr.sinAddr);
-    addr.sinPort = SoftBusHtoNs(port);
+
+    addr.sinPort = htons(port);
     int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
@@ -256,7 +257,7 @@ int GetTcpSockPort(int fd)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,GetTcpSockPort rc=%d", fd, rc);
         return rc;
     }
-    return SoftBusNtoHs(addr.sinPort);
+    return ntohs(addr.sinPort);
 }
 
 ssize_t SendTcpData(int fd, const char *buf, size_t len, int timeout)

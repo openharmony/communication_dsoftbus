@@ -108,7 +108,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     uint32_t tmpSeq;
     if (flags == FLAG_ACK) {
         finalSeq = *((int32_t *)data);
-        tmpSeq = SoftBusHtoNl((uint32_t)finalSeq);
+        tmpSeq = htonl((uint32_t)finalSeq);
         finalData = (char *)(&tmpSeq);
     }
 
@@ -135,26 +135,22 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
 static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, const char *data, uint32_t len,
     int32_t flags)
 {
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcProcessPostData 0.");
     uint32_t outLen;
     char *buf = TransTdcPackData(channel, data, len, flags, &outLen);
     if (buf == NULL || outLen != len + OVERHEAD_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
         return SOFTBUS_ENCRYPT_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcProcessPostData 1.");
     uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
         return SOFTBUS_TCP_SOCKET_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcProcessPostData 2.");
     uint32_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != outLen + DC_DATA_HEAD_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to send tcp data.");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcProcessPostData 3.");
     SoftBusFree(buf);
     return SOFTBUS_OK;
 }
@@ -179,18 +175,15 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
 int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
 {
     TcpDirectChannelInfo channel;
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcSendMessage 0.");
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
         return SOFTBUS_ERR;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcSendMessage 1.");
     int32_t ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "postBytes failed.");
         return ret;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcSendMessage 2.");
     return ProcPendingPacket(channelId, channel.detail.sequence, PENDING_TYPE_DIRECT);
 }
 
