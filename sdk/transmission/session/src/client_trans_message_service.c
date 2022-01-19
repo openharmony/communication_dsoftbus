@@ -64,7 +64,6 @@ int32_t SendMessage(int32_t sessionId, const void *data, uint32_t len)
     if (len > maxLen) {
         return SOFTBUS_INVALID_PARAM;
     }
-SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendMessage:1");
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
