@@ -21,8 +21,8 @@
 
 using namespace testing::ext;
 namespace OHOS {
-const std::string UDP_TEST_PKG_NAME = "com.huawei.plrdtest.dsoftbus.server";
-const std::string UDP_TEST_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendRawStream_0";
+const std::string UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.server";
+const std::string UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStream_0";
 int32_t g_testWay = 0;
 class TransQosStatServerTest : public testing::Test {
 public:

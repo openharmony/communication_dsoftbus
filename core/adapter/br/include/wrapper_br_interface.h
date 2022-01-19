@@ -33,7 +33,7 @@ typedef uint8_t BT_UUIDL[BT_UUID_LEN];
 typedef uint8_t BT_ADDR[BT_ADDR_LEN];
 
 #define BR_READ_SOCKET_CLOSED 0
-#define BR_READ_FAILED -1
+#define BR_READ_FAILED (-1)
 
 typedef struct {
     BT_UUIDL uuid;

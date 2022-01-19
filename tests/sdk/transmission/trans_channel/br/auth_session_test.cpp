@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: br connection test.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,8 +54,8 @@ ConnectionAddr g_addrInfo[CONN_ADDR_INFO_COUNT];
 
 ISessionListener g_sessionlistener;
 int32_t g_openCount = 0;
-const char *g_testModuleName = "com.huawei.plrdtest";
-const char *g_testSessionName   = "com.huawei.plrdtest.dsoftbus";
+const char *g_testModuleName = "com.plrdtest";
+const char *g_testSessionName   = "com.plrdtest.dsoftbus";
 const char *g_testData = "{\"data\":\"open auth session test!!!\"}";
 
 int32_t g_sessionId = -1;
@@ -155,12 +154,12 @@ void OnBytesReceived(int sessionId, const void *data, unsigned int len)
     if (g_testWay == PASSIVE_OPENAUTHSESSION_WAY) {
         SendBytes(sessionId, "{\"received ok\"}", strlen("{\"received ok\"}"));
     }
-    printf("bytes received, sessionid[%d], data[%s], dataLen[%d]\n", sessionId, data, len);
+    printf("bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
 
 void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    printf("msg received, sessionid[%d], data[%s], dataLen[%d]\n", sessionId, data, len);
+    printf("msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
 }
 
 void TestSessionListenerInit(void)
@@ -227,11 +226,11 @@ void TestCloseSessionTwo(void)
     }
 }
 
-class SoftbusOpenAuthTest : public testing::Test {
+class AuthSessionTest : public testing::Test {
 public:
-    SoftbusOpenAuthTest()
+    AuthSessionTest()
     {}
-    ~SoftbusOpenAuthTest()
+    ~AuthSessionTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -240,7 +239,7 @@ public:
     int32_t TestWaitOpenSession(int32_t count);
 };
 
-void SoftbusOpenAuthTest::SetUpTestCase(void)
+void AuthSessionTest::SetUpTestCase(void)
 {
     SoftbusConfigInit();
     TestSessionListenerInit();
@@ -255,18 +254,18 @@ void SoftbusOpenAuthTest::SetUpTestCase(void)
     getchar();
 }
 
-void SoftbusOpenAuthTest::TearDownTestCase(void)
+void AuthSessionTest::TearDownTestCase(void)
 {}
 
-void SoftbusOpenAuthTest::SetUp(void)
+void AuthSessionTest::SetUp(void)
 {}
 
-void SoftbusOpenAuthTest::TearDown(void)
+void AuthSessionTest::TearDown(void)
 {
     TestCloseSession();
 }
 
-int32_t SoftbusOpenAuthTest::TestWaitOpenSession(int32_t count)
+int32_t AuthSessionTest::TestWaitOpenSession(int32_t count)
 {
     int32_t timeout = count * CONN_SINGLE_WAIT_TIMEOUT;
     while (g_openCount < count) {
@@ -286,7 +285,7 @@ int32_t SoftbusOpenAuthTest::TestWaitOpenSession(int32_t count)
 * @tc.type: FUNC
 * @tc.require:AR000GIRGG
 */
-HWTEST_F(SoftbusOpenAuthTest, testPassiveOpenAuthSession001, TestSize.Level1)
+HWTEST_F(AuthSessionTest, testPassiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != PASSIVE_OPENAUTHSESSION_WAY) {
         printf("skip testPassiveOpenAuthSession001 test.");
@@ -317,7 +316,7 @@ HWTEST_F(SoftbusOpenAuthTest, testPassiveOpenAuthSession001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:AR000GIRGG
 */
-HWTEST_F(SoftbusOpenAuthTest, testActiveOpenAuthSession001, TestSize.Level1)
+HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("skip testActiveOpenAuthSession001 test.");
@@ -373,7 +372,7 @@ HWTEST_F(SoftbusOpenAuthTest, testActiveOpenAuthSession001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:AR000GIRGG
 */
-HWTEST_F(SoftbusOpenAuthTest, testActiveOpenAuthSession002, TestSize.Level1)
+HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("skip testActiveOpenAuthSession002 test.");

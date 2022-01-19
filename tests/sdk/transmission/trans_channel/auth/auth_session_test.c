@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: auth channel test.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,9 +40,9 @@
 #define WAIT_SERVER_READY 5
 #define MAX_TEST_COUNT 8
 #define NSTACKX_MAX_IP_STRING_LEN 20
-#define DISC_TEST_PKG_NAME "com.huawei.plrdtest"
+#define DISC_TEST_PKG_NAME "com.plrdtest"
 static const char *g_testModuleName = DISC_TEST_PKG_NAME;
-static const char *g_testSessionName   = "com.huawei.plrdtest.dsoftbus";
+static const char *g_testSessionName   = "com.plrdtest.dsoftbus";
 static ISessionListener g_sessionlistener;
 static SessionAttribute g_sessionAttr;
 static bool g_successFlag = false;
@@ -81,9 +80,9 @@ static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
     (void)data;
     if (g_sessionId == -1 || sessionId == g_sessionId) {
-        printf("client bytes received, data[%s], dataLen[%d]\n", data, len);
+        printf("client bytes received, data[%s], dataLen[%u]\n", data, len);
     } else {
-        printf("server bytes received, sessionid[%d], data[%s], dataLen[%d]\n", sessionId, data, len);
+        printf("server bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
     }
 }
 
@@ -91,9 +90,9 @@ static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
     (void)data;
     if (g_sessionId == -1 || sessionId == g_sessionId) {
-        printf("client msg received, data[%s], dataLen[%d]\n", data, len);
+        printf("client msg received, data[%s], dataLen[%u]\n", data, len);
     } else {
-        printf("server msg received, sessionid[%d], data[%s], dataLen[%d]\n", sessionId, data, len);
+        printf("server msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
     }
 }
 
@@ -112,7 +111,7 @@ static int32_t TestSendBytesData(const char *data, int32_t len)
     printf("SendBytes start\n");
     int32_t ret = SendBytes(g_sessionId, data, len);
     if (ret != SOFTBUS_OK) {
-        printf("SendBytes failed ret[%d] len[%d]\n", ret, len);
+        printf("SendBytes failed ret[%d] len[%u]\n", ret, len);
     }
     printf("SendBytes end\n");
     return ret;
@@ -123,7 +122,7 @@ static int32_t TestSendMessageData(const char *data, int32_t len)
     printf("SendMessage start\n");
     int32_t ret = SendMessage(g_sessionId, data, len);
     if (ret != SOFTBUS_OK) {
-        printf("SendMessage failed ret[%d] len[%d]\n", ret, len);
+        printf("SendMessage failed ret[%d] len[%u]\n", ret, len);
     }
     printf("SendMessage end\n");
     return ret;

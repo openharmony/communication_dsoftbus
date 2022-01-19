@@ -24,8 +24,8 @@
 
 using namespace testing::ext;
 namespace OHOS {
-const std::string UDP_TEST_PKG_NAME = "com.huawei.plrdtest.dsoftbus.client";
-const std::string UDP_TEST_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendRawStream_0";
+const std::string UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.client";
+const std::string UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStream_0";
 const int32_t PERIOD_MS = 1000;
 std::map<int, int> g_qosEventCount;
 std::map<int, uint64_t> g_timeDiff;
