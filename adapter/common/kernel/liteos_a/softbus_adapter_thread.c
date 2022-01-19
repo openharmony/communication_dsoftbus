@@ -118,11 +118,11 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
     ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexDestroy failed, ret[%{public}d]", ret);
-        SoftBusFree(mutex);
+        SoftBusFree((void *)*mutex);
         return SOFTBUS_ERR;
     }
 
-    SoftBusFree(mutex);
+    SoftBusFree((void *)*mutex);
     return SOFTBUS_OK;
 }
 
@@ -437,10 +437,10 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond)
     ret = pthread_cond_destroy((pthread_cond_t *)*cond);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondDestroy failed, ret[%{public}d]", ret);
-        SoftBusFree(cond);
+        SoftBusFree((void *)*cond);
         return SOFTBUS_ERR;
     }
 
-    SoftBusFree(cond);
+    SoftBusFree((void *)*cond);
     return SOFTBUS_OK;
 }
