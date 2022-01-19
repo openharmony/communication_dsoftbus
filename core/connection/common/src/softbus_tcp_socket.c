@@ -322,6 +322,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
         if (err < 0) {
             return err;
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data wait event err[%d]", err);
         }
     }
 
@@ -330,6 +331,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
     if ((rc == -1) && (errno == EAGAIN)) {
         rc = 0;
     } else if (rc <= 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data fail errno[%d]", errno);
         rc = -1;
     }
     return rc;
