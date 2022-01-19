@@ -14,136 +14,143 @@
  */
 #include "wrapper_br_interface.h"
 
-#include "bt_rfcom.h"
 #include "message_handler.h"
+#include "ohos_bt_def.h"
+#include "ohos_bt_gap.h"
+#include "ohos_bt_spp.h"
+#include "securec.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "string.h"
 
-static SppSocketEventCallback *g_connectCallback = NULL;
-static SppSocketEventCallback *g_connectServiceCallback = NULL;
-
-static void OnEventRfcom(uint8 type, uint8 handle, int value)
-{
-    g_connectCallback->OnEvent((int32_t)type, (int32_t)handle, value);
-}
-
-static void OnDataReceivedRfcom(uint8 handle, const uint8 *buf, uint16 len)
-{
-    g_connectCallback->OnDataReceived((int32_t)handle, (char*)buf, (int32_t)len);
-}
-
-static BtRfcomEventCallback g_rfcomEventcb = {
-    .OnEvent = OnEventRfcom,
-    .OnDataReceived = OnDataReceivedRfcom
-};
-
-static void OnEventServiceRfcom(uint8 type, uint8 handle, int value)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-        "[Client event call back form bt, and socketid = %u, tpye = %u]", handle, type);
-    if (g_connectServiceCallback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[g_connectServiceCallback is NULL]");
-        return;
-    }
-    g_connectServiceCallback->OnEvent((int32_t)type, (int32_t)handle, value);
-}
-
-static void OnDataReceivedServiceRfcom(uint8 handle, const uint8 *buf, uint16 len)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-        "[Client received call back form bt, and socketid = %u, len = %u]", handle, len);
-    if (g_connectServiceCallback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[g_connectServiceCallback is NULL]");
-        return;
-    }
-    g_connectServiceCallback->OnDataReceived((int32_t)handle, (char*)buf, (int32_t)len);
-}
-
-static BtRfcomEventCallback g_rfcomServiceEventcb = {
-    .OnEvent = OnEventServiceRfcom,
-    .OnDataReceived = OnDataReceivedServiceRfcom
-};
-
-static int32_t Connect(int32_t clientFd, const SppSocketEventCallback *callback)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[mock clientFd = %d]", clientFd);
-    g_connectCallback = (SppSocketEventCallback*)callback;
-    int ret = BtRfcomClientConnect((uint8)clientFd, &g_rfcomEventcb);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[BtRfcom return  = %d]", ret);
-    ret = (ret == BT_RFCOM_STATUS_OK) ? SOFTBUS_OK : SOFTBUS_ERR;
-    return ret;
-}
+#define IS_BR_ENCRYPT true
 
 static void Init(const struct tagSppSocketDriver *sppDriver)
 {
     (void)sppDriver;
 }
 
-static int32_t OpenSppServer(const BT_ADDR mac, const BT_UUIDL uuid, int32_t isSecure)
+static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid, int32_t isSecure)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[OpenSppServer connect]");
-    return SOFTBUS_ERR;
+    if (name == NULL || nameLen <= 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSppServer invalid param");
+        return SOFTBUS_ERR;
+    }
+    (void)isSecure;
+
+    BtCreateSocketPara socketPara;
+    (void)memset_s((char *)&socketPara, sizeof(socketPara), 0, sizeof(socketPara));
+    socketPara.uuid.uuid = (char *)uuid;
+    socketPara.uuid.uuidLen = strlen(uuid);
+    socketPara.socketType = OHOS_SPP_SOCKET_RFCOMM;
+    socketPara.isEncrypt = IS_BR_ENCRYPT;
+    return SppServerCreate(&socketPara, name, nameLen);
 }
 
-static int32_t OpenSppClient(const BT_ADDR mac, const BT_UUIDL uuid, int32_t isSecure)
+static void CloseSppServer(int32_t serverFd)
 {
-    (void)isSecure;
-    int ret = BtRfcomClientCreate(mac, uuid);
-    if (ret == BT_RFCOM_CLIENT_INVALID_HANDLE) {
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseServer Connect, and serverFd = %d]", serverFd);
+    SppServerClose(serverFd);
+}
+
+static int32_t Connect(const char *uuid, const BT_ADDR mac)
+{
+    if (mac == NULL) {
+        return SOFTBUS_ERR;
+    }
+    BtCreateSocketPara socketPara;
+    (void)memset_s((char *)&socketPara, sizeof(socketPara), 0, sizeof(socketPara));
+    socketPara.uuid.uuid = (char *)uuid;
+    socketPara.uuid.uuidLen = strlen(uuid);
+    socketPara.socketType = OHOS_SPP_SOCKET_RFCOMM;
+    socketPara.isEncrypt = IS_BR_ENCRYPT;
+
+    BdAddr bdAddr;
+    (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
+    if (memcpy_s((char *)bdAddr.addr, OHOS_BD_ADDR_LEN, mac, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Connect memcpy_s failed");
+        return SOFTBUS_ERR;
+    }
+    int ret = SppConnect(&socketPara, &bdAddr);
+    if (ret == BT_SPP_INVALID_ID) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[BT_SPP_INVALID_ID]");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SppConnect ok clientId: %d", ret);
+    return ret;
+}
+
+static int32_t DisConnect(int32_t clientFd)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[DisConnect, and clientFd = %d]", clientFd);
+    return SppDisconnect(clientFd);
+}
+
+static bool IsConnected(int32_t clientFd)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[get connected state from bt, clientFd = %d]", clientFd);
+    return IsSppConnected(clientFd);
+}
+
+static int32_t Accept(int32_t serverFd)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Accept remote device to connect, and serverFd = %d]", serverFd);
+    int32_t ret = SppServerAccept(serverFd);
+    if (ret == BT_SPP_INVALID_ID) {
         return SOFTBUS_ERR;
     }
     return ret;
 }
 
-static int32_t CloseClient(int32_t clientFd)
+static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseClient connect, and serverFd = %d]", clientFd);
-    return BtRfcomClientDisconnect((uint8)clientFd);
+    return SppWrite(clientFd, buf, len);
 }
 
-static void CloseServer(int32_t serverFd)
+static int32_t Read(int32_t clientFd, char *buf, const int32_t len)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseServer Connect, and serverFd = %d]", serverFd);
+    int32_t ret = SppRead(clientFd, buf, len);
+    if (ret == BT_SPP_READ_SOCKET_CLOSED) {
+        return BR_READ_SOCKET_CLOSED;
+    } else if (ret == BT_SPP_READ_FAILED) {
+        return BR_READ_FAILED;
+    }
+    return ret;
 }
-
 
 static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice *device)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[to get remotedeviceinfo, clientFd = %d]", clientFd);
-    return 0;
-}
+    BdAddr bdAddr;
+    (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
+    (void)SppGetRemoteAddr(clientFd, &bdAddr);
+    if (memcpy_s((char *)device->mac, BT_ADDR_LEN, (char *)bdAddr.addr, OHOS_BD_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetRemoteDeviceInfo memcpy_s failed");
+        return SOFTBUS_ERR;
+    }
 
-static int32_t IsConnected(int32_t clientFd)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[to get connected state from bt, clientFd = %d]", clientFd);
-    return true;
-}
-
-static int32_t Accept(int32_t serverFd, const SppSocketEventCallback *callback)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Accept remote device to connect, and serverFd = %d]", serverFd);
-    g_connectServiceCallback = (SppSocketEventCallback*)callback;
-    return 0;
-}
-
-static int32_t Write(int32_t g_clientFd, const char *buf, const int32_t length)
-{
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[mock Write] g_clientFd=%d,len=%d", g_clientFd, length);
-    return BtRfcomClientWrite((uint8)g_clientFd, (uint8 *)buf, (uint16)length);
+    return SOFTBUS_OK;
 }
 
 static SppSocketDriver g_sppSocketDriver = {
     .Init = Init,
     .OpenSppServer = OpenSppServer,
-    .OpenSppClient = OpenSppClient,
-    .CloseClient = CloseClient,
-    .CloseServer = CloseServer,
+    .CloseSppServer = CloseSppServer,
     .Connect = Connect,
-    .GetRemoteDeviceInfo = GetRemoteDeviceInfo,
+    .DisConnect = DisConnect,
     .IsConnected = IsConnected,
     .Accept = Accept,
-    .Write = Write
+    .Write = Write,
+    .Read = Read,
+    .GetRemoteDeviceInfo = GetRemoteDeviceInfo
 };
+
+int32_t SppGattsRegisterHalCallback(const SoftBusBtStateListener *lister)
+{
+    return SoftBusAddBtStateListener(lister);
+}
 
 SppSocketDriver *InitSppSocketDriver()
 {

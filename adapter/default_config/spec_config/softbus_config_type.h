@@ -44,6 +44,8 @@ typedef enum {
     SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN, /* the default val is 0 */
     SOFTBUS_STR_LNN_NET_IF_NAME, /* the default val is 0:eth0,1:wlan0 */
     SOFTBUS_INT_LNN_MAX_CONCURENT_NUM, /* the default val is 0 */
+    SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, /* L1: 4K, L2: 64K */
+    SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH, /* L1: 1K, L2: 4K */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

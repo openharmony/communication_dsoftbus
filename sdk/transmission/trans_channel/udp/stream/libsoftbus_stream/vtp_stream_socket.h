@@ -56,7 +56,9 @@ public:
     bool CreateClient(IpAndPort &local, int streamType, const std::string &sessionKey) override;
     bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
         const std::string &sessionKey) override;
+
     bool CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey) override;
+
     void DestroyStreamSocket() override;
 
     bool Connect(const IpAndPort &remote) override;
@@ -159,6 +161,27 @@ private:
     void NotifyStreamListener();
 
     void GetCryptErrorReason(void) const;
+
+    bool EnableBwEstimationAlgo(int streamfd, bool isServer) const;
+
+    bool EnableJitterDetectionAlgo(int streamfd) const;
+
+    void RegisterMetricCallback(bool isServer); /* register the metric callback function */
+
+    static void AddStreamSocketLock(int fd, std::mutex &streamsocketlock);
+
+    static void AddStreamSocketListener(int fd, std::shared_ptr<IStreamSocketListener> streamreceiver);
+
+    static void RemoveStreamSocketLock(int fd);
+
+    static void RemoveStreamSocketListener(int fd);
+
+    static int FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info);
+
+    void FillpAppStatistics();
+
+    static std::map<int, std::mutex &> g_streamSocketLockMap;
+    static std::map<int, std::shared_ptr<IStreamSocketListener>> g_streamReceiverMap;
 
     std::map<int, OptionFunc> optFuncMap_ {};
     static std::shared_ptr<VtpInstance> vtpInstance_;

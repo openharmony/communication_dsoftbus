@@ -25,6 +25,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
@@ -42,6 +43,8 @@
 
 static SoftBusList *g_proxyChannelList = NULL;
 static SoftBusMutex g_myIdLock;
+static int32_t g_authMaxByteBufSize;
+static int32_t g_authMaxMessageBufSize;
 
 static int32_t MyIdIsValid(int16_t myId)
 {
@@ -816,10 +819,13 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomStr err");
         return SOFTBUS_ERR;
     }
-
-    if (SoftBusGenerateRandomArray((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomArray err");
-        return SOFTBUS_ERR;
+    
+    if (appInfo->appType != APP_TYPE_AUTH) {
+        if (SoftBusGenerateRandomArray((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey))
+            != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomArray err");
+            return SOFTBUS_ERR;
+        }
     }
 
     (void)memcpy_s(&(chan->appInfo), sizeof(chan->appInfo), appInfo, sizeof(AppInfo));
@@ -1007,6 +1013,29 @@ void TransProxyTimerProc(void)
     TransProxyTimerItemProc(&proxyProcList);
 }
 
+int32_t TransProxyAuthSessionDataLenCheck(uint32_t dataLen, int32_t type)
+{
+    switch (type) {
+        case PROXY_FLAG_MESSAGE:
+        case PROXY_FLAG_ASYNC_MESSAGE: {
+            if (dataLen > g_authMaxMessageBufSize) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        }
+        case PROXY_FLAG_BYTES: {
+            if (dataLen > g_authMaxByteBufSize) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        }
+        default: {
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 {
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
@@ -1038,6 +1067,18 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
 
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH,
+        (unsigned char*)&g_authMaxByteBufSize, sizeof(g_authMaxByteBufSize)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get auth proxy channel max bytes length fail");
+    }
+    
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH,
+        (unsigned char*)&g_authMaxMessageBufSize, sizeof(g_authMaxMessageBufSize)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get auth proxy channel max message length fail");
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "proxy auth byteSize[%u], messageSize[%u]",
+        g_authMaxByteBufSize, g_authMaxMessageBufSize);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel init ok");
     return SOFTBUS_OK;
 }

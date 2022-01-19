@@ -25,8 +25,11 @@ if (enable_connection_br == false) {
 } else {
   br_connection_src = br_adapter_src
   br_connection_inc = br_adapter_inc
-  br_connection_src +=
-      [ "$dsoftbus_root_path/core/connection/br/src/br_connection.c" ]
+  br_connection_src += [
+    "$dsoftbus_root_path/core/connection/br/src/br_connection.c",
+    "$dsoftbus_root_path/core/connection/br/src/br_trans_manager.c",
+    "$dsoftbus_root_path/core/connection/br/src/br_connection_manager.c",
+  ]
   br_connection_inc += [
     "$dsoftbus_root_path/core/connection/br/include",
     "//third_party/cJSON",

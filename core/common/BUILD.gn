@@ -18,6 +18,7 @@ import(
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 common_utils_src = [
+  "bitmap/softbus_bitmap.c",
   "network/softbus_network_utils.c",
   "json_utils/softbus_json_utils.c",
   "log/softbus_log.c",

@@ -250,7 +250,7 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
 {
     ProxyDataInfo packDataInfo = {0};
     int32_t ret;
-    int32_t seq;
+    int32_t seq = 0;
 
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid para");
@@ -259,10 +259,29 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
 
     packDataInfo.inData = (unsigned char *)data;
     packDataInfo.inLen = len;
-    ret = TransProxyPackBytes(channelId, &packDataInfo, flags, &seq);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PackBytes err");
-        return ret;
+    ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (chanInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc in TransProxyPostPacketData.id[%d]", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (TransProxyGetSendMsgChanInfo(channelId, chanInfo) != SOFTBUS_OK) {
+        SoftBusFree(chanInfo);
+        return SOFTBUS_ERR;
+    }
+    AppType appType = chanInfo->appInfo.appType;
+    SoftBusFree(chanInfo);
+    if (appType != APP_TYPE_AUTH) {
+        ret = TransProxyPackBytes(channelId, &packDataInfo, flags, &seq);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PackBytes err");
+            return ret;
+        }
+    } else {
+        packDataInfo.outData = (uint8_t *)data;
+        packDataInfo.outLen = len;
+        if (flags == PROXY_FLAG_MESSAGE) {
+            flags = PROXY_FLAG_BYTES;
+        }
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "InLen[%d] seq[%d] outLen[%d] flags[%d]",
         len, seq, packDataInfo.outLen, flags);
@@ -271,8 +290,9 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
     } else {
         ret = TransProxyTransDataSendMsg(channelId, (char *)packDataInfo.outData, packDataInfo.outLen, flags);
     }
-
-    SoftBusFree(packDataInfo.outData);
+    if (appType != APP_TYPE_AUTH) {
+        SoftBusFree(packDataInfo.outData);
+    }
     return ret;
 }
 
@@ -296,7 +316,10 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
     int dstLen;
 
     connHeadLen = ConnGetHeadSize();
-    bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + sizeof(SliceHead) + datalen;
+    bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + datalen;
+    if (sliceHead != NULL) {
+        bufLen += sizeof(SliceHead);
+    }
     buf = (char*)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         return NULL;
@@ -306,19 +329,53 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
         SoftBusFree(buf);
         return NULL;
     }
-    dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
-    if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, sliceHead, sizeof(SliceHead)) != EOK) {
-        SoftBusFree(buf);
-        return NULL;
-    }
-    dstLen = bufLen - connHeadLen - MSG_SLICE_HEAD_LEN;
-    if (memcpy_s(buf + connHeadLen + MSG_SLICE_HEAD_LEN, dstLen, payLoad, datalen) != EOK) {
-        SoftBusFree(buf);
-        return NULL;
+    if (sliceHead != NULL) {
+        dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
+        if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, sliceHead, sizeof(SliceHead)) != EOK) {
+            SoftBusFree(buf);
+            return NULL;
+        }
+        dstLen = bufLen - connHeadLen - MSG_SLICE_HEAD_LEN;
+        if (memcpy_s(buf + connHeadLen + MSG_SLICE_HEAD_LEN, dstLen, payLoad, datalen) != EOK) {
+            SoftBusFree(buf);
+            return NULL;
+        }
+    } else {
+        dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
+        if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, payLoad, datalen) != EOK) {
+            SoftBusFree(buf);
+            return NULL;
+        }
     }
 
     *outlen = bufLen;
     return buf;
+}
+
+static int32_t TransProxyTransAuthMsg(const ProxyChannelInfo *info, const char *payLoad, int payLoadLen,
+    ProxyPacketType flag)
+{
+    ProxyMessageHead msgHead = {0};
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = info->myId;
+    msgHead.peerId = info->peerId;
+    char *buf = NULL;
+    int bufLen = 0;
+    buf = TransProxyPackAppNormalMsg(&msgHead, NULL, payLoad, payLoadLen, &bufLen);
+    if (buf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy pack msg error");
+        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+    }
+    int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+    if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send queue full!!");
+        return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
+    }
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send msg error");
+        return SOFTBUS_TRANS_PROXY_SENDMSG_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const char *payLoad, int payLoadLen,
@@ -401,7 +458,11 @@ int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int p
         ret = SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
         goto EXIT;
     }
-    ret = TransProxyTransAppNormalMsg(info, payLoad, payLoadLen, flag);
+    if (info->appInfo.appType == APP_TYPE_AUTH) {
+        ret = TransProxyTransAuthMsg(info, payLoad, payLoadLen, flag);
+    } else {
+        ret = TransProxyTransAppNormalMsg(info, payLoad, payLoadLen, flag);
+    }
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         goto EXIT;
@@ -743,6 +804,28 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t channelId, const c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "sub packets proc slicecount:%d", headSlice->sliceNum);
         return TransProxySubPacketProc(pkgName, channelId, headSlice, data + sizeof(SliceHead), dataLen);
     }
+}
+
+int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
+{
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data null.");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "AuthReceived inputLen[%d]", len);
+
+    ProxyPacketType type = PROXY_FLAG_BYTES;
+    if (TransProxyAuthSessionDataLenCheck(len, type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data len is too large %d type %d", len, type);
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Auth ProcessData debug: len %d \n", len);
+    if (TransProxyNotifySession(pkgName, channelId, type, 0, (const char *)data, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Auth process data err");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)

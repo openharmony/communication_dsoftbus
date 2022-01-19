@@ -15,6 +15,7 @@
 
 #include "stream_manager.h"
 
+#include "session.h"
 #include "vtp_stream_socket.h"
 
 namespace Communication {

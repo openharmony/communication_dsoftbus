@@ -32,6 +32,8 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
 
 bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target);
 
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target);
+
 bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target);
 
 bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target);
@@ -43,6 +45,8 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
 
 bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num);
+
+bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value);
 
 #ifdef __cplusplus
 #if __cplusplus

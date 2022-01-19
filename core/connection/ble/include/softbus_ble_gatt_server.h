@@ -13,38 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef BLE_CONNECTION_INNER_H
-#define BLE_CONNECTION_INNER_H
+#ifndef BLE_GATT_SERVER_H
+#define BLE_GATT_SERVER_H
 
 #include "common_list.h"
 #include "softbus_adapter_ble_gatt_server.h"
+#include "softbus_ble_connection_inner.h"
 #include "softbus_conn_manager.h"
 
-#define MAX_CACHE_NUM_PER_CONN 3
-
-typedef struct {
-    int32_t isUsed;
-    int32_t timeStamp;
-    int32_t seq;
-    int32_t currentSize;
-    char *cache;
-} BleRecvCache;
-
-typedef struct {
-    ListNode node;
-    int32_t halConnId;
-    uint32_t connId;
-    SoftBusBtAddr btBinaryAddr;
-    ConnectionInfo info;
-    int32_t state;
-    int32_t refCount;
-    int32_t mtu;
-    int32_t peerType;
-    char peerDevId[UDID_BUF_LEN];
-    BleRecvCache recvCache[MAX_CACHE_NUM_PER_CONN];
-} BleConnectionInfo;
-
-BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId);
-int32_t GetBleAttrHandle(int32_t module);
+int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb);
+int32_t SoftBusGattServerStartService(void);
+int32_t SoftBusGattServerStopService(void);
+void SoftBusGattServerOnBtStateChanged(int state);
+int32_t SoftBusGattServerSend(int32_t halConnId, const char *data, int32_t len, int32_t module);
 
 #endif
