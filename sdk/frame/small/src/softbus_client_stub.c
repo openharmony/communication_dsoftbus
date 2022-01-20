@@ -98,7 +98,7 @@ static int InnerRegisterService(void)
         continue;
     }
 
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "InnerRegisterService success");
     return SOFTBUS_OK;
 }
 
