@@ -175,6 +175,7 @@ int OpenTcpServerSocket(const char *ip, int port)
 int OpenTcpClientSocket(const char *peerIp, const char *myIp, int port, bool isNonBlock)
 {
     if ((peerIp == NULL) || (port <= 0)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClientSocket invalid para, port=%d", port);
         return -1;
     }
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -304,6 +305,7 @@ static ssize_t OnRecvData(int fd, char *buf, size_t len, int timeout, int flags)
     if (timeout != 0) {
         int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
         if (err < 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data wait event err[%d]", err);
             return err;
         }
     }
@@ -313,6 +315,7 @@ static ssize_t OnRecvData(int fd, char *buf, size_t len, int timeout, int flags)
     if ((rc == -1) && (errno == EAGAIN)) {
         rc = 0;
     } else if (rc <= 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data fail errno[%d]", errno);
         rc = -1;
     }
     return rc;

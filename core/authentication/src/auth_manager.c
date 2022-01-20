@@ -459,6 +459,7 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "generate auth param failed");
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start auth device, enter hichain process");
     if (auth->hichain->authDevice(auth->authId, authParams, &g_hichainCallback) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authDevice failed");
         cJSON_free(authParams);
