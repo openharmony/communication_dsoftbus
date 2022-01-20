@@ -55,7 +55,7 @@ static int OpenTcpServer(const char *ip, int port)
         return SOFTBUS_ERR;
     }
     addr.sinFamily = SOFTBUS_AF_INET;
-    addr.sinPort = htons(port);
+    addr.sinPort = SoftBusHtoNs(port);
     int fd;
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
         SOFTBUS_SOCK_CLOEXEC, 0, &fd);
