@@ -100,6 +100,11 @@ if (defined(ohos_lite)) {
     sources += conn_common_src + trans_common_src
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/data\"" ]
     defines += [ "SOFTBUS_STANDARD_SYSTEM" ]
+
+    if (is_asan) {
+      defines += [ "ASAN_BUILD" ]
+    }
+
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
