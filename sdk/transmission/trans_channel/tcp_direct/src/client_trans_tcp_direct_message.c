@@ -85,7 +85,7 @@ static int32_t TransTdcSetPendingPacket(int32_t channelId, const char *data, uin
         return SOFTBUS_ERR;
     }
 
-    int32_t seq = (int32_t)ntohl(*(uint32_t *)data);
+    int32_t seq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
     if (SetPendingPacket(channelId, seq, PENDING_TYPE_DIRECT) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not match seq.[%d]", seq);
         return SOFTBUS_ERR;
@@ -108,7 +108,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     uint32_t tmpSeq;
     if (flags == FLAG_ACK) {
         finalSeq = *((int32_t *)data);
-        tmpSeq = htonl((uint32_t)finalSeq);
+        tmpSeq = SoftBusHtoNl((uint32_t)finalSeq);
         finalData = (char *)(&tmpSeq);
     }
 
