@@ -25,6 +25,8 @@
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 
+int32_t TransProxyAuthSessionDataLenCheck(uint32_t dataLen, int32_t type);
+
 int32_t TransProxyGetNewChanSeq(int32_t channelId);
 int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyCloseProxyChannel(int32_t channelId);

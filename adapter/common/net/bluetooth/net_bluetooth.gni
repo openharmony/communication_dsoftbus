@@ -21,8 +21,10 @@ adapter_ble_inc = [
 ]
 adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_server.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/adapter_bt_utils.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
 ]
+adapter_net_br_src = [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
 adapter_ble_deps = [ "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework:btframework" ]

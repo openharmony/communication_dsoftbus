@@ -22,6 +22,9 @@
 #define LOG_NAME_MAX_LEN 5
 #define LOG_PRINT_MAX_LEN 256
 
+// anonymize should mask more than half of the string
+#define EXPECTED_ANONYMIZED_TIMES 2
+
 static int32_t g_logLevel;
 
 typedef struct {
@@ -50,7 +53,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
         return;
     }
 
-    SoftbusGetConfig(SOFTBUS_INT_ADAPTER_LOG_LEVEL, (unsigned char*)&g_logLevel, sizeof(g_logLevel));
+    SoftbusGetConfig(SOFTBUS_INT_ADAPTER_LOG_LEVEL, (unsigned char *)&g_logLevel, sizeof(g_logLevel));
     if ((int32_t)level < g_logLevel) {
         return;
     }
@@ -72,4 +75,20 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
     SoftBusOutPrint(szStr, level);
 
     return;
+}
+
+const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
+{
+    if (target == NULL) {
+        return "NULL";
+    }
+    if (expectAnonymizedLength == 0) {
+        return "BADLENGTH";
+    }
+    size_t targetLen = strlen(target);
+    if (targetLen / expectAnonymizedLength < EXPECTED_ANONYMIZED_TIMES) {
+        return "TOOSHORT";
+    }
+
+    return target + (targetLen - expectAnonymizedLength);
 }

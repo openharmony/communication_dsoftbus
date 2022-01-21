@@ -33,7 +33,7 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, int32
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    if (info->appInfo.appType != APP_TYPE_NORMAL) {
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
     msgHead.myId = info->myId;
@@ -55,7 +55,9 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "handshake myId %d", msgHead.myId);
@@ -96,7 +98,9 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d",
         chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    if (chan->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
     payLoad = TransProxyPackHandshakeAckMsg(chan);
     if (payLoad == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack fail");
@@ -137,7 +141,9 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
     payLoadLen = strlen(payLoad) + 1;
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
 
     if (TransProxyPackMessage(&msgHead, connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive head fail");
@@ -169,7 +175,9 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     payLoadLen = strlen(payLoad) + 1;
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
 
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive ack head fail");
@@ -203,7 +211,9 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     payLoadLen = strlen(payLoad) + 1;
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
 
     if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset head fail");

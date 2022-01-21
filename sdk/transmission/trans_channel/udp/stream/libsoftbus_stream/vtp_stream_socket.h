@@ -56,7 +56,9 @@ public:
     bool CreateClient(IpAndPort &local, int streamType, const std::string &sessionKey) override;
     bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
         const std::string &sessionKey) override;
+
     bool CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey) override;
+
     void DestroyStreamSocket() override;
 
     bool Connect(const IpAndPort &remote) override;
@@ -160,13 +162,34 @@ private:
 
     void GetCryptErrorReason(void) const;
 
+    bool EnableBwEstimationAlgo(int streamFd, bool isServer) const;
+
+    bool EnableJitterDetectionAlgo(int streamFd) const;
+
+    void RegisterMetricCallback(bool isServer); /* register the metric callback function */
+
+    static void AddStreamSocketLock(int fd, std::mutex &streamsocketlock);
+
+    static void AddStreamSocketListener(int fd, std::shared_ptr<IStreamSocketListener> streamreceiver);
+
+    static void RemoveStreamSocketLock(int fd);
+
+    static void RemoveStreamSocketListener(int fd);
+
+    static int FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info);
+
+    void FillpAppStatistics();
+
+    static std::map<int, std::mutex &> g_streamSocketLockMap;
+    static std::map<int, std::shared_ptr<IStreamSocketListener>> g_streamReceiverMap;
+
     std::map<int, OptionFunc> optFuncMap_ {};
     static std::shared_ptr<VtpInstance> vtpInstance_;
     std::condition_variable configCv_;
     std::mutex streamSocketLock_;
     int scene_ = UNKNOWN_SCENE;
     int streamHdrSize_ = 0;
-    bool isDestoryed_ = false;
+    bool isDestroyed_ = false;
 };
 } // namespace SoftBus
 } // namespace Communication

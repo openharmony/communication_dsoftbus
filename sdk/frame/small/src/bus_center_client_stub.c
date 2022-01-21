@@ -16,7 +16,9 @@
 #include "bus_center_client_stub.h"
 
 #include <stdint.h>
+
 #include "client_bus_center_manager.h"
+#include "liteipc_adapter.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 

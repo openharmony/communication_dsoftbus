@@ -49,7 +49,7 @@
 extern "C" {
 #endif
 /**
- * @brief bussiness type of session
+ * @brief business type of session
  *
  * @since 1.0
  * @version 1.0
@@ -93,7 +93,7 @@ typedef enum  {
 /**
  * @brief session attribute.
  *
- * control the attribute of session
+ * control the attribute of session.
  *
  * @since 1.0
  * @version 1.0
@@ -144,9 +144,63 @@ typedef enum {
     QOS_EVENT_MAX
 } QosEvent;
 
+typedef enum {
+    WIFI_CHANNEL_QUALITY = 1,
+    FRAME_REALTIME_STATUS = 2,
+    BANDWIDTH_ESTIMATE_VALUE = 3,
+    JITTER_DETECTION_VALUE = 4,
+    STREAM_TRAFFIC_STASTICS = 5,
+} TransEnumEventType;
+
 typedef struct {
-    int type;
-    void *value;
+    int32_t channel;
+    int32_t score;
+} WifiChannelQuality;
+
+typedef struct {
+    int32_t streamId;
+    int32_t seqNum;
+    int32_t level;
+    int32_t transStatus;
+    int32_t interval;
+} FrameStatus;
+
+typedef struct {
+    uint32_t trend;
+    uint32_t rate;  /* kbps */
+} BandwidthDetection;
+
+typedef struct {
+    int32_t jitterLevel;
+    uint32_t bufferTime;  /* ms */
+} JitterEstimation;
+
+typedef struct {
+    uint64_t statisticsGotTime; /* time point that stream traficc statistics are obtained (ms) */
+    uint64_t periodRecvBits;
+    uint32_t pktNum;
+    uint32_t periodRecvPkts;
+    uint32_t periodRecvPktLoss;
+    uint32_t periodRecvRate; /* kbps */
+    uint64_t periodRecvRateBps; /* bps */
+    uint32_t periodRtt; /* ms */
+    uint32_t periodRecvPktLossHighPrecision; /* for example when lost rate is 1.10%, then 110 will returned */
+    uint32_t periodSendLostPkts;
+    uint32_t periodSendPkts;
+    uint32_t periodSendPktLossHighPrecision; /* for example when lost rate is 1.10%, then 110 will returned */
+    uint64_t periodSendBits;
+    uint64_t periodSendRateBps; /* bps */
+} StreamStatistics;
+
+typedef struct {
+    TransEnumEventType type;
+    union {
+        WifiChannelQuality wifiChannelInfo;
+        FrameStatus frameStatusInfo;
+        BandwidthDetection bandwidthInfo;
+        JitterEstimation jitterInfo;
+        StreamStatistics appStatistics;
+    } info;
 } QosTv;
 
 /**
@@ -213,6 +267,18 @@ typedef struct {
     void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext,
         const StreamFrameInfo *param);
 
+    /**
+     * @brief Called when QoS information is retrieved.
+     *
+     * This function is used to notify that QoS information is retrieved.
+     *
+     * @param sessionId Indicates the session ID.
+     * @param eventId Indicates the type of QoS information, e.g., channel quality and stream quality
+     * @param tvCount Indicates the number of structure returned in the fourth parameters, i.e., tvList.
+     * @param tvList Indicates the detailed information of data transmission.
+     * @since 1.0
+     * @version 1.0
+     */
     void (*OnQosEvent)(int sessionId, int eventId, int tvCount, const QosTv *tvList);
 } ISessionListener;
 

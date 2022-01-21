@@ -110,7 +110,7 @@ typedef struct {
 typedef struct {
     void (*OnScanStart)(int listenerId, int status);
     void (*OnScanStop)(int listenerId, int status);
-    void (*OnScanResult)(int listenerId, SoftBusBleScanResult *scanResultdata);
+    void (*OnScanResult)(int listenerId, const SoftBusBleScanResult *scanResultdata);
 } SoftBusScanListener;
 
 typedef struct {
