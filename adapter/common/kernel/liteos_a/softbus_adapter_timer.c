@@ -104,7 +104,7 @@ int SoftBusSleepMs(unsigned int ms)
     tm.tv_usec = (ms % MS_PER_SECOND) * US_PER_MSECOND;
 
     do {
-        ret = SoftBusSocketSelect(0, NULL, NULL, NULL, &tm);
+        ret = select(0, NULL, NULL, NULL, &tm);
     } while ((ret == -1) && (errno == EINTR));
 
     return SOFTBUS_ERR;

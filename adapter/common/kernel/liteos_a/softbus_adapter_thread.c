@@ -118,11 +118,11 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
     ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexDestroy failed, ret[%{public}d]", ret);
-        SoftBusFree(mutex);
+        SoftBusFree((void *)*mutex);
         return SOFTBUS_ERR;
     }
 
-    SoftBusFree(mutex);
+    SoftBusFree((void *)*mutex);
     return SOFTBUS_OK;
 }
 
@@ -261,7 +261,6 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
 int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)
     (void *), void *arg)
 {
-    HILOG_INFO(SOFTBUS_HILOG_ID, "Wherecome to ThreadCreate");
     if (thread == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");
         return SOFTBUS_INVALID_PARAM;
@@ -301,7 +300,6 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
         }
     }
 
-    HILOG_INFO(SOFTBUS_HILOG_ID, "ThreadCreate is done");
     return SOFTBUS_OK;
 }
 
@@ -439,10 +437,10 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond)
     ret = pthread_cond_destroy((pthread_cond_t *)*cond);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondDestroy failed, ret[%{public}d]", ret);
-        SoftBusFree(cond);
+        SoftBusFree((void *)*cond);
         return SOFTBUS_ERR;
     }
 
-    SoftBusFree(cond);
+    SoftBusFree((void *)*cond);
     return SOFTBUS_OK;
 }

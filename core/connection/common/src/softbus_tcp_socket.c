@@ -14,18 +14,13 @@
  */
 
 #include "softbus_tcp_socket.h"
-
-#include <arpa/inet.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <securec.h>
 #include <sys/select.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -37,7 +32,7 @@
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
 {
-    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set SO_REUSEPORT");
         return -1;
@@ -48,7 +43,7 @@ static int SetReusePort(int fd, int on)
 
 static int SetReuseAddr(int fd, int on)
 {
-    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR");
         return -1;
@@ -58,9 +53,9 @@ static int SetReuseAddr(int fd, int on)
 
 static int SetNoDelay(int fd, int on)
 {
-    int rc = SoftBusSocketSetOpt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_NODELAY, &on, sizeof(on));
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set TCP_NODELAY");
         return -1;
     }
     return 0;
@@ -129,22 +124,20 @@ static int WaitEvent(int fd, short events, int timeout)
 
 static int BindLocalIP(int fd, const char *localIP, uint16_t port)
 {
-    struct sockaddr_in addr;
+    SoftBusSockAddrIn addr;
 
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
     }
 
-    addr.sin_family = AF_INET;
-    int rc = inet_pton(AF_INET, localIP, &addr.sin_addr);
-    if (rc <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "inet_pton rc=%d", rc);
+    addr.sinFamily = SOFTBUS_AF_INET;
+    int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, localIP, &addr.sinAddr);
+    if (rc != SOFTBUS_ADAPTER_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusInetPtoN rc=%d", rc);
         return SOFTBUS_ERR;
     }
-    addr.sin_port = htons(port);
-
-    errno = 0;
-    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (struct sockaddr *)&addr, sizeof(addr)));
+    addr.sinPort = SoftBusHtoNs(port);
+    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "bind fd=%d,rc=%d", fd, rc);
         return SOFTBUS_ERR;
@@ -152,9 +145,9 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
     return SOFTBUS_OK;
 }
 
-int32_t SetIpTos(int fd, uint8_t tos)
+int32_t SetIpTos(int fd, uint32_t tos)
 {
-    int rc = SoftBusSocketSetOpt(fd, IPPROTO_IP, IP_TOS, &tos, sizeof(tos));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &tos, sizeof(tos));
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set tos failed");
         return SOFTBUS_TCP_SOCKET_ERR;
@@ -169,7 +162,7 @@ int32_t OpenTcpServerSocket(const char *ip, int32_t port)
     }
 
     int fd;
-    int ret = SoftBusSocketCreate(AF_INET, SOCK_STREAM, 0, (int32_t *)&fd);
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d", fd);
         return -1;
@@ -193,7 +186,7 @@ int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, 
     }
 
     int fd;
-    int ret = SoftBusSocketCreate(AF_INET, SOCK_STREAM, 0, &fd);
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
         return -1;
@@ -214,17 +207,16 @@ int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, 
             return -1;
         }
     }
-    struct sockaddr_in addr;
+    SoftBusSockAddrIn addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
     }
-    addr.sin_family = AF_INET;
-    inet_pton(AF_INET, peerIp, &addr.sin_addr);
-    addr.sin_port = htons(port);
-    errno = 0;
-    int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (struct sockaddr *)&addr, sizeof(addr)));
-    if ((rc == SOFTBUS_ERR) && (errno != EINPROGRESS)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d, errno=%d", fd, rc, errno);
+    addr.sinFamily = SOFTBUS_AF_INET;
+    SoftBusInetPtoN(SOFTBUS_AF_INET, peerIp, &addr.sinAddr);
+    addr.sinPort = SoftBusHtoNs(port);
+    int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
+    if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
         TcpShutDown(fd);
         return -1;
     }
@@ -256,15 +248,15 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 
 int32_t GetTcpSockPort(int32_t fd)
 {
-    struct sockaddr_in addr;
-    socklen_t addrLen = sizeof(addr);
+    SoftBusSockAddrIn addr;
+    int32_t addrLen = sizeof(addr);
 
-    int rc = SoftBusSocketGetLocalName(fd, (struct sockaddr *)&addr, (int *)&addrLen);
+    int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr, &addrLen);
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,GetTcpSockPort rc=%d", fd, rc);
         return rc;
     }
-    return ntohs(addr.sin_port);
+    return SoftBusNtoHs(addr.sinPort);
 }
 
 ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
@@ -284,9 +276,8 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
     }
     ssize_t bytes = 0;
     while (1) {
-        errno = 0;
         ssize_t rc = TEMP_FAILURE_RETRY(SoftBusSocketSend(fd, &buf[bytes], len - bytes, 0));
-        if ((rc == -1) && (errno == EAGAIN)) {
+        if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
             continue;
         } else if (rc <= 0) {
             if (bytes == 0) {
@@ -327,9 +318,8 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         }
     }
 
-    errno = 0;
     ssize_t rc = TEMP_FAILURE_RETRY(SoftBusSocketRecv(fd, buf, len, flags));
-    if ((rc == -1) && (errno == EAGAIN)) {
+    if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
         rc = 0;
     } else if (rc <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data fail errno[%d]", errno);
@@ -355,7 +345,7 @@ void TcpShutDown(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);
-        SoftBusSocketShutDown(fd, SHUT_RDWR);
+        SoftBusSocketShutDown(fd, SOFTBUS_SHUT_RDWR);
         SoftBusSocketClose(fd);
     }
 }
@@ -372,21 +362,22 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
     int32_t enable;
     if (seconds > 0) {
         enable = 1;
-        rc = SoftBusSocketSetOpt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &seconds, sizeof(seconds));
+        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &seconds, sizeof(seconds));
         if (rc != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set TCP_KEEPIDLE");
             return -1;
         }
 
         int32_t keepAliveCnt = KEEP_ALIVE_COUNT;
-        rc = SoftBusSocketSetOpt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepAliveCnt, sizeof(keepAliveCnt));
+        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCnt, sizeof(keepAliveCnt));
         if (rc != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set TCP_KEEPCNT");
             return -1;
         }
 
         int32_t keepAliveIntvl = 1;
-        rc = SoftBusSocketSetOpt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepAliveIntvl, sizeof(keepAliveIntvl));
+        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl,
+            sizeof(keepAliveIntvl));
         if (rc != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set TCP_KEEPINTVL");
             return -1;
@@ -395,7 +386,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
         enable = 0;
     }
 
-    rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+    rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set SO_KEEPALIVE");
         return -1;
