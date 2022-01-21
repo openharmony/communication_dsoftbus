@@ -15,6 +15,7 @@
 
 #include "softbus_adapter_timer.h"
 
+#include <sys/time.h>
 #include "cmsis_os2.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
@@ -60,3 +61,18 @@ int SoftBusSleepMs(unsigned int ms)
     osDelay(ms * osKernelGetTickFreq() / MS_PER_SECOND);
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
+{
+    if (sysTime == NULL) {
+        HILOG_INFO(SOFTBUS_HILOG_ID, "sysTime is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct timeval time = {0};
+    gettimeofday(&time, NULL);
+
+    sysTime->sec = time.tv_sec;
+    sysTime->usec = time.tv_usec;
+    return SOFTBUS_OK;
+}
+

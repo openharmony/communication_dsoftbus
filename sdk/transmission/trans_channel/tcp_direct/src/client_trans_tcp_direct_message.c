@@ -23,6 +23,7 @@
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -85,7 +86,7 @@ static int32_t TransTdcSetPendingPacket(int32_t channelId, const char *data, uin
         return SOFTBUS_ERR;
     }
 
-    int32_t seq = (int32_t)ntohl(*(uint32_t *)data);
+    int32_t seq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
     if (SetPendingPacket(channelId, seq, PENDING_TYPE_DIRECT) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not match seq.[%d]", seq);
         return SOFTBUS_ERR;
@@ -108,7 +109,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     uint32_t tmpSeq;
     if (flags == FLAG_ACK) {
         finalSeq = *((int32_t *)data);
-        tmpSeq = htonl((uint32_t)finalSeq);
+        tmpSeq = SoftBusHtoNl((uint32_t)finalSeq);
         finalData = (char *)(&tmpSeq);
     }
 
@@ -141,7 +142,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    uint8_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
+    uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
         return SOFTBUS_TCP_SOCKET_ERR;
     }
@@ -179,13 +180,11 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
         return SOFTBUS_ERR;
     }
-
     int32_t ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "postBytes failed.");
         return ret;
     }
-
     return ProcPendingPacket(channelId, channel.detail.sequence, PENDING_TYPE_DIRECT);
 }
 

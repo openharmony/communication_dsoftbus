@@ -15,14 +15,10 @@
 
 #include "file_adapter.h"
 
-#include <arpa/inet.h>
-#include <errno.h>
-#include <netinet/in.h>
 #include <securec.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <unistd.h>
 
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -31,7 +27,7 @@
 
 static int SetReuseAddr(int fd, int on)
 {
-    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR error");
         return SOFTBUS_ERR;
@@ -41,7 +37,7 @@ static int SetReuseAddr(int fd, int on)
 
 static int SetReusePort(int fd, int on)
 {
-    int rc = SoftBusSocketSetOpt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+    int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEPORT error");
         return SOFTBUS_ERR;
@@ -51,19 +47,18 @@ static int SetReusePort(int fd, int on)
 
 static int OpenTcpServer(const char *ip, int port)
 {
-    struct sockaddr_in addr;
+    SoftBusSockAddrIn addr;
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
-    errno = 0;
-    int rc = inet_pton(AF_INET, ip, &addr.sin_addr);
-    if (rc <= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d:%s", rc, strerror(errno));
+    int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addr.sinAddr);
+    if (rc != SOFTBUS_ADAPTER_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d", rc);
         return SOFTBUS_ERR;
     }
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-
+    addr.sinFamily = SOFTBUS_AF_INET;
+    addr.sinPort = SoftBusHtoNs(port);
     int fd;
-    int ret = SoftBusSocketCreate(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, &fd);
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
+        SOFTBUS_SOCK_CLOEXEC, 0, &fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Create error");
         return SOFTBUS_ERR;
@@ -71,8 +66,8 @@ static int OpenTcpServer(const char *ip, int port)
 
     (void)SetReuseAddr(fd, 1);
     (void)SetReusePort(fd, 1);
-    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (struct sockaddr *)&addr, sizeof(addr)));
-    if (rc != SOFTBUS_OK) {
+    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
+    if (rc != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Bind error");
         TcpShutDown(fd);
         return SOFTBUS_ERR;
@@ -103,7 +98,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_port = port;
-    localAddr.sin_addr.s_addr = ntohl(inet_addr(myIP));
+    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIP));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);
@@ -127,7 +122,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_port = peerPort;
-    localAddr.sin_addr.s_addr = ntohl(inet_addr(peerIp));
+    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(peerIp));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int32_t sessionId = NSTACKX_DFileClient(&localAddr, addrLen, key, keyLen, msgReceiver);

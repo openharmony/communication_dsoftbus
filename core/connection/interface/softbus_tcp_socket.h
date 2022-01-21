@@ -16,12 +16,12 @@
 #ifndef SOFTBUS_TCP_SOCKET_H
 #define SOFTBUS_TCP_SOCKET_H
 
-#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 
+#include "softbus_adapter_errcode.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -36,7 +36,7 @@ extern "C" {
     {   \
     long int __result; \
     do __result = (long int) (expression); \
-    while ((__result == -1L) && (errno == EINTR)); \
+    while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
     __result; \
     } \
     ) \
@@ -57,7 +57,7 @@ ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void CloseTcpFd(int32_t fd);
 void TcpShutDown(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
-int32_t SetIpTos(int fd, uint8_t tos);
+int32_t SetIpTos(int fd, uint32_t tos);
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 
 #ifdef __cplusplus
