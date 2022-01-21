@@ -15,6 +15,7 @@
 #include "softbus_adapter_ble_gatt.h"
 
 #include <pthread.h>
+#include "adapter_bt_utils.h"
 #include "ohos_bt_def.h"
 #include "ohos_bt_gap.h"
 #include "ohos_bt_gatt.h"

@@ -14,6 +14,7 @@
  */
 
 #include "client_trans_tcp_direct_message.h"
+
 #include <arpa/inet.h>
 #include <securec.h>
 

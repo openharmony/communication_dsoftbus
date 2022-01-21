@@ -81,6 +81,18 @@ public:
         }
     }
 
+    void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList)
+    {
+        if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnQosEvent for channelId = %ld",
+                adaptor_->GetChannelId());
+            adaptor_->GetListenerCallback()->OnQosEvent(adaptor_->GetChannelId(), eventId, tvCount, tvList);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "Get ListenerCallback by StreamAdaptor is failed, channelId = %ld", adaptor_->GetChannelId());
+        }
+    }
+
 private:
     std::shared_ptr<StreamAdaptor> adaptor_ = nullptr;
 };

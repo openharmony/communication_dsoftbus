@@ -17,7 +17,7 @@
     <systemability> <!-- Declare a system ability and its profile -->
         <name>4700</name> <!-- Declare the id of system ability. Must be same with system_ability_definition.h -->
         <libpath>libsoftbus_server.z.so</libpath> <!-- Declare the path of .so file which includes the system ability; Note: 1 .so file can have 1 to N system abilities. -->
-        <run-on-create>true</run-on-create> <!-- "true" means the system ability would start imediately, "false" means the system ability would start on demand. -->
+        <run-on-create>true</run-on-create> <!-- "true" means the system ability would start immediately, "false" means the system ability would start on demand. -->
         <distributed>false</distributed> <!-- "true" means the system ability supports distributed scheduling while "false" is not. -->
         <dump-level>1</dump-level> <!-- Declare the dump level. 1-high; 2-media; 3-low -->
     </systemability>

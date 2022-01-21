@@ -14,12 +14,27 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 libsoftbus_stream_sdk_path = "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream"
 
+dstream_native_source_path = rebase_path("$dsoftbus_root_path")
+dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
+enhanced = exec_script(
+        "$dsoftbus_root_path/run_shell_cmd.py",
+        [ "cd $dstream_native_source_path; if [ -f $dstream_dep_file ]; then echo true; else echo false; fi" ],
+        "value")
+
 libsoftbus_stream_inc = [
   "$libsoftbus_stream_sdk_path/include",
-  "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
   "//third_party/cJSON",
   "//third_party/openssl/include",
 ]
+
+if (enhanced) {
+  libsoftbus_stream_inc +=
+      [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/" ]
+} else {
+  libsoftbus_stream_inc +=
+      [ "$dsoftbus_root_path/components/nstackx/fillp/include/" ]
+}
+
 libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/raw_stream_data.cpp",
   "$libsoftbus_stream_sdk_path/stream_common_data.cpp",
@@ -30,12 +45,25 @@ libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/vtp_instance.cpp",
   "$libsoftbus_stream_sdk_path/vtp_stream_socket.cpp",
 ]
+
 if (defined(ohos_lite)) {
-  libsoftbus_stream_deps =
-      [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
+  if (enhanced) {
+    libsoftbus_stream_deps =
+        [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
+  } else {
+    libsoftbus_stream_deps =
+        [ "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open" ]
+  }
 } else {
-  libsoftbus_stream_deps = [
-    "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
-    "//utils/native/base:utilsecurec_shared",
-  ]
+  if (enhanced) {
+    libsoftbus_stream_deps = [
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+  } else {
+    libsoftbus_stream_deps = [
+      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
+      "//utils/native/base:utilsecurec_shared",
+    ]
+  }
 }

@@ -58,6 +58,11 @@ typedef struct {
     char *uuid;
 } SoftBusBtUuid;
 
+typedef enum {
+    SOFTBUS_BT_CONNECT = 0x01,
+    SOFTBUS_BT_DISCONNECT = 0x03
+} SoftBusBtConnectState;
+
 typedef struct {
     void (*OnBtStateChanged)(int listenerId, int state);
 } SoftBusBtStateListener;
