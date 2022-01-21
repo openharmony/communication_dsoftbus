@@ -22,7 +22,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "endian.h" /* liteos_m htons*/
+#include "endian.h" /* liteos_m htons */
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_log.h"
 #include "softbus_def.h"
