@@ -648,9 +648,10 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         auth->encryptLen = len;
     }
     if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
-        auth->encryptInfoStatus == KEY_GENERATEG_STATE && auth->cb->onKeyGenerated != NULL) {
-        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
+        auth->encryptInfoStatus == KEY_GENERATEG_STATE &&
+        auth->status == IN_SYNC_PROGRESS && auth->cb->onKeyGenerated != NULL) {
         auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
+        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
         return;
     }
 
