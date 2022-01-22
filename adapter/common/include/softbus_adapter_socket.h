@@ -17,7 +17,6 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <stdint.h>
-#include <sys/select.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
@@ -68,6 +67,9 @@ extern "C" {
 
 #define SOFTBUS_O_NONBLOCK (04000)
 
+/* select.h */
+#define SOFTBUS_FD_SETSIZE (1024)
+
 /* netinet/in.h */
 typedef struct {
     unsigned short saFamily; /* address family */
@@ -85,6 +87,11 @@ typedef struct {
     unsigned char sinZero[ADDR_IN_RESER_SIZE]; /* Same size as struct sockaddr */
 } SoftBusSockAddrIn;
 
+typedef struct {
+    uint32_t fdsCount;
+    unsigned long fdsBits[SOFTBUS_FD_SETSIZE / 8 / sizeof(long)];
+} SoftBusFdSet;
+
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
 int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName,  const void *optVal, int32_t optLen);
 int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  void *optVal, int32_t *optLen);
@@ -97,12 +104,12 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
     int32_t *acceptFd);
 int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen);
 
-void SoftBusSocketFdZero(fd_set *set);
-void SoftBusSocketFdSet(int32_t socketFd, fd_set *set);
-void SoftBusSocketFdClr(int32_t socketFd, fd_set *set);
-int32_t SoftBusSocketFdIsset(int32_t socketFd, fd_set *set);
+void SoftBusSocketFdZero(SoftBusFdSet *set);
+void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set);
+void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set);
+int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set);
 
-int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set
+int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
     *exceptFds, struct timeval *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, void *argp);

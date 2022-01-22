@@ -91,7 +91,7 @@ static int WaitEvent(int fd, short events, int timeout)
     int rc = 0;
     switch (events) {
         case SOFTBUS_SOCKET_OUT: {
-                fd_set writeSet;
+                SoftBusFdSet writeSet;
                 SoftBusSocketFdZero(&writeSet);
                 SoftBusSocketFdSet(fd, &writeSet);
                 rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
@@ -104,7 +104,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 break;
             }
         case SOFTBUS_SOCKET_IN: {
-                fd_set readSet;
+                SoftBusFdSet readSet;
                 SoftBusSocketFdZero(&readSet);
                 SoftBusSocketFdSet(fd, &readSet);
                 rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
