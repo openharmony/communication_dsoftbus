@@ -40,7 +40,7 @@ int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -76,7 +76,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -92,7 +92,7 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 
 int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -109,7 +109,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -342,7 +342,7 @@ SoftBusThread SoftBusThreadGetSelf(void)
 /* cond */
 int32_t SoftBusCondInit(SoftBusCond *cond)
 {
-    if (cond == NULL) {
+    if ((cond == NULL) || (*cond == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -366,7 +366,7 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
 
 int32_t SoftBusCondSignal(SoftBusCond *cond)
 {
-    if (cond == NULL) {
+    if ((cond == NULL) || (*cond == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -383,7 +383,7 @@ int32_t SoftBusCondSignal(SoftBusCond *cond)
 
 int32_t SoftBusCondBroadcast(SoftBusCond *cond)
 {
-    if (cond == NULL) {
+    if ((cond == NULL) || (*cond == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -400,8 +400,13 @@ int32_t SoftBusCondBroadcast(SoftBusCond *cond)
 
 int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time)
 {
-    if (cond == NULL) {
+    if ((cond == NULL) || (*cond == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((mutex == NULL) || (*mutex == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -428,7 +433,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 
 int32_t SoftBusCondDestroy(SoftBusCond *cond)
 {
-    if (cond == NULL) {
+    if ((cond == NULL) || (*cond == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }

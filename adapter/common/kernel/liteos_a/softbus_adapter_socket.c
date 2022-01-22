@@ -20,6 +20,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 
 #include "endian.h" /* liteos_m htons */
@@ -159,54 +160,54 @@ int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int3
     return SOFTBUS_ADAPTER_OK;
 }
 
-void SoftBusSocketFdZero(fd_set *set)
+void SoftBusSocketFdZero(SoftBusFdSet *set)
 {
     if (set == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
 
-    FD_ZERO(set);
+    FD_ZERO(set->fdsBits);
 }
 
-void SoftBusSocketFdSet(int32_t socketFd, fd_set *set)
+void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
 {
     if (set == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
 
-    FD_SET(socketFd, set);
+    FD_SET(socketFd, set->fdsBits);
 }
 
-void SoftBusSocketFdClr(int32_t socketFd, fd_set *set)
+void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set)
 {
     if (set == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
 
-    FD_CLR(socketFd, set);
+    FD_CLR(socketFd, set->fdsBits);
 }
 
-int32_t SoftBusSocketFdIsset(int32_t socketFd, fd_set *set)
+int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
 {
     if (set == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return 0;
     }
 
-    if (FD_ISSET(socketFd, set) == true) {
+    if (FD_ISSET(socketFd, set->fdsBits) == true) {
         return 1;
     } else {
         return 0;
     }
 }
 
-int32_t SoftBusSocketSelect(int32_t nfds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval
-    *timeOut)
+int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
+    *exceptFds, struct timeval *timeOut)
 {
-    int32_t ret = select(nfds, readFds, writeFds, exceptFds, timeOut);
+    int32_t ret = select(nfds, readFds->fdsBits, writeFds->fdsBits, exceptFds->fdsBits, timeOut);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));
         return GetErrorCode();

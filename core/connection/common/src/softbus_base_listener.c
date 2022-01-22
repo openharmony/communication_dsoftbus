@@ -15,7 +15,7 @@
 
 #include "softbus_base_listener.h"
 
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 #include <securec.h>
 #include <unistd.h>
 
@@ -74,18 +74,18 @@ typedef struct {
 
 static SoftbusListenerNode g_listenerList[UNUSE_BUTT];
 static ThreadPool *g_threadPool = NULL;
-static fd_set g_readSet;
-static fd_set g_writeSet;
-static fd_set g_exceptSet;
+static SoftBusFdSet g_readSet;
+static SoftBusFdSet g_writeSet;
+static SoftBusFdSet g_exceptSet;
 static int32_t g_maxFd;
 static SoftBusSetLock g_fdSetLock = {
     .lockInit = false,
 };
 static bool g_fdSetInit = false;
 
-static int32_t FdCopy(const fd_set *dest, const fd_set *src)
+static int32_t FdCopy(const SoftBusFdSet *dest, const SoftBusFdSet *src)
 {
-    return memcpy_s((void *)dest, sizeof(fd_set), (void *)src, sizeof(fd_set));
+    return memcpy_s((void *)dest, sizeof(SoftBusFdSet), (void *)src, sizeof(SoftBusFdSet));
 }
 
 static int32_t MaxFd(int32_t fd1, int32_t fd2)
@@ -346,7 +346,7 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
     return SOFTBUS_OK;
 }
 
-static void ProcessData(fd_set *readSet, fd_set *writeSet, fd_set *exceptSet)
+static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
         SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
@@ -386,7 +386,7 @@ static void ProcessData(fd_set *readSet, fd_set *writeSet, fd_set *exceptSet)
     }
 }
 
-static int32_t SetSelect(fd_set *readSet, fd_set *writeSet, fd_set *exceptSet)
+static int32_t SetSelect(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
@@ -422,9 +422,9 @@ static int32_t SelectThread(void)
         sizeof(timeOut)) == SOFTBUS_OK) {
         tv.tv_usec = (long)timeOut;
     }
-    fd_set readSet;
-    fd_set writeSet;
-    fd_set exceptSet;
+    SoftBusFdSet readSet;
+    SoftBusFdSet writeSet;
+    SoftBusFdSet exceptSet;
     SoftBusSocketFdZero(&readSet);
     SoftBusSocketFdZero(&writeSet);
     SoftBusSocketFdZero(&exceptSet);
