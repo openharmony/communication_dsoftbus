@@ -17,6 +17,7 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <stdint.h>
+#include <sys/select.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
@@ -112,7 +113,7 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set);
 int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
     *exceptFds, struct timeval *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
-int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, void *argp);
+int32_t SoftBusFcntl(int32_t socketFd, long cmd, void *argp);
 
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
