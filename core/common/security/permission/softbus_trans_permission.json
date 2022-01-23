@@ -52,7 +52,7 @@
   {
     "SESSION_NAME": "objectstoreDB-*",
     "REGEXP": "true",
-    "DEVID": "UUID",
+    "DEVID": "UDID",
     "SEC_LEVEL": "public",
     "APP_INFO": [
       {
