@@ -34,7 +34,6 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//third_party/mbedtls/include",
     "//utils/native/base/include",
     "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
   ]
@@ -47,10 +46,7 @@ if (defined(ohos_lite)) {
         include_dirs +=
             [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
       }
-      cflags = [
-        "-Wall",
-        "-fPIC",
-      ]
+      cflags = [ "-Wall" ]
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter_weak.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
@@ -63,7 +59,10 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
-      deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+      deps = [
+        "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite",
+        "//third_party/mbedtls",
+      ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
@@ -94,7 +93,7 @@ if (defined(ohos_lite)) {
         "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
-      deps += [ "//third_party/mbedtls:mbedtls_shared" ]
+      deps += [ "//third_party/mbedtls" ]
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
@@ -112,7 +111,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
-      "//third_party/mbedtls/include",
       "//utils/native/base/include",
     ]
     sources = [
@@ -130,7 +128,7 @@ if (defined(ohos_lite)) {
     public_deps = [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/mbedtls:mbedtls_shared",
+      "//third_party/mbedtls",
       "//utils/native/base:utils",
     ]
     public_configs = [ ":config_adapter_common" ]

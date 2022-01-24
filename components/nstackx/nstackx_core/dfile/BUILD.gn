@@ -49,8 +49,6 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_util/interface",
         "$NSTACKX_ROOT/nstackx_util/platform/liteos",
         "//third_party/bounds_checking_function/include/",
-        "//third_party/mbedtls/include",
-        "//third_party/mbedtls/include/mbedtls/",
       ]
       sources = [
         "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_dfile.c",
@@ -72,6 +70,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+        "//third_party/mbedtls",
       ]
     } else if (ohos_kernel_type == "linux") {
       configs += [ ":dfile_linux_config" ]
@@ -83,8 +82,6 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_util/interface",
         "$NSTACKX_ROOT/nstackx_util/platform/unix",
         "//third_party/bounds_checking_function/include/",
-        "//third_party/mbedtls/include",
-        "//third_party/mbedtls/include/mbedtls/",
       ]
       sources = [
         "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile.c",
@@ -106,6 +103,7 @@ if (defined(ohos_lite)) {
       deps = [
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+        "//third_party/mbedtls",
       ]
     }
   }
@@ -126,8 +124,6 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_core",
       "$NSTACKX_ROOT/nstackx_util/interface",
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
-      "//third_party/mbedtls/include",
-      "//third_party/mbedtls/include/mbedtls/",
       "//utils/native/base/include/",
     ]
     sources = [
@@ -150,6 +146,7 @@ if (defined(ohos_lite)) {
     deps = [
       "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+      "//third_party/mbedtls",
       "//utils/native/base:utilsecurec_shared",
     ]
     part_name = "dsoftbus_standard"
