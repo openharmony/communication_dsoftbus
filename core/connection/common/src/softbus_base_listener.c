@@ -15,7 +15,6 @@
 
 #include "softbus_base_listener.h"
 
-//#include <arpa/inet.h>
 #include <securec.h>
 #include <unistd.h>
 
