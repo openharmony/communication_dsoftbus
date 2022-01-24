@@ -56,7 +56,11 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     if (mutexAttr == NULL) {
+#ifndef __LITEOS_M__
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+#else
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+#endif
     } else if (mutexAttr->type == SOFTBUS_MUTEX_NORMAL) {
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
     } else if (mutexAttr->type == SOFTBUS_MUTEX_RECURSIVE) {
@@ -76,7 +80,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == 0)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -92,7 +96,7 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 
 int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == 0)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -109,7 +113,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
-    if (mutex == NULL) {
+    if ((mutex == NULL) || (*mutex == 0)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -134,7 +138,11 @@ int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr)
         return SOFTBUS_INVALID_PARAM;
     }
 
+#ifndef __LITEOS_M__
     threadAttr->policy = SOFTBUS_SCHED_OTHER;
+#else
+    threadAttr->policy = SOFTBUS_SCHED_RR;
+#endif
     threadAttr->detachState = SOFTBUS_THREAD_JOINABLE;
     threadAttr->stackSize = 0;
     threadAttr->prior = SOFTBUS_PRIORITY_DEFAULT;
