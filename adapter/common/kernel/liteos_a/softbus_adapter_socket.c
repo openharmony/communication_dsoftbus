@@ -167,12 +167,9 @@ void SoftBusSocketFdZero(SoftBusFdSet *set)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
-    fd_set tempSet;
-    if (memcpy_s(&tempSet, sizeof(tempSet), set->fdsBits, sizeof(set->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s FD_ZERO error");
-        return;
-    }
-    FD_ZERO(&tempSet);
+
+    FD_ZERO((fd_set *)set->fdsBits);
+
 }
 
 void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
@@ -181,12 +178,8 @@ void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
-    fd_set tempSet;
-    if (memcpy_s(&tempSet, sizeof(tempSet), set->fdsBits, sizeof(set->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s FD_SET error");
-        return;
-    }
-    FD_SET(socketFd, &tempSet);
+
+    FD_SET(socketFd, (fd_set *)set->fdsBits);
 }
 
 void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set)
@@ -195,12 +188,10 @@ void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return;
     }
-    fd_set tempSet;
-    if (memcpy_s(&tempSet, sizeof(tempSet), set->fdsBits, sizeof(set->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s FD_CLR error");
-        return;
-    }
-    FD_CLR(socketFd, &tempSet);
+
+    FD_CLR(socketFd, (fd_set *)set->fdsBits);
+
+;
 }
 
 int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
@@ -209,12 +200,8 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set is null");
         return 0;
     }
-    fd_set tempSet;
-    if (memcpy_s(&tempSet, sizeof(tempSet), set->fdsBits, sizeof(set->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s FD_ISSET error");
-        return 0;
-    }
-    if (FD_ISSET(socketFd, &tempSet) == true) {
+
+    if (FD_ISSET(socketFd, (fd_set *)set->fdsBits) == true) {
         return 1;
     } else {
         return 0;
@@ -224,24 +211,27 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
 int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
     *exceptFds, struct timeval *timeOut)
 {
-    fd_set tempReadSet;
-    fd_set tempWriteSet;
-    fd_set tempExceptSet;
-    if (memcpy_s(&tempReadSet, sizeof(tempReadSet), readFds->fdsBits, sizeof(readFds->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s ReadSet error");
+    if (timeOut == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timeOut is null");
         return SOFTBUS_ADAPTER_ERR;
+
     }
-    if (memcpy_s(&tempWriteSet, sizeof(tempWriteSet), writeFds->fdsBits, sizeof(writeFds->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s WriteSet error");
-        return SOFTBUS_ADAPTER_ERR;
+    fd_set * tempReadSet = NULL;
+    fd_set * tempWriteSet = NULL;
+    fd_set * tempExceptSet = NULL;
+
+    if (readFds != NULL) {
+        tempReadSet = (fd_set *)readFds->fdsBits;
     }
-    if (memcpy_s(&tempExceptSet, sizeof(tempExceptSet), exceptFds->fdsBits, sizeof(exceptFds->fdsBits)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s ExceptSet error");
-        return SOFTBUS_ADAPTER_ERR;
+    if (writeFds != NULL) {
+        tempWriteSet = (fd_set *)writeFds->fdsBits;
     }
-    int32_t ret = select(nfds, &tempReadSet, &tempWriteSet, &tempWriteSet, timeOut);
+    if (exceptFds != NULL) {
+        tempExceptSet = (fd_set *)exceptFds->fdsBits;
+    }
+    int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, timeOut);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));        
         return GetErrorCode();
     }
 
@@ -259,9 +249,9 @@ int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp)
     return ret;
 }
 
-int32_t SoftBusFcntl(int32_t socketFd, long cmd, void *argp)
+int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag)
 {
-    int32_t ret = fcntl(socketFd, cmd, argp);
+    int32_t ret = fcntl(socketFd, cmd, flag);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fcntl : %{public}s", strerror(errno));
         return SOFTBUS_ADAPTER_ERR;

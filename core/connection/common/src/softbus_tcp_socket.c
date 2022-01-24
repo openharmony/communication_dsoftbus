@@ -227,7 +227,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     if (fd < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t flags = SoftBusFcntl(fd, SOFTBUS_F_GETFL, 0);
+    int32_t flags = SoftBusSocketFcntl(fd, SOFTBUS_F_GETFL, 0);
     if (flags < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
         return SOFTBUS_ERR;
@@ -242,7 +242,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);
         return SOFTBUS_OK;
     }
-    return fcntl(fd, F_SETFL, flags);
+    return SoftBusSocketFcntl(fd, SOFTBUS_F_SETFL, flags);
 }
 
 int32_t GetTcpSockPort(int32_t fd)

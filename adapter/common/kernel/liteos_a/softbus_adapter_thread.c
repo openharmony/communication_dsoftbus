@@ -40,7 +40,7 @@ int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
-    if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
+    if (mutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -342,7 +342,7 @@ SoftBusThread SoftBusThreadGetSelf(void)
 /* cond */
 int32_t SoftBusCondInit(SoftBusCond *cond)
 {
-    if ((cond == NULL) || ((void *)(*cond) == NULL)) {
+    if (cond == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
