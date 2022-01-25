@@ -1,0 +1,614 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "p2plink_manager.h"
+
+#include <string.h>
+#include <unistd.h>
+
+#include "auth_interface.h"
+
+#include "p2plink_adapter.h"
+#include "p2plink_broadcast_receiver.h"
+#include "p2plink_common.h"
+#include "p2plink_control_message.h"
+#include "p2plink_device.h"
+#include "p2plink_lnn_sync.h"
+#include "p2plink_loop.h"
+#include "p2plink_message.h"
+#include "p2plink_negotiation.h"
+#include "p2plink_reference.h"
+
+#include "securec.h"
+
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+
+#define OPEN_AUTH_CHAN_DELAY  200
+typedef struct {
+    int64_t authId;
+    int32_t pid;
+    char mac[P2P_MAC_LEN];
+} DisConnInfo;
+
+typedef struct {
+    int64_t authId;
+    uint32_t requestId;
+} P2pAuthSuccessInfo;
+
+static void P2pLinkReuse(ConnectingNode *item)
+{
+    int32_t ret;
+    P2pLinkAuthId chan = {0};
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p Link reuse.");
+    chan.inAuthId = item->connInfo.authId;
+    ret = P2pLinkSendReuse(&chan, P2pLinkGetMyMac());
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link send reuse fail.");
+        P2pLinkConningCallback(item, SOFTBUS_ERR, P2PLINK_P2P_SEND_REUSEFAIL);
+        SoftBusFree(item);
+        return;
+    }
+    item->state = P2PLINK_MANAGER_STATE_REUSE;
+    P2pLinkAddConningDev(item);
+}
+
+static void P2pLinkSendStartRequestToNego(P2pLinkConnectInfo *requestInfo)
+{
+    P2pLinkNegoConnInfo negoInfo = {0};
+
+    negoInfo.authId = requestInfo->authId;
+    negoInfo.requestId = requestInfo->requestId;
+    negoInfo.expectRole = requestInfo->expectedRole;
+    int32_t ret = strcpy_s(negoInfo.peerMac, sizeof(negoInfo.peerMac), requestInfo->peerMac);
+    if (ret != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+    }
+    P2pLinkNegoStart(&negoInfo);
+}
+
+void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
+{
+    ConnectedNode *connedDev = NULL;
+
+    if (arg == NULL) {
+        return;
+    }
+    (void)msgType;
+    ConnectingNode *conningDev = (ConnectingNode *)arg;
+    P2pLinkConnectInfo *requestInfo = &conningDev->connInfo;
+    if (P2pLinkIsEnable() == false) {
+        P2pLinkConningCallback(conningDev, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
+        SoftBusFree(conningDev);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in conn dev p2p state is closed");
+        return;
+    }
+    if (P2pLinkIsDisconnectState() == true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2plink state is disconnecting");
+        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        P2pLinkAddConningDev(conningDev);
+        return;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p conn auth %lld req %d ex-role %d",
+        requestInfo->authId, requestInfo->requestId, requestInfo->expectedRole);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[connecting] dev %s %d",
+        requestInfo->peerMac, GetP2pLinkNegoStatus());
+    connedDev = P2pLinkGetConnedDevByMac(requestInfo->peerMac);
+    if (connedDev != NULL) {
+        if (strlen(connedDev->peerIp) == 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2P link is used by another service.");
+            P2pLinkConningCallback(conningDev, SOFTBUS_ERR, ERROR_LINK_USED_BY_ANOTHER_SERVICE);
+            SoftBusFree(conningDev);
+            return;
+        }
+        P2pLinkReuse(conningDev);
+        return;
+    }
+
+    if (GetP2pLinkNegoStatus() != P2PLINK_NEG_IDLE) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p Link busy");
+        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        P2pLinkAddConningDev(conningDev);
+        return;
+    }
+    conningDev->state = P2PLINK_MANAGER_STATE_NEGOING;
+    conningDev->timeOut = 0;
+    P2pLinkAddConningDev(conningDev);
+    P2pLinkSendStartRequestToNego(requestInfo);
+    return;
+}
+
+static int32_t GetDisConnectInfo(P2pLinkDisconnectInfo *info, void *arg)
+{ 
+    int32_t ret;
+
+    if (arg == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    ret = memcpy_s(info, sizeof(P2pLinkDisconnectInfo), arg, sizeof(P2pLinkDisconnectInfo));
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(arg);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(arg);
+    return SOFTBUS_OK;
+}
+
+void P2pLinkLoopDisconnectDev(P2pLoopMsg msgType, void *arg)
+{
+    P2pLinkDisconnectInfo info = {0};
+    int32_t ret;
+    ConnectedNode *item = NULL;
+
+    if (GetDisConnectInfo(&info, arg) == SOFTBUS_ERR) {
+        return;
+    }
+
+    if (P2pLinkIsEnable() == false) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in disconn dev p2p state is closed");
+        return;
+    }
+
+    if (P2pLinkIsDisconnectState() == true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2plink is disconnecting");
+        return;
+    }
+
+    (void)msgType;
+    if (strlen(info.peerMac) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d mac %s", info.pid, info.peerMac);
+        if (P2pLinGetMacRefCnt(info.pid, info.peerMac) == 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer mac not ref");
+            return;
+        }
+        item = P2pLinkGetConnedDevByMac(info.peerMac);
+        if (item == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer mac not online");
+            return;
+        }
+        item->chanId.inAuthId = info.authId;
+        ret = P2pLinkSendDisConnect(&item->chanId, P2pLinkGetMyMac());
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify disconnect fail");
+        }
+        ret = P2pLinkSharelinkRemoveGroup();
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "remove group fail");
+            return;
+        }
+        P2pLinkDelPidMacRef(info.pid, info.peerMac);
+        P2pLinkDelMyP2pRef();
+    } else {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info.pid);
+        DisConnectByPid(info.pid);
+    }
+    P2pLinkDumpRef();
+}
+
+static void LoopOpenP2pAuthSuccess(P2pLoopMsg msgType, void *arg)
+{
+    ConnectedNode *item = NULL;
+    int32_t ret;
+    int64_t p2pAuthId;
+    P2pLinkAuthId chan = {0};
+    P2pAuthSuccessInfo *authInfo = NULL;
+    uint32_t authRequestId;
+
+    if (arg == NULL) {
+        return;
+    }
+    (void)msgType;
+    authInfo = (P2pAuthSuccessInfo *)arg;
+    p2pAuthId = authInfo->authId;
+    authRequestId = authInfo->requestId;
+    SoftBusFree(arg);
+
+    item = P2pLinkGetConnedByAuthReqeustId(authRequestId);
+    if (item == NULL) {
+        AuthCloseConn(p2pAuthId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth ok no find item %lld", p2pAuthId);
+        return;
+    }
+
+    chan.p2pAuthId = p2pAuthId;
+    chan.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
+    ret = P2pLinkSendHandshake(&chan, P2pLinkGetMyMac(), P2pLinkGetMyIp());
+    if (ret != SOFTBUS_OK) {
+        AuthCloseConn(p2pAuthId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send hand shake fail %lld", p2pAuthId);
+        return;
+    }
+    item->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
+    item->chanId.p2pAuthId = p2pAuthId;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+               "p2plink handshake success id %d authId %llu", authRequestId, p2pAuthId);
+}
+
+static void OpenP2pAuthSuccess(uint32_t requestId, int64_t authId)
+{
+    int32_t ret;
+    P2pAuthSuccessInfo *arg = NULL;
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth success id %d authId %llu", requestId, authId);
+    arg = (P2pAuthSuccessInfo *)SoftBusCalloc(sizeof(P2pAuthSuccessInfo));
+    if (arg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnResult Failed to malloc");
+        return;
+    }
+    arg->authId = authId;
+    arg->requestId = requestId;
+    ret = P2pLoopProc(LoopOpenP2pAuthSuccess, (void *)arg, P2PLOOP_P2PAUTHCHAN_OK);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(arg);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenP2pAuthSuccess loop fail");
+    }
+}
+
+static void OpenP2pAuthFail(uint32_t requestId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth request id %d fail %d", requestId, reason);
+}
+
+static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
+{
+    AuthConnInfo *authInfo = NULL;
+    char *peerMac = NULL;
+    ConnectedNode *connedItem = NULL;
+    AuthConnCallback authCb = {0};
+    uint32_t authRequestId;
+    int32_t gcPort;
+    AuthListennerInfo info = {0};
+
+    if (arg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "arg is invalid");
+        return;
+    }
+    (void)msgType;
+    authInfo = (AuthConnInfo *)arg;
+    peerMac = (char *)(authInfo + 1);
+
+    connedItem = P2pLinkGetConnedDevByMac(peerMac);
+    if (connedItem == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p auth can not find %s", peerMac);
+        SoftBusFree(arg);
+        return;
+    }
+
+    authCb.onConnOpened = OpenP2pAuthSuccess;
+    authCb.onConnOpenFailed =  OpenP2pAuthFail;
+    authRequestId = AuthGenRequestId();
+    connedItem->chanId.authRequestId = authRequestId;
+    if (P2pLinkGetGcPort() <= 0) {
+        info.type = AUTH_LINK_TYPE_P2P;
+        int32_t ret = strcpy_s(info.info.ipInfo.ip, sizeof(info.info.ipInfo.ip), P2pLinkGetMyIp());
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "gc start listen %s %d ", info.info.ipInfo.ip, ret);
+        gcPort  = AuthStartListening(&info);
+        if (gcPort <= 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gc start listen fail %d", gcPort);
+            SoftBusFree(arg);
+            return;
+        }
+        P2pLinkSetGcPort(gcPort);
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open auth chan info %s %d",
+        authInfo->info.ipInfo.ip, authInfo->info.ipInfo.port);
+    if (AuthOpenConn(authInfo, authRequestId, &authCb) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan fail %s %d",
+            authInfo->info.ipInfo.ip, authInfo->info.ipInfo.port);
+    }
+    SoftBusFree(arg);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open p2p auth chan %d", authRequestId);
+}
+
+static void P2pLinkStartOpenP2pAuthChan(const P2pLinkNegoConnResult *conn)
+{
+    char *peerMac = NULL;
+    AuthConnInfo *authInfo = NULL;
+    int32_t ret;
+
+    authInfo = SoftBusCalloc(sizeof(AuthConnInfo) + P2P_MAC_LEN);
+    if (authInfo != NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send auth chan loop msg");
+        authInfo->type = AUTH_LINK_TYPE_P2P;
+        authInfo->info.ipInfo.port = conn->goPort;
+        ret = strcpy_s(authInfo->info.ipInfo.ip, sizeof(authInfo->info.ipInfo.ip), conn->peerIp);
+        if (ret != EOK) {
+            SoftBusFree(authInfo);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+            return;
+        }
+        peerMac = (char *)(authInfo + 1);
+        ret = strcpy_s(peerMac, P2P_MAC_LEN, conn->peerMac);
+        if (ret != EOK) {
+            SoftBusFree(authInfo);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+            return;
+        }
+        ret = P2pLoopProcDelay(LoopOpenP2pAuthChan, (char *)authInfo, OPEN_AUTH_CHAN_DELAY, P2PLOOP_OPEN_AUTH_CHAN);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan loop fail");
+            SoftBusFree(authInfo);
+        }
+    }
+}
+
+static void P2pLinkNegoSuccessSetGoInfo(const P2pLinkNegoConnResult *conn)
+{
+    P2pLinkSetMyIp(conn->localIp);
+    P2pLinkSetGoPort(conn->goPort);
+    P2pLinkSetGoIp(conn->peerIp);
+    P2pLinkSetGoMac(conn->peerMac);
+}
+
+static int32_t P2pLinkNegoSuccessAddConnedItem(const P2pLinkNegoConnResult *conn, const ConnectingNode *conningItem)
+{
+    ConnectedNode *connedItem = NULL;
+
+    connedItem = SoftBusCalloc(sizeof(ConnectedNode));
+    if (connedItem == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Nego ok malloc fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(connedItem->peerIp, sizeof(connedItem->peerIp), conn->peerIp) != EOK ||
+        strcpy_s(connedItem->peerMac, sizeof(connedItem->peerMac), conn->peerMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+        return SOFTBUS_ERR;
+    }
+    connedItem->chanId.inAuthId = conningItem->connInfo.authId;
+    P2pLinkAddConnedDev(connedItem);
+    return SOFTBUS_OK;
+}
+
+static void P2pLinkNegoSuccess(int32_t requestId, const P2pLinkNegoConnResult *conn)
+{
+    P2pLinkAuthId chan = {0};
+    int32_t ret;
+    if (conn == NULL) {
+        return;
+    }
+    ConnectingNode *conningItem = P2pLinkGetConningDevByReqId(requestId);
+    if (conningItem == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Nego ok no find item %d", requestId);
+        return;
+    }
+    P2pLinkRole role = P2pLinkGetRole();
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego ok ip %s mac %s, port %d, role %d",
+        conn->peerIp, conn->peerMac, conn->goPort, role);
+    ConnectedNode *connedItem = P2pLinkGetConnedDevByMac(conn->peerMac);
+    if (connedItem != NULL) {
+        ret = strcpy_s(connedItem->peerIp, sizeof(connedItem->peerIp), conn->peerIp);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "update ip %s ret %d", conn->peerIp, ret);
+        connedItem->chanId.inAuthId = conningItem->connInfo.authId;
+    } else {
+        if (P2pLinkNegoSuccessAddConnedItem(conn, conningItem) != SOFTBUS_OK) {
+            chan.inAuthId = conningItem->connInfo.authId;
+            P2pLinkSendDisConnect(&chan, P2pLinkGetMyMac());
+            P2pLinkSharelinkRemoveGroup();
+            P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_MALLOCFAIL);
+            P2pLinkDelConning(conningItem->connInfo.requestId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Nego ok malloc fail");
+            return;
+        }
+    }
+    P2pLinkAddPidMacRef(conningItem->connInfo.pid, conn->peerMac);
+    P2pLinkAddMyP2pRef();
+    P2pLinkDumpRef();
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "add new dev ok role %d", role);
+    if (role == ROLE_GC) {
+        P2pLinkNegoSuccessSetGoInfo(conn);
+        P2pLinkStartOpenP2pAuthChan(conn);
+    }
+    if (strcpy_s(conningItem->myIp, sizeof(conningItem->myIp), P2pLinkGetMyIp()) != EOK ||
+        strcpy_s(conningItem->peerIp, sizeof(conningItem->peerIp), conn->peerIp) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+    }
+    P2pLinkConningCallback(conningItem, SOFTBUS_OK, 0);
+    P2pLinkDelConning(conningItem->connInfo.requestId);
+    P2pLinkLnnSync();
+    P2pLinkDumpDev();
+}
+
+static void P2pLinkNegoFail(int32_t requestId, int32_t reason)
+{
+    ConnectingNode *item = NULL;
+    int32_t ret;
+    P2pLinkAuthId chanId = {0};
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "nego fail reqid %d, reason %d", requestId, reason);
+    item = P2pLinkGetConningDevByReqId(requestId);
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Nego Fail no find item.");
+        return;
+    }
+
+    if (reason == ERROR_BUSY) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev is busy");
+        item->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        return;
+    }
+
+    if (reason == NEED_POST_DISCONNECT) {
+        chanId.inAuthId = item->connInfo.authId;
+        ret = P2pLinkSendDisConnect(&chanId, P2pLinkGetMyMac());
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify disconnect fail");
+        }
+    }
+
+    P2pLinkConningCallback(item, SOFTBUS_ERR, reason);
+    P2pLinkDelConning(requestId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "nego notify fail finish");
+    P2pLinkLnnSync();
+    P2pLinkDumpDev();
+}
+
+static void P2pLinkNegoConnected(const P2pLinkNegoConnResult *conn)
+{
+    ConnectedNode *connedDev = NULL;
+    P2pLinkRole role;
+
+    if (conn == NULL) {
+        return;
+    }
+    role = P2pLinkGetRole();
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego conned ip %s mac %s, port %d role %d",
+               conn->peerIp, conn->peerMac, conn->goPort, role);
+    connedDev = P2pLinkGetConnedDevByMac(conn->peerMac);
+    if (connedDev != NULL) {
+        if (strcpy_s(connedDev->peerIp, sizeof(connedDev->peerIp), conn->peerIp) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+        }
+        connedDev->chanId.inAuthId = conn->authId;
+    } else {
+        connedDev = (ConnectedNode *)SoftBusCalloc(sizeof(ConnectedNode));
+        if (connedDev == NULL) {
+            P2pLinkSharelinkRemoveGroup();
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc fail");
+            return;
+        }
+        if (strcpy_s(connedDev->peerMac, sizeof(connedDev->peerMac), conn->peerMac) != EOK ||
+            strcpy_s(connedDev->peerIp, sizeof(connedDev->peerIp), conn->peerIp) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+            SoftBusFree(connedDev);
+            return;
+        }
+        connedDev->chanId.inAuthId = conn->authId;
+        P2pLinkAddConnedDev(connedDev);
+    }
+    P2pLinkAddMyP2pRef();
+    P2pLinkDumpRef();
+    P2pLinkDumpDev();
+    P2pLinkLnnSync();
+    if (role == ROLE_GC) {
+        P2pLinkNegoSuccessSetGoInfo(conn);
+        P2pLinkStartOpenP2pAuthChan(conn);
+    }
+}
+
+static void P2pLinkUpdateRole(const P2pLinkGroup *group)
+{
+    if (group == NULL) {
+        P2pLinkSetRole(ROLE_NONE);
+        return;
+    }
+    P2pLinkSetRole(group->role);
+}
+
+int32_t P2pLinkMagicInit(void)
+{
+    int32_t ret;
+    char myIp[P2P_IP_LEN] = {0};
+    P2pLinkGroup *p2pGroupInfo = NULL;
+
+    if (P2pLinkGetWifiState() == SOFTBUS_OK) {
+        P2pLinkSetState(true);
+    } else {
+        P2pLinkSetState(false);
+    }
+
+    ret = P2pLinkBroadCastInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reg broadcast fail.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = P2pLinkGetP2pIpAddress(myIp, sizeof(myIp));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkMagicInit no get p2p ip ");
+    }
+    P2pLinkSetMyIp(myIp);
+
+    p2pGroupInfo = P2pLinkRequetGroupInfo();
+    if (p2pGroupInfo != NULL) {
+        P2pLinkUpdateRole(p2pGroupInfo);
+        SoftBusFree(p2pGroupInfo);
+    } else {
+        P2pLinkUpdateRole(NULL);
+    }
+    P2pLinkLnnSync();
+    return SOFTBUS_OK;
+}
+
+void P2pLinkClean(void)
+{
+#define CLEAN_DELAY_100MS 100000
+    AuthListennerInfo listenInfo = {0};
+    int32_t ret;
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p clean.");
+    listenInfo.type = AUTH_LINK_TYPE_P2P;
+    P2pLinkSetRole(ROLE_NONE);
+    P2pLinkNegoStop();
+    if (P2pLinkGetGoPort() > 0 || P2pLinkGetGcPort() > 0) {
+        ret = AuthStopListening(&listenInfo);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "AuthStopListening ret %d", ret);
+        P2pLinkSetGoPort(0);
+        P2pLinkSetGcPort(0);
+    }
+    P2pLinkRefClean();
+    P2pLinkDevClean();
+    P2pLinkCommonClean();
+    usleep(CLEAN_DELAY_100MS);
+}
+
+int32_t P2pLinkManagerInit(void)
+{
+    P2pLinkNegoCb cb = {0};
+    int32_t ret;
+    P2pLinkCommonInit();
+
+    ret = P2pLinkMagicInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p magic Link Init fail.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = P2pLoopInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p loop Init fail.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = P2pLinkDevInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link dev Init fail.");
+        return SOFTBUS_ERR;
+    }
+    P2pLinkInitRef();
+
+    cb.onConnected = P2pLinkNegoSuccess;
+    cb.onConnectFailed = P2pLinkNegoFail;
+    cb.onPeerConnected = P2pLinkNegoConnected;
+    ret = P2pLinkNegoInit(&cb);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link nego Init fail.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = P2pLinkMessageInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link msg Init fail.");
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p Link Init ok.");
+    return SOFTBUS_OK;
+}

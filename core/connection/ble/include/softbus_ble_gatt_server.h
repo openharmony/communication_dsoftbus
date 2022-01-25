@@ -21,10 +21,21 @@
 #include "softbus_ble_connection_inner.h"
 #include "softbus_conn_manager.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb);
 int32_t SoftBusGattServerStartService(void);
 int32_t SoftBusGattServerStopService(void);
 void SoftBusGattServerOnBtStateChanged(int state);
 int32_t SoftBusGattServerSend(int32_t halConnId, const char *data, int32_t len, int32_t module);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

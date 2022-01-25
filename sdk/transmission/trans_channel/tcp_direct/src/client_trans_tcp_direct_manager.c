@@ -27,6 +27,7 @@
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
+#include "trans_server_proxy.h"
 
 #define HEART_TIME 300
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
@@ -113,6 +114,9 @@ int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
 void TransTdcCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseTcpDirectChannel, channelId [%d]", channelId);
+    if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
+    }
 
     TcpDirectChannelInfo *item = NULL;
     (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);

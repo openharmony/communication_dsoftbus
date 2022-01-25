@@ -21,6 +21,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "p2plink_interface.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
@@ -29,6 +30,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_tcp_socket.h"
 #include "trans_tcp_direct_message.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 static SoftbusBaseListener g_sessionListener;
 
@@ -67,6 +69,27 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
+static void GetP2pAuthOptionUuid(ConnectOption *option)
+{
+    int32_t ret;
+    char p2pMac[P2P_MAC_LEN] = {0};
+    ConnectOption authOption = {0};
+
+    ret = P2pLinkGetPeerMacByPeerIp(option->info.ipOption.ip, p2pMac, sizeof(p2pMac));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UUID is not p2p ip %s", option->info.ipOption.ip);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UUID get auth p2pmac %s", p2pMac);
+    ret = AuthGetConnectOptionByP2pMac(p2pMac, AUTH_LINK_TYPE_WIFI, &authOption);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UUID %s get auth opthon fail", p2pMac);
+        return;
+    }
+    (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
+    return;
+}
+
 static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
 {
     if (ip == NULL || uuid == NULL) {
@@ -78,6 +101,7 @@ static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
         return SOFTBUS_MEM_ERR;
     }
+    GetP2pAuthOptionUuid(&option);
     if (AuthGetUuidByOption(&option, uuid, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid fail.");
         return SOFTBUS_ERR;
@@ -267,4 +291,14 @@ int32_t TransTdcStopSessionListener(void)
     int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
     DestroyBaseListener(DIRECT_CHANNEL_SERVER);
     return ret;
+}
+
+int32_t GetTdcBaseListener(SoftbusBaseListener *listener)
+{
+    if (listener == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    listener->onConnectEvent = OnConnectEvent;
+    listener->onDataEvent = OnDataEvent;
+    return SOFTBUS_OK;
 }

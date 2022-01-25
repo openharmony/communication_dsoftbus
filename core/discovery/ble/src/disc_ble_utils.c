@@ -22,16 +22,12 @@
 #include "disc_ble_constant.h"
 #include "discovery_service.h"
 #include "lnn_device_info.h"
-#include "mbedtls/md.h"
-#include "mbedtls/platform.h"
 #include "securec.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-
-#define MBEDTLS_MD_C
-#define MBEDTLS_SHA256_C
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
@@ -52,34 +48,6 @@
         return len; \
     }
 #endif
-
-int32_t GenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
-{
-    if (str == NULL || hash == NULL || len == 0) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    mbedtls_md_context_t ctx;
-    const mbedtls_md_info_t *info = NULL;
-    mbedtls_md_init(&ctx);
-    info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    if (mbedtls_md_setup(&ctx, info, 0) != 0) {
-        goto EXIT;
-    }
-    if (mbedtls_md_starts(&ctx) != 0) {
-        goto EXIT;
-    }
-    if (mbedtls_md_update(&ctx, str, len) != 0) {
-        goto EXIT;
-    }
-    if (mbedtls_md_finish(&ctx, hash) != 0) {
-        goto EXIT;
-    }
-    mbedtls_md_free(&ctx);
-    return SOFTBUS_OK;
-EXIT:
-    mbedtls_md_free(&ctx);
-    return SOFTBUS_ENCRYPT_ERR;
-}
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
@@ -207,7 +175,7 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceId failed");
         return ret;
     }
-    ret = GenerateStrHash((const unsigned char *)devId, strlen(devId) + 1, (unsigned char *)hashResult);
+    ret = SoftBusGenerateStrHash((const unsigned char *)devId, strlen(devId) + 1, (unsigned char *)hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;
@@ -234,7 +202,7 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetHwAccount failed");
         return ret;
     }
-    ret = GenerateStrHash(account, strlen((const char *)account) + 1, hashResult);
+    ret = SoftBusGenerateStrHash(account, strlen((const char *)account) + 1, hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;
@@ -308,7 +276,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceInfoFromAdvData input param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memcpy_s(info->hwAccountHash, SHORT_USER_ID_HASH_LEN,
+    if (memcpy_s(info->accountHash, SHORT_USER_ID_HASH_LEN,
         &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy hwAccountHash failed");
         return SOFTBUS_MEM_ERR;

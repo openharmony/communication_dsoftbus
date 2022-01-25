@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
+#include "p2plink_interface.h"
 #include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
@@ -55,18 +56,19 @@ bool GetServerIsInit(void)
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
-    
+
     if (ServerStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server stub init failed.");
         return;
     }
+
     if (SoftBusTimerInit() == SOFTBUS_ERR) {
         return;
     }
+
     if (LooperInit() == -1) {
         return;
     }
-
     if (ConnServerInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus conn server init failed.");
         goto ERR_EXIT;
@@ -92,6 +94,10 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
+    if (P2pLinkInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
+        goto ERR_EXIT;
+    }
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;

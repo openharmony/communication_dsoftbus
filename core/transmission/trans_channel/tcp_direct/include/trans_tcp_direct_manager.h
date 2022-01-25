@@ -36,29 +36,6 @@ extern "C" {
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
 
-#define SKEY_LENGTH 16
-
-typedef enum {
-    TCP_DIRECT_CHANNEL_STATUS_HANDSHAKING,
-    TCP_DIRECT_CHANNEL_STATUS_CONNECTING,
-    TCP_DIRECT_CHANNEL_STATUS_CONNECTED,
-    TCP_DIRECT_CHANNEL_STATUS_TIMEOUT,
-} TcpDirectChannelStatus;
-
-typedef struct {
-    char sessionKey[SKEY_LENGTH];
-    int sessionIndex;
-} IAuthConnection;
-
-typedef struct {
-    ListNode node;
-    bool serverSide;
-    int32_t channelId;
-    AppInfo appInfo;
-    uint32_t status;
-    uint32_t timeout;
-} SessionConn;
-
 typedef struct {
     uint32_t magicNumber;
     uint32_t module;
@@ -67,25 +44,16 @@ typedef struct {
     uint32_t dataLen;
 } TdcPacketHead;
 
-int32_t TransOpenTcpDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
+int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 
-uint64_t TransTdcGetNewSeqId(void);
-SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
-SessionConn *GetSessionConnByFd(int fd, SessionConn *conn);
+void TransTcpDirectDeinit(void);
 
-int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo);
-int32_t SetSessionConnStatusById(int32_t channelId, int32_t status);
+void TransTdcDeathCallback(const char *pkgName);
 
-int32_t TransTdcAddSessionConn(SessionConn *conn);
-
-void TransDelSessionConnById(int32_t channelId);
+int32_t TransOpenDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
 void TransTdcStopSessionProc(void);
-int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
-void TransTcpDirectDeinit(void);
-void TransTdcDeathCallback(const char *pkgName);
-int32_t GenerateTdcChannelId(void);
-void SetSessionKeyByChanId(int chanId, const char *sessionKey, int32_t keyLen);
+
 #ifdef __cplusplus
 }
 #endif

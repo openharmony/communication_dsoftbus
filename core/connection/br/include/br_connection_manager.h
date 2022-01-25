@@ -75,6 +75,8 @@ typedef struct BrConnectionInfo {
 
 void InitBrConnectionManager(int32_t brBuffSize);
 
+int32_t GetBrConnectionCount(void);
+
 bool IsExitConnectionById(uint32_t connId);
 
 bool IsExitBrConnectByFd(int32_t socketFd);
@@ -113,6 +115,8 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCoun
 bool IsBrDeviceReady(uint32_t connId);
 
 int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType);
+
+bool BrCheckActiveConnection(const ConnectOption *option);
 
 #endif
 

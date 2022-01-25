@@ -20,6 +20,12 @@
 #include "stdint.h"
 #include "softbus_adapter_bt_common.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     SoftBusBtUuid charaUuid;
     uint16_t dataLen;
@@ -52,4 +58,9 @@ int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *server
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData);
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H */

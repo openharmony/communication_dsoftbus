@@ -426,7 +426,7 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
 
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
-int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
+int QosReport(int sessionId, int appType, int quality);
 
 #ifdef __cplusplus
 }

@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    int fd;
+    int32_t fd;
     int32_t channelType;
     int32_t businessType;
     bool aliveState;

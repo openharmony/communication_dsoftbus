@@ -18,6 +18,12 @@
 
 #include "softbus_adapter_bt_common.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef enum {
     SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE = 0x00,
     SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED = 0x04,
@@ -160,4 +166,9 @@ int SoftBusStopAdv(int advId);
 
 int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

@@ -32,6 +32,7 @@
 #define PKG_NAME "PKG_NAME"
 #define CLIENT_BUS_NAME "CLIENT_BUS_NAME"
 #define AUTH_STATE "AUTH_STATE"
+#define MSG_ROUTE_TYPE "ROUTE_TYPE"
 
 #ifdef __cplusplus
 extern "C" {

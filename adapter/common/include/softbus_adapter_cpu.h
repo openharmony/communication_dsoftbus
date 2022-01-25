@@ -29,7 +29,7 @@ extern "C" {
 #define RMB() BARRIER()
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
 #define DSB() __asm__ volatile("dsb" ::: "memory")
-#ifdef _ARM64_
+#ifdef __aarch64__
 #define DMB() __asm__ volatile("DMB ISHLD" : : : "memory")
 #else
 #define DMB() __asm__ volatile("dmb" ::: "memory")

@@ -24,8 +24,6 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define MAX_LANE_NUM 10
-
 typedef struct {
     ListNode node;
     int32_t channelId;
@@ -79,9 +77,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
 
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     if (newLane == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "new lane item failed.[channelId = %d, channelType = %d]",
-            channelId, channelType);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     newLane->channelId = channelId;
     newLane->channelType = channelType;
@@ -90,13 +86,6 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
         SoftBusFree(newLane);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
-    }
-
-    if (g_channelLaneList->cnt >= MAX_LANE_NUM) {
-        SoftBusFree(newLane);
-        (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel num reach max");
-        return SOFTBUS_ERR;
     }
 
     TransLaneInfo *laneItem = NULL;
@@ -112,6 +101,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
     ListInit(&(newLane->node));
     ListAdd(&(g_channelLaneList->list), &(newLane->node));
     g_channelLaneList->cnt++;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane num is %d", g_channelLaneList->cnt);
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return SOFTBUS_OK;
 }

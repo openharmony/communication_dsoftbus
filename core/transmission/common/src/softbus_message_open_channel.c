@@ -83,7 +83,8 @@ char *PackRequest(const AppInfo *appInfo)
     if (appInfo->myData.apiVersion != API_V1) {
         if (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
             !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
-            !AddStringToJsonObject(json, AUTH_STATE, authState)) {
+            !AddStringToJsonObject(json, AUTH_STATE, authState) ||
+            !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType)) {
             cJSON_Delete(json);
             return NULL;
         }
@@ -135,7 +136,11 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get pkgName");
         return SOFTBUS_ERR;
     }
-
+    int32_t routeType = WIFI_STA;
+    if (GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get route type");
+    }
+    appInfo->routeType = (RouteType)routeType;
     return SOFTBUS_OK;
 }
 
@@ -147,7 +152,6 @@ char *PackReply(const AppInfo *appInfo)
     }
     cJSON *json =  cJSON_CreateObject();
     if (json == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
@@ -160,7 +164,7 @@ char *PackReply(const AppInfo *appInfo)
         return NULL;
     }
     if (appInfo->myData.apiVersion != API_V1) {
-        char *authState = (char*)appInfo->myData.authState;
+        char *authState = (char *)appInfo->myData.authState;
         if (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
             !AddStringToJsonObject(json, AUTH_STATE, authState)) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to add pkgName or authState");

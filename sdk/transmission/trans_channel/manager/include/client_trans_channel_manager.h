@@ -33,8 +33,8 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
 
 int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const void *data, uint32_t len);
 
-int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data, const StreamData *ext,
-    const StreamFrameInfo *param);
+int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data,
+    const StreamData *ext, const StreamFrameInfo *param);
 
 int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt);

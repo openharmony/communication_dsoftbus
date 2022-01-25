@@ -49,6 +49,21 @@ void InitBrConnectionManager(int32_t brBuffSize)
     pthread_mutex_init(&g_connectionLock, NULL);
 }
 
+int32_t GetBrConnectionCount(void)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
+        return SOFTBUS_ERR;
+    }
+    ListNode *item = NULL;
+    int32_t count = 0;
+    LIST_FOR_EACH(item, &g_connection_list) {
+        count++;
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    return count;
+}
+
 bool IsExitConnectionById(uint32_t connId)
 {
     (void)pthread_mutex_lock(&g_connectionLock);
@@ -498,4 +513,34 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;
+}
+
+bool BrCheckActiveConnection(const ConnectOption *option)
+{
+    if (option == NULL || option->type != CONNECT_BR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "option check fail");
+        return false;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection brMac=%s", option->info.brOption.brMac);
+
+    ListNode *item = NULL;
+    BrConnectionInfo *itemNode = NULL;
+
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
+        return false;
+    }
+    LIST_FOR_EACH(item, &g_conection_list) {
+        itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
+        if ((memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) &&
+            (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection true");
+            (void)pthread_mutex_unlock(&g_connectionLock);
+            return true;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection false");
+    return false;
 }
