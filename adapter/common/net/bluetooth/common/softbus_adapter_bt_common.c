@@ -26,24 +26,25 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define STATE_LISTENER_MAX_NUM 3
+#define STATE_LISTENER_MAX_NUM 4
+#define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
     bool isUsed;
     SoftBusBtStateListener *listener;
 } StateListener;
 
-static int ConvertBtState(int state)
+static int ConvertBtState(const int transport, int state)
 {
     switch (state) {
         case OHOS_GAP_STATE_TURNING_ON:
-            return SOFTBUS_BT_STATE_TURNING_ON;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_ON : SOFTBUS_BT_STATE_TURNING_ON;
         case OHOS_GAP_STATE_TURN_ON:
-            return SOFTBUS_BT_STATE_TURN_ON;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_ON : SOFTBUS_BT_STATE_TURN_ON;
         case OHOS_GAP_STATE_TURNING_OFF:
-            return SOFTBUS_BT_STATE_TURNING_OFF;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURNING_OFF : SOFTBUS_BT_STATE_TURNING_OFF;
         case OHOS_GAP_STATE_TURN_OFF:
-            return SOFTBUS_BT_STATE_TURN_OFF;
+            return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_OFF : SOFTBUS_BT_STATE_TURN_OFF;
         default:
             return -1;
     }
@@ -57,7 +58,7 @@ static void WrapperStateChangeCallback(const int transport, const int status)
     (void)transport;
     LOG_INFO("WrapperStateChangeCallback");
     int listenerId;
-    int st = ConvertBtState((BtStatus)status);
+    int st = ConvertBtState(transport, (BtStatus)status);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
             g_stateListener[listenerId].listener != NULL &&

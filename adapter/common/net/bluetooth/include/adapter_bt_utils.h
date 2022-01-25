@@ -22,6 +22,17 @@
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int BleOhosStatusToSoftBus(BtStatus status);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

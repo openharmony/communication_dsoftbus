@@ -746,7 +746,6 @@ int32_t StopBaseListener(ListenerModule module)
     listenerInfo->listenFd = -1;
     SoftBusMutexUnlock(&g_listenerList[module].lock);
 
-    UpdateMaxFd();
     return SOFTBUS_OK;
 }
 

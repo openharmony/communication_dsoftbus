@@ -33,6 +33,11 @@ int32_t DiscClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
+int32_t DiscClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t DiscClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;

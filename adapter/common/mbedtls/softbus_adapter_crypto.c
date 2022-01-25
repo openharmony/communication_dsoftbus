@@ -20,11 +20,21 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/gcm.h"
+#include "mbedtls/md.h"
+#include "mbedtls/platform.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
 
 #ifndef MBEDTLS_CTR_DRBG_C
 #define MBEDTLS_CTR_DRBG_C
+#endif
+
+#ifndef MBEDTLS_MD_C
+#define MBEDTLS_MD_C
+#endif
+
+#ifndef MBEDTLS_SHA256_C
+#define MBEDTLS_SHA256_C
 #endif
 
 #ifndef MBEDTLS_ENTROPY_C
@@ -123,6 +133,38 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
         return SOFTBUS_INVALID_PARAM;
     }
     return mbedtls_base64_decode(dst, dlen, olen, src, slen);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    if (str == NULL || hash == NULL || len == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    mbedtls_md_context_t ctx;
+    const mbedtls_md_info_t *info = NULL;
+    mbedtls_md_init(&ctx);
+
+    info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    if (mbedtls_md_setup(&ctx, info, 0) != 0) {
+        mbedtls_md_free(&ctx);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    if (mbedtls_md_starts(&ctx) != 0) {
+        mbedtls_md_free(&ctx);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    if (mbedtls_md_update(&ctx, str, len) != 0) {
+        mbedtls_md_free(&ctx);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    if (mbedtls_md_finish(&ctx, hash) != 0) {
+        mbedtls_md_free(&ctx);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+
+    mbedtls_md_free(&ctx);
+    return SOFTBUS_OK;
 }
 
 int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)

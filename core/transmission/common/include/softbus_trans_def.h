@@ -22,6 +22,11 @@
 extern "C" {
 #endif // __cplusplus
 
+#define DISABLE_FD (-1)
+
+#define MSG_FLAG_REQUEST 0
+#define MES_FLAG_REPLY 1
+
 typedef struct {
     const char *sessionName;
     const char *peerSessionName;

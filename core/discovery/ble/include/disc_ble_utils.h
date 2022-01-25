@@ -27,7 +27,7 @@ extern "C" {
 #endif
 #endif
 
-#define ADV_DATA_MAX_LEN 23
+#define ADV_DATA_MAX_LEN 24
 #define RESP_DATA_MAX_LEN 26
 #define BOARDCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 
@@ -55,7 +55,6 @@ uint8_t DiscBleGetDeviceType(void);
 int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr);
 
-int32_t GenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const unsigned char *data, uint32_t dataLen);
 int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data, uint32_t dataLen);
 

@@ -599,11 +599,13 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
         return;
     }
     if ((status != SOFTBUS_GATT_SUCCESS) || infoNode->state != BLE_GATT_CLIENT_CONNECTED) {
+        (void)pthread_mutex_unlock(&g_gattcInfoList->lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "111BleGattcNotificationReceiveCallback error");
         return;
     }
     bool isBleConn;
     if (GetMouduleFlags(&(param->charaUuid), &isBleConn) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_gattcInfoList->lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcNotificationReceiveCallback uuid error");
         return;
     }
@@ -612,6 +614,7 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
     char *value = BleTransRecv(clientId, (char *)param->data,
         (uint32_t)param->dataLen, &len, &index);
     if (value == NULL) {
+        (void)pthread_mutex_unlock(&g_gattcInfoList->lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "data not enough");
         return;
     }

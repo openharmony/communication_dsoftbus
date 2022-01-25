@@ -18,6 +18,12 @@
 
 #include "softbus_ble_connection_inner.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define MAX_DATA_LEN 4096
 
 typedef struct {
@@ -29,4 +35,9 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index);
 void BleTransCacheFree(int32_t halConnId, int32_t index);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

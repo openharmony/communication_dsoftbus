@@ -113,3 +113,19 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
     return &g_channelCallBack;
 }
+
+int32_t TransServerOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+{
+    if (pkgName == NULL || networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s, networkId=%s",
+        pkgName, networkId);
+
+    if (ClientIpcOnChannelLinkDown(pkgName, networkId, routeType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+

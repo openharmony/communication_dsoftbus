@@ -21,6 +21,7 @@
 
 typedef enum {
     UDP_CHANNEL_STATUS_INIT = 0,
+    UDP_CHANNEL_STATUS_OPEN_AUTH,
     UDP_CHANNEL_STATUS_NEGING,
     UDP_CHANNEL_STATUS_DONE
 } UdpChannelStatus;
@@ -31,16 +32,21 @@ typedef struct {
     AppInfo info;
     uint32_t timeOut;
     UdpChannelStatus status;
+    uint32_t requestId;
 } UdpChannelInfo;
 
 int32_t TransUdpChannelMgrInit(void);
 void TransUdpChannelMgrDeinit(void);
+
+int32_t GetUdpChannelLock(void);
+void ReleaseUdpChannelLock(void);
 
 int32_t TransAddUdpChannel(UdpChannelInfo *channel);
 int32_t TransDelUdpChannel(int32_t channelId);
 
 int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel);
 int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel);
+int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel);
 
 int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status);
 int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type);
@@ -49,4 +55,6 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     uint16_t pkgNameLen, uint16_t sessionNameLen);
 
 void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
+
+UdpChannelInfo *TransGetChannelObj(int32_t channelId);
 #endif // !TRANS_UDP_CHANNEL_MANAGER_H

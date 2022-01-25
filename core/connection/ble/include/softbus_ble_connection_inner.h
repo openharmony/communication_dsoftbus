@@ -20,6 +20,12 @@
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_conn_manager.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define MAX_CACHE_NUM_PER_CONN 3
 #define BLE_CLIENT_TYPE 0
 #define BLE_SERVER_TYPE 1
@@ -64,4 +70,9 @@ typedef struct {
     BleConnectionInfo* (*GetBleConnInfoByHalConnId)(int32_t halConnectionId);
 } SoftBusBleConnCalback;
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

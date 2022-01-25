@@ -21,6 +21,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_channel_callback.h"
 
 #define MAX_SESSION_SERVER_NUM 32
 
@@ -226,4 +227,28 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s", sessionName);
     return SOFTBUS_ERR;
+}
+
+void TransOnLinkDown(const char *networkId, int32_t routeType)
+{
+    if (networkId == NULL || g_sessionServerList == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown: networkId=%s, routeType=%d",
+        networkId, routeType);
+
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+
+    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+        (void)TransServerOnChannelLinkDown(pos->pkgName, networkId, routeType);
+    }
+    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown end");
+    return;
 }

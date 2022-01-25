@@ -263,18 +263,22 @@ static int32_t BleConnectDeviceFristTime(const ConnectOption *option, uint32_t r
     newConnectionInfo->mtu = BLE_GATT_ATT_MTU_MAX;
     ListInit(&requestInfo->node);
     ListAdd(&newConnectionInfo->requestList, &requestInfo->node);
-    if (strcpy_s(newConnectionInfo->info.info.bleInfo.bleMac, sizeof(newConnectionInfo->info.info.bleInfo.bleMac),
+    if (strcpy_s(newConnectionInfo->info.info.bleInfo.bleMac, BT_MAC_LEN,
         option->info.bleOption.bleMac) != EOK) {
         ReleaseBleconnectionNode(newConnectionInfo);
         return SOFTBUS_ERR;
     }
-
+    char tempBleMac[BT_MAC_LEN];
+    if (strcpy_s(tempBleMac, BT_MAC_LEN, option->info.bleOption.bleMac) != EOK) {
+        ReleaseBleconnectionNode(newConnectionInfo);
+        return SOFTBUS_ERR;
+    }
     requestInfo->requestId = requestId;
     (void)memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result));
     newConnectionInfo->state = BLE_CONNECTION_STATE_CONNECTING;
     newConnectionInfo->info.isServer = BLE_CLIENT_TYPE;
     int32_t clientId = INVALID_CLIENID;
-    if (ConvertBtMacToBinary(newConnectionInfo->info.info.bleInfo.bleMac, BT_MAC_LEN,
+    if (ConvertBtMacToBinary(tempBleMac, BT_MAC_LEN,
         newConnectionInfo->btBinaryAddr.addr, BT_ADDR_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "convert bt mac to binary fail.");
         ReleaseBleconnectionNode(newConnectionInfo);
@@ -309,18 +313,19 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         if (itemNode->info.isServer != BLE_CLIENT_TYPE) {
             continue;
         }
-        if (strncmp(itemNode->info.info.bleInfo.bleMac, option->info.bleOption.bleMac, BT_MAC_LEN) == 0) {
+        if (strcmp(itemNode->info.info.bleInfo.bleMac, option->info.bleOption.bleMac) == 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[state = %d]", itemNode->state);
             targetConnectionInfo = itemNode;
-            if (itemNode->state == BLE_CONNECTION_STATE_CONNECTED) {
+            if (itemNode->state == BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
                 BleDeviceConnected(itemNode, requestId, result);
                 (void)pthread_mutex_unlock(&g_connectionLock);
                 return SOFTBUS_OK;
-            } else if (itemNode->state == BLE_CONNECTION_STATE_CONNECTING) {
+            } else if (itemNode->state == BLE_CONNECTION_STATE_CONNECTING ||
+                itemNode->state == BLE_CONNECTION_STATE_CONNECTED) {
                 BleRequestInfo *requestInfo = SoftBusMalloc(sizeof(BleRequestInfo));
                 if (requestInfo == NULL) {
                     (void)pthread_mutex_unlock(&g_connectionLock);
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                        "[ConnectDevice fail and state is BLE_CONNECTION_STATE_CONNECTING.]");
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "malloc failed");
                     return SOFTBUS_ERR;
                 }
                 (void)memset_s(requestInfo, sizeof(BleRequestInfo), 0, sizeof(BleRequestInfo));
@@ -328,8 +333,12 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
                 requestInfo->requestId = requestId;
                 (void)memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result));
                 ListAdd(&itemNode->requestList, &requestInfo->node);
+                (void)pthread_mutex_unlock(&g_connectionLock);
+                return SOFTBUS_OK;
             } else if (itemNode->state == BLE_CONNECTION_STATE_CLOSING) {
                 result->OnConnectFailed(requestId, 0);
+                (void)pthread_mutex_unlock(&g_connectionLock);
+                return SOFTBUS_OK;
             }
         }
     }
@@ -348,13 +357,19 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes GetBleConnInfo failed");
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
     SendQueueNode *node = SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_MALLOC_ERR;
     }
     node->halConnId = connInfo->halConnId;
@@ -369,8 +384,10 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         SoftBusFree(node);
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return ret;
     }
+    (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
 
@@ -380,13 +397,19 @@ static int32_t BlePostBytesInner(uint32_t connectionId, ConnPostData *data)
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes GetBleConnInfo failed");
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
     SendQueueNode *node = SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_MALLOC_ERR;
     }
     node->halConnId = connInfo->halConnId;
@@ -401,8 +424,10 @@ static int32_t BlePostBytesInner(uint32_t connectionId, ConnPostData *data)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
         SoftBusFree(node);
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return ret;
     }
+    (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
 
@@ -620,9 +645,14 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDeviceByOption]");
     BleConnectionInfo *server = NULL;
     BleConnectionInfo *client = NULL;
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
     ret = GetBleConnInfoByAddr(option->info.bleOption.bleMac, &server, &client);
     if ((ret != SOFTBUS_OK) || ((server == NULL) && (client == NULL))) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectDevice GetBleConnInfo failed");
+        (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
     if (server != NULL) {
@@ -632,6 +662,7 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
         client->state = BLE_CONNECTION_STATE_CLOSING;
         SoftBusGattClientDisconnect(client->halConnId);
     }
+    (void)pthread_mutex_unlock(&g_connectionLock);
     return ret;
 }
 
@@ -667,6 +698,37 @@ static int32_t BleStartLocalListening(const LocalListenerInfo *info)
 static int32_t BleStopLocalListening(const LocalListenerInfo *info)
 {
     return SoftBusGattServerStopService();
+}
+
+static bool BleCheckActiveConnection(const ConnectOption *option)
+{
+    if (option == NULL || option->type != CONNECT_BLE) {
+        return false;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection: bleM ac=%s",
+        option->info.bleOption.bleMac);
+    int32_t ret;
+    BleConnectionInfo *server = NULL;
+    BleConnectionInfo *client = NULL;
+
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        return false;
+    }
+    ret = GetBleConnInfoByAddr(option->info.bleOption.bleMac, &server, &client);
+    if ((ret != SOFTBUS_OK) || (server == NULL && client == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleCheckActiveConnection no active conn");
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        return false;
+    }
+    if ((server != NULL && server->state == BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) ||
+        (client != NULL && client->state == BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED)) {
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection had active conn");
+        return true;
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection no active conn");
+    return false;
 }
 
 static void BleDeviceConnectPackRequest(int32_t value, int32_t connId)
@@ -1052,6 +1114,7 @@ static void InitBleInterface(void)
     g_bleInterface.GetConnectionInfo = BleGetConnectionInfo;
     g_bleInterface.StartLocalListening = BleStartLocalListening;
     g_bleInterface.StopLocalListening = BleStopLocalListening;
+    g_bleInterface.CheckActiveConnection = BleCheckActiveConnection;
 }
 
 static int BleQueueInit(void)

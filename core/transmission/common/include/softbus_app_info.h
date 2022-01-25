@@ -35,7 +35,9 @@ typedef enum {
     APP_TYPE_AUTH,
     APP_TYPE_INNER
 } AppType;
+
 typedef enum {
+    ROUTE_TYPE_ALL = 0,
     WIFI_STA = 1,
     WIFI_P2P = 2,
 } RouteType;

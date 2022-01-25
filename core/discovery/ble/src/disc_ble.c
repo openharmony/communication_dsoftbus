@@ -28,6 +28,7 @@
 #include "securec.h"
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bitmap.h"
 #include "softbus_def.h"
@@ -312,7 +313,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     }
     (void)pthread_mutex_unlock(&g_bleInfoLock);
     char key[SHA_HASH_LEN];
-    if (GenerateStrHash(advData, advLen, (unsigned char *)key) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash(advData, advLen, (unsigned char *)key) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return;
     }
@@ -337,7 +338,7 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
             return false;
         }
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "my account = %s", hwAccountHash);
-        if (strcmp((char *)hwAccountHash, foundInfo->hwAccountHash) == EOK) {
+        if (strcmp((char *)hwAccountHash, foundInfo->accountHash) == EOK) {
             return true;
         }
         return false;
@@ -526,9 +527,9 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         isSameAccount = isSameAccount ? isSameAccount : g_bleInfoManager[infoIndex].isSameAccount[pos];
         isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
     }
-    (void)memset_s(info->hwAccountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
+    (void)memset_s(info->accountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
     if (isSameAccount) {
-        if (DiscBleGetShortUserIdHash((unsigned char *)info->hwAccountHash) != SOFTBUS_OK) {
+        if (DiscBleGetShortUserIdHash((unsigned char *)info->accountHash) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
         }
     }
@@ -645,7 +646,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
             boardcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
         }
         if (memcpy_s(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
-            info->hwAccountHash, SHORT_USER_ID_HASH_LEN) != EOK) {
+            info->accountHash, SHORT_USER_ID_HASH_LEN) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed");
             return SOFTBUS_ERR;
         }

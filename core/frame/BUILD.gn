@@ -167,9 +167,13 @@ if (defined(ohos_lite)) {
     if (is_standard_system) {
       external_deps = bus_center_server_external_deps
       external_deps += [
+        "ability_runtime:app_manager",
+        "ability_runtime:want",
+        "appexecfwk_standard:appexecfwk_core",
         "deviceauth_standard:deviceauth_sdk",
         "hiviewdfx_hilog_native:libhilog",
         "ipc:ipc_core",
+        "permission_standard:libpermissionsdk_standard",
         "safwk:system_ability_fwk",
         "samgr_standard:samgr_proxy",
       ]

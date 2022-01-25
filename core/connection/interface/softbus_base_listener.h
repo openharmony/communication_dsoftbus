@@ -46,6 +46,7 @@ typedef enum {
     PROXY = 0,
     AUTH,
     AUTH_P2P,
+    DIRECT_CHANNEL_P2P,
     DIRECT_CHANNEL_CLIENT,
     DIRECT_CHANNEL_SERVER,
     UNUSE_BUTT,
