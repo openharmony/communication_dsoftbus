@@ -35,11 +35,11 @@ int32_t LnnInitNetworkManagerDelay(void);
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 
-int32_t __attribute__ ((weak)) LnnInitIpNetwork(void);
+int32_t LnnInitIpNetwork(void);
 
-int32_t __attribute__ ((weak)) LnnDeinitIpNetwork(void);
+int32_t LnnDeinitIpNetwork(void);
 
-int32_t __attribute__ ((weak)) LnnInitIpNetworkDelay(void);
+int32_t LnnInitIpNetworkDelay(void);
 
 void __attribute__ ((weak)) LnnCallIpDiscovery(void);
 
