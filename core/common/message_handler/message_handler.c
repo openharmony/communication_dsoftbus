@@ -147,18 +147,10 @@ static void *LoopTask(void *arg)
                     context->name, msg->handler->name, msg->what, context->msgSize);
             }
         } else {
-#ifdef __LITEOS_M__
-            uint64_t diff = time - now;
-            SoftBusSysTime tv;
-            tv.sec = diff / TIME_THOUSANDS_MULTIPLIER / TIME_THOUSANDS_MULTIPLIER;
-            tv.usec = diff % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER) * TIME_THOUSANDS_MULTIPLIER;
-            SoftBusCondWait(&context->cond, &context->lock, &tv);
-#else
             SoftBusSysTime tv;
             tv.sec = time / TIME_THOUSANDS_MULTIPLIER / TIME_THOUSANDS_MULTIPLIER;
             tv.usec = time % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER) * TIME_THOUSANDS_MULTIPLIER;
             SoftBusCondWait(&context->cond, &context->lock, &tv);
-#endif
         }
 
         if (msg == NULL) {

@@ -36,11 +36,11 @@ int32_t LnnStartDiscovery(void);
 
 void LnnStopDiscovery(void);
 
-int32_t __attribute__ ((weak)) LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
+int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
 
-int32_t __attribute__ ((weak)) LnnStartCoapDiscovery(void);
+int32_t LnnStartCoapDiscovery(void);
 
-int32_t __attribute__ ((weak)) LnnStopCoapDiscovery(void);
+int32_t LnnStopCoapDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus
