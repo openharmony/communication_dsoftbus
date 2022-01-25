@@ -91,7 +91,7 @@ static int WaitEvent(int fd, short events, int timeout)
     int rc = 0;
     switch (events) {
         case SOFTBUS_SOCKET_OUT: {
-                fd_set writeSet;
+                SoftBusFdSet writeSet;
                 SoftBusSocketFdZero(&writeSet);
                 SoftBusSocketFdSet(fd, &writeSet);
                 rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
@@ -104,7 +104,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 break;
             }
         case SOFTBUS_SOCKET_IN: {
-                fd_set readSet;
+                SoftBusFdSet readSet;
                 SoftBusSocketFdZero(&readSet);
                 SoftBusSocketFdSet(fd, &readSet);
                 rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
@@ -228,22 +228,22 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     if (fd < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t flags = fcntl(fd, F_GETFL, 0);
+    int32_t flags = SoftBusSocketFcntl(fd, SOFTBUS_F_GETFL, 0);
     if (flags < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
         return SOFTBUS_ERR;
     }
-    if (isNonBlock && (flags & O_NONBLOCK) == 0) {
-        flags |= O_NONBLOCK;
+    if (isNonBlock && (flags & SOFTBUS_O_NONBLOCK) == 0) {
+        flags |= SOFTBUS_O_NONBLOCK;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to nonblock", fd);
-    } else if (!isNonBlock && (flags & O_NONBLOCK) != 0) {
-        flags = flags & ~O_NONBLOCK;
+    } else if (!isNonBlock && (flags & SOFTBUS_O_NONBLOCK) != 0) {
+        flags = flags & ~SOFTBUS_O_NONBLOCK;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to block", fd);
     } else {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);
         return SOFTBUS_OK;
     }
-    return fcntl(fd, F_SETFL, flags);
+    return SoftBusSocketFcntl(fd, SOFTBUS_F_SETFL, flags);
 }
 
 int32_t GetTcpSockPort(int32_t fd)
