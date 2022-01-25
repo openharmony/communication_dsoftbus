@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "i_stream.h"
+#include "session.h"
 #include "stream_common.h"
 
 namespace Communication {
@@ -35,6 +36,7 @@ public:
     virtual void OnStreamReceived(std::unique_ptr<IStream> stream) = 0;
     virtual void OnStreamStatus(int status) = 0;
     virtual int OnStreamHdrReceived(std::unique_ptr<char[]> header, int size) = 0;
+    virtual void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const = 0;
 };
 
 class IStreamSocket {

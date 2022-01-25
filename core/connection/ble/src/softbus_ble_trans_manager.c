@@ -14,9 +14,13 @@
  */
 
 #include "softbus_ble_trans_manager.h"
+
 #include <arpa/inet.h>
+
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_ble_gatt_client.h"
+#include "softbus_ble_gatt_server.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -29,6 +33,7 @@ typedef struct {
 } BleTransHeader;
 
 static const int MTU_HEADER_SIZE = 3;
+static SoftBusBleTransCalback *g_softBusBleTransCb = NULL;
 
 static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
 {
@@ -85,7 +90,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv invalid data");
         return NULL;
     }
-    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnId);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv unknown device");
         return NULL;
@@ -108,7 +113,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     }
 
     if (memcpy_s(targetNode->recvCache[canIndex].cache + header.offset, MAX_DATA_LEN - header.offset,
-        value + sizeof(BleTransHeader), header.size) != 0) {
+        value + sizeof(BleTransHeader), header.size) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv memcpy_s failed");
         targetNode->recvCache[canIndex].isUsed = 0;
         return NULL;
@@ -127,7 +132,7 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
 
 void BleTransCacheFree(int32_t halConnId, int32_t index)
 {
-    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnId);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransCacheFree unknown device");
         return;
@@ -142,53 +147,59 @@ void BleTransCacheFree(int32_t halConnId, int32_t index)
 static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t module)
 {
     if (connInfo->info.isServer == 1) {
-        SoftBusGattsNotify notify = {
-            .connectId = connInfo->halConnId,
-            .attrHandle =  GetBleAttrHandle(module),
-            .confirm = 0,
-            .valueLen = len,
-            .value = (char *)data
-        };
-        return SoftBusGattsSendNotify(&notify);
+        return SoftBusGattServerSend(connInfo->halConnId, data, len, module);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendBleData ble gatt client not support");
-        return SOFTBUS_ERR;
+        return SoftBusGattClientSend(connInfo->halConnId, data, len, module);
     }
 }
 
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module)
 {
-    int32_t templen = len;
+    int32_t tempLen = len;
     char *sendData = (char *)data;
     int32_t dataLenMax = connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader);
     int32_t offset = 0;
-    while (templen > 0) {
-        int32_t sendlenth = templen;
-        if (sendlenth > dataLenMax) {
-            sendlenth = dataLenMax;
+    while (tempLen > 0) {
+        int32_t sendLenth = tempLen;
+        if (sendLenth > dataLenMax) {
+            sendLenth = dataLenMax;
         }
-        char *buff = (char *)SoftBusCalloc(sendlenth + sizeof(BleTransHeader));
-        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendlenth, sendData, sendlenth);
-        if (ret != SOFTBUS_OK) {
-            LOG_INFO("BleTransSend big msg, len:%{public}d\n", templen);
+        char *buff = (char *)SoftBusCalloc(sendLenth + sizeof(BleTransHeader));
+        if (buff == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendLenth, sendData, sendLenth);
+        if (ret != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend big msg, len:%d\n", tempLen);
             SoftBusFree(buff);
             return ret;
         }
         BleTransHeader *transHeader = (BleTransHeader *)buff;
         transHeader->total = htonl(len);
-        transHeader->size = htonl(sendlenth);
+        transHeader->size = htonl(sendLenth);
         transHeader->offset = htonl(offset);
         transHeader->seq = htonl(seq);
-        ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendlenth + sizeof(BleTransHeader), module);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend  module:%d", module);
+        ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLenth + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
-            LOG_INFO("BleTransSend BleHalSend failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend BleHalSend failed");
             SoftBusFree(buff);
             return ret;
         }
         SoftBusFree(buff);
-        sendData += sendlenth;
-        templen -= sendlenth;
-        offset += sendlenth;
+        sendData += sendLenth;
+        tempLen -= sendLenth;
+        offset += sendLenth;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t BleTransInit(SoftBusBleTransCalback *cb)
+{
+    if (cb == NULL) {
+        return SOFTBUS_ERR;
+    }
+    g_softBusBleTransCb = cb;
     return SOFTBUS_OK;
 }

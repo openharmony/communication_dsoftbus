@@ -198,9 +198,9 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
-    cJSON *root = 0;
+    cJSON *root = NULL;
     SessionKeyBase64 sessionBase64;
-    char *buf = 0;
+    char *buf = NULL;
     AppInfo *appInfo = &(info->appInfo);
     int32_t ret;
 
@@ -214,38 +214,39 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
         !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
         !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName)) {
-        cJSON_Delete(root);
-        return NULL;
+        goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
 
     if (appInfo->appType == APP_TYPE_NORMAL) {
         ret = PackHandshakeMsgForNormal(&sessionBase64, appInfo, root);
         if (ret != SOFTBUS_OK) {
-            cJSON_Delete(root);
-            return NULL;
+            goto EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
+        if (strlen(appInfo->reqId) == 0 && GenerateRandomStr(appInfo->reqId, REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
+            goto EXIT;
+        }
+        if (!AddStringToJsonObject(root, JSON_KEY_REQUEST_ID, appInfo->reqId)) {
+            goto EXIT;
+        }
         if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
-            cJSON_Delete(root);
-            return NULL;
+            goto EXIT;
         }
     } else {
-        ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64,
-            sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
-            (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+        ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64, sizeof(sessionBase64.sessionKeyBase64),
+            &(sessionBase64.len), (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls_base64_encode FAIL %d", ret);
-            cJSON_Delete(root);
-            return NULL;
+            goto EXIT;
         }
         if (!AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64.sessionKeyBase64)) {
-            cJSON_Delete(root);
-            return NULL;
+            goto EXIT;
         }
     }
 
     buf = cJSON_PrintUnformatted(root);
+EXIT:
     cJSON_Delete(root);
     return buf;
 }
@@ -336,6 +337,20 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
     return SOFTBUS_OK;
 }
 
+static int32_t TransProxyUnpackAuthHandshakeMsg(cJSON *root, AppInfo *appInfo)
+{
+    if (!GetJsonObjectStringItem(root, JSON_KEY_REQUEST_ID, appInfo->reqId, REQ_ID_SIZE_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg REQUEST_ID");
+        return SOFTBUS_ERR;
+    }
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME,
+        appInfo->peerData.pkgName, sizeof(appInfo->peerData.pkgName))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg pkgName");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
 {
     cJSON *root = cJSON_Parse(msg);
@@ -367,9 +382,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
             return ret;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
-        if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME,
-            appInfo->peerData.pkgName, sizeof(appInfo->peerData.pkgName))) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
+        if (TransProxyUnpackAuthHandshakeMsg(root, appInfo) != SOFTBUS_OK) {
             cJSON_Delete(root);
             return SOFTBUS_ERR;
         }

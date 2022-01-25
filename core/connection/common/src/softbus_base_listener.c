@@ -874,6 +874,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     SoftbusBaseListenerInfo *info = g_listenerList[module].info;
     if (info == NULL) {
         SoftBusMutexUnlock(&g_listenerList[module].lock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "DelTrigger base listener info is NULL");
         return SOFTBUS_ERR;
     }
 

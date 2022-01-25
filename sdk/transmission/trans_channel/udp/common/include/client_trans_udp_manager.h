@@ -33,6 +33,7 @@ typedef struct {
     void (*OnMessageReceived)(void);
     void (*OnUdpChannelOpened)(int32_t channelId);
     void (*OnUdpChannelClosed)(int32_t channelId);
+    void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
 } UdpChannelMgrCb;
 
 typedef struct {

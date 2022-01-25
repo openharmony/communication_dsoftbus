@@ -16,6 +16,7 @@
 #include "client_trans_stream.h"
 
 #include "client_trans_udp_stream_interface.h"
+#include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -86,9 +87,18 @@ static void OnStreamReceived(int32_t channelId, const StreamData *data, const St
     g_udpChannelMgrCb->OnStreamReceived(channelId, data, ext, param);
 }
 
+static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+{
+    if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnQosEvent == NULL)) {
+        return;
+    }
+    g_udpChannelMgrCb->OnQosEvent(channelId, eventId, tvCount, tvList);
+}
+
 static IStreamListener g_streamCallcb = {
     .OnStatusChange = SetStreamChannelStatus,
     .OnStreamReceived = OnStreamReceived,
+    .OnQosEvent = OnQosEvent,
 };
 
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)

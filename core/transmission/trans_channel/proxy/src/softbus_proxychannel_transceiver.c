@@ -502,6 +502,11 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
                 break;
             }
             case CONNECT_BLE:
+                if (strcmp(connInfo->info.bleOption.bleMac, item->connInfo.info.bleOption.bleMac) == 0) {
+                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy error");
+                    find = true;
+                }
+                break;
             default:
                 break;
         }
