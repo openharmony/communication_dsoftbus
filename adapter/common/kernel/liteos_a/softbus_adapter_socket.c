@@ -169,7 +169,6 @@ void SoftBusSocketFdZero(SoftBusFdSet *set)
     }
 
     FD_ZERO((fd_set *)set->fdsBits);
-
 }
 
 void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
@@ -190,8 +189,6 @@ void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set)
     }
 
     FD_CLR(socketFd, (fd_set *)set->fdsBits);
-
-;
 }
 
 int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
@@ -214,11 +211,10 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
     if (timeOut == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timeOut is null");
         return SOFTBUS_ADAPTER_ERR;
-
     }
-    fd_set * tempReadSet = NULL;
-    fd_set * tempWriteSet = NULL;
-    fd_set * tempExceptSet = NULL;
+    fd_set *tempReadSet = NULL;
+    fd_set *tempWriteSet = NULL;
+    fd_set *tempExceptSet = NULL;
 
     if (readFds != NULL) {
         tempReadSet = (fd_set *)readFds->fdsBits;
@@ -231,7 +227,7 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
     }
     int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, timeOut);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));        
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));
         return GetErrorCode();
     }
 
