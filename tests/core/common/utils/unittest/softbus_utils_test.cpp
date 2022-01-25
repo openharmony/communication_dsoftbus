@@ -33,7 +33,7 @@ void MockSoftBusTimer(void)
 
 /**
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Normal destory softbus list test.
+ * @tc.desc: Normal destroy softbus list test.
  * @tc.type: FUNC
  * @tc.require:
  */

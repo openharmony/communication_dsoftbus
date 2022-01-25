@@ -58,12 +58,11 @@ static int InnerRegisterService(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
         return SOFTBUS_ERR;
     }
-    int ret = serverProxyFrame->SoftbusRegisterService(clientName, nullptr);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerIpcRegisterService failed!\n");
-        return ret;
+    while (serverProxyFrame->SoftbusRegisterService(clientName, nullptr) != SOFTBUS_OK) {
+        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        continue;
     }
-    ret = ReCreateSessionServerToServer();
+    int32_t ret = ReCreateSessionServerToServer();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReCreateSessionServerToServer failed!\n");
         return ret;

@@ -316,7 +316,11 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     }
 
     transInfo.channelId = ServerIpcOpenAuthSession(sessionName, addr);
-    transInfo.channelType = CHANNEL_TYPE_AUTH;
+    if (addr->type == CONNECTION_ADDR_BR || addr->type == CONNECTION_ADDR_BLE) {
+        transInfo.channelType = CHANNEL_TYPE_PROXY;
+    } else {
+        transInfo.channelType = CHANNEL_TYPE_AUTH;
+    }
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");

@@ -11,19 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import(
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/net_bluetooth.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ble_connection_deps = []
 if (enable_connection_ble == false) {
   ble_connection_src = [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection_virtual.c" ]
   ble_connection_inc = [ "$dsoftbus_root_path/core/connection/ble/include" ]
+  if (enable_connection_br == true) {
+    ble_connection_src += adapter_net_br_src
+    ble_connection_inc += adapter_ble_inc
+    ble_connection_deps += adapter_ble_deps
+  }
 } else {
   ble_connection_src = [
     "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_gatt_client.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_gatt_server.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_queue.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_trans_manager.c",
   ]
   ble_connection_inc = [
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/ble/src",
   ]
+  ble_connection_src += adapter_ble_src
+  ble_connection_inc += adapter_ble_inc
+  ble_connection_deps += adapter_ble_deps
 }

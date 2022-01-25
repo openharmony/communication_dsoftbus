@@ -54,6 +54,20 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *
     return true;
 }
 
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
+{
+    if (json == NULL || string == NULL || target == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsNumber(item)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
+        return false;
+    }
+    *target = (int)item->valuedouble;
+    return true;
+}
+
 bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
@@ -138,6 +152,23 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     cJSON *item = cJSON_CreateNumber(num);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON number object [%s]", string);
+        return false;
+    }
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
+bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
+{
+    if (json == NULL || string == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_CreateBool(value);
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON bool object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {

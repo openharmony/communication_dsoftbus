@@ -483,6 +483,7 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "generate auth param failed");
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start auth device, enter hichain process");
     if (auth->hichain->authDevice(auth->authId, authParams, &g_hichainCallback) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authDevice failed");
         cJSON_free(authParams);
@@ -647,9 +648,10 @@ void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len
         auth->encryptLen = len;
     }
     if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG &&
-        auth->encryptInfoStatus == KEY_GENERATEG_STATE && auth->cb->onKeyGenerated != NULL) {
-        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
+        auth->encryptInfoStatus == KEY_GENERATEG_STATE &&
+        auth->status == IN_SYNC_PROGRESS && auth->cb->onKeyGenerated != NULL) {
         auth->encryptInfoStatus = RECV_ENCRYPT_DATA_STATE;
+        auth->cb->onKeyGenerated(auth->authId, &auth->option, auth->peerVersion);
         return;
     }
 

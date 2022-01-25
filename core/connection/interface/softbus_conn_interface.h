@@ -40,6 +40,7 @@ typedef enum {
     MODULE_PROXY_CHANNEL = 13,
     MODULE_DEVICE_AUTH = 14,
     MODULE_P2P_LINK = 15,
+    MODULE_P2P_LISTEN = 16,
     MODULE_UDP_INFO = 17,
     MODULE_TIME_SYNC = 18,
     MODULE_PKG_VERIFY = 20,
@@ -70,6 +71,7 @@ typedef struct {
             char ip[IP_LEN];
             int32_t port;
             int32_t fd;
+            int32_t moduleId; /* For details, see {@link ListenerModule}. */
         } ipInfo;
     } info;
 } ConnectionInfo;
@@ -124,6 +126,7 @@ typedef struct {
         struct IpListenerInfo {
             char ip[IP_LEN];
             int32_t port;
+            int32_t moduleId; /* For details, see {@link ListenerModule}. */
         } ipListenerInfo;
     } info;
 } LocalListenerInfo;

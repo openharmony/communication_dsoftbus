@@ -26,7 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define STATE_LISTENER_MAX_NUM 2
+#define STATE_LISTENER_MAX_NUM 3
 
 typedef struct {
     bool isUsed;

@@ -66,7 +66,7 @@ int TransClientInit(void)
     }
 
     ClientTransRegLnnOffline();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init succ");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init trans client success");
     return SOFTBUS_OK;
 }
 
@@ -297,6 +297,7 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
     session->isServer = false;
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
+    session->isEncrypt = true;
 
     return session;
 }
@@ -447,6 +448,7 @@ static SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
         return NULL;
     }
     session->channelType = CHANNEL_TYPE_AUTH;
+    session->isEncrypt = false;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         SoftBusFree(session);
         return NULL;
@@ -715,6 +717,45 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
     return SOFTBUS_OK;
 }
 
+int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data)
+{
+    if ((channelId < 0) || (data == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId == channelId && (int32_t)sessionNode->channelType == channelType) {
+                *data = (int32_t)sessionNode->isEncrypt;
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d]", channelId);
+    return SOFTBUS_ERR;
+}
+
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId)
 {
     if ((channelId < 0) || (sessionId == NULL)) {
@@ -787,7 +828,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isServer = channel->isServer;
                 sessionNode->isEnable = true;
                 *sessionId = sessionNode->sessionId;
-                if (channel->channelType == CHANNEL_TYPE_AUTH) {
+                if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
                             channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
                         (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);

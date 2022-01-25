@@ -284,17 +284,69 @@ EXIT_ERR:
     return INVALID_CHANNEL_ID;
 }
 
+static AppInfo *GetAuthAppInfo(const char *mySessionName)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo");
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return NULL;
+    }
+    appInfo->appType = APP_TYPE_AUTH;
+    appInfo->myData.apiVersion = API_V2;
+    if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
+        goto EXIT_ERR;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
+        sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get deviceId failed");
+        goto EXIT_ERR;
+    }
+    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), mySessionName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo strcpy_s mySessionName failed");
+        goto EXIT_ERR;
+    }
+    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), mySessionName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo strcpy_s peerSessionName failed");
+        goto EXIT_ERR;
+    }
+    if (TransGetPkgNameBySessionName(mySessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get PkgName failed");
+        goto EXIT_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo ok");
+    return appInfo;
+EXIT_ERR:
+    if (appInfo != NULL) {
+        SoftBusFree(appInfo);
+    }
+    return NULL;
+}
+
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
         return channelId;
     }
-    if (connOpt->type != CONNECT_TCP) {
-        return channelId;
-    }
-    if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId) != SOFTBUS_OK) {
-        return INVALID_CHANNEL_ID;
+
+    if (connOpt->type == CONNECT_TCP) {
+        if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId) != SOFTBUS_OK) {
+            return INVALID_CHANNEL_ID;
+        }
+    } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE) {
+        AppInfo *appInfo = GetAuthAppInfo(sessionName);
+        if (appInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo failed");
+            return INVALID_CHANNEL_ID;
+        }
+        if (TransProxyOpenProxyChannel(appInfo, connOpt, &channelId) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenAuthChannel proxy channel err");
+            SoftBusFree(appInfo);
+            return INVALID_CHANNEL_ID;
+        }
+        SoftBusFree(appInfo);
     }
     return channelId;
 }

@@ -236,11 +236,9 @@ static int DataSend(int size, int type)
 void Wait()
 {
     LOG_INFO("[test]Wait enter");
-SLEEP:
-    sleep(1);
-    if (g_state == false) {
-        goto SLEEP;
-    }
+    do {
+        sleep(1);
+    } while (!g_state);
     LOG_INFO("[test]Wait end");
     g_state = false;
 }
@@ -269,9 +267,8 @@ void TearDownTestCase()
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_SendByte_Func_0100
- * @tc.name   : SendByte_数据包大小1B，发送-接收成功
- * @tc.desc   : 测试SendByte发送数据规格
+ * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0100
+ * @tc.desc   : Test limiation of SendByte
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -289,9 +286,8 @@ void TransFuncTest001(void)
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_SendByte_Func_0200
- * @tc.name   : SendByte_数据包大小2K，发送-接收成功
- * @tc.desc   : 测试SendByte发送数据规格
+ * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0200
+ * @tc.desc   : Test up limitation data size of SendByte
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -309,9 +305,8 @@ void TransFuncTest002(void)
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_SendByte_Func_0300
- * @tc.name   : SendByte_数据包大小Max，发送-接收成功
- * @tc.desc   : 测试SendByte发送数据规格
+ * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0300
+ * @tc.desc   : Test up limitation data size of SendByte
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -329,9 +324,8 @@ void TransFuncTest003(void)
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_SendMessage_Func_0100
- * @tc.name   : SendMessage_数据包大小1B，发送-接收成功
- * @tc.desc   : 测试SendMessage发送数据规格
+ * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0100
+ * @tc.desc   : Test the minimum data size of SendMessage
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -349,9 +343,8 @@ void TransFuncTest004(void)
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_SendMessage_Func_0200
- * @tc.name   : SendMessage_数据包大小1000B，发送-接收成功
- * @tc.desc   : 测试SendMessage发送数据规格
+ * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0200
+ * @tc.desc   : Test send 1000 Byte data size via function SendMessage
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */
@@ -369,9 +362,8 @@ void TransFuncTest005(void)
 }
 
 /**
- * @tc.number : SUB_Softbus_Trans_Session_Func_0100
- * @tc.name   : 1个Client_创建SessionServer_Max个，成功
- * @tc.desc   : 测试会话管理
+ * @tc.name   : SUB_Softbus_Trans_Session_Func_0100
+ * @tc.desc   : Test the maximum number of sessions that can be create by function CreateSessionServer
  * @tc.type   : FUNC
  * @tc.size   : MediumTest
  */

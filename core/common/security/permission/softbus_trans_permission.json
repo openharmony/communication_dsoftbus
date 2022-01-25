@@ -50,6 +50,19 @@
     ]
   },
   {
+    "SESSION_NAME": "objectstoreDB-*",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "normal_app",
+        "PKG_NAME": "ohos.objectstore",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "ohos.distributedschedule.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
@@ -91,17 +104,6 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.distributedhardware.devicemanager",
-        "TYPE": "system_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "objectstore",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "com.objectstore.foundation",
         "TYPE": "system_app",
         "ACTIONS": "create,open"
       }

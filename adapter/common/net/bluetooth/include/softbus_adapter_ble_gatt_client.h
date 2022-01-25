@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H
+#define SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H
+
+#include "stdbool.h"
+#include "stdint.h"
+#include "softbus_adapter_bt_common.h"
+
+typedef struct {
+    SoftBusBtUuid charaUuid;
+    uint16_t dataLen;
+    uint8_t *data;
+} SoftBusGattcNotify;
+
+typedef struct {
+    SoftBusBtUuid serviceUuid;
+    SoftBusBtUuid characterUuid;
+    int32_t valueLen;
+    char *value;
+} SoftBusGattcData;
+
+typedef struct {
+    void (*ConnectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
+    void (*ServiceCompleteCallback)(int32_t clientId, int32_t status);
+    void (*RegistNotificationCallback)(int32_t clientId, int status);
+    void (*NotificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
+    void (*ConfigureMtuSizeCallback)(int clientId, int mtuSize, int status);
+} SoftBusGattcCallback;
+
+void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb);
+int32_t SoftbusGattcRegister(void);
+int32_t SoftbusGattcUnRegister(int32_t clientId);
+int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr);
+int32_t SoftbusBleGattcDisconnect(int32_t clientId);
+int32_t SoftbusGattcSearchServices(int32_t clientId);
+int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid);
+int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid);
+int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData);
+int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
+
+#endif /* SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H */

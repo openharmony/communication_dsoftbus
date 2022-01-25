@@ -45,6 +45,7 @@ typedef struct {
     bool isEnable;
     int32_t peerUid;
     int32_t peerPid;
+    bool isEncrypt;
 } SessionInfo;
 
 typedef struct {
@@ -89,6 +90,8 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable);
 
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
+
+int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
