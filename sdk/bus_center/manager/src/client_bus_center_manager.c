@@ -651,6 +651,21 @@ int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
     return ret;
 }
 
+int32_t ActiveMetaNodeInner(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    return ServerIpcActiveMetaNode(pkgName, info, metaNodeId);
+}
+
+int32_t DeactiveMetaNodeInner(const char *pkgName, const char *metaNodeId)
+{
+    return ServerIpcDeactiveMetaNode(pkgName, metaNodeId);
+}
+
+int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
+{
+    return ServerIpcGetAllMetaNodeInfo(pkgName, infos, infoNum);
+}
+
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;

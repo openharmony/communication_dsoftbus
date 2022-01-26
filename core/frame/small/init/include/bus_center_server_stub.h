@@ -36,6 +36,9 @@ int32_t ServerPublishLNN(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerStopPublishLNN(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerStopRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerActiveMetaNode(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerDeactiveMetaNode(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerGetAllMetaNodeInfo(const void *origin, IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

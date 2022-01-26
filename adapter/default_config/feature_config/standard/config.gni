@@ -28,6 +28,7 @@ declare_args() {
   enable_time_sync = true
   enable_qos = true
   enable_dsoftbus_driver = false
+  enable_lnn_meta_node = true
 
   enable_build_shared_sdk = true
 }

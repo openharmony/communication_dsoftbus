@@ -231,6 +231,21 @@ int32_t SoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
     return LnnIpcStopRefreshLNN(pkgName, refreshId);
 }
 
+int32_t SoftBusServer::ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    return LnnIpcActiveMetaNode(info, metaNodeId);
+}
+
+int32_t SoftBusServer::DeactiveMetaNode(const char *metaNodeId)
+{
+    return LnnIpcDeactiveMetaNode(metaNodeId);
+}
+
+int32_t SoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
+{
+    return LnnIpcGetAllMetaNodeInfo(info, infoNum);
+}
+
 void SoftBusServer::OnStart()
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServer OnStart called!\n");

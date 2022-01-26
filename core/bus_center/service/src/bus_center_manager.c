@@ -25,6 +25,7 @@
 #include "lnn_event_monitor.h"
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_meta_node_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
@@ -135,6 +136,10 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init distributed net ledger fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node ledger fail!");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitSyncLedgerItem() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync ledger item fail!");
         return SOFTBUS_ERR;
@@ -174,6 +179,7 @@ void BusCenterServerDeinit(void)
 {
     LnnDeinitLocalLedger();
     LnnDeinitDistributedLedger();
+    LnnDeinitMetaNodeLedger();
     LnnDeinitNetBuilder();
     LnnDeinitSyncLedgerItem();
     LnnDeinitEventMonitor();

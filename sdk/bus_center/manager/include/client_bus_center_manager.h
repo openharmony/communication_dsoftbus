@@ -43,6 +43,9 @@ int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPub
 int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId);
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
 int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId);
+int32_t ActiveMetaNodeInner(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId);
+int32_t DeactiveMetaNodeInner(const char *pkgName, const char *metaNodeId);
+int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);

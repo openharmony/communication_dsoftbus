@@ -541,4 +541,96 @@ int32_t BusCenterServerProxy::StopRefreshLNN(const char *pkgName, int32_t refres
     }
     return serverRet;
 }
+
+int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteRawData(info, sizeof(MetaNodeConfigInfo))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode write meta node config failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_ACTIVE_META_NODE, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode send request failed!");
+        return SOFTBUS_ERR;
+    }
+    char *retBuf = (char *)reply.ReadCString();
+    if (retBuf == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode read meta node id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(metaNodeId, NETWORK_ID_BUF_LEN, retBuf, strlen(retBuf)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode copy meta node id failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(metaNodeId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeactiveMetaNode write meta node id failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_DEACTIVE_META_NODE, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeactiveMetaNode send request failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInt32(*infoNum)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write infoNum failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_GET_ALL_META_NODE_INFO, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retInfoNum;
+    if (!reply.ReadInt32(retInfoNum)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo read infoNum failed!");
+        return SOFTBUS_ERR;
+    }
+    if (retInfoNum > 0) {
+        char *retBuf = (char *)reply.ReadRawData(retInfoNum * sizeof(MetaNodeInfo));
+        if (retBuf == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo read meta node failed!");
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(infos, *infoNum * sizeof(MetaNodeInfo), retBuf, retInfoNum * sizeof(MetaNodeInfo)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo copy meta node info failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    *infoNum = retInfoNum;
+    return SOFTBUS_OK;
+}
 }

@@ -97,6 +97,22 @@ extern "C" {
 #define EVENT_NODE_STATE_MASK 0x07
 
 /**
+ * @brief The maximum length of meta node bypass info {@link MetaNodeConfigInfo.bypassInfo}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define META_NODE_BYPASS_INFO_LEN 64
+
+/**
+ * @brief The maximum of meta node {@link MetaNodeConfigInfo.bypassInfo}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define MAX_META_NODE_NUM 3
+
+/**
  * @brief Enumerates keys for an online device.
  * The key can be obtained via {@link GetNodeKeyInfo}.
  *
@@ -317,6 +333,33 @@ typedef struct {
      */
     void (*onTimeSyncResult)(const TimeSyncResultInfo *info, int32_t retCode);
 } ITimeSyncCb;
+
+/**
+ * @brief Defines a meta node configuration, see {@link ActiveMetaNode}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    char deviceName[DEVICE_NAME_BUF_LEN];
+    uint16_t deviceTypeId;
+    uint8_t addrNum;
+    ConnectionAddr addr[CONNECTION_ADDR_MAX];
+    char bypassInfo[META_NODE_BYPASS_INFO_LEN];
+} MetaNodeConfigInfo;
+
+/**
+ * @brief Defines a meta node infomation, see {@link GetAllMetaNodeInfo}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    char metaNodeId[NETWORK_ID_BUF_LEN];
+    bool isOnline;
+    MetaNodeConfigInfo configInfo;
+} MetaNodeInfo;
 
 /**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
@@ -552,6 +595,51 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
  * @return Returns <b>SOFTBUS_OK</b> if the service unsubscription is successful.
  */
 int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
+
+/**
+ * @brief Active meta node. The meta node online status will be notified by {@link INodeStateCb}
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param info Meta node configuration infomation, see {@link MetaNodeConfigInfo}.
+ * @param metaNodeId Save meta node ID when it is activated successfully, its buffer length must be not
+ * less then NETWORK_ID_BUF_LEN
+ *
+ * @return Returns <b>0</b> if the meta node is activated; returns any other value if the request fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t ActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId);
+
+/**
+ * @brief Deactive meta node. The meta node will be removed.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param metaNodeId The meta node ID which deactivated, it's obtained by {@link ActiveMetaNode}.
+ *
+ * @return Returns <b>0</b> if the meta node is deactivated; returns any other value if the request fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t DeactiveMetaNode(const char *pkgName, const char *metaNodeId);
+
+/**
+ * @brief Get all meta node by {@link ActiveMetaNode}.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param infos The buffer for save meta node info.
+ * @param infoNum The infos buffer num which maximum is {@link MAX_META_NODE_NUM}.
+ *
+ * @return Returns <b>0</b> if the call is success; returns any other value if it fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 
 #ifdef __cplusplus
 }
