@@ -1,7 +1,7 @@
 {
     "name": "@openharmony/dsoftbus_standard",
     "version": "3.1.0",
-    "description": "dsoftbus",
+    "description": "dsoftbus_standard",
     "publishAs": "code-segment",
     "scripts": {
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/communication/dsoftbus && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
@@ -44,7 +44,7 @@
         ],
         "inner_kits": [
           {
-            "name": "//foundation/communication/dsoftbus_standard/sdk:softbus_client",
+            "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
             "header": {
               "header_files": [
                 "bus_center/softbus_bus_center.h",
