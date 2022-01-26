@@ -261,7 +261,7 @@ int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerPublishLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerPublishLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerPublishLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -295,7 +295,7 @@ int32_t ServerPublishLNN(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStopPublishLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStopPublishLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopPublishLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -323,7 +323,7 @@ int32_t ServerStopPublishLNN(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerRefreshLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerRefreshLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -357,7 +357,7 @@ int32_t ServerRefreshLNN(void *origin, IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStopRefreshLNN(void *origin, IpcIo *req, IpcIo *reply)
+int32_t ServerStopRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopRefreshLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
