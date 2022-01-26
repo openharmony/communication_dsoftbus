@@ -13,5 +13,43 @@
  * limitations under the License.
  */
 
+#include "if_softbus_server.h"
+
+#include "softbus_log.h"
+#include "softbus_errcode.h"
+
 namespace OHOS {
+int32_t ISoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PublishLNN ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    (void)pkgName;
+    (void)publishId;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopPublishLNN ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RefreshLNN ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    (void)pkgName;
+    (void)refreshId;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopRefreshLNN ipc default impl");
+    return SOFTBUS_ERR;
+}
 } // namespace OHOS

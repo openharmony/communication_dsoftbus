@@ -197,6 +197,62 @@ typedef struct {
 } TimeSyncResultInfo;
 
 /**
+ * @brief Enumerates error codes for service publishing failures.
+ *
+ * The error codes are returned to the caller through <b>IPublishCallback</b>.
+ *
+ */
+typedef enum {
+    /* publish success */
+    PUBLISH_LNN_SUCCESS = 0,
+    /* Unsupported medium */
+    PUBLISH_LNN_NOT_SUPPORT_MEDIUM = 1,
+    /* internal error */
+    PUBLISH_LNN_INTERNAL = 2,
+    /* Unknown reason */
+    PUBLISH_LNN_UNKNOWN = 0xFF
+} PublishResult;
+
+/**
+ * @brief Enumerates error codes for service subscription failures.
+ *
+ * The error codes are returned to the caller through <b>IDiscoveryCallback</b>.
+ *
+ */
+typedef enum {
+    /* refresh success */
+    REFRESH_LNN_SUCCESS = 0,
+    /* Unsupported medium */
+    REFRESH_LNN_NOT_SUPPORT_MEDIUM = 1,
+    /* internal error */
+    REFRESH_LNN_INTERNAL = 2,
+    /* Unknown error */
+    REFRESH_LNN_UNKNOWN = 0xFF
+} RefreshResult;
+
+/**
+ * @brief Defines the callbacks for successful and failed service publishing.
+ *
+ */
+typedef struct {
+    /** Callback for publish result */
+    void (*OnPublishResult)(int publishId, PublishResult reason);
+} IPublishCb;
+
+/**
+ * @brief Defines a callback for service subscription.
+ *
+ * Three types of callbacks are available.
+ *
+ */
+typedef struct {
+    /** Callback that is invoked when a device is found */
+    void (*OnDeviceFound)(const DeviceInfo *device);
+    /** Callback for a subscription result */
+    void (*OnDiscoverResult)(int32_t refreshId, RefreshResult reason);
+} IRefreshCallback;
+
+/**
  * @brief Defines a callback that is invoked when the device state or information changes.
  * For details, see {@link RegNodeDeviceStateCb}.
  *
@@ -441,6 +497,61 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
  * @version 1.0
  */
 int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId);
+
+/**
+ * @brief Publishes a specified service.
+ *
+ * Peer devices in the same LAN as the device that publishes this service can discover this service as needed.
+ * The service is identified by <b>publicId</b> and <b>pkgName</b>.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param info Indicates the pointer to the service publishing information. For details, see {@link PublishInfo}.
+ * @param cb Indicates the pointer to the service publishing callback {@link IPublishCallback}.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service is successfully published.
+ */
+int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
+
+/**
+ * @brief stoppublishes a specified service.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param publishId Indicates the service ID.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_OK</b> if the service is successfully unpublished.
+ */
+int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
+
+/**
+ * @brief Subscribes to a specified service.
+ *
+ * Information about the device that publishes the service will be reported to the device that subscribes to
+ * the service.
+ * The service is identified by <b>subscribeId</b> and <b>pkgName</b>.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param info Indicates the pointer to the service subscription information. For details, see {@link RefreshInfo}.
+ * @param cb Indicates the service subscription callback {@link IRefreshCallback}.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful.
+ */
+int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
+
+/**
+ * @brief Unsubscribes from a specified service.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param refreshId Indicates the service ID.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_OK</b> if the service unsubscription is successful.
+ */
+int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
 
 #ifdef __cplusplus
 }

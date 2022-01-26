@@ -117,6 +117,14 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::StopTimeSyncInner;
     memberFuncMap_[SERVER_QOS_REPORT] =
         &SoftBusServerStub::QosReportInner;
+    memberFuncMap_[SERVER_PUBLISH_LNN] =
+        &SoftBusServerStub::PublishLNNInner;
+    memberFuncMap_[SERVER_STOP_PUBLISH_LNN] =
+        &SoftBusServerStub::StopPublishLNNInner;
+    memberFuncMap_[SERVER_REFRESH_LNN] =
+        &SoftBusServerStub::RefreshLNNInner;
+    memberFuncMap_[SERVER_STOP_REFRESH_LNN] =
+        &SoftBusServerStub::StopRefreshLNNInner;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -653,6 +661,96 @@ int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &re
     int32_t retReply = QosReport(channelId, channelType, appType, quality);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *clientName = data.ReadCString();
+    if (clientName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read clientName failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t infoTypeLen;
+    if (!data.ReadUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info type length failed!");
+        return SOFTBUS_ERR;
+    }
+    const void *info = (void *)data.ReadRawData(infoTypeLen);
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = PublishLNN(clientName, info, infoTypeLen);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopPublishLNNInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *clientName = data.ReadCString();
+    if (clientName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner read clientName failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t publishId;
+    if (!data.ReadInt32(publishId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner read publishId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = StopPublishLNN(clientName, publishId);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *clientName = data.ReadCString();
+    if (clientName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read clientName failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t infoTypeLen;
+    if (!data.ReadUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info type length failed!");
+        return SOFTBUS_ERR;
+    }
+    const void *info = (void *)data.ReadRawData(infoTypeLen);
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = RefreshLNN(clientName, info, infoTypeLen);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *clientName = data.ReadCString();
+    if (clientName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner read clientName failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t refreshId;
+    if (!data.ReadInt32(refreshId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner read refreshId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = StopRefreshLNN(clientName, refreshId);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

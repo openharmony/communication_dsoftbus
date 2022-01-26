@@ -26,8 +26,12 @@ namespace OHOS {
 using namespace testing::ext;
 
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
+constexpr char TEST_PKG_ERROR_NAME[] = "com.softbus.error.test";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
+constexpr int32_t ERRO_CAPDATA_LEN = 514;
+static int32_t g_subscribeId = 0;
+static int32_t g_publishId = 0;
 
 class BusCenterSdkTest : public testing::Test {
 public:
@@ -52,6 +56,62 @@ void BusCenterSdkTest::SetUp()
 void BusCenterSdkTest::TearDown()
 {
 }
+
+static int32_t GetSubscribeId(void)
+{
+    g_subscribeId++;
+    return g_subscribeId;
+}
+
+static int32_t GetPublishId(void)
+{
+    g_publishId++;
+    return g_publishId;
+}
+
+static SubscribeInfo g_sInfo = {
+    .subscribeId = 1,
+    .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
+    .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
+    .capability = "dvKit",
+    .capabilityData = (unsigned char *)"capdata3",
+    .dataLen = sizeof("capdata3")
+};
+
+static PublishInfo g_pInfo = {
+    .publishId = 1,
+    .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
+    .freq = MID,
+    .capability = "dvKit",
+    .capabilityData = (unsigned char *)"capdata4",
+    .dataLen = sizeof("capdata4")
+};
+
+static PublishInfo g_pInfo1 = {
+    .publishId = 1,
+    .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
+    .freq = MID,
+    .capability = "dvKit",
+    .capabilityData = NULL,
+    .dataLen = 0
+};
+
+static SubscribeInfo g_sInfo1 = {
+    .subscribeId = 1,
+    .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
+    .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
+    .capability = "hicall",
+    .capabilityData = NULL,
+    .dataLen = 0,
+};
 
 static void OnNodeOnline(NodeBasicInfo *info)
 {
@@ -84,6 +144,30 @@ static void OnTimeSyncResult(const TimeSyncResultInfo *info, int32_t retCode)
 
 static ITimeSyncCb g_timeSyncCb = {
     .onTimeSyncResult = OnTimeSyncResult,
+};
+
+static void TestDeviceFound(const DeviceInfo *device)
+{
+    printf("[client]TestDeviceFound\n");
+}
+
+static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
+{
+    printf("[client]TestDiscoverResult:%d\n", reason);
+}
+
+static void TestPublishResult(int publishId, PublishResult reason)
+{
+    printf("[client]TestPublishResult:%d\n", reason);
+}
+
+static IRefreshCallback g_refreshCb = {
+    .OnDeviceFound = TestDeviceFound,
+    .OnDiscoverResult = TestDiscoverResult
+};
+
+static IPublishCb g_publishCb = {
+    .OnPublishResult = TestPublishResult
 };
 
 /*
@@ -235,5 +319,147 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
     EXPECT_TRUE(StopTimeSync(NULL, networkId) != SOFTBUS_OK);
     EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, NULL) != SOFTBUS_OK);
     EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, networkId) != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: PublishLNNTest001
+ * @tc.desc: Verify wrong parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
+{
+    int32_t ret = PublishLNN(NULL, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+
+    ret = PublishLNN(TEST_PKG_NAME, NULL, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, NULL);
+    EXPECT_TRUE(ret != 0);
+
+    g_pInfo.medium = (ExchanageMedium)(COAP + 1);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.medium = COAP;
+
+    g_pInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.mode = DISCOVER_MODE_ACTIVE;
+
+    g_pInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.freq = LOW;
+
+    g_pInfo.capabilityData = NULL;
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.capabilityData = (unsigned char *)"capdata1";
+
+    g_pInfo.dataLen = ERRO_CAPDATA_LEN;
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.dataLen = sizeof("capdata1");
+
+    ret = PublishLNN(TEST_PKG_ERROR_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+}
+
+/**
+ * @tc.name: PublishLNNTest002
+ * @tc.desc: Verify normal case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
+{
+    int32_t ret;
+    int tmpId1 = GetPublishId();
+    int tmpId2 = GetPublishId();
+
+    g_pInfo.publishId = tmpId1;
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    g_pInfo1.publishId = tmpId2;
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo1, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopPublishLNN(TEST_PKG_NAME, tmpId1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopPublishLNN(TEST_PKG_NAME, tmpId2);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: RefreshLNNTest001
+ * @tc.desc: Verify wrong parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
+{
+    int ret;
+
+    ret = RefreshLNN(NULL, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+
+    ret = RefreshLNN(TEST_PKG_ERROR_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+
+    ret = RefreshLNN(TEST_PKG_NAME, NULL, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, NULL);
+    EXPECT_TRUE(ret != 0);
+
+    g_sInfo.medium = (ExchanageMedium)(COAP + 1);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.medium = COAP;
+
+    g_sInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.mode = DISCOVER_MODE_ACTIVE;
+
+    g_sInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.freq = LOW;
+
+    g_sInfo.capabilityData = NULL;
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.capabilityData = (unsigned char *)"capdata1";
+
+    g_sInfo.dataLen = ERRO_CAPDATA_LEN;
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.dataLen = sizeof("capdata1");
+}
+
+/**
+ * @tc.name: RefreshLNNTest002
+ * @tc.desc: Verify normal case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
+{
+    int32_t ret;
+    int tmpId1 = GetSubscribeId();
+    int tmpId2 = GetSubscribeId();
+
+    g_sInfo.subscribeId = tmpId1;
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret == 0);
+    g_sInfo1.subscribeId = tmpId2;
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo1, &g_refreshCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(TEST_PKG_NAME, tmpId1);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(TEST_PKG_NAME, tmpId2);
+    EXPECT_TRUE(ret == 0);
 }
 } // namespace OHOS

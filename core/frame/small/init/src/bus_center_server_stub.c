@@ -260,3 +260,127 @@ int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply)
     }
     return SOFTBUS_OK;
 }
+
+int32_t ServerPublishLNN(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerPublishLNN ipc server pop.");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len;
+    uint32_t size;
+    const char *pkgName = (const char*)IpcIoPopString(req, &len);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t infoLen = IpcIoPopUint32(req);
+    void *info = (void*)IpcIoPopFlatObj(req, &size);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read info is null.");
+        return SOFTBUS_ERR;
+    }
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcPublishLNN(pkgName, info, infoLen);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerStopPublishLNN(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopPublishLNN ipc server pop.");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len;
+    const char *pkgName = (const char*)IpcIoPopString(req, &len);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopPublishLNN read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t publishId = IpcIoPopInt32(req);
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopPublishLNN no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcStopPublishLNN(pkgName, publishId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopPublishLNN failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerRefreshLNN ipc server pop.");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len;
+    uint32_t size;
+    const char *pkgName = (const char*)IpcIoPopString(req, &len);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    uint32_t infoTypeLen = IpcIoPopUint32(req);
+    void *info = (void*)IpcIoPopFlatObj(req, &size);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read info is null.");
+        return SOFTBUS_ERR;
+    }
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcRefreshLNN(pkgName, info, infoTypeLen);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerStopRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopRefreshLNN ipc server pop.");
+    if (req == NULL || reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len;
+    const char *pkgName = (const char*)IpcIoPopString(req, &len);
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopRefreshLNN read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t refreshId = IpcIoPopInt32(req);
+    int32_t callingUid = GetCallingUid(origin);
+    if (!CheckBusCenterPermission(callingUid, pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopRefreshLNN no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+
+    int32_t ret = LnnIpcStopRefreshLNN(pkgName, refreshId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopRefreshLNN failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}

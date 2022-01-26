@@ -63,3 +63,23 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     return LnnIpcStopTimeSync(pkgName, targetNetworkId);
 }
+
+int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+{
+    return LnnIpcPublishLNN(pkgName, info, infoLen);
+}
+
+int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    return LnnIpcStopPublishLNN(pkgName, publishId);
+}
+
+int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    return LnnIpcRefreshLNN(pkgName, info, infoTypeLen);
+}
+
+int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    return LnnIpcStopRefreshLNN(pkgName, refreshId);
+}
