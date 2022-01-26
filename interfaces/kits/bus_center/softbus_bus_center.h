@@ -551,7 +551,7 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_OK</b> if the service unsubscription is successful.
  */
-int32_t StopRefreshLNN(const char *pkgName, int refreshId);
+int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
 
 #ifdef __cplusplus
 }
