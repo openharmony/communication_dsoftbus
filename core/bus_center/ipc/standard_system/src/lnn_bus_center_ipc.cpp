@@ -26,6 +26,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ipc_utils.h"
+#include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -236,6 +237,21 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTyp
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     return DiscStopDiscovery(pkgName, refreshId);
+}
+
+int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    return LnnActiveMetaNode(info, metaNodeId);
+}
+
+int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
+{
+    return LnnDeactiveMetaNode(metaNodeId);
+}
+
+int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
+{
+    return LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)

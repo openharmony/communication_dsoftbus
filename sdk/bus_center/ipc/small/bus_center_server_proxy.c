@@ -34,29 +34,56 @@ typedef enum {
     GET_ALL_ONLINE_NODE_INFO = 0,
     GET_LOCAL_DEVICE_INFO,
     GET_NODE_KEY_INFO,
+    ACTIVE_META_NODE,
+    DEACTIVE_META_NODE,
+    GET_ALL_META_NODE,
 } FunID;
+
 typedef struct {
     FunID id;
-    int ret;
+    int32_t arg1;
+    int32_t retCode;
     void* data;
 } Reply;
 
 static IClientProxy *g_serverProxy = NULL;
 
-static int ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
+static int32_t ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
 {
     Reply *info = (Reply *)owner;
     uint32_t infoSize;
     switch (info->id) {
         case GET_ALL_ONLINE_NODE_INFO:
-            info->ret = IpcIoPopInt32(reply);
-            if (info->ret > 0) {
+            info->arg1 = IpcIoPopInt32(reply);
+            if (info->arg1 > 0) {
                 info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
             }
             break;
         case GET_LOCAL_DEVICE_INFO:
         case GET_NODE_KEY_INFO:
             info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+            break;
+        case ACTIVE_META_NODE:
+            info->retCode = IpcIoPopInt32(reply);
+            if (info->retCode == SOFTBUS_OK) {
+                info->data = (void *)IpcIoPopString(reply, &infoSize);
+                if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
+                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid meta node id length: %d", infoSize);
+                    return SOFTBUS_ERR;
+                }
+            }
+            break;
+        case DEACTIVE_META_NODE:
+            info->retCode = IpcIoPopInt32(reply);
+            break;
+        case GET_ALL_META_NODE:
+            info->retCode = IpcIoPopInt32(reply);
+            if (info->retCode == SOFTBUS_OK) {
+                info->arg1 = IpcIoPopInt32(reply);
+                if (info->arg1 > 0) {
+                    info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+                }
+            }
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unknown funid");
@@ -122,7 +149,7 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
-    *infoNum = reply.ret;
+    *infoNum = reply.arg1;
     int32_t infoSize = (*infoNum) * (int32_t)infoTypeLen;
     *info = NULL;
     if (infoSize > 0) {
@@ -423,5 +450,99 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
+    IpcIoPushString(&request, pkgName);
+    IpcIoPushFlatObj(&request, info, sizeof(MetaNodeConfigInfo));
+    Reply reply = {0};
+    reply.id = ACTIVE_META_NODE;
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_ACTIVE_META_NODE, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode invoke failed[%d, %d].",
+            ans, reply.retCode);
+        return SOFTBUS_ERR;
+    }
+    if (reply.data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode read data failed!");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(metaNodeId, NETWORK_ID_BUF_LEN, (char *)reply.data, strlen((char *)reply.data)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode copy meta node id failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
+{
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushString(&request, pkgName);
+    IpcIoPushString(&request, metaNodeId);
+    Reply reply = {0};
+    reply.id = DEACTIVE_META_NODE;
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_DEACTIVE_META_NODE, &request,
+        &reply, ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode invoke failed[%d, %d]",
+            ans, reply.retCode);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
+{
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushString(&request, pkgName);
+    IpcIoPushInt32(&request, *infoNum);
+    Reply reply = {0};
+    reply.id = GET_ALL_META_NODE;
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_GET_ALL_META_NODE_INFO, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo invoke failed[%d, %d]",
+            ans, reply.retCode);
+        return SOFTBUS_ERR;
+    }
+    if (reply.arg1 > 0) {
+        if (reply.data == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo read meta node info failed!");
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(infos, *infoNum * sizeof(MetaNodeInfo), reply.data, reply.arg1 * sizeof(MetaNodeInfo)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo copy meta node info failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    *infoNum = reply.arg1;
     return SOFTBUS_OK;
 }

@@ -25,6 +25,19 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
+static int32_t CommonInit(const char *pkgName)
+{
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init softbus failed");
+        return SOFTBUS_ERR;
+    }
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
 static bool IsValidNodeStateCb(INodeStateCb *callback)
 {
     if (callback == NULL) {
@@ -124,12 +137,7 @@ int32_t GetAllNodeDeviceInfo(const char *pkgName, NodeBasicInfo **info, int32_t 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: params are null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return GetAllNodeDeviceInfoInner(pkgName, info, infoNum);
@@ -149,12 +157,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: params are null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return GetLocalNodeDeviceInfoInner(pkgName, info);
@@ -167,16 +170,11 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeivceInf
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
@@ -188,12 +186,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return JoinLNNInner(pkgName, target, cb);
@@ -220,12 +213,7 @@ int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return RegNodeDeviceStateCbInner(pkgName, callback);
@@ -247,12 +235,7 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return StartTimeSyncInner(pkgName, targetNetworkId, accuracy, period, cb);
@@ -264,12 +247,7 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
     return StopTimeSyncInner(pkgName, targetNetworkId);
@@ -281,21 +259,12 @@ int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishC
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (PublishInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     return PublishLNNInner(pkgName, info, cb);
 }
 
@@ -305,17 +274,9 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     return StopPublishLNNInner(pkgName, publishId);
 }
 
@@ -325,17 +286,9 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -348,16 +301,44 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
-        return SOFTBUS_ERR;
-    }
-
-    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     return StopRefreshLNNInner(pkgName, refreshId);
+}
+
+int32_t ActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    if (pkgName == NULL || info == NULL || metaNodeId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid active meta node para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ActiveMetaNodeInner(pkgName, info, metaNodeId);
+}
+
+int32_t DeactiveMetaNode(const char *pkgName, const char *metaNodeId)
+{
+    if (pkgName == NULL || metaNodeId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid deactive meta node para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return DeactiveMetaNodeInner(pkgName, metaNodeId);
+}
+
+int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
+{
+    if (pkgName == NULL || infos == NULL || infoNum == NULL || *infoNum > MAX_META_NODE_NUM) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid query meta node info para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return GetAllMetaNodeInfoInner(pkgName, infos, infoNum);
 }

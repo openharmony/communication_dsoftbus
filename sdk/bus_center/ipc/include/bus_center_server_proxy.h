@@ -18,6 +18,8 @@
 
 #include <stdint.h>
 
+#include "softbus_bus_center.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -36,6 +38,9 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
 int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
+int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId);
+int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId);
+int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 
 #ifdef __cplusplus
 #if __cplusplus

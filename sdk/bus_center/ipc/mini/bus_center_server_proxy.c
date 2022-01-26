@@ -83,3 +83,21 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     return LnnIpcStopRefreshLNN(pkgName, refreshId);
 }
+
+int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    (void)pkgName;
+    return LnnIpcActiveMetaNode(info, metaNodeId);
+}
+
+int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
+{
+    (void)pkgName;
+    return LnnIpcDeactiveMetaNode(metaNodeId);
+}
+
+int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
+{
+    (void)pkgName;
+    return LnnIpcGetAllMetaNodeInfo(infos, infoNum);
+}
