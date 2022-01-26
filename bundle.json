@@ -1,0 +1,72 @@
+{
+    "name": "@openharmony/dsoftbus_standard",
+    "version": "3.1.0",
+    "description": "dsoftbus",
+    "publishAs": "code-segment",
+    "scripts": {
+      "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/communication/dsoftbus && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
+    },
+    "author": {},
+    "repository": "",
+    "license": "Apache License 2.0",
+    "component": {
+      "name": "dsoftbus_standard",
+      "subsystem": "communication",
+      "adapted_system_type": [
+        "mini",
+        "small",  
+        "standard"
+      ],
+      "features": [],
+      "rom": "967KB",
+      "ram": "28MB",
+      "deps": {
+        "components": [
+          "libhilog",
+          "libipc_single",
+          "libwifi_sdk",
+          "libsystem_ability_fwk",
+          "libsyspara",
+          "samgr_proxy",
+          "utils_base"
+        ],
+        "third_party": [
+          "libcoap",
+          "libmbedtls",
+          "bounds_checking_function"
+        ]
+      },
+      "build": {
+        "sub_component": [
+          "//foundation/communication/dsoftbus/core:softbus_server",
+          "//foundation/communication/dsoftbus/sdk:softbus_client",
+          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
+        ],
+        "inner_kits": [
+          {
+            "name": "//foundation/communication/dsoftbus_standard/sdk:softbus_client",
+            "header": {
+              "header_files": [
+                "bus_center/softbus_bus_center.h",
+                "common/softbus_common.h",
+                "discovery/discovery_service.h",
+                "transport/session.h"
+              ],
+              "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
+            }
+          }
+        ],
+        "test": [ 
+          "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
+          "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
+          "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
+          "//foundation/communication/dsoftbus/tests/core/common/utils:unittest",
+          "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
+          "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest"
+        ]
+      }
+    }
+  }
