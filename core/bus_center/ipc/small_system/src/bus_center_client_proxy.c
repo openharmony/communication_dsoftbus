@@ -239,3 +239,77 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t i
     }
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnPublishLNNResult callback ipc server push.");
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushInt32(&io, publishId);
+    IpcIoPushInt32(&io, reason);
+    SvcIdentity svc = {0};
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback get svc failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback SendRequest failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshLNNResult callback ipc server push.");
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushInt32(&io, refreshId);
+    IpcIoPushInt32(&io, reason);
+    SvcIdentity svc = {0};
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback get svc failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback SendRequest failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshDeviceFound callback ipc server push.");
+    if (pkgName == NULL || device == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
+    IpcIoPushFlatObj(&io, device, deviceLen);
+    SvcIdentity svc = {0};
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback get svc failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback SendRequest failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}

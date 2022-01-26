@@ -53,6 +53,10 @@ private:
     int32_t StartTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t QosReportInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PublishLNNInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopPublishLNNInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RefreshLNNInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopRefreshLNNInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);

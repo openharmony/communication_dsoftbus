@@ -49,6 +49,7 @@ if (defined(ohos_lite)) {
   ]
 
   softbus_client_frame_src = [
+    "$dsoftbus_root_path/core/frame/standard/init/src/if_softbus_server.cpp",
     "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_event_manager.c",
     "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_frame_manager.c",
     "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",

@@ -31,6 +31,10 @@ int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoT
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
 int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
+int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId);
+int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);

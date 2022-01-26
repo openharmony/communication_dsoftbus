@@ -407,4 +407,138 @@ int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targ
     }
     return serverRet;
 }
+
+int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    if (pkgName == nullptr || info == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write client name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write info type length failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(info, infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write info failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_PUBLISH_LNN, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN send request failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::StopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    if (pkgName == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write client name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(publishId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write publishId failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_STOP_PUBLISH_LNN, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopPublishLNN send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopPublishLNN read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    if (pkgName == nullptr || info == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write client name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write info type length failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(info, infoTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write info failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_REFRESH_LNN, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN send request failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::StopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    if (pkgName == nullptr) {
+        return SOFTBUS_ERR;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopRefreshLNN write client name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(refreshId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopRefreshLNN write refreshId failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_STOP_REFRESH_LNN, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopRefreshLNN send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopPublishLNN read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
 }

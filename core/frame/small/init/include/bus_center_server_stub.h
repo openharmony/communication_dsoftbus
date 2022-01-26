@@ -32,6 +32,10 @@ int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
 int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerPublishLNN(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStopPublishLNN(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerRefreshLNN(void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerStopRefreshLNN(void *origin, IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus
