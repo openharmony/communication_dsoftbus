@@ -48,7 +48,7 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type);
-int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode);
+int32_t LnnOnTimeSyncResult(const void *info, int retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
