@@ -45,6 +45,7 @@ if (defined(ohos_lite)) {
       if (board_name == "hispark_pegasus") {
         include_dirs +=
             [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
+        defines = [ "HISPARK_PEGASUS_USE_NETIF_GET_ADDR" ]
       }
       cflags = [ "-Wall" ]
       sources = [

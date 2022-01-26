@@ -28,23 +28,29 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     struct netif *netif = NULL;
     char *ipStr = NULL;
     char *netMaskStr = NULL;
-    ip4_addr_t ipAddr;
-    ip4_addr_t netMask;
-    ip4_addr_t gw;
+    ip4_addr_t *ipAddr = NULL;
+    ip4_addr_t *netMask = NULL;
+    ip4_addr_t *gw = NULL;
 
     netif = netif_find(ifName);
     if (netif == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "netif is NULL!");
         return SOFTBUS_ERR;
     }
-    netifapi_netif_get_addr(netif, &ipAddr, &netMask, &gw);
-    ipStr = ip4addr_ntoa(&ipAddr);
+#ifdef HISPARK_PEGASUS_USE_NETIF_GET_ADDR
+    netifapi_netif_get_addr(netif, ipAddr, netMask, gw);
+#else
+    ipAddr = netif_ip4_addr(netif);
+    netMask = netif_ip4_netmask(netif);
+    gw = netif_ip4_gw(netif);
+#endif
+    ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "copy ip failed!");
         return SOFTBUS_ERR;
     }
     if (netmask != NULL) {
-        netMaskStr = ip4addr_ntoa(&netMask);
+        netMaskStr = ip4addr_ntoa(netMask);
         if (strncpy_s(netmask, len, netMaskStr, strlen(netMaskStr)) != EOK) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "copy netmask failed!");
             return SOFTBUS_ERR;
