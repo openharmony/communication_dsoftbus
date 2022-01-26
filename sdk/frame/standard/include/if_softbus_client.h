@@ -45,6 +45,9 @@ public:
     virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) = 0;
     virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) = 0;
+    virtual void OnPublishLNNResult(int32_t publishId, int32_t reason);
+    virtual void OnRefreshLNNResult(int32_t refreshId, int32_t reason);
+    virtual void OnRefreshDeviceFound(const void *device, uint32_t deviceLen);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

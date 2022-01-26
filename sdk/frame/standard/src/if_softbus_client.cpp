@@ -13,5 +13,30 @@
  * limitations under the License.
  */
 
+#include "if_softbus_client.h"
+
+#include "softbus_log.h"
+#include "softbus_errcode.h"
+
 namespace OHOS {
+void ISoftBusClient::OnPublishLNNResult(int32_t publishId, int32_t reason)
+{
+    (void)publishId;
+    (void)reason;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnPublishLNNResult ipc default impl");
+}
+
+void ISoftBusClient::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
+{
+    (void)refreshId;
+    (void)reason;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnRefreshLNNResult ipc default impl");
+}
+
+void ISoftBusClient::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
+{
+    (void)device;
+    (void)deviceLen;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnRefreshDeviceFound ipc default impl");
+}
 } // namespace OHOS

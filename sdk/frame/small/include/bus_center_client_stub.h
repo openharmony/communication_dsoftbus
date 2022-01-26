@@ -29,6 +29,9 @@ int32_t ClientOnLeaveLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg
 int32_t ClientOnNodeOnlineStateChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+void ClientOnPublishLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+void ClientOnRefreshLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+void ClientOnRefreshDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
 
 #ifdef __cplusplus
 #if __cplusplus

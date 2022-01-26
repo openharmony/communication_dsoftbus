@@ -22,7 +22,10 @@
 
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
+#include "disc_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_ipc_utils.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -42,6 +45,12 @@ struct LeaveLnnRequestInfo {
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
+
+static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device);
+
+static IServerDiscInnerCallback g_discInnerCb = {
+    .OnServerDeviceFound = OnRefreshDeviceFound,
+};
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *addr)
 {
@@ -99,6 +108,37 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
     }
     g_leaveLNNRequestInfo.push_back(info);
     return SOFTBUS_OK;
+}
+
+static int32_t PublishResultTransfer(int32_t retCode)
+{
+    if (retCode == SOFTBUS_OK) {
+        return PUBLISH_LNN_SUCCESS;
+    } else if (retCode == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
+        return PUBLISH_LNN_NOT_SUPPORT_MEDIUM;
+    } else {
+        return PUBLISH_LNN_INTERNAL;
+    }
+}
+
+static int32_t DiscoveryResultTransfer(int32_t retCode)
+{
+    if (retCode == SOFTBUS_OK) {
+        return REFRESH_LNN_SUCCESS;
+    } else if (retCode == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
+        return REFRESH_LNN_NOT_SUPPORT_MEDIUM;
+    }
+    return REFRESH_LNN_INTERNAL;
+}
+
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
+{
+    NodeInfo *info = LnnGetNodeInfoById(device->devId, CATEGORY_UDID);
+    if (info != NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online, no need to notify sdk");
+        return SOFTBUS_OK;
+    }
+    return ClientOnRefreshDeviceFound(pkgName, device, sizeof(DeviceInfo));
 }
 
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
@@ -165,6 +205,37 @@ int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, in
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     return LnnStopTimeSync(pkgName, targetNetworkId);
+}
+
+int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    (void)infoTypeLen;
+    PublishInfo pubInfo;
+    ConvertVoidToPublishInfo(info, &pubInfo);
+    int32_t ret = DiscPublishService(pkgName, &pubInfo);
+    (void)ClientOnPublishLNNResult(pkgName, pubInfo.publishId, PublishResultTransfer(ret));
+    return ret;
+}
+
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    return DiscUnPublishService(pkgName, publishId);
+}
+
+int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    (void)infoTypeLen;
+    SubscribeInfo subInfo;
+    ConvertVoidToSubscribeInfo(info, &subInfo);
+    SetCallLnnStatus(false);
+    int32_t ret = DiscStartDiscovery(pkgName, &subInfo, &g_discInnerCb);
+    (void)ClientOnRefreshLNNResult(pkgName, subInfo.subscribeId, DiscoveryResultTransfer(ret));
+    return ret;
+}
+
+int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    return DiscStopDiscovery(pkgName, refreshId);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)

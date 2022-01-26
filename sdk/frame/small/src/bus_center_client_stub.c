@@ -157,3 +157,44 @@ int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg
     FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
+
+void ClientOnPublishLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+{
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        FreeBuffer(ctx, ipcMsg);
+        return;
+    }
+    int32_t publishId = IpcIoPopInt32(reply);
+    int32_t reason = IpcIoPopInt32(reply);
+
+    LnnOnPublishLNNResult(publishId, reason);
+    FreeBuffer(ctx, ipcMsg);
+}
+
+void ClientOnRefreshLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+{
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        FreeBuffer(ctx, ipcMsg);
+        return;
+    }
+    int32_t refreshId = IpcIoPopInt32(reply);
+    int32_t reason = IpcIoPopInt32(reply);
+
+    LnnOnRefreshLNNResult(refreshId, reason);
+    FreeBuffer(ctx, ipcMsg);
+}
+
+void ClientOnRefreshDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+{
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        FreeBuffer(ctx, ipcMsg);
+        return;
+    }
+    uint32_t infoSize;
+    void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
+    LnnOnRefreshDeviceFound(info);
+    FreeBuffer(ctx, ipcMsg);
+}
