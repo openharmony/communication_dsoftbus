@@ -53,6 +53,10 @@ public:
         int32_t period) override;
     int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
+    int32_t PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen) override;
+    int32_t StopPublishLNN(const char *pkgName, int32_t publishId) override;
+    int32_t RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen) override;
+    int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId) override;
 
 protected:
     void OnStart() override;

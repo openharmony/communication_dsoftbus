@@ -48,6 +48,76 @@ static bool IsValidNodeStateCb(INodeStateCb *callback)
     return true;
 }
 
+static int32_t PublishInfoCheck(const PublishInfo *info)
+{
+    if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mode is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->medium < AUTO) || (info->medium > COAP)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "freq is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (info->dataLen == 0) {
+        return SOFTBUS_OK;
+    }
+
+    if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
+        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
+{
+    if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->medium < AUTO) || (info->medium > COAP)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (info->dataLen == 0) {
+        return SOFTBUS_OK;
+    }
+
+    if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
+        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t GetAllNodeDeviceInfo(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum)
 {
     if (pkgName == NULL || info == NULL || infoNum == NULL) {
@@ -203,4 +273,91 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
         return SOFTBUS_INVALID_PARAM;
     }
     return StopTimeSyncInner(pkgName, targetNetworkId);
+}
+
+int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
+{
+    if ((pkgName == NULL) || (info == NULL) || (cb == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (PublishInfoCheck(info) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return PublishLNNInner(pkgName, info, cb);
+}
+
+int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return StopPublishLNNInner(pkgName, publishId);
+}
+
+int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
+{
+    if ((pkgName == NULL) || (info == NULL) || (cb == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return RefreshLNNInner(pkgName, info, cb);
+}
+
+int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: init softbus");
+        return SOFTBUS_ERR;
+    }
+
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return StopRefreshLNNInner(pkgName, refreshId);
 }

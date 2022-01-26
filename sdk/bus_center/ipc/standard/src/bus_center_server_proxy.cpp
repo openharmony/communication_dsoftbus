@@ -157,3 +157,57 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     }
     return SOFTBUS_OK;
 }
+
+int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->PublishLNN(pkgName, info, infoLen);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN failed!");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopPublishLNN g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->StopPublishLNN(pkgName, publishId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopPublishLNN failed!");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->RefreshLNN(pkgName, info, infoTypeLen);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN failed!");
+    }
+    return ret;
+}
+
+int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->StopRefreshLNN(pkgName, refreshId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN failed!");
+    }
+    return ret;
+}

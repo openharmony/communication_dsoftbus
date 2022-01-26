@@ -258,4 +258,73 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
     }
     return SOFTBUS_OK;
 }
+
+void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(publishId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write publishId failed");
+        return;
+    }
+    if (!data.WriteInt32(reason)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write reason failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_PUBLISH_LNN_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnPublishLNNResult send request failed");
+    }
+}
+
+void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(refreshId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write refreshId failed");
+        return;
+    }
+    if (!data.WriteInt32(reason)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write reason failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_REFRESH_LNN_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnRefreshLNNResult send request failed");
+    }
+}
+
+void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteUint32(deviceLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device length failed");
+        return;
+    }
+    if (!data.WriteRawData(device, deviceLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnRefreshDeviceFound send request failed");
+    }
+}
 } // namespace OHOS

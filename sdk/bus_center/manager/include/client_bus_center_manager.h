@@ -39,12 +39,19 @@ int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId,
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);
+int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
+int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId);
+int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
+int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type);
 int32_t LnnOnTimeSyncResult(const void *info, int retCode);
+void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
+void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
+void LnnOnRefreshDeviceFound(const void *device);
 
 #ifdef __cplusplus
 }

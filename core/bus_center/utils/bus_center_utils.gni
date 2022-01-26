@@ -18,6 +18,7 @@ bus_center_utils_src = [
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ip_utils.c",
+  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ipc_utils.c",
 ]
 bus_center_utils_inc = [ "$dsoftbus_root_path/core/bus_center/utils/include" ]
 bus_center_utils_deps = []

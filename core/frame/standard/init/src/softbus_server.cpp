@@ -211,6 +211,26 @@ int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t ap
     return QosReportExecute(channelId, chanType, appType, quality);
 }
 
+int32_t SoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    return LnnIpcPublishLNN(pkgName, info, infoTypeLen);
+}
+
+int32_t SoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
+{
+    return LnnIpcStopPublishLNN(pkgName, publishId);
+}
+
+int32_t SoftBusServer::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+{
+    return LnnIpcRefreshLNN(pkgName, info, infoTypeLen);
+}
+
+int32_t SoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
+{
+    return LnnIpcStopRefreshLNN(pkgName, refreshId);
+}
+
 void SoftBusServer::OnStart()
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServer OnStart called!\n");

@@ -60,6 +60,12 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnNodeBasicInfoChangedInner;
     memberFuncMap_[CLIENT_ON_TIME_SYNC_RESULT] =
         &SoftBusClientStub::OnTimeSyncResultInner;
+    memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] =
+        &SoftBusClientStub::OnPublishLNNResultInner;
+    memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] =
+        &SoftBusClientStub::OnRefreshLNNResultInner;
+    memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] =
+        &SoftBusClientStub::OnRefreshDeviceFoundInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -497,6 +503,56 @@ int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessagePar
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnPublishLNNResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t publishId;
+    if (!data.ReadInt32(publishId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnPublishLNNResultInner read publishId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t reason;
+    if (!data.ReadInt32(reason)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnPublishLNNResultInner read reason failed!");
+        return SOFTBUS_ERR;
+    }
+
+    OnPublishLNNResult(publishId, reason);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t refreshId;
+    if (!data.ReadInt32(refreshId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshLNNResultInner read publishId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t reason;
+    if (!data.ReadInt32(reason)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshLNNResultInner read reason failed!");
+        return SOFTBUS_ERR;
+    }
+
+    OnRefreshLNNResult(refreshId, reason);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t deviceLen;
+    if (!data.ReadUint32(deviceLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshDeviceFoundInner read info length failed!");
+        return SOFTBUS_ERR;
+    }
+    void *device = (void *)data.ReadRawData(deviceLen);
+    if (device == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshDeviceFoundInner read info failed!");
+        return SOFTBUS_ERR;
+    }
+    OnRefreshDeviceFound(device, deviceLen);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addrTypeLen;
@@ -524,5 +580,21 @@ int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeL
 {
     (void)infoTypeLen;
     return LnnOnTimeSyncResult(info, retCode);
+}
+
+void SoftBusClientStub::OnPublishLNNResult(int32_t publishId, int32_t reason)
+{
+    LnnOnPublishLNNResult(publishId, reason);
+}
+
+void SoftBusClientStub::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
+{
+    LnnOnRefreshLNNResult(refreshId, reason);
+}
+
+void SoftBusClientStub::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
+{
+    (void)deviceLen;
+    LnnOnRefreshDeviceFound(device);
 }
 } // namespace OHOS
