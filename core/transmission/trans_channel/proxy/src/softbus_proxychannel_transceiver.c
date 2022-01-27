@@ -662,7 +662,6 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
         TransDelConnByReqId(reqId);
         TransProxyDelChanByChanId(chanNewId);
-        return ret;
     }
     return ret;
 }

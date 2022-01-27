@@ -374,15 +374,14 @@ static void TimerNegoWatingProcess(ConnectingNode *conningDev)
         conningDev->state = P2PLINK_MANAGER_STATE_NEGOING;
         P2pLinkNegoStart(&negoInfo);
         return;
-    }    
+    }
 }
 
 static void P2pLinkReuseTimeOut(ConnectingNode *item)
 {
     ConnectedNode *connedItem = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
-        "conning dev timeout state %d", item->state);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
     connedItem = P2pLinkGetConnedDevByMac(item->connInfo.peerMac);
     if (connedItem != NULL) {
         P2pLinkAddPidMacRef(item->connInfo.pid, item->connInfo.peerMac);
@@ -396,7 +395,7 @@ static void P2pLinkReuseTimeOut(ConnectingNode *item)
         P2pLinkConningCallback(item, SOFTBUS_OK, 0);
     } else {
         P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_REUSE_FAILED);
-    }   
+    }
 }
 
 static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
@@ -423,8 +422,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 break;
             case P2PLINK_MANAGER_STATE_NEGO_WATING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
-                        "conning dev timeout state %d", item->state);
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_BUSY);
                     P2pLinkDelConningDev(item);
                     break;
@@ -433,8 +431,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 break;
             case P2PLINK_MANAGER_STATE_NEGOING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                        "conning dev timeout state %d", item->state);
+                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_CONNECT_TIMEOUT);
                     P2pLinkDelConningDev(item);
                     break;

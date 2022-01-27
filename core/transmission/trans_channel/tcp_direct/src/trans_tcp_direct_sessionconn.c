@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "trans_tcp_direct_sessionconn.h"
 
 #include <securec.h>

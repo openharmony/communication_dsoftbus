@@ -36,6 +36,12 @@ int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
+{
+    (void)info;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info)
 {
     (void)info;
