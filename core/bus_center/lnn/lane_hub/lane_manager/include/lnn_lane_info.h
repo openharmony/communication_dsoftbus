@@ -18,7 +18,9 @@
 
 #include <stdint.h>
 
+#include "session.h"
 #include "softbus_bus_center.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,16 +31,29 @@ extern "C" {
 #define PASSING_LANE_QUALITY_SCORE 80
 #define THRESHOLD_LANE_QUALITY_SCORE 60
 #define LANE_COUNT_THRESHOLD 5
+#define LNN_LANE_P2P_MAX_NUM 4
 
 /* Link type */
 typedef enum {
     LNN_LINK_TYPE_WLAN_5G = 0x0,
     LNN_LINK_TYPE_WLAN_2P4G,
     LNN_LINK_TYPE_BR,
+    LNN_LINK_TYPE_P2P,
+    LNN_LINK_TYPE_P2P_MAX = LNN_LINK_TYPE_P2P + LNN_LANE_P2P_MAX_NUM,
     LNN_LINK_TYPE_BUTT,
 } LnnLaneLinkType;
 
+typedef struct {
+    char localIp[IP_LEN];
+    char peerIp[IP_LEN];
+} LnnLaneP2pInfo;
+
 typedef void (*LnnLaneMonitorCallback)(int32_t laneId, int32_t socre);
+
+typedef struct {
+    uint32_t linkTypeNum;
+    LinkType linkType[LINK_TYPE_MAX];
+} LnnPreferredLinkList;
 
 ConnectionAddrType LnnGetLaneType(int32_t laneId);
 void LnnReleaseLane(int32_t laneId);
@@ -48,6 +63,8 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
 int32_t LnnRegisterLaneMonitor(LnnLaneMonitorCallback callback);
 int32_t LnnGetLaneScore(int32_t laneId);
 void TriggerLaneMonitor(void);
+void LnnLaneSetNetworkIdAndPid(int32_t laneId, const char *networkId, int32_t pid);
+int32_t LnnUpdateLaneP2pInfo(const LnnLaneP2pInfo *info);
 
 #ifdef __cplusplus
 }

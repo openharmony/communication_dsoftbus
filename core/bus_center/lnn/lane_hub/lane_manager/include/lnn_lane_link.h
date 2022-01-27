@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef LNN_SMART_COMMUNICATION_H
-#define LNN_SMART_COMMUNICATION_H
+#ifndef LNN_LANE_LINK_H
+#define LNN_LANE_LINK_H
 
 #include <stdint.h>
-
-#include "bus_center_manager.h"
+#include "lnn_lane_info.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-int32_t LnnGetRightLane(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
-    const LnnPreferredLinkList *linkList);
+int32_t LnnLanePendingInit(void);
+void LnnLanePendingDeinit(void);
+int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo);
+int32_t LnnDisconnectP2p(const char *networkId, int32_t pid);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_SMART_COMMUNICATION_H */
+#endif /* LNN_LANE_LINK_H */

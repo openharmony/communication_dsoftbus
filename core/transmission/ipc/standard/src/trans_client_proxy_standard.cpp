@@ -90,6 +90,7 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
             data.WriteCString(channel->peerIp);
         }
     }
+    data.WriteInt32(channel->routeType);
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {
@@ -130,6 +131,40 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed read serverRet failed");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
+
+int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteCString(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(routeType)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write routeType failed");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(CLIENT_ON_CHANNEL_LINKDOWN, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon send request failed");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -299,5 +334,17 @@ int32_t TransClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLe
 int32_t TransClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     return SOFTBUS_OK;
+}
+
+void TransClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
+{
+}
+
+void TransClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
+{
+}
+
+void TransClientProxy::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
+{
 }
 } // namespace OHOS

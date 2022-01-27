@@ -57,7 +57,7 @@ static void DeviceFound(const DeviceInfo *device)
         return;
     }
     addr.info.ip.port = device->addr[0].info.ip.port;
-    if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->hwAccountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
+    if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s peer uid failed\n");
         return;
     }
