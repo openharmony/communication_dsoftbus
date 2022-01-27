@@ -40,7 +40,8 @@
         "sub_component": [
           "//foundation/communication/dsoftbus/core:softbus_server",
           "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
+          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
+          "//foundation/communication/dsoftbus/tools:tool"
         ],
         "inner_kits": [
           {
