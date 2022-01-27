@@ -1049,7 +1049,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransOnLinkDown: networkId=%s, routeType=%d",
         networkId, routeType);
 
-    if (pthread_mutex_lock(&(g_clientSessionServerList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
@@ -1057,7 +1057,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         DestroyClientSessionByDevId(serverNode, networkId, routeType);
     }
-    (void)pthread_mutex_unlock(&(g_clientSessionServerList->lock));
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return;
 }
 

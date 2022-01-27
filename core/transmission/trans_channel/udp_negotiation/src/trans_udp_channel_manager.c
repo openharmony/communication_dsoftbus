@@ -35,7 +35,7 @@ int32_t GetUdpChannelLock(void)
     if (g_udpChannelMgr == NULL) {
         return SOFTBUS_NO_INIT;
     }
-    if (pthread_mutex_lock(&g_udpChannelMgr->lock) != 0) {
+    if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -44,7 +44,7 @@ int32_t GetUdpChannelLock(void)
 
 void ReleaseUdpChannelLock(void)
 {
-    (void)pthread_mutex_unlock(&g_udpChannelMgr->lock);
+    (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
 }
 
 static void TransUdpTimerProc(void)
@@ -378,7 +378,7 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (pthread_mutex_lock(&(g_udpChannelMgr->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -387,14 +387,14 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->requestId == requestId) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
-                (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;
             }
-            (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
         }
     }
-    (void)pthread_mutex_unlock(&(g_udpChannelMgr->lock));
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[requestId = %lld]", requestId);
     return SOFTBUS_ERR;
 }

@@ -240,14 +240,14 @@ void TransOnLinkDown(const char *networkId, int32_t routeType)
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
 
-    if (pthread_mutex_lock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         (void)TransServerOnChannelLinkDown(pos->pkgName, networkId, routeType);
     }
-    (void)pthread_mutex_unlock(&g_sessionServerList->lock);
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown end");
     return;

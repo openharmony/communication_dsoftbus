@@ -18,6 +18,7 @@
 
 #include "auth_interface.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -74,7 +75,7 @@ int32_t GetSessionConnLock(void)
     if (g_sessionConnList == NULL) {
         return SOFTBUS_NO_INIT;
     }
-    if (pthread_mutex_lock(&g_sessionConnList->lock) != 0) {
+    if (SoftBusMutexLock(&g_sessionConnList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -85,7 +86,7 @@ void ReleaseSessonConnLock(void)
     if (g_sessionConnList == NULL) {
         return;
     }
-    (void)pthread_mutex_unlock(&g_sessionConnList->lock);
+    (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
 }
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId)
