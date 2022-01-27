@@ -125,6 +125,12 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::RefreshLNNInner;
     memberFuncMap_[SERVER_STOP_REFRESH_LNN] =
         &SoftBusServerStub::StopRefreshLNNInner;
+    memberFuncMap_[SERVER_ACTIVE_META_NODE] =
+        &SoftBusServerStub::ActiveMetaNodeInner;
+    memberFuncMap_[SERVER_DEACTIVE_META_NODE] =
+        &SoftBusServerStub::DeactiveMetaNodeInner;
+    memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] =
+        &SoftBusServerStub::GetAllMetaNodeInfoInner;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -751,6 +757,60 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
     int32_t retReply = StopRefreshLNN(clientName, refreshId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
+{
+    MetaNodeConfigInfo *info = (MetaNodeConfigInfo *)data.ReadRawData(sizeof(MetaNodeConfigInfo));
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode read meta node config info failed!");
+        return SOFTBUS_ERR;
+    }
+    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    if (ActiveMetaNode(info, metaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (!reply.WriteCString(metaNodeId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode write meta node id failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *metaNodeId = (const char *)data.ReadCString();
+    if (metaNodeId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeactiveMetaNode read meta node id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (DeactiveMetaNode(metaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t infoNum;
+    MetaNodeInfo infos[MAX_META_NODE_NUM];
+
+    if (!data.ReadInt32(infoNum)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo read infoNum failed!");
+        return SOFTBUS_ERR;
+    }
+    if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (!reply.WriteInt32(infoNum)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write infoNum failed!");
+        return SOFTBUS_ERR;
+    }
+    if (infoNum > 0 && !reply.WriteRawData(infos, infoNum * sizeof(MetaNodeInfo))) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write meta node info failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

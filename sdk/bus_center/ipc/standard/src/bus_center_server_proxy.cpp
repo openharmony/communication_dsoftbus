@@ -211,3 +211,45 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
     }
     return ret;
 }
+
+int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    (void)pkgName;
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->ActiveMetaNode(info, metaNodeId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode failed!");
+    }
+    return ret;
+}
+
+int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
+{
+    (void)pkgName;
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->DeactiveMetaNode(metaNodeId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode failed!");
+    }
+    return ret;
+}
+
+int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
+{
+    (void)pkgName;
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->GetAllMetaNodeInfo(infos, infoNum);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo failed!");
+    }
+    return ret;
+}

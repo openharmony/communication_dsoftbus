@@ -20,6 +20,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_trans_def.h"
 
@@ -56,6 +57,9 @@ public:
     virtual int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
     virtual int32_t RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
     virtual int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
+    virtual int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
+    virtual int32_t DeactiveMetaNode(const char *metaNodeId);
+    virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

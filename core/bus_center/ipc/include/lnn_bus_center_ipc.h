@@ -19,6 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "softbus_bus_center.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +37,9 @@ int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTyp
 int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId);
 int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
+int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
+int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId);
+int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum);
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);

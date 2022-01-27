@@ -15,8 +15,8 @@
 
 #include "if_softbus_server.h"
 
-#include "softbus_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
 namespace OHOS {
 int32_t ISoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
@@ -50,6 +50,29 @@ int32_t ISoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
     (void)pkgName;
     (void)refreshId;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopRefreshLNN ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+{
+    (void)info;
+    (void)metaNodeId;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::DeactiveMetaNode(const char *metaNodeId)
+{
+    (void)metaNodeId;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeactiveMetaNode ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
+{
+    (void)info;
+    (void)infoNum;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo ipc default impl");
     return SOFTBUS_ERR;
 }
 } // namespace OHOS
