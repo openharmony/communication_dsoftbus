@@ -228,22 +228,22 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     if (fd < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t flags = SoftBusSocketFcntl(fd, SOFTBUS_F_GETFL, 0);
+    int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
         return SOFTBUS_ERR;
     }
-    if (isNonBlock && (flags & SOFTBUS_O_NONBLOCK) == 0) {
-        flags |= SOFTBUS_O_NONBLOCK;
+    if (isNonBlock && (flags & O_NONBLOCK) == 0) {
+        flags |= O_NONBLOCK;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to nonblock", fd);
-    } else if (!isNonBlock && (flags & SOFTBUS_O_NONBLOCK) != 0) {
-        flags = flags & ~SOFTBUS_O_NONBLOCK;
+    } else if (!isNonBlock && (flags & O_NONBLOCK) != 0) {
+        flags = flags & ~O_NONBLOCK;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to block", fd);
     } else {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);
         return SOFTBUS_OK;
     }
-    return SoftBusSocketFcntl(fd, SOFTBUS_F_SETFL, flags);
+    return fcntl(fd, F_SETFL, flags);
 }
 
 int32_t GetTcpSockPort(int32_t fd)
