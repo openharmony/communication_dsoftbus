@@ -135,7 +135,7 @@ void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
 }
 
 static int32_t GetDisConnectInfo(P2pLinkDisconnectInfo *info, void *arg)
-{ 
+{
     int32_t ret;
 
     if (arg == NULL) {
@@ -298,6 +298,11 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
     if (P2pLinkGetGcPort() <= 0) {
         info.type = AUTH_LINK_TYPE_P2P;
         int32_t ret = strcpy_s(info.info.ipInfo.ip, sizeof(info.info.ipInfo.ip), P2pLinkGetMyIp());
+        if (ret != EOK) {
+            SoftBusFree(arg);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+            return;
+        }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "gc start listen %s %d ", info.info.ipInfo.ip, ret);
         gcPort  = AuthStartListening(&info);
         if (gcPort <= 0) {
@@ -395,6 +400,10 @@ static void P2pLinkNegoSuccess(int32_t requestId, const P2pLinkNegoConnResult *c
     ConnectedNode *connedItem = P2pLinkGetConnedDevByMac(conn->peerMac);
     if (connedItem != NULL) {
         ret = strcpy_s(connedItem->peerIp, sizeof(connedItem->peerIp), conn->peerIp);
+        if (ret != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+            return;
+        }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "update ip %s ret %d", conn->peerIp, ret);
         connedItem->chanId.inAuthId = conningItem->connInfo.authId;
     } else {

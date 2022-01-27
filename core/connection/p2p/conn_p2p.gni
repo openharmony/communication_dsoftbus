@@ -13,8 +13,8 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-p2p_connection_src = [ ]
-p2p_connection_deps = [ ]
+p2p_connection_src = []
+p2p_connection_deps = []
 
 p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/adapter",
@@ -50,7 +50,5 @@ if (enable_connection_p2p == true) {
   ]
   p2p_connection_deps += [ "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard:wifi_sdk" ]
 } else {
-  p2p_connection_src += [
-    "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface_virtual.c",
-  ]
+  p2p_connection_src += [ "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface_virtual.c" ]
 }

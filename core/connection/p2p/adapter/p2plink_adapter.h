@@ -75,6 +75,6 @@ void P2pLinkStopPeerDiscovery(void);
 void P2pLinkRemoveGroup(void);
 void P2pLinkRemoveGcGroup(void);
 
-void P2pLinkEnableStub();
+void P2pLinkEnableStub(void);
 
 #endif

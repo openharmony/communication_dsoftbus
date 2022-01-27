@@ -94,5 +94,5 @@ void P2pLinkLnnSync(void)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "lnn sync flag %d", change);
     if (change == 1) {
         LnnSyncP2pInfo();
-    }   
+    }
 }

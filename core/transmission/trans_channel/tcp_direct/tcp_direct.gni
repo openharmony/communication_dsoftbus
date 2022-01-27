@@ -25,16 +25,14 @@ trans_direct_channel_src = [
 ]
 
 if (enable_connection_p2p == true) {
-  trans_direct_channel_src += [
-    "$tcp_direct_channel_path/src/trans_tcp_direct_p2p.c",
-  ]
+  trans_direct_channel_src +=
+      [ "$tcp_direct_channel_path/src/trans_tcp_direct_p2p.c" ]
 } else {
-  trans_direct_channel_src += [
-    "$tcp_direct_channel_path/src/trans_tcp_direct_p2p_virtual.c",
-  ]
+  trans_direct_channel_src +=
+      [ "$tcp_direct_channel_path/src/trans_tcp_direct_p2p_virtual.c" ]
 }
 
 trans_direct_channel_inc = [
   "$tcp_direct_channel_path/include",
-  "$dsoftbus_root_path/core/connection/p2p/interface"
+  "$dsoftbus_root_path/core/connection/p2p/interface",
 ]

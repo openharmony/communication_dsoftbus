@@ -88,7 +88,7 @@ void AddNewMacItem(ListNode *macList, const char *mac)
 
 void AddNewPidItem(int32_t pid, const char* mac)
 {
-    RefPidItem *pItem = (RefPidItem *)SoftBusMalloc(sizeof(RefPidItem)); 
+    RefPidItem *pItem = (RefPidItem *)SoftBusMalloc(sizeof(RefPidItem));
     if (pItem == NULL) {
         return;
     }

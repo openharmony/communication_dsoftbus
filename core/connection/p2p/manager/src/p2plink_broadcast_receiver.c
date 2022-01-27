@@ -60,7 +60,7 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
         for (i = 0; i < myRef; i++) {
             P2pLinkSharelinkRemoveGroup();
         }
-    } 
+    }
 }
 
 static void UpdateP2pGcGroup(void)
@@ -74,7 +74,7 @@ static void UpdateP2pGcGroup(void)
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
         }
-    }    
+    }
 }
 
 void UpdateP2pGroup(const P2pLinkGroup *group)
@@ -83,8 +83,7 @@ void UpdateP2pGroup(const P2pLinkGroup *group)
         P2pLinkClean();
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
-               "UpdateP2pGroup role %d num %d", group->role, group->peerMacNum);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "UpdateP2pGroup role %d num %d", group->role, group->peerMacNum);
     P2pLinkSetRole(group->role);
     if (group->role == ROLE_GO) {
         UpdateP2pGoGroup(group);
