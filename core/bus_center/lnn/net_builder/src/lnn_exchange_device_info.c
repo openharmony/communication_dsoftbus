@@ -48,7 +48,10 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
         !AddStringToJsonObject(json, NETWORK_ID, info->networkId) ||
         !AddStringToJsonObject(json, VERSION_TYPE, info->versionType) ||
-        !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity)) {
+        !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity) ||
+        !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
+        !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
+        !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         return SOFTBUS_ERR;
     }
@@ -83,6 +86,11 @@ static void UnPackCommon(const cJSON* json, NodeInfo *info, SoftBusVersion versi
     (void)GetJsonObjectStringItem(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
     (void)GetJsonObjectStringItem(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)GetJsonObjectNumberItem(json, CONN_CAP, (int *)&info->netCapacity);
+
+    (void)GetJsonObjectNumberItem(json, P2P_ROLE, &info->p2pInfo.p2pRole);
+    info->isBleP2p = false;
+    (void)GetJsonObjectBoolItem(json, BLE_P2P, &info->isBleP2p);
+    (void)GetJsonObjectStringItem(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN);
     return;
 }
 
@@ -218,36 +226,18 @@ static int32_t UnPackLedgerInfo(const cJSON *json, NodeInfo *info,
     }
     return SOFTBUS_ERR;
 }
-static ConvertType g_convertTable[] = {
-    {CONNECT_BR, AUTH_BT},
-    {CONNECT_BLE, AUTH_BT},
-    {CONNECT_TCP, AUTH_WIFI},
-};
 
-static AuthType ConvertCnnTypeToAuthType(ConnectType type)
-{
-    uint32_t i;
-    for (i = 0; i < sizeof(g_convertTable) / sizeof(ConvertType); i++) {
-        if (g_convertTable[i].cnnType == type) {
-            return g_convertTable[i].authType;
-        }
-    }
-    return AUTH_MAX;
-}
-
-uint8_t *LnnGetExchangeNodeInfo(int32_t seq, ConnectOption *option, SoftBusVersion version,
+uint8_t *LnnGetExchangeNodeInfo(int32_t seq, AuthType authType, SoftBusVersion version,
     uint32_t *outSize, int32_t *side)
 {
     char *data = NULL;
     uint8_t *encryptData = NULL;
     OutBuf buf = {0};
-    AuthType authType;
     uint32_t len;
 
-    if (option == NULL || outSize == NULL || side == NULL) {
+    if (outSize == NULL || side == NULL) {
         return NULL;
     }
-    authType = ConvertCnnTypeToAuthType(option->type);
     data = PackLedgerInfo(version, authType);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack ledger info error!");
@@ -276,19 +266,17 @@ uint8_t *LnnGetExchangeNodeInfo(int32_t seq, ConnectOption *option, SoftBusVersi
     return encryptData;
 }
 
-int32_t LnnParsePeerNodeInfo(ConnectOption *option, NodeInfo *info,
+int32_t LnnParsePeerNodeInfo(ConnectOption *option, AuthType authType, NodeInfo *info,
     const ParseBuf *bufInfo, AuthSideFlag side, SoftBusVersion version)
 {
     cJSON *json = NULL;
     int ret = SOFTBUS_OK;
     uint8_t *decryptData = NULL;
     OutBuf buf = {0};
-    AuthType authType;
     if ((option == NULL) || (info == NULL) || (bufInfo == NULL) || (bufInfo->buf == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    authType = ConvertCnnTypeToAuthType(option->type);
     decryptData = (uint8_t *)SoftBusCalloc(bufInfo->len - AuthGetEncryptHeadLen() + 1);
     if (decryptData == NULL) {
         return SOFTBUS_MALLOC_ERR;

@@ -52,13 +52,14 @@ extern "C" {
 #define IN_SYNC_PROGRESS 3
 #define SYNC_FINISH 4
 #define WAIT_PEER_DEV_INFO 5
-#define AUTH_PASSED 6
-#define RECV_CLSOE_ACK 7
+#define WAIT_CLOSE_ACK 6
+#define AUTH_PASSED 7
+
 
 typedef struct {
     uint32_t type;
     int32_t module;
-    int64_t authId;
+    int64_t seq;
     int32_t flag;
     uint32_t dataLen;
 } AuthDataInfo;
@@ -78,6 +79,10 @@ typedef struct {
     const GroupAuthManager *hichain;
     VerifyCallback *cb;
 
+    AuthConnCallback connCb;
+    bool isAuthP2p;
+
+    char peerP2pMac[MAC_LEN];
     char peerUdid[UDID_BUF_LEN];
     char peerUuid[UUID_BUF_LEN];
     char peerUid[MAX_ACCOUNT_HASH_LEN];
@@ -94,14 +99,16 @@ AuthManager *AuthGetManagerByRequestId(uint32_t requestId);
 AuthManager *AuthGetManagerByAuthId(int64_t authId);
 AuthManager *AuthGetManagerByConnId(uint16_t id);
 AuthManager *AuthGetManagerByFd(int32_t fd);
+AuthManager *AuthGetManagerByConnectionId(uint32_t connectionId);
 int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data);
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen);
 void AuthNotifyLnnDisconn(const AuthManager *auth);
 void AuthNotifyTransDisconn(int64_t authId);
-void AuthHandleTransInfo(AuthManager *auth, const ConnPktHead *head, char *data, int len);
+void AuthHandleTransInfo(const AuthManager *auth, const ConnPktHead *head, char *data);
 void AuthHandleFail(AuthManager *auth, int32_t reason);
+int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *connInfo);
 
 #ifdef __cplusplus
 }

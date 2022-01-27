@@ -32,6 +32,7 @@ public:
     void OnPublishFail(int publishId, int reason) override;
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelLinkDown(const char *NetworkId, int32_t routeType) override;
     int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
     int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t type) override;

@@ -42,6 +42,9 @@ extern "C" {
 #define SW_VERSION "SW_VERSION"
 #define MASTER_UDID "MASTER_UDID"
 #define MASTER_WEIGHT "MASTER_WEIGHT"
+#define BLE_P2P "BLE_P2P"
+#define P2P_MAC_ADDR "P2P_MAC_ADDR"
+#define P2P_ROLE "P2P_ROLE"
 
 #define CODE_VERIFY_IP 1
 #define CODE_VERIFY_BT 5
@@ -70,9 +73,9 @@ typedef struct {
     int32_t (*unpack)(const cJSON* json, NodeInfo *info, SoftBusVersion version);
 } ProcessLedgerInfo;
 
-uint8_t *LnnGetExchangeNodeInfo(int32_t seq, ConnectOption *option, SoftBusVersion version,
+uint8_t *LnnGetExchangeNodeInfo(int32_t seq, AuthType authType, SoftBusVersion version,
     uint32_t *outSize, int32_t *side);
-int32_t LnnParsePeerNodeInfo(ConnectOption *option, NodeInfo *info,
+int32_t LnnParsePeerNodeInfo(ConnectOption *option, AuthType authType, NodeInfo *info,
     const ParseBuf *bufInfo, AuthSideFlag side, SoftBusVersion version);
 
 #ifdef __cplusplus

@@ -15,13 +15,15 @@
 
 #include "lnn_lane_info.h"
 
-#include <pthread.h>
+#include <securec.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -33,6 +35,8 @@ typedef struct {
     bool isUse;
     SoftBusMutex lock;
     int32_t score;
+    int32_t pid;
+    char networkId[NETWORK_ID_BUF_LEN];
 } LaneInfoImpl;
 
 static LaneInfoImpl g_lanes[LNN_LINK_TYPE_BUTT];
@@ -114,9 +118,22 @@ void LnnReleaseLane(int32_t laneId)
     if (laneId < LNN_LINK_TYPE_WLAN_5G || laneId >= LNN_LINK_TYPE_BUTT) {
         return;
     }
+    int32_t count = LnnGetLaneCount(laneId);
+    if (count == SOFTBUS_ERR || count > 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lane already used, count = %d.", count);
+        return;
+    }
+
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
+    }
+    if (laneId >= LNN_LINK_TYPE_P2P && laneId <= LNN_LINK_TYPE_P2P_MAX) {
+        (void)LnnDisconnectP2p(g_lanes[laneId].networkId, g_lanes[laneId].pid);
+    }
+    if (g_lanes[laneId].laneInfo.p2pInfo != NULL) {
+        SoftBusFree(g_lanes[laneId].laneInfo.p2pInfo);
+        g_lanes[laneId].laneInfo.p2pInfo = NULL;
     }
     g_lanes[laneId].isUse = false;
     (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
@@ -238,4 +255,70 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
     }
     g_lanes[laneId].laneInfo.isSupportUdp = isSupport;
     (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
+}
+
+void LnnLaneSetNetworkIdAndPid(int32_t laneId, const char *networkId, int32_t pid)
+{
+    if (laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error, laneId = %d", laneId);
+        return;
+    }
+    if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    g_lanes[laneId].pid = pid;
+    if (strcpy_s(g_lanes[laneId].networkId, sizeof(g_lanes[laneId].networkId), networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set networkId failed");
+    }
+    (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
+}
+
+int32_t LnnUpdateLaneP2pInfo(const LnnLaneP2pInfo *info)
+{
+    int32_t i;
+    int32_t laneId = LNN_LINK_TYPE_BUTT;
+    LnnLaneP2pInfo *p2pInfo = NULL;
+    if (info == NULL) {
+        return LNN_LINK_TYPE_BUTT;
+    }
+    for (i = LNN_LINK_TYPE_P2P; i <= LNN_LINK_TYPE_P2P_MAX; i++) {
+        if (SoftBusMutexLock(&g_lanes[i].lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock fail.");
+            return LNN_LINK_TYPE_BUTT;
+        }
+        if (g_lanes[i].laneInfo.p2pInfo == NULL) {
+            laneId = i;
+        } else if (memcmp(g_lanes[i].laneInfo.p2pInfo, info, sizeof(LnnLaneP2pInfo)) == 0) {
+            (void)SoftBusMutexUnlock(&g_lanes[i].lock);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "reuse p2p lane, id = %d.", i);
+            return i;
+        }
+        (void)SoftBusMutexUnlock(&g_lanes[i].lock);
+    }
+    if (laneId == LNN_LINK_TYPE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no free p2p lane.");
+        return LNN_LINK_TYPE_BUTT;
+    }
+
+    p2pInfo = (LnnLaneP2pInfo *)SoftBusCalloc(sizeof(LnnLaneP2pInfo));
+    if (p2pInfo == NULL) {
+        return LNN_LINK_TYPE_BUTT;
+    }
+    if (memcpy_s(p2pInfo, sizeof(LnnLaneP2pInfo), info, sizeof(LnnLaneP2pInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p ip fail.");
+        SoftBusFree(p2pInfo);
+        return LNN_LINK_TYPE_BUTT;
+    }
+    if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock fail.");
+        SoftBusFree(p2pInfo);
+        return LNN_LINK_TYPE_BUTT;
+    }
+    g_lanes[laneId].laneInfo.p2pInfo = p2pInfo;
+    g_lanes[laneId].laneInfo.isProxy = false;
+    g_lanes[laneId].isUse = true;
+    (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get p2p lane ok, id = %d.", laneId);
+    return laneId;
 }

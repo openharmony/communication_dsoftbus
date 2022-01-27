@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -135,9 +136,9 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
             break;
         }
         case CONNECT_BLE:
-            if (strncpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac,
-                BT_MAC_LEN) != EOK || strncpy_s(option->info.bleOption.deviceIdHash, DEV_ID_HASH_LEN,
-                connInfo->info.bleInfo.deviceIdHash, strlen(connInfo->info.bleInfo.deviceIdHash)) != EOK) {
+            if (strcpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
+                strcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
+                connInfo->info.bleInfo.deviceIdHash) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
@@ -156,4 +157,114 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
         }
     }
     return SOFTBUS_OK;
+}
+
+int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *option)
+{
+    if (info == NULL || option == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (info->type) {
+        case AUTH_LINK_TYPE_WIFI:
+            option->type = CONNECT_TCP;
+            if (strcpy_s(option->info.ipOption.ip, sizeof(option->info.ipOption.ip), info->info.ipInfo.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->info.ipOption.port = info->info.ipInfo.port;
+            break;
+        case AUTH_LINK_TYPE_BR:
+            option->type = CONNECT_BR;
+            if (strcpy_s(option->info.brOption.brMac, sizeof(option->info.brOption.brMac),
+                info->info.brInfo.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            option->type = CONNECT_BLE;
+            if (strcpy_s(option->info.bleOption.bleMac, sizeof(option->info.bleOption.bleMac),
+                info->info.bleInfo.bleMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        case AUTH_LINK_TYPE_P2P:
+            option->type = CONNECT_TCP;
+            if (strcpy_s(option->info.ipOption.ip, sizeof(option->info.ipOption.ip), info->info.ipInfo.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->info.ipOption.port = info->info.ipInfo.port;
+            option->info.ipOption.moduleId = AUTH_P2P;
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport link type, type = %d.", info->type);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertOptionToAuthConnInfo(const ConnectOption *option, bool isAuthP2p, AuthConnInfo *info)
+{
+    if (option == NULL || info == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (option->type) {
+        case CONNECT_TCP:
+            info->type = isAuthP2p ? AUTH_LINK_TYPE_P2P : AUTH_LINK_TYPE_WIFI;
+            if (strcpy_s(info->info.ipInfo.ip, sizeof(info->info.ipInfo.ip), option->info.ipOption.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            info->info.ipInfo.port = option->info.ipOption.port;
+            break;
+        case CONNECT_BR:
+            info->type = AUTH_LINK_TYPE_BR;
+            if (strcpy_s(info->info.brInfo.brMac, sizeof(info->info.brInfo.brMac),
+                option->info.brOption.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        case CONNECT_BLE:
+            info->type = AUTH_LINK_TYPE_BLE;
+            if (strcpy_s(info->info.bleInfo.bleMac, sizeof(info->info.bleInfo.bleMac),
+                option->info.bleOption.bleMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac failed.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type, type = %d.", option->type);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *option2)
+{
+    switch (option1->type) {
+        case CONNECT_TCP:
+            if (option2->type == CONNECT_TCP &&
+                strcmp(option1->info.ipOption.ip, option2->info.ipOption.ip) == 0) {
+                return true;
+            }
+            break;
+        case CONNECT_BR:
+            if (option2->type == CONNECT_BR &&
+                strcmp(option1->info.brOption.brMac, option2->info.brOption.brMac) == 0) {
+                return true;
+            }
+            break;
+        case CONNECT_BLE:
+            if (option2->type == CONNECT_BLE &&
+                strcmp(option1->info.bleOption.bleMac, option2->info.bleOption.bleMac) == 0) {
+                return true;
+            }
+            break;
+        default:
+            break;
+    }
+    return false;
 }

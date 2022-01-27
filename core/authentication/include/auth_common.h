@@ -34,6 +34,10 @@ AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq);
 int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectOption *option);
 int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInfo);
 
+int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *option);
+int32_t ConvertOptionToAuthConnInfo(const ConnectOption *option, bool isAuthP2p, AuthConnInfo *info);
+bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *option2);
+
 #ifdef __cplusplus
 }
 #endif

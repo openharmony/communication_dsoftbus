@@ -55,6 +55,9 @@ uint32_t LnnGetNetCapabilty(void)
     if ((configValue & (1 << BIT_WIFI)) != 0) {
         (void)LnnSetNetCapability(&capability, BIT_WIFI);
     }
+    if ((configValue & (1 << BIT_WIFI_P2P)) != 0) {
+        (void)LnnSetNetCapability(&capability, BIT_WIFI_P2P);
+    }
     if ((configValue & (1 << BIT_WIFI_24G)) != 0) {
         (void)LnnSetNetCapability(&capability, BIT_WIFI_24G);
     }

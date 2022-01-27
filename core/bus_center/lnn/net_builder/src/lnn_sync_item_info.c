@@ -27,6 +27,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
+#include "lnn_p2p_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
@@ -54,13 +55,15 @@ static int32_t ReceiveDeviceName(uint8_t *msg, uint32_t len, const SyncItemInfo 
 static int32_t ReceiveElectMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
 static SyncItemInfo *GetTransReqMsg(const char *networkId, DiscoveryType discoveryType);
 static int32_t ReceiveTransReqMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
+static int32_t ReceiveP2pInfoMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
 static uint32_t ControlStaConnectTargetAp(const SyncItemInfo *itemInfo);
 
 static ItemFunc g_itemGetFunTable[] = {
     {INFO_TYPE_DEVICE_NAME, GetDeviceNameMsg, ReceiveDeviceName},
     {INFO_TYPE_OFFLINE, GetOfflineMsg, NULL},
     {INFO_TYPE_MASTER_ELECT, GetElectMsg, ReceiveElectMsg},
-    {INFO_TYPE_BSS_TRANS, GetTransReqMsg, ReceiveTransReqMsg}
+    {INFO_TYPE_BSS_TRANS, GetTransReqMsg, ReceiveTransReqMsg},
+    {INFO_TYPE_P2P_INFO, NULL, ReceiveP2pInfoMsg},
 };
 
 typedef enum {
@@ -351,6 +354,26 @@ static int32_t ReceiveTransReqMsg(uint8_t *msg, uint32_t len, const SyncItemInfo
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv trans req.");
     if (ControlStaConnectTargetAp(info) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "control sta connect target ap fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ReceiveP2pInfoMsg(uint8_t *msg, uint32_t len, const SyncItemInfo *info)
+{
+    if (msg == NULL || len == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv p2p info.");
+
+    P2pInfo p2pInfo = {0};
+    if (LnnParseP2pInfoMsg((const char *)msg, &p2pInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (!LnnSetDLP2pInfo(info->udid, &p2pInfo)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set p2p info fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -823,7 +846,7 @@ int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType
 int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, SyncItemType itemType)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnSyncLedgerItemInfo type=%d", itemType);
-    if (networkId == NULL || buf == NULL || itemType != INFO_TYPE_CHANNEL_NOISE_INFO) {
+    if (networkId == NULL || buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network id = null or buf = null, type=%d", itemType);
         return SOFTBUS_INVALID_PARAM;
     }
