@@ -55,6 +55,10 @@ public:
     int32_t StopPublishLNN(const char *pkgName, int32_t publishId) override;
     int32_t RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen) override;
     int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId) override;
+    int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) override;
+    int32_t DeactiveMetaNode(const char *metaNodeId) override;
+    int32_t GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) override;
+
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;
 };
