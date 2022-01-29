@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "bus_center_info_key.h"
+#include "lnn_lane_info.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -38,13 +39,6 @@ typedef struct {
     uint32_t laneNum;
     int32_t laneId[0];
 } LnnLanesObject;
-
-typedef struct {
-    bool isSupportUdp;
-    bool isProxy;
-    ConnectionAddr conOption;
-    LnnLaneP2pInfo *p2pInfo;
-} LnnLaneInfo;
 
 int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
 int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info);

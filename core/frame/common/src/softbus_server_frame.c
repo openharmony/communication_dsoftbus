@@ -94,9 +94,13 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    if (P2pLinkInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
-        goto ERR_EXIT;
+    int32_t ret = P2pLinkInit();
+    if (ret != SOFTBUS_OK) {
+        if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
+            goto ERR_EXIT;
+        }
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
     }
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
