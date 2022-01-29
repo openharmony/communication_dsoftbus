@@ -1325,10 +1325,10 @@ static void ClearAuthManager(void)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "clear auth manager finish");
 }
 
-int32_t AuthDeinit(void)
+void AuthDeinit(void)
 {
     if (g_isAuthInit == false) {
-        return SOFTBUS_OK;
+        return;
     }
     if (g_verifyCallback != NULL) {
         SoftBusFree(g_verifyCallback);
@@ -1340,7 +1340,6 @@ int32_t AuthDeinit(void)
     SoftBusMutexDestroy(&g_authLock);
     g_isAuthInit = false;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth deinit succ!");
-    return SOFTBUS_OK;
 }
 
 int32_t AuthInit(void)
@@ -1352,7 +1351,7 @@ int32_t AuthInit(void)
     AuthListInit();
     if (RegisterConnCallback(&g_connCallback, &g_connResult) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "RegisterConnCallback failed");
-        (void)AuthDeinit();
+        AuthDeinit();
         return SOFTBUS_ERR;
     }
     AuthLooperInit();
@@ -1361,13 +1360,13 @@ int32_t AuthInit(void)
 
     if (HichainServiceInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth hichain init failed");
-        (void)AuthDeinit();
+        AuthDeinit();
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexInit(&g_authLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "mutex init fail!");
-        (void)AuthDeinit();
+        AuthDeinit();
         return SOFTBUS_ERR;
     }
 

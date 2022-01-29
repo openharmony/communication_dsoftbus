@@ -49,16 +49,14 @@ typedef enum {
 
 int32_t LnnInitDistributedLedger(void);
 void LnnDeinitDistributedLedger(void);
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info);
 ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
-int32_t LnnGetDLStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len);
-int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info);
 short LnnGetCnnCode(const char *uuid, DiscoveryType type);
-int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 int32_t LnnGetLaneCount(int32_t laneId);
 int32_t LnnSetLaneCount(int32_t laneId, int32_t num);

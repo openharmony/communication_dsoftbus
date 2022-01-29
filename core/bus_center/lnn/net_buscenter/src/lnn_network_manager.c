@@ -81,13 +81,10 @@ void LnnDeinitNetworkManager(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network impl(%d) failed\n", i);
         }
     }
-    return;
 }
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     (void)type;
-    if (LnnCallIpDiscovery != NULL) {
-        LnnCallIpDiscovery();
-    }
+    LnnCallIpDiscovery();
 }

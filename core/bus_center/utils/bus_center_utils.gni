@@ -13,24 +13,25 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+core_bus_center_utils_path = "$dsoftbus_root_path/core/bus_center/utils"
+
 bus_center_utils_src = [
-  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
-  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
-  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
-  "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ip_utils.c",
+  "$core_bus_center_utils_path/src/lnn_async_callback_utils.c",
+  "$core_bus_center_utils_path/src/lnn_connection_addr_utils.c",
+  "$core_bus_center_utils_path/src/lnn_map.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ipc_utils.c",
 ]
-bus_center_utils_inc = [ "$dsoftbus_root_path/core/bus_center/utils/include" ]
-bus_center_utils_deps = []
-if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
-  if (ohos_kernel_type == "liteos_m") {
-    if (board_name == "hispark_pegasus") {
-      bus_center_utils_inc +=
-          [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
-    }
-  }
-} else {
-  bus_center_utils_inc += [ "//utils/native/base/include" ]
-  bus_center_utils_deps += [ "//utils/native/base:utils" ]
+if (enable_lnn_net) {
+  bus_center_utils_src += [
+    "$core_bus_center_utils_path/src/lnn_ip_utils.c",
+    "$core_bus_center_utils_path/src/lnn_state_machine.c",
+  ]
 }
+if (enable_lnn_net || enable_lnn_meta_node) {
+  bus_center_utils_src += [
+    "$core_bus_center_utils_path/src/lnn_file_utils.c",
+    "$core_bus_center_utils_path/src/lnn_network_id.c",
+  ]
+}
+bus_center_utils_inc = [ "$core_bus_center_utils_path/include" ]
+bus_center_utils_deps = []

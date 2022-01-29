@@ -22,6 +22,7 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
+#include "bus_center_manager.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -531,7 +532,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
 };
 
-int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     uint32_t i;
     int32_t ret;
@@ -561,7 +562,7 @@ int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info)
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     uint32_t i;
     int32_t ret;
@@ -596,7 +597,7 @@ static bool JudgeString(const char *info, int32_t len)
     return (len <= 0) ? false : IsValidString(info, len);
 }
 
-int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
+int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     uint32_t i;
     int32_t ret;
@@ -629,7 +630,7 @@ int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     uint32_t i;
     int32_t ret;
@@ -656,6 +657,33 @@ int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info)
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
+}
+
+int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
+{
+    int32_t rc;
+    char type[DEVICE_TYPE_BUF_LEN] = {0};
+
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    rc = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, info->deviceName, DEVICE_NAME_BUF_LEN);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local device info failed");
+        return SOFTBUS_ERR;
+    }
+    rc = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, info->networkId, NETWORK_ID_BUF_LEN);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id info failed");
+        return SOFTBUS_ERR;
+    }
+    rc = LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local device type failed");
+        return SOFTBUS_ERR;
+    }
+    return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
 }
 
 int32_t LnnInitLocalLedger()
@@ -710,7 +738,7 @@ int32_t LnnInitLocalLedgerDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitLocalLedger()
+void LnnDeinitLocalLedger(void)
 {
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
         SoftBusMutexDestroy(&g_localNetLedger.lock);

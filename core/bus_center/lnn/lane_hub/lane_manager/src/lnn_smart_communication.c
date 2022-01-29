@@ -58,7 +58,7 @@ int32_t LnnGetRightLane(const char *netWorkId, LnnLaneProperty prop)
     int32_t lane = SOFTBUS_ERR;
     for (uint8_t i = 0; i < g_smartLaneMap[prop].preferredLinkNum; i++) {
         lane = g_smartLaneMap[prop].getLaneByType[i](netWorkId, prop);
-        if (lane >= 0 && LNNGetLaneScore(lane) > THRESHOLD_LANE_QUALITY_SCORE) {
+        if (lane >= 0 && LnnGetLaneScore(lane) > THRESHOLD_LANE_QUALITY_SCORE) {
             LnnSetLaneSupportUdp(netWorkId, lane, IsSupportUdp(prop));
             return lane;
         }

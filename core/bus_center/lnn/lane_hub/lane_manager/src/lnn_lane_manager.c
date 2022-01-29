@@ -17,7 +17,9 @@
 
 #include <securec.h>
 
+#include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_info.h"
 #include "lnn_smart_communication.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -25,16 +27,10 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-struct LnnLanesObject {
-    LnnLaneProperty prop;
-    uint32_t laneNum;
-    int32_t laneId[0];
-};
-
 typedef struct {
     ListNode node;
     LnnLanesObject *object;
-    LNNLaneQosObserverNotify notify;
+    LnnLaneQosObserverNotify notify;
 } LaneObserverListItem;
 
 static SoftBusList *g_laneQosObserver;
@@ -100,7 +96,7 @@ uint32_t LnnGetLaneNum(LnnLanesObject *lanesObject)
     return lanesObject->laneNum;
 }
 
-static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LNNLaneQosObserverNotify notify)
+static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LnnLaneQosObserverNotify notify)
 {
     LaneObserverListItem *item = NULL;
     SoftBusList *list = g_laneQosObserver;
@@ -134,7 +130,7 @@ static void ClearLaneQosObserverList(LnnLanesObject *object)
     }
 }
 
-int32_t LNNLaneQosObserverAttach(LnnLanesObject *object, LNNLaneQosObserverNotify notify)
+int32_t LnnLaneQosObserverAttach(LnnLanesObject *object, LnnLaneQosObserverNotify notify)
 {
     if (object == NULL || notify == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
@@ -147,7 +143,7 @@ int32_t LNNLaneQosObserverAttach(LnnLanesObject *object, LNNLaneQosObserverNotif
     return SOFTBUS_OK;
 }
 
-void LNNLaneQosObserverDetach(LnnLanesObject *object)
+void LnnLaneQosObserverDetach(LnnLanesObject *object)
 {
     if (object == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
@@ -168,7 +164,7 @@ static void LaneMonitorCallback(int32_t laneId, int32_t socre)
     }
 }
 
-int32_t InitLaneManager(void)
+int32_t LnnInitLaneManager(void)
 {
     if (LnnLanesInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanesInit error");

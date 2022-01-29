@@ -11,25 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare_args() {
-  enable_discovery_ble = false
-  enable_discovery_coap = true
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-  enable_connection_tcp = true
-  enable_connection_br = false
-  enable_connection_ble = false
-
-  enable_trans_udp = true
-  enable_trans_udp_stream = false
-  enable_trans_udp_file = true
-
-  enable_ip_auth = true
-  enable_auth_account = false
-
-  enable_lnn_net = true
-  enable_lnn_time_sync = true
-  enable_lnn_meta_node = true
-  enable_qos = true
-
-  enable_build_shared_sdk = true
+if (enable_lnn_net) {
+  bus_center_monitor_src =
+      [ "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c" ]
+} else {
+  bus_center_monitor_src = [ "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor_virtual.c" ]
 }
+bus_center_monitor_inc =
+    [ "$dsoftbus_root_path/core/bus_center/monitor/include" ]
+bus_center_monitor_deps = []

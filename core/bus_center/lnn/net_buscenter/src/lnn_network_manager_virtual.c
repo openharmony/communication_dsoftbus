@@ -13,25 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef LNN_TIME_SYNC_MANAGER_H
-#define LNN_TIME_SYNC_MANAGER_H
+#include "lnn_network_manager.h"
 
-#include "bus_center_event.h"
-#include "softbus_bus_center.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
-    TimeSyncAccuracy accuracy, TimeSyncPeriod period);
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId);
-
-int32_t LnnInitTimeSync(void);
-void LnnDeinitTimeSync(void);
-
-#ifdef __cplusplus
+int32_t LnnInitNetworkManager(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn network manager");
+    return SOFTBUS_OK;
 }
-#endif
 
-#endif
+int32_t LnnInitNetworkManagerDelay(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitNetworkManager(void)
+{
+}
+
+void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+{
+    (void)type;
+}

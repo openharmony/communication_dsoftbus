@@ -17,29 +17,46 @@ if (enable_auth_account == true) {
   AUTH_SERVER_DEFINES += [ "AUTH_ACCOUNT" ]
 }
 
-auth_server_src = [
-  "$dsoftbus_root_path/core/authentication/src/auth_common.c",
-  "$dsoftbus_root_path/core/authentication/src/auth_connection.c",
-  "$dsoftbus_root_path/core/authentication/src/auth_manager.c",
-  "$dsoftbus_root_path/core/authentication/src/auth_sessionkey.c",
-  "$dsoftbus_root_path/core/authentication/src/auth_socket.c",
-]
+authentication_path = "$dsoftbus_root_path/core/authentication"
+if (enable_lnn_net) {
+  auth_server_src = [
+    "$authentication_path/src/auth_common.c",
+    "$authentication_path/src/auth_connection.c",
+    "$authentication_path/src/auth_manager.c",
+    "$authentication_path/src/auth_sessionkey.c",
+  ]
+  if (enable_ip_auth) {
+    auth_server_src +=
+        [ "$dsoftbus_root_path/core/authentication/src/auth_socket.c" ]
+  } else {
+    auth_server_src +=
+        [ "$dsoftbus_root_path/core/authentication/src/auth_socket_virtual.c" ]
+  }
+} else {
+  auth_server_src = [
+    "$authentication_path/src/auth_manager_virtual.c",
+    "$authentication_path/src/auth_socket_virtual.c",
+  ]
+}
 auth_server_inc = [
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
 ]
 auth_server_deps = []
+
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
-    auth_server_deps += [ "//base/security/deviceauth:deviceauth_lite" ]
+    if (enable_lnn_net) {
+      auth_server_deps += [ "//base/security/deviceauth:deviceauth_lite" ]
+    }
   } else {
     auth_server_inc += [ "//third_party/cJSON" ]
-    auth_server_deps += [ "//base/security/deviceauth/services:deviceauth_sdk" ]
+    if (enable_lnn_net) {
+      auth_server_deps +=
+          [ "//base/security/deviceauth/services:deviceauth_sdk" ]
+    }
   }
 } else {
-  auth_server_inc += [
-    "//base/security/deviceauth/interfaces/innerkits",
-    "//third_party/cJSON",
-  ]
+  auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
 }

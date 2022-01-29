@@ -18,7 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
-#include "lnn_distributed_net_ledger.h"
+#include "bus_center_manager.h"
 #include "lnn_time_sync_impl.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -57,7 +57,6 @@ typedef struct {
     ListNode reqList;
     SoftBusLooper *looper;
     SoftBusHandler handler;
-    LnnOnTimeSyncCallBack notifyCallback;
 } TimeSyncCtrl;
 
 typedef struct {
@@ -322,7 +321,7 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
         resultInfo.result.millisecond, resultInfo.result.microsecond, resultInfo.result.accuracy, resultInfo.flag);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify time sync result to %s", item->pkgName);
-        g_timeSyncCtrl.notifyCallback(item->pkgName, &resultInfo, retCode);
+        LnnNotifyTimeSyncResult(item->pkgName, &resultInfo, retCode);
     }
 }
 
@@ -454,19 +453,15 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
 {
     char uuid[UUID_BUF_LEN] = {0};
 
-    if (LnnGetDLStrInfo(info->targetNetworkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfo(info->targetNetworkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get uuid fail");
         return false;
     }
     return true;
 }
 
-int32_t LnnTimeSyncInit(LnnOnTimeSyncCallBack notifyCallback)
+int32_t LnnInitTimeSync(void)
 {
-    if (notifyCallback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "null time sync result callback");
-        return SOFTBUS_INVALID_PARAM;
-    }
     ListInit(&g_timeSyncCtrl.reqList);
     g_timeSyncCtrl.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_timeSyncCtrl.looper == NULL) {
@@ -476,12 +471,11 @@ int32_t LnnTimeSyncInit(LnnOnTimeSyncCallBack notifyCallback)
     g_timeSyncCtrl.handler.name = "TimeSync";
     g_timeSyncCtrl.handler.looper = g_timeSyncCtrl.looper;
     g_timeSyncCtrl.handler.HandleMessage = TimeSyncMessageHandler;
-    g_timeSyncCtrl.notifyCallback = notifyCallback;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init time sync success");
     return LnnTimeSyncImplInit();
 }
 
-void LnnTimeSyncDeinit(void)
+void LnnDeinitTimeSync(void)
 {
     if (g_timeSyncCtrl.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync not init");
