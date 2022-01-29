@@ -17,6 +17,7 @@
 #define LNN_LANE_INFO_H
 
 #include <stdint.h>
+
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -37,29 +38,15 @@ typedef enum {
     LNN_LINK_TYPE_BUTT,
 } LnnLaneLinkType;
 
-typedef struct {
-    bool isSupportUdp;
-    bool isProxy;
-    ConnectionAddr conOption;
-} LnnLaneInfo;
-
-typedef enum {
-    LNN_MESSAGE_LANE = 1,
-    LNN_BYTES_LANE,
-    LNN_FILE_LANE,
-    LNN_STREAM_LANE,
-    LNN_LANE_PROPERTY_BUTT,
-} LnnLaneProperty;
+typedef void (*LnnLaneMonitorCallback)(int32_t laneId, int32_t socre);
 
 ConnectionAddrType LnnGetLaneType(int32_t laneId);
 void LnnReleaseLane(int32_t laneId);
-const LnnLaneInfo *LnnGetConnection(int32_t laneId);
 bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool mode);
 int32_t LnnLanesInit(void);
 void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport);
-typedef void (*LnnLaneMonitorCallback)(int32_t laneId, int32_t socre);
 int32_t LnnRegisterLaneMonitor(LnnLaneMonitorCallback callback);
-int32_t LNNGetLaneScore(int32_t laneId);
+int32_t LnnGetLaneScore(int32_t laneId);
 void TriggerLaneMonitor(void);
 
 #ifdef __cplusplus

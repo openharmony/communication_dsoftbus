@@ -43,11 +43,8 @@ typedef struct {
 int32_t LnnInitLocalLedger(void);
 int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
+
 const NodeInfo *LnnGetLocalNodeInfo(void);
-int32_t LnnGetLocalLedgerStrInfo(InfoKey key, char *info, uint32_t len);
-int32_t LnnGetLocalLedgerNumInfo(InfoKey key, int32_t *info);
-int32_t LnnSetLocalLedgerStrInfo(InfoKey key, const char *info);
-int32_t LnnSetLocalLedgerNumInfo(InfoKey key, int32_t info);
 
 #ifdef __cplusplus
 }

@@ -25,25 +25,21 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     (void)targetNetworkId;
     (void)accuracy;
     (void)period;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start time sync stub enter");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     (void)targetNetworkId;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop time sync stub impl");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnTimeSyncInit(LnnOnTimeSyncCallBack notifyCallback)
+int32_t LnnInitTimeSync(void)
 {
-    (void)notifyCallback;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync stub init");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync virtual init success");
     return SOFTBUS_OK;
 }
 
-void LnnTimeSyncDeinit(void)
+void LnnDeinitTimeSync(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync stub deinit");
 }

@@ -22,8 +22,8 @@
 
 #include <securec.h>
 
+#include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
@@ -481,7 +481,7 @@ static int32_t FillSyncItemInfo(const char *networkId, SyncItemInfo *info, SyncI
     const uint8_t *data, uint32_t dataLen)
 {
     info->type = type;
-    if (LnnGetDLStrInfo(networkId, STRING_KEY_DEV_UDID, info->udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, info->udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid fail");
         return SOFTBUS_ERR;
     }
@@ -587,8 +587,8 @@ static SyncItemInfo *GetElectMsg(const char *networkId, DiscoveryType discoveryT
     int32_t masterWeight;
 
     (void)discoveryType;
-    if (LnnGetLocalLedgerStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGetLocalLedgerNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &masterWeight) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &masterWeight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node info failed");
         return NULL;
     }

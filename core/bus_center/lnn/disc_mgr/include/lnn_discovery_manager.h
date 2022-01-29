@@ -13,32 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_WIFI_API_ADAPTER_H
-#define SOFTBUS_WIFI_API_ADAPTER_H
-
 #include <stdint.h>
+
+#include "softbus_bus_center.h"
+
+#ifndef LNN_DISCOVERY_MANAGER_H
+#define LNN_DISCOVERY_MANAGER_H
+
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
 #endif
-#define WIFI_MAX_SSID_LEN 33
-#define WIFI_MAC_LEN 6
-#define WIFI_MAX_KEY_LEN 65
-#define WIFI_MAX_CONFIG_SIZE 10
+#endif
 
 typedef struct {
-    char ssid[WIFI_MAX_SSID_LEN];
-    unsigned char bssid[WIFI_MAC_LEN];
-    char preSharedKey[WIFI_MAX_KEY_LEN];
-    int32_t securityType;
-    int32_t netId;
-    int32_t isHiddenSsid;
-} SoftBusWifiDevConf;
+    void (*OnDeviceFound)(const ConnectionAddr *addr);
+} LnnDiscoveryImplCallback;
 
-int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
-int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
-int32_t SoftBusDisconnectDevice(void);
+int32_t LnnInitDiscoveryManager(void);
+int32_t LnnStartDiscovery(void);
+void LnnStopDiscovery(void);
+
+int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
+int32_t LnnStartCoapDiscovery(void);
+int32_t LnnStopCoapDiscovery(void);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif
-#endif // SOFTBUS_WIFI_API_ADAPTER_H
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* LNN_DISCOVERY_MANAGER_H */

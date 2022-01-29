@@ -17,7 +17,6 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
-#include "lnn_lane_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -257,7 +256,7 @@ static int32_t TransGetLaneInfo(SessionType flags, const char *peerDeviceId,
     }
     int32_t laneIndex = 0;
     int32_t laneId = LnnGetLaneId(object, laneIndex);
-    const LnnLaneInfo *info = LnnGetConnection(laneId);
+    const LnnLaneInfo *info = LnnGetLaneInfo(laneId);
     if (info == NULL) {
         LnnReleaseLanesObject(object);
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
