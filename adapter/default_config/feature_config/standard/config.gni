@@ -26,7 +26,7 @@ declare_args() {
   enable_ip_auth = true
   enable_auth_account = false
 
-  enable_lnn_net = false
+  enable_lnn_net = true
   enable_lnn_time_sync = true
   enable_lnn_meta_node = true
   enable_qos = true

@@ -28,7 +28,7 @@ declare_args() {
   enable_auth_account = false
 
   enable_lnn_net = true
-  enable_lnn_time_sync = false
+  enable_lnn_time_sync = true
   enable_lnn_meta_node = false
   enable_qos = false
 
