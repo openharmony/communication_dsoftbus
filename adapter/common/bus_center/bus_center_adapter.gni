@@ -1,0 +1,92 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+adapter_bus_center_path = "$softbus_adapter_common/bus_center"
+
+bus_center_adapter_src = []
+bus_center_adapter_inc = [ "$softbus_adapter_common/bus_center/include" ]
+bus_center_adapter_deps = []
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    if (enable_lnn_net) {
+      bus_center_adapter_src += [
+        "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
+        "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
+        "$adapter_bus_center_path/network/lnn_linkwatch_virtual.c",
+        "$adapter_bus_center_path/network/lnn_lwip_monitor.c",
+        "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
+        "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+      ]
+    }
+  } else if (ohos_kernel_type == "linux") {
+    if (enable_lnn_net) {
+      bus_center_adapter_src += [
+        "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
+        "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
+        "$adapter_bus_center_path/network/lnn_linkwatch.c",
+        "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
+        "$adapter_bus_center_path/network/lnn_netlink_monitor.c",
+        "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+        "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+      ]
+    }
+  } else if (ohos_kernel_type == "liteos_a") {
+    bus_center_adapter_inc += [
+      "//drivers/adapter/uhdf/posix/include",
+      "//drivers/framework/include/utils",
+      "//drivers/framework/include/core",
+      "//drivers/framework/ability/sbuf/include",
+    ]
+    if (enable_lnn_net) {
+      bus_center_adapter_src += [
+        "$adapter_bus_center_path/driver/lnn_hdf_driver_monitor.c",
+        "$adapter_bus_center_path/driver/lnn_hdf_driver_request.c",
+        "$adapter_bus_center_path/network/lnn_linkwatch_virtual.c",
+        "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
+        "$adapter_bus_center_path/network/lnn_netlink_monitor_virtual.c",
+        "$adapter_bus_center_path/platform/lnn_product_monitor.c",
+        "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+      ]
+      bus_center_adapter_inc += [
+        "//drivers/framework/core/shared/include",
+        "//drivers/framework/include",
+      ]
+      bus_center_adapter_deps += [
+        "//drivers/adapter/uhdf/manager:hdf_core",
+        "//drivers/adapter/uhdf/platform:hdf_platform",
+        "//drivers/adapter/uhdf/posix:hdf_posix_osal",
+      ]
+    }
+  }
+} else {
+  if (enable_lnn_net) {
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
+      "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
+      "$adapter_bus_center_path/network/lnn_linkwatch.c",
+      "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
+      "$adapter_bus_center_path/network/lnn_netlink_monitor.c",
+      "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
+      "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+    ]
+  }
+  bus_center_adapter_inc += [
+    "//utils/native/base/include",
+    "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
+    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
+  ]
+  bus_center_adapter_external_deps = []
+}

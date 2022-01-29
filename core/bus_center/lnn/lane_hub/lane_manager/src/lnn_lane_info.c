@@ -38,7 +38,7 @@ typedef struct {
 static LaneInfoImpl g_lanes[LNN_LINK_TYPE_BUTT];
 static LnnLaneMonitorCallback g_callback;
 
-int32_t LNNGetLaneScore(int32_t laneId)
+int32_t LnnGetLaneScore(int32_t laneId)
 {
     int32_t count = LnnGetLaneCount(laneId);
     if (count == SOFTBUS_ERR) {
@@ -61,7 +61,7 @@ int32_t LNNGetLaneScore(int32_t laneId)
 void TriggerLaneMonitor(void)
 {
     for (int32_t laneId = 0; laneId < LNN_LINK_TYPE_BUTT; laneId++) {
-        int32_t score = LNNGetLaneScore(laneId);
+        int32_t score = LnnGetLaneScore(laneId);
         if (score < PASSING_LANE_QUALITY_SCORE && g_callback != NULL) {
             g_callback(laneId, score);
         }
@@ -133,7 +133,7 @@ ConnectionAddrType LnnGetLaneType(int32_t laneId)
     return laneId;
 }
 
-const LnnLaneInfo *LnnGetConnection(int32_t laneId)
+const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId)
 {
     if (!IsValidLaneId(laneId)) {
         return NULL;

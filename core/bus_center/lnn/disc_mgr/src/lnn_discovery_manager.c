@@ -81,6 +81,7 @@ static int32_t RestartPublish(void)
     }
     return SOFTBUS_OK;
 }
+
 int32_t LnnInitDiscoveryManager(void)
 {
     uint32_t i;

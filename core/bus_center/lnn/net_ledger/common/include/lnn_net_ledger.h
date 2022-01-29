@@ -13,32 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_WIFI_API_ADAPTER_H
-#define SOFTBUS_WIFI_API_ADAPTER_H
+#ifndef LNN_NET_LEDGER_H
+#define LNN_NET_LEDGER_H
 
 #include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
-#endif
-#define WIFI_MAX_SSID_LEN 33
-#define WIFI_MAC_LEN 6
-#define WIFI_MAX_KEY_LEN 65
-#define WIFI_MAX_CONFIG_SIZE 10
+#endif /* __cplusplus */
 
-typedef struct {
-    char ssid[WIFI_MAX_SSID_LEN];
-    unsigned char bssid[WIFI_MAC_LEN];
-    char preSharedKey[WIFI_MAX_KEY_LEN];
-    int32_t securityType;
-    int32_t netId;
-    int32_t isHiddenSsid;
-} SoftBusWifiDevConf;
-
-int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
-int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
-int32_t SoftBusDisconnectDevice(void);
+int32_t LnnInitNetLedger(void);
+int32_t LnnInitNetLedgerDelay(void);
+void LnnDeinitNetLedger(void);
 
 #ifdef __cplusplus
 }
-#endif
-#endif // SOFTBUS_WIFI_API_ADAPTER_H
+#endif /* __cplusplus */
+
+#endif /* LNN_NET_LEDGER_H */

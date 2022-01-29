@@ -832,16 +832,16 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
     int32_t rc;
 
     // get local master node info
-    if (LnnGetLocalLedgerStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+    if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
         LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &localMasterWeight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node info from ledger failed");
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local master(%u) weight=%d", connFsm->id, localMasterWeight);
-    if (LnnGetDLStrInfo(connFsm->connInfo.peerNetworkId, STRING_KEY_MASTER_NODE_UDID,
-                        peerMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGetDLNumInfo(connFsm->connInfo.peerNetworkId, NUM_KEY_MASTER_NODE_WEIGHT,
-                        &peerMasterWeight) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfo(connFsm->connInfo.peerNetworkId, STRING_KEY_MASTER_NODE_UDID,
+        peerMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetRemoteNumInfo(connFsm->connInfo.peerNetworkId, NUM_KEY_MASTER_NODE_WEIGHT,
+            &peerMasterWeight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node info(%u) is not found", connFsm->id);
         return SOFTBUS_ERR;
     }
@@ -863,7 +863,7 @@ static int32_t TryElectMasterNodeOffline(const LnnConnectionFsm *connFsm)
     char localUdid[UDID_BUF_LEN] = {0};
     char localMasterUdid[UDID_BUF_LEN] = {0};
 
-    if (LnnGetLocalLedgerStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node info from ledger failed");
         return SOFTBUS_ERR;
     }
@@ -933,7 +933,7 @@ static int32_t ProcessMasterElect(const void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node(%u) is already offline", connFsm->id);
             break;
         }
-        if (LnnGetLocalLedgerStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
             LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &localMasterWeight) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node(%u) info from ledger failed",
                 connFsm->id);
@@ -1247,23 +1247,25 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder repeatly");
         return SOFTBUS_OK;
     }
+    if (LnnInitSyncLedgerItem() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync ledger item fail");
+        return SOFTBUS_ERR;
+    }
     NetBuilderConfigInit();
     if (RegisterAuthCallback() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
         return SOFTBUS_ERR;
     }
-
     if (ConifgLocalLedger() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "config local ledger fail");
         return SOFTBUS_ERR;
     }
-
     ListInit(&g_netBuilder.fsmList);
     ListInit(&g_netBuilder.pendingList);
     g_netBuilder.nodeType = NODE_TYPE_L;
     g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_netBuilder.looper == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get default looper failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get default looper fail");
         return SOFTBUS_ERR;
     }
     g_netBuilder.handler.name = "NetBuilderHandler";
@@ -1295,6 +1297,7 @@ void LnnDeinitNetBuilder(void)
     if (!g_netBuilder.isInit) {
         return;
     }
+    LnnDeinitSyncLedgerItem();
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         StopConnectionFsm(item);
     }

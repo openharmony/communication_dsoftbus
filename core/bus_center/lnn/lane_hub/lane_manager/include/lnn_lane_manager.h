@@ -17,23 +17,19 @@
 #define LNN_LANE_MANAGER_H
 
 #include <stdint.h>
-#include "lnn_lane_info.h"
+
+#include "bus_center_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t InitLaneManager(void);
-typedef struct LnnLanesObject LnnLanesObject;
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty prop, uint32_t laneNum);
-void LnnReleaseLanesObject(LnnLanesObject *lanesObject);
+typedef void (*LnnLaneQosObserverNotify)(int32_t laneId, int32_t score);
 
+int32_t LnnInitLaneManager(void);
 uint32_t LnnGetLaneNum(LnnLanesObject *lanesObject);
-int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num);
-
-typedef void (*LNNLaneQosObserverNotify)(int32_t laneId, int32_t score);
-int32_t LNNLaneQosObserverAttach(LnnLanesObject *object, LNNLaneQosObserverNotify notify);
-void LNNLaneQosObserverDetach(LnnLanesObject *object);
+int32_t LnnLaneQosObserverAttach(LnnLanesObject *object, LnnLaneQosObserverNotify notify);
+void LnnLaneQosObserverDetach(LnnLanesObject *object);
 
 #ifdef __cplusplus
 }

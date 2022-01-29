@@ -814,12 +814,15 @@ EXIT:
     return false;
 }
 
-int32_t LnnGetDLStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
+int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
 {
     uint32_t i;
     int32_t ret;
-    if (networkId == NULL || info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (key >= STRING_KEY_END) {
@@ -844,12 +847,15 @@ int32_t LnnGetDLStrInfo(const char *networkId, InfoKey key, char *info, uint32_t
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info)
+int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
 {
     uint32_t i;
     int32_t ret;
-    if (networkId == NULL || info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
@@ -874,7 +880,7 @@ int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetDistributedNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     int ret = SOFTBUS_ERR;
 
