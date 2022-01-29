@@ -11,23 +11,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+trans_sdk_test_common_src = [
+  "tcp_direct/unittest/trans_session_test.cpp",
+  "tcp_direct/unittest/trans_tcp_direct_test.cpp",
+  "udp/stream/trans_sdk_stream_test.cpp",
+]
+trans_sdk_test_common_inc = [
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/interfaces/inner_kits/transport",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+]
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   if (ohos_build_type == "debug") {
     unittest("TransSdkTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = [
-        "tcp_direct/unittest/trans_tcp_direct_test.cpp",
-        "udp/stream/trans_sdk_stream_test.cpp",
-      ]
-      include_dirs = [
-        "$dsoftbus_root_path/core/common/include",
+      sources = trans_sdk_test_common_src
+      include_dirs = trans_sdk_test_common_inc
+      include_dirs += [
         "$dsoftbus_root_path/core/common/softbus_property/include",
-        "$dsoftbus_root_path/interfaces/kits/transport",
         "$softbus_adapter_config/spec_config",
       ]
       deps = [
@@ -39,20 +47,12 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   module_output_path = "dsoftbus_standard/transmission"
-
   ohos_unittest("TransSdkTest") {
     module_out_path = module_output_path
-    sources = [
-      "tcp_direct/unittest/trans_tcp_direct_test.cpp",
-      "udp/stream/trans_sdk_stream_test.cpp",
-    ]
-    include_dirs = [
-      "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/interfaces/kits/transport",
-    ]
+    sources = trans_sdk_test_common_src
+    include_dirs = trans_sdk_test_common_inc
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/sdk:softbus_client",
