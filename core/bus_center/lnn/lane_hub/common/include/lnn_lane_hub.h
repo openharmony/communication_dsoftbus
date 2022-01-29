@@ -13,39 +13,19 @@
  * limitations under the License.
  */
 
+#ifndef LNN_LANE_HUB_H
+#define LNN_LANE_HUB_H
+
 #include <stdint.h>
 
-#include "softbus_bus_center.h"
-
-#ifndef LNN_DISCOVERY_MANAGER_H
-#define LNN_DISCOVERY_MANAGER_H
-
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif
 
-typedef struct {
-    void (*OnDeviceFound)(const ConnectionAddr *addr);
-} LnnDiscoveryImplCallback;
-
-int32_t LnnInitDiscoveryManager(void);
-
-int32_t LnnStartDiscovery(void);
-
-void LnnStopDiscovery(void);
-
-int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
-
-int32_t LnnStartCoapDiscovery(void);
-
-int32_t LnnStopCoapDiscovery(void);
+int32_t LnnInitLaneHub(void);
+void LnnDeinitLaneHub(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* LNN_DISCOVERY_MANAGER_H */
+#endif
+#endif /* LNN_LANE_HUB_H */

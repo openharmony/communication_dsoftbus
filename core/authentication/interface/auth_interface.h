@@ -149,7 +149,8 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
 int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId);
 
 int32_t AuthInit(void);
-int32_t AuthDeinit(void);
+void AuthDeinit(void);
+
 #ifdef __cplusplus
 }
 #endif

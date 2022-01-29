@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef LNN_TIME_SYNC_MANAGER_H
-#define LNN_TIME_SYNC_MANAGER_H
+#include "lnn_lane_hub.h"
 
 #include "bus_center_event.h"
-#include "softbus_bus_center.h"
+#include "lnn_lane_manager.h"
+#include "lnn_time_sync_manager.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
-    TimeSyncAccuracy accuracy, TimeSyncPeriod period);
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId);
-
-int32_t LnnInitTimeSync(void);
-void LnnDeinitTimeSync(void);
-
-#ifdef __cplusplus
+int32_t LnnInitLaneHub(void)
+{
+    if (LnnInitLaneManager() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane manager fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitTimeSync() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init time sync fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
-#endif
 
-#endif
+void LnnDeinitLaneHub(void)
+{
+    LnnDeinitTimeSync();
+}

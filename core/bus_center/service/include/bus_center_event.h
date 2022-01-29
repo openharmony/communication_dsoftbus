@@ -25,8 +25,6 @@
 extern "C" {
 #endif
 
-typedef void (*LnnOnTimeSyncCallBack)(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
-
 void LnnNotifyJoinResult(ConnectionAddr *addr,
     const char *networkId, int32_t retCode);
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);

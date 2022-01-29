@@ -28,20 +28,15 @@ extern "C" {
 #endif
 
 int32_t LnnInitNetworkManager(void);
-
-void LnnDeinitNetworkManager(void);
-
 int32_t LnnInitNetworkManagerDelay(void);
+void LnnDeinitNetworkManager(void);
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 
 int32_t LnnInitIpNetwork(void);
-
-int32_t LnnDeinitIpNetwork(void);
-
 int32_t LnnInitIpNetworkDelay(void);
-
-void __attribute__ ((weak)) LnnCallIpDiscovery(void);
+int32_t LnnDeinitIpNetwork(void);
+void LnnCallIpDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus

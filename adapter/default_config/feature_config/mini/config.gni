@@ -22,12 +22,14 @@ declare_args() {
   enable_trans_udp = false
   enable_trans_udp_stream = false
   enable_trans_udp_file = false
+
+  enable_ip_auth = true
   enable_auth_account = false
 
-  enable_auto_networking = true
-  enable_dsoftbus_driver = false
+  enable_lnn_net = true
+  enable_lnn_time_sync = false
   enable_lnn_meta_node = false
+  enable_qos = false
 
   enable_build_shared_sdk = false
-  enable_qos = false
 }

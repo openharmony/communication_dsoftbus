@@ -17,7 +17,8 @@
 #define LNN_SMART_COMMUNICATION_H
 
 #include <stdint.h>
-#include "lnn_lane_info.h"
+
+#include "bus_center_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
