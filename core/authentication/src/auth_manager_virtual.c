@@ -69,13 +69,6 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-// int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
-// {
-//     (void)option;
-//     (void)authId;
-//     return SOFTBUS_NOT_IMPLEMENT;
-// }
-
 int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
 {
     (void)moduleId;
@@ -98,10 +91,3 @@ int32_t AuthCloseChannel(int64_t authId)
     (void)authId;
     return SOFTBUS_NOT_IMPLEMENT;
 }
-
-// int32_t AuthRegCallback(AuthModuleId moduleId, VerifyCallback *cb)
-// {
-//     (void)moduleId;
-//     (void)cb;
-//     return SOFTBUS_OK;
-// }
