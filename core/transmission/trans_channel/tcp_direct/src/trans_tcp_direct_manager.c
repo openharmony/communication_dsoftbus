@@ -104,8 +104,13 @@ void TransTdcStopSessionProc(void)
 
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
-    if (P2pDirectChannelInit() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    int32_t ret = P2pDirectChannelInit();
+    if (ret != SOFTBUS_OK) {
+        if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init p2p direct channel failed");
+            return SOFTBUS_ERR;
+        }
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "p2p direct channel not support.");
     }
     if (TransSrvDataListInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init srv trans tcp direct databuf list failed");

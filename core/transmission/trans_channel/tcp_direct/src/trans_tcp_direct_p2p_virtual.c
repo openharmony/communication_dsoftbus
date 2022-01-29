@@ -19,7 +19,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 
-
 int32_t P2pDirectChannelInit(void)
 {
     return SOFTBUS_FUNC_NOT_SUPPORT;
@@ -28,7 +27,11 @@ int32_t P2pDirectChannelInit(void)
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     (void)appInfo;
-    (void)appInfo;
-    (void)appInfo;
+    (void)connInfo;
+    (void)channelId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+void StopP2pSessionListener(void)
+{
 }

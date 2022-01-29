@@ -737,7 +737,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_PRELINK_LANE_Test_002, TestSize.Level1)
     LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId1 = LnnGetLaneId(lanesObj1, 0);
     LnnSetLaneCount(laneId1, LANE_COUNT_THRESHOLD);
-    EXPECT_TRUE(LNNGetLaneScore(laneId1) == THRESHOLD_LANE_QUALITY_SCORE);
+    EXPECT_TRUE(LnnGetLaneScore(laneId1) == THRESHOLD_LANE_QUALITY_SCORE);
     LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
     EXPECT_TRUE(laneId2 == LNN_LINK_TYPE_WLAN_2P4G);

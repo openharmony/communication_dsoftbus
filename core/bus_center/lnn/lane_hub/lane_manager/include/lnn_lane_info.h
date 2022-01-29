@@ -48,6 +48,13 @@ typedef struct {
     char peerIp[IP_LEN];
 } LnnLaneP2pInfo;
 
+typedef struct {
+    bool isSupportUdp;
+    bool isProxy;
+    ConnectionAddr conOption;
+    LnnLaneP2pInfo *p2pInfo;
+} LnnLaneInfo;
+
 typedef void (*LnnLaneMonitorCallback)(int32_t laneId, int32_t socre);
 
 typedef struct {
