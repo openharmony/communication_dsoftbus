@@ -686,7 +686,7 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
 }
 
-int32_t LnnInitLocalLedger()
+int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
