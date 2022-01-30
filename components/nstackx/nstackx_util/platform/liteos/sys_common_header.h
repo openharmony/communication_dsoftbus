@@ -31,6 +31,7 @@
 #include <net/if.h>
 #include <limits.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/ioctl.h>
 #endif /* LWIP_LITEOS_A_COMPAT */
 

@@ -1,0 +1,113 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+fillp_source = [
+  "src/app_lib/src/api.c",
+  "src/app_lib/src/epoll_app.c",
+  "src/app_lib/src/fillp_stack_app_config.c",
+  "src/app_lib/src/fillp_stack_app_config_in.c",
+  "src/app_lib/src/socket_app.c",
+  "src/app_lib/src/spunge_app.c",
+  "src/app_lib/src/socket_opt.c",
+  "src/fillp_lib/src/fillp_buf_item.c",
+  "src/fillp_lib/src/fillp_cookie.c",
+  "src/fillp_lib/src/fillp_stack_config.c",
+  "src/fillp_lib/src/fillp_stack_config_in.c",
+  "src/fillp_lib/src/hmac.c",
+  "src/fillp_lib/src/net.c",
+  "src/fillp_lib/src/pcb.c",
+  "src/fillp_lib/src/res.c",
+  "src/fillp_lib/src/sha256.c",
+  "src/fillp_lib/src/spunge_core.c",
+  "src/fillp_lib/src/spunge_stack.c",
+  "src/fillp_lib/src/sysio.c",
+  "src/fillp_lib/src/sysio_udp.c",
+  "src/fillp_lib/src/fillp/fillp.c",
+  "src/fillp_lib/src/fillp/fillp_common.c",
+  "src/fillp_lib/src/fillp/fillp_conn.c",
+  "src/fillp_lib/src/fillp/fillp_flow_control_alg0.c",
+  "src/fillp_lib/src/fillp/fillp_flow_control.c",
+  "src/fillp_lib/src/fillp/fillp_input.c",
+  "src/fillp_lib/src/fillp/fillp_output.c",
+  "src/fillp_lib/src/fillp/fillp_pcb.c",
+  "src/fillp_lib/src/fillp/fillp_timer.c",
+  "src/fillp_lib/src/fillp/fillp_frame.c",
+  "src/public/src/callbacks.c",
+  "src/public/src/dympool.c",
+  "src/public/src/epoll.c",
+  "src/public/src/fillp_os.c",
+  "src/public/src/lf_ring.c",
+  "src/public/src/log.c",
+  "src/public/src/mem_pool.c",
+  "src/public/src/rb_tree.c",
+  "src/public/src/skiplist.c",
+  "src/public/src/socket_common.c",
+  "src/public/src/spunge.c",
+  "src/public/src/spunge_mem.c",
+  "src/public/src/spunge_message.c",
+  "src/public/src/timing_wheel.c",
+]
+
+fillp_include = [
+  "include",
+  "src/app_lib/include",
+  "src/fillp_lib/include",
+  "src/fillp_lib/include/fillp",
+  "src/public/include",
+]
+
+fillp_cflags = [
+  "-DPDT_MIRACAST",
+  "-DFILLP_SERVER_SUPPORT",
+  "-DFILLP_LITTLE_ENDIAN",
+  "-DFILLP_LINUX",
+  "-DFILLP_POWER_SAVE",
+  "-DFILLP_POWER_SAVING_LINUX",
+]
+
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  shared_library("FillpSo.open") {
+    cflags = fillp_cflags
+    cflags += [ "-Wall" ]
+    include_dirs = fillp_include
+    include_dirs += [ "//third_party/bounds_checking_function/include/" ]
+    sources = fillp_source
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+
+    if (ohos_kernel_type == "liteos_a") {
+      cflags += [ "-DNSTACKX_WITH_LITEOS" ]
+    } else {
+      cflags += [ "-DNSTACKX_WITH_HMOS_LINUX" ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("FillpSo.open") {
+    cflags = fillp_cflags
+    cflags += [
+      "-Wall",
+      "-DNSTACKX_WITH_HMOS_LINUX",
+    ]
+
+    include_dirs = fillp_include
+    include_dirs += [ "//utils/native/base/include/" ]
+    sources = fillp_source
+    deps = [ "//utils/native/base:utilsecurec_shared" ]
+
+    part_name = "dsoftbus_standard"
+    subsystem_name = "communication"
+  }
+}
