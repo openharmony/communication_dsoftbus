@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#ifndef LNN_DISCOVERY_MANAGER_H
+#define LNN_DISCOVERY_MANAGER_H
+
 #include <stdint.h>
 
 #include "softbus_bus_center.h"
-
-#ifndef LNN_DISCOVERY_MANAGER_H
-#define LNN_DISCOVERY_MANAGER_H
 
 #ifdef __cplusplus
 #if __cplusplus
