@@ -67,6 +67,9 @@ if (defined(ohos_lite)) {
   }
   group("unittest") {
     testonly = true
-    deps = [ ":TransSdkTest" ]
+    deps = [
+      ":TransSdkTest",
+      "udp/p2p/softbus_test_farmeworks:stream_p2p_test"
+    ]
   }
 }
