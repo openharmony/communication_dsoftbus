@@ -95,6 +95,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
         IpcIoPushInt32(&io, channel->peerPort);
         IpcIoPushString(&io, channel->peerIp);
     }
+    IpcIoPushInt32(&io, channel->routeType);
     int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_OPENED, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened SendRequest failed");
@@ -122,6 +123,32 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return ans;
 }
 
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+{
+    if (pkgName == NULL || networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientIpcOnChannelLinkDown: pkgName=%s, networkId=%s",
+        pkgName, networkId);
+
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoPushString(&io, networkId);
+    IpcIoPushInt32(&io, routeType);
+    SvcIdentity svc = {0};
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback get svc failed.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_CHANNEL_LINKDOWN, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientIpcOnChannelLinkDown callback SendRequest failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
@@ -142,7 +169,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     return ans;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, 
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
                                       const void *data, unsigned int len, int32_t type)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");

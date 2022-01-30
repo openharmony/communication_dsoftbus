@@ -21,6 +21,12 @@
 
 #include "softbus_type_def.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define BT_ADDR_LEN 6
 #define BT_UUID_LEN 16
 
@@ -46,7 +52,11 @@ typedef enum {
     SOFTBUS_BT_STATE_TURNING_ON = 0x0,
     SOFTBUS_BT_STATE_TURN_ON,
     SOFTBUS_BT_STATE_TURNING_OFF,
-    SOFTBUS_BT_STATE_TURN_OFF
+    SOFTBUS_BT_STATE_TURN_OFF,
+    SOFTBUS_BR_STATE_TURNING_ON,
+    SOFTBUS_BR_STATE_TURN_ON,
+    SOFTBUS_BR_STATE_TURNING_OFF,
+    SOFTBUS_BR_STATE_TURN_OFF
 } SoftBusBtStackState;
 
 typedef struct {
@@ -83,4 +93,9 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener);
 
 int SoftBusRemoveBtStateListener(int listenerId);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

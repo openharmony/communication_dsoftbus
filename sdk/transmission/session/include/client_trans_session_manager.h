@@ -46,6 +46,7 @@ typedef struct {
     int32_t peerUid;
     int32_t peerPid;
     bool isEncrypt;
+    int32_t routeType;
 } SessionInfo;
 
 typedef struct {
@@ -111,6 +112,8 @@ void TransClientDeinit(void);
 
 int32_t ReCreateSessionServerToServer(void);
 void ClientTransRegLnnOffline(void);
+
+void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 #ifdef __cplusplus
 }
 #endif

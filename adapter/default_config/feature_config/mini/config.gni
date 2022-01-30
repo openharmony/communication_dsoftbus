@@ -18,6 +18,7 @@ declare_args() {
   enable_connection_tcp = true
   enable_connection_br = false
   enable_connection_ble = false
+  enable_connection_p2p = false
 
   enable_trans_udp = false
   enable_trans_udp_stream = false

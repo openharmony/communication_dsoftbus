@@ -30,12 +30,13 @@ typedef enum {
     SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, /* the default val is 4096 */
     SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN, /* the default val is 990 */
     SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN, /* the default val is 10 */
+    SOFTBUS_INT_CONN_BR_MAX_CONN_NUM, /* the default val is 20 */
     SOFTBUS_INT_CONN_TCP_MAX_LENGTH, /* the default val is 3072 */
     SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, /* the default val is 30 */
     SOFTBUS_INT_CONN_TCP_TIME_OUT, /* the default val is 100 */
     SOFTBUS_INT_MAX_NODE_STATE_CB_CNT, /* the default val is 10 */
     SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, /* the default val is 10 */
-    SOFTBUS_INT_LNN_SUPPORT_CAPBILITY, /* the default val is 22 */
+    SOFTBUS_INT_LNN_SUPPORT_CAPBILITY, /* the default val is 30 */
     SOFTBUS_INT_AUTH_ABILITY_COLLECTION, /* the default val is 0 */
     SOFTBUS_INT_ADAPTER_LOG_LEVEL, /* the default val is 0 */
     SOFTBUS_STR_STORAGE_DIRECTORY, /* the max length is MAX_STORAGE_PATH_LEN */

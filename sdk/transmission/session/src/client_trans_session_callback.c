@@ -41,6 +41,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->isServer = channel->isServer;
     session->isEnable = true;
     session->info.flag = flag;
+    session->routeType = channel->routeType;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -85,8 +86,9 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d",
-        sessionName, flag, channel->isServer);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d, type=%d",
+        sessionName, flag, channel->isServer, channel->routeType);
 
     ISessionListener listener = {0};
     int32_t ret = ClientGetSessionCallbackByName(sessionName, &listener);
@@ -210,7 +212,8 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     return SOFTBUS_OK;
 }
 
-int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+    const QosTv *tvList)
 {
     int32_t sessionId;
     ISessionListener listener = {0};

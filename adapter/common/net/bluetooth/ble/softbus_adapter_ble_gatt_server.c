@@ -151,9 +151,12 @@ int SoftBusGattsDeleteService(int srvcHandle)
 
 int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
 {
-    (void)btAddr;
-    (void)connId;
     if (CheckGattsStatus() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    BdAddr addr;
+    (void)memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN);
+    if (BleGattsDisconnect(g_halServerId, addr, connId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

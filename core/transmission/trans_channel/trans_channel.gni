@@ -33,6 +33,7 @@ trans_channel_src += [
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_callback.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_channel_manager.c",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_lane_manager.c",
+  "$dsoftbus_root_path/core/transmission/trans_channel/manager/src/trans_link_listener.c",
 ]
 trans_channel_inc += [
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",

@@ -161,7 +161,7 @@ static unsigned char ConvertScanType(unsigned char scanType)
     }
 }
 
-static void ConvertScanParam(const SoftBusBleScanParams *src, BleScanParams *dst)
+void ConvertScanParam(const SoftBusBleScanParams *src, BleScanParams *dst)
 {
     if (src == NULL || dst == NULL) {
         return;
@@ -254,13 +254,11 @@ static void WrapperAdvEnableCallback(int advId, int status)
 {
     int st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
-        pthread_mutex_lock(&g_advLock);
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
             advChannel->isUsed == false ||
             advChannel->advCallback == NULL ||
             advChannel->advCallback->AdvEnableCallback == NULL) {
-            pthread_mutex_unlock(&g_advLock);
             continue;
         }
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
@@ -268,7 +266,6 @@ static void WrapperAdvEnableCallback(int advId, int status)
             pthread_cond_signal(&advChannel->cond);
         }
         advChannel->advCallback->AdvEnableCallback(index, st);
-        pthread_mutex_unlock(&g_advLock);
         break;
     }
 }
@@ -277,13 +274,11 @@ static void WrapperAdvDisableCallback(int advId, int status)
 {
     int st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
-        pthread_mutex_lock(&g_advLock);
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
             advChannel->isUsed == false ||
             advChannel->advCallback == NULL ||
             advChannel->advCallback->AdvDisableCallback == NULL) {
-            pthread_mutex_unlock(&g_advLock);
             continue;
         }
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
@@ -291,7 +286,6 @@ static void WrapperAdvDisableCallback(int advId, int status)
             pthread_cond_signal(&advChannel->cond);
         }
         advChannel->advCallback->AdvDisableCallback(index, st);
-        pthread_mutex_unlock(&g_advLock);
         break;
     }
 }
@@ -300,17 +294,14 @@ static void WrapperAdvDataCallback(int advId, int status)
 {
     int st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
-        pthread_mutex_lock(&g_advLock);
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
             advChannel->isUsed == false ||
             advChannel->advCallback == NULL ||
             advChannel->advCallback->AdvDataCallback == NULL) {
-            pthread_mutex_unlock(&g_advLock);
             continue;
         }
         advChannel->advCallback->AdvDataCallback(index, st);
-        pthread_mutex_unlock(&g_advLock);
         break;
     }
 }
@@ -319,17 +310,14 @@ static void WrapperAdvUpdateCallback(int advId, int status)
 {
     int st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
-        pthread_mutex_lock(&g_advLock);
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
             advChannel->isUsed == false ||
             advChannel->advCallback == NULL ||
             advChannel->advCallback->AdvUpdateCallback == NULL) {
-            pthread_mutex_unlock(&g_advLock);
             continue;
         }
         advChannel->advCallback->AdvUpdateCallback(index, st);
-        pthread_mutex_unlock(&g_advLock);
         break;
     }
 }

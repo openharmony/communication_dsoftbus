@@ -31,6 +31,11 @@ int32_t BusCenterClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;

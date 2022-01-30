@@ -503,3 +503,21 @@ void ConnServerDeinit(void)
     g_isInited = false;
 }
 
+bool CheckActiveConnection(const ConnectOption *info)
+{
+    if (info == NULL) {
+        return false;
+    }
+
+    if (ConnTypeCheck(info->type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connect type is err %d", info->type);
+        return false;
+    }
+
+    if (g_connManager[info->type]->CheckActiveConnection == NULL) {
+        return false;
+    }
+
+    return g_connManager[info->type]->CheckActiveConnection(info);
+}
+

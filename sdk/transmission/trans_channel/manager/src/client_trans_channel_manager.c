@@ -111,6 +111,7 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+
     int32_t ret = SOFTBUS_OK;
     switch (type) {
         case CHANNEL_TYPE_AUTH:
@@ -129,8 +130,8 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
     return ret;
 }
 
-int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data, const StreamData *ext,
-    const StreamFrameInfo *param)
+int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data,
+    const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");

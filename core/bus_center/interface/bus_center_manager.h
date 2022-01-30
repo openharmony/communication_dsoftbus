@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "bus_center_info_key.h"
+#include "lnn_lane_info.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -39,12 +40,6 @@ typedef struct {
     int32_t laneId[0];
 } LnnLanesObject;
 
-typedef struct {
-    bool isSupportUdp;
-    bool isProxy;
-    ConnectionAddr conOption;
-} LnnLaneInfo;
-
 int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
 int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info);
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info);
@@ -59,13 +54,16 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
 int32_t LnnServerJoin(ConnectionAddr *addr);
 int32_t LnnServerLeave(const char *networkId);
 
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty prop, uint32_t laneNum);
+LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+    const LnnPreferredLinkList *list, uint32_t laneNum);
 void LnnReleaseLanesObject(LnnLanesObject *lanesObject);
 int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num);
 const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId);
 
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
+
+int32_t LnnSyncP2pInfo(void);
 
 #ifdef __cplusplus
 }

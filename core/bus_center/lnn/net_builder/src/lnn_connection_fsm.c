@@ -393,6 +393,7 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     AuthDataHead head;
     ConnectOption option;
+    AuthType authType;
 
     if (CheckDeadFlag(connFsm, true)) {
         return SOFTBUS_ERR;
@@ -401,7 +402,8 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]convert addr to option failed", connFsm->id);
         return SOFTBUS_ERR;
     }
-    buf = LnnGetExchangeNodeInfo((int32_t)connInfo->authId, &option, SOFT_BUS_NEW_V1, &bufSize, &head.flag);
+    authType = (option.type == CONNECT_TCP) ? AUTH_WIFI : AUTH_BT;
+    buf = LnnGetExchangeNodeInfo((int32_t)connInfo->authId, authType, SOFT_BUS_NEW_V1, &bufSize, &head.flag);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]pack local device info fail", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
@@ -415,6 +417,7 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
         head.module = HICHAIN_SYNC;
     }
     head.authId = connInfo->authId;
+    head.seq = connInfo->authId;
     rc = AuthPostData(&head, buf, bufSize);
     if (rc != SOFTBUS_OK) {
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
@@ -442,6 +445,7 @@ static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo
     ParseBuf parseBuf;
     int32_t rc = SOFTBUS_OK;
     ConnectOption option;
+    AuthType authType;
     do {
         if (connInfo->nodeInfo == NULL) {
             connInfo->nodeInfo = SoftBusCalloc(sizeof(NodeInfo));
@@ -457,7 +461,8 @@ static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo
         }
         parseBuf.buf = para->data;
         parseBuf.len = para->len;
-        if (LnnParsePeerNodeInfo(&option, connInfo->nodeInfo, &parseBuf,
+        authType = (option.type == CONNECT_TCP) ? AUTH_WIFI : AUTH_BT;
+        if (LnnParsePeerNodeInfo(&option, authType, connInfo->nodeInfo, &parseBuf,
             para->side, connInfo->peerVersion) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack peer device info fail");
             rc = SOFTBUS_NETWORK_UNPACK_DEV_INFO_FAILED;

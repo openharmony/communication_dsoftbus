@@ -223,3 +223,67 @@ int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
     info->connectInfo.proxyPort = port;
     return SOFTBUS_OK;
 }
+
+int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->p2pInfo.p2pRole = p2pRole;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetP2pRole(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return 0;
+    }
+    return info->p2pInfo.p2pRole;
+}
+
+int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
+{
+    if (info == NULL || p2pMac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->p2pInfo.p2pMac, sizeof(info->p2pInfo.p2pMac), p2pMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s p2p mac err.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+const char *LnnGetP2pMac(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return NULL;
+    }
+    return info->p2pInfo.p2pMac;
+}
+
+int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
+{
+    if (info == NULL || goMac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (strcpy_s(info->p2pInfo.goMac, sizeof(info->p2pInfo.goMac), goMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s go mac err.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+const char *LnnGetP2pGoMac(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return NULL;
+    }
+    return info->p2pInfo.goMac;
+}

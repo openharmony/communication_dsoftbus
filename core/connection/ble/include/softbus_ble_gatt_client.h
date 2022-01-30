@@ -21,9 +21,20 @@
 #include "softbus_ble_connection_inner.h"
 #include "softbus_conn_manager.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb);
 int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr);
 int32_t SoftBusGattClientDisconnect(int32_t clientId);
 int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t len, int32_t module);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* BLE_GATT_CLIENT_H */

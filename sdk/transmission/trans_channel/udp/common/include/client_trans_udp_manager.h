@@ -53,6 +53,7 @@ typedef struct {
     int32_t businessType;
     bool isEnable;
     sessionNeed info;
+    int32_t routeType;
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);

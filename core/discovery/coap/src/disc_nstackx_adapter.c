@@ -49,7 +49,7 @@ static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 
 static void ParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 {
-    if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, device->hwAccountHash, sizeof(device->hwAccountHash))) {
+    if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, device->accountHash, sizeof(device->accountHash))) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse hw account hash value failed.");
         return;
     }
@@ -345,7 +345,7 @@ static int32_t SetLocalDeviceInfo(void)
         return SOFTBUS_ERR;
     }
     deviceType = DEFAULT_DEVICE_TYPE;
-    g_localDeviceInfo->deviceType = deviceType;
+    g_localDeviceInfo->deviceType = (uint8_t)deviceType;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name,
                            sizeof(g_localDeviceInfo->name)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,

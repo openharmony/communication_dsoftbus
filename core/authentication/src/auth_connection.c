@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "auth_common.h"
+#include "auth_p2p.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "softbus_adapter_mem.h"
@@ -71,12 +72,12 @@ static int32_t SetBufData(char *buf, const AuthManager *auth, const AuthDataHead
     const uint8_t *data, uint32_t len)
 {
     buf += ConnGetHeadSize();
-    if (auth->option.type != CONNECT_TCP) {
+    if (!IsWiFiLink(auth)) {
         *(int32_t *)buf = head->dataType;
         buf += sizeof(int32_t);
         *(int32_t *)buf = head->module;
         buf += sizeof(int32_t);
-        *(int64_t *)buf = head->authId;
+        *(int64_t *)buf = head->seq;
         buf += sizeof(int64_t);
         *(int32_t *)buf = head->flag;
         buf += sizeof(int32_t);
@@ -116,7 +117,7 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
         return SOFTBUS_ERR;
     }
 
-    if (auth->option.type == CONNECT_TCP) {
+    if (IsWiFiLink(auth)) {
         if (AuthSocketSendData(auth, head, data, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthSocketSendData failed");
             return SOFTBUS_ERR;
@@ -174,7 +175,7 @@ static cJSON *AuthPackDeviceInfo(const AuthManager *auth)
         cJSON_Delete(msg);
         return NULL;
     }
-    if (auth->option.type == CONNECT_TCP && auth->side == CLIENT_SIDE_FLAG) {
+    if (IsWiFiLink(auth) && auth->side == CLIENT_SIDE_FLAG) {
         if (AddStringToJsonObject(msg, CMD_TAG, CMD_GET_AUTH_INFO) == false) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject failed!");
             cJSON_Delete(msg);
@@ -218,13 +219,16 @@ int32_t AuthSyncDeviceUuid(AuthManager *auth)
         return SOFTBUS_ERR;
     }
     auth->status = IN_AUTH_PROGRESS;
-    if (auth->option.type == CONNECT_TCP) {
+    if (IsWiFiLink(auth)) {
+        /* WIFI_WLAN or ETH */
         head.module = MODULE_TRUST_ENGINE;
     } else {
+        /* WIFI_P2P or BR or BLE */
         head.dataType = DATA_TYPE_DEVICE_ID;
         head.module = NONE;
     }
     head.authId = auth->authId;
+    head.seq = auth->authId;
     head.flag = auth->side;
     if (AuthPostData(&head, (uint8_t *)msgStr, strlen(msgStr) + 1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthPostData failed");
@@ -267,7 +271,7 @@ int32_t AuthUnpackDeviceInfo(AuthManager *auth, uint8_t *data)
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
-    if (auth->option.type == CONNECT_TCP && auth->side == SERVER_SIDE_FLAG) {
+    if (IsWiFiLink(auth) && auth->side == SERVER_SIDE_FLAG) {
         if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth cmd tag error");
             cJSON_Delete(msg);
@@ -398,5 +402,6 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
     head.module = AUTH_SDK;
     head.authId = auth->authId;
     head.flag = auth->side;
+    head.seq = auth->authId;
     return AuthPostData(&head, data, len) == SOFTBUS_OK;
 }

@@ -18,6 +18,12 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     uint32_t halConnId;
     uint32_t connectionId;
@@ -35,4 +41,10 @@ int BleInnerQueueInit(void);
 void BleInnerQueueDeinit(void);
 int BleEnqueueNonBlock(const void *msg);
 int BleDequeueNonBlock(void **msg);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

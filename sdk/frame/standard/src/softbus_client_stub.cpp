@@ -44,6 +44,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnChannelOpenedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_OPENFAILED] =
         &SoftBusClientStub::OnChannelOpenFailedInner;
+    memberFuncMap_[CLIENT_ON_CHANNEL_LINKDOWN] =
+        &SoftBusClientStub::OnChannelLinkDownInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_CLOSED] =
         &SoftBusClientStub::OnChannelClosedInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_MSGRECEIVED] =
@@ -162,6 +164,11 @@ int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channe
     return TransOnChannelOpenFailed(channelId, channelType);
 }
 
+int32_t SoftBusClientStub::OnChannelLinkDown(const char *networkId, int32_t routeType)
+{
+    return TransOnChannelLinkDown(networkId, routeType);
+}
+
 int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType)
 {
     return TransOnChannelClosed(channelId, channelType);
@@ -245,6 +252,8 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
             channel.peerIp = (char *)data.ReadCString();
         }
     }
+    data.ReadInt32(channel.routeType);
+
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {
@@ -272,6 +281,26 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
     bool res = reply.WriteInt32(ret);
     if (!res) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnChannelLinkDownInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *networkId = data.ReadCString();
+    if (networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner read networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t routeType;
+    if (!data.ReadInt32(routeType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner read routeType failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = OnChannelLinkDown(networkId, routeType);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -18,6 +18,7 @@
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_callback.h"
+#include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
@@ -74,6 +75,18 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
+}
+
+int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
+{
+    if (networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelLinkDown: networkId=%s, channelType=%d",
+        networkId, routeType);
+    ClientTransOnLinkDown(networkId, routeType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelLinkDown end");
+    return SOFTBUS_OK;
 }
 
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)

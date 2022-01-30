@@ -22,7 +22,10 @@ extern "C" {
 #endif
 
 int32_t TransTdcStartSessionListener(const char *ip, const int port);
+
 int32_t TransTdcStopSessionListener(void);
+
+int32_t GetTdcBaseListener(SoftbusBaseListener *listener);
 
 #ifdef __cplusplus
 }
