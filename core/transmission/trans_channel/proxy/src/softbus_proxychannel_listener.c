@@ -242,14 +242,14 @@ static LnnLaneProperty TransGetLnnLaneProperty(SessionType type)
     }
 }
 
-static int32_t TransGetLaneInfo(SessionType flags, const char *peerDeviceId,
+static int32_t TransGetLaneInfo(SessionType flags, const char *peerDeviceId, int32_t pid,
     LnnLanesObject **lanesObject, const LnnLaneInfo **laneInfo)
 {
     LnnLaneProperty laneProperty = TransGetLnnLaneProperty(flags);
     if (laneProperty == LNN_LANE_PROPERTY_BUTT) {
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
     }
-    LnnLanesObject *object = LnnRequestLanesObject(peerDeviceId, laneProperty, 1);
+    LnnLanesObject *object = LnnRequestLanesObject(peerDeviceId, pid, laneProperty, NULL, 1);
     if (object == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lne obj err");
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
@@ -273,8 +273,8 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
 {
     LnnLanesObject *object = NULL;
     const LnnLaneInfo *info = NULL;
-
-    if (TransGetLaneInfo(TYPE_MESSAGE, peerNetworkId, &object, &info) != SOFTBUS_OK) {
+#define DEFAULT_PID 0
+    if (TransGetLaneInfo(TYPE_MESSAGE, peerNetworkId, DEFAULT_PID, &object, &info) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "net Channel lane info: udp=%d, proxy=%d, type=%d",

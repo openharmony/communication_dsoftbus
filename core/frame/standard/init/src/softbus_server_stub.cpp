@@ -26,6 +26,7 @@
 #include "softbus_log.h"
 #include "softbus_permission.h"
 #include "softbus_server.h"
+#include "softbus_server_frame.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 
@@ -137,6 +138,13 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServerStub::OnReceived, code = %u", code);
+    if (GetServerIsInit() == false) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
+        if (!reply.WriteInt32(SOFTBUS_SERVER_NOT_INIT)) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SOFTBUS_SERVER_NOT_INIT write reply failed!");
+        }
+        return SOFTBUS_ERR;
+    }
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;

@@ -227,7 +227,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         cJSON_Delete(obj);
         return SOFTBUS_MEM_ERR;
     }
-    int32_t port;
+    int port;
     if (GetJsonObjectStringItem(obj, "ETH_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
         GetJsonObjectNumberItem(obj, "ETH_PORT", &port)) {
         addrInfo->info.ip.port = (uint16_t)port;
@@ -343,7 +343,7 @@ void NotifyAuthSuccess(int sessionId)
         return;
     }
 
-    int32_t isServer = 0;
+    int isServer = 0;
     if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get isServer failed");
         return;

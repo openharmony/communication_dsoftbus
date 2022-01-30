@@ -27,6 +27,8 @@ int32_t TransOnChannelOpened(const char* sessionName, const ChannelInfo *channel
 
 int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType);
 
+int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType);
+
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType);
 
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,

@@ -115,13 +115,13 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
     }
     int fd = 1;
 
-    ret = TransOpenTcpDirectChannel(NULL, &connInfo, &fd);
+    ret = TransOpenDirectChannel(NULL, &connInfo, &fd);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = TransOpenTcpDirectChannel(&appInfo, NULL, &fd);
+    ret = TransOpenDirectChannel(&appInfo, NULL, &fd);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = TransOpenTcpDirectChannel(&appInfo, &connInfo, NULL);
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
     TEST_ASSERT_TRUE(ret != 0);
 }
 }

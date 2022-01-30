@@ -101,6 +101,7 @@ static void OpenProxyPort(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip failed\n");
         return;
     }
+    listenerInfo.info.ipListenerInfo.moduleId = PROXY;
     port = ConnStartLocalListening(&listenerInfo);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed\n");
@@ -113,6 +114,7 @@ static void CloseProxyPort(void)
 {
     LocalListenerInfo listenerInfo = {0};
     listenerInfo.type = CONNECT_TCP;
+    listenerInfo.info.ipListenerInfo.moduleId = PROXY;
     if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConnStopLocalListening fail!\n");
     }

@@ -173,6 +173,7 @@ static void OnUdpChannelOpened(int32_t channelId)
     info.groupId = channel.info.groupId;
     info.peerDeviceId = channel.info.peerDeviceId;
     info.peerSessionName = channel.info.peerSessionName;
+    info.routeType = channel.routeType;
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
         g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }
@@ -192,6 +193,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     newChannel->info.isServer = channel->isServer;
     newChannel->info.peerPid = channel->peerPid;
     newChannel->info.peerUid = channel->peerUid;
+    newChannel->routeType = channel->routeType;
     if (strcpy_s(newChannel->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||

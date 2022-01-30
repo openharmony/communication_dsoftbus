@@ -18,6 +18,7 @@
 #include "br_connection_manager.h"
 #include "br_trans_manager.h"
 #include "common_list.h"
+#include "bus_center_manager.h"
 #include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -37,6 +38,7 @@
 #include "wrapper_br_interface.h"
 
 #define DISCONN_DELAY_TIME 200
+#define BR_ACCEPET_WAIT_TIME 1000
 #define CONNECT_REF_INCRESE 1
 #define CONNECT_REF_DECRESE (-1)
 #define BR_SEND_THREAD_STACK 5120
@@ -54,6 +56,7 @@
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
 
 static pthread_mutex_t g_brConnLock;
+static int32_t g_brMaxConnCount;
 
 static SoftBusHandler g_brAsyncHandler = {
     .name = "g_brAsyncHandler"
@@ -102,7 +105,8 @@ static ConnectFuncInterface g_brInterface = {
     .DisconnectDeviceNow = DisconnectDeviceNow,
     .GetConnectionInfo = GetConnectionInfo,
     .StartLocalListening = StartLocalListening,
-    .StopLocalListening = StopLocalListening
+    .StopLocalListening = StopLocalListening,
+    .CheckActiveConnection = BrCheckActiveConnection
 };
 
 static DataQueueStruct g_dataQueue;
@@ -115,7 +119,7 @@ static int32_t g_brSendQueueMaxLen;
 
 static SoftBusBtStateListener g_sppBrCallback;
 static bool g_startListenFlag = false;
-static int32_t g_brEnable = SOFTBUS_BT_STATE_TURN_OFF;
+static int32_t g_brEnable = SOFTBUS_BR_STATE_TURN_OFF;
 
 static SoftBusMessage *BrConnCreateLoopMsg(BrConnLoopMsgType what, uint64_t arg1, uint64_t arg2, const char *data)
 {
@@ -475,7 +479,14 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
         result->OnConnectFailed(requestId, 0);
         ret = SOFTBUS_ERR;
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
-        ret = ConnectDeviceFristTime(option, requestId, result);
+        int32_t connCount = GetBrConnectionCount();
+        if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDevice connCount: %d", connCount);
+            result->OnConnectFailed(requestId, 0);
+            ret = SOFTBUS_ERR;
+        } else {
+            ret = ConnectDeviceFristTime(option, requestId, result);
+        }
     }
     (void)pthread_mutex_unlock(&g_brConnLock);
     return ret;
@@ -790,14 +801,20 @@ void *ConnBrAccept(void *arg)
     int32_t num = 0;
     int32_t tryCount = 0;
     while (tryCount < TRY_OPEN_SERVER_COUNT) {
-        if (g_sppDriver == NULL || !g_startListenFlag || g_brEnable != SOFTBUS_BT_STATE_TURN_ON) {
+        if (g_sppDriver == NULL || !g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_sppDriver failed EXIT!");
             break;
+        }
+        int32_t connCount = GetBrConnectionCount();
+        if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connCount: %d", connCount);
+            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
+            continue;
         }
         ret = sprintf_s(name, BR_SERVER_NAME_LEN, "SOFTBUS_BR_%d", num);
         if (ret <= 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnBrAccept sprintf_s failed %d", num);
-            sleep(1);
+            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
             tryCount++;
             continue;
         }
@@ -805,13 +822,13 @@ void *ConnBrAccept(void *arg)
         serverId = g_sppDriver->OpenSppServer(name, strlen(name), UUID, 0);
         if (serverId == SOFTBUS_ERR) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenSppServer name %s failed", name);
-            sleep(1);
+            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
             tryCount++;
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "OpenSppServer ok");
         clientId = g_sppDriver->Accept(serverId);
-        if (clientId != SOFTBUS_ERR && g_brEnable == SOFTBUS_BT_STATE_TURN_ON) {
+        if (clientId != SOFTBUS_ERR && g_brEnable == SOFTBUS_BR_STATE_TURN_ON) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Accept ok clientId: %d", clientId);
             ConnBrOnEvent(ADD_CONN_BR_SERVICE_CONNECTED_MSG, clientId, clientId);
         } else {
@@ -862,6 +879,7 @@ static int32_t InitProperty()
 {
     g_brBuffSize = INVALID_LENGTH;
     g_brSendPeerLen = INVALID_LENGTH;
+    g_brMaxConnCount = INVALID_LENGTH;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
         (unsigned char*)&g_brBuffSize, sizeof(g_brBuffSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br BuffSize fail");
@@ -877,6 +895,11 @@ static int32_t InitProperty()
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br SendQueueMaxLen fail");
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_CONN_NUM,
+        (unsigned char*)&g_brMaxConnCount, sizeof(g_brMaxConnCount)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br MaxConnCount fail");
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br MaxConnCount is %d", g_brMaxConnCount);
     if (g_brBuffSize == INVALID_LENGTH || g_brBuffSize > MAX_BR_SIZE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
         return SOFTBUS_ERR;
@@ -887,6 +910,10 @@ static int32_t InitProperty()
     }
     if (g_brSendQueueMaxLen == SOFTBUS_ERR || g_brSendQueueMaxLen > MAX_BR_PEER_SIZE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendQueueMaxLen");
+        return SOFTBUS_ERR;
+    }
+    if (g_brMaxConnCount == INVALID_LENGTH) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get MaxConnCount");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1107,15 +1134,34 @@ static int32_t BrConnLooperInit(void)
     return SOFTBUS_OK;
 }
 
+static void UpdateLocalBtMac(void)
+{
+    SoftBusBtAddr mac;
+    if (SoftBusGetBtMacAddr(&mac) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Get bt mac addr fail");
+        return;
+    }
+    char macStr[BT_MAC_LEN] = {0};
+    if (ConvertBtMacToStr(macStr, sizeof(macStr), mac.addr, sizeof(mac.addr)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert bt mac to str fail");
+        return;
+    }
+    if (LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Set bt mac to local fail");
+        return;
+    }
+}
+
 static void StateChangedCallback(int32_t listenerId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChanged id: %d, status: %d", listenerId, status);
     g_brEnable = status;
     LocalListenerInfo info;
     info.type = CONNECT_BR;
-    if (status == SOFTBUS_BT_STATE_TURN_ON) {
+    if (status == SOFTBUS_BR_STATE_TURN_ON) {
+        UpdateLocalBtMac();
         (void)StartLocalListening(&info);
-    } else if (status == SOFTBUS_BT_STATE_TURN_OFF) {
+    } else if (status == SOFTBUS_BR_STATE_TURN_OFF) {
         (void)StopLocalListening(&info);
     }
 }

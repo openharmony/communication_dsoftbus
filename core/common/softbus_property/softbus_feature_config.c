@@ -28,8 +28,10 @@
 
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define CONN_BR_MAX_DATA_LENGTH (40 * 1000)
+#define CONN_BR_MAX_CONN_NUM 20
 #else
 #define CONN_BR_MAX_DATA_LENGTH 4096
+#define CONN_BR_MAX_CONN_NUM 5
 #endif
 
 #define CONN_RFCOM_SEND_MAX_LEN 990
@@ -39,7 +41,7 @@
 #define CONN_TCP_TIME_OUT 100
 #define MAX_NODE_STATE_CB_CNT 10
 #define MAX_LNN_CONNECTION_CNT 10
-#define LNN_SUPPORT_CAPBILITY 22
+#define LNN_SUPPORT_CAPBILITY 30
 #define AUTH_ABILITY_COLLECTION 0
 #define ADAPTER_LOG_LEVEL 0
 #ifndef DEFAULT_STORAGE_PATH
@@ -80,6 +82,7 @@ typedef struct {
     int32_t connBrMaxDataLen;
     int32_t connRfcomSendMaxLen;
     int32_t connBrRecvMaxLen;
+    int32_t connBrMaxConnNum;
     int32_t connTcpMaxLen;
     int32_t connTcpMaxConnNum;
     int32_t connTcpTimeOut;
@@ -104,6 +107,7 @@ ConfigItem g_config = {
     CONN_BR_MAX_DATA_LENGTH,
     CONN_RFCOM_SEND_MAX_LEN,
     CONN_BR_RECEIVE_MAX_LEN,
+    CONN_BR_MAX_CONN_NUM,
     CONN_TCP_MAX_LENGTH,
     CONN_TCP_MAX_CONN_NUM,
     CONN_TCP_TIME_OUT,
@@ -153,6 +157,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN,
         (unsigned char*)&(g_config.connBrRecvMaxLen),
         sizeof(g_config.connBrRecvMaxLen)
+    },
+    {
+        SOFTBUS_INT_CONN_BR_MAX_CONN_NUM,
+        (unsigned char*)&(g_config.connBrMaxConnNum),
+        sizeof(g_config.connBrMaxConnNum)
     },
     {
         SOFTBUS_INT_CONN_TCP_MAX_LENGTH,

@@ -54,6 +54,12 @@ typedef struct {
 } BssTransInfo;
 
 typedef struct {
+    int32_t p2pRole;
+    char p2pMac[MAC_LEN]; // the mac of local p2p interface
+    char goMac[MAC_LEN]; // the mac of p2p Go device, while local device as Gc role.
+} P2pInfo;
+
+typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
     char versionType[VERSION_MAX_LEN]; // compatible nearby
     char uuid[UUID_BUF_LEN]; // compatible nearby
@@ -71,6 +77,8 @@ typedef struct {
     int64_t authSeqNum;
     int32_t authChannelId;
     BssTransInfo bssTransInfo;
+    bool isBleP2p; // true: this device support connect p2p via ble connection
+    P2pInfo p2pInfo;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -93,6 +101,12 @@ int32_t LnnGetSessionPort(const NodeInfo *info);
 int32_t LnnSetSessionPort(NodeInfo *info, int32_t port);
 int32_t LnnGetProxyPort(const NodeInfo *info);
 int32_t LnnSetProxyPort(NodeInfo *info, int32_t port);
+int32_t LnnSetP2pRole(NodeInfo *info, int32_t role);
+int32_t LnnGetP2pRole(const NodeInfo *info);
+int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
+const char *LnnGetP2pMac(const NodeInfo *info);
+int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
+const char *LnnGetP2pGoMac(const NodeInfo *info);
 
 #ifdef __cplusplus
 }

@@ -52,6 +52,17 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return SOFTBUS_OK;
 }
 
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+{
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    clientProxy->OnChannelLinkDown(networkId, routeType);
+    return SOFTBUS_OK;
+}
+
 int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);

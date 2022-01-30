@@ -197,23 +197,9 @@ int32_t ServerCloseChannel(const void *origin, IpcIo *req, IpcIo *reply)
     TransInfo info;
     int32_t channelId = IpcIoPopInt32(req);
     int32_t channelType = IpcIoPopInt32(req);
-    int32_t callingUid = GetCallingUid(origin);
-    int32_t callingPid = GetCallingPid(origin);
-    char pkgName[PKG_NAME_SIZE_MAX];
-    char sessionName[SESSION_NAME_SIZE_MAX];
 
     info.channelId = channelId;
     info.channelType = channelType;
-    ret = TransGetNameByChanId(&info, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerCloseChannel invalid channel info");
-        return ret;
-    }
-    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
-        IpcIoPushInt32(reply, SOFTBUS_PERMISSION_DENIED);
-        return SOFTBUS_PERMISSION_DENIED;
-    }
     ret = TransCloseChannel(channelId, channelType);
 
     IpcIoPushInt32(reply, ret);

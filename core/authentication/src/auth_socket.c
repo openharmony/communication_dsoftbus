@@ -71,6 +71,21 @@ int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
+static bool IsAuthTransModule(int32_t module)
+{
+    switch (module) {
+        case MODULE_UDP_INFO:
+        case MODULE_AUTH_CHANNEL:
+        case MODULE_AUTH_MSG:
+        case MODULE_P2P_LINK:
+        case MODULE_P2P_LISTEN:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data, int len)
 {
     if (head == NULL || data == NULL) {
@@ -83,7 +98,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ip get auth failed");
         return;
     }
-    if (head->module != MODULE_UDP_INFO && head->module != MODULE_AUTH_CHANNEL && head->module != MODULE_AUTH_MSG) {
+    if (!IsAuthTransModule(head->module)) {
         if (auth->authId != head->seq && auth->authId != fd &&
             (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION)) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
@@ -108,7 +123,9 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             AuthHandlePeerSyncDeviceInfo(auth, (uint8_t *)data, head->len);
             break;
         case MODULE_UDP_INFO:
-            AuthHandleTransInfo(auth, head, data, head->len);
+        case MODULE_P2P_LINK:
+        case MODULE_P2P_LISTEN:
+            AuthHandleTransInfo(auth, head, data);
             break;
         case MODULE_TIME_SYNC:
         case MODULE_AUTH_CHANNEL:
@@ -116,7 +133,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             if (auth->authId == 0) {
                 auth->authId = GetSeq(SERVER_SIDE_FLAG);
             }
-            AuthHandleTransInfo(auth, head, data, head->len);
+            AuthHandleTransInfo(auth, head, data);
             break;
         }
         default:
@@ -134,8 +151,8 @@ static void AuthNotifyDisconn(int32_t fd)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth disconnect");
-    AuthNotifyLnnDisconn(auth);
     AuthNotifyTransDisconn(auth->authId);
+    AuthNotifyLnnDisconn(auth);
 }
 
 static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
@@ -247,7 +264,7 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
     char *connPostData = NULL;
     ethHead.magic = MAGIC_NUMBER;
     ethHead.module = head->module;
-    if (head->module == MODULE_UDP_INFO || head->module == MODULE_AUTH_CHANNEL || head->module == MODULE_AUTH_MSG) {
+    if (IsAuthTransModule(head->module)) {
         ethHead.seq = head->seq;
         ethHead.flag = head->flag;
     } else if (head->module == MODULE_AUTH_CONNECTION && auth->side == SERVER_SIDE_FLAG) {

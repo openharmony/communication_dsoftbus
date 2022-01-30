@@ -32,6 +32,7 @@ public:
     void OnPublishFail(int publishId, int reason) override;
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) override;
     int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
     int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t type) override;
@@ -43,6 +44,9 @@ public:
     int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;
     int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) override;
     int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
+    void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
+    void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
+    void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;

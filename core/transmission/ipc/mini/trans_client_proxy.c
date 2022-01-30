@@ -31,6 +31,12 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return TransOnChannelOpenFailed(channelId, channelType);
 }
 
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+{
+    (void)pkgName;
+    return TransOnChannelLinkDown(networkId, routeType);
+}
+
 int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     (void)pkgName;

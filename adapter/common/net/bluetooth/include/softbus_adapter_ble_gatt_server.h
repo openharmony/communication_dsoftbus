@@ -20,6 +20,12 @@
 #include "stdint.h"
 #include "softbus_adapter_bt_common.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef enum {
     SOFTBUS_GATT_SUCCESS = 0x00,
     SOFTBUS_GATT_INVALID_HANDLE = 0x01,
@@ -168,4 +174,9 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId);
 int SoftBusGattsSendResponse(SoftBusGattsResponse *param);
 int SoftBusGattsSendNotify(SoftBusGattsNotify *param);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

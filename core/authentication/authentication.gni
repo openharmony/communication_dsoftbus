@@ -23,6 +23,7 @@ if (enable_lnn_net) {
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
     "$authentication_path/src/auth_manager.c",
+    "$authentication_path/src/auth_p2p.c",
     "$authentication_path/src/auth_sessionkey.c",
   ]
   if (enable_ip_auth) {

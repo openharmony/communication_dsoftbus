@@ -41,6 +41,8 @@ typedef struct {
 
 IServerChannelCallBack *TransServerGetChannelCb(void);
 
+int32_t TransServerOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

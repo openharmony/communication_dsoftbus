@@ -20,6 +20,7 @@
 #include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -827,6 +828,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->peerUid = channel->peerUid;
                 sessionNode->isServer = channel->isServer;
                 sessionNode->isEnable = true;
+                sessionNode->routeType = channel->routeType;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
@@ -953,21 +955,27 @@ int32_t ClientGetSessionSide(int32_t sessionId)
     return side;
 }
 
-static void DestroyClientSessionByDevId(const ClientSessionServer *server, const char *devId)
+static void DestroyClientSessionByDevId(const ClientSessionServer *server,
+    const char *devId, int32_t routeType)
 {
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-        if (strcmp(sessionNode->info.peerDeviceId, devId) == 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "network offline destroy session server [%s]",
-                       server->sessionName);
-            int id = sessionNode->sessionId;
-            (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-            DestroySessionId(sessionNode->sessionId);
-            ListDelete(&sessionNode->node);
-            SoftBusFree(sessionNode);
-            server->listener.session.OnSessionClosed(id);
+        if (strcmp(sessionNode->info.peerDeviceId, devId) != 0) {
+            continue;
         }
+        if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+            continue;
+        }
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByDevId info={%d, %d, %d}",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+
+        int id = sessionNode->sessionId;
+        (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+        DestroySessionId(sessionNode->sessionId);
+        ListDelete(&sessionNode->node);
+        SoftBusFree(sessionNode);
+        server->listener.session.OnSessionClosed(id);
     }
 }
 
@@ -988,7 +996,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
 
     ClientSessionServer *serverNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionByDevId(serverNode, info->networkId);
+        DestroyClientSessionByDevId(serverNode, info->networkId, ROUTE_TYPE_ALL);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return;
@@ -1032,3 +1040,24 @@ void ClientTransRegLnnOffline(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reg lnn offline fail");
     }
 }
+
+void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
+{
+    if (networkId == NULL || g_clientSessionServerList == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransOnLinkDown: networkId=%s, routeType=%d",
+        networkId, routeType);
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        DestroyClientSessionByDevId(serverNode, networkId, routeType);
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return;
+}
+

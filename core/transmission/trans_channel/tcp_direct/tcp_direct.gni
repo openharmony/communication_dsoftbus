@@ -19,5 +19,20 @@ trans_direct_channel_src = [
   "$tcp_direct_channel_path/src/trans_tcp_direct_listener.c",
   "$tcp_direct_channel_path/src/trans_tcp_direct_manager.c",
   "$tcp_direct_channel_path/src/trans_tcp_direct_message.c",
+  "$tcp_direct_channel_path/src/trans_tcp_direct_wifi.c",
+  "$tcp_direct_channel_path/src/trans_tcp_direct_sessionconn.c",
+  "$tcp_direct_channel_path/src/trans_tcp_direct_json.c",
 ]
-trans_direct_channel_inc = [ "$tcp_direct_channel_path/include" ]
+
+if (enable_connection_p2p == true) {
+  trans_direct_channel_src +=
+      [ "$tcp_direct_channel_path/src/trans_tcp_direct_p2p.c" ]
+} else {
+  trans_direct_channel_src +=
+      [ "$tcp_direct_channel_path/src/trans_tcp_direct_p2p_virtual.c" ]
+}
+
+trans_direct_channel_inc = [
+  "$tcp_direct_channel_path/include",
+  "$dsoftbus_root_path/core/connection/p2p/interface",
+]

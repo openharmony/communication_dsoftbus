@@ -19,8 +19,6 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 
-#define DEV_ID_HASH_LEN 32
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -52,6 +50,7 @@ typedef enum {
     CONNECT_TCP = 1,
     CONNECT_BR,
     CONNECT_BLE,
+    CONNECT_P2P,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -65,7 +64,7 @@ typedef struct {
         } brInfo;
         struct BleInfo {
             char bleMac[BT_MAC_LEN];
-            char deviceIdHash[DEV_ID_HASH_LEN];
+            char deviceIdHash[UDID_HASH_LEN];
         } bleInfo;
         struct IpInfo {
             char ip[IP_LEN];
@@ -111,11 +110,12 @@ typedef struct {
         } brOption;
         struct BleOption {
             char bleMac[BT_MAC_LEN];
-            char deviceIdHash[DEV_ID_HASH_LEN];
+            char deviceIdHash[UDID_HASH_LEN];
         } bleOption;
         struct IpOption {
             char ip[IP_LEN];
             int32_t port;
+            int32_t moduleId; /* For details, see {@link ListenerModule}. */
         } ipOption;
     } info;
 } ConnectOption;
@@ -158,6 +158,8 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
 int32_t ConnStopLocalListening(const LocalListenerInfo *info);
 
 int32_t ConnStartLocalListening(const LocalListenerInfo *info);
+
+bool CheckActiveConnection(const ConnectOption *option);
 
 #ifdef __cplusplus
 #if __cplusplus

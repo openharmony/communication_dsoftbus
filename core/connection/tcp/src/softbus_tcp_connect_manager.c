@@ -32,6 +32,7 @@
 #include "softbus_utils.h"
 
 #define INVALID_DATA (-1)
+#define AUTH_P2P_KEEP_ALIVE_TIME 10
 
 static int32_t g_tcpMaxConnNum;
 static int32_t g_tcpTimeOut;
@@ -56,6 +57,7 @@ static int32_t DelTcpConnInfo(uint32_t connectionId);
 static void DelAllConnInfo(ListenerModule moduleId);
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const char *ip);
 static int32_t TcpOnDataEvent(int32_t events, int32_t fd);
+static SoftbusBaseListener *CheckTcpListener(ListenerModule moduleId);
 
 int32_t TcpGetConnNum(void)
 {
@@ -258,7 +260,6 @@ uint32_t CalTcpConnectionId(int32_t fd)
     return connectionId;
 }
 
-/* Note: all tcp clients use PROXY as default listener. */
 int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     if (result == NULL ||
@@ -266,7 +267,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         result->OnConnectSuccessed == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (option == NULL || option->type != CONNECT_TCP) {
+    if (option == NULL || option->type != CONNECT_TCP || CheckTcpListener(option->info.ipOption.moduleId) == NULL) {
         result->OnConnectFailed(requestId, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -284,7 +285,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
-    if (AddTrigger(PROXY, fd, READ_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(option->info.ipOption.moduleId, fd, READ_TRIGGER) != SOFTBUS_OK) {
         TcpShutDown(fd);
         SoftBusFree(tcpConnInfoNode);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -298,10 +299,10 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     tcpConnInfoNode->info.type = CONNECT_TCP;
     tcpConnInfoNode->info.info.ipInfo.port = option->info.ipOption.port;
     tcpConnInfoNode->info.info.ipInfo.fd = fd;
-    tcpConnInfoNode->info.info.ipInfo.moduleId = PROXY;
+    tcpConnInfoNode->info.info.ipInfo.moduleId = option->info.ipOption.moduleId;
     if (strcpy_s(tcpConnInfoNode->info.info.ipInfo.ip, IP_LEN, option->info.ipOption.ip) != EOK ||
         AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
-        (void)DelTrigger(PROXY, fd, READ_TRIGGER);
+        (void)DelTrigger(option->info.ipOption.moduleId, fd, READ_TRIGGER);
         TcpShutDown(fd);
         SoftBusFree(tcpConnInfoNode);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -423,6 +424,10 @@ static int32_t OnProxyServerConnectEvent(int32_t events, int32_t cfd, const char
 
 static int32_t OnAuthP2pServerConnectEvent(int32_t events, int32_t cfd, const char *ip)
 {
+    if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
+        TcpShutDown(cfd);
+        return SOFTBUS_ERR;
+    }
     return TcpOnConnectEvent(AUTH_P2P, events, cfd, ip);
 }
 
@@ -444,7 +449,7 @@ static TcpListenerItem g_tcpListenerItems[] = {
     /* Note: if add new tcp server, expend it here according to the above codes. */
 };
 
-static SoftbusBaseListener *GetTcpListener(ListenerModule moduleId)
+static SoftbusBaseListener *CheckTcpListener(ListenerModule moduleId)
 {
     for (uint32_t i = 0; i < sizeof(g_tcpListenerItems) / sizeof(TcpListenerItem); i++) {
         if (g_tcpListenerItems[i].moduleId == moduleId) {
@@ -461,7 +466,7 @@ int32_t TcpStartListening(const LocalListenerInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     ListenerModule moduleId = info->info.ipListenerInfo.moduleId;
-    SoftbusBaseListener *listener = GetTcpListener(moduleId);
+    SoftbusBaseListener *listener = CheckTcpListener(moduleId);
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -480,7 +485,7 @@ int32_t TcpStopListening(const LocalListenerInfo *info)
     }
 
     ListenerModule moduleId = info->info.ipListenerInfo.moduleId;
-    if (GetTcpListener(moduleId) == NULL) {
+    if (CheckTcpListener(moduleId) == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -521,6 +526,12 @@ static int32_t InitProperty(void)
     return SOFTBUS_OK;
 }
 
+static bool TcpCheckActiveConnection(const ConnectOption *info)
+{
+    (void)info;
+    return false;
+}
+
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     if (callback == NULL) {
@@ -543,6 +554,7 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
     interface->GetConnectionInfo = TcpGetConnectionInfo;
     interface->StartLocalListening = TcpStartListening;
     interface->StopLocalListening = TcpStopListening;
+    interface->CheckActiveConnection = TcpCheckActiveConnection;
     g_tcpConnCallback = callback;
 
     if (g_tcpConnInfoList == NULL) {

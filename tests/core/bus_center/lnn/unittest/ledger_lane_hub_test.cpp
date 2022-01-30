@@ -23,6 +23,7 @@
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_sync_item_info.h"
+#include "message_handler.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -76,6 +77,7 @@ constexpr uint32_t LANE_HUB_MSEC = 1000;
 constexpr uint32_t LOCAL_MAX_SIZE = 128;
 constexpr uint32_t ALL_CAPACITY = 3;
 constexpr int32_t LANES_COUNT_MAX = 100;
+constexpr int32_t DEFAULT_PID = 0;
 
 class LedgerLaneHubTest : public testing::Test {
 public:
@@ -95,7 +97,9 @@ void LedgerLaneHubTest::TearDownTestCase()
 
 void LedgerLaneHubTest::SetUp()
 {
-    int32_t ret = LnnInitDistributedLedger();
+    int32_t ret = LooperInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -309,7 +313,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001, TestSize.Le
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(false);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo);
@@ -329,7 +333,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_BYTES_LANE_Test_001, TestSize.Leve
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(false);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, LNN_BYTES_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, DEFAULT_PID, LNN_BYTES_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -352,7 +356,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_FILE_LANE_Test_001, TestSize.Level
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(false);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, LNN_FILE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -375,7 +379,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_STREAM_LANE_Test_001, TestSize.Lev
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(false);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, LNN_STREAM_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, DEFAULT_PID, LNN_STREAM_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -398,7 +402,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_MESSAGE_LANE_Test_001, TestSize.Leve
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL);
@@ -418,7 +422,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_BYTES_LANE_Test_001, TestSize.Level1
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, LNN_BYTES_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, DEFAULT_PID, LNN_BYTES_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -441,7 +445,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_FILE_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, LNN_FILE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -464,7 +468,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_STREAM_LANE_Test_001, TestSize.Level
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, LNN_STREAM_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, DEFAULT_PID, LNN_STREAM_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == false &&
@@ -487,7 +491,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_MESSAGE_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructBtLocalInfo();
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_BR && laneInfo != NULL && laneInfo->isProxy &&
@@ -509,7 +513,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_BYTES_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructBtLocalInfo();
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, LNN_BYTES_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, DEFAULT_PID, LNN_BYTES_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_BR && laneInfo != NULL && laneInfo->isProxy &&
@@ -531,7 +535,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_FILE_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructBtLocalInfo();
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, LNN_FILE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_BR && laneInfo != NULL && laneInfo->isProxy &&
@@ -553,7 +557,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_BR_STREAM_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructBtLocalInfo();
 
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, LNN_STREAM_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, DEFAULT_PID, LNN_STREAM_LANE, NULL, LANES_NUM);
     EXPECT_TRUE(lanesObj == NULL);
     LnnReleaseLanesObject(lanesObj);
 }
@@ -577,7 +581,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_LnnRequestLanesObject_Test_001, TestSize.Le
     int times = 0;
     gettimeofday(&start, NULL);
     while (testCount--) {
-        LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, LNN_FILE_LANE, LANES_NUM);
+        LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE1_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
         EXPECT_TRUE(lanesObj != NULL);
         LnnReleaseLanesObject(lanesObj);
         times++;
@@ -706,8 +710,8 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_PRELINK_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj1, 0);
     LnnSetLaneCount(laneId, 3); // LaneCount add 3
     EXPECT_TRUE(LnnGetLaneScore(laneId) == THRESHOLD_LANE_QUALITY_SCORE);
@@ -730,11 +734,11 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_PRELINK_LANE_Test_002, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId1 = LnnGetLaneId(lanesObj1, 0);
     LnnSetLaneCount(laneId1, LANE_COUNT_THRESHOLD);
     EXPECT_TRUE(LnnGetLaneScore(laneId1) == THRESHOLD_LANE_QUALITY_SCORE);
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
     EXPECT_TRUE(laneId2 == LNN_LINK_TYPE_WLAN_2P4G);
     LnnReleaseLanesObject(lanesObj1);
@@ -758,10 +762,10 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_SCHEDULE_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId1 = LnnGetLaneId(lanesObj1, 0);
     EXPECT_TRUE(LnnGetLaneCount(laneId1) == 1); // lane used 1 times
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
     EXPECT_TRUE(LnnGetLaneCount(laneId1) == 2); // lane used 2 times
     LnnReleaseLanesObject(lanesObj1);
@@ -795,16 +799,16 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_SCHEDULE_LANE_Test_002, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId1 = LnnGetLaneId(lanesObj1, 0);
     (void)LnnLaneQosObserverAttach(lanesObj1, ScheduleNotify5G);
     (void)LnnSetLaneCount(laneId1, LANE_COUNT_THRESHOLD);
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
     (void)LnnLaneQosObserverAttach(lanesObj2, ScheduleNotify2P4G);
     (void)LnnSetLaneCount(laneId2, LANE_COUNT_THRESHOLD);
     TriggerLaneMonitor();
-    LnnLanesObject *lanesObj3 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj3 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId3 = LnnGetLaneId(lanesObj3, 0);
     EXPECT_TRUE(laneId3 == LNN_LINK_TYPE_BR);
 
@@ -834,11 +838,11 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_MANAGER_LANE_Test_001, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj3 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj4 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj5 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj3 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj4 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj5 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj1, 0);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G);
     LnnReleaseLanesObject(lanesObj1);
@@ -863,8 +867,8 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_MANAGER_LANE_Test_002, TestSize.Level1)
     ConstructCommonLocalInfo();
     ConstructAllCapacityLocalInfo();
 
-    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
-    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj1 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
+    LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj1, 0);
     EXPECT_TRUE(LnnGetLaneCount(laneId) == 2); // Lane used 2 times
     LnnReleaseLanesObject(lanesObj1);
@@ -887,7 +891,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_ANALYSE_LANE_Test_001, TestSize.Level1)
     ConstructAllCapacityLocalInfo();
 
     (void)LnnSetLaneCount(LNN_LINK_TYPE_WLAN_5G, LANE_COUNT_THRESHOLD);
-    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE4_NETWORK_ID, LNN_MESSAGE_LANE, LANES_NUM);
+    LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G);
     LnnReleaseLanesObject(lanesObj);

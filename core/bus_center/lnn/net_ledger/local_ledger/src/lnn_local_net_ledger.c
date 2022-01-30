@@ -23,6 +23,7 @@
 
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_p2p_info.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -336,6 +337,51 @@ static int32_t L1GetMasterNodeWeight(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetP2pMac(void *buf, uint32_t len)
+{
+    const char *mac = NULL;
+    if (buf == NULL || len < MAC_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    mac = LnnGetP2pMac(&g_localNetLedger.localInfo);
+    if (mac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p mac failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetP2pGoMac(void *buf, uint32_t len)
+{
+    const char *mac = NULL;
+    if (buf == NULL || len < MAC_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    mac = LnnGetP2pGoMac(&g_localNetLedger.localInfo);
+    if (mac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p go mac fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p go mac failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetP2pRole(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != NUM_BUF_SIZE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = LnnGetP2pRole(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
 static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 {
     char devType[DEVICE_TYPE_BUF_LEN] = TYPE_UNKNOWN;
@@ -513,6 +559,33 @@ static int32_t UpdateMasterNodeUdid(const void *udid)
     return LnnSetMasterUdid(&g_localNetLedger.localInfo, (const char *)udid);
 }
 
+static int32_t UpdateP2pMac(const void *mac)
+{
+    if (mac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetP2pMac(&g_localNetLedger.localInfo, (char *)mac);
+}
+
+static int32_t UpdateP2pGoMac(const void *mac)
+{
+    if (mac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetP2pGoMac(&g_localNetLedger.localInfo, (char *)mac);
+}
+
+static int32_t UpdateP2pRole(const void *p2pRole)
+{
+    if (p2pRole == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetP2pRole(&g_localNetLedger.localInfo, *(int32_t *)p2pRole);
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -524,12 +597,15 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_WLAN_IP, IP_MAX_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
     {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
     {STRING_KEY_MASTER_NODE_UDID, UDID_BUF_LEN, L1GetMasterNodeUdid, UpdateMasterNodeUdid},
+    {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
+    {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
+    {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -713,6 +789,10 @@ int32_t LnnInitLocalLedger(void)
     }
     if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local connect info error!");
+        goto EXIT;
+    }
+    if (LnnInitLocalP2pInfo(nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local p2p info error!");
         goto EXIT;
     }
 

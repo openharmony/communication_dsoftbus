@@ -19,6 +19,7 @@
 
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_info.h"
 #include "lnn_smart_communication.h"
 #include "softbus_adapter_mem.h"
@@ -35,7 +36,8 @@ typedef struct {
 
 static SoftBusList *g_laneQosObserver;
 
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty prop, uint32_t laneNum)
+LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+    const LnnPreferredLinkList *linkList, uint32_t laneNum)
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL ||
         laneNum == 0 || laneNum > LNN_REQUEST_MAX_LANE_NUM) {
@@ -53,7 +55,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, LnnLaneProperty pro
     lanesObject->laneNum = laneNum;
 
     for (uint32_t i = 0; i < laneNum; i++) {
-        int32_t laneId = LnnGetRightLane(netWorkId, prop);
+        int32_t laneId = LnnGetRightLane(netWorkId, pid, prop, linkList);
         if (laneId < 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRightLane error. laneId = %d", laneId);
             lanesObject->laneNum = i;
@@ -179,6 +181,12 @@ int32_t LnnInitLaneManager(void)
     }
     if (LnnRegisterLaneMonitor(LaneMonitorCallback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnRegisterLaneMonitor error");
+        DestroySoftBusList(g_laneQosObserver);
+        g_laneQosObserver = NULL;
+        return SOFTBUS_ERR;
+    }
+    if (LnnLanePendingInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanePendingInit error");
         DestroySoftBusList(g_laneQosObserver);
         g_laneQosObserver = NULL;
         return SOFTBUS_ERR;

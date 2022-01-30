@@ -78,6 +78,14 @@ extern "C" {
 #define UDID_BUF_LEN 65
 
 /**
+ * @brief Indicates the length of the UDID hash value.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define UDID_HASH_LEN 32
+
+/**
  * @brief Indicates the length of the UUID string, including the terminating null character <b>\0</b>.
  *
  * @since 1.0
@@ -162,6 +170,7 @@ typedef struct {
         /**< BLE address */
         struct BleAddr {
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
+            uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {
@@ -352,7 +361,7 @@ typedef struct {
     /** Device ID. Its maximum length is specified by {@link DISC_MAX_DEVICE_ID_LEN}. */
     char devId[DISC_MAX_DEVICE_ID_LEN];
     /** Account hash code. Its maximum length is specified by {@link MAX_ACCOUNT_HASH_LEN}. */
-    char hwAccountHash[MAX_ACCOUNT_HASH_LEN];
+    char accountHash[MAX_ACCOUNT_HASH_LEN];
     /** Device type. For details, see {@link DeviceType}. */
     DeviceType devType;
     /** Device name. Its maximum length is specified by {@link DISC_MAX_DEVICE_NAME_LEN}. */
