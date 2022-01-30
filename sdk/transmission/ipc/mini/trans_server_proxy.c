@@ -41,6 +41,24 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     return TransOpenSession(param, info);
 }
 
+int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
+{
+    if ((sessionName == NULL) || (addrInfo == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    ConnectOption connOpt;
+    if (!LnnConverAddrToOption(addrInfo, &connOpt)) {
+        return SOFTBUS_ERR;
+    }
+    return TransOpenAuthChannel(sessionName, &connOpt);
+}
+
+int32_t ServerIpcNotifyAuthSuccess(int channelId)
+{
+    return TransNotifyAuthSuccess(channelId);
+}
+
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     return TransCloseChannel(channelId, channelType);
