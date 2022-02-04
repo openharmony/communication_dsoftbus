@@ -19,6 +19,7 @@
 #include "bus_center_info_key.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_lane_info.h"
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
@@ -106,6 +107,8 @@ void LedgerLaneHubTest::SetUp()
     ret = LnnInitSyncLedgerItem();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)LnnInitLaneManager();
+    ret = LnnInitHeartbeat();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     GTEST_LOG_(INFO) << "LaneHubTest start.";
 }
 
@@ -955,5 +958,40 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_LOCALINFO_LANE_Test_001, TestSize.Level1)
     EXPECT_TRUE(socre == PASSING_LANE_QUALITY_SCORE);
     LnnSetLaneCount(LNN_LINK_TYPE_WLAN_5G, -LANES_COUNT_MAX);
     EXPECT_TRUE(LnnGetLaneCount(LNN_LINK_TYPE_WLAN_5G) == 0);
+}
+
+/*
+* @tc.name: HEARTBEAT_ARGS_ADJUST_Test_001
+* @tc.desc: heart beat parameter adjust test
+* @tc.type: FUNC
+* @tc.require: AR000FNSVF
+*/
+HWTEST_F(LedgerLaneHubTest, HEARTBEAT_PARAMS_ADJUST_Test_001, TestSize.Level1)
+{
+    GearMode mode = {
+        .modeCycle = HIGH_FREQ_CYCLE,
+        .modeDuration = NORMAL_DURATION,
+        .wakeupFlag = false,
+    };
+    HeartbeatImplPolicy implPolicy = {
+        .type = LNN_BEAT_IMPL_TYPE_BLE,
+        .info.ble = {
+            .advMinInterval = 10,
+        }
+    };
+
+    EXPECT_FALSE(ShiftLNNGear(NULL, 0, NULL, mode, &implPolicy) == SOFTBUS_OK);
+    EXPECT_FALSE(ShiftLNNGear("", -1, NULL, mode, &implPolicy) == SOFTBUS_OK);
+    ConstructALLCapacityNode();
+    LnnAddOnlineNode(&g_nodeInfo[ALL_CAPACITY]);
+    EXPECT_TRUE(ShiftLNNGear("", 0, g_nodeInfo[ALL_CAPACITY].networkId, mode, &implPolicy) == SOFTBUS_OK);
+    GearMode tempMode;
+    EXPECT_TRUE(LnnGetHeartbeatGearMode(&tempMode) == SOFTBUS_OK);
+    EXPECT_TRUE(tempMode.modeCycle == HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(tempMode.modeDuration == NORMAL_DURATION);
+    EXPECT_TRUE(tempMode.wakeupFlag == false);
+    HeartbeatImplPolicy tempImplPolicy;
+    EXPECT_TRUE(LnnGetHeartbeatImplPolicy(LNN_BEAT_IMPL_TYPE_BLE, &tempImplPolicy) == SOFTBUS_OK);
+    EXPECT_TRUE(tempImplPolicy.info.ble.advMinInterval == 10);
 }
 }

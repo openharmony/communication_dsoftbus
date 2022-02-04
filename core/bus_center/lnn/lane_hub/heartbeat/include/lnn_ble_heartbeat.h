@@ -13,26 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef LNN_CONNECTION_ADDR_UTILS_H
-#define LNN_CONNECTION_ADDR_UTILS_H
+#ifndef LNN_BLE_HEARTBEAT_H
+#define LNN_BLE_HEARTBEAT_H
 
-#include <stdbool.h>
-
-#include "lnn_node_info.h"
-#include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
+#include "lnn_heartbeat_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
-bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
-bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
-DiscoveryType LnnGetDiscoveryType(ConnectionAddrType type);
+int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback);
+int32_t LnnOnceBleBeatBegin(void);
+int32_t LnnOnceBleBeatEnd(void);
+int32_t LnnStopBleHeartbeat(void);
+int32_t LnnDeinitBleHeartbeat(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_CONNECTION_ADDR_UTILS_H */
-
+#endif /* LNN_BLE_HEARTBEAT_H */
