@@ -22,6 +22,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_lane_hub.h"
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
@@ -40,6 +41,7 @@ typedef enum {
     INIT_LOCAL_LEDGER_DELAY_TYPE = 0,
     INIT_NETWORK_MANAGER_DELAY_TYPE,
     INIT_NETBUILDER_DELAY_TYPE,
+    INIT_LANEHUB_DELAY_TYPE,
     INIT_DELAY_MAX_TYPE,
 } InitDelayType;
 
@@ -65,6 +67,10 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
         },
         [INIT_NETBUILDER_DELAY_TYPE] = {
             .implInit = LnnInitNetBuilderDelay,
+            .isInit = false,
+        },
+        [INIT_LANEHUB_DELAY_TYPE] = {
+            .implInit = LnnInitLaneHubDelay,
             .isInit = false,
         },
     },
@@ -94,8 +100,8 @@ static void BusCenterServerDelayInit(void *para)
         if (g_lnnLocalConfigInit.initDelayImpl[i].implInit == NULL) {
             continue;
         }
-        if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit
-            && g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
+        if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
+            g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init delay impl(%u) failed", i);
             ret = SOFTBUS_ERR;
         } else {
@@ -129,7 +135,7 @@ int32_t BusCenterServerInit(void)
         return SOFTBUS_ERR;
     }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
