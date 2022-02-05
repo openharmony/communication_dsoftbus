@@ -25,7 +25,7 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-int __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");
