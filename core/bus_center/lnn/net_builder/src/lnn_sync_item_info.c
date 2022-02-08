@@ -845,7 +845,7 @@ int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType
 
 int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, SyncItemType itemType)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnSyncLedgerItemInfo type=%d", itemType);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnSyncDirectiveInfo type=%d", itemType);
     if (networkId == NULL || buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network id = null or buf = null, type=%d", itemType);
         return SOFTBUS_INVALID_PARAM;
