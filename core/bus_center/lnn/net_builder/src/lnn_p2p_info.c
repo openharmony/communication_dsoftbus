@@ -91,6 +91,7 @@ static void ProcessSyncP2pInfo(void *para)
 {
     (void)para;
     int32_t i;
+    uint32_t len;
     int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
@@ -113,11 +114,10 @@ static void ProcessSyncP2pInfo(void *para)
         SoftBusFree(info);
         return;
     }
+    len = strlen(msg) + 1; /* add 1 for '\0' */
     for (i = 0; i < infoNum; i++) {
-        if (LnnSyncDirectiveInfo(info[i].networkId, (uint8_t *)msg, strlen(msg) + 1, /* add 1 for '\0' */
-            INFO_TYPE_P2P_INFO) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync p2p info to %s fail.",
-                info[i].deviceName);
+        if (LnnSyncDirectiveInfo(info[i].networkId, (uint8_t *)msg, len, INFO_TYPE_P2P_INFO) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync p2p info to %s fail.", info[i].deviceName);
         }
     }
     cJSON_free(msg);
@@ -127,9 +127,9 @@ static void ProcessSyncP2pInfo(void *para)
 
 int32_t LnnSyncP2pInfo(void)
 {
-    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo,
-        NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async p2p info fail.");
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async p2p info fail, ret = %d.", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
