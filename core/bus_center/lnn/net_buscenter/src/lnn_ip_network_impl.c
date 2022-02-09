@@ -198,16 +198,12 @@ static int32_t UpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uin
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "close previous ip link and stop previous discovery\n");
         CloseIpLink();
         LnnStopDiscovery();
+        DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local ledger\n");
     if (SetLocalIpInfo(ipNewAddr, ifNewName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed\n");
         return SOFTBUS_ERR;
-    }
-    if (strncmp(ifNewName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
-    } else {
-        DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
     return SOFTBUS_OK;
 }
@@ -290,11 +286,11 @@ int32_t LnnInitIpNetwork(void)
         return SOFTBUS_ERR;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
-        DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open ip link and start discovery\n");
         if (OpenIpLink() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
         }
+        DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
         if (LnnStartDiscovery() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
         }
@@ -347,6 +343,7 @@ void LnnCallIpDiscovery(void)
         if (OpenIpLink() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
         }
+        DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
         if (LnnStartDiscovery() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
         }
