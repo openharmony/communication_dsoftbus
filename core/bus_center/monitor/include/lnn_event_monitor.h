@@ -18,17 +18,11 @@
 
 #include <stdint.h>
 
-#include "lnn_event_monitor_impl.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int32_t LnnInitEventMonitor(void);
-void LnnDeinitEventMonitor(void);
-
-int32_t LnnRegisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
-void LnnUnregisterEventHandler(LnnMonitorEventType event, LnnMonitorEventHandler handler);
 
 #ifdef __cplusplus
 }

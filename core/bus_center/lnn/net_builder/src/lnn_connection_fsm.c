@@ -19,12 +19,14 @@
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
+#include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -177,14 +179,18 @@ static void ReportResult(const char *udid, ReportCategory report)
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
+    ReportCategory report;
+    uint32_t oldType = 0;
 
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     if (retCode == SOFTBUS_OK) {
-        ReportCategory report = LnnAddOnlineNode(connInfo->nodeInfo);
+        (void)LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&oldType);
+        report = LnnAddOnlineNode(connInfo->nodeInfo);
         NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
         LnnNotifyNodeStateChanged(&connInfo->addr);
+        LnnNotifyDiscoveryTypeChanged(networkId, oldType);
     } else {
         NotifyJoinResult(connFsm, networkId, retCode);
         (void)AuthHandleLeaveLNN(connInfo->authId);
@@ -251,7 +257,6 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     (void)AuthHandleLeaveLNN(connInfo->authId);
     connFsm->isDead = true;
-    connInfo->flag &= ~LNN_CONN_INFO_FLAG_ONLINE;
     LnnRequestCleanConnFsm(connFsm->id);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
 }
@@ -734,6 +739,33 @@ static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para
     return true;
 }
 
+static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
+{
+    int16_t code;
+    uint32_t combinedInt;
+    char uuid[UUID_BUF_LEN];
+
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_BR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "just br need send offline");
+        return SOFTBUS_ERR;
+    }
+    (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    code = LnnGetCnnCode(uuid, DISCOVERY_TYPE_BR);
+    if (code == INVALID_CONNECTION_CODE_VALUE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid not exist!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    combinedInt = ((uint16_t)code << 16) | ((uint16_t)DISCOVERY_TYPE_BR & 0x7FFF);
+    combinedInt = SoftBusHtoNl(combinedInt);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetOfflineMsg combinedInt: 0x%04x", combinedInt);
+    if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, connFsm->connInfo.peerNetworkId,
+        (uint8_t *)&combinedInt, sizeof(int32_t), LnnSyncOfflineComplete) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync offline fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void LeavingStateEnter(FsmStateMachine *fsm)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -750,7 +782,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    rc = LnnSyncLedgerItemInfo(connInfo->peerNetworkId, GetDiscoveryType(connInfo->addr.type), INFO_TYPE_OFFLINE);
+    rc = SyncOffline(connFsm);
     if (rc == SOFTBUS_OK) {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
             NULL, LEAVE_LNN_TIMEOUT_LEN);
