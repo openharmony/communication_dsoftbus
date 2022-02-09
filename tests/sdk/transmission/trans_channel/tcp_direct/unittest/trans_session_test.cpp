@@ -27,7 +27,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 ConnectionAddr g_addrInfo;
-const char *g_testSessionName   = "ohos.distributedschedule.dms.test";
+const char *g_testSessionName = "ohos.distributedschedule.dms.test";
 std::string testData = "TranSessionTest_GetSessionKeyTestData";
 
 class TransSessionTest : public testing::Test {
@@ -198,5 +198,18 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
 
     ret = OpenAuthSession(g_testSessionName, &(g_addrInfo), 1, NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: NotifyAuthSuccessTest001
+ * @tc.desc: use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
+{
+    int32_t sessionId = 1;
+
+    NotifyAuthSuccess(sessionId);
 }
 }
