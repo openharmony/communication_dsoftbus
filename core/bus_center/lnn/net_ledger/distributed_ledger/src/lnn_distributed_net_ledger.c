@@ -563,6 +563,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     mac = LnnGetP2pMac(info);
@@ -570,7 +571,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strcpy_s(buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -584,6 +585,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     mac = LnnGetP2pGoMac(info);
@@ -591,7 +593,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p go mac fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strcpy_s(buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p go mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -607,6 +609,7 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     *((int32_t *)buf) = LnnGetP2pRole(info);
