@@ -20,7 +20,7 @@ if (enable_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_item_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
   ]
 } else {
   bus_center_builder_src = [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c" ]
