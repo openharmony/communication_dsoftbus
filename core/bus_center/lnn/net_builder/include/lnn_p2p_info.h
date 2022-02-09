@@ -23,8 +23,9 @@
 extern "C" {
 #endif
 
+int32_t LnnInitP2p(void);
+void LnnDeinitP2p(void);
 int32_t LnnInitLocalP2pInfo(NodeInfo *info);
-int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info);
 int32_t LnnSyncP2pInfo(void);
 
 #ifdef __cplusplus

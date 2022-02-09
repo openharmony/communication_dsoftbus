@@ -103,8 +103,6 @@ void LedgerLaneHubTest::SetUp()
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnInitSyncLedgerItem();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)LnnInitLaneManager();
     GTEST_LOG_(INFO) << "LaneHubTest start.";
 }

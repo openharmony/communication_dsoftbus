@@ -50,6 +50,7 @@ typedef enum {
     NUM_KEY_DEV_TYPE_ID,
     NUM_KEY_MASTER_NODE_WEIGHT,
     NUM_KEY_P2P_ROLE,
+    NUM_KEY_DISCOVERY_TYPE,
     NUM_KEY_END,
 } InfoKey;
 
