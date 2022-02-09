@@ -17,8 +17,9 @@
 
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_sync_item_info.h"
+#include "lnn_sync_info_manager.h"
 #include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -58,11 +59,8 @@ static char *LnnGetP2pInfoMsg(const P2pInfo *info)
     return msg;
 }
 
-int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info)
+static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info)
 {
-    if (msg == NULL || info == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     cJSON *json = cJSON_Parse((char *)msg);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info json fail.");
@@ -91,8 +89,8 @@ static void ProcessSyncP2pInfo(void *para)
 {
     (void)para;
     int32_t i;
-    uint32_t len;
     int32_t infoNum = 0;
+    uint32_t len;
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get all online node info fail.");
@@ -116,7 +114,7 @@ static void ProcessSyncP2pInfo(void *para)
     }
     len = strlen(msg) + 1; /* add 1 for '\0' */
     for (i = 0; i < infoNum; i++) {
-        if (LnnSyncDirectiveInfo(info[i].networkId, (uint8_t *)msg, len, INFO_TYPE_P2P_INFO) != SOFTBUS_OK) {
+        if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync p2p info to %s fail.", info[i].deviceName);
         }
     }
@@ -125,11 +123,30 @@ static void ProcessSyncP2pInfo(void *para)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "sync p2p info done.");
 }
 
+static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv p2p info, type:%d, len: %d", type, len);
+    if (type != LNN_INFO_TYPE_P2P_INFO) {
+        return;
+    }
+    if (msg == NULL || len == 0) {
+        return;
+    }
+    P2pInfo p2pInfo = {0};
+    if (LnnParseP2pInfoMsg((const char *)msg, &p2pInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info fail");
+        return;
+    }
+    if (!LnnSetDLP2pInfo(networkId, &p2pInfo)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set p2p info fail");
+    }
+}
+
 int32_t LnnSyncP2pInfo(void)
 {
-    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async p2p info fail, ret = %d.", ret);
+    int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async p2p info fail, rc=%d", rc);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -150,4 +167,14 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
     }
     info->isBleP2p = (isSupportBle && isSupportP2p);
     return SOFTBUS_OK;
+}
+
+int32_t LnnInitP2p(void)
+{
+    return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
+}
+
+void LnnDeinitP2p(void)
+{
+    (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }

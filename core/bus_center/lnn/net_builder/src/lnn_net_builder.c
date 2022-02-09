@@ -32,13 +32,17 @@
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_weight.h"
-#include "lnn_sync_item_info.h"
+#include "lnn_p2p_info.h"
+#include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_json_utils.h"
 #include "softbus_log.h"
 
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
+#define JSON_KEY_MASTER_UDID "MasterUdid"
+#define JSON_KEY_MASTER_WEIGHT "MasterWeight"
 
 typedef enum {
     LNN_MSG_ID_ELECT,
@@ -100,7 +104,7 @@ typedef struct {
 } AuthResultMsgPara;
 
 typedef struct {
-    char udid[UDID_BUF_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
     char masterUdid[UDID_BUF_LEN];
     int32_t masterWeight;
 } ElectMsgPara;
@@ -269,6 +273,41 @@ static void UpdateLocalMasterNode(const char *masterUdid, int32_t weight)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local master weight=%d", weight);
 }
 
+static int32_t SyncElectMessage(const char *networkId)
+{
+    char masterUdid[UDID_BUF_LEN] = {0};
+    int32_t masterWeight;
+    char *data = NULL;
+    cJSON *json = NULL;
+    int32_t rc;
+
+    if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &masterWeight) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node info failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    json = cJSON_CreateObject();
+    if (json == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create elect json object failed");
+        return SOFTBUS_ERR;
+    }
+    if (!AddStringToJsonObject(json, JSON_KEY_MASTER_UDID, masterUdid) ||
+        !AddNumberToJsonObject(json, JSON_KEY_MASTER_WEIGHT, masterWeight)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add elect info to json failed");
+        cJSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    data = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "format elect packet fail");
+        return SOFTBUS_ERR;
+    }
+    rc = LnnSendSyncInfoMsg(LNN_INFO_TYPE_MASTER_ELECT, networkId, (uint8_t *)data, strlen(data) + 1, NULL);
+    cJSON_free(data);
+    return rc;
+}
+
 static void SendElectMessageToAll(const char *skipNetworkId)
 {
     LnnConnectionFsm *item = NULL;
@@ -280,8 +319,7 @@ static void SendElectMessageToAll(const char *skipNetworkId)
         if (!IsNodeOnline(item->connInfo.peerNetworkId)) {
             continue;
         }
-        if (LnnSyncLedgerItemInfo(item->connInfo.peerNetworkId, DISCOVERY_TYPE_UNKNOWN,
-            INFO_TYPE_MASTER_ELECT) != SOFTBUS_OK) {
+        if (SyncElectMessage(item->connInfo.peerNetworkId) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync elect info to connFsm(%u) failed", item->id);
         }
     }
@@ -461,6 +499,10 @@ static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
     const ConnectionAddr *addr2 = NULL;
     ConnectOption option;
 
+    // Not realy leaving lnn
+    if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
+        return;
+    }
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         addr2 = &item->connInfo.addr;
         if (addr1->type != addr2->type) {
@@ -924,12 +966,12 @@ static int32_t ProcessMasterElect(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
     do {
-        connFsm = FindConnectionFsmByUdid(msgPara->udid);
+        connFsm = FindConnectionFsmByNetworkId(msgPara->networkId);
         if (connFsm == NULL || connFsm->isDead) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can't find connection fsm when receive elect node");
             break;
         }
-        if (IsNodeOnline(connFsm->connInfo.peerNetworkId)) {
+        if (!IsNodeOnline(connFsm->connInfo.peerNetworkId)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node(%u) is already offline", connFsm->id);
             break;
         }
@@ -942,13 +984,14 @@ static int32_t ProcessMasterElect(const void *para)
         compareRet = LnnCompareNodeWeight(localMasterWeight, localMasterUdid,
             msgPara->masterWeight, msgPara->masterUdid);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]weight compare result: %d", connFsm->id, compareRet);
-        if (compareRet < 0) {
-            UpdateLocalMasterNode(msgPara->masterUdid, msgPara->masterWeight);
-            SendElectMessageToAll(connFsm->connInfo.peerNetworkId);
-        } else {
-            if (LnnSyncLedgerItemInfo(connFsm->connInfo.peerNetworkId, DISCOVERY_TYPE_UNKNOWN,
-                INFO_TYPE_MASTER_ELECT) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync elect info to connFsm(%u) failed", connFsm->id);
+        if (compareRet != 0) {
+            if (compareRet < 0) {
+                UpdateLocalMasterNode(msgPara->masterUdid, msgPara->masterWeight);
+                SendElectMessageToAll(connFsm->connInfo.peerNetworkId);
+            } else {
+                rc = SyncElectMessage(connFsm->connInfo.peerNetworkId);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "sync elect info to connFsm(%u) result:%d",
+                    connFsm->id, rc);
             }
         }
         rc = SOFTBUS_OK;
@@ -1241,19 +1284,70 @@ static int32_t RegisterAuthCallback(void)
     return SOFTBUS_OK;
 }
 
+static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    cJSON *json = NULL;
+    ElectMsgPara *para = NULL;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv master elect msg, type:%d, len: %d", type, len);
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return;
+    }
+    if (type != LNN_INFO_TYPE_MASTER_ELECT) {
+        return;
+    }
+    json = cJSON_Parse((char *)msg);
+    if (json == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse elect msg json fail");
+        return;
+    }
+    para = SoftBusMalloc(sizeof(ElectMsgPara));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc elect msg para fail");
+        cJSON_Delete(json);
+        return;
+    }
+    if (!GetJsonObjectNumberItem(json, JSON_KEY_MASTER_WEIGHT, &para->masterWeight) ||
+        !GetJsonObjectStringItem(json, JSON_KEY_MASTER_UDID, para->masterUdid, UDID_BUF_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse master info json fail");
+        cJSON_Delete(json);
+        SoftBusFree(para);
+        return;
+    }
+    cJSON_Delete(json);
+    if (strcpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy network id fail");
+        SoftBusFree(para);
+        return;
+    }
+    if (PostMessageToHandler(MSG_TYPE_MASTER_ELECT, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post elect message fail");
+        SoftBusFree(para);
+    }
+}
+
 int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder repeatly");
         return SOFTBUS_OK;
     }
-    if (LnnInitSyncLedgerItem() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync ledger item fail");
+    if (LnnInitSyncInfoManager() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync info manager fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitP2p() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
         return SOFTBUS_ERR;
     }
     NetBuilderConfigInit();
     if (RegisterAuthCallback() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register sync master elect msg fail");
         return SOFTBUS_ERR;
     }
     if (ConifgLocalLedger() != SOFTBUS_OK) {
@@ -1297,10 +1391,12 @@ void LnnDeinitNetBuilder(void)
     if (!g_netBuilder.isInit) {
         return;
     }
-    LnnDeinitSyncLedgerItem();
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         StopConnectionFsm(item);
     }
+    LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
+    LnnDeinitP2p();
+    LnnDeinitSyncInfoManager();
     g_netBuilder.isInit = false;
 }
 
@@ -1420,25 +1516,26 @@ int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNotifySyncOfflineFinish(const char *networkId)
+void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
     char *para = NULL;
 
+    (void)type;
+    (void)msg;
+    (void)len;
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
-        return SOFTBUS_ERR;
+        return;
     }
     para = CreateNetworkIdMsgPara(networkId);
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare notify sync offline message fail");
-        return SOFTBUS_MALLOC_ERR;
+        return;
     }
     if (PostMessageToHandler(MSG_TYPE_SYNC_OFFLINE_FINISH, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post sync offline finish message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
 }
 
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr)
@@ -1456,38 +1553,6 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr)
     }
     if (PostMessageToHandler(MSG_TYPE_NODE_STATE_CHANGED, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post node state changed message failed");
-        SoftBusFree(para);
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t masterWeight)
-{
-    ElectMsgPara *para = NULL;
-
-    if (g_netBuilder.isInit == false) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
-        return SOFTBUS_ERR;
-    }
-    if (udid == NULL || masterUdid == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid elect msg para");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    para = SoftBusMalloc(sizeof(ElectMsgPara));
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc elect msg para failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (strncpy_s(para->udid, UDID_BUF_LEN, udid, strlen(udid)) != EOK ||
-        strncpy_s(para->masterUdid, UDID_BUF_LEN, masterUdid, strlen(masterUdid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid and maser udid failed");
-        SoftBusFree(para);
-        return SOFTBUS_ERR;
-    }
-    para->masterWeight = masterWeight;
-    if (PostMessageToHandler(MSG_TYPE_MASTER_ELECT, para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post elect message failed");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }

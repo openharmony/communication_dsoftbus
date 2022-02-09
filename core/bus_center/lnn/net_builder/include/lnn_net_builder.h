@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -34,12 +35,11 @@ int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
-int32_t LnnNotifySyncOfflineFinish(const char *networkId);
+void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen);
 int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId);
 int32_t LnnRequestCleanConnFsm(uint16_t connFsmId);
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
-int32_t LnnNotifyMasterElect(const char *udid, const char *masterUdid, int32_t masterWeight);
 
 #ifdef __cplusplus
 }

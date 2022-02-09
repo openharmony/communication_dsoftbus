@@ -22,12 +22,12 @@
 #include <unistd.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_net_builder.h"
 #include "lnn_discovery_manager.h"
-#include "lnn_event_monitor.h"
 #include "lnn_ip_utils.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -242,14 +242,13 @@ static int32_t UpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uin
     return SOFTBUS_OK;
 }
 
-static void IpAddrChangeEventHandler(LnnMonitorEventType event, const LnnMoniterData *para)
+static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     char ipCurrentAddr[IP_LEN] = {0};
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
 
-    (void)para;
-    if (event != LNN_MONITOR_EVENT_IP_ADDR_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event: %d\n", event);
+    if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");
         return;
     }
     if (SoftBusMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
@@ -265,13 +264,13 @@ static void IpAddrChangeEventHandler(LnnMonitorEventType event, const LnnMoniter
     (void)SoftBusMutexUnlock(&g_lnnIpNetworkInfo.lock);
 }
 
-static void WifiStateChangeEventHandler(LnnMonitorEventType event, const LnnMoniterData *para)
+static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     char ipCurrentAddr[IP_LEN] = {0};
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
-    (void)para;
-    if (event != LNN_MONITOR_EVENT_WIFI_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event: %d\n", event);
+
+    if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");
         return;
     }
     if (SoftBusMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
@@ -304,11 +303,11 @@ static int32_t LnnInitAutoNetworking(void)
 {
     char ipAddr[IP_LEN] = {0};
     char ifName[NET_IF_NAME_LEN] = {0};
-    if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
+    if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed\n");
         return SOFTBUS_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler) != SOFTBUS_OK) {
+    if (LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register wifi state change event handler failed\n");
         return SOFTBUS_ERR;
     }
