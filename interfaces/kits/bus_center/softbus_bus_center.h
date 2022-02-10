@@ -124,7 +124,7 @@ typedef enum {
     NODE_KEY_UUID,      /**< UUID in string format */
 } NodeDeviceInfoKey;
 
-/**i
+/**
  * @brief Enumerates accuracy for time synchronize among device.
  *
  * @since 1.0
@@ -488,7 +488,7 @@ void FreeNodeInfo(NodeBasicInfo *info);
  */
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
 
-/**i
+/**
  * @brief Obtains a specified {@link NodeDeviceInfoKey} of an online device.
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
@@ -500,7 +500,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
  *
  * @return Returns <b>0</b> if the {@link NodeDeviceInfoKey} is obtained, in which case <b>info</b> is valid;
  * returns any other value otherwise.
- *i
+ *
  * @since 1.0
  * @version 1.0
  */
