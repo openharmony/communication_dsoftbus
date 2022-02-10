@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -53,7 +52,7 @@ static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
     LOW_PRIORITY_DEFAULT_LIMIT
 };
 static LIST_HEAD(g_bleQueueList);
-static pthread_mutex_t g_bleQueueLock;
+static SoftBusMutex g_bleQueueLock;
 static BleQueue *g_innerQueue = NULL;
 
 static BleQueue *CreateBleQueue(int32_t pid)
@@ -113,7 +112,7 @@ int BleEnqueueNonBlock(const void *msg)
     }
     LockFreeQueue *lockFreeQueue = NULL;
     BleQueue *item = NULL;
-    if (pthread_mutex_lock(&g_bleQueueLock) != EOK) {
+    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_bleQueueList, BleQueue, node) {
@@ -126,13 +125,13 @@ int BleEnqueueNonBlock(const void *msg)
         BleQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleEnqueueNonBlock CreateBleQueue failed");
-            (void)pthread_mutex_unlock(&g_bleQueueLock);
+            (void)SoftBusMutexUnlock(&g_bleQueueLock);
             return SOFTBUS_ERR;
         }
         ListTailInsert(&g_bleQueueList, &(newQueue->node));
         lockFreeQueue = newQueue->queue[GetPriority(queueNode->flag)];
     }
-    (void)pthread_mutex_unlock(&g_bleQueueLock);
+    (void)SoftBusMutexUnlock(&g_bleQueueLock);
     return QueueMultiProducerEnqueue(lockFreeQueue, msg);
 }
 
@@ -155,34 +154,34 @@ int BleDequeueNonBlock(void **msg)
         return SOFTBUS_OK;
     }
 
-    if (pthread_mutex_lock(&g_bleQueueLock) != EOK) {
+    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
         return SOFTBUS_ERR;
     }
     if (IsListEmpty(&g_bleQueueList)) {
-        (void)pthread_mutex_unlock(&g_bleQueueLock);
+        (void)SoftBusMutexUnlock(&g_bleQueueLock);
         return SOFTBUS_ERR;
     }
     BleQueue *item = LIST_ENTRY(g_bleQueueList.next, BleQueue, node);
     ListDelete(&(item->node));
     if (GetMsg(item, msg) == SOFTBUS_OK) {
         ListTailInsert(&g_bleQueueList, &(item->node));
-        (void)pthread_mutex_unlock(&g_bleQueueLock);
+        (void)SoftBusMutexUnlock(&g_bleQueueLock);
         return SOFTBUS_OK;
     }
     DestroyBleQueue(item);
-    (void)pthread_mutex_unlock(&g_bleQueueLock);
+    (void)SoftBusMutexUnlock(&g_bleQueueLock);
     return SOFTBUS_ERR;
 }
 
 int BleInnerQueueInit(void)
 {
-    if (pthread_mutex_init(&g_bleQueueLock, NULL) != 0) {
+    if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
         return SOFTBUS_ERR;
     }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit CreateBleQueue(0) failed");
-        (void)pthread_mutex_destroy(&g_bleQueueLock);
+        (void)SoftBusMutexDestroy(&g_bleQueueLock);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -190,7 +189,7 @@ int BleInnerQueueInit(void)
 
 void BleInnerQueueDeinit(void)
 {
-    pthread_mutex_destroy(&g_bleQueueLock);
+    SoftBusMutexDestroy(&g_bleQueueLock);
     DestroyBleQueue(g_innerQueue);
     g_innerQueue = NULL;
 }

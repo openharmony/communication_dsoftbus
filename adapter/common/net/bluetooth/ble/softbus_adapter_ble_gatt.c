@@ -14,7 +14,6 @@
  */
 #include "softbus_adapter_ble_gatt.h"
 
-#include <pthread.h>
 #include "adapter_bt_utils.h"
 #include "ohos_bt_def.h"
 #include "ohos_bt_gap.h"
@@ -22,6 +21,7 @@
 #include "securec.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -33,7 +33,7 @@ typedef struct {
     int advId;
     bool isUsed;
     bool isAdvertising;
-    pthread_cond_t cond;
+    SoftBusCond cond;
     SoftBusBleAdvData advData;
     SoftBusAdvCallback *advCallback;
 } AdvChannel;
@@ -45,11 +45,32 @@ typedef struct {
     SoftBusScanListener *listener;
 } ScanListener;
 
+typedef struct {
+    SoftBusMutex lock;
+    bool lockInit;
+} SoftBusBleGattLock;
+
 static AdvChannel g_advChannel[ADV_MAX_NUM];
 static ScanListener g_scanListener[SCAN_MAX_NUM];
-static pthread_mutex_t g_advLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t g_scanerLock = PTHREAD_MUTEX_INITIALIZER;
+static SoftBusBleGattLock g_advLock = {
+    .lockInit = false,
+};
+static SoftBusBleGattLock g_scanerLock = {
+    .lockInit = false,
+};
 static bool g_isRegCb = false;
+
+static void BleGattLockInit(SoftBusBleGattLock *bleGattLock)
+{
+    if (bleGattLock->lockInit == false) {
+        if (SoftBusMutexInit(&(bleGattLock->lock), NULL) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "bleGatt lock init failed");
+            return;
+        }
+        bleGattLock->lockInit = true;
+    }
+    return;
+}
 
 static unsigned char ConvertScanFilterPolicy(unsigned char policy)
 {
@@ -263,7 +284,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
         }
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = true;
-            pthread_cond_signal(&advChannel->cond);
+            SoftBusCondSignal(&advChannel->cond);
         }
         advChannel->advCallback->AdvEnableCallback(index, st);
         break;
@@ -283,7 +304,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
         }
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = false;
-            pthread_cond_signal(&advChannel->cond);
+            SoftBusCondSignal(&advChannel->cond);
         }
         advChannel->advCallback->AdvDisableCallback(index, st);
         break;
@@ -325,7 +346,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
 static void WrapperSecurityRespondCallback(const BdAddr *bdAddr)
 {
     (void)bdAddr;
-    LOG_INFO("WrapperSecurityRespondCallback");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperSecurityRespondCallback");
 }
 
 static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
@@ -337,14 +358,14 @@ static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
     SoftBusBleScanResult sr;
     ConvertScanResult(scanResultdata, &sr);
     for (listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
-        pthread_mutex_lock(&g_scanerLock);
+        SoftBusMutexLock(&g_scanerLock.lock);
         ScanListener *scanListener = &g_scanListener[listenerId];
         if (!scanListener->isUsed || scanListener->listener == NULL || !scanListener->isScanning ||
             scanListener->listener->OnScanResult == NULL) {
-            pthread_mutex_unlock(&g_scanerLock);
+            SoftBusMutexUnlock(&g_scanerLock.lock);
             continue;
         }
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         scanListener->listener->OnScanResult(listenerId, &sr);
     }
 }
@@ -353,7 +374,7 @@ static void WrapperScanParameterSetCompletedCallback(int clientId, int status)
 {
     (void)clientId;
     (void)status;
-    LOG_INFO("WrapperScanParameterSetCompletedCallback");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperScanParameterSetCompletedCallback");
 }
 
 static BtGattCallbacks g_softbusGattCb = {
@@ -384,7 +405,7 @@ static bool CheckAdvChannelInUsed(int advId)
         return false;
     }
     if (!g_advChannel[advId].isUsed) {
-        LOG_ERR("advId %d is ready released", advId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "advId %d is ready released", advId);
         return false;
     }
     return true;
@@ -405,12 +426,12 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->advLength != 0) {
         g_advChannel[advId].advData.advData = SoftBusCalloc(data->advLength);
         if (g_advChannel[advId].advData.advData == NULL) {
-            LOG_ERR("SetAdvData calloc advData failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData calloc advData failed");
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength, 
             data->advData, data->advLength) != EOK) {
-            LOG_ERR("SetAdvData memcpy advData failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MEM_ERR;
@@ -419,14 +440,14 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->scanRspLength != 0) {
         g_advChannel[advId].advData.scanRspData = SoftBusCalloc(data->scanRspLength);
         if (g_advChannel[advId].advData.scanRspData == NULL) {
-            LOG_ERR("SetAdvData calloc scanRspData failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData calloc scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength, 
             data->scanRspData, data->scanRspLength) != EOK) {
-            LOG_ERR("SetAdvData memcpy scanRspData failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData memcpy scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             SoftBusFree(g_advChannel[advId].advData.scanRspData);
             g_advChannel[advId].advData.advData = NULL;
@@ -452,11 +473,12 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
     if (callback == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_advLock) != 0) {
+    BleGattLockInit(&g_advLock);
+    if (SoftBusMutexLock(&g_advLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (RegisterBleGattCallback() != SOFTBUS_OK) {
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     int freeAdvId;
@@ -466,35 +488,35 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
         }
     }
     if (freeAdvId == ADV_MAX_NUM) {
-        LOG_ERR("no available adv channel");
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no available adv channel");
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     g_advChannel[freeAdvId].advId = -1;
     g_advChannel[freeAdvId].isUsed = true;
     g_advChannel[freeAdvId].isAdvertising = false;
-    pthread_cond_init(&g_advChannel[freeAdvId].cond, NULL);
+    SoftBusCondInit(&g_advChannel[freeAdvId].cond);
     g_advChannel[freeAdvId].advCallback = (SoftBusAdvCallback *)callback;
-    pthread_mutex_unlock(&g_advLock);
+    SoftBusMutexUnlock(&g_advLock.lock);
     return freeAdvId;
 }
 
 int SoftBusReleaseAdvChannel(int advId)
 {
-    if (pthread_mutex_lock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     ClearAdvData(advId);
     g_advChannel[advId].advId = -1;
     g_advChannel[advId].isUsed = false;
     g_advChannel[advId].isAdvertising = false;
-    pthread_cond_destroy(&g_advChannel[advId].cond);
+    SoftBusCondDestroy(&g_advChannel[advId].cond);
     g_advChannel[advId].advCallback = NULL;
-    pthread_mutex_unlock(&g_advLock);
+    SoftBusMutexUnlock(&g_advLock.lock);
     return SOFTBUS_OK;
 }
 
@@ -503,11 +525,11 @@ int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     int ret = SetAdvData(advId, data);
@@ -516,7 +538,7 @@ int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
     } else {
         g_advChannel[advId].advCallback->AdvDataCallback(advId, SOFTBUS_BT_STATUS_FAIL);
     }
-    pthread_mutex_unlock(&g_advLock);
+    SoftBusMutexUnlock(&g_advLock.lock);
     return ret;
 }
 
@@ -525,15 +547,15 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
     if (param == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     if (g_advChannel[advId].isAdvertising) {
-        pthread_cond_wait(&g_advChannel[advId].cond, &g_advLock);
+        SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock.lock, NULL);
     }
     int innerAdvId;
     BleAdvParams dstParam;
@@ -543,36 +565,36 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
     int ret = BleStartAdvEx(&innerAdvId, advData, dstParam);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);
     g_advChannel[advId].advId = innerAdvId;
-    pthread_mutex_unlock(&g_advLock);
+    SoftBusMutexUnlock(&g_advLock.lock);
     return SOFTBUS_OK;
 }
 
 int SoftBusStopAdv(int advId)
 {
-    if (pthread_mutex_lock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        pthread_cond_wait(&g_advChannel[advId].cond, &g_advLock);
+        SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock.lock, NULL);
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
-        pthread_mutex_unlock(&g_advLock);
+        SoftBusMutexUnlock(&g_advLock.lock);
         return SOFTBUS_OK;
     }
     ClearAdvData(advId);
     g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);
-    pthread_mutex_unlock(&g_advLock);
+    SoftBusMutexUnlock(&g_advLock.lock);
     return SOFTBUS_OK;
 }
 
@@ -600,11 +622,12 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
     if (listener == NULL) {
         return SOFTBUS_ERR;
     }
-    if (pthread_mutex_lock(&g_scanerLock) != 0) {
+    BleGattLockInit(&g_scanerLock);
+    if (SoftBusMutexLock(&g_scanerLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (RegisterBleGattCallback() != SOFTBUS_OK) {
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_ERR;
     }
     for (int index = 0; index < SCAN_MAX_NUM; index++) {
@@ -614,11 +637,11 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
             (void)memset_s(&g_scanListener[index].param, sizeof(SoftBusBleScanParams),
                            0x0, sizeof(SoftBusBleScanParams));
             g_scanListener[index].listener = (SoftBusScanListener *)listener;
-            pthread_mutex_unlock(&g_scanerLock);
+            SoftBusMutexUnlock(&g_scanerLock.lock);
             return index;
         }
     }
-    pthread_mutex_unlock(&g_scanerLock);
+    SoftBusMutexUnlock(&g_scanerLock.lock);
     return SOFTBUS_ERR;
 }
 
@@ -627,13 +650,13 @@ int SoftBusRemoveScanListener(int listenerId)
     if (listenerId < 0 || listenerId >= SCAN_MAX_NUM) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_scanerLock) != 0) {
+    if (SoftBusMutexLock(&g_scanerLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     g_scanListener[listenerId].isUsed = false;
     g_scanListener[listenerId].isScanning = false;
     g_scanListener[listenerId].listener = NULL;
-    pthread_mutex_unlock(&g_scanerLock);
+    SoftBusMutexUnlock(&g_scanerLock.lock);
     return SOFTBUS_OK;
 }
 
@@ -665,12 +688,12 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     if (param == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_scanerLock) != 0) {
+    if (SoftBusMutexLock(&g_scanerLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!g_scanListener[listenerId].isUsed) {
-        LOG_ERR("ScanListener id:%d is not in use", listenerId);
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ScanListener id:%d is not in use", listenerId);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_ERR;
     }
     int status = SOFTBUS_BT_STATUS_SUCCESS;
@@ -678,7 +701,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
         status = BleOhosStatusToSoftBus(BleStartScan());
     }
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_ERR;
     }
     g_scanListener[listenerId].isScanning = true;
@@ -686,7 +709,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
         g_scanListener[listenerId].listener->OnScanStart != NULL) {
         g_scanListener[listenerId].listener->OnScanStart(listenerId, SOFTBUS_BT_STATUS_SUCCESS);        
     }
-    pthread_mutex_unlock(&g_scanerLock);
+    SoftBusMutexUnlock(&g_scanerLock.lock);
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {
         return SOFTBUS_OK;
     }
@@ -695,15 +718,15 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
 
 int SoftBusStopScan(int listenerId)
 {
-    if (pthread_mutex_lock(&g_scanerLock) != 0) {
+    if (SoftBusMutexLock(&g_scanerLock.lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     if (!g_scanListener[listenerId].isUsed) {
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_ERR;
     }
     if (!g_scanListener[listenerId].isScanning) {
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_OK;
     }
     int status = SOFTBUS_BT_STATUS_SUCCESS;
@@ -711,7 +734,7 @@ int SoftBusStopScan(int listenerId)
         status = BleOhosStatusToSoftBus(BleStopScan());
     }
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
-        pthread_mutex_unlock(&g_scanerLock);
+        SoftBusMutexUnlock(&g_scanerLock.lock);
         return SOFTBUS_ERR;
     }
     g_scanListener[listenerId].isScanning = false;
@@ -719,7 +742,7 @@ int SoftBusStopScan(int listenerId)
         g_scanListener[listenerId].listener->OnScanStop != NULL) {
         g_scanListener[listenerId].listener->OnScanStop(listenerId, status);    
     }
-    pthread_mutex_unlock(&g_scanerLock);
+    SoftBusMutexUnlock(&g_scanerLock.lock);
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {
         return SOFTBUS_OK;
     }
