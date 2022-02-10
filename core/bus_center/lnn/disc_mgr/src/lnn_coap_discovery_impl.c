@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-#include "lnn_discovery_manager.h"
+#include "lnn_coap_discovery_impl.h"
 
 #include <securec.h>
 
-#include "disc_interface.h"
-#include "discovery_service.h"
+#include "bus_center_manager.h"
+#include "lnn_discovery_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #define LNN_DISC_CAPABILITY "ddmpCapability"
 #define LNN_SUBSCRIBE_ID 0
+#define LNN_PUBLISH_ID 0
 
 static LnnDiscoveryImplCallback g_callback;
 
@@ -66,19 +67,35 @@ static void DeviceFound(const DeviceInfo *device)
     }
 }
 
+int32_t LnnStartCoapPublish(void)
+{
+    PublishInfo publishInfo = {
+        .publishId = LNN_PUBLISH_ID,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = COAP,
+        .freq = HIGH,
+        .capability = LNN_DISC_CAPABILITY,
+        .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
+        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
+    };
+    return LnnPublishService(NULL, &publishInfo, true);
+}
+
+int32_t LnnStopCoapPublish(void)
+{
+    return LnnUnPublishService(NULL, LNN_PUBLISH_ID, true);
+}
+
 int32_t LnnStopCoapDiscovery(void)
 {
-    if (DiscStopAdvertise(MODULE_LNN, LNN_SUBSCRIBE_ID) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStopAdvertise fail!\n");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return LnnStopDiscDevice(NULL, LNN_SUBSCRIBE_ID, true);
 }
 
 int32_t LnnStartCoapDiscovery(void)
 {
-    SubscribeInnerInfo subscribeInfo = {
+    SubscribeInfo subscribeInfo = {
         .subscribeId = LNN_SUBSCRIBE_ID,
+        .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = HIGH,
         .isSameAccount = false,
@@ -87,11 +104,10 @@ int32_t LnnStartCoapDiscovery(void)
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
         .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
     };
-    if (DiscSetDiscoverCallback(MODULE_LNN, &g_discCb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscSetDiscoverCallback failed\n");
-        return SOFTBUS_ERR;
-    }
-    return DiscStartAdvertise(MODULE_LNN, &subscribeInfo);
+    InnerCallback callback = {
+        .innerCb = g_discCb,
+    };
+    return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true);
 }
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
