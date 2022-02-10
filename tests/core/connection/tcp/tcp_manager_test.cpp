@@ -190,6 +190,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
     ConnectOption option;
     option.type = CONNECT_BR;
     option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
     int ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
@@ -237,6 +238,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = PROXY;
     (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -268,6 +270,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
     ConnectOption option;
     option.type = CONNECT_TCP;
     option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
 
     EXPECT_EQ(port, TcpStartListening(&info));
@@ -301,6 +304,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
     ConnectOption option = {};
     option.type = CONNECT_TCP;
     option.info.ipOption.port = serverPort;
+    option.info.ipOption.moduleId = PROXY;
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
 
     ConnPktHead head = {0};
@@ -348,6 +352,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
     ConnectOption option;
     option.type = CONNECT_TCP;
     option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
 
     int32_t maxConnNum;
@@ -389,6 +394,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     ConnectOption option;
     option.type = CONNECT_TCP;
     option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
     (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
 
     int maxDataLen;

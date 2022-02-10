@@ -70,8 +70,8 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
         HdfIoServiceRecycle(softbusService);
         return SOFTBUS_ERR;
     }
-    reqData = HdfSBufObtainDefaultSize();
-    rspData = HdfSBufObtainDefaultSize();
+    reqData = HdfSbufObtainDefaultSize();
+    rspData = HdfSbufObtainDefaultSize();
     do {
         if (reqData == NULL || rspData == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "obtain sbuf fail for module %d", moduleId);
@@ -90,10 +90,10 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
         rc = ParseReply(rspData, reply, replyLen);
     }
     if (reqData != NULL) {
-        HdfSBufRecycle(reqData);
+        HdfSbufRecycle(reqData);
     }
     if (rspData != NULL) {
-        HdfSBufRecycle(rspData);
+        HdfSbufRecycle(rspData);
     }
     HdfIoServiceRecycle(softbusService);
     return rc;

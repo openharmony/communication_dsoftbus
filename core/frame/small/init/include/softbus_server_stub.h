@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t ServerStubInit(void);
+int ServerStubInit(void);
 
 #ifdef __cplusplus
 }

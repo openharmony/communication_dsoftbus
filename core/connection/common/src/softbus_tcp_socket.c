@@ -27,7 +27,7 @@
 
 #define SEND_BUF_SIZE 0x200000  // 2M
 #define RECV_BUF_SIZE 0x100000  // 1M
-#define USER_TIMEOUT_MS 5000  // 5000us
+#define USER_TIMEOUT_MS 500000  // 500000us
 
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
@@ -272,6 +272,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 
     int err = WaitEvent(fd, SOFTBUS_SOCKET_OUT, USER_TIMEOUT_MS);
     if (err <= 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait event error %d", err);
         return err;
     }
     ssize_t bytes = 0;
@@ -283,6 +284,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
             if (bytes == 0) {
                 bytes = -1;
             }
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp send fail %d %d", rc, errno);
             break;
         }
         bytes += rc;
@@ -295,6 +297,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
             continue;
         } else if (err < 0) {
             if (bytes == 0) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send data wait event fail %d", err);
                 bytes = err;
             }
             break;

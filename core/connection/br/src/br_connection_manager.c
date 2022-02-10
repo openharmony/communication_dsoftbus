@@ -530,7 +530,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
         return false;
     }
-    LIST_FOR_EACH(item, &g_conection_list) {
+    LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if ((memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) &&
             (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {

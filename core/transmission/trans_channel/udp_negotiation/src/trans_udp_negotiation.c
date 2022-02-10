@@ -321,7 +321,32 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
     return SOFTBUS_OK;
 }
 
-static int32_t ParseRequestAppInfo(const cJSON *msg, AppInfo *appInfo)
+static int32_t SetPeerDeviceIdByAuth(int64_t authId, AppInfo *appInfo)
+{
+    char peerUuid[UUID_BUF_LEN] = {0};
+    int32_t ret = AuthGetDeviceUuid(authId, peerUuid, sizeof(peerUuid));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get peer uuid by auth id failed, ret = %d.", ret);
+        return SOFTBUS_ERR;
+    }
+
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    ret = LnnGetNetworkIdByUuid(peerUuid, networkId, sizeof(networkId));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed, ret = %d.", ret);
+        return SOFTBUS_ERR;
+    }
+
+    if (memcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
+        networkId, sizeof(networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s network id failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *appInfo)
 {
     if (TransUnpackRequestUdpInfo(msg, appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack request udp info failed.");
@@ -349,6 +374,12 @@ static int32_t ParseRequestAppInfo(const cJSON *msg, AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_ERR;
     }
+
+    if (SetPeerDeviceIdByAuth(authId, appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by auth id failed.");
+        return SOFTBUS_ERR;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -400,7 +431,7 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
         /* receive request message */
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive request udp negotiation info.");
         AppInfo info = {0};
-        if (ParseRequestAppInfo(msg, &info) != SOFTBUS_OK) {
+        if (ParseRequestAppInfo(authId, msg, &info) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get appinfo failed.");
             return;
         }

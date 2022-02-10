@@ -261,10 +261,6 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
     uint32_t maxLen = 4;
     EXPECT_FALSE(IsValidString(input, maxLen));
 
-    input = "";
-    maxLen = 4;
-    EXPECT_FALSE(IsValidString(input, maxLen));
-
     input = "ABCD";
     maxLen = 4;
     EXPECT_FALSE(IsValidString(input, maxLen));
