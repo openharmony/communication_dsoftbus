@@ -163,7 +163,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
     return GetLocalNodeDeviceInfoInner(pkgName, info);
 }
 
-int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeivceInfoKey key,
+int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
     if (pkgName == NULL) {

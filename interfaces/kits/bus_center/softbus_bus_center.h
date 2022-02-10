@@ -122,9 +122,9 @@ extern "C" {
 typedef enum {
     NODE_KEY_UDID = 0,  /**< UDID in string format*/
     NODE_KEY_UUID,      /**< UUID in string format */
-} NodeDeivceInfoKey;
+} NodeDeviceInfoKey;
 
-/**
+/**i
  * @brief Enumerates accuracy for time synchronize among device.
  *
  * @since 1.0
@@ -488,8 +488,8 @@ void FreeNodeInfo(NodeBasicInfo *info);
  */
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
 
-/**
- * @brief Obtains a specified {@link NodeDeivceInfoKey} of an online device.
+/**i
+ * @brief Obtains a specified {@link NodeDeviceInfoKey} of an online device.
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
@@ -498,14 +498,14 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
  * @param info Indicates the pointer to the buffer that stores the obtained key.
  * @param infoLen Indicates the buffer length.
  *
- * @return Returns <b>0</b> if the {@link NodeDeivceInfoKey} is obtained, in which case <b>info</b> is valid;
+ * @return Returns <b>0</b> if the {@link NodeDeviceInfoKey} is obtained, in which case <b>info</b> is valid;
  * returns any other value otherwise.
- *
+ *i
  * @since 1.0
  * @version 1.0
  */
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
-    NodeDeivceInfoKey key, uint8_t *info, int32_t infoLen);
+    NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen);
 
 /**
  * @brief Start the time synchronize with specific target node.
