@@ -80,12 +80,11 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 {
     if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] network id is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelLinkDown: networkId=%s, channelType=%d",
-        networkId, routeType);
+
     ClientTransOnLinkDown(networkId, routeType);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelLinkDown end");
     return SOFTBUS_OK;
 }
 

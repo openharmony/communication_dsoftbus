@@ -234,15 +234,25 @@ int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *bin
     if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    char *token = strtok((char *)strMac, BT_ADDR_DELIMITER);
+    char *tmpMac = (char *)SoftBusMalloc(strMacLen * sizeof(char));
+    if (tmpMac == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(tmpMac, strMacLen, strMac, strMacLen) != EOK) {
+        SoftBusFree(tmpMac);
+        return SOFTBUS_MEM_ERR;
+    }
+    char *token = strtok((char *)tmpMac, BT_ADDR_DELIMITER);
     char *endptr = NULL;
     for (int i = 0; i < BT_ADDR_LEN; i++) {
         if (token == NULL) {
+            SoftBusFree(tmpMac);
             return SOFTBUS_ERR;
         }
         binMac[i] = strtol(token, &endptr, BT_ADDR_BASE);
         token = strtok(NULL, BT_ADDR_DELIMITER);
     }
+    SoftBusFree(tmpMac);
     return SOFTBUS_OK;
 }
 

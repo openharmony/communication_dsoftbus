@@ -893,10 +893,10 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
         }
     }
     ReleaseBleConnectionInfo(bleNode);
-    (void)SoftBusMutexUnlock(&g_connectionLock);
     if (connectionId != -1) {
         BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, isServer);
     }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
 }
 
 static cJSON *GetLocalInfoJson(int32_t roleType)
@@ -1164,17 +1164,17 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
     int32_t ret;
     ret = SoftBusGattServerInit(&g_bleServerConnCalback);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerInit failed: %d", ret);
         return NULL;
     }
     ret = SoftBusGattClientInit(&g_bleClientConnCalback);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattClientInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattClientInit failed: %d", ret);
         return NULL;
     }
     ret = BleTransInit(&g_bleTransCallback);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransInit failed: %d", ret);
         return NULL;
     }
     SoftBusMutexAttr attr;
@@ -1182,12 +1182,12 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
     SoftBusMutexInit(&g_connectionLock, &attr);
     ret = BleQueueInit();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit failed: %d", ret);
         return NULL;
     }
     ret = SoftBusAddBtStateListener(&g_bleConnStateListener);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusAddBtStateListener failed: %d", ret);
         return NULL;
     }
     g_connectCallback = (ConnectCallback*)callback;

@@ -563,10 +563,10 @@ static int GattsRegisterCallback(void)
 
 static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call GattsRegisterCallback");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "call GattsRegisterCallback");
     int32_t ret = GattsRegisterCallback();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed：%d", ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed: %d", ret);
         return;
     }
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {

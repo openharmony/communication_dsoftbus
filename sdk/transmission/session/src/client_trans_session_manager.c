@@ -981,6 +981,7 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server,
 
 static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
 {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device offline callback enter.");
     if (info == NULL) {
         return;
     }

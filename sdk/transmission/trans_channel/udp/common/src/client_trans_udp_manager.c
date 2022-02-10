@@ -203,6 +203,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
         SoftBusFree(newChannel);
         return NULL;
     }
+
     return newChannel;
 }
 
