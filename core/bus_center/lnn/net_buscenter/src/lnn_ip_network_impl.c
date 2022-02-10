@@ -407,7 +407,7 @@ int32_t LnnInitIpNetwork(void)
     }
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char*)&g_lnnIpNetworkInfo.autoNetworkingSwitch,
         sizeof(g_lnnIpNetworkInfo.autoNetworkingSwitch)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get autoNetworkingSwitch from config file, use default value");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get autoNetworkingSwitch from config file");
         g_lnnIpNetworkInfo.autoNetworkingSwitch = true;
     }
 
