@@ -20,7 +20,6 @@ declare_args() {
   dsoftbus_standard_feature_conn_ble = false 
   dsoftbus_standard_feature_conn_p2p = false
 
-
   dsoftbus_standard_feature_trans_udp = true
   dsoftbus_standard_feature_trans_udp_stream = false
   dsoftbus_standard_feature_trans_udp_file = true
