@@ -15,7 +15,7 @@ import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 br_connection_deps = []
-if (enable_connection_br == false) {
+if (dsoftbus_standard_feature_conn_br == false) {
   br_connection_src =
       [ "$dsoftbus_root_path/core/connection/br/src/br_connection_virtual.c" ]
   br_connection_inc = [

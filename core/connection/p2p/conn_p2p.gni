@@ -30,7 +30,7 @@ p2p_connection_inc = [
   "//foundation/communication/wifi/interfaces/innerkits/native_c",
 ]
 
-if (enable_connection_p2p == true) {
+if (dsoftbus_standard_feature_conn_p2p == true) {
   p2p_connection_src += [
     "$dsoftbus_root_path/core/connection/p2p/message/src/p2plink_message.c",
     "$dsoftbus_root_path/core/connection/p2p/negotiation/src/p2plink_channel_freq.c",

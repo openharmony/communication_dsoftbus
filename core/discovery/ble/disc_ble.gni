@@ -15,7 +15,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ble_discovery_inc = [ "$dsoftbus_root_path/core/discovery/ble/include" ]
 ble_discovery_deps = []
-if (enable_discovery_ble == false) {
+if (dsoftbus_standard_feature_disc_ble == false) {
   ble_discovery_src =
       [ "$dsoftbus_root_path/core/discovery/ble/src/disc_ble_virtual.c" ]
 } else {
