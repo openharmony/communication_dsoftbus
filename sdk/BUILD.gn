@@ -30,7 +30,7 @@ common_client_deps += [
 ]
 
 if (defined(ohos_lite)) {
-  if (enable_build_shared_sdk == true) {
+  if (dsoftbus_standard_feature_build_shared_sdk == true) {
     build_type = "shared_library"
   } else {
     build_type = "static_library"
@@ -43,7 +43,7 @@ if (defined(ohos_lite)) {
     ]
   }
 } else {
-  if (enable_build_shared_sdk == true) {
+  if (dsoftbus_standard_feature_build_shared_sdk == true) {
     build_type = "ohos_shared_library"
   } else {
     build_type = "ohos_static_library"

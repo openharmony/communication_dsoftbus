@@ -14,52 +14,52 @@
 mainmenu "Dsoftbus Configuration"
 
 comment "Select discovery protocol"
-config enable_discovery_coap
+config dsoftbus_standard_feature_disc_coap
     bool "Enable discovery with coap"
     default y
     help
       Answer Y to enable discovery with coap
 
-config enable_discovery_ble
+config dsoftbus_standard_feature_disc_ble
     bool "Enable discovery with ble"
     default n
     help
       Answer Y to enable discovery with ble
 
 comment "Select connection protocol"
-config enable_connection_tcp
+config dsoftbus_standard_feature_conn_tcp
     bool "Enable connection with tcp"
     default y
     help
       Answer Y to enable connection with tcp
 
-config enable_connection_br
+config dsoftbus_standard_feature_conn_br
     bool "Enable connection with br"
     default n
     help
       Answer Y to enable connection with br
 
-config enable_connection_ble
+config dsoftbus_standard_feature_conn_ble
     bool "Enable connection with ble"
     default n
     help
       Answer Y to enable connection with ble
 
 comment "Select transmission feature"
-config enable_trans_udp
+config dsoftbus_standard_feature_trans_udp
     bool "Enable transmission with udp"
     default n
     help
       Answer Y to enable transmission with udp
 
-config enable_trans_udp_file
+config dsoftbus_standard_feature_trans_udp_file
     bool "Enable file transmission"
     default n
     depends on enable_trans_udp
     help
       Answer Y to enable file transmission with udp
 
-config enable_trans_udp_stream
+config dsoftbus_standard_feature_trans_udp_stream
     bool "Enable stream transmission"
     default n
     depends on enable_trans_udp
@@ -67,7 +67,7 @@ config enable_trans_udp_stream
       Answer Y to enable stream transmission with udp
 
 comment "Other configuration"
-config enable_auth_account
+config dsoftbus_standard_feature_auth_account
     bool "Enable auth account"
     default n
     help

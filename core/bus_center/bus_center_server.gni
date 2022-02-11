@@ -45,7 +45,7 @@ bus_center_server_deps =
 
 bus_center_server_src +=
     [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c" ]
-if (enable_lnn_net) {
+if (dsoftbus_standard_feature_lnn_net) {
   bus_center_server_src +=
       [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c" ]
 }

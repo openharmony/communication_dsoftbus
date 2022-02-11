@@ -20,7 +20,7 @@ bus_center_adapter_inc = [ "$softbus_adapter_common/bus_center/include" ]
 bus_center_adapter_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    if (enable_lnn_net) {
+    if (dsoftbus_standard_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -32,7 +32,7 @@ if (defined(ohos_lite)) {
       ]
     }
   } else if (ohos_kernel_type == "linux") {
-    if (enable_lnn_net) {
+    if (dsoftbus_standard_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -50,7 +50,7 @@ if (defined(ohos_lite)) {
       "//drivers/framework/include/core",
       "//drivers/framework/ability/sbuf/include",
     ]
-    if (enable_lnn_net) {
+    if (dsoftbus_standard_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_hdf_driver_monitor.c",
         "$adapter_bus_center_path/driver/lnn_hdf_driver_request.c",
@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
     }
   }
 } else {
-  if (enable_lnn_net) {
+  if (dsoftbus_standard_feature_lnn_net) {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
       "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",

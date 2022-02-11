@@ -20,7 +20,7 @@ trans_file_sdk_inc = [ "$dsoftbus_file_sdk_path/include" ]
 trans_file_sdk_src = []
 trans_file_sdk_deps = []
 
-if (enable_trans_udp_file == true) {
+if (dsoftbus_standard_feature_trans_udp_file == true) {
   trans_file_sdk_src += [
     "$dsoftbus_file_sdk_path/src/client_trans_file.c",
     "$dsoftbus_file_sdk_path/src/client_trans_file_listener.c",

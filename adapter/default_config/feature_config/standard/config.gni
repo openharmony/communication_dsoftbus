@@ -12,25 +12,26 @@
 # limitations under the License.
 
 declare_args() {
-  enable_discovery_ble = false
-  enable_discovery_coap = true
+  dsoftbus_standard_feature_disc_ble = false
+  dsoftbus_standard_feature_disc_coap = true
 
-  enable_connection_tcp = true
-  enable_connection_br = false
-  enable_connection_ble = false
-  enable_connection_p2p = false
+  dsoftbus_standard_feature_conn_tcp = true
+  dsoftbus_standard_feature_conn_br = false
+  dsoftbus_standard_feature_conn_ble = false 
+  dsoftbus_standard_feature_conn_p2p = false
 
-  enable_trans_udp = true
-  enable_trans_udp_stream = false
-  enable_trans_udp_file = true
 
-  enable_ip_auth = true
-  enable_auth_account = false
+  dsoftbus_standard_feature_trans_udp = true
+  dsoftbus_standard_feature_trans_udp_stream = false
+  dsoftbus_standard_feature_trans_udp_file = true
 
-  enable_lnn_net = true
-  enable_lnn_time_sync = true
-  enable_lnn_meta_node = true
-  enable_qos = true
+  dsoftbus_standard_feature_ip_auth = true
+  dsoftbus_standard_feature_auth_account = false
 
-  enable_build_shared_sdk = true
+  dsoftbus_standard_feature_lnn_net = true
+  dsoftbus_standard_feature_lnn_time_sync = true
+  dsoftbus_standard_feature_lnn_meta_node = true
+  dsoftbus_standard_feature_qos = true
+
+  dsoftbus_standard_feature_build_shared_sdk = true
 }
