@@ -66,10 +66,6 @@ static int InitServer()
         printf("init distributed net ledger fail!");
         return SOFTBUS_ERR;
     }
-    if (LnnInitSyncLedgerItem() != SOFTBUS_OK) {
-        printf("init sync ledger item fail!");
-        return SOFTBUS_ERR;
-    }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
         printf("init event monitor failed");
         return SOFTBUS_ERR;

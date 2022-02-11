@@ -33,6 +33,7 @@
 #include "nstackx_util.h"
 
 #define TAG "nStackXDFinder"
+#define NSTACKX_THREAD_STACK_SIZE 0x2000
 
 enum {
     NSTACKX_INIT_STATE_START = 0,
@@ -185,6 +186,7 @@ static int32_t InternalInit(EpollDesc epollfd)
 int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 {
     int32_t ret;
+    pthread_attr_t attr;
     if (g_nstackInitState != NSTACKX_INIT_STATE_START) {
         return NSTACKX_EOK;
     }
@@ -212,7 +214,11 @@ int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 
     g_terminateFlag = NSTACKX_FALSE;
     g_validTidFlag = NSTACKX_FALSE;
-    ret = PthreadCreate(&g_tid, NULL, NstackMainLoop, NULL);
+
+    (void)pthread_attr_init(&attr);
+    (void)pthread_attr_setstacksize(&attr, NSTACKX_THREAD_STACK_SIZE);
+
+    ret = PthreadCreate(&g_tid, &attr, NstackMainLoop, NULL);
     if (ret != 0) {
         LOGE(TAG, "thread create failed");
         goto L_ERR_INIT;

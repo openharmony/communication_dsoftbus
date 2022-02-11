@@ -134,6 +134,10 @@ int32_t BusCenterServerInit(void)
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init bus center event failed");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor fail");
         return SOFTBUS_ERR;
@@ -167,7 +171,7 @@ void BusCenterServerDeinit(void)
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();
     LnnDeinitNetworkManager();
-    LnnDeinitEventMonitor();
+    LnnDeinitBusCenterEvent();
     LnnDeinitNetLedger();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

@@ -17,44 +17,14 @@
 #define LNN_SYNC_LEDGER_ITEM_INFO_H
 
 #include <stdint.h>
-#include "lnn_distributed_net_ledger.h"
+
+#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    INFO_TYPE_CAPABILITY = 0,
-    INFO_TYPE_CONNECTION_INFO,
-    INFO_TYPE_DEVICE_NAME,
-    INFO_TYPE_BATTERY_INFO,
-    INFO_TYPE_SCREEN_STATUS,
-    INFO_TYPE_OFFLINE,
-    INFO_TYPE_P2P_INFO,
-    INFO_TYPE_CHANNEL_NOISE_INFO,
-    INFO_TYPE_MASTER_ELECT,
-    INFO_TYPE_BSS_TRANS,
-    INFO_TYPE_COUNT,
-} SyncItemType;
-
-typedef struct {
-    char udid[UDID_BUF_LEN];
-    SyncItemType type;
-    uint32_t bufLen;
-    uint8_t buf[0];
-} SyncItemInfo;
-
-typedef struct {
-    SyncItemType type;
-    SyncItemInfo *(*get)(const char* networkId, DiscoveryType type);
-    int32_t (*receive)(uint8_t *msg, uint32_t len, const SyncItemInfo *info);
-} ItemFunc;
-
-int32_t LnnSyncLedgerItemInfo(const char *networkId, DiscoveryType discoveryType, SyncItemType itemType);
-int32_t LnnSyncDirectiveInfo(const char *networkId, uint8_t *buf, uint32_t len, SyncItemType itemType);
-int32_t LnnInitSyncLedgerItem(void);
-void LnnDeinitSyncLedgerItem(void);
-uint32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo);
+int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo);
 
 #ifdef __cplusplus
 }

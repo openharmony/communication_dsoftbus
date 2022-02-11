@@ -104,8 +104,6 @@ void LedgerLaneHubTest::SetUp()
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnInitSyncLedgerItem();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)LnnInitLaneManager();
     ret = LnnInitHeartbeat();
     EXPECT_TRUE(ret == SOFTBUS_OK);

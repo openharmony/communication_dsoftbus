@@ -19,11 +19,52 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "lnn_event_monitor_impl.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+    /* event from system monitor */
+    LNN_EVENT_IP_ADDR_CHANGED,
+    LNN_EVENT_WIFI_STATE_CHANGED,
+    LNN_EVENT_WLAN_PARAM,
+    /* event from internal lnn */
+    LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
+    LNN_EVENT_DISCOVERY_TYPE_CHANGED,
+    LNN_EVENT_TYPE_MAX,
+} LnnEventType;
+
+typedef struct {
+    LnnEventType event;
+} LnnEventBasicInfo;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    const LnnMoniterData *data;
+} LnnMonitorEventInfo;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    bool isOnline;
+    const char *networkId;
+} LnnOnlineStateEventInfo;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint32_t oldType;
+    const char *networkId;
+} LnnDiscoveryTypeEventInfo;
+
+typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
+
+int32_t LnnInitBusCenterEvent(void);
+void LnnDeinitBusCenterEvent(void);
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
 
 void LnnNotifyJoinResult(ConnectionAddr *addr,
     const char *networkId, int32_t retCode);
@@ -31,6 +72,8 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
+void LnnNotifyMonitorEvent(const LnnMonitorEventInfo *info);
+void LnnNotifyDiscoveryTypeChanged(const char *networkId, uint32_t oldType);
 
 void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
 
