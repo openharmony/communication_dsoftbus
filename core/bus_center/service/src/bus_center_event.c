@@ -18,11 +18,66 @@
 #include <stdlib.h>
 
 #include "lnn_bus_center_ipc.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_qos.h"
 
+typedef struct {
+    ListNode node;
+    LnnEventHandler handler;
+} LnnEventHandlerItem;
+
+typedef struct {
+    ListNode handlers[LNN_EVENT_TYPE_MAX];
+    SoftBusMutex lock;
+} BusCenterEventCtrl;
+
+static BusCenterEventCtrl g_eventCtrl;
+
+static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    LnnEventHandlerItem *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
+        if (item->handler == handler) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static LnnEventHandlerItem *CreateEventHandlerItem(LnnEventHandler handler)
+{
+    LnnEventHandlerItem *item = SoftBusMalloc(sizeof(LnnEventHandlerItem));
+
+    if (item == NULL) {
+        return NULL;
+    }
+    ListInit(&item->node);
+    item->handler = handler;
+    return item;
+}
+
+static void NotifyEvent(const LnnEventBasicInfo *info)
+{
+    LnnEventHandlerItem *item = NULL;
+
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed in notify event");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
+        item->handler(info);
+    }
+    (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+}
+
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
+    LnnOnlineStateEventInfo eventInfo;
+
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
         return;
@@ -30,6 +85,10 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s", (isOnline == true) ? "online" : "offline");
     SetDefaultQdisc();
     LnnIpcNotifyOnlineState(isOnline, info, sizeof(NodeBasicInfo));
+    eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
+    eventInfo.isOnline = isOnline;
+    eventInfo.networkId = info->networkId;
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
@@ -64,6 +123,20 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
     LnnIpcNotifyLeaveResult(networkId, retCode);
 }
 
+void LnnNotifyDiscoveryTypeChanged(const char *networkId, uint32_t oldType)
+{
+    LnnDiscoveryTypeEventInfo info;
+
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "networkId is null");
+        return;
+    }
+    info.basic.event = LNN_EVENT_DISCOVERY_TYPE_CHANGED;
+    info.oldType = oldType;
+    info.networkId = networkId;
+    NotifyEvent((LnnEventBasicInfo *)&info);
+}
+
 void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
@@ -72,4 +145,79 @@ void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify time Sync result %d", retCode);
     LnnIpcNotifyTimeSyncResult(pkgName, info, sizeof(TimeSyncResultInfo), retCode);
+}
+
+void LnnNotifyMonitorEvent(const LnnMonitorEventInfo *info)
+{
+    if (info == NULL || info->basic.event == LNN_EVENT_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid monitr event paramter");
+        return;
+    }
+    NotifyEvent((const LnnEventBasicInfo *)info);
+}
+
+int32_t LnnInitBusCenterEvent(void)
+{
+    int32_t i;
+
+    SoftBusMutexInit(&g_eventCtrl.lock, NULL);
+    for (i = 0; i < LNN_EVENT_TYPE_MAX; ++i) {
+        ListInit(&g_eventCtrl.handlers[i]);
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitBusCenterEvent(void)
+{
+    SoftBusMutexDestroy(&g_eventCtrl.lock);
+}
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    LnnEventHandlerItem *item = NULL;
+
+    if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event handler params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed in register event handler");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (IsRepeatEventHandler(event, handler)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "event(%u) handler is already exist", event);
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    item = CreateEventHandlerItem(handler);
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create event handler item failed");
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    ListAdd(&g_eventCtrl.handlers[event], &item->node);
+    (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+    return SOFTBUS_OK;
+}
+
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    LnnEventHandlerItem *item = NULL;
+
+    if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event handler params");
+        return;
+    }
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in unregister event handler");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
+        if (item->handler == handler) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
 }

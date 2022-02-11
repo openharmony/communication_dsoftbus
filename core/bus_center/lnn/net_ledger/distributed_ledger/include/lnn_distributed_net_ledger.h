@@ -55,8 +55,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
-bool LnnSetDLP2pInfo(const char *udid, const P2pInfo *info);
+bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen);
 short LnnGetCnnCode(const char *uuid, DiscoveryType type);
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 int32_t LnnGetLaneCount(int32_t laneId);

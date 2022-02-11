@@ -563,6 +563,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     mac = LnnGetP2pMac(info);
@@ -570,7 +571,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strcpy_s(buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -584,6 +585,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     mac = LnnGetP2pGoMac(info);
@@ -591,7 +593,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p go mac fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strcpy_s(buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p go mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -607,6 +609,7 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
     *((int32_t *)buf) = LnnGetP2pRole(info);
@@ -841,6 +844,48 @@ const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
     return LnnGetDeviceUdid(info);
 }
 
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    NodeInfo *info = NULL;
+    const char *id = NULL;
+    int32_t rc = SOFTBUS_OK;
+
+    if (srcId == NULL || dstIdBuf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    info = LnnGetNodeInfoById(srcId, srcIdType);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no node info for: %s/%d", srcId, srcIdType);
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    switch (dstIdType) {
+        case CATEGORY_UDID:
+            id = info->deviceInfo.deviceUdid;
+            break;
+        case CATEGORY_UUID:
+            id = info->uuid;
+            break;
+        case CATEGORY_NETWORK_ID:
+            id = info->networkId;
+            break;
+        default:
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(dstIdBuf, dstIdBufLen, id) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy id fail");
+        rc = SOFTBUS_MEM_ERR;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return rc;
+}
+
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -874,11 +919,10 @@ EXIT:
     return false;
 }
 
-bool LnnSetDLP2pInfo(const char *udid, const P2pInfo *info)
+bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
-    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     NodeInfo *node = NULL;
-    if (udid == NULL || info == NULL) {
+    if (networkId == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
         return false;
     }
@@ -886,7 +930,7 @@ bool LnnSetDLP2pInfo(const char *udid, const P2pInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail.");
         return false;
     }
-    node = GetNodeInfoFromMap(map, udid);
+    node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "udid not found.");
         goto EXIT;
