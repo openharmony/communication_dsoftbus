@@ -25,6 +25,12 @@ int32_t LnnInitLaneHub(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnInitLaneHubDelay(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lane hub delay");
+    return SOFTBUS_OK;
+}
+
 void LnnDeinitLaneHub(void)
 {
 }
