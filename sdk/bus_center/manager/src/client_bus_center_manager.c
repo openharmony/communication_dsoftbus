@@ -403,7 +403,7 @@ int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info)
     return ret;
 }
 
-int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDeivceInfoKey key,
+int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
     int ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, info, infoLen);
