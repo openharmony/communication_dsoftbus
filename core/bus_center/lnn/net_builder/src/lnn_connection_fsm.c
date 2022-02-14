@@ -23,10 +23,12 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -190,6 +192,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
         LnnNotifyNodeStateChanged(&connInfo->addr);
+        LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
         LnnNotifyDiscoveryTypeChanged(networkId, oldType);
     } else {
         NotifyJoinResult(connFsm, networkId, retCode);
@@ -432,17 +435,15 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
     return rc;
 }
 
-static DiscoveryType GetDiscoveryType(ConnectionAddrType type)
+static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
 {
-    if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
-        return DISCOVERY_TYPE_WIFI;
-    } else if (type == CONNECTION_ADDR_BR) {
-        return DISCOVERY_TYPE_BR;
-    } else if (type == CONNECTION_ADDR_BLE) {
-        return DISCOVERY_TYPE_BLE;
-    } else {
-        return DISCOVERY_TYPE_COUNT;
-    }
+    SoftBusSysTime times;
+    SoftBusGetTime(&times);
+    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HEARTBEAT_TIME_FACTOR +
+        (uint64_t)times.usec / HEARTBEAT_TIME_FACTOR;
+    connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
+    connInfo->nodeInfo->authSeqNum = connInfo->authId;
+    connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
 }
 
 static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *connInfo)
@@ -473,9 +474,7 @@ static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo
             rc = SOFTBUS_NETWORK_UNPACK_DEV_INFO_FAILED;
             break;
         }
-        connInfo->nodeInfo->discoveryType = 1 << (uint32_t)GetDiscoveryType(connInfo->addr.type);
-        connInfo->nodeInfo->authSeqNum = connInfo->authId;
-        connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
+        ParsePeerConnInfo(connInfo);
         if (strncpy_s(connInfo->nodeInfo->uuid, UUID_BUF_LEN, para->uuid, strlen(para->uuid)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s uuid failed");
             rc = SOFTBUS_MEM_ERR;

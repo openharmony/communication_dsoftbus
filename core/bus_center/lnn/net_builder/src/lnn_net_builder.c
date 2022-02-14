@@ -27,6 +27,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_ip_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
@@ -64,6 +65,7 @@ typedef enum {
     MSG_TYPE_MASTER_ELECT,
     MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
+    MSG_TYPE_LEAVE_SPECIFIC,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -114,6 +116,11 @@ typedef struct {
     ConnectionAddrType addrType;
     char newNetworkId[NETWORK_ID_BUF_LEN];
 } LeaveInvalidConnMsgPara;
+
+typedef struct {
+    char networkId[NETWORK_ID_BUF_LEN];
+    ConnectionAddrType addrType;
+} SpecificLeaveMsgPara;
 
 static NetBuilder g_netBuilder;
 
@@ -269,6 +276,9 @@ static void UpdateLocalMasterNode(const char *masterUdid, int32_t weight)
     }
     if (LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, weight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local master weight failed");
+    }
+    if (LnnNotifyMasterNodeChanged(masterUdid, weight) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify master node change to heartbeat module failed");
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local master weight=%d", weight);
 }
@@ -1035,6 +1045,33 @@ static int32_t ProcessLeaveByAddrType(const void *para)
     return SOFTBUS_OK;
 }
 
+static int32_t ProcessLeaveSpecific(const void *para)
+{
+    const SpecificLeaveMsgPara *msgPara = (const SpecificLeaveMsgPara *)para;
+    LnnConnectionFsm *item = NULL;
+
+    if (msgPara == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave specific msg is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t rc;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (strcmp(item->connInfo.peerNetworkId, msgPara->networkId) != 0 ||
+            item->connInfo.addr.type != msgPara->addrType) {
+            continue;
+        }
+        rc = LnnSendLeaveRequestToConnFsm(item);
+        if (rc == SOFTBUS_OK) {
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "send leave LNN msg to connection fsm[id=%u] result: %d", item->id, rc);
+    }
+    SoftBusFree((void *)msgPara);
+    return SOFTBUS_OK;
+}
+
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -1050,6 +1087,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessMasterElect,
     ProcessLeaveInvalidConn,
     ProcessLeaveByAddrType,
+    ProcessLeaveSpecific,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -1559,6 +1597,38 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
+int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)
+{
+    ElectMsgPara *para = NULL;
+
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_ERR;
+    }
+    if (networkId == NULL || masterUdid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid elect msg para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    para = SoftBusMalloc(sizeof(ElectMsgPara));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc elect msg para failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK ||
+        strncpy_s(para->masterUdid, UDID_BUF_LEN, masterUdid, strlen(masterUdid)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid and maser udid failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    para->masterWeight = masterWeight;
+    if (PostMessageToHandler(MSG_TYPE_MASTER_ELECT, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post elect message failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
 {
     bool *para = NULL;
@@ -1583,6 +1653,36 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
     }
     if (PostMessageToHandler(MSG_TYPE_LEAVE_BY_ADDR_TYPE, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave by addr type message failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+{
+    SpecificLeaveMsgPara *para = NULL;
+
+    if (networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_NO_INIT;
+    }
+    para = (SpecificLeaveMsgPara *)SoftBusCalloc(sizeof(SpecificLeaveMsgPara));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc specific msg fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strncpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    para->addrType = addrType;
+    if (PostMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave specific msg failed");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }
