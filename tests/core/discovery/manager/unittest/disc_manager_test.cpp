@@ -94,8 +94,9 @@ static IServerDiscInnerCallback g_subscribeCb = {
     .OnServerDeviceFound = TestDeviceFound
 };
 
-static PublishInnerInfo g_pInnerInfo = {
+static PublishInfo g_pInnerInfo = {
     .publishId = TEST_PUBLISHINNER_ID,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
@@ -113,15 +114,16 @@ static PublishInfo g_pInfo = {
     .dataLen = sizeof("capdata2")
 };
 
-static SubscribeInnerInfo g_sInnerInfo = {
+static SubscribeInfo g_sInnerInfo = {
     .subscribeId = TEST_SUBSCRIBEINNER_ID,
+    .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3"),
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = sizeof("capdata3")
 };
 
 static SubscribeInfo g_sInfo = {
@@ -129,15 +131,16 @@ static SubscribeInfo g_sInfo = {
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = sizeof("capdata4"),
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = sizeof("capdata4")
 };
 
-static PublishInnerInfo g_pInnerInfo1 = {
+static PublishInfo g_pInnerInfo1 = {
     .publishId = TEST_PUBLISHINNER_ID1,
+    .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = LOW,
     .capability = "hicall",
@@ -155,15 +158,16 @@ static PublishInfo g_pInfo1 = {
     .dataLen = 0
 };
 
-static SubscribeInnerInfo g_sInnerInfo1 = {
+static SubscribeInfo g_sInnerInfo1 = {
     .subscribeId = TEST_SUBSCRIBEINNER_ID1,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = NULL,
-    .dataLen = 0,
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = 0
 };
 
 static SubscribeInfo g_sInfo1 = {
@@ -171,11 +175,11 @@ static SubscribeInfo g_sInfo1 = {
     .mode = DISCOVER_MODE_ACTIVE,
     .medium = COAP,
     .freq = MID,
+    .isSameAccount = true,
+    .isWakeRemote = false,
     .capability = "hicall",
     .capabilityData = NULL,
-    .dataLen = 0,
-    .isSameAccount = true,
-    .isWakeRemote = false
+    .dataLen = 0
 };
 
 /**
@@ -200,8 +204,9 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest001, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, DiscPublishTest002, TestSize.Level1)
 {
     int ret;
-    PublishInnerInfo testInfo = {
+    PublishInfo testInfo = {
         .publishId = TEST_PUBLISHINNER_ID,
+        .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
@@ -254,7 +259,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest003, TestSize.Level1)
     DiscMgrInit();
 
     ret = DiscPublish(MODULE_LNN, &g_pInnerInfo);
-    TEST_ASSERT_TRUE(ret == 0);
+    TEST_ASSERT_TRUE(ret != 0);
 
     ret = DiscPublish(MODULE_LNN, &g_pInnerInfo1);
     TEST_ASSERT_TRUE(ret == 0);
@@ -273,10 +278,10 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest004, TestSize.Level1)
     int ret;
     DiscMgrInit();
 
-    ret = DiscPublish(MODULE_LNN, &g_pInnerInfo);
+    ret = DiscPublish(MODULE_LNN, &g_pInnerInfo1);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscPublish(MODULE_LNN, &g_pInnerInfo);
+    ret = DiscPublish(MODULE_LNN, &g_pInnerInfo1);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -304,8 +309,9 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest001, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, DiscStartScanTest002, TestSize.Level1)
 {
     int ret;
-    PublishInnerInfo testInfo = {
+    PublishInfo testInfo = {
         .publishId = TEST_PUBLISHINNER_ID,
+        .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "hicall",
@@ -361,7 +367,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest003, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscStartScan(MODULE_LNN, &g_pInnerInfo1);
-    TEST_ASSERT_TRUE(ret == 0);
+    TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
 }
@@ -408,15 +414,16 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
 {
     int ret;
-    SubscribeInnerInfo testInfo = {
+    SubscribeInfo testInfo = {
         .subscribeId = TEST_SUBSCRIBEINNER_ID,
+        .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = MID,
+        .isSameAccount = true,
+        .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .isSameAccount = true,
-        .isWakeRemote = false
+        .dataLen = sizeof("capdata3")
     };
 
     DiscMgrInit();
@@ -467,7 +474,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo1);
-    TEST_ASSERT_TRUE(ret == 0);
+    TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
 }
@@ -514,15 +521,16 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest001, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
 {
     int ret;
-    SubscribeInnerInfo testInfo = {
+    SubscribeInfo testInfo = {
         .subscribeId = TEST_SUBSCRIBEINNER_ID,
+        .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
         .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
         .isSameAccount = true,
-        .isWakeRemote = false
+        .isWakeRemote = false,
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
     };
 
     DiscMgrInit();
@@ -570,7 +578,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest003, TestSize.Level1)
     DiscMgrInit();
 
     ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo);
-    TEST_ASSERT_TRUE(ret == 0);
+    TEST_ASSERT_TRUE(ret != 0);
 
     ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo1);
     TEST_ASSERT_TRUE(ret == 0);
@@ -589,10 +597,10 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest004, TestSize.Level1)
     int ret;
     DiscMgrInit();
 
-    ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo);
+    ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo1);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo);
+    ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo1);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -621,7 +629,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
-    DiscPublish(MODULE_LNN, &g_pInnerInfo);
+    DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
     ret = DiscUnpublish((DiscModule)TEST_ERRO_MOUDULE, TEST_PUBLISHINNER_ID);
     TEST_ASSERT_TRUE(ret != 0);
@@ -639,11 +647,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
-    DiscPublish(MODULE_LNN, &g_pInnerInfo);
     DiscPublish(MODULE_LNN, &g_pInnerInfo1);
-
-    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID);
-    TEST_ASSERT_TRUE(ret == 0);
 
     ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
     TEST_ASSERT_TRUE(ret == 0);
@@ -661,12 +665,12 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
-    DiscPublish(MODULE_LNN, &g_pInnerInfo);
+    DiscPublish(MODULE_LNN, &g_pInnerInfo1);
 
-    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID);
+    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
     TEST_ASSERT_TRUE(ret == 0);
 
-    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID);
+    ret = DiscUnpublish(MODULE_LNN, TEST_PUBLISHINNER_ID1);
     TEST_ASSERT_TRUE(ret != 0);
 
     DiscMgrDeinit();
@@ -714,12 +718,8 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
     int ret;
     DiscMgrInit();
     DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo);
-    DiscStartAdvertise(MODULE_LNN, &g_sInnerInfo1);
 
     ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID);
-    TEST_ASSERT_TRUE(ret == 0);
-
-    ret = DiscStopAdvertise(MODULE_LNN, TEST_SUBSCRIBEINNER_ID1);
     TEST_ASSERT_TRUE(ret == 0);
 
     DiscMgrDeinit();
@@ -892,14 +892,14 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest002, TestSize.Level1)
     int ret;
     SubscribeInfo testInfo = {
         .subscribeId = TEST_SUBSCRIBEINNER_ID,
-        .medium = COAP,
         .mode = DISCOVER_MODE_ACTIVE,
+        .medium = COAP,
         .freq = MID,
+        .isSameAccount = true,
+        .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .isSameAccount = true,
-        .isWakeRemote = false
+        .dataLen = sizeof("capdata3")
     };
 
     DiscMgrInit();

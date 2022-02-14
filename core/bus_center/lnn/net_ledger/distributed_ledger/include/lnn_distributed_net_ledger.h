@@ -63,6 +63,7 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type);
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 int32_t LnnGetLaneCount(int32_t laneId);
 int32_t LnnSetLaneCount(int32_t laneId, int32_t num);
+bool LnnGetOnlineStateById(const char *id, IdCategory type);
 
 #ifdef __cplusplus
 }

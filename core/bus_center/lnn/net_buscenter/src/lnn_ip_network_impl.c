@@ -32,6 +32,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "trans_tcp_direct_listener.h"
 
@@ -39,11 +40,13 @@
 
 typedef struct {
     bool isIpLinkClosed;
+    bool autoNetworkingSwitch;
     SoftBusMutex lock;
 } LNNIpNetworkInfo;
 
 static LNNIpNetworkInfo g_lnnIpNetworkInfo = {
     .isIpLinkClosed = true,
+    .autoNetworkingSwitch = true,
 };
 
 static int32_t OpenAuthPort(void)
@@ -231,6 +234,7 @@ static int32_t UpdateLocalIp(char *ipAddr, uint32_t ipAddrLen, char *ifName, uin
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "close previous ip link and stop previous discovery\n");
         CloseIpLink();
+        LnnStopPublish();
         LnnStopDiscovery();
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     }
@@ -326,7 +330,10 @@ static int32_t LnnInitAutoNetworking(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
         }
         DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
-        if (LnnStartDiscovery() != SOFTBUS_OK) {
+        if (LnnStartPublish() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish failed\n");
+        }
+        if (g_lnnIpNetworkInfo.autoNetworkingSwitch && LnnStartDiscovery() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
         }
         SetCallLnnStatus(true);
@@ -357,8 +364,12 @@ static void OnGroupCreated(const char *groupId)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
+    LnnStopPublish();
     LnnStopDiscovery();
-    if (LnnStartDiscovery() != SOFTBUS_OK) {
+    if (LnnStartPublish() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish failed\n");
+    }
+    if (g_lnnIpNetworkInfo.autoNetworkingSwitch && LnnStartDiscovery() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
     }
     SetCallLnnStatus(true);
@@ -393,6 +404,11 @@ int32_t LnnInitIpNetwork(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read net config list error!");
         (void)SoftBusMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return SOFTBUS_ERR;
+    }
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char*)&g_lnnIpNetworkInfo.autoNetworkingSwitch,
+        sizeof(g_lnnIpNetworkInfo.autoNetworkingSwitch)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get autoNetworkingSwitch from config file");
+        g_lnnIpNetworkInfo.autoNetworkingSwitch = true;
     }
 
     if (AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb) != SOFTBUS_OK) {
@@ -440,7 +456,7 @@ int32_t LnnDeinitIpNetwork(void)
     return SOFTBUS_OK;
 }
 
-void LnnCallIpDiscovery(void)
+void LnnNotifyOfflineMsg(void)
 {
     char ipCurrentAddr[IP_LEN] = {0};
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
@@ -464,7 +480,10 @@ void LnnCallIpDiscovery(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed\n");
         }
         DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
-        if (LnnStartDiscovery() != SOFTBUS_OK) {
+        if (LnnStartPublish() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish failed\n");
+        }
+        if (g_lnnIpNetworkInfo.autoNetworkingSwitch && LnnStartDiscovery() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
         }
         SetCallLnnStatus(true);

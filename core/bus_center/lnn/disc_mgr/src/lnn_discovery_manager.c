@@ -20,14 +20,12 @@
 
 #include "disc_interface.h"
 #include "discovery_service.h"
+#include "lnn_coap_discovery_impl.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-
-#define LNN_DISC_CAPABILITY "ddmpCapability"
-#define LNN_PUBLISH_ID 0
 
 static void DeviceFound(const ConnectionAddr *addr);
 
@@ -38,6 +36,8 @@ typedef enum {
 
 typedef struct {
     int32_t (*InitDiscoveryImpl)(LnnDiscoveryImplCallback *callback);
+    int32_t (*StartPublishImpl)(void);
+    int32_t (*StopPublishImpl)(void);
     int32_t (*StartDiscoveryImpl)(void);
     int32_t (*StopDiscoveryImpl)(void);
 } DiscoveryImpl;
@@ -45,6 +45,8 @@ typedef struct {
 static DiscoveryImpl g_discoveryImpl[LNN_DISC_IMPL_TYPE_MAX] = {
     [LNN_DISC_IMPL_TYPE_COAP] = {
         .InitDiscoveryImpl = LnnInitCoapDiscovery,
+        .StartPublishImpl = LnnStartCoapPublish,
+        .StopPublishImpl = LnnStopCoapPublish,
         .StartDiscoveryImpl = LnnStartCoapDiscovery,
         .StopDiscoveryImpl = LnnStopCoapDiscovery,
     },
@@ -65,23 +67,6 @@ static void DeviceFound(const ConnectionAddr *addr)
     }
 }
 
-static int32_t RestartPublish(void)
-{
-    PublishInnerInfo publishInfo = {
-        .publishId = LNN_PUBLISH_ID,
-        .medium = COAP,
-        .freq = HIGH,
-        .capability = LNN_DISC_CAPABILITY,
-        .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
-        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
-    };
-    if (DiscStartScan(MODULE_LNN, &publishInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStartScan failed\n");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t LnnInitDiscoveryManager(void)
 {
     uint32_t i;
@@ -98,16 +83,45 @@ int32_t LnnInitDiscoveryManager(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnStartPublish(void)
+{
+    uint32_t i;
+
+    for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
+        if (g_discoveryImpl[i].StartPublishImpl == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support start publish(%d)\n", i);
+            continue;
+        }
+        if (g_discoveryImpl[i].StartPublishImpl() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish impl(%d) failed\n", i);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnStopPublish(void)
+{
+    uint32_t i;
+
+    for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
+        if (g_discoveryImpl[i].StopPublishImpl == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support stop publish(%d)\n", i);
+            continue;
+        }
+        if (g_discoveryImpl[i].StopPublishImpl() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop publish impl(%d) failed\n", i);
+        }
+    }
+}
+
 int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
-    if (RestartPublish() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RestartPublish fail!");
-        return SOFTBUS_ERR;
-    }
+
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StartDiscoveryImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support discovery(%d)\n", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support start discovery(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StartDiscoveryImpl() != SOFTBUS_OK) {
@@ -121,12 +135,10 @@ int32_t LnnStartDiscovery(void)
 void LnnStopDiscovery(void)
 {
     uint32_t i;
-    if (DiscUnpublish(MODULE_LNN, LNN_PUBLISH_ID) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscUnpublish fail!\n");
-    }
+
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StopDiscoveryImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support discovery(%d)\n", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support stop discovery(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StopDiscoveryImpl() != SOFTBUS_OK) {

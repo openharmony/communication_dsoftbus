@@ -15,6 +15,7 @@
 
 #include <securec.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
@@ -94,6 +95,7 @@ typedef struct {
     int32_t lnnUdidInitDelayLen;
     char lnnNetIfName[MAX_NET_IF_NAME_LEN];
     int32_t lnnMaxConcurentNum;
+    bool lnnAutoNetworkingSwitch;
 } ConfigItem;
 
 typedef struct {
@@ -119,6 +121,7 @@ ConfigItem g_config = {
     LNN_UDID_INIT_DELAY_LEN,
     LNN_NET_IF_NAME,
     LNN_MAX_CONCURENT_NUM,
+    true,
 };
 
 typedef struct {
@@ -242,6 +245,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH,
         (unsigned char*)&(g_tranConfig.maxAuthMessageLen),
         sizeof(g_tranConfig.maxAuthMessageLen)
+    },
+    {
+        SOFTBUS_INT_AUTO_NETWORKING_SWITCH,
+        (unsigned char*)&(g_config.lnnAutoNetworkingSwitch),
+        sizeof(g_config.lnnAutoNetworkingSwitch)
     },
 };
 

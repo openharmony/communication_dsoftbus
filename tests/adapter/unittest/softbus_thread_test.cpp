@@ -1,0 +1,1082 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <securec.h>
+#include "gtest/gtest.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_errcode.h"
+
+using namespace std;
+using namespace testing::ext;
+
+namespace OHOS {
+static SoftBusCond g_cond;
+static SoftBusMutex g_mutex;
+
+class DsoftbusThreadTest : public testing::Test {
+protected:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+};
+
+void DsoftbusThreadTest::SetUpTestCase(void)
+{
+}
+
+void DsoftbusThreadTest::TearDownTestCase(void)
+{
+}
+
+void DsoftbusThreadTest::SetUp()
+{
+}
+
+void DsoftbusThreadTest::TearDown()
+{
+}
+
+static void *SoftBusThreadTask(void *arg)
+{
+    printf("----------%s--------\n", __FUNCTION__);
+    return static_cast<void *>(const_cast<char *>("SoftBusThreadTask"));
+}
+
+static void *ThreadSelfTest(void *arg)
+{
+    printf("----------%s--------\n", __FUNCTION__);
+    SoftBusThread thread = SoftBusThreadGetSelf();
+    EXPECT_TRUE(thread != 0);
+    return nullptr;
+}
+
+static void *ThreadWaitTest(void *arg)
+{
+    printf("----------%s--------\n", __FUNCTION__);
+    int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    sleep(1);
+    return nullptr;
+}
+
+static void *ThreadSignalTest(void *arg)
+{
+    printf("----------%s--------\n", __FUNCTION__);
+    sleep(1);
+    int32_t ret = SoftBusCondSignal(&g_cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    return nullptr;
+}
+
+/*
+* @tc.name: SoftbusMutexAttrInitTest001
+* @tc.desc: mutexAttr is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexAttrInit(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftbusMutexAttrInitTest002
+* @tc.desc: mutexAttr is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest002, Function | MediumTest | Level2)
+{
+    SoftBusMutexAttr mutexAttr;
+    int32_t ret = SoftBusMutexAttrInit(&mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_MUTEX_NORMAL, mutexAttr.type);
+}
+
+/*
+* @tc.name: SoftBusMutexInitTest002
+* @tc.desc: mutexAttr is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest002, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexInitTest003
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest003, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexInitTest004
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest004, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexLockTest001
+* @tc.desc: mutex is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexLock(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexLockTest002
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest002, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexLockTest003
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_RECURSIVE
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest003, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexLockTest004
+* @tc.desc: mutex is default
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest004, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexLockTest005
+* @tc.desc: mutex value is 0
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest005, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex = 0;
+    int32_t ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexUnlockTest001
+* @tc.desc: mutex is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexUnlock(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexUnlockTest002
+* @tc.desc: mutex value is 0
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest002, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex = 0;
+    int32_t ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexUnlockTest003
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest003, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexUnlockTest004
+* @tc.desc: mutexAttr type is SOFTBUS_MUTEX_NORMAL
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest004, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexUnlockTest005
+* @tc.desc: mutex value is default
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest005, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexDestroyTest001
+* @tc.desc: mutex is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexDestroy(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexDestroyTest002
+* @tc.desc: mutex value is 0
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest002, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexDestroy(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexDestroyTest003
+* @tc.desc: mutexAttr is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest003, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexDestroyTest004
+* @tc.desc: mutexAttr is SOFTBUS_MUTEX_NORMAL
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest004, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusMutexDestroyTest005
+* @tc.desc: mutexAttr is SOFTBUS_MUTEX_RECURSIVE
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest005, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadAttrInitTest001
+* @tc.desc: threadAttr is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusThreadAttrInit(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadAttrInitTest002
+* @tc.desc: threadAttr is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, Function | MediumTest | Level2)
+{
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest001
+* @tc.desc: thread is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest001, Function | MediumTest | Level2)
+{
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusThreadCreate(nullptr, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest002
+* @tc.desc: threadAttr is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest002, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+
+    int32_t ret = SoftBusThreadCreate(&thread, nullptr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest003
+* @tc.desc: threadAttr is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_TRUE(thread == 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest004
+* @tc.desc: threadAttr is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest005
+* @tc.desc: threadAttr add taskName
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.taskName = "ThreadTask";
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest006
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest007
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGH;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest008
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_DEFAULT;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest009
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_LOW;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest010
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_LOWEST;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusThreadCreateTest011
+* @tc.desc: threadEntry is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest011, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest001
+* @tc.desc: name is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest01, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest002
+* @tc.desc: name is large than TASK_NAME_MAX_LEN
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, Function | MediumTest | Level2)
+{
+    const char *name = "abcdefghijklmnopqrstuvwxyz";
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest003
+* @tc.desc: name is equal to TASK_NAME_MAX_LEN
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, Function | MediumTest | Level2)
+{
+    const char *name = "abcdefghijklmnop";
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest004
+* @tc.desc: name include chinese character
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, Function | MediumTest | Level2)
+{
+    const char *name = "a中文p";
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest005
+* @tc.desc: name is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, Function | MediumTest | Level2)
+{
+    const char *name = "testThread";
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadSetNameTest006
+* @tc.desc: threadAttr is nullptr, name is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest006, Function | MediumTest | Level2)
+{
+    const char *name = "testThread";
+    SoftBusThread thread = 0;
+
+    int32_t ret = SoftBusThreadCreate(&thread, nullptr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+
+    ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadGetSelfTest001
+* @tc.desc: threadAttr modify prior
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadGetSelfTest001, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+
+    int32_t ret = SoftBusThreadCreate(&thread, NULL, ThreadSelfTest, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+}
+
+/*
+* @tc.name: SoftBusCondInitTest001
+* @tc.desc: cond is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusCondInit(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondInitTest002
+* @tc.desc: cond is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest002, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+}
+
+/*
+* @tc.name: SoftBusCondSignalTest001
+* @tc.desc: cond is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusCondSignal(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondSignalTest002
+* @tc.desc: no wait thread
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest002, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondSignal(&cond);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondSignalTest003
+* @tc.desc: no wait thread
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest003, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+    ret = SoftBusCondSignal(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusCondBroadcastTest001
+* @tc.desc: cond is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusCondBroadcast(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondBroadcastTest002
+* @tc.desc: cond is not init
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest002, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+
+    int32_t ret = SoftBusCondBroadcast(&cond);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondBroadcastTest003
+* @tc.desc: cond is init value
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest003, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+
+    ret = SoftBusCondBroadcast(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusCondWaitTest001
+* @tc.desc: cond is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest001, Function | MediumTest | Level2)
+{
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusCondWait(nullptr, &mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondWaitTest002
+* @tc.desc: cond value is invalid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest002, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    SoftBusMutex mutex;
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusCondWait(&cond, &mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondWaitTest003
+* @tc.desc: mutex is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest003, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+    ret = SoftBusCondWait(&cond, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondWaitTest004
+* @tc.desc: mutex value is invalid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest004, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    SoftBusMutex mutex = { 0 };
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+
+    ret = SoftBusCondWait(&cond, &mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondDestroyTest001
+* @tc.desc: cond is null
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusCondDestroy(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusCondDestroyTest002
+* @tc.desc: cond is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest002, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondInit(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(cond != 0);
+
+    ret = SoftBusCondDestroy(&cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusCondDestroyTest003
+* @tc.desc: cond is valid
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest003, Function | MediumTest | Level2)
+{
+    SoftBusCond cond = 0;
+    int32_t ret = SoftBusCondDestroy(&cond);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadJoinTest001
+* @tc.desc: value is nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest001, Function | MediumTest | Level2)
+{
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+    ret = SoftBusThreadJoin(thread, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: SoftBusThreadJoinTest003
+* @tc.desc: value is not nullptr
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest003, Function | MediumTest | Level2)
+{
+    char *value = nullptr;
+    SoftBusThread thread = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
+    ret = SoftBusThreadJoin(thread, (void **)&value);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(value != nullptr);
+}
+
+/*
+* @tc.name: SoftBusThreadFullTest001
+* @tc.desc: thread process test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest001, Function | MediumTest | Level2)
+{
+    int32_t ret = SoftBusMutexInit(&g_mutex, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusCondInit(&g_cond);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusThread threadWait = 0;
+    SoftBusThread threadSignal = 0;
+    SoftBusThreadAttr threadAttr = { 0 };
+    ret = SoftBusThreadAttrInit(&threadAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    threadAttr.stackSize = 0x800;
+
+    ret = SoftBusThreadCreate(&threadWait, &threadAttr, ThreadWaitTest, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(threadWait != 0);
+
+    ret = SoftBusThreadCreate(&threadSignal, &threadAttr, ThreadSignalTest, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(threadSignal != 0);
+
+    ret = SoftBusThreadJoin(threadWait, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusThreadJoin(threadSignal, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+}

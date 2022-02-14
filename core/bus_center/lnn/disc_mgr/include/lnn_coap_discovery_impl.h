@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef LNN_NETWORK_MANAGER_H
-#define LNN_NETWORK_MANAGER_H
+#ifndef LNN_COAP_DISCOVERY_IMPL_H
+#define LNN_COAP_DISCOVERY_IMPL_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "softbus_bus_center.h"
 
@@ -27,11 +26,19 @@ extern "C" {
 #endif
 #endif
 
-int32_t LnnInitNetworkManager(void);
-int32_t LnnInitNetworkManagerDelay(void);
-void LnnDeinitNetworkManager(void);
+typedef struct {
+    void (*OnDeviceFound)(const ConnectionAddr *addr);
+} LnnDiscoveryImplCallback;
 
-void LnnNotifyAllTypeOffline(ConnectionAddrType type);
+int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
+
+int32_t LnnStartCoapPublish(void);
+
+int32_t LnnStopCoapPublish(void);
+
+int32_t LnnStartCoapDiscovery(void);
+
+int32_t LnnStopCoapDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -39,4 +46,4 @@ void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* LNN_NETWORK_MANAGER_H */
+#endif /* LNN_COAP_DISCOVERY_IMPL_H */

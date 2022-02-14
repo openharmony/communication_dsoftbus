@@ -24,6 +24,15 @@ int32_t LnnInitDiscoveryManager(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnStartPublish(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnStopPublish(void)
+{
+}
+
 int32_t LnnStartDiscovery(void)
 {
     return SOFTBUS_NOT_IMPLEMENT;
