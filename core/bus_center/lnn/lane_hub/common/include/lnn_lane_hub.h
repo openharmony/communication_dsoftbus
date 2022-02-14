@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 int32_t LnnInitLaneHub(void);
+int32_t LnnInitLaneHubDelay(void);
 void LnnDeinitLaneHub(void);
 
 #ifdef __cplusplus

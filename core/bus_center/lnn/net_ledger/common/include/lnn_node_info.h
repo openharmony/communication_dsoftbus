@@ -72,6 +72,7 @@ typedef struct {
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t discoveryType;
+    uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
