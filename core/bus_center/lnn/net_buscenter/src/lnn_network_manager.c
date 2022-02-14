@@ -15,6 +15,7 @@
 
 #include "lnn_network_manager.h"
 
+#include "lnn_ip_network_impl.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -27,6 +28,7 @@ typedef struct {
     int32_t (*InitNetworkImpl)(void);
     int32_t (*InitNetworkDelayImpl)(void);
     int32_t (*DeinitNetworkImpl)(void);
+    void (*NotifyOfflineMsg)(void);
 } NetworkImpl;
 
 static NetworkImpl g_networkImpl[LNN_NETWORK_IMPL_TYPE_MAX] = {
@@ -34,6 +36,7 @@ static NetworkImpl g_networkImpl[LNN_NETWORK_IMPL_TYPE_MAX] = {
         .InitNetworkImpl = LnnInitIpNetwork,
         .InitNetworkDelayImpl = LnnInitIpNetworkDelay,
         .DeinitNetworkImpl = LnnDeinitIpNetwork,
+        .NotifyOfflineMsg = LnnNotifyOfflineMsg,
     },
 };
 
@@ -86,5 +89,11 @@ void LnnDeinitNetworkManager(void)
 void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     (void)type;
-    LnnCallIpDiscovery();
+    uint32_t i;
+    for (i = 0; i < LNN_NETWORK_IMPL_TYPE_MAX; ++i) {
+        if (g_networkImpl[i].NotifyOfflineMsg == NULL) {
+            continue;
+        }
+        g_networkImpl[i].NotifyOfflineMsg();
+    }
 }

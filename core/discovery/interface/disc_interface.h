@@ -37,36 +37,6 @@ typedef enum {
     MODULE_MAX = MODULE_CONN
 } DiscModule;
 
-/**
- * @ingroup softbus_disc_manager
- * Inner publish info.
- *
- */
-typedef struct {
-    int publishId;
-    ExchanageMedium medium;
-    ExchangeFreq freq;
-    const char *capability;
-    unsigned char *capabilityData;
-    unsigned int dataLen;
-} PublishInnerInfo;
-
-/**
- * @ingroup softbus_disc_manager
- * Inner subscribe info.
- *
- */
-typedef struct {
-    int subscribeId;
-    ExchanageMedium medium;
-    ExchangeFreq freq;
-    bool isSameAccount;
-    bool isWakeRemote;
-    const char *capability;
-    unsigned char *capabilityData;
-    unsigned int dataLen;
-} SubscribeInnerInfo;
-
 typedef enum {
     LINK_STATUS_UP = 0,
     LINK_STATUS_DOWN,
@@ -127,7 +97,7 @@ int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *cb
  * @brief Active publish.
  *
  * @param  moduleId    [IN]  Type  #DiscModule module ID.
- * @param  info        [IN]  Type  #PublishInnerInfo * publish information.
+ * @param  info        [IN]  Type  #PublishInfo * publish information.
  *
  * @retval #SOFTBUS_INVALID_PARAM                       Invalid moduleId or info parameter.
  * @retval #SOFTBUS_DISCOVER_MANAGER_NOT_INIT           Discovery manager is not initialised.
@@ -141,14 +111,14 @@ int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *cb
  * @retval #SOFTBUS_OK                                  Active publish successfully.
  *
  */
-int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info);
+int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info);
 
 /**
  * @ingroup softbus_disc_manager
  * @brief Passive publish.
  *
  * @param  moduleId    [IN]  Type  #DiscModule module ID.
- * @param  info        [IN]  Type  #PublishInnerInfo * publish information.
+ * @param  info        [IN]  Type  #PublishInfo * publish information.
  *
  * @retval #SOFTBUS_INVALID_PARAM                       Invalid moduleId or info parameter.
  * @retval #SOFTBUS_DISCOVER_MANAGER_NOT_INIT           Discovery manager is not initialised.
@@ -162,7 +132,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info);
  * @retval #SOFTBUS_OK                                  Passive publish successfully.
  *
  */
-int32_t DiscStartScan(DiscModule moduleId, const PublishInnerInfo *info);
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
 
 /**
  * @ingroup softbus_disc_manager
@@ -186,7 +156,7 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
  * @brief Active discover.
  *
  * @param  moduleId    [IN]  Type  #DiscModule module ID.
- * @param  info        [IN]  Type  #SubscribeInnerInfo * discover information.
+ * @param  info        [IN]  Type  #SubscribeInfo * discover information.
  *
  * @retval #SOFTBUS_INVALID_PARAM                       Invalid moduleId or info parameter.
  * @retval #SOFTBUS_DISCOVER_MANAGER_NOT_INIT           Discovery manager is not initialised.
@@ -200,14 +170,14 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
  * @retval #SOFTBUS_OK                                  Active discover successfully.
  *
  */
-int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInnerInfo *info);
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info);
 
 /**
  * @ingroup softbus_disc_manager
  * @brief Passive discover.
  *
  * @param  moduleId    [IN]  Type  #DiscModule module ID.
- * @param  info        [IN]  Type  #SubscribeInnerInfo * discover information.
+ * @param  info        [IN]  Type  #SubscribeInfo * discover information.
  *
  * @retval #SOFTBUS_INVALID_PARAM                       Invalid moduleId or info parameter.
  * @retval #SOFTBUS_DISCOVER_MANAGER_NOT_INIT           Discovery manager is not initialised.
@@ -221,7 +191,7 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInnerInfo *info);
  * @retval #SOFTBUS_OK                                  Passive discover successfully.
  *
  */
-int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInnerInfo *info);
+int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info);
 
 /**
  * @ingroup softbus_disc_manager
