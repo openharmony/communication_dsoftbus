@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (enable_discovery_coap == true) {
+if (dsoftbus_standard_feature_disc_coap == true) {
   disc_coap_src = [
     "$dsoftbus_root_path/core/discovery/coap/src/disc_coap.c",
     "$dsoftbus_root_path/core/discovery/coap/src/disc_nstackx_adapter.c",

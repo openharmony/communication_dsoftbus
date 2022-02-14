@@ -24,7 +24,7 @@ trans_direct_channel_src = [
   "$tcp_direct_channel_path/src/trans_tcp_direct_json.c",
 ]
 
-if (enable_connection_p2p == true) {
+if (dsoftbus_standard_feature_conn_p2p == true) {
   trans_direct_channel_src +=
       [ "$tcp_direct_channel_path/src/trans_tcp_direct_p2p.c" ]
 } else {
