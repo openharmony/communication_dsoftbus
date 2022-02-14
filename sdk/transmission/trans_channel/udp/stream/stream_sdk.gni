@@ -21,8 +21,8 @@ dsoftbus_stream_sdk_path =
 trans_dstream_src = []
 trans_dstream_inc = []
 trans_dstream_deps = []
-if (enable_trans_udp == true) {
-  if (enable_trans_udp_stream == true) {
+if (dsoftbus_standard_feature_trans_udp == true) {
+  if (dsoftbus_standard_feature_trans_udp_stream == true) {
     trans_dstream_inc += [
       "$dsoftbus_stream_sdk_path/adaptor/include",
       "$dsoftbus_stream_sdk_path/include",

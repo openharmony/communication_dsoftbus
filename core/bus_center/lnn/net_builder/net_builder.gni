@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (enable_lnn_net) {
+if (dsoftbus_standard_feature_lnn_net) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_exchange_device_info.c",

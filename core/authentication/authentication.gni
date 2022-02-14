@@ -13,12 +13,12 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 AUTH_SERVER_DEFINES = []
-if (enable_auth_account == true) {
+if (dsoftbus_standard_feature_auth_account == true) {
   AUTH_SERVER_DEFINES += [ "AUTH_ACCOUNT" ]
 }
 
 authentication_path = "$dsoftbus_root_path/core/authentication"
-if (enable_lnn_net) {
+if (dsoftbus_standard_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
@@ -26,7 +26,7 @@ if (enable_lnn_net) {
     "$authentication_path/src/auth_p2p.c",
     "$authentication_path/src/auth_sessionkey.c",
   ]
-  if (enable_ip_auth) {
+  if (dsoftbus_standard_feature_ip_auth) {
     auth_server_src +=
         [ "$dsoftbus_root_path/core/authentication/src/auth_socket.c" ]
   } else {
@@ -48,12 +48,12 @@ auth_server_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
-    if (enable_lnn_net) {
+    if (dsoftbus_standard_feature_lnn_net) {
       auth_server_deps += [ "//base/security/deviceauth:deviceauth_lite" ]
     }
   } else {
     auth_server_inc += [ "//third_party/cJSON" ]
-    if (enable_lnn_net) {
+    if (dsoftbus_standard_feature_lnn_net) {
       auth_server_deps +=
           [ "//base/security/deviceauth/services:deviceauth_sdk" ]
     }
