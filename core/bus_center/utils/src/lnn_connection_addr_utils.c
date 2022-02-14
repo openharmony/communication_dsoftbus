@@ -29,11 +29,12 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
         return strncmp(addr1->info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_BLE) {
-        return strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 &&
+        strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
-        return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0)
-            && (addr1->info.ip.port == addr2->info.ip.port);
+        return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0) &&
+        (addr1->info.ip.port == addr2->info.ip.port);
     }
     return false;
 }
@@ -112,4 +113,17 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", option->type);
     return false;
+}
+
+DiscoveryType LnnGetDiscoveryType(ConnectionAddrType type)
+{
+    if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
+        return DISCOVERY_TYPE_WIFI;
+    } else if (type == CONNECTION_ADDR_BR) {
+        return DISCOVERY_TYPE_BR;
+    } else if (type == CONNECTION_ADDR_BLE) {
+        return DISCOVERY_TYPE_BLE;
+    } else {
+        return DISCOVERY_TYPE_COUNT;
+    }
 }

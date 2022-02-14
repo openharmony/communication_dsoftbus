@@ -16,6 +16,7 @@
 #include "lnn_lane_hub.h"
 
 #include "bus_center_event.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_lane_manager.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
@@ -31,10 +32,24 @@ int32_t LnnInitLaneHub(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init time sync fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitHeartbeat() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init heart beat fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitLaneHubDelay(void)
+{
+    if (LnnStartHeartbeatDelay() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start heartbeat delay fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
 void LnnDeinitLaneHub(void)
 {
     LnnDeinitTimeSync();
+    LnnDeinitHeartbeat();
 }

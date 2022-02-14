@@ -35,7 +35,7 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback);
 int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum);
 int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info);
 int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId,
-    NodeDeivceInfoKey key, uint8_t *info, int32_t infoLen);
+    NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen);
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);

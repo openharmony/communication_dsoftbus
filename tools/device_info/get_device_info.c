@@ -25,7 +25,7 @@ static void PrintNodeProperty(NodeBasicInfo *nodeInfo)
 {
     printf("DeviceName = %s\n", nodeInfo->deviceName);
     printf("NetworkId = %s\n", nodeInfo->networkId);
-    NodeDeivceInfoKey key;
+    NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
     unsigned char udid[UDID_BUF_LEN] = {0};
     if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
