@@ -146,6 +146,8 @@ typedef struct {
     void (*AdvUpdateCallback)(int advId, int status);
 } SoftBusAdvCallback;
 
+int BleGattLockInit(void);
+
 int SoftBusAddScanListener(const SoftBusScanListener *listener);
 
 int SoftBusRemoveScanListener(int listenerId);
