@@ -13,13 +13,15 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+bus_center_disc_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c" ]
+
 if (enable_lnn_net) {
-  bus_center_disc_mgr_src = [
+  bus_center_disc_mgr_src += [
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_discovery_impl.c",
   ]
 } else {
-  bus_center_disc_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_manager_virtual.c" ]
+  bus_center_disc_mgr_src += [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_manager_virtual.c" ]
 }
 bus_center_disc_mgr_inc =
     [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include" ]
