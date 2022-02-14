@@ -261,12 +261,8 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
     return;
 }
 
-static int32_t PublishInfoCheck(const char *packageName, const PublishInfo *info)
+static int32_t PublishInfoCheck(const PublishInfo *info)
 {
-    if (strlen(packageName) >= PKG_NAME_SIZE_MAX) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -295,68 +291,12 @@ static int32_t PublishInfoCheck(const char *packageName, const PublishInfo *info
     return SOFTBUS_OK;
 }
 
-static int32_t PublishInnerInfoCheck(const PublishInnerInfo *info)
+static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 {
-    if ((info->medium < AUTO) || (info->medium > COAP)) {
-        return SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM;
-    }
-
-    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
-    if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
-        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    return SOFTBUS_OK;
-}
-
-static int32_t SubscribeInfoCheck(const char *packageName, const SubscribeInfo *info)
-{
-    if (strlen(packageName) >= PKG_NAME_SIZE_MAX) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if ((info->medium < AUTO) || (info->medium > COAP)) {
-        return SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM;
-    }
-
-    if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
-    if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
-        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    return SOFTBUS_OK;
-}
-
-static int32_t SubscribeInnerInfoCheck(const SubscribeInnerInfo *info)
-{
     if ((info->medium < AUTO) || (info->medium > COAP)) {
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM;
     }
@@ -482,86 +422,6 @@ static DiscInfo *CreateNewSubscribeInfoNode(const SubscribeInfo *info)
     infoNode->id = info->subscribeId;
     infoNode->medium = info->medium;
     infoNode->mode = info->mode;
-    infoNode->option.subscribeOption.freq = info->freq;
-    infoNode->option.subscribeOption.dataLen = info->dataLen;
-    infoNode->option.subscribeOption.isSameAccount = info->isSameAccount;
-    infoNode->option.subscribeOption.isWakeRemote = info->isWakeRemote;
-    infoNode->option.subscribeOption.capabilityData =
-        (unsigned char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN * sizeof(unsigned char));
-    if (infoNode->option.subscribeOption.capabilityData == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc capabilityData failed");
-        SoftBusFree(infoNode);
-        return NULL;
-    }
-    if ((info->dataLen != 0) && (memcpy_s(infoNode->option.subscribeOption.capabilityData, MAX_CAPABILITYDATA_LEN,
-        info->capabilityData, info->dataLen) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s fail");
-        ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
-        return NULL;
-    }
-    ret = CapabilityStringToBimap(info->capability);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "capability not found");
-        ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
-        return NULL;
-    }
-    BitmapSet(&(infoNode->option.subscribeOption.capabilityBitmap[0]), ret);
-    return infoNode;
-}
-
-static DiscInfo *CreateNewPublishInnerInfoNode(const PublishInnerInfo *info, const DiscoverMode mode)
-{
-    int32_t ret;
-    DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
-    if (infoNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc infoNode failed");
-        return NULL;
-    }
-    ListInit(&(infoNode->node));
-    ListInit(&(infoNode->capNode));
-    infoNode->item = NULL;
-    infoNode->id = info->publishId;
-    infoNode->medium = info->medium;
-    infoNode->mode = mode;
-    infoNode->option.publishOption.freq = info->freq;
-    infoNode->option.publishOption.dataLen = info->dataLen;
-    infoNode->option.publishOption.capabilityData =
-        (unsigned char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN * sizeof(unsigned char));
-    if (infoNode->option.publishOption.capabilityData == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc capabilityData failed");
-        SoftBusFree(infoNode);
-        return NULL;
-    }
-    if ((info->dataLen != 0) && (memcpy_s(infoNode->option.publishOption.capabilityData, MAX_CAPABILITYDATA_LEN,
-        info->capabilityData, info->dataLen) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s fail");
-        ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
-        return NULL;
-    }
-    ret = CapabilityStringToBimap(info->capability);
-    if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "capability not found");
-        ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
-        return NULL;
-    }
-    BitmapSet(&(infoNode->option.publishOption.capabilityBitmap[0]), ret);
-    return infoNode;
-}
-
-static DiscInfo *CreateNewSubscribeInnerInfoNode(const SubscribeInnerInfo *info, const DiscoverMode mode)
-{
-    int32_t ret;
-    DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
-    if (infoNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc infoNode failed");
-        return NULL;
-    }
-    ListInit(&(infoNode->node));
-    ListInit(&(infoNode->capNode));
-    infoNode->item = NULL;
-    infoNode->id = info->subscribeId;
-    infoNode->medium = info->medium;
-    infoNode->mode = mode;
     infoNode->option.subscribeOption.freq = info->freq;
     infoNode->option.subscribeOption.dataLen = info->dataLen;
     infoNode->option.subscribeOption.isSameAccount = info->isSameAccount;
@@ -840,13 +700,16 @@ int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *cb
     return SOFTBUS_OK;
 }
 
-int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info)
+int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
 {
     if ((moduleId < MODULE_MIN) || (moduleId > MODULE_MAX) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (info->mode != DISCOVER_MODE_ACTIVE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    if (PublishInnerInfoCheck(info) != SOFTBUS_OK) {
+    if (PublishInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -861,7 +724,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE;
     }
 
-    DiscInfo *infoNode = CreateNewPublishInnerInfoNode(info, DISCOVER_MODE_ACTIVE);
+    DiscInfo *infoNode = CreateNewPublishInfoNode(info);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "infoNode create failed");
         SoftBusFree(packageName);
@@ -878,13 +741,16 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInnerInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t DiscStartScan(DiscModule moduleId, const PublishInnerInfo *info)
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
 {
     if ((moduleId < MODULE_MIN) || (moduleId > MODULE_MAX) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (info->mode != DISCOVER_MODE_PASSIVE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    if (PublishInnerInfoCheck(info) != SOFTBUS_OK) {
+    if (PublishInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -899,7 +765,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE;
     }
 
-    DiscInfo *infoNode = CreateNewPublishInnerInfoNode(info, DISCOVER_MODE_PASSIVE);
+    DiscInfo *infoNode = CreateNewPublishInfoNode(info);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "infoNode create failed");
         SoftBusFree(packageName);
@@ -942,13 +808,16 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInnerInfo *info)
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
 {
     if ((moduleId < MODULE_MIN) || (moduleId > MODULE_MAX) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (info->mode != DISCOVER_MODE_ACTIVE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    if (SubscribeInnerInfoCheck(info) != SOFTBUS_OK) {
+    if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -963,7 +832,7 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE;
     }
 
-    DiscInfo *infoNode = CreateNewSubscribeInnerInfoNode(info, DISCOVER_MODE_ACTIVE);
+    DiscInfo *infoNode = CreateNewSubscribeInfoNode(info);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "infoNode create failed");
         SoftBusFree(packageName);
@@ -980,13 +849,16 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInnerInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInnerInfo *info)
+int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
 {
     if ((moduleId < MODULE_MIN) || (moduleId > MODULE_MAX) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (info->mode != DISCOVER_MODE_PASSIVE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    if (SubscribeInnerInfoCheck(info) != SOFTBUS_OK) {
+    if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -1001,7 +873,7 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInnerInfo *info)
         return SOFTBUS_DISCOVER_MANAGER_INVALID_PKGNAME;
     }
 
-    DiscInfo *infoNode = CreateNewSubscribeInnerInfoNode(info, DISCOVER_MODE_PASSIVE);
+    DiscInfo *infoNode = CreateNewSubscribeInfoNode(info);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "infoNode create failed");
         SoftBusFree(packageName);
@@ -1049,8 +921,11 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
     if ((packageName == NULL) || (info == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (strlen(packageName) >= PKG_NAME_SIZE_MAX) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    ret = PublishInfoCheck(packageName, info);
+    ret = PublishInfoCheck(info);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -1099,8 +974,11 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, c
     if ((packageName == NULL) || (info == NULL) || (cb == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (strlen(packageName) >= PKG_NAME_SIZE_MAX) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-    ret = SubscribeInfoCheck(packageName, info);
+    ret = SubscribeInfoCheck(info);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

@@ -372,6 +372,28 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return NULL;
 }
 
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    bool state = false;
+    if (!IsValidString(id, ID_MAX_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "id is invalid");
+        return state;
+    }
+
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return state;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return state;
+    }
+    state = (nodeInfo->status == STATUS_ONLINE) ? true : false;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return state;
+}
+
 static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;

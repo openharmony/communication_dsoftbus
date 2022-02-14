@@ -20,7 +20,6 @@
 
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
-#include "disc_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
@@ -57,8 +56,7 @@ static int32_t DiscoveryResultTransfer(int32_t retCode)
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
 {
-    NodeInfo *info = LnnGetNodeInfoById(device->devId, CATEGORY_UDID);
-    if (info != NULL) {
+    if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online, no need to notify sdk");
         return SOFTBUS_OK;
     }
@@ -114,14 +112,14 @@ int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTyp
     (void)infoTypeLen;
     PublishInfo pubInfo;
     ConvertVoidToPublishInfo(info, &pubInfo);
-    int32_t ret = DiscPublishService(pkgName, &pubInfo);
+    int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
     LnnOnPublishLNNResult(pubInfo.publishId, PublishResultTransfer(ret));
     return SOFTBUS_OK;
 }
 
 int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
-    return DiscUnPublishService(pkgName, publishId);
+    return LnnUnPublishService(pkgName, publishId, false);
 }
 
 int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
@@ -130,14 +128,17 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTyp
     SubscribeInfo subInfo;
     ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
-    int32_t ret = DiscStartDiscovery(pkgName, &subInfo, &g_discInnerCb);
+    InnerCallback callback = {
+        .serverCb = g_discInnerCb,
+    };
+    int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
     LnnOnRefreshLNNResult(subInfo.subscribeId, DiscoveryResultTransfer(ret));
     return SOFTBUS_OK;
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
-    return DiscStopDiscovery(pkgName, refreshId);
+    return LnnStopDiscDevice(pkgName, refreshId, false);
 }
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
