@@ -65,6 +65,7 @@ int32_t LnnGetLaneCount(int32_t laneId);
 int32_t LnnSetLaneCount(int32_t laneId, int32_t num);
 int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t *timestamp);
+bool LnnGetOnlineStateById(const char *id, IdCategory type);
 
 #ifdef __cplusplus
 }

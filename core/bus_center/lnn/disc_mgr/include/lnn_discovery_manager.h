@@ -26,17 +26,15 @@ extern "C" {
 #endif
 #endif
 
-typedef struct {
-    void (*OnDeviceFound)(const ConnectionAddr *addr);
-} LnnDiscoveryImplCallback;
-
 int32_t LnnInitDiscoveryManager(void);
-int32_t LnnStartDiscovery(void);
-void LnnStopDiscovery(void);
 
-int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
-int32_t LnnStartCoapDiscovery(void);
-int32_t LnnStopCoapDiscovery(void);
+int32_t LnnStartPublish(void);
+
+void LnnStopPublish(void);
+
+int32_t LnnStartDiscovery(void);
+
+void LnnStopDiscovery(void);
 
 #ifdef __cplusplus
 #if __cplusplus
