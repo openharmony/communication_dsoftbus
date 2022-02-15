@@ -913,7 +913,7 @@ static int32_t InitProperty()
         return SOFTBUS_ERR;
     }
     if (g_brMaxConnCount == INVALID_LENGTH) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get MaxConnCount");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brMaxConnCount");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -952,7 +952,9 @@ void *ConnBrRead(void *arg)
         }
         if (packLen == BR_READ_FAILED) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] failed");
-            continue;
+            g_sppDriver->DisConnect(socketFd);
+            BrDisconnect(socketFd, socketFd);
+            return NULL;
         }
         if (outBuf == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] outBuf null");
