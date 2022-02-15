@@ -628,7 +628,7 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start auth device, enter hichain process");
-    if (auth->hichain->authDevice(auth->authId, authParams, &g_hichainCallback) != 0) {
+    if (auth->hichain->authDevice(ANY_OS_ACCOUNT, auth->authId, authParams, &g_hichainCallback) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authDevice failed");
         cJSON_free(authParams);
         AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_AUTH_DEVICE_FAILED);
