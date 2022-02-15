@@ -65,7 +65,8 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
             }
             if (recvLen == BR_READ_FAILED) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sppDriver Read BR_READ_FAILED");
-                continue;
+                ReleaseConnectionRef(conn);
+                return BR_READ_SOCKET_CLOSED;
             }
             conn->recvPos += recvLen;
         }

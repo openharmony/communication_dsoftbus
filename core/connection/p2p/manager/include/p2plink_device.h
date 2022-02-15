@@ -81,4 +81,5 @@ void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb);
 void P2pLinkDelConnedByAuthId(int64_t authId);
 ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp);
 void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole);
+void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId);
 #endif

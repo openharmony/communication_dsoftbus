@@ -31,7 +31,7 @@
 
 static bool g_isInit = false;
 
-int32_t __attribute__((weak)) ServerStubInit(void)
+int __attribute__((weak)) ServerStubInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus server stub init(weak function).");
     return SOFTBUS_OK;

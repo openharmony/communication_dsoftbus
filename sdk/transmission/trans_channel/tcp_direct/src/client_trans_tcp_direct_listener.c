@@ -41,7 +41,7 @@ static void TdcLockInit(void)
 {
     if (g_lock.lockInit == false) {
         if (SoftBusMutexInit(&g_lock.lock, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TDC  lock init failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TDC lock init failed");
             return;
         }
         g_lock.lockInit = true;

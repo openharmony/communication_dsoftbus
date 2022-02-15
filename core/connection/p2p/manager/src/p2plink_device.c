@@ -78,6 +78,16 @@ ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
     return NULL;
 }
 
+void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
+{
+    ConnectedNode *item = P2pLinkGetConnedDevByMac(peerMac);
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s is no need update authid", peerMac);
+        return;
+    }
+    item->chanId.inAuthId = authId;
+}
+
 ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp)
 {
     ConnectedNode *item = NULL;

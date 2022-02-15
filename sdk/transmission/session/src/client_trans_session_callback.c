@@ -49,6 +49,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         SoftBusFree(session);
         return SOFTBUS_MEM_ERR;
     }
+
     int32_t ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client add session failed");

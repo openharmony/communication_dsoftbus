@@ -194,7 +194,7 @@ static int StartNewLooperThread(SoftBusLooper *looper)
 #ifdef ASAN_BUILD
 #define MAINLOOP_STACK_SIZE 10240
 #else
-#define MAINLOOP_STACK_SIZE 5120
+#define MAINLOOP_STACK_SIZE 8192
 #endif
     int ret;
     SoftBusThreadAttr threadAttr;

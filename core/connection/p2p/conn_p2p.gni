@@ -23,8 +23,6 @@ p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/manager/include",
   "$dsoftbus_root_path/core/connection/p2p/message/include",
   "$dsoftbus_root_path/core/connection/p2p/negotiation/include",
-  "$dsoftbus_root_path/core/connection/p2p/test/testcase",
-  "$dsoftbus_root_path/core/connection/p2p/test/stub",
   "$dsoftbus_root_path/core/connection/p2p/adapter",
 
   "//foundation/communication/wifi/interfaces/innerkits/native_c",

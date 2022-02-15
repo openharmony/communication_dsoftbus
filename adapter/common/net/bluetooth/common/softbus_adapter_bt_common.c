@@ -55,7 +55,6 @@ static bool g_isRegCb = false;
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    (void)transport;
     LOG_INFO("WrapperStateChangeCallback");
     int listenerId;
     int st = ConvertBtState(transport, (BtStatus)status);
