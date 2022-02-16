@@ -33,7 +33,7 @@ typedef enum {
     LNN_EVENT_WLAN_PARAM,
     /* event from internal lnn */
     LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
-    LNN_EVENT_DISCOVERY_TYPE_CHANGED,
+    LNN_EVENT_RELATION_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -54,9 +54,11 @@ typedef struct {
 
 typedef struct {
     LnnEventBasicInfo basic;
-    uint32_t oldType;
-    const char *networkId;
-} LnnDiscoveryTypeEventInfo;
+    ConnectionAddrType type;
+    uint8_t relation;
+    bool isJoin;
+    const char *udid;
+} LnnRelationChanedEventInfo;
 
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
@@ -73,7 +75,7 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
 void LnnNotifyMonitorEvent(const LnnMonitorEventInfo *info);
-void LnnNotifyDiscoveryTypeChanged(const char *networkId, uint32_t oldType);
+void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
 
 void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
 

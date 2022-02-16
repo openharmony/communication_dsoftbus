@@ -735,6 +735,16 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     return (*ptr);
 }
 
+static void MergeLnnRelation(const NodeInfo *oldInfo, NodeInfo *info)
+{
+    int32_t i;
+
+    for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
+        info->lnnRelation[i] += oldInfo->lnnRelation[i];
+        info->lnnRelation[i] &= LNN_RELATION_MASK;
+    }
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -776,6 +786,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         } else {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "flag error");
         }
+        MergeLnnRelation(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnMapSet(&map->udidMap, deviceId, info, sizeof(NodeInfo));
@@ -789,7 +800,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     return REPORT_NONE;
 }
 
-ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId)
+ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
 
@@ -803,6 +814,9 @@ ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
+    }
+    if (type != CONNECTION_ADDR_MAX && info->lnnRelation[type] > 0) {
+        info->lnnRelation[type]--;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
@@ -882,7 +896,7 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     info = LnnGetNodeInfoById(srcId, srcIdType);
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no node info for: %s/%d", srcId, srcIdType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no node info for: %d", srcIdType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
@@ -906,6 +920,32 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return rc;
+}
+
+int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (id == NULL || relation == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    info = LnnGetNodeInfoById(id, type);
+    if (info == NULL || !LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node not online");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (memcpy_s(relation, len, info->lnnRelation, CONNECTION_ADDR_MAX) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy relation fail");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
 }
 
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)

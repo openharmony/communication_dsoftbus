@@ -28,6 +28,9 @@ extern "C" {
 #endif
 #define WIFI_SSID_LEN 32
 #define WIFI_MAC_LEN 6
+
+#define LNN_RELATION_MASK 0x03
+
 typedef enum {
     ROLE_UNKNOWN = 0,
     ROLE_CONTROLLER,
@@ -67,6 +70,7 @@ typedef struct {
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];
     char masterUdid[UDID_BUF_LEN];
+    uint8_t lnnRelation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
