@@ -27,6 +27,7 @@
 #define HDF_ENLARGE_FACTOR 2
 #define HDF_MAP_KEY_MAX_SIZE 1000
 #define HDF_MAP_VALUE_MAX_SIZE 1000
+#define SHIFT_ALIGN_BYTE 4
 
 /* BKDR Hash */
 static uint32_t MapHash(const char *key)
@@ -94,6 +95,7 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
     const void *value, uint32_t valueSize)
 {
     uint32_t keySize = strlen(key) + 1;
+    keySize = keySize + (SHIFT_ALIGN_BYTE - keySize % SHIFT_ALIGN_BYTE);
     MapNode *node = (MapNode *)SoftBusCalloc(sizeof(*node) + keySize + valueSize);
     if (node == NULL) {
         return NULL;
@@ -103,7 +105,7 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
     node->key = (uint8_t *)node + sizeof(*node);
     node->value = (uint8_t *)node + sizeof(*node) + keySize;
     node->valueSize = valueSize;
-    if (memcpy_s(node->key, keySize, key, keySize) != EOK) {
+    if (memcpy_s(node->key, keySize, key, strlen(key) + 1) != EOK) {
         SoftBusFree(node);
         return NULL;
     }
