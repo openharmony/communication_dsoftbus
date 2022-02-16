@@ -741,7 +741,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_PRELINK_LANE_Test_002, TestSize.Level1)
     EXPECT_TRUE(LnnGetLaneScore(laneId1) == THRESHOLD_LANE_QUALITY_SCORE);
     LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
-    EXPECT_TRUE(laneId2 == LNN_LINK_TYPE_WLAN_2P4G);
+    EXPECT_TRUE(laneId2 == LNN_LINK_TYPE_WLAN_5G);
     LnnReleaseLanesObject(lanesObj1);
     LnnReleaseLanesObject(lanesObj2);
     LnnSetLaneCount(laneId1, -LANES_COUNT_MAX);
@@ -781,12 +781,6 @@ static void ScheduleNotify5G(int32_t laneId, int32_t score)
     printf("ScheduleNotify5G laneId %d, socre %d.\n", laneId, score);
 }
 
-static void ScheduleNotify2P4G(int32_t laneId, int32_t score)
-{
-    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && score == THRESHOLD_LANE_QUALITY_SCORE);
-    printf("ScheduleNotify2P4G laneId %d, socre %d.\n", laneId, score);
-}
-
 /*
 * @tc.name: LANE_HUB_SCHEDULE_LANE_Test_002
 * @tc.desc: Schedule lane test
@@ -806,12 +800,12 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_SCHEDULE_LANE_Test_002, TestSize.Level1)
     (void)LnnSetLaneCount(laneId1, LANE_COUNT_THRESHOLD);
     LnnLanesObject *lanesObj2 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId2 = LnnGetLaneId(lanesObj2, 0);
-    (void)LnnLaneQosObserverAttach(lanesObj2, ScheduleNotify2P4G);
+    (void)LnnLaneQosObserverAttach(lanesObj2, ScheduleNotify5G);
     (void)LnnSetLaneCount(laneId2, LANE_COUNT_THRESHOLD);
     TriggerLaneMonitor();
     LnnLanesObject *lanesObj3 = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId3 = LnnGetLaneId(lanesObj3, 0);
-    EXPECT_TRUE(laneId3 == LNN_LINK_TYPE_BR);
+    EXPECT_TRUE(laneId3 == LNN_LINK_TYPE_WLAN_5G);
 
     LnnReleaseLanesObject(lanesObj1);
     LnnReleaseLanesObject(lanesObj2);
@@ -894,7 +888,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_ANALYSE_LANE_Test_001, TestSize.Level1)
     (void)LnnSetLaneCount(LNN_LINK_TYPE_WLAN_5G, LANE_COUNT_THRESHOLD);
     LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE4_NETWORK_ID, DEFAULT_PID, LNN_MESSAGE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
-    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G);
+    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G);
     LnnReleaseLanesObject(lanesObj);
     LnnSetLaneCount(LNN_LINK_TYPE_WLAN_5G, -LANES_COUNT_MAX);
     LnnSetLaneCount(laneId, -LANES_COUNT_MAX);
