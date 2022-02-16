@@ -69,6 +69,7 @@ extern "C" {
 #define SOFTBUS_O_NONBLOCK (04000)
 
 /* select.h */
+/* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE (1024)
 
 /* netinet/in.h */
