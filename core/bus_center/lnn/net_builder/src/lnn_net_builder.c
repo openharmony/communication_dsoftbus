@@ -35,6 +35,7 @@
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
 #include "lnn_sync_info_manager.h"
+#include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -1375,6 +1376,7 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync info manager fail");
         return SOFTBUS_ERR;
     }
+    LnnInitTopoManager();
     if (LnnInitP2p() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
         return SOFTBUS_ERR;
@@ -1433,6 +1435,7 @@ void LnnDeinitNetBuilder(void)
         StopConnectionFsm(item);
     }
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
+    LnnDeinitTopoManager();
     LnnDeinitP2p();
     LnnDeinitSyncInfoManager();
     g_netBuilder.isInit = false;
