@@ -298,8 +298,8 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
 int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
     *fromAddr, int32_t *fromAddrLen)
 {
-    if (fromAddr == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "fromAddr is null");
+    if ((fromAddr == NULL) || (fromAddrLen == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fromAddr or fromAddrLen is null");
         return SOFTBUS_ADAPTER_ERR;
     }
 
