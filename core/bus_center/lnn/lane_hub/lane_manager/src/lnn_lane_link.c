@@ -480,7 +480,7 @@ static int32_t CheckP2pRoleConflict(const char *networkId)
 {
     RoleIsConflictInfo info = {0};
     if (LnnGetRemoteNumInfo(networkId, NUM_KEY_P2P_ROLE, (int32_t *)&info.peerRole) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer udid fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p role fail.");
         return SOFTBUS_ERR;
     }
     info.expectedRole = GetExpectedP2pRole();

@@ -440,9 +440,9 @@ void AuthHandleFail(AuthManager *auth, int32_t reason)
     EventRemove(auth->id);
     auth->cb->onDeviceVerifyFail(auth->authId, reason);
     if (auth->connCb.onConnOpenFailed != NULL) {
-        DeleteAuth(auth);
         auth->connCb.onConnOpenFailed(auth->requestId, reason);
         auth->connCb.onConnOpenFailed = NULL;
+        DeleteAuth(auth);
     }
 }
 
@@ -464,7 +464,7 @@ int32_t AuthHandleLeaveLNN(int64_t authId)
     (void)SoftBusMutexUnlock(&g_authLock);
     if (IsWiFiLink(auth)) {
         AuthCloseTcpFd(auth->fd);
-    } else if (auth->status != AUTH_PASSED) {
+    } else if (auth->status != AUTH_PASSED || auth->option.type == CONNECT_BR) {
         ConnDisconnectDevice(auth->connectionId);
     }
     DeleteAuth(auth);
@@ -734,7 +734,7 @@ static void TryRemoveOldAuthManager(const AuthManager *auth, bool isClientSide)
                 SoftBusFree(item->encryptDevData);
                 item->encryptDevData = NULL;
             }
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "remove old auth manager, authId = %lld", auth->authId);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "remove old auth manager, authId = %lld", item->authId);
             SoftBusFree(item);
         }
     }
@@ -750,10 +750,10 @@ static void TryRemoveConnection(const AuthManager *auth)
         /* AuthOpenConn start verify process, just return. */
         return;
     }
-    if (auth->option.type != CONNECT_TCP && auth->side == CLIENT_SIDE_FLAG) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "try remove br/ble connection, authId = %lld.", auth->authId);
+    if (auth->option.type == CONNECT_BLE && auth->side == CLIENT_SIDE_FLAG) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "try remove ble connection, authId = %lld.", auth->authId);
         if (ConnDisconnectDevice(auth->connectionId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "disconnect br/ble device fail.");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "disconnect ble device fail.");
         }
     }
 }
@@ -1630,6 +1630,7 @@ static int32_t TryCreateConnection(const ConnectOption *option, uint32_t request
     if (option->type != CONNECT_BR && option->type != CONNECT_BLE) {
         return SOFTBUS_INVALID_PARAM;
     }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "try to create br/ble connection, type = %d.", option->type);
     /* use authManager to record this connect request, delete it while connect successed. */
     char peerUid[MAX_ACCOUNT_HASH_LEN] = {0};
     AuthManager *conn = InitClientAuthManager(LNN, option, requestId, peerUid);
@@ -1668,50 +1669,42 @@ static AuthManager *AuthGetManagerByOption(const ConnectOption *option)
     return NULL;
 }
 
-static int32_t CheckIfAuthConnExisted(const ConnectOption *option, uint32_t requestId,
+static bool IsNeedVerifyAgain(const ConnectOption *option, uint32_t requestId,
     const AuthConnCallback *callback)
 {
+    ConnectionInfo info;
+    AuthManager *auth = NULL;
+
     if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        return SOFTBUS_LOCK_ERR;
+        return true;
     }
-    AuthManager *auth = AuthGetManagerByOption(option);
+    auth = AuthGetManagerByOption(option);
     if (auth == NULL) {
         (void)SoftBusMutexUnlock(&g_authLock);
-        return SOFTBUS_AUTH_NOT_EXISTED;
+        return true;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "found existing auth conn, type = %d.", auth->option.type);
     if (IsP2PLink(auth)) {
-        (void)SoftBusMutexUnlock(&g_authLock);
         callback->onConnOpened(requestId, auth->authId);
-        return SOFTBUS_AUTH_EXISTED;
-    } else if (auth->option.type == CONNECT_BLE) {
-        if (!CheckActiveConnection(&auth->option)) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ble has disconnect yet.");
-            return SOFTBUS_CONNECTION_ERR_CLOSED;
+        (void)SoftBusMutexUnlock(&g_authLock);
+        return false;
+    } else if (auth->option.type == CONNECT_BR || auth->option.type == CONNECT_BLE) {
+        if (ConnGetConnectionInfo(auth->connectionId, &info) != SOFTBUS_OK ||
+            !CheckActiveConnection(&auth->option)) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth br/ble has disconnect, do verify again.");
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return true;
         }
         (void)SoftBusMutexUnlock(&g_authLock);
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "try to create ble connection.");
-        if (TryCreateConnection(option, requestId, callback) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "create connection fail.");
-            return SOFTBUS_ERR;
+        if (TryCreateConnection(option, requestId, callback) == SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth br/ble connection exist, no neeed verify again.");
+            return false;
         }
-        return SOFTBUS_AUTH_EXISTED;
-    } else if (auth->option.type == CONNECT_BR) {
-        if (!CheckActiveConnection(&auth->option)) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth br has disconnect, do verify again.");
-            return SOFTBUS_AUTH_NOT_EXISTED;
-        }
-        (void)SoftBusMutexUnlock(&g_authLock);
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "try to create br connection.");
-        if (TryCreateConnection(option, requestId, callback) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "create connection fail.");
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_AUTH_EXISTED;
+        return true;
     }
     (void)SoftBusMutexUnlock(&g_authLock);
-    return SOFTBUS_AUTH_NOT_EXISTED;
+    return true;
 }
 
 static int32_t AuthOpenCommonConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
@@ -1722,12 +1715,8 @@ static int32_t AuthOpenCommonConn(const AuthConnInfo *info, uint32_t requestId, 
         return SOFTBUS_ERR;
     }
 
-    int32_t ret = CheckIfAuthConnExisted(&option, requestId, callback);
-    if (ret == SOFTBUS_AUTH_EXISTED) {
+    if (!IsNeedVerifyAgain(&option, requestId, callback)) {
         return SOFTBUS_OK;
-    } else if (ret != SOFTBUS_AUTH_NOT_EXISTED) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "check active auth conn failed.");
-        return ret;
     }
 
     AuthVerifyModule module = (info->type == AUTH_LINK_TYPE_P2P) ? VERIFY_P2P_DEVICE : LNN;
