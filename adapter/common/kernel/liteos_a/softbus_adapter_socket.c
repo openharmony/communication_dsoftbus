@@ -270,8 +270,8 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
     *toAddr, int32_t toAddrLen)
 {
-    if (toAddr == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "toAddr is null");
+    if ((toAddr == NULL) || (toAddrLen <= 0)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "toAddr is null or toAddrLen <= 0");
         return SOFTBUS_ADAPTER_ERR;
     }
 
