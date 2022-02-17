@@ -92,7 +92,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
     struct timespec outtime = {0};
     struct timespec now = {0};
-    (void)clock_gettime(CLOCK_BOOTTIME, &now);
+    (void)clock_gettime(CLOCK_REALTIME, &now);
     outtime.tv_sec = now.tv_sec + TIME_OUT;
     outtime.tv_nsec = now.tv_nsec;
 
