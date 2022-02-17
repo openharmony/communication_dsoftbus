@@ -687,6 +687,9 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         return;
     }
     TransProxyonMessageReceived(&msg);
+    if (msg.msgHead.chiper & ENCRYPTED) {
+        SoftBusFree(msg.data);
+    }
 }
 
 int32_t TransProxyTransInit(void)

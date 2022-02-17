@@ -805,10 +805,6 @@ void TransProxyonMessageReceived(const ProxyMessage *msg)
             break;
         }
     }
-
-    if (msg->msgHead.chiper != 0) {
-        SoftBusFree(msg->data);
-    }
 }
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)

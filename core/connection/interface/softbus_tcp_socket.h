@@ -59,6 +59,7 @@ void TcpShutDown(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
 int32_t SetIpTos(int fd, uint32_t tos);
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
+int32_t ConnGetSocketErr(int32_t fd);
 
 #ifdef __cplusplus
 #if __cplusplus
