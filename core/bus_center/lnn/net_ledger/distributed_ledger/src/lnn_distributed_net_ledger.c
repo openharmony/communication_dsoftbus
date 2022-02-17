@@ -1148,7 +1148,7 @@ int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *tim
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t *timestamp)
+int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1160,7 +1160,7 @@ int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    nodeInfo->heartbeatTimeStamp = *timestamp;
+    nodeInfo->heartbeatTimeStamp = timestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
