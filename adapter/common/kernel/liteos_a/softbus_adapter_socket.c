@@ -270,6 +270,11 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
     *toAddr, int32_t toAddrLen)
 {
+    if ((toAddr == NULL) || (toAddrLen <= 0)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "toAddr is null or toAddrLen <= 0");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
     int32_t ret = sendto(socketFd, buf, len, flags, (struct sockaddr *)toAddr, toAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "sendto : %{public}s", strerror(errno));
@@ -293,6 +298,11 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
 int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
     *fromAddr, int32_t *fromAddrLen)
 {
+    if ((fromAddr == NULL) || (fromAddrLen == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fromAddr or fromAddrLen is null");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
     int32_t ret = recvfrom(socketFd, buf, len, flags, (struct sockaddr *)fromAddr, (socklen_t *)fromAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "recvfrom : %{public}s", strerror(errno));
