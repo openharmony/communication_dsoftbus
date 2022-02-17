@@ -44,7 +44,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_INVALID_PARAM;
     }
 
-    SessionConn *newConn = CreateNewSessinConn(false);
+    SessionConn *newConn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_WIFI, false);
     if (newConn == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -70,7 +70,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         SoftBusFree(newConn);
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(DIRECT_CHANNEL_SERVER, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(DIRECT_CHANNEL_SERVER_WIFI, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel add trigger fail");
         TransDelSessionConnById(newConn->channelId);
         TransSrvDelDataBufNode(newchannelId);

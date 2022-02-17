@@ -27,6 +27,7 @@ extern "C" {
 
 #define MAX_DEVICE_KEY_LEN 64
 #define AUTH_ERROR_CODE (-1)
+#define AUTH_INVALID_ID (-1)
 
 typedef enum {
     /* nearby type v1 */

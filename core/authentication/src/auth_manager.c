@@ -1952,7 +1952,7 @@ int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *info)
     }
     (void)ConvertOptionToAuthConnInfo(&auth->option, auth->isAuthP2p, info);
     (void)SoftBusMutexUnlock(&g_authLock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_OK;
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *mac)
