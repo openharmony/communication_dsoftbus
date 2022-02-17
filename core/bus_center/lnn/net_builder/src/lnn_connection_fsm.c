@@ -439,8 +439,8 @@ static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
 {
     SoftBusSysTime times;
     SoftBusGetTime(&times);
-    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HEARTBEAT_TIME_FACTOR +
-        (uint64_t)times.usec / HEARTBEAT_TIME_FACTOR;
+    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
+        (uint64_t)times.usec / HB_TIME_FACTOR;
     connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
     connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;

@@ -1675,7 +1675,7 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc specific msg fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strncpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+    if (strcpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;
