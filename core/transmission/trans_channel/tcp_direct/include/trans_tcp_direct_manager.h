@@ -35,6 +35,10 @@ extern "C" {
 #define MODULE_SESSION 6
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
+#define FLAG_WIFI 0
+#define FLAG_BR 2
+#define FLAG_BLE 4
+#define FLAG_P2P 8
 
 typedef struct {
     uint32_t magicNumber;

@@ -96,7 +96,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener001, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(PROXY, nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(AUTH, nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_WIFI, nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(UNUSE_BUTT, nullptr));
 };
 
@@ -169,7 +169,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener003, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testBaseListener004, TestSize.Level1)
 {
-    ListenerModule module = DIRECT_CHANNEL_SERVER;
+    ListenerModule module = DIRECT_CHANNEL_SERVER_WIFI;
     EXPECT_EQ(SOFTBUS_ERR, StopBaseListener(module));
     SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);

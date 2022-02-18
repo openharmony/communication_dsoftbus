@@ -353,6 +353,11 @@ void TcpShutDown(int32_t fd)
     }
 }
 
+int32_t ConnGetSocketError(int32_t fd)
+{
+    return SoftBusSocketGetError(fd);
+}
+
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 {
 #define KEEP_ALIVE_COUNT 5

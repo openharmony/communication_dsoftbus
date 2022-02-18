@@ -138,6 +138,8 @@ uint16_t SoftBusNtoHs(uint16_t netshort);
 
 uint32_t SoftBusInetAddr(const char *cp);
 
+int32_t SoftBusSocketGetError(int32_t socketFd);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

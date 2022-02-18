@@ -44,6 +44,14 @@ typedef struct {
     char *w;
 } ServerDataBuf;
 
+typedef struct {
+    char *in;
+    uint32_t inLen;
+    char *out;
+    uint32_t outLen;
+} MsgCryptInfo;
+
+
 static SoftBusList *g_tcpSrvDataList = NULL;
 
 int32_t TransSrvDataListInit(void)
@@ -137,7 +145,46 @@ void TransSrvDelDataBufNode(int channelId)
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 }
 
-static int32_t GetAuthConnectOption(int32_t channelId, ConnectOption *option)
+static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
+{
+    if (cipherFlag & FLAG_BR) {
+        return AUTH_LINK_TYPE_BR;
+    }
+
+    if (cipherFlag & FLAG_BLE) {
+        return AUTH_LINK_TYPE_BLE;
+    }
+
+    if (cipherFlag & FLAG_P2P) {
+        return AUTH_LINK_TYPE_P2P;
+    }
+    return AUTH_LINK_TYPE_WIFI;
+}
+
+static int32_t GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherFlag, ConnectOption *option)
+{
+    int32_t ret;
+    char p2pMac[P2P_MAC_LEN] = {0};
+    ConnectOption authOption = {0};
+    AuthLinkType linkType;
+
+    ret = P2pLinkGetPeerMacByPeerIp(peerIp, p2pMac, sizeof(p2pMac));
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth peerIp %s, p2pmac %s linktype %d flag 0x%x",
+        peerIp, p2pMac, linkType, cipherFlag);
+    ret = AuthGetConnectOptionByP2pMac(p2pMac, linkType, &authOption);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s get auth opthon fail", p2pMac);
+        return SOFTBUS_ERR;
+    }
+    (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
+    return SOFTBUS_OK;
+}
+
+static int32_t GetAuthConnectOption(int32_t channelId, uint32_t cipherFlag, ConnectOption *option)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
@@ -148,6 +195,11 @@ static int32_t GetAuthConnectOption(int32_t channelId, ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
+    }
+    // get br or ble auth opthion
+    if (GetP2pAuthOptionByCipherFlag(conn->appInfo.peerData.ip, cipherFlag, option) == SOFTBUS_OK) {
+        SoftBusFree(conn);
+        return SOFTBUS_OK;
     }
     if (strcpy_s(option->info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err");
@@ -165,7 +217,7 @@ static AuthSideFlag GetAuthSideFlag(uint64_t seq, uint32_t flags)
 {
 #define AUTH_CONN_SERVER_SEQ_MASK 0x01
     AuthSideFlag side = AUTH_SIDE_ANY;
-    if (flags == FLAG_REPLY) {
+    if (flags & FLAG_REPLY) {
         side = ((seq & AUTH_CONN_SERVER_SEQ_MASK) != 0) ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthSideFlag: flags=%d, side=%d, seq=%lld", flags, side, seq);
@@ -188,18 +240,17 @@ static int32_t GetSessionAuthIdAndSide(int32_t channelId, int64_t *authId)
     return SOFTBUS_OK;
 }
 
-static int32_t EncryptDataByAuthId(int64_t authId, const char *data,
-    char *encryptData, uint32_t encryptDataLen, AuthSideFlag *side)
+static int32_t EncryptDataByAuthId(int64_t authId, MsgCryptInfo *cryptInfo, AuthSideFlag *side)
 {
     OutBuf buf = {0};
-    buf.buf = (unsigned char *)encryptData;
-    buf.bufLen = encryptDataLen;
+    buf.buf = (unsigned char *)cryptInfo->out;
+    buf.bufLen = cryptInfo->outLen;
 
-    if (AuthEncryptBySeq((int32_t)authId, side, (unsigned char *)data, strlen(data), &buf) != SOFTBUS_OK) {
+    if (AuthEncryptBySeq((int32_t)authId, side, (unsigned char *)cryptInfo->in, cryptInfo->inLen, &buf) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByAuthId encrypt fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    if (buf.outLen != encryptDataLen) {
+    if (buf.outLen != cryptInfo->outLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByAuthId outLen not right");
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -207,50 +258,36 @@ static int32_t EncryptDataByAuthId(int64_t authId, const char *data,
     return SOFTBUS_OK;
 }
 
-static void GetP2pAuthOption(ConnectOption *option)
-{
-    int32_t ret;
-    char p2pMac[P2P_MAC_LEN] = {0};
-    ConnectOption authOption = {0};
-
-    ret = P2pLinkGetPeerMacByPeerIp(option->info.ipOption.ip, p2pMac, sizeof(p2pMac));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "is not p2p ip %s", option->info.ipOption.ip);
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth p2pmac %s", p2pMac);
-    ret = AuthGetConnectOptionByP2pMac(p2pMac, AUTH_LINK_TYPE_WIFI, &authOption);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s get auth opthon fail", p2pMac);
-        return;
-    }
-    (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
-    return;
-}
-
-static int32_t EncryptDataByConnOpt(int32_t channelId, const char *data,
-    char *encryptData, uint32_t encryptDataLen, AuthSideFlag *side)
+static int32_t EncryptDataByConnOpt(int32_t channelId,
+    MsgCryptInfo *cryptInfo, AuthSideFlag *side, uint32_t cipherFlag)
 {
     ConnectOption option = {0};
-    if (GetAuthConnectOption(channelId, &option) != SOFTBUS_OK) {
+    if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByConnOpt get conn option fail");
         return SOFTBUS_ERR;
     }
 
     OutBuf outbuf = {0};
-    outbuf.buf = (unsigned char *)encryptData;
-    outbuf.bufLen = encryptDataLen;
-    GetP2pAuthOption(&option);
-    int32_t ret = AuthEncrypt(&option, side, (unsigned char *)data, strlen(data), &outbuf);
+    outbuf.buf = (unsigned char *)cryptInfo->out;
+    outbuf.bufLen = cryptInfo->outLen;
+    int32_t ret = AuthEncrypt(&option, side, (unsigned char *)cryptInfo->in, cryptInfo->inLen, &outbuf);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByConnOpt encrypt fail");
         return SOFTBUS_ERR;
     }
-    if (outbuf.outLen != encryptDataLen) {
+    if (outbuf.outLen != cryptInfo->outLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByAuthId outLen not right");
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static uint32_t GetMsgTypeByCipherFlags(uint32_t flags)
+{
+    if (flags & FLAG_REPLY) {
+        return FLAG_REPLY;
+    }
+    return FLAG_REQUEST;
 }
 
 static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *packetHead,
@@ -259,33 +296,37 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 #define AUTH_CONN_SERVER_SIDE 0x01
     int64_t authId;
     AuthSideFlag side = AUTH_SIDE_ANY;
+    MsgCryptInfo cryptInfo = {0};
 
     if (GetSessionAuthIdAndSide(channelId, &authId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PackBytes get auth id fail");
         return SOFTBUS_NOT_FIND;
     }
-
-    char *eBuf = buffer + DC_MSG_PACKET_HEAD_SIZE;
-    uint32_t eBufLen = packetHead->dataLen;
-    if (authId > 0) {
-        if (EncryptDataByAuthId(authId, data, eBuf, eBufLen, &side) != SOFTBUS_OK) {
+    cryptInfo.in = (char *)data;
+    cryptInfo.inLen = strlen(data);
+    cryptInfo.out = buffer + DC_MSG_PACKET_HEAD_SIZE;
+    cryptInfo.outLen = packetHead->dataLen;
+    if (authId != AUTH_INVALID_ID) {
+        if (EncryptDataByAuthId(authId, &cryptInfo, &side) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByAuthId fail");
             return SOFTBUS_ENCRYPT_ERR;
         }
     } else {
         side = GetAuthSideFlag(packetHead->seq, packetHead->flags);
-        if (EncryptDataByConnOpt(channelId, data, eBuf, eBufLen, &side) != SOFTBUS_OK) {
+        if (EncryptDataByConnOpt(channelId, &cryptInfo, &side, packetHead->flags) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByConnOpt fail");
             return SOFTBUS_ENCRYPT_ERR;
         }
     }
 
-    if (packetHead->flags == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
+    if (GetMsgTypeByCipherFlags(packetHead->flags) == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
         packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
     }
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=%d, seq=%llu",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=0x%x, seq=%llu",
         side, packetHead->flags, packetHead->seq);
     return SOFTBUS_OK;
 }
@@ -332,32 +373,23 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     return SOFTBUS_OK;
 }
 
-static int32_t DecryptMessage(int32_t channelId, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
+static int32_t DecryptMessage(int32_t channelId, uint32_t cipherFlag, MsgCryptInfo *cryptInfo)
 {
-    SessionConn conn;
-    if (GetSessionConnById(channelId, &conn) == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelId[%d] is not exist.", channelId);
-        return SOFTBUS_ERR;
-    }
-
     ConnectOption option = {0};
-    option.type = CONNECT_TCP;
-    if (strcpy_s(option.info.ipOption.ip, sizeof(option.info.ipOption.ip), conn.appInfo.peerData.ip) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
+    if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DecryptMessage get conn option fail");
         return SOFTBUS_ERR;
     }
-    option.info.ipOption.port = conn.appInfo.peerData.port;
-    GetP2pAuthOption(&option);
     AuthSideFlag side = CLIENT_SIDE_FLAG;
     OutBuf outbuf = {0};
-    outbuf.bufLen = inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1;
-    outbuf.buf = (uint8_t *)out;
-    int32_t ret = AuthDecrypt(&option, side, (uint8_t *)in, inLen, &outbuf);
+    outbuf.bufLen = cryptInfo->inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1;
+    outbuf.buf = (uint8_t *)cryptInfo->out;
+    int32_t ret = AuthDecrypt(&option, side, (uint8_t *)cryptInfo->in, cryptInfo->inLen, &outbuf);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthDecrypt err.");
         return SOFTBUS_ERR;
     }
-    *outLen = outbuf.outLen;
+    cryptInfo->outLen = outbuf.outLen;
     return ret;
 }
 
@@ -428,6 +460,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
 
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
+    (void)seq;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusReply: channelId=%d", channelId);
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {
@@ -452,13 +485,13 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
 }
 
 static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
-    int32_t errCode)
+    int32_t errCode, uint32_t flags)
 {
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
         .seq = seq,
-        .flags = FLAG_REPLY,
+        .flags = (FLAG_REPLY | flags),
         .dataLen = 0,
     };
 
@@ -480,7 +513,22 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
     return ret;
 }
 
-static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *request)
+static int32_t GetUuidByChanId(int32_t channelId, char *uuid, uint32_t len, uint32_t cipherFlag)
+{
+    ConnectOption option = {0};
+    if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetUuidByChanId get conn option fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (AuthGetUuidByOption(&option, uuid, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
@@ -503,6 +551,12 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
         return SOFTBUS_ERR;
     }
 
+    if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, flags) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get Uuid By ChanId failed.");
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+    }
+
     if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
         SoftBusFree(conn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
@@ -514,7 +568,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint64_t seq, const cJSON *
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
 
     int32_t ret = NotifyChannelOpened(channelId);
-    if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, ret) != SOFTBUS_OK) {
+    if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, ret, flags) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequest reply err");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
@@ -533,7 +587,7 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
     if (flags & FLAG_REPLY) {
         return OpenDataBusReply(channelId, seq, packet);
     }
-    return OpenDataBusRequest(channelId, seq, packet);
+    return OpenDataBusRequest(channelId, flags, seq, packet);
 }
 
 static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
@@ -572,57 +626,58 @@ static int GetPktHeadInfoByDatabuf(const ServerDataBuf *node, uint32_t *inLen, u
 
 static int32_t ProcessReceivedData(int32_t channelId)
 {
-    uint32_t inLen, flags, outLen;
+    uint32_t flags;
     uint64_t seq;
+    MsgCryptInfo crypInfo = {0};
 
     SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
-    if (GetPktHeadInfoByDatabuf(node, &inLen, &seq, &flags) != SOFTBUS_OK) {
+    if (GetPktHeadInfoByDatabuf(node, &crypInfo.inLen, &seq, &flags) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_ERR;
     }
 
-    char *in = node->data + sizeof(TdcPacketHead);
-    char *out = (char *)SoftBusCalloc(inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1);
-    if (out == NULL) {
+    crypInfo.in = node->data + sizeof(TdcPacketHead);
+    crypInfo.out = (char *)SoftBusCalloc(crypInfo.inLen - SESSION_KEY_INDEX_SIZE - OVERHEAD_LEN + 1);
+    if (crypInfo.out == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: malloc fail.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (DecryptMessage(channelId, in, inLen, out, &outLen) != SOFTBUS_OK) {
+    if (DecryptMessage(channelId, flags, &crypInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: decrypt message err.");
-        SoftBusFree(out);
+        SoftBusFree(crypInfo.out);
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_ERR;
     }
-    char *end = node->data + sizeof(TdcPacketHead) + inLen;
+    char *end = node->data + sizeof(TdcPacketHead) + crypInfo.inLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
-        SoftBusFree(out);
+        SoftBusFree(crypInfo.out);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_MEM_ERR;
     }
-    node->w = node->w - sizeof(TdcPacketHead) - inLen;
+    node->w = node->w - sizeof(TdcPacketHead) - crypInfo.inLen;
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    out[outLen] = 0;
-    cJSON *packet = cJSON_Parse(out);
+    crypInfo.out[crypInfo.outLen] = 0;
+    cJSON *packet = cJSON_Parse(crypInfo.out);
     if (packet == NULL) {
-        SoftBusFree(out);
+        SoftBusFree(crypInfo.out);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: json parse failed.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProcessReceivedData: %s", out);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProcessReceivedData: %s", crypInfo.out);
     int32_t ret = ProcessMessage(channelId, flags, seq, packet);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process message fail.[%d]", ret);
     }
-    SoftBusFree(out);
+    SoftBusFree(crypInfo.out);
     cJSON_Delete(packet);
     return ret;
 }
 
-static int32_t TransTdcSrvProcData(int32_t channelId)
+static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
 {
     SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
@@ -659,12 +714,12 @@ static int32_t TransTdcSrvProcData(int32_t channelId)
             bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
-    DelTrigger(DIRECT_CHANNEL_SERVER, node->fd, READ_TRIGGER);
+    DelTrigger(module, node->fd, READ_TRIGGER);
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
     return ProcessReceivedData(channelId);
 }
 
-int32_t TransTdcSrvRecvData(int32_t channelId)
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
 {
     SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
@@ -682,5 +737,5 @@ int32_t TransTdcSrvRecvData(int32_t channelId)
     node->w += ret;
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 
-    return TransTdcSrvProcData(channelId);
+    return TransTdcSrvProcData(module, channelId);
 }

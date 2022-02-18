@@ -92,6 +92,23 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  v
     return SOFTBUS_ADAPTER_OK;
 }
 
+int32_t SoftBusSocketGetError(int32_t socketFd)
+{
+    int32_t err = 0;
+    int32_t errSize = sizeof(err);
+
+    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, (socklen_t *)&errSize);
+    if (ret < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
+        return ret;
+    }
+    if (err != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, err=%{public}d", socketFd, err);
+        return err;
+    }
+    return err;
+}
+
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen)
 {
     int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)addrLen);
