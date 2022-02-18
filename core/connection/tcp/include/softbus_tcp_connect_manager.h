@@ -50,6 +50,8 @@ int32_t TcpStopListening(const LocalListenerInfo *info);
 
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback);
 
+int32_t ConnGetSocketError(int32_t fd);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

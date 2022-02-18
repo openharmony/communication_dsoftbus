@@ -352,6 +352,7 @@ void TcpShutDown(int32_t fd)
         SoftBusSocketClose(fd);
     }
 }
+
 int32_t ConnGetSocketError(int32_t fd)
 {
     return SoftBusSocketGetError(fd);
