@@ -256,3 +256,5 @@ communication_bluetooth
 communication_ipc
 
 communication_wifi
+
+ysh_test
