@@ -522,8 +522,8 @@ static int32_t GetUuidByChanId(int32_t channelId, char *uuid, uint32_t len, uint
     }
 
     if (AuthGetUuidByOption(&option, uuid, len) != SOFTBUS_OK) {
-         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid fail");
-         return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid fail");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

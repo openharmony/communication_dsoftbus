@@ -97,7 +97,7 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     int32_t err = 0;
     int32_t errSize = sizeof(err);
 
-    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
+    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, (socklen_t *)&errSize);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
         return ret;

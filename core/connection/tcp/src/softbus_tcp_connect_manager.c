@@ -271,7 +271,7 @@ int32_t TcpOnDataEventOut(int32_t fd)
     (void)DelTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, WRITE_TRIGGER);
     (void)AddTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, READ_TRIGGER);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notfiy finish");
-    return SOFTBUS_OK;    
+    return SOFTBUS_OK;
 }
 
 int32_t TcpOnDataEventIn(int32_t fd)
