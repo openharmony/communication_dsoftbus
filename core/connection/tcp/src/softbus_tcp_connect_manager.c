@@ -232,7 +232,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-        return;
+        return SOFTBUS_ERR;
     }
     TcpConnInfoNode *item = NULL;
     TcpConnInfoNode *next = NULL;
