@@ -123,17 +123,15 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
     LnnIpcNotifyLeaveResult(networkId, retCode);
 }
 
-void LnnNotifyDiscoveryTypeChanged(const char *networkId, uint32_t oldType)
+void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin)
 {
-    LnnDiscoveryTypeEventInfo info;
+    LnnRelationChanedEventInfo info;
 
-    if (networkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "networkId is null");
-        return;
-    }
-    info.basic.event = LNN_EVENT_DISCOVERY_TYPE_CHANGED;
-    info.oldType = oldType;
-    info.networkId = networkId;
+    info.basic.event = LNN_EVENT_RELATION_CHANGED;
+    info.type = type;
+    info.relation = relation;
+    info.isJoin = isJoin;
+    info.udid = udid;
     NotifyEvent((LnnEventBasicInfo *)&info);
 }
 

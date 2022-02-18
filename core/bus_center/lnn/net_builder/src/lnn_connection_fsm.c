@@ -182,18 +182,19 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     ReportCategory report;
-    uint32_t oldType = 0;
+    uint8_t relation[CONNECTION_ADDR_MAX] = {0};
 
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     if (retCode == SOFTBUS_OK) {
-        (void)LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&oldType);
         report = LnnAddOnlineNode(connInfo->nodeInfo);
         NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
         LnnNotifyNodeStateChanged(&connInfo->addr);
         LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
-        LnnNotifyDiscoveryTypeChanged(networkId, oldType);
+        LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
+        LnnNotifyLnnRelationChanged(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type,
+            relation[connInfo->addr.type], true);
     } else {
         NotifyJoinResult(connFsm, networkId, retCode);
         (void)AuthHandleLeaveLNN(connInfo->authId);
@@ -217,13 +218,18 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     NodeInfo *info = NULL;
     const char *udid = NULL;
     bool needReportOffline = false;
+    uint8_t relation[CONNECTION_ADDR_MAX] = {0};
+    ReportCategory report;
 
     info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (info == NULL) {
         return needReportOffline;
     }
     udid = LnnGetDeviceUdid(info);
-    if (LnnSetNodeOffline(udid, (int32_t)connInfo->authId) == REPORT_OFFLINE) {
+    report = LnnSetNodeOffline(udid, connInfo->addr.type, (int32_t)connInfo->authId);
+    LnnGetLnnRelation(udid, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
+    LnnNotifyLnnRelationChanged(udid, connInfo->addr.type, relation[connInfo->addr.type], false);
+    if (report == REPORT_OFFLINE) {
         needReportOffline = true;
         (void)memset_s(basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
         if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
@@ -444,6 +450,7 @@ static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
     connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
     connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
+    connInfo->nodeInfo->lnnRelation[connInfo->addr.type]++;
 }
 
 static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *connInfo)

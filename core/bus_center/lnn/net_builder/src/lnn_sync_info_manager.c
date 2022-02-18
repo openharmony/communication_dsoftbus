@@ -328,6 +328,8 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
 {
     SyncChannelInfo *info = NULL;
     LnnSyncInfoType type;
+    LnnSyncInfoMsgHandler handler;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "data recevied, channelId: %d", channelId);
     if (data == NULL || len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
@@ -345,12 +347,19 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
         return;
     }
     type = (LnnSyncInfoType)(*(int32_t *)data);
-    if (g_syncInfoManager.handlers[type] != NULL) {
-        SoftBusGetTime(&info->accessTime);
-        g_syncInfoManager.handlers[type](type, info->networkId,
-            (const uint8_t *)&data[MSG_HEAD_LEN], len - MSG_HEAD_LEN);
+    handler = g_syncInfoManager.handlers[type];
+    if (handler == NULL) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
     }
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
+    }
+    SoftBusGetTime(&info->accessTime);
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    handler(type, networkId, (const uint8_t *)&data[MSG_HEAD_LEN], len - MSG_HEAD_LEN);
 }
 
 static INetworkingListener g_networkListener = {
@@ -472,7 +481,7 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     SyncInfoMsg *syncMsg = NULL;
     int32_t rc;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync info msg for type: %d", type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync info msg for type: %d, len=%d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;
