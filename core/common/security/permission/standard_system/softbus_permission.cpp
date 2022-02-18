@@ -23,7 +23,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
 namespace {
