@@ -161,7 +161,7 @@ static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
     return AUTH_LINK_TYPE_WIFI;
 }
 
-static void GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherFlag, ConnectOption *option)
+static int32_t GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherFlag, ConnectOption *option)
 {
     int32_t ret;
     char p2pMac[P2P_MAC_LEN] = {0};
@@ -170,7 +170,7 @@ static void GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherFlag
 
     ret = P2pLinkGetPeerMacByPeerIp(peerIp, p2pMac, sizeof(p2pMac));
     if (ret != SOFTBUS_OK) {
-        return;
+        return SOFTBUS_ERR;
     }
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth peerIp %s, p2pmac %s linktype %d flag 0x%x",
@@ -178,10 +178,10 @@ static void GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherFlag
     ret = AuthGetConnectOptionByP2pMac(p2pMac, linkType, &authOption);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s get auth opthon fail", p2pMac);
-        return;
+        return SOFTBUS_ERR;
     }
     (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
-    return;
+    return SOFTBUS_OK;
 }
 
 static int32_t GetAuthConnectOption(int32_t channelId, uint32_t cipherFlag, ConnectOption *option)
@@ -460,6 +460,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
 
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
+    (void)seq;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusReply: channelId=%d", channelId);
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {
@@ -550,7 +551,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_ERR;
     }
 
-    if (GetUuidByChanId(channelId, (conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, flags) != SOFTBUS_OK) {
+    if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, flags) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get Uuid By ChanId failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
