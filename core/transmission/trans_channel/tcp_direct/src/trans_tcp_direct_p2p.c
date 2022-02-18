@@ -41,13 +41,13 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
     int32_t listenerPort;
 
     GetTdcBaseListener(&listener);
-    ret = SetSoftbusBaseListener(DIRECT_CHANNEL_P2P, &listener);
+    ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, &listener);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener set listener fail");
         return ret;
     }
 
-    listenerPort = StartBaseListener(DIRECT_CHANNEL_P2P, ip, *port, SERVER_MODE);
+    listenerPort = StartBaseListener(DIRECT_CHANNEL_SERVER_P2P, ip, *port, SERVER_MODE);
     if (listenerPort < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener start listener fail");
         return SOFTBUS_ERR;
@@ -59,7 +59,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 void StopP2pSessionListener(void)
 {
     if (g_p2pSessionPort > 0) {
-        if (StopBaseListener(DIRECT_CHANNEL_P2P) != SOFTBUS_OK) {
+        if (StopBaseListener(DIRECT_CHANNEL_SERVER_P2P) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StopP2pSessionListener stop listener fail");
         }
     }
@@ -177,6 +177,7 @@ static int32_t SendAuthData(int64_t authId, int32_t module, int32_t flag, int64_
     }
 
     AuthDataHead head = {0};
+    head.dataType = DATA_TYPE_CONNECTION;
     head.module = module;
     head.authId = authId;
     head.flag = flag;
@@ -409,7 +410,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (AddTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(DIRECT_CHANNEL_SERVER_P2P, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply add trigger fail");
         goto EXIT_ERR;
     }
@@ -482,7 +483,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t ret;
     uint32_t requestId;
 
-    conn = CreateNewSessinConn(false);
+    conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
     if (conn == NULL) {
         return SOFTBUS_MEM_ERR;
     }

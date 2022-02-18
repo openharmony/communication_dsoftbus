@@ -286,7 +286,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         goto EXIT_ERR;
     }
 
-    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, object) != SOFTBUS_OK) {
+    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, object,
+        appInfo->myData.pkgName) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
@@ -418,6 +419,7 @@ void TransChannelDeathCallback(const char *pkgName)
 {
     TransProxyDeathCallback(pkgName);
     TransTdcDeathCallback(pkgName);
+    TransLaneMgrDeathCallback(pkgName);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,

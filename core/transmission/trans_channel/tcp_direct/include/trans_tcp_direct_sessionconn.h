@@ -20,6 +20,7 @@
 #include "softbus_def.h"
 #include "common_list.h"
 #include "softbus_app_info.h"
+#include "softbus_base_listener.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -47,6 +48,7 @@ typedef struct {
     int64_t req;
     uint32_t requestId;
     int64_t authId;
+    ListenerModule listenMod;
 } SessionConn;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -67,7 +69,7 @@ SessionConn *GetSessionConnByChannelId(uint32_t channelId);
 
 SessionConn *GetSessionConnByReq(int64_t req);
 
-SessionConn *CreateNewSessinConn(bool isServerSid);
+SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid);
 
 SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn);
 
