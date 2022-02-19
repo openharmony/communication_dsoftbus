@@ -52,9 +52,13 @@ int32_t DiscServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     sptr<IRemoteObject> object = GetSystemAbility();
+    if (object == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        return SOFTBUS_ERR;
+    }
     g_serverProxy = new (std::nothrow) DiscServerProxy(object);
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Create disc server proxy failed!\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
