@@ -474,6 +474,26 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
     return rc;
 }
 
+static bool IsSameNodeStateCb(const INodeStateCb *callback1, const INodeStateCb *callback2)
+{
+    if (callback1->events != callback2->events) {
+        return false;
+    }
+    if ((callback1->events & EVENT_NODE_STATE_ONLINE) &&
+        callback1->onNodeOnline != callback2->onNodeOnline) {
+        return false;
+    }
+    if ((callback1->events & EVENT_NODE_STATE_OFFLINE) &&
+        callback1->onNodeOffline != callback2->onNodeOffline) {
+        return false;
+    }
+    if ((callback1->events & EVENT_NODE_STATE_INFO_CHANGED) &&
+        callback1->onNodeBasicInfoChanged != callback2->onNodeBasicInfoChanged) {
+        return false;
+    }
+    return true;
+}
+
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
 {
     NodeStateCallbackItem *item = NULL;
@@ -485,6 +505,13 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
     }
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock node state cb list in reg");
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
+        if (IsSameNodeStateCb(&item->cb, callback)) {
+            (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "warn: reg node state callback repeatedly");
+            return SOFTBUS_OK;
+        }
     }
     do {
         if (g_busCenterClient.nodeStateCbListCnt >= g_maxNodeStateCbCount) {
@@ -524,7 +551,7 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock node state cb list in unreg");
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
-        if (memcmp(&item->cb, callback, sizeof(*callback)) == 0) {
+        if (IsSameNodeStateCb(&item->cb, callback)) {
             ListDelete(&item->node);
             SoftBusFree(item);
             g_busCenterClient.nodeStateCbListCnt--;

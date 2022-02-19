@@ -52,9 +52,13 @@ int32_t BusCenterServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     sptr<IRemoteObject> object = GetSystemAbility();
+    if (object == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        return SOFTBUS_ERR;
+    }
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Create bus center server proxy failed!\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
