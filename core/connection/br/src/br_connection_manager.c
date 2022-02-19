@@ -34,7 +34,6 @@
 #include "softbus_utils.h"
 #include "stdbool.h"
 #include "string.h"
-#include "time.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
 

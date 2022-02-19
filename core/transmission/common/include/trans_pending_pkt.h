@@ -16,7 +16,6 @@
 #ifndef TRANS_PENDING_PKT_H
 #define TRANS_PENDING_PKT_H
 
-#include <pthread.h>
 #include <stdint.h>
 
 #include "common_list.h"

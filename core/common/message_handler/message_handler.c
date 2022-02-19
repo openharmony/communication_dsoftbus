@@ -51,14 +51,13 @@ struct SoftBusLooperContext {
     SoftBusCond condRunning;
 };
 
-static uint64_t UptimeMicros(void)
+static int64_t UptimeMicros(void)
 {
     SoftBusSysTime t;
     t.sec = 0;
     t.usec = 0;
     SoftBusGetTime(&t);
-    uint64_t when = ((uint64_t)(t.sec)) * TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER +
-        (uint64_t)t.usec;
+    int64_t when = t.sec * TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER + t.usec;
     return when;
 }
 
@@ -132,11 +131,11 @@ static void *LoopTask(void *arg)
             continue;
         }
 
-        uint64_t now = UptimeMicros();
+        int64_t now = UptimeMicros();
         ListNode *item = context->msgHead.next;
         SoftBusMessage *msg = NULL;
         SoftBusMessageNode *itemNode = CONTAINER_OF(item, SoftBusMessageNode, node);
-        uint64_t time = itemNode->msg->time;
+        int64_t time = itemNode->msg->time;
         if (now >= time) {
             msg = itemNode->msg;
             ListDelete(item);

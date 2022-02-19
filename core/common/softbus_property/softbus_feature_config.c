@@ -102,7 +102,7 @@ typedef struct {
 typedef struct {
     ConfigType type;
     unsigned char *val;
-    int32_t len;
+    uint32_t len;
 } ConfigVal;
 
 ConfigItem g_config = {
@@ -260,7 +260,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     },
 };
 
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
+int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 {
     if (len > g_configItems[type].len) {
         return SOFTBUS_ERR;
@@ -274,7 +274,7 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len)
     return SOFTBUS_OK;
 }
 
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len)
+int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     if (len != g_configItems[type].len) {
         return SOFTBUS_ERR;

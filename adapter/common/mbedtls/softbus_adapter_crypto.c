@@ -85,7 +85,7 @@ static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigne
     return (plainTextSize + OVERHEAD_LEN);
 }
 
-static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned char *cipherText,
+static uint32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned char *cipherText,
     uint32_t cipherTextSize, unsigned char *plain, uint32_t plainLen)
 {
     if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
@@ -104,7 +104,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
         return SOFTBUS_DECRYPT_ERR;
     }
 
-    int32_t actualPlainLen = cipherTextSize - OVERHEAD_LEN;
+    uint32_t actualPlainLen = cipherTextSize - OVERHEAD_LEN;
     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
         GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
@@ -204,7 +204,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusGenerateSessionKey(char *key, int32_t len)
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 {
     if (SoftBusGenerateRandomArray((unsigned char*)key, len) != SOFTBUS_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "generate sessionKey error.");
@@ -267,10 +267,7 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
         return SOFTBUS_ENCRYPT_ERR;
     }
     uint32_t outLen = inLen - OVERHEAD_LEN;
-    int32_t result = MbedAesGcmDecrypt(cipherKey, input, inLen, decryptData, outLen);
-    if (result <= 0) {
-        return SOFTBUS_ENCRYPT_ERR;
-    }
+    uint32_t result = MbedAesGcmDecrypt(cipherKey, input, inLen, decryptData, outLen);
     *decryptLen = result;
     return SOFTBUS_OK;
 }
