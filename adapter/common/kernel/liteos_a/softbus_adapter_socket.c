@@ -14,11 +14,11 @@
  */
 
 #include "softbus_adapter_socket.h"
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <securec.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
@@ -32,24 +32,20 @@
 
 static int32_t GetErrorCode(void)
 {
-    int32_t errCode = SOFTBUS_ADAPTER_ERR;
+    int32_t errCode;
     switch (errno) {
-        case EINTR : {
+        case EINTR:
             errCode = SOFTBUS_ADAPTER_SOCKET_EINTR;
             break;
-        }
-        case EINPROGRESS : {
+        case EINPROGRESS:
             errCode = SOFTBUS_ADAPTER_SOCKET_EINPROGRESS;
             break;
-        }
-        case EAGAIN : {
+        case EAGAIN:
             errCode = SOFTBUS_ADAPTER_SOCKET_EAGAIN;
             break;
-        }
-        default : {
+        default:
             errCode = SOFTBUS_ADAPTER_ERR;
             break;
-        }
     }
     return errCode;
 }
@@ -222,8 +218,8 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
     }
 }
 
-int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
-    *exceptFds, struct timeval *timeOut)
+int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
+    struct timeval *timeOut)
 {
     if (timeOut == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timeOut is null");
@@ -284,8 +280,8 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32
     return ret;
 }
 
-int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
-    *toAddr, int32_t toAddrLen)
+int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags,
+    const SoftBusSockAddr *toAddr, int32_t toAddrLen)
 {
     if ((toAddr == NULL) || (toAddrLen <= 0)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "toAddr is null or toAddrLen <= 0");
@@ -312,8 +308,8 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
     return ret;
 }
 
-int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
-    *fromAddr, int32_t *fromAddrLen)
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr *fromAddr,
+    int32_t *fromAddrLen)
 {
     if ((fromAddr == NULL) || (fromAddrLen == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fromAddr or fromAddrLen is null");

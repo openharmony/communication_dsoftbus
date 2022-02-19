@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/prctl.h>
-#include <time.h>
 
 #include "cJSON.h"
 #include "message_handler.h"
