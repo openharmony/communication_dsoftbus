@@ -57,17 +57,17 @@ SoftBusList *CreateSoftBusList(void);
 
 void DestroySoftBusList(SoftBusList *list);
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, int32_t inLen);
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen);
 
-int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, int32_t inLen);
+int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen);
 
 int32_t GenerateRandomStr(char *str, uint32_t size);
 
 bool IsValidString(const char *input, uint32_t maxLen);
 
-int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *binMac, int32_t binMacLen);
+int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen);
 
-int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen, const uint8_t *binMac, int32_t binMacLen);
+int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
 #ifdef __cplusplus
 #if __cplusplus

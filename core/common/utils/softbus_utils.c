@@ -16,6 +16,7 @@
 #include "softbus_utils.h"
 
 #include <stdlib.h>
+
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -118,7 +119,7 @@ void SoftBusTimerDeInit(void)
     }
 }
 
-int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, int32_t inLen)
+int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen)
 {
     (void)outBufLen;
 
@@ -160,9 +161,9 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
     return SOFTBUS_OK;
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, int32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
-    if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < (uint32_t)HEXIFY_LEN(inLen))) {
+    if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
         return SOFTBUS_ERR;
     }
 
@@ -229,7 +230,7 @@ bool IsValidString(const char *input, uint32_t maxLen)
     return true;
 }
 
-int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *binMac, int32_t binMacLen)
+int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen)
 {
     if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -242,21 +243,22 @@ int32_t ConvertBtMacToBinary(const char *strMac, int32_t strMacLen, uint8_t *bin
         SoftBusFree(tmpMac);
         return SOFTBUS_MEM_ERR;
     }
-    char *token = strtok((char *)tmpMac, BT_ADDR_DELIMITER);
+    char *nextTokenPtr = NULL;
+    char *token = strtok_r((char *)tmpMac, BT_ADDR_DELIMITER, &nextTokenPtr);
     char *endptr = NULL;
     for (int i = 0; i < BT_ADDR_LEN; i++) {
         if (token == NULL) {
             SoftBusFree(tmpMac);
             return SOFTBUS_ERR;
         }
-        binMac[i] = strtol(token, &endptr, BT_ADDR_BASE);
-        token = strtok(NULL, BT_ADDR_DELIMITER);
+        binMac[i] = (uint8_t)strtol(token, &endptr, BT_ADDR_BASE);
+        token = strtok_r(NULL, BT_ADDR_DELIMITER, &nextTokenPtr);
     }
     SoftBusFree(tmpMac);
     return SOFTBUS_OK;
 }
 
-int32_t ConvertBtMacToStr(char *strMac, int32_t strMacLen, const uint8_t *binMac, int32_t binMacLen)
+int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen)
 {
     int32_t ret;
 

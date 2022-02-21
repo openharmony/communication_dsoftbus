@@ -28,7 +28,7 @@ static bool IsDifferentSign(int32_t seqA, int32_t seqB)
 
 static bool IsPassDuplicateCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
 {
-    uint32_t offset = seqVerifyInfo->maxSeq - recvSeq;
+    uint32_t offset = (uint32_t)(seqVerifyInfo->maxSeq - recvSeq);
     int32_t isRepeat = seqVerifyInfo->recvBitmap & (0x1UL << offset);
     if (isRepeat) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "duplicated package seq[%d].", recvSeq);
@@ -49,7 +49,7 @@ static bool IsPassOverMaxCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "seq bias reach max[%d].", MAX_SEQ_BIAS);
         return false;
     }
-    uint32_t seqOffset = recvSeq - seqVerifyInfo->maxSeq + 1;
+    uint32_t seqOffset = (uint32_t)(recvSeq - seqVerifyInfo->maxSeq + 1);
     seqVerifyInfo->maxSeq = ++recvSeq;
     seqVerifyInfo->recvBitmap = seqVerifyInfo->recvBitmap << seqOffset;
     /* 1: represent the penultimate bit of recvBitmap is 1. */

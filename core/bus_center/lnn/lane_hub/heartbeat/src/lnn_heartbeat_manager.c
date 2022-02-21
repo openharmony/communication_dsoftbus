@@ -160,7 +160,7 @@ static bool IsRepeatedUpdateReq(const char *udidHash, ConnectionAddrType type, u
     return false;
 }
 
-static int32_t GenHexStringHash(const unsigned char *str, int32_t len, char *hashStr)
+static int32_t GenHexStringHash(const unsigned char *str, uint32_t len, char *hashStr)
 {
     if (str == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat GenHexStringHash invalid param");

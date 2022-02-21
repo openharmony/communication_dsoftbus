@@ -14,8 +14,8 @@
  */
 
 #include <securec.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
@@ -262,10 +262,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 {
-    if (len > g_configItems[type].len) {
-        return SOFTBUS_ERR;
-    }
-    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (type != g_configItems[type].type)) {
+    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (len > g_configItems[type].len) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len) != EOK) {
@@ -276,10 +273,7 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 
 int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
-    if (len != g_configItems[type].len) {
-        return SOFTBUS_ERR;
-    }
-    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (type != g_configItems[type].type)) {
+    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (len != g_configItems[type].len) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
