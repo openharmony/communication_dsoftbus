@@ -286,7 +286,8 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "InLen[%d] seq[%d] outLen[%d] flags[%d]",
         len, seq, packDataInfo.outLen, flags);
     if (flags == PROXY_FLAG_MESSAGE) {
-        ret = TransProxyTransDataSendSyncMsg(channelId, (char *)packDataInfo.outData, (int32_t)packDataInfo.outLen, flags, seq);
+        ret = TransProxyTransDataSendSyncMsg(channelId, (char *)packDataInfo.outData,
+            (int32_t)packDataInfo.outLen, flags, seq);
     } else {
         ret = TransProxyTransDataSendMsg(channelId, (char *)packDataInfo.outData, (int32_t)packDataInfo.outLen, flags);
     }
@@ -705,7 +706,8 @@ static int32_t TransProxyNormalSliceProcess(SliceProcessor *processor, const Sli
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (memcpy_s(processor->data + processor->dataLen, (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
+    if (memcpy_s(processor->data + processor->dataLen,
+        (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy fail when proc normal slice");
         return SOFTBUS_MEM_ERR;
     }
@@ -723,7 +725,8 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (memcpy_s(processor->data + processor->dataLen, (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
+    if (memcpy_s(processor->data + processor->dataLen,
+        (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy fail when proc last slice");
         return SOFTBUS_MEM_ERR;
     }
