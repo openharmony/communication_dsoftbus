@@ -325,7 +325,7 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
         if (*fdArrLen == fdArrSize) {
             int32_t *tmp = NULL;
 
-            tmp = (int32_t *)SoftBusCalloc(sizeof(int32_t) * fdArrSize * FDARR_EXPAND_BASE);
+            tmp = (int32_t *)SoftBusCalloc((int32_t)sizeof(int32_t) * fdArrSize * FDARR_EXPAND_BASE);
             if (tmp == NULL) {
                 SoftBusFree(tmpFdArr);
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCalloc failed, out of memory");
@@ -368,17 +368,17 @@ static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFd
         SoftBusMutexUnlock(&g_listenerList[i].lock);
 
         if ((listenFd > 0) && SoftBusSocketFdIsset(listenFd, readSet)) {
-            OnEvent(i, listenFd, SOFTBUS_SOCKET_IN);
+            OnEvent((ListenerModule)i, listenFd, SOFTBUS_SOCKET_IN);
         }
         for (int j = 0; j < fdArrLen; j++) {
             if (SoftBusSocketFdIsset(fdArr[j], readSet)) {
-                OnEvent(i, fdArr[j], SOFTBUS_SOCKET_IN);
+                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_IN);
             }
             if (SoftBusSocketFdIsset(fdArr[j], writeSet)) {
-                OnEvent(i, fdArr[j], SOFTBUS_SOCKET_OUT);
+                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_OUT);
             }
             if (SoftBusSocketFdIsset(fdArr[j], exceptSet)) {
-                OnEvent(i, fdArr[j], SOFTBUS_SOCKET_EXCEPTION);
+                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_EXCEPTION);
             }
         }
         SoftBusFree(fdArr);

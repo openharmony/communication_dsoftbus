@@ -868,7 +868,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
         bleOption->freq = option->subscribeOption->freq;
     }
-    bleOption->optionCapBitMap[0] = ConvertCapBitMap(bleOption->optionCapBitMap[0]);
+    bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(bleOption->optionCapBitMap[0]);
 }
 
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
@@ -897,7 +897,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         info->capCount[pos] += 1;
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
-        info->freq[pos] = freq;
+        info->freq[pos] = (int32_t)freq;
         info->capDataLen[pos] = 0;
         if (custData == NULL) {
             continue;
@@ -928,10 +928,10 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
     bool isWakeRemote = false;
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
+        optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
     } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
-        optionCapBitMap[0] = ConvertCapBitMap(optionCapBitMap[0]);
+        optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
         isSameAccount = option->subscribeOption->isSameAccount;
         isWakeRemote = option->subscribeOption->isWakeRemote;
     }
