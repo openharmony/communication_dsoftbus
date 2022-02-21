@@ -17,8 +17,8 @@
 
 #include "br_connection_manager.h"
 #include "br_trans_manager.h"
-#include "common_list.h"
 #include "bus_center_manager.h"
+#include "common_list.h"
 #include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"

@@ -186,16 +186,16 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
 {
 #ifdef __linux__
     /* periorityParam is between 1 and 99 in linux */
-    #define PTHREAD_PERIOR_LOWEST (1)
-    #define PTHREAD_PERIOR_LOW (33)
-    #define PTHREAD_PERIOR_HIGH (66)
-    #define PTHREAD_PERIOR_HIGHEST (99)
+    #define PTHREAD_PERIOR_LOWEST 1
+    #define PTHREAD_PERIOR_LOW 33
+    #define PTHREAD_PERIOR_HIGH 66
+    #define PTHREAD_PERIOR_HIGHEST 99
 #else
     /* periorityParam is between 0 and 31 in liteOS */
-    #define PTHREAD_PERIOR_LOWEST (30)
-    #define PTHREAD_PERIOR_LOW (20)
-    #define PTHREAD_PERIOR_HIGH (10)
-    #define PTHREAD_PERIOR_HIGHEST (0)
+    #define PTHREAD_PERIOR_LOWEST 30
+    #define PTHREAD_PERIOR_LOW 20
+    #define PTHREAD_PERIOR_HIGH 10
+    #define PTHREAD_PERIOR_HIGHEST 0
 #endif
 
     struct sched_param periorityParam;
