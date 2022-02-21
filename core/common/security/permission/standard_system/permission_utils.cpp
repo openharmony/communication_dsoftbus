@@ -17,7 +17,6 @@
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "sys_mgr_client.h"
 
 
 extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
