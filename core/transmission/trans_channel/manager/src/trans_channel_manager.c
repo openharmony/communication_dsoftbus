@@ -282,7 +282,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     transInfo->channelType = TransGetChannelType(info);
-    if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt, &(transInfo->channelId)) != SOFTBUS_OK) {
+    if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo,&connOpt,
+        &(transInfo->channelId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
