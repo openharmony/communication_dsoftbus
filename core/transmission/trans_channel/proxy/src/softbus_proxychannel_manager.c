@@ -107,11 +107,11 @@ int16_t TransProxyGetNewMyId(void)
     while (cnt) {
         cnt--;
         myId++;
-        int16_t ret = myId % MYID_MAX_NUM + 1;
+        uint16_t ret = myId % MYID_MAX_NUM + 1;
         ret = EndianSwap16(ret);
-        if (MyIdIsValid(ret) == SOFTBUS_OK) {
+        if (MyIdIsValid((int16_t)ret) == SOFTBUS_OK) {
             SoftBusMutexUnlock(&g_myIdLock);
-            return ret;
+            return (int16_t)ret;
         }
     }
     SoftBusMutexUnlock(&g_myIdLock);
