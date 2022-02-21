@@ -290,8 +290,8 @@ static bool GetIpAddr(const char *ifName, char *ipAddr, int32_t len)
     }
     close(fd);
     struct sockaddr_in *sin = (struct sockaddr_in *)(&ifr.ifr_addr);
-    if (strcpy_s(ipAddr, len, inet_ntoa(sin->sin_addr)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy_s ip addr failed.");
+    if (inet_ntop(sin->sin_family, sin->sin_addr, ipAddr, len) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "inet_ntop ip addr failed.");
         return false;
     }
     return true;
@@ -605,7 +605,7 @@ int32_t P2pLinkRequestGcIp(const char *mac, char *ip, int32_t len)
 
 static int32_t ConvertIpStringToIntArray(unsigned int dest[IPV4_ARRAY_LEN], const char *src)
 {
-    int32_t ret = sscanf_s(src, "%d.%d.%d.%d", &dest[0], &dest[1], &dest[2], &dest[3]);
+    int32_t ret = sscanf_s(src, "%u.%u.%u.%u", &dest[0], &dest[1], &dest[2], &dest[3]);
     if (ret == -1) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sscanf_s failed, src = %s.", src);
         return SOFTBUS_MEM_ERR;

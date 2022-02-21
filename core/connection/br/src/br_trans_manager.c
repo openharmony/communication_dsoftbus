@@ -119,7 +119,7 @@ int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
     }
     int32_t ret = SOFTBUS_OK;
     int32_t writeRet;
-    int32_t tempLen = len;
+    int32_t tempLen = (int32_t)len;
     while (tempLen > 0) {
         (void)pthread_mutex_lock(&brConnInfo->lock);
         while (brConnInfo->conGestState == BT_RFCOM_CONGEST_ON &&

@@ -21,7 +21,7 @@
 
 typedef struct {
     ListNode node;
-    int32_t requestId;
+    uint32_t requestId;
     ConnectResult callback;
 } RequestInfo;
 

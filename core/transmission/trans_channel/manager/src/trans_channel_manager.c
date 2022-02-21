@@ -282,7 +282,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     transInfo->channelType = TransGetChannelType(info);
-    if (TransOpenChannelProc(transInfo->channelType, appInfo, &connOpt, &(transInfo->channelId)) != SOFTBUS_OK) {
+    if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt, &(transInfo->channelId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
@@ -406,9 +406,9 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return TransSendAuthMsg(channelId, data, len);
+            return TransSendAuthMsg(channelId, data, (int32_t)len);
         case CHANNEL_TYPE_PROXY:
-            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, msgType);
+            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
             return SOFTBUS_ERR;
