@@ -723,7 +723,7 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (memcpy_s(processor->data + processor->dataLen, (uint32_t)(processor->bufLen - processor->dataLen, data), len) != EOK) {
+    if (memcpy_s(processor->data + processor->dataLen, (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy fail when proc last slice");
         return SOFTBUS_MEM_ERR;
     }
