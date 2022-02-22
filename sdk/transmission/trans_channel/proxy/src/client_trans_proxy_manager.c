@@ -48,6 +48,10 @@ static RecvFileInfo g_recvFileInfo = {
 
 static void ProxyFileTransTimerProc(void);
 
+#define BYTE_INT_NUM (4)
+#define BIT_INT_NUM (32)
+#define BIT_BYTE_NUM (8)
+
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
@@ -185,6 +189,34 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
     ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_MESSAGE);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
+}
+
+static bool IntToByte(int32_t value, char *buffer, int32_t len)
+{
+    if ((buffer == NULL) || (len < sizeof(int32_t))) {
+        return false;
+    }
+
+    for (int32_t i = 0; i < BYTE_INT_NUM; i++) {
+        int32_t offset = BIT_INT_NUM - (i + 1) * BIT_BYTE_NUM;
+        buffer[i] = (char)((value >> offset) & 0xFF);
+    }
+    return true;
+}
+
+static bool ByteToInt(char *buffer, int32_t len, int32_t *outValue)
+{
+    if ((outValue == NULL) || (buffer == NULL) || (len < sizeof(int32_t))) {
+        return false;
+    }
+    int32_t value = 0;
+    for (int32_t i = 0; i < BYTE_INT_NUM; i++) {
+        value <<= BIT_BYTE_NUM;
+        value |= buffer[i] & 0xFF;
+    }
+
+    *outValue = value;
+    return true;
 }
 
 static int32_t GetIdleIndexNode(int32_t *index)
@@ -488,7 +520,7 @@ int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, const char
             return SOFTBUS_ERR;
         }
         if (index == 0) {
-            uint32_t destFileNameSize = strlen(destFile) + 1;
+            uint32_t destFileNameSize = strlen(destFile);
             if (memcpy_s(fileFrame.data + FRAME_DATA_SEQ_OFFSET, destFileNameSize,
                 destFile, destFileNameSize) != SOFTBUS_OK) {
                 return SOFTBUS_ERR;
@@ -559,7 +591,7 @@ char *GetDestFilePath(FileFrame fileFrame)
         return NULL;
     }
 
-    int32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET;
+    int32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET + 1;
     if (filePathSize > MAX_REMOTE_PATH_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is too long");
         return NULL;
@@ -887,14 +919,19 @@ static int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileLis
         return SOFTBUS_ERR;
     }
 
+    char byteBuff[sizeof(int32_t)] = {0};
     for (index = 0; index < fileCnt; index++) {
-        (void)memcpy_s(buffer + offset, indexSize, &index, indexSize);
+        if (IntToByte(index, byteBuff, indexSize) == false) {
+            return SOFTBUS_ERR;
+        }
+        (void)memcpy_s(buffer + offset, indexSize, byteBuff, indexSize);
         offset += indexSize;
-
-        fileNameSize = strlen(destFile[index]) + 1;
-        (void)memcpy_s(buffer + offset, sizeof(fileNameSize), &fileNameSize, sizeof(fileNameSize));
+        fileNameSize = strlen(destFile[index]);
+        if (IntToByte(fileNameSize, byteBuff, indexSize) == false) {
+            return SOFTBUS_ERR;
+        }
+        (void)memcpy_s(buffer + offset, sizeof(fileNameSize), byteBuff, sizeof(fileNameSize));
         offset += sizeof(fileNameSize);
-
         (void)memcpy_s(buffer + offset, fileNameSize, destFile[index], fileNameSize);
         offset += fileNameSize;
     }
@@ -915,13 +952,17 @@ int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int32_t *fi
     uint32_t offset = 0;
     int32_t count = 0;
     int32_t fileNameLength = 0;
-
+    int32_t byteLen = sizeof(int32_t);
+    char byteBuff[sizeof(int32_t)] = {0};
     while (offset < bufferInfo.bufferSize) {
         offset += sizeof(uint32_t);
 
-        (void)memcpy_s(&fileNameLength, sizeof(fileNameLength), buffer + offset, sizeof(fileNameLength));
-        offset += sizeof(fileNameLength);
+        (void)memcpy_s(byteBuff, byteLen, buffer + offset, byteLen);
 
+        if (ByteToInt(byteBuff, byteLen, &fileNameLength) == false) {
+            return SOFTBUS_ERR;
+        }
+        offset += byteLen;
         if ((fileNameLength < 0) || (fileNameLength > (int32_t)(bufferInfo.bufferSize - offset))) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList invalid fileLength");
             return SOFTBUS_ERR;
