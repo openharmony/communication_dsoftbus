@@ -51,7 +51,7 @@ GetLaneByType g_linkLaneTable[LINK_TYPE_MAX + 1] = {
 
 static bool IsSupportUdp(LnnLaneProperty prop)
 {
-    if (prop == LNN_STREAM_LANE) {
+    if (prop == LNN_MESSAGE_LANE || prop == LNN_STREAM_LANE) {
         return true;
     } else {
         return false;
