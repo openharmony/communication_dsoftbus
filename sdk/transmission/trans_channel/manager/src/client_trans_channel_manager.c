@@ -150,7 +150,7 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
     return ret;
 }
 
-int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
+int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret = SOFTBUS_OK;
