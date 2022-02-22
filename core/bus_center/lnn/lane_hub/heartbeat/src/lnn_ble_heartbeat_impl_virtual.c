@@ -25,13 +25,13 @@ int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnceBleBeatBegin(void)
+int32_t LnnOnceBleHbBegin(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat once");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnOnceBleBeatEnd(void)
+int32_t LnnOnceBleHbEnd(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat end");
     return SOFTBUS_NOT_IMPLEMENT;

@@ -36,7 +36,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define BEAT_REQ_LIFETIME_IN_MEM (60 * 60 * HEARTBEAT_TIME_FACTOR)
+#define BEAT_REQ_LIFETIME_IN_MEM (60 * 60 * HB_TIME_FACTOR)
 
 typedef struct {
     ListNode node;
@@ -54,151 +54,153 @@ typedef struct {
     int32_t (*deinit)(void);
 } HeartbeatImpl;
 
-static void BeatMgrRelayToMaster(const char *udidHash, ConnectionAddrType type);
-static int32_t BeatMgrRecvHigherWight(const char *udidHash, int32_t weight, ConnectionAddrType type);
-static int32_t BeatMgrUpdateDevInfo(DeviceInfo *device, int32_t weight, int32_t localMasterWeight);
+static void HbMgrRelayToMaster(const char *udidHash, ConnectionAddrType type);
+static int32_t HbMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type);
+static int32_t HbMgrUpdateDevInfo(DeviceInfo *device, int32_t weight, int32_t localMasterWeight);
 
-static HeartbeatImpl g_heartbeatImpl[LNN_BEAT_IMPL_TYPE_MAX] = {
-    [LNN_BEAT_IMPL_TYPE_BLE] = {
+static HeartbeatImpl g_hbImpl[HB_IMPL_TYPE_MAX] = {
+    [HB_IMPL_TYPE_BLE] = {
         .init = LnnInitBleHeartbeat,
-        .onOnceBegin = LnnOnceBleBeatBegin,
-        .onOnceEnd = LnnOnceBleBeatEnd,
+        .onOnceBegin = LnnOnceBleHbBegin,
+        .onOnceEnd = LnnOnceBleHbEnd,
         .stop = LnnStopBleHeartbeat,
         .deinit = LnnDeinitBleHeartbeat,
     },
 };
 
-static LnnHeartbeatImplCallback g_heartbeatCallback = {
-    .onRelay = BeatMgrRelayToMaster,
-    .onRecvHigherWeight = BeatMgrRecvHigherWight,
-    .onUpdateDev = BeatMgrUpdateDevInfo,
+static LnnHeartbeatImplCallback g_hbCallback = {
+    .onRelay = HbMgrRelayToMaster,
+    .onRecvHigherWeight = HbMgrRecvHigherWeight,
+    .onUpdateDev = HbMgrUpdateDevInfo,
 };
 
-static SoftBusList *g_beatUpdateInfoList = NULL;
+static SoftBusList *g_hbUpdateInfoList = NULL;
 
-static int32_t FirstSetUpdateReqTime(DeviceInfo *device, int32_t weight, int32_t localMasterWeight,
-    uint64_t *updateTime)
+static int32_t FirstSetUpdateReqTime(DeviceInfo *device, int32_t weight, int32_t localMasterWeight, uint64_t updateTime)
 {
     HeartbeatUpdateReq *item = NULL;
+
     item = (HeartbeatUpdateReq *)SoftBusMalloc(sizeof(HeartbeatUpdateReq));
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat item malloc err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB item malloc err");
         return SOFTBUS_MALLOC_ERR;
     }
-
     item->device = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     if (item->device == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat device malloc err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB calloc deviceInfo err");
         SoftBusFree(item);
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(item->device, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat device memcpy_s err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB memcpy_s deviceInfo err");
         SoftBusFree(item->device);
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
-
-    item->lastUpdateTime = *updateTime;
+    item->lastUpdateTime = updateTime;
     item->weight = weight;
     item->localMasterWeight = localMasterWeight;
     ListInit(&item->node);
-    ListAdd(&g_beatUpdateInfoList->list, &item->node);
-    g_beatUpdateInfoList->cnt++;
+    ListAdd(&g_hbUpdateInfoList->list, &item->node);
+    g_hbUpdateInfoList->cnt++;
     return SOFTBUS_OK;
 }
 
-static int32_t SetUpdateReqTime(DeviceInfo *device, int32_t weight, int32_t localMasterWeight,
-    uint64_t *updateTime)
+static int32_t SetUpdateReqTime(DeviceInfo *device, int32_t weight, int32_t localMasterWeight, uint64_t updateTime)
 {
     HeartbeatUpdateReq *item = NULL;
     HeartbeatUpdateReq *nextItem = NULL;
-    if (SoftBusMutexLock(&g_beatUpdateInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock BeatMgrUpdateList fail");
+
+    if (SoftBusMutexLock(&g_hbUpdateInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock update info list fail");
         return SOFTBUS_LOCK_ERR;
     }
-
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_beatUpdateInfoList->list, HeartbeatUpdateReq, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hbUpdateInfoList->list, HeartbeatUpdateReq, node) {
         if (memcmp((void *)item->device->devId, (void *)device->devId, SHORT_UDID_HASH_LEN) == 0 &&
             LnnGetDiscoveryType(item->device->addr[0].type) == LnnGetDiscoveryType(device->addr[0].type)) {
-            item->lastUpdateTime = *updateTime;
+            item->lastUpdateTime = updateTime;
             item->weight = weight;
             item->localMasterWeight = localMasterWeight;
-            (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
+            (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
             return SOFTBUS_OK;
         }
-        if ((*updateTime - item->lastUpdateTime) > BEAT_REQ_LIFETIME_IN_MEM) {
+        if ((updateTime - item->lastUpdateTime) > BEAT_REQ_LIFETIME_IN_MEM) {
             ListDelete(&item->node);
             SoftBusFree(item->device);
             SoftBusFree(item);
         }
     }
-
-    FirstSetUpdateReqTime(device, weight, localMasterWeight, updateTime);
-    (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
+    if (FirstSetUpdateReqTime(device, weight, localMasterWeight, updateTime) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB first set update req time fail");
+        (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
+        return SOFTBUS_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
     return SOFTBUS_OK;
 }
 
-static bool IsRepeatedUpdateReq(const char *udidHash, ConnectionAddrType type, uint64_t *nowTime)
+static bool IsRepeatedUpdateReq(const char *udidHash, ConnectionAddrType type, uint64_t nowTime)
 {
-    /* ignore repeated (udidHash & DiscoveryType) update callbacks within 10 seconds */
+    /* ignore repeated (udidHash & DiscoveryType) update request within 10 seconds */
     HeartbeatUpdateReq *item = NULL;
-    if (SoftBusMutexLock(&g_beatUpdateInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock BeatMgrUpdateList fail");
+
+    if (SoftBusMutexLock(&g_hbUpdateInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock update info list fail");
         return false;
     }
-
-    LIST_FOR_EACH_ENTRY(item, &g_beatUpdateInfoList->list, HeartbeatUpdateReq, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_hbUpdateInfoList->list, HeartbeatUpdateReq, node) {
         if (memcmp((void *)item->device->devId, (void *)udidHash, DISC_MAX_DEVICE_ID_LEN) == 0 &&
             LnnGetDiscoveryType(item->device->addr[0].type) == LnnGetDiscoveryType(type) &&
-            (*nowTime - item->lastUpdateTime < HEARTBEAT_UPDATE_TIME_PRECISION)) {
-            (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
+            (nowTime - item->lastUpdateTime < HB_UPDATE_INTERVAL_LEN)) {
+            (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
             return true;
         }
     }
-    (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
     return false;
 }
 
 static int32_t GenHexStringHash(const unsigned char *str, int32_t len, char *hashStr)
 {
+    int32_t ret;
+    unsigned char hashResult[HB_SHA_HASH_LEN] = {0};
+
     if (str == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat GenHexStringHash invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB gen str hash invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    unsigned char hashResult[BEAT_SHA_HASH_LEN] = {0};
-    int32_t ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
+    ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat GenerateStrHash fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB gen str hash fail, ret=%d", ret);
         return ret;
     }
     ret = ConvertBytesToHexString(hashStr, len + 1, hashResult, len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat ConvertBytesToHexString fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB convert bytes to str hash fail ret=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;
 }
 
-static NodeInfo *BeatGetMatchNode(const char *devId, const ConnectionAddrType type)
+static NodeInfo *HbGetMatchNode(const char *devId, const ConnectionAddrType type)
 {
-    NodeBasicInfo *info = NULL;
     int32_t infoNum, i;
+    NodeBasicInfo *info = NULL;
+    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get node info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get all online node info fail");
         return NULL;
     }
     if (info == NULL || infoNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "beat no online node");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB none online node");
         return NULL;
     }
-
-    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     DiscoveryType discType = LnnGetDiscoveryType(type);
     for (i = 0; i < infoNum; i++) {
         NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
         if (nodeInfo == NULL || !LnnHasDiscoveryType(nodeInfo, discType)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "beat node online not have discType:%d", discType);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node online not have discType:%d", discType);
             continue;
         }
         if (GenHexStringHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
@@ -206,7 +208,7 @@ static NodeInfo *BeatGetMatchNode(const char *devId, const ConnectionAddrType ty
             continue;
         }
         if (strncmp(udidHash, devId, SHORT_UDID_HASH_HEX_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "beat node online udidHash:%s, devId:%s", udidHash, devId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node online udidHash:%s", udidHash);
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -215,288 +217,308 @@ static NodeInfo *BeatGetMatchNode(const char *devId, const ConnectionAddrType ty
     return NULL;
 }
 
-static int32_t BeatMgrDeviceFound(const DeviceInfo *device)
+static int32_t HbMgrDiscoveryDevice(const DeviceInfo *device)
 {
     ConnectionAddr *addr = (ConnectionAddr *)device->addr;
     if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device addr is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB discovery device addr is null");
         return SOFTBUS_ERR;
     }
-
     if (LnnNotifyDiscoveryDevice(addr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify device found fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify device found fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t BeatProcessUpdateReq(const DeviceInfo *device, const uint64_t *updateTime)
+static int32_t HbProcessUpdateReq(const DeviceInfo *device, const uint64_t updateTime)
 {
-    NodeInfo *nodeInfo = BeatGetMatchNode(device->devId, device->addr[0].type);
+    NodeInfo *nodeInfo = HbGetMatchNode(device->devId, device->addr[0].type);
     if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "beat find device [udidHash:%s, ConnectionAddrType:%02X]",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) find device udidHash:%s, ConnectionAddrType:%02X",
             device->devId, device->addr[0].type);
-        (void)BeatMgrDeviceFound(device);
+        (void)HbMgrDiscoveryDevice(device);
         return SOFTBUS_OK;
     }
-
     if (LnnSetDistributedHeartbeatTimestamp(nodeInfo->networkId, updateTime) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat update timeStamp err, udidHash:%s", device->devId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB update timeStamp err, udidHash:%s", device->devId);
         return SOFTBUS_ERR;
     }
-    if (LnnRemoveBeatFsmMsg(EVENT_BEAT_DEVICE_LOST, (uint64_t)device->addr[0].type,
-        nodeInfo->networkId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat remove offline check err, udidHash:%s", device->devId);
+    if (LnnRemoveHbFsmMsg(EVENT_HB_DEVICE_LOST, (uint64_t)device->addr[0].type, nodeInfo->networkId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB remove offline check err, udidHash:%s", device->devId);
         return SOFTBUS_ERR;
     }
     if (LnnOfflineTimingByHeartbeat(nodeInfo->networkId, device->addr[0].type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat set new offline check err, udidHash:%s", device->devId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set new offline check err, udidHash:%s", device->devId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t BeatMgrUpdateDevInfo(DeviceInfo *device, int32_t weight, int32_t localMasterWeight)
+static int32_t HbMgrUpdateDevInfo(DeviceInfo *device, int32_t weight, int32_t localMasterWeight)
 {
     SoftBusSysTime times;
     SoftBusGetTime(&times);
     uint64_t nowTime;
 
-    nowTime = (uint64_t)times.sec * HEARTBEAT_TIME_FACTOR + (uint64_t)times.usec / HEARTBEAT_TIME_FACTOR;
-    if (IsRepeatedUpdateReq(device->devId, device->addr[0].type, &nowTime) == true) {
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
-    if (SetUpdateReqTime(device, weight, localMasterWeight, &nowTime) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat updateMgrDev fail, udidHash:%s", device->devId);
+    if (device == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr update deviceInfo get invalid param");
         return SOFTBUS_ERR;
     }
+    nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+    if (IsRepeatedUpdateReq(device->devId, device->addr[0].type, nowTime)) {
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    if (SetUpdateReqTime(device, weight, localMasterWeight, nowTime) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB update req time fail, udidHash:%s", device->devId);
+        return SOFTBUS_ERR;
+    }
+
     char *deviceType = LnnConvertIdToDeviceType((uint16_t)device->devType);
     if (deviceType == NULL) {
         return SOFTBUS_ERR;
     }
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, ">> BeatMgrUpdateDevInfo OnTock [udidHash:%s, devTypeHex:%02X,"
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X,"
         "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, localMasterWeight:%d, nowTime:%llu]", device->devId,
         device->devType, deviceType, device->addr[0].type, weight, localMasterWeight, nowTime);
-
-    if (BeatProcessUpdateReq(device, &nowTime) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return HbProcessUpdateReq(device, nowTime);
 }
 
-static int32_t BeatMgrRecvHigherWight(const char *udidHash, int32_t weight, ConnectionAddrType type)
+static int32_t HbMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type)
 {
     char localMasterUdid[UDID_BUF_LEN] = {0};
-    NodeInfo *nodeInfo = BeatGetMatchNode(udidHash, type);
+
+    if (udidHash == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr recv higher weight get invalid param");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = HbGetMatchNode(udidHash, type);
     if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BeatMgrRecvHigherWight udidhash:%s is not online yet", udidHash);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidhash:%s is not online yet", udidHash);
         return SOFTBUS_OK;
     }
-
     if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, sizeof(localMasterUdid)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get local master udid fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local master udid fail");
         return SOFTBUS_ERR;
     }
     if (strcmp(localMasterUdid, nodeInfo->deviceInfo.deviceUdid) != 0 &&
         LnnNotifyMasterElect(nodeInfo->networkId, nodeInfo->deviceInfo.deviceUdid, weight) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat set local master info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set local master info fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "BeatMgrRecvHigherWight udidHash:%s, weight:%d", udidHash, weight);
-    return LnnHeartbeatAsNormalNode();
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB recv higher weight udidHash:%s, weight:%d", udidHash, weight);
+    return SOFTBUS_OK;
 }
 
-static void BeatMgrRelayToMaster(const char *udidHash, ConnectionAddrType type)
+static void HbMgrRelayToMaster(const char *udidHash, ConnectionAddrType type)
 {
-    NodeInfo *nodeInfo = BeatGetMatchNode(udidHash, type);
-    if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BeatMgrRelayToMaster udidhash:%s is not online yet", udidHash);
-        return;
-    }
-
     char localUdid[UDID_BUF_LEN] = {0};
     char localMasterUdid[UDID_BUF_LEN] = {0};
-    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
-    (void)LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN);
+
+    if (udidHash == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay to master get invalid param");
+        return;
+    }
+    NodeInfo *nodeInfo = HbGetMatchNode(udidHash, type);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB relay to master udidhash:%s is not online yet", udidHash);
+        return;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay to master get udid err, udidhash:%s", udidHash);
+        return;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay to master get masterUdid err, udidhash:%s", udidHash);
+        return;
+    }
     if (strcmp(localMasterUdid, localUdid) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BeatMgrRelayToMaster process. localMasterUdid:%s, localUdid:%s",
-            localMasterUdid, localUdid);
-        (void)LnnHeartbeatRelayBeat(type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB relay to master process, udidhash:%s", udidHash);
+        (void)LnnHbRelayToMaster(type);
     }
 }
 
-static void BeatInitUpdateList(void)
+static int32_t HbInitUpdateList(void)
 {
-    if (g_beatUpdateInfoList != NULL) {
-        return;
+    if (g_hbUpdateInfoList != NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB init update list get invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
-    g_beatUpdateInfoList = CreateSoftBusList();
-    if (g_beatUpdateInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create BeatMgrUpdateList fail.");
-        return;
+    g_hbUpdateInfoList = CreateSoftBusList();
+    if (g_hbUpdateInfoList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB create update info list fail");
+        return SOFTBUS_ERR;
     }
-    g_beatUpdateInfoList->cnt = 0;
+    g_hbUpdateInfoList->cnt = 0;
+    return SOFTBUS_OK;
 }
 
-static void BeatDeinitUpdateList(void)
+static void HbDeinitUpdateList(void)
 {
-    if (g_beatUpdateInfoList == NULL) {
-        return;
-    }
-    if (SoftBusMutexLock(&g_beatUpdateInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock BeatMgrUpdateList fail");
-        return;
-    }
-
     HeartbeatUpdateReq *reqItem = NULL;
     HeartbeatUpdateReq *nextreqItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(reqItem, nextreqItem, &g_beatUpdateInfoList->list, HeartbeatUpdateReq, node) {
+
+    if (g_hbUpdateInfoList == NULL) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_hbUpdateInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock update info list fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(reqItem, nextreqItem, &g_hbUpdateInfoList->list, HeartbeatUpdateReq, node) {
         ListDelete(&reqItem->node);
         SoftBusFree(reqItem->device);
         SoftBusFree(reqItem);
     }
-    (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
-    DestroySoftBusList(g_beatUpdateInfoList);
-    g_beatUpdateInfoList = NULL;
+    (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
+    DestroySoftBusList(g_hbUpdateInfoList);
+    g_hbUpdateInfoList = NULL;
 }
 
-void LnnDumpBeatMgrUpdateList(void)
+void LnnDumpHbMgrUpdateList(void)
 {
+#define HB_DUMP_UPDATE_INFO_MAX_NUM 10
+    int32_t dumpCount = 0;
+    char *deviceType = NULL;
     HeartbeatUpdateReq *item = NULL;
-    if (SoftBusMutexLock(&g_beatUpdateInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock BeatMgrUpdateList fail");
-        return;
-    }
-    if (IsListEmpty(&g_beatUpdateInfoList->list)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpBeatMgrUpdateList count:0");
-        (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
-        return;
-    }
 
-    LIST_FOR_EACH_ENTRY(item, &g_beatUpdateInfoList->list, HeartbeatUpdateReq, node) {
-        char *deviceType = LnnConvertIdToDeviceType((uint16_t)item->device->devType);
-        if (deviceType == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get deviceType fail");
-            (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
-            return;
+    if (SoftBusMutexLock(&g_hbUpdateInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock update info list fail");
+        return;
+    }
+    if (IsListEmpty(&g_hbUpdateInfoList->list)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbMgrUpdateList count=0");
+        (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_hbUpdateInfoList->list, HeartbeatUpdateReq, node) {
+        dumpCount++;
+        if (dumpCount > HB_DUMP_UPDATE_INFO_MAX_NUM) {
+            continue;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpBeatMgrUpdateList count:%d [udidHash:%s, deviceType:%s,"
+        deviceType = LnnConvertIdToDeviceType((uint16_t)item->device->devType);
+        if (deviceType == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get deviceType fail, devId:%s", item->device->devId);
+            continue;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbMgrUpdateList count:%d [udidHash:%s, deviceType:%s,"
             "ConnectionAddrType:%02X, weight:%d, localMasterWeight:%d, lastUpdateTime:%llu]",
-            g_beatUpdateInfoList->cnt, item->device->devId, deviceType, item->device->addr[0].type, item->weight,
+            g_hbUpdateInfoList->cnt, item->device->devId, deviceType, item->device->addr[0].type, item->weight,
             item->localMasterWeight, item->lastUpdateTime);
     }
-    (void)SoftBusMutexUnlock(&g_beatUpdateInfoList->lock);
+    (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
 }
 
-void LnnDumpBeatOnlineNodeList(void)
+void LnnDumpHbOnlineNodeList(void)
 {
+#define HB_DUMP_ONLINE_NODE_MAX_NUM 5
     int32_t infoNum, i;
     uint64_t oldTimeStamp;
     NodeBasicInfo *info = NULL;
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get node info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get node info fail");
         return;
     }
     if (info == NULL || infoNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnDumpBeatOnlineNodeList count:0");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnDumpHbOnlineNodeList count=0");
         return;
     }
     for (i = 0; i < infoNum; i++) {
         NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL) {
+        if (nodeInfo == NULL || i > HB_DUMP_ONLINE_NODE_MAX_NUM) {
             continue;
         }
         if (LnnGetDistributedHeartbeatTimestamp(info[i].networkId, &oldTimeStamp) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get timeStamp err, networkId:%s", info[i].networkId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, nodeInfo i=%d", i);
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpBeatOnlineNodeList count:%d [udid:%s, networkId:%s,"
-            "masterUdid:%s, masterWeight:%d, discoveryType:%d, oldTimeStamp:%llu]", infoNum,
-            nodeInfo->deviceInfo.deviceUdid, nodeInfo->networkId, nodeInfo->masterUdid, nodeInfo->masterWeight,
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbOnlineNodeList count:%d [i:%d, deviceName:%s,"
+            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%llu]", infoNum, i,
+            nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId, nodeInfo->masterWeight,
             nodeInfo->discoveryType, oldTimeStamp);
     }
     SoftBusFree(info);
 }
 
-int32_t LnnHeartbeatMgrInit(void)
+int32_t LnnHbMgrInit(void)
 {
     uint32_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; ++i) {
-        if (g_heartbeatImpl[i].init == NULL) {
+    for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].init == NULL) {
             continue;
         }
-        if (g_heartbeatImpl[i].init(&g_heartbeatCallback) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init heartbeat impl(%d) fail", i);
+        if (g_hbImpl[i].init(&g_hbCallback) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB init heartbeat impl(%d) fail", i);
             return SOFTBUS_ERR;
         }
     }
-
-    BeatInitUpdateList();
-    return SOFTBUS_OK;
-}
-
-int32_t LnnHeartbeatMgrStart(void)
-{
-    uint32_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; ++i) {
-        if (g_heartbeatImpl[i].onOnceBegin == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "not support heartbeat(%d)", i);
-            continue;
-        }
-        if (g_heartbeatImpl[i].onOnceBegin() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start heartbeat impl(%d) fail", i);
-            return SOFTBUS_ERR;
-        }
+    if (HbInitUpdateList() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB init update list fail");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t LnnHeartbeatMgrStopAdv(void)
+int32_t LnnHbMgrOneCycleBegin(void)
 {
     uint32_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; ++i) {
-        if (g_heartbeatImpl[i].onOnceEnd == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "not support heartbeat(%d)", i);
+    for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].onOnceBegin == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_heartbeatImpl[i].onOnceEnd() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "once heartbeat impl(%d) fail", i);
+        if (g_hbImpl[i].onOnceBegin() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat impl(%d) fail", i);
             return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
 }
 
-int32_t LnnHeartbeatMgrStop(void)
+int32_t LnnHbMgrOneCycleEnd(void)
 {
     uint32_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; ++i) {
-        if (g_heartbeatImpl[i].stop == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "not support heartbeat(%d)", i);
+    for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].onOnceEnd == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_heartbeatImpl[i].stop() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop heartbeat impl(%d) fail", i);
+        if (g_hbImpl[i].onOnceEnd() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB once heartbeat impl(%d) fail", i);
             return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
 }
 
-void LnnHeartbeatMgrDeinit(void)
+int32_t LnnHbMgrStop(void)
 {
     uint32_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; ++i) {
-        if (g_heartbeatImpl[i].deinit == NULL) {
+    for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].stop == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_heartbeatImpl[i].deinit() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit heartbeat impl(%d) fail", i);
-            return;
+        if (g_hbImpl[i].stop() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat impl(%d) fail", i);
+            continue;
         }
     }
+    return SOFTBUS_OK;
+}
 
-    BeatDeinitUpdateList();
+void LnnHbMgrDeinit(void)
+{
+    uint32_t i;
+    for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].deinit == NULL) {
+            continue;
+        }
+        if (g_hbImpl[i].deinit() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB deinit heartbeat impl(%d) fail", i);
+            continue;
+        }
+    }
+    HbDeinitUpdateList();
 }

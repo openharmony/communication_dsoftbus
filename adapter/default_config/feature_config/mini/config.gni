@@ -29,7 +29,7 @@ declare_args() {
 
   dsoftbus_standard_feature_lnn_net = true
   dsoftbus_standard_feature_lnn_time_sync = false
-  enable_lnn_heartbeat = false
+  dsoftbus_standard_feature_lnn_heartbeat = false
   dsoftbus_standard_feature_lnn_meta_node = false
   dsoftbus_standard_feature_qos = false
 

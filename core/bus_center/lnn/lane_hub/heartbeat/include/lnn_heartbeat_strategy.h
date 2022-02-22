@@ -24,12 +24,12 @@
 extern "C" {
 #endif
 
-#define HEARTBEAT_TIME_FACTOR (1000LL)
-#define HEARTBEAT_ENABLE_DELAY_LEN (20 * HEARTBEAT_TIME_FACTOR)
-#define HEARTBEAT_TOCK_TIME_LEN (10 * HEARTBEAT_TIME_FACTOR)
-#define HEARTBEAT_MONITOR_DELAY_LEN (10 * HEARTBEAT_TIME_FACTOR + HEARTBEAT_TOCK_TIME_LEN)
-#define HEARTBEAT_MANAGER_TIMEOUT_LEN (5 * HEARTBEAT_TIME_FACTOR + HEARTBEAT_TOCK_TIME_LEN)
-#define HEARTBEAT_UPDATE_TIME_PRECISION (HEARTBEAT_ENABLE_DELAY_LEN - HEARTBEAT_TOCK_TIME_LEN)
+#define HB_TIME_FACTOR (1000LL)
+#define HB_ONE_CYCLE_LEN (10 * HB_TIME_FACTOR)
+#define HB_ONE_CYCLE_TIMEOUT_LEN (5 * HB_TIME_FACTOR + HB_ONE_CYCLE_LEN)
+#define HB_CHECK_DELAY_LEN (10 * HB_TIME_FACTOR + HB_ONE_CYCLE_LEN)
+#define HB_ENABLE_DELAY_LEN (20 * HB_TIME_FACTOR)
+#define HB_UPDATE_INTERVAL_LEN (HB_ENABLE_DELAY_LEN - HB_ONE_CYCLE_LEN)
 
 typedef enum {
     /**< Heartbeat cycle ( in sec ). */
@@ -76,7 +76,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 int32_t LnnNotifyMasterNodeChanged(const char *masterUdid, int32_t weight);
 
 int32_t LnnStartHeartbeatDelay(void);
-void LnnStopHeartbeat(void);
+void LnnStopHeartbeatNow(void);
 
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);

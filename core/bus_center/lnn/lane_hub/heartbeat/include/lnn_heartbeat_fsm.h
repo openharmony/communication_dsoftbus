@@ -27,42 +27,42 @@ extern "C" {
 #define SHORT_USRID_HASH_HEX_LEN 4
 
 typedef enum {
-    STATE_NONE_BEAT_INDEX = 0,
-    STATE_BEAT_NORMAL_NODE_INDEX,
-    STATE_BEAT_MASTER_NODE_INDEX,
-    STATE_BEAT_INDEX_MAX,
+    STATE_HB_NONE_INDEX = 0,
+    STATE_HB_NORMAL_NODE_INDEX,
+    STATE_HB_MASTER_NODE_INDEX,
+    STATE_HB_INDEX_MAX,
 } LnnHeartbeatState;
 
 typedef enum {
-    EVENT_BEAT_ENTER = 0,
-    EVENT_BEAT_START,
-    EVENT_BEAT_ONCE_ENTER,
-    EVENT_BEAT_DEVICE_LOST,
-    EVENT_BEAT_AS_MASTER_NODE,
-    EVENT_BEAT_AS_NORMAL_NODE = 5,
-    EVENT_BEAT_MONITOR_DEV,
-    EVENT_BEAT_REPEAT_CYCLE,
-    EVENT_BEAT_ONCE_OUT,
-    EVENT_BEAT_STOP,
-    EVENT_BEAT_TIMEOUT = 10,
-    EVENT_BEAT_EXIT,
-    EVENT_BEAT_MAX,
+    EVENT_HB_ENTER = 0,
+    EVENT_HB_START,
+    EVENT_HB_ONCE_BEGIN,
+    EVENT_HB_DEVICE_LOST,
+    EVENT_HB_AS_MASTER_NODE,
+    EVENT_HB_AS_NORMAL_NODE = 5,
+    EVENT_HB_CHECK_DEV,
+    EVENT_HB_REPEAT_CYCLE,
+    EVENT_HB_ONCE_END,
+    EVENT_HB_STOP,
+    EVENT_HB_TIMEOUT = 10,
+    EVENT_HB_EXIT,
+    EVENT_HB_MAX,
 } LnnHeartbeatEventType;
 
-int32_t LnnPostMsgToBeatFsm(int32_t eventType, void *obj);
-int32_t LnnPostDelayMsgToBeatFsm(int32_t eventType, void *obj, uint64_t delayMillis);
-int32_t LnnRemoveBeatFsmMsg(int32_t eventType, uint64_t para, void *obj);
+int32_t LnnPostMsgToHbFsm(int32_t eventType, void *obj);
+int32_t LnnPostDelayMsgToHbFsm(int32_t eventType, void *obj, uint64_t delayMillis);
+int32_t LnnRemoveHbFsmMsg(int32_t eventType, uint64_t para, void *obj);
 
-int32_t LnnHeartbeatRelayBeat(ConnectionAddrType type);
-int32_t LnnHeartbeatMonitorDevInfo(ConnectionAddrType type, uint64_t delayMillis);
-int32_t LnnHeartbeatAsNormalNode(void);
-int32_t LnnHeartbeatNodeOffline(const char *networkId, ConnectionAddrType addrType, uint64_t delayMillis);
+int32_t LnnHbRelayToMaster(ConnectionAddrType type);
+int32_t LnnHbCheckDevStatus(ConnectionAddrType type, uint64_t delayMillis);
+int32_t LnnHbAsNormalNode(void);
+int32_t LnnHbProcessDeviceLost(const char *networkId, ConnectionAddrType addrType, uint64_t delayMillis);
 
-int32_t LnnHeartbeatFsmStart(int32_t beatStateIndex, uint64_t delayMillis);
-int32_t LnnHeartbeatFsmStop(uint64_t delayMillis);
+int32_t LnnHbFsmStart(int32_t stateIndex, uint64_t delayMillis);
+int32_t LnnHbFsmStop(uint64_t delayMillis);
 
-int32_t LnnHeartbeatFsmInit(void);
-void LnnHeartbeatFsmDeinit(void);
+int32_t LnnHbFsmInit(void);
+void LnnHbFsmDeinit(void);
 
 #ifdef __cplusplus
 }
