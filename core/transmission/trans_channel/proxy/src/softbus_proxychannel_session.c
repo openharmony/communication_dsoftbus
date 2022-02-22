@@ -312,9 +312,9 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
     int32_t datalen, int32_t *outlen)
 {
     char *buf = NULL;
-    unsigned int bufLen;
-    unsigned int connHeadLen;
-    unsigned int dstLen;
+    uint32_t bufLen;
+    uint32_t connHeadLen;
+    uint32_t dstLen;
 
     connHeadLen = ConnGetHeadSize();
     bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + datalen;
@@ -349,7 +349,7 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
         }
     }
 
-    *outlen = (int)bufLen;
+    *outlen = (int32_t)bufLen;
     return buf;
 }
 
