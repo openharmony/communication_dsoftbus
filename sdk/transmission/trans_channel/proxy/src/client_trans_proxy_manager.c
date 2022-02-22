@@ -324,7 +324,7 @@ int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath, FileLi
         return SOFTBUS_ERR;
     }
     if (memcpy_s(&g_recvFileInfo.fileListener, sizeof(FileListener),
-        &fileListener, sizeof(FileListener)) != EOK){
+        &fileListener, sizeof(FileListener)) != EOK) {
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -776,7 +776,7 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
     if (fileFrame.frameLength <= FRAME_DATA_SEQ_OFFSET) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "WriteFrameToFile framelength less then offset");
         return SOFTBUS_ERR;
-    } 
+    }
 
     int32_t frameDataLength = frameLength - FRAME_DATA_SEQ_OFFSET;
     *writeLength = pwrite(fileInfo.fileFd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, frameDataLength,
@@ -924,15 +924,21 @@ static int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileLis
         if (IntToByte(index, byteBuff, indexSize) == false) {
             return SOFTBUS_ERR;
         }
-        (void)memcpy_s(buffer + offset, indexSize, byteBuff, indexSize);
+        if (memcpy_s(buffer + offset, indexSize, byteBuff, indexSize) != EOK) {
+            return SOFTBUS_ERR;
+        }
         offset += indexSize;
         fileNameSize = strlen(destFile[index]);
         if (IntToByte(fileNameSize, byteBuff, indexSize) == false) {
             return SOFTBUS_ERR;
         }
-        (void)memcpy_s(buffer + offset, sizeof(fileNameSize), byteBuff, sizeof(fileNameSize));
+        if (memcpy_s(buffer + offset, sizeof(fileNameSize), byteBuff, sizeof(fileNameSize)) != EOK) {
+            return SOFTBUS_ERR;
+        }
         offset += sizeof(fileNameSize);
-        (void)memcpy_s(buffer + offset, fileNameSize, destFile[index], fileNameSize);
+        if (memcpy_s(buffer + offset, fileNameSize, destFile[index], fileNameSize) != EOK) {
+            return SOFTBUS_ERR;
+        }
         offset += fileNameSize;
     }
 
@@ -957,8 +963,9 @@ int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int32_t *fi
     while (offset < bufferInfo.bufferSize) {
         offset += sizeof(uint32_t);
 
-        (void)memcpy_s(byteBuff, byteLen, buffer + offset, byteLen);
-
+        if (memcpy_s(byteBuff, byteLen, buffer + offset, byteLen) != EOK) {
+            return SOFTBUS_ERR;
+        }
         if (ByteToInt(byteBuff, byteLen, &fileNameLength) == false) {
             return SOFTBUS_ERR;
         }
@@ -969,7 +976,9 @@ int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int32_t *fi
         }
         /* only output first file path */
         if (count == 0) {
-            (void)memcpy_s(firstFile, fileNameLength, buffer + offset, fileNameLength);
+            if (memcpy_s(firstFile, fileNameLength, buffer + offset, fileNameLength) != EOK) {
+                return SOFTBUS_ERR;
+            }
         }
         offset += fileNameLength;
         count ++;
@@ -986,7 +995,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
         return SOFTBUS_ERR;
     }
 
-    FileListBuffer bufferInfo; 
+    FileListBuffer bufferInfo;
     char firtFilePath[MAX_REMOTE_PATH_LEN];
     int32_t fileCount = 0;
     bufferInfo.buffer = (uint8_t *)data;
