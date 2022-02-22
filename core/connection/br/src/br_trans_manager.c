@@ -64,7 +64,7 @@ static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] a complete package packLen: %d", packLen);
     char *dataCopy = SoftBusMalloc(packLen);
     if (dataCopy == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] SoftBusMalloc failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] SoftBusMalloc failed");
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, conn->recvBuf, packLen) != EOK) {
@@ -91,7 +91,6 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
         return BR_READ_FAILED;
     }
     int32_t recvLen;
-    int32_t bufLen;
     while (1) {
         int32_t packLen;
         char *dataBuf = BrRecvDataParse(conn, &packLen);
