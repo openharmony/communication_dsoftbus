@@ -611,7 +611,7 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         }
     }
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, chan->appInfo.myData.deviceId,
                            sizeof(chan->appInfo.myData.deviceId)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
         return SOFTBUS_ERR;
