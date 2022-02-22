@@ -1083,7 +1083,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
         }
 
         std::string devName(ifa->ifa_name);
-        if (strcmp(boundIp.c_str(), inet_ntoa(((struct sockaddr_in *)(ifa->ifa_addr))->sin_addr)) == 0) {
+        if (strcmp(boundIp.c_str(), inet_ntoa(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr)) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "current use interface %s to bind to socket", ifa->ifa_name);
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());
             if (err < 0) {
