@@ -219,9 +219,10 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read infoNum failed!");
         return SOFTBUS_ERR;
     }
-    int32_t infoSize = (*infoNum) * (int32_t)infoTypeLen;
+    
     *info = nullptr;
-    if (infoSize > 0) {
+    if ((*infoNum) > 0) {
+        uint32_t infoSize = (uint32_t)(*infoNum) * infoTypeLen;
         void *nodeInfo = (void *)reply.ReadRawData(infoSize);
         if (nodeInfo == nullptr) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read node info failed!");

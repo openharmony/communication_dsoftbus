@@ -904,7 +904,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
+int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
 {
     int32_t ret;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
