@@ -53,7 +53,7 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer)
     dataLength_ = header_.GetDataLen() - tlvTotalLen;
     if (dataLength_ <= 0 || dataLength_ > MAX_STREAM_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "DepacketizeBuffer error, header_dataLen = %d, tlvTotalLen = %u", header_.GetDataLen(), tlvTotalLen);
+            "DepacketizeBuffer error, header_dataLen = %d, tlvTotalLen = %d", header_.GetDataLen(), tlvTotalLen);
         return;
     }
     data_ = std::make_unique<char[]>(dataLength_);
