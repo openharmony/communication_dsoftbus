@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -185,6 +186,41 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
         case TRANS_SESSION_MESSAGE:
             if (listener.OnMessageReceived != NULL) {
                 listener.OnMessageReceived(sessionId, data, len);
+            }
+            break;
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+        case TRANS_SESSION_FILE_LAST_FRAME:
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+            if (channelType == CHANNEL_TYPE_PROXY) {
+                char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+                if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME)
+                    != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get peer session name failed");
+                    return SOFTBUS_ERR;
+                }
+
+                FileListener fileListener;
+                memset_s(&fileListener, sizeof(fileListener), 0, sizeof(fileListener));
+                if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
+                    return SOFTBUS_ERR;
+                }
+
+                if (type == TRANS_SESSION_FILE_ALLFILE_SENT) {
+                    ret = ProcessFileListData(sessionId, fileListener, data, len);
+                    if (ret != SOFTBUS_OK) {
+                        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process filelist data failed");
+                        return SOFTBUS_ERR;
+                    }
+                } else {
+                    ret = ProcessFileFrameData(sessionId, fileListener, data, len, type);
+                    if (ret != SOFTBUS_OK) {
+                        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
+                        return SOFTBUS_ERR;
+                    }
+                }
             }
             break;
         default:

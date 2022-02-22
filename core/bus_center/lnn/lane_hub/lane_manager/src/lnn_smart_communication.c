@@ -51,7 +51,7 @@ GetLaneByType g_linkLaneTable[LINK_TYPE_MAX + 1] = {
 
 static bool IsSupportUdp(LnnLaneProperty prop)
 {
-    if (prop == LNN_FILE_LANE || prop == LNN_STREAM_LANE) {
+    if (prop == LNN_STREAM_LANE) {
         return true;
     } else {
         return false;
@@ -112,7 +112,7 @@ int32_t LnnGetRightLane(const char *netWorkId, int32_t pid, LnnLaneProperty prop
 
 static bool IsProxyPort(LnnLaneProperty prop, LnnLaneLinkType type)
 {
-    if (prop == LNN_MESSAGE_LANE) {
+    if (prop == LNN_MESSAGE_LANE || prop == LNN_FILE_LANE) {
         return true;
     }
     return false;
