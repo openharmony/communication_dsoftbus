@@ -96,7 +96,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -322,7 +322,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get deviceId failed");
         goto EXIT_ERR;
