@@ -281,7 +281,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
+        ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
@@ -382,8 +382,8 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger005, TestSize.Level1)
 */
 HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger006, TestSize.Level1)
 {
-    int reqId = 1;
-    int ret;
+    uint32_t reqId = 1;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;

@@ -158,7 +158,7 @@ static void AuthNotifyDisconn(int32_t fd)
 static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
 {
     char *data = NULL;
-    int32_t remainLen;
+    uint32_t remainLen;
     ssize_t len;
 
     char *ipData = (char *)SoftBusMalloc(head->len);

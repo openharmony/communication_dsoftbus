@@ -1214,12 +1214,13 @@ static void OnRecvPeerDeviceInfo(int64_t authId, AuthSideFlag side,
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     char *udid = NULL;
-    int32_t udidLen;
+    uint32_t udidLen;
 
     if (peerUdid == NULL) {
         return;
     }
     udidLen = strlen(peerUdid) + 1;
+
     udid = (char *)SoftBusMalloc(udidLen);
     if (udid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");
@@ -1632,7 +1633,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
     bool *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {

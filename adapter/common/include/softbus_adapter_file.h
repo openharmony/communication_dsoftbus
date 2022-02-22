@@ -28,8 +28,8 @@ extern "C" {
 #define SOFTBUS_MAX_PATH_LEN 256
 
 /* File operation */
-int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen);
-int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, int32_t len);
+int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen);
+int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

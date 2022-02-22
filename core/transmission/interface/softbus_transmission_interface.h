@@ -29,14 +29,14 @@ typedef struct {
     int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer); // compatible nearby
     void (*onChannelOpenFailed)(int32_t channelId, const char *uuid);
     void (*onChannelClosed)(int32_t channelId);
-    void (*onMessageReceived)(int32_t channelId, const char *data, unsigned int len);
+    void (*onMessageReceived)(int32_t channelId, const char *data, uint32_t len);
 } INetworkingListener;
 
 int TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId);
 
 int TransCloseNetWorkingChannel(int32_t channelId);
 
-int TransSendNetworkingMessage(int32_t channelId, const char *data, int dataLen, int priority);
+int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority);
 
 int TransRegisterNetworkingChannelListener(const INetworkingListener *listener);
 

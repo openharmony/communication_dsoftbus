@@ -20,7 +20,7 @@
 #include "softbus_errcode.h"
 #include "utils_file.h"
 
-int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen)
+int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
     if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -57,7 +57,7 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, int32_t len)
+int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len)
 {
     int32_t ret;
     int32_t fd;

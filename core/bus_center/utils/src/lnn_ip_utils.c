@@ -50,7 +50,7 @@ static ListNode g_netIfNameList = {
     .next = &g_netIfNameList,
 };
 
-static int32_t AddNetConfigInfo(LnnNetIfNameType type, const char *netIfName, int32_t netIfNameLen)
+static int32_t AddNetConfigInfo(LnnNetIfNameType type, const char *netIfName, uint32_t netIfNameLen)
 {
     if (netIfName == NULL || type < LNN_ETH_TYPE || type >= LNN_MAX_NUM_TYPE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invaild!");
@@ -82,7 +82,7 @@ static int32_t ParseIfNameConfig(char *buf)
     while (key != NULL) {
         value1 = strtok_r(key, LNN_DELIMITER_INSIDE, &innerPtr);
         value2 = strtok_r(NULL, LNN_DELIMITER_INSIDE, &innerPtr);
-        if (AddNetConfigInfo(atoi(value1), value2, strlen(value2)) != SOFTBUS_OK) {
+        if (AddNetConfigInfo((uint32_t)atoi(value1), value2, strlen(value2)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddNetConfigInfo fail");
             return SOFTBUS_ERR;
         }
@@ -135,7 +135,7 @@ int32_t LnnClearNetConfigList(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, ConnectionAddrType *type)
+int32_t LnnGetAddrTypeByIfName(const char *ifName, uint32_t ifNameLen, ConnectionAddrType *type)
 {
     if (ifName == NULL || type == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");

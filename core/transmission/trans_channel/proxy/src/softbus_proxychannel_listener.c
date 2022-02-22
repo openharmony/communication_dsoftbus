@@ -318,7 +318,7 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
     return channelId;
 }
 
-int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
+int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
 {
     return TransProxySendMsg(channelId, data, dataLen, priority);
 }
