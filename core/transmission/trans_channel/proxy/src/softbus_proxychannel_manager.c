@@ -1063,6 +1063,10 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
 
+    if (TransSliceManagerInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Trans slice manager init failed");
+    }
+
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH,
         (unsigned char*)&g_authMaxByteBufSize, sizeof(g_authMaxByteBufSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get auth proxy channel max bytes length fail");
@@ -1107,6 +1111,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 
 void TransProxyManagerDeinit(void)
 {
+    TransSliceManagerDeInit();
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
     PendingDeinit(PENDING_TYPE_PROXY);
 }

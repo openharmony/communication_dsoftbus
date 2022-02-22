@@ -83,7 +83,7 @@ int32_t ProxyTypeToProxyIndex(ProxyPacketType packetType)
         case PROXY_FLAG_BYTES:
             return PROXY_CHANNEL_PRORITY_BYTES;
         default:
-            return PROXY_CHANNEL_PRORITY_BYTES;
+            return PROXY_CHANNEL_PRORITY_FILE;
     }
 }
 
@@ -94,6 +94,16 @@ ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
             return PROXY_FLAG_BYTES;
         case TRANS_SESSION_MESSAGE:
             return PROXY_FLAG_MESSAGE;
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+            return PROXY_FILE_FIRST_FRAME;
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+            return PROXY_FILE_ONGOINE_FRAME;
+        case TRANS_SESSION_FILE_LAST_FRAME:
+            return PROXY_FILE_LAST_FRAME;
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+            return PROXY_FILE_ONLYONE_FRAME;
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+            return PROXY_FILE_ALLFILE_SENT;
         default:
             return PROXY_FLAG_BYTES;
     }
@@ -484,6 +494,28 @@ static void TransProxySendSessionAck(int32_t channelId, int32_t seq)
     }
 }
 
+static SessionPktType PacketTypeToSessionType(ProxyPacketType pktType)
+{
+    switch (pktType) {
+        case PROXY_FLAG_BYTES:
+            return TRANS_SESSION_BYTES;
+        case PROXY_FLAG_MESSAGE:
+            return TRANS_SESSION_MESSAGE;
+        case PROXY_FILE_FIRST_FRAME:
+            return TRANS_SESSION_FILE_FIRST_FRAME;
+        case PROXY_FILE_ONGOINE_FRAME:
+            return TRANS_SESSION_FILE_ONGOINE_FRAME;
+        case PROXY_FILE_LAST_FRAME:
+            return TRANS_SESSION_FILE_LAST_FRAME;
+        case PROXY_FILE_ONLYONE_FRAME:
+            return TRANS_SESSION_FILE_ONLYONE_FRAME;
+        case PROXY_FILE_ALLFILE_SENT:
+            return TRANS_SESSION_FILE_ALLFILE_SENT;
+        default:
+            return PROXY_FLAG_BYTES;
+    }
+}
+
 int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPacketType flags, int32_t seq,
     const char *data, uint32_t len)
 {
@@ -498,6 +530,12 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
             return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
         case PROXY_FLAG_ACK:
             return TransProxyProcSendMsgAck(channelId, data, len);
+        case PROXY_FILE_FIRST_FRAME:
+        case PROXY_FILE_ONGOINE_FRAME:
+        case PROXY_FILE_LAST_FRAME:
+        case PROXY_FILE_ONLYONE_FRAME:
+        case PROXY_FILE_ALLFILE_SENT:
+            return NotifyClientMsgReceived(pkgName, channelId, data, len, PacketTypeToSessionType(flags));
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid flags(%d)", flags);
             return SOFTBUS_INVALID_PARAM;

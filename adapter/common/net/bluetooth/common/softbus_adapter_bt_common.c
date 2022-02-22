@@ -55,7 +55,8 @@ static bool g_isRegCb = false;
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    LOG_INFO("WrapperStateChangeCallback");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperStateChangeCallback, transport=%d, status=%d",
+        transport, status);
     int listenerId;
     int st = ConvertBtState(transport, (BtStatus)status);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
@@ -67,8 +68,40 @@ static void WrapperStateChangeCallback(const int transport, const int status)
     }
 }
 
+static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
+{
+    if (bdAddr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairRequestedCallback addr is null");
+        return ;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperStateChangeCallback, addr=%02X:%02X:***%02X, transport=%d\n",
+        bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
+    if (PairRequestReply(bdAddr, transport, true) != true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PairRequestReply error");
+    }
+}
+
+static void WrapperPairConfirmedCallback(const BdAddr *bdAddr, int transport, int reqType, int number)
+{
+    if (bdAddr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairConfirmedCallback addr is null");
+        return ;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
+        "WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d\n",
+        bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX],
+        transport, reqType, number);
+    if (SetDevicePairingConfirmation(bdAddr, transport, true) != true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetDevicePairingConfirmation error");
+    }
+}
+
 static BtGapCallBacks g_softbusGapCb = {
-    .stateChangeCallback = WrapperStateChangeCallback
+    .stateChangeCallback = WrapperStateChangeCallback,
+    .pairRequestedCallback = WrapperPairRequestedCallback,
+    .pairConfirmedCallback = WrapperPairConfirmedCallback
 };
 
 static int RegisterListenerCallback(void)
