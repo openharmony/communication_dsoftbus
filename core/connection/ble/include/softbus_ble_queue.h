@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint32_t halConnId;
+    int32_t halConnId;
     uint32_t connectionId;
     int32_t pid;
     int32_t flag;

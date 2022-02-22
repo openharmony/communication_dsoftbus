@@ -141,7 +141,7 @@ static inline int32_t QueueSingleProducerEnqueue(LockFreeQueue *queue, const voi
 }
 
 /** @brief Enqueue operation, thread safe */
-static inline uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node)
+static inline int32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void* node)
 {
     uint32_t producerHead;
     uint32_t producerNext;
@@ -205,7 +205,7 @@ static inline uint32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const voi
 }
 
 /** @brief Dequeue operation, thread unsafe */
-static inline uint32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** node)
+static inline int32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** node)
 {
     uint32_t consumerHead;
     uint32_t producerTail;
@@ -258,7 +258,7 @@ static inline uint32_t QueueSingleConsumerDequeue(LockFreeQueue* queue, void** n
 }
 
 /** @brief Dequeue operation, thread safe */
-static inline uint32_t QueueMultiConsumerDequeue(LockFreeQueue *queue, void **node)
+static inline int32_t QueueMultiConsumerDequeue(LockFreeQueue *queue, void **node)
 {
     bool success = false;
     uint32_t consumerHead;
