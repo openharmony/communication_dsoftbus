@@ -469,8 +469,9 @@ static int32_t SendOneFrame(int32_t channelId, FileFrame fileFrame)
     return SOFTBUS_OK;
 }
 
-int32_t FileToFrame(int32_t channelId, uint64_t frameNum,in32_t fd, const char *destFile, uint64_t fileSize)
+int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, const char *destFile, uint64_t fileSize)
 {
+#define SEND_DELAY_TIME (20)
     FileFrame fileFrame;
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(PROXY_MAX_PACKET_SIZE);
     if (buffer == NULL) {
@@ -521,7 +522,6 @@ int32_t FileToFrame(int32_t channelId, uint64_t frameNum,in32_t fd, const char *
 
 int32_t FileToFrameAndSendFile(int32_t channelId, const char *sourceFile, const char *destFile)
 {
-#define SEND_DELAY_TIME (50)
     uint64_t fileSize = 0;
     if (CheckAndGetFileSize(sourceFile, &fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
@@ -572,7 +572,8 @@ char *GetDestFilePath(FileFrame fileFrame)
     if (memcpy_s(filePath, filePathSize, fileFrame.data + FRAME_DATA_SEQ_OFFSET,
         fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed");
-        return SOFTBUS_ERR;
+        SoftBusFree(filePath);
+        return NULL;
     }
     return filePath;
 }
@@ -734,7 +735,7 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
-static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int32_t *writeLength)
+static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int32_t seq, int32_t *writeLength)
 {
     if (writeLength == NULL) {
         return SOFTBUS_ERR;
@@ -752,7 +753,7 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pwrite file failed");
         return SOFTBUS_ERR;
     }
-    fileInfo.fileOffset += writeLength;
+    fileInfo.fileOffset += (uint64_t)writeLength;
 
     if (fileInfo.fileOffset > MAX_FILE_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large");
@@ -811,7 +812,7 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         return SOFTBUS_ERR;
     }
     int32_t writeLength = 0;
-    if (ProcessOneFrame(fileFrame, fileInfo, &writeLength) != SOFTBUS_OK) {
+    if (ProcessOneFrame(fileFrame, fileInfo, seq, &writeLength) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write one frame error");
         goto EXIT_ERR;
     }
