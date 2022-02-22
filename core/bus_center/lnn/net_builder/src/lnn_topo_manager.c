@@ -29,8 +29,8 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_json_utils.h"
+#include "softbus_log.h"
 
 #define JSON_KEY_TYPE "type"
 #define JSON_KEY_SEQ "seq"
