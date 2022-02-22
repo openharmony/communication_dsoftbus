@@ -75,14 +75,14 @@ static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
         return ;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperStateChangeCallback, addr=%02X:%02X:***%02X, transport=%d\n",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d\n",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
     if (PairRequestReply(bdAddr, transport, true) != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PairRequestReply error");
     }
 }
 
-static void WrapperPairConfirmedCallback(const BdAddr *bdAddr, int transport, int reqType, int number)
+static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType, int number)
 {
     if (bdAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairConfirmedCallback addr is null");
@@ -101,7 +101,7 @@ static void WrapperPairConfirmedCallback(const BdAddr *bdAddr, int transport, in
 static BtGapCallBacks g_softbusGapCb = {
     .stateChangeCallback = WrapperStateChangeCallback,
     .pairRequestedCallback = WrapperPairRequestedCallback,
-    .pairConfirmedCallback = WrapperPairConfirmedCallback
+    .pairConfiremedCallback = WrapperPairConfiremedCallback
 };
 
 static int RegisterListenerCallback(void)

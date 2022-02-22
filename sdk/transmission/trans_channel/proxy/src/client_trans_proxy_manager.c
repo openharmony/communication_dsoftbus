@@ -596,7 +596,7 @@ static char *CreateFullRecvPath(const char *filePath, const char *recvRootDir)
 
     int32_t destFullPathLength = (isNeedAddSep) ? (rootDirLength + sizeof('/') + filePathLength) :
         (rootDirLength + filePathLength);
-    char *recvFullPath = SoftBusCalloc(destFullPathLength + 1);
+    char *recvFullPath = (char *)SoftBusCalloc(destFullPathLength + 1);
     if (recvFullPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recvFullPath is null");
         return NULL;
@@ -933,7 +933,6 @@ int32_t SendFileList(int32_t channelId, const char **destFile, uint32_t fileCnt)
         return ret;
     }
 
-    // 执行回调函数
     SoftBusFree(bufferInfo.buffer);
 
     return SOFTBUS_OK;
