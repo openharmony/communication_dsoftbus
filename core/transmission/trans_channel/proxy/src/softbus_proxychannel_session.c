@@ -512,7 +512,7 @@ static SessionPktType PacketTypeToSessionType(ProxyPacketType pktType)
         case PROXY_FILE_ALLFILE_SENT:
             return TRANS_SESSION_FILE_ALLFILE_SENT;
         default:
-            return PROXY_FLAG_BYTES;
+            return TRANS_SESSION_BYTES;
     }
 }
 
