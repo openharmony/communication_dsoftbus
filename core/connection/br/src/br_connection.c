@@ -1157,13 +1157,15 @@ static void UpdateLocalBtMac(void)
 static void StateChangedCallback(int32_t listenerId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChanged id: %d, status: %d", listenerId, status);
-    g_brEnable = status;
+
     LocalListenerInfo info;
     info.type = CONNECT_BR;
     if (status == SOFTBUS_BR_STATE_TURN_ON) {
+        g_brEnable = status;
         UpdateLocalBtMac();
         (void)StartLocalListening(&info);
     } else if (status == SOFTBUS_BR_STATE_TURN_OFF) {
+        g_brEnable = status;
         (void)StopLocalListening(&info);
     }
 }
