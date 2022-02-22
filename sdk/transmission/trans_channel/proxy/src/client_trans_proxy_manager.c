@@ -309,7 +309,7 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, size_t maxLen
             return false;
         }
         size_t len = strlen(str[i]);
-        if (len == 0 || len > (maxLen - 1) {
+        if (len == 0 || len > (maxLen - 1)) {
             return false;
         }
     }
@@ -618,14 +618,14 @@ static char *CreateFullRecvPath(const char *filePath, const char *recvRootDir)
 
 int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener fileListener)
 {
-    if (SoftBusMutexLock(g_recvFileInfo.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_recvFileInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock fileFromFrame fail");
         return SOFTBUS_ERR;
     }
     uint32_t seq = 0;
     if (GetDestFileFrameSeq(fileFrame, &seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -633,7 +633,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
     if (destFilePath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetDestFilePath failed");
         SoftBusFree(destFilePath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -642,7 +642,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFilePath is invalid");
         SoftBusFree(destFilePath);
         SoftBusFree(fullRecvPath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -650,7 +650,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateDestFile failed");
         SoftBusFree(destFilePath);
         SoftBusFree(fullRecvPath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -659,7 +659,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
         SoftBusFree(destFilePath);
         SoftBusFree(fullRecvPath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -668,7 +668,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
         SoftBusFree(destFilePath);
         SoftBusFree(fullRecvPath);
         close(fd);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     if (fileListener.recvListener.OnReceiveFileStarted != NULL) {
@@ -682,20 +682,20 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
 
 int32_t WriteFrameToFile(FileFrame fileFrame)
 {
-    if (SoftBusMutexLock(g_recvFileInfo.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_recvFileInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock write frame fail");
         return SOFTBUS_ERR;
     }
     uint32_t seq = 0;
     if (GetDestFileFrameSeq(fileFrame, &seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     SingleFileInfo fileInfo = {0};
     if (GetRecvFileInfoBySeq(seq, &fileInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetFileFdBySeq fail");
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -706,7 +706,7 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         if (RemoveFromRecvListBySeq(seq) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Clear RecvFileInfo fail");
         }
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
         
     }
@@ -715,7 +715,7 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "WriteFrameToFile framelength less then offset");
         close(fileInfo.fileFd);
         remove(fileInfo.filePath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     } 
 
@@ -726,7 +726,7 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pwrite file failed");
         close(fileInfo.fileFd);
         remove(fileInfo.filePath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     fileInfo.fileOffset += wirteLength;
@@ -735,14 +735,14 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large");
         close(fileInfo.fileFd);
         remove(fileInfo.filePath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     if (UpdateRecvInfo(fileInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UpdateRecvInfo fail");
         close(fileInfo.fileFd);
         remove(fileInfo.filePath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -754,11 +754,11 @@ int32_t WriteFrameToFile(FileFrame fileFrame)
         if (RemoveFromRecvListBySeq(seq) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClearRecvFileInfoBySeq fail");
             remove(fileInfo.filePath);
-            SoftBusMutexUnlock(g_recvFileInfo.lock);
+            SoftBusMutexUnlock(&g_recvFileInfo.lock);
             return SOFTBUS_ERR;
         }
     }
-    SoftBusMutexUnlock(g_recvFileInfo.lock);
+    SoftBusMutexUnlock(&g_recvFileInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -879,7 +879,7 @@ int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int32_t *fi
 
 int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, int32_t len)
 {
-    if (SoftBusMutexLock(g_recvFileInfo.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_recvFileInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock filelist data fail");
         return SOFTBUS_ERR;
     }
@@ -892,7 +892,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     int32_t ret = BufferToFileList(bufferInfo, firtFilePath, &fileCount);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Buffer To File List failed");
-        SoftBusMutexUnlock(g_recvFileInfo.lock)
+        SoftBusMutexUnlock(&g_recvFileInfo.lock)
         return SOFTBUS_ERR;
     }
 
@@ -900,7 +900,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     if (IsPathValid(fullRecvPath) == false) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fullRecvPath is invalid");
         SoftBusFree(fullRecvPath);
-        SoftBusMutexUnlock(g_recvFileInfo.lock);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -910,7 +910,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Process File List Data success!!!");
     SoftBusFree(fullRecvPath);
-    SoftBusMutexUnlock(g_recvFileInfo.lock);
+    SoftBusMutexUnlock(&g_recvFileInfo.lock);
     return SOFTBUS_OK;
 }
 
