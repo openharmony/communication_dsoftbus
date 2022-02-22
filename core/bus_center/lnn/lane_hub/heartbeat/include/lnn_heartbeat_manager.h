@@ -23,12 +23,12 @@
 extern "C" {
 #endif
 
-#define BEAT_SHA_HASH_LEN 32
-#define BEAT_USER_ID_LEN 65
+#define HB_SHA_HASH_LEN 32
+#define HB_USER_ID_LEN 65
 
 typedef enum {
-    LNN_BEAT_IMPL_TYPE_BLE = 0,
-    LNN_BEAT_IMPL_TYPE_MAX,
+    HB_IMPL_TYPE_BLE = 0,
+    HB_IMPL_TYPE_MAX,
 } LnnHeartbeatImplType;
 
 typedef struct {
@@ -37,14 +37,14 @@ typedef struct {
     int32_t (*onUpdateDev)(DeviceInfo *device, int32_t weight, int32_t localMasterWeight);
 } LnnHeartbeatImplCallback;
 
-int32_t LnnHeartbeatMgrInit(void);
-int32_t LnnHeartbeatMgrStart(void);
-int32_t LnnHeartbeatMgrStopAdv(void);
-int32_t LnnHeartbeatMgrStop(void);
-void LnnHeartbeatMgrDeinit(void);
+int32_t LnnHbMgrInit(void);
+int32_t LnnHbMgrOneCycleBegin(void);
+int32_t LnnHbMgrOneCycleEnd(void);
+int32_t LnnHbMgrStop(void);
+void LnnHbMgrDeinit(void);
 
-void LnnDumpBeatMgrUpdateList(void);
-void LnnDumpBeatOnlineNodeList(void);
+void LnnDumpHbMgrUpdateList(void);
+void LnnDumpHbOnlineNodeList(void);
 
 #ifdef __cplusplus
 }
