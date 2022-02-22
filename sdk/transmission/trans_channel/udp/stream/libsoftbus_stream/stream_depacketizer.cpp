@@ -39,7 +39,7 @@ void StreamDepacketizer::DepacketizeHeader(const char *header)
 void StreamDepacketizer::DepacketizeBuffer(char *buffer)
 {
     char *ptr = buffer;
-    uint32_t tlvTotalLen = 0;
+    int tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
         tlvs_.Depacketize(ptr);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
