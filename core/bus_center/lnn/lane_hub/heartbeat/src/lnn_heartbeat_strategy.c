@@ -27,59 +27,54 @@
 #include "softbus_permission.h"
 #include "softbus_utils.h"
 
-#define BEAT_INVALID_UID (-1)
+#define HB_INVALID_UID (-1)
 
 typedef struct {
     int32_t callingUid;
     GearMode gearMode;
-    HeartbeatPolicy beatPolicy[LNN_BEAT_IMPL_TYPE_MAX];
+    HeartbeatPolicy policy[HB_IMPL_TYPE_MAX];
     SoftBusMutex lock;
 } LnnHeartbeatStrategy;
 
 static LnnHeartbeatStrategy g_strategy = {
-    .beatPolicy[LNN_BEAT_IMPL_TYPE_BLE] = {
+    .policy[HB_IMPL_TYPE_BLE] = {
         .implPolicy = NULL,
     },
 };
 
-static int32_t HeartbeatMonitorInit(void)
+static int32_t HbMonitorInit(void)
 {
     if (SoftBusMutexInit(&g_strategy.lock, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mutex init fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor init mutex fail!");
         return SOFTBUS_ERR;
     }
-
     g_strategy.gearMode.modeCycle = LOW_FREQ_CYCLE;
     g_strategy.gearMode.modeDuration = LONG_DURATION;
     g_strategy.gearMode.wakeupFlag = false;
-    g_strategy.callingUid = BEAT_INVALID_UID;
+    g_strategy.callingUid = HB_INVALID_UID;
     return SOFTBUS_OK;
 }
 
-static int32_t HeartbeatMonitorDeinit(void)
+static void HbMonitorDeinit(void)
 {
     uint8_t i;
-    for (i = 0; i < LNN_BEAT_IMPL_TYPE_MAX; i++) {
-        if (g_strategy.beatPolicy[i].implPolicy != NULL) {
-            SoftBusFree(g_strategy.beatPolicy[i].implPolicy);
-            g_strategy.beatPolicy[i].implPolicy = NULL;
+    for (i = 0; i < HB_IMPL_TYPE_MAX; i++) {
+        if (g_strategy.policy[i].implPolicy != NULL) {
+            SoftBusFree(g_strategy.policy[i].implPolicy);
+            g_strategy.policy[i].implPolicy = NULL;
         }
     }
-    if (SoftBusMutexDestroy(&g_strategy.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mutex deinit fail!");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    SoftBusMutexDestroy(&g_strategy.lock);
 }
 
 static int32_t ResetHeartbeatParam(int32_t callingUid, GearMode mode, const HeartbeatImplPolicy *implPolicy)
 {
     if (SoftBusMutexLock(&g_strategy.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB reset param lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
-    if (g_strategy.callingUid == BEAT_INVALID_UID || g_strategy.callingUid == callingUid) {
+    if (g_strategy.callingUid == HB_INVALID_UID || g_strategy.callingUid == callingUid) {
         g_strategy.gearMode = mode;
     } else {
         if (g_strategy.gearMode.modeCycle <= mode.modeCycle) {
@@ -93,41 +88,41 @@ static int32_t ResetHeartbeatParam(int32_t callingUid, GearMode mode, const Hear
     if (implPolicy != NULL) {
         HeartbeatImplPolicy *tmpImplPolicy = (HeartbeatImplPolicy *)SoftBusCalloc(sizeof(HeartbeatImplPolicy));
         if (tmpImplPolicy == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat malloc err");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB calloc tmpImplPolicy err");
+            (void)SoftBusMutexUnlock(&g_strategy.lock);
             return SOFTBUS_MALLOC_ERR;
         }
         tmpImplPolicy->type = implPolicy->type;
         tmpImplPolicy->info = implPolicy->info;
-        g_strategy.beatPolicy[implPolicy->type].implPolicy = tmpImplPolicy;
+        g_strategy.policy[implPolicy->type].implPolicy = tmpImplPolicy;
         tmpImplPolicy = NULL;
     }
-    SoftBusMutexUnlock(&g_strategy.lock);
+    (void)SoftBusMutexUnlock(&g_strategy.lock);
     return SOFTBUS_OK;
 }
 
 int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId,
     GearMode mode, const HeartbeatImplPolicy *implPolicy)
 {
-    if (pkgName == NULL || callingUid <= BEAT_INVALID_UID) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat invalid param");
+    NodeInfo *nodeInfo = NULL;
+
+    if (pkgName == NULL || callingUid <= HB_INVALID_UID) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (targetNetworkId != NULL) {
-        NodeInfo *nodeInfo = NULL;
         nodeInfo = LnnGetNodeInfoById(targetNetworkId, CATEGORY_NETWORK_ID);
         if (nodeInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat get node info fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get node info fail");
             return SOFTBUS_ERR;
         }
         if (!LnnIsNodeOnline(nodeInfo)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat target networdid offline");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB target networkId has offline");
             return SOFTBUS_ERR;
         }
     }
-
     if (ResetHeartbeatParam(callingUid, mode, implPolicy) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reset gear mode param fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB reset gearMode param fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -136,14 +131,15 @@ int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *target
 int32_t LnnGetHeartbeatGearMode(GearMode *mode)
 {
     if (mode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get gearMode invalid param!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_strategy.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get gearMode lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
     *mode = g_strategy.gearMode;
-    SoftBusMutexUnlock(&g_strategy.lock);
+    (void)SoftBusMutexUnlock(&g_strategy.lock);
     return SOFTBUS_OK;
 }
 
@@ -153,97 +149,105 @@ int32_t LnnGetHeartbeatImplPolicy(LnnHeartbeatImplType type, HeartbeatImplPolicy
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_strategy.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat lock mutex fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get impl policy lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_strategy.beatPolicy[type].implPolicy == NULL) {
-        SoftBusMutexUnlock(&g_strategy.lock);
+    if (g_strategy.policy[type].implPolicy == NULL) {
+        (void)SoftBusMutexUnlock(&g_strategy.lock);
         return SOFTBUS_ERR;
     }
-    *implPolicy = *g_strategy.beatPolicy[type].implPolicy;
-    SoftBusMutexUnlock(&g_strategy.lock);
+    *implPolicy = *g_strategy.policy[type].implPolicy;
+    (void)SoftBusMutexUnlock(&g_strategy.lock);
     return SOFTBUS_OK;
 }
 
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
+    uint64_t delayMillis;
+    GearMode gearMode;
+
     if (networkId == NULL || addrType != CONNECTION_ADDR_BLE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat invalid param: %d", addrType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB offline timing get invalid param: %d", addrType);
         return SOFTBUS_INVALID_PARAM;
     }
-
-    GearMode gearMode;
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    uint64_t delayMillis = (uint64_t)gearMode.modeCycle * HEARTBEAT_TIME_FACTOR + HEARTBEAT_ENABLE_DELAY_LEN;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "beat start offline countdown");
-    return LnnHeartbeatNodeOffline(networkId, addrType, delayMillis);
+    delayMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "heartbeat(HB) start offline countdown");
+    if (LnnHbProcessDeviceLost(networkId, addrType, delayMillis) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LnnNotifyMasterNodeChanged(const char *masterUdid, int32_t weight)
 {
     (void)weight;
     char localUdid[UDID_BUF_LEN] = {0};
+
     if (masterUdid == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-
-    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
-    if (strcmp(masterUdid, localUdid) == 0) {
-        return LnnPostMsgToBeatFsm(EVENT_BEAT_AS_MASTER_NODE, NULL);
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify master node changed get local udid err");
+        return SOFTBUS_ERR;
     }
-    return LnnPostMsgToBeatFsm(EVENT_BEAT_AS_NORMAL_NODE, NULL);
+    if (strcmp(masterUdid, localUdid) == 0) {
+        return LnnPostMsgToHbFsm(EVENT_HB_AS_MASTER_NODE, NULL);
+    }
+    return LnnPostMsgToHbFsm(EVENT_HB_AS_NORMAL_NODE, NULL);
 }
 
 int32_t LnnStartHeartbeatDelay(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat fsm start");
-    (void)LnnRemoveBeatFsmMsg(EVENT_BEAT_START, 0, NULL);
-    (void)LnnRemoveBeatFsmMsg(EVENT_BEAT_STOP, 0, NULL);
-    if (LnnHeartbeatFsmStart(STATE_BEAT_MASTER_NODE_INDEX, 0) != SOFTBUS_OK) {
+    uint64_t delayMillis;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
+    if (LnnRemoveHbFsmMsg(EVENT_HB_START, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-
-    uint64_t delayMillis = (uint64_t)g_strategy.gearMode.modeDuration * HEARTBEAT_TIME_FACTOR;
-    if (LnnHeartbeatFsmStop(delayMillis) != SOFTBUS_OK) {
+    if (LnnRemoveHbFsmMsg(EVENT_HB_STOP, 0, NULL) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnHbFsmStart(STATE_HB_MASTER_NODE_INDEX, 0) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    delayMillis = (uint64_t)g_strategy.gearMode.modeDuration * HB_TIME_FACTOR;
+    if (LnnHbFsmStop(delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-void LnnStopHeartbeat(void)
+void LnnStopHeartbeatNow(void)
 {
-    (void)LnnHeartbeatFsmStop(0);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process stop.");
+    (void)LnnHbFsmStop(0);
 }
 
 int32_t LnnInitHeartbeat(void)
 {
-    if (LnnHeartbeatMgrInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat manager init fail");
+    if (LnnHbMgrInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager init fail");
         return SOFTBUS_ERR;
     }
-
-    if (LnnHeartbeatFsmInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat fsm init fail");
+    if (LnnHbFsmInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fsm init fail");
         return SOFTBUS_ERR;
     }
-
-    if (HeartbeatMonitorInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat monitor init fail!");
+    if (HbMonitorInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor init fail!");
         return SOFTBUS_ERR;
     }
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitHeartbeat(void)
 {
-    LnnHeartbeatFsmDeinit();
-    if (HeartbeatMonitorDeinit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "beat monitor deinit fail");
-    }
-    LnnHeartbeatMgrDeinit();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn heartbeat deinit done");
+    LnnHbFsmDeinit();
+    HbMonitorDeinit();
+    LnnHbMgrDeinit();
 }

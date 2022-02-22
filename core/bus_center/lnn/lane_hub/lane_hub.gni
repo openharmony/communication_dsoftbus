@@ -41,7 +41,7 @@ if (dsoftbus_standard_feature_lnn_net) {
     bus_center_hub_src +=
         [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
   }
-  if (enable_lnn_heartbeat) {
+  if (dsoftbus_standard_feature_lnn_heartbeat) {
     bus_center_hub_src += [
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_strategy.c",
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_manager.c",
@@ -76,6 +76,7 @@ if (dsoftbus_standard_feature_lnn_net &&
     dsoftbus_standard_feature_lnn_time_sync && enhanced) {
   bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
 }
-if (dsoftbus_standard_feature_lnn_net && enable_lnn_heartbeat && enhanced) {
+if (dsoftbus_standard_feature_lnn_net &&
+    dsoftbus_standard_feature_lnn_heartbeat && enhanced) {
   bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_heartbeat_impl" ]
 }
