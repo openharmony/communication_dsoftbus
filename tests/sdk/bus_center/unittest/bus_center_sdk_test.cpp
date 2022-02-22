@@ -224,11 +224,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
     int i;
 
     for (i = 0; i <= DEFAULT_NODE_STATE_CB_NUM; ++i) {
-        if (i < DEFAULT_NODE_STATE_CB_NUM) {
-            EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) == SOFTBUS_OK);
-        } else {
-            EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) != SOFTBUS_OK);
-        }
+        EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) == SOFTBUS_OK);
     }
     for (i = 0; i < DEFAULT_NODE_STATE_CB_NUM; ++i) {
         EXPECT_TRUE(UnregNodeDeviceStateCb(&g_nodeStateCb) == SOFTBUS_OK);
