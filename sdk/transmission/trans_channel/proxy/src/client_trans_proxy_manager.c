@@ -538,7 +538,7 @@ int32_t GetDestFileFrameSeq(FileFrame fileFrame, uint32_t *seq)
 static bool IsPathValid(char *filePath)
 {
     if ((filePath == NULL) || (strlen(filePath) == 0) ||
-        (strlen(filePath) > (MAX_REMOTE_PATH_LEN - 1)) {
+        (strlen(filePath) > (MAX_REMOTE_PATH_LEN - 1))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size is wrong");
         return false;
     }
@@ -676,7 +676,7 @@ int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener
     }
     SoftBusFree(destFilePath);
     SoftBusFree(fullRecvPath);
-    SoftBusMutexUnlock(g_recvFileInfo.lock);
+    SoftBusMutexUnlock(&g_recvFileInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -892,7 +892,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     int32_t ret = BufferToFileList(bufferInfo, firtFilePath, &fileCount);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Buffer To File List failed");
-        SoftBusMutexUnlock(&g_recvFileInfo.lock)
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
@@ -926,7 +926,7 @@ int32_t SendFileList(int32_t channelId, const char **destFile, uint32_t fileCnt)
 
     // send file list
     int32_t type = TRANS_SESSION_FILE_ALLFILE_SENT;
-    int32_t ret = ProxyChannelSendFileStream(channelId, (char *)bufferInfo.buffer, bufferInfo.bufferSize, type);
+    ret = ProxyChannelSendFileStream(channelId, (char *)bufferInfo.buffer, bufferInfo.bufferSize, type);
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send buf fail %d", ret);
         SoftBusFree(bufferInfo.buffer);
