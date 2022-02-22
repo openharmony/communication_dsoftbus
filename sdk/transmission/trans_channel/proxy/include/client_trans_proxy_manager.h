@@ -69,7 +69,7 @@ typedef struct {
     int32_t index;
     uint32_t seq;
     int32_t fileFd;
-    int32_t fileStatus; /*0: idle 1:busy */
+    int32_t fileStatus; /* 0: idle 1:busy */
     uint64_t fileOffset;
     int32_t timeOut;
     char filePath[MAX_REMOTE_PATH_LEN];

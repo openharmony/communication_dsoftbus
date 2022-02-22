@@ -75,7 +75,8 @@ static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
         return ;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d\n",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
+        "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d\n",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
     if (PairRequestReply(bdAddr, transport, true) != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PairRequestReply error");
