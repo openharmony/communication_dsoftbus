@@ -82,9 +82,9 @@ static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
 {
     *typeId = 0;
     uint16_t tmp;
-    for (int32_t i = 0; i < strlen(deviceType); i++) {
+    for (uint32_t i = 0; i < strlen(deviceType); i++) {
         if ((*(deviceType + i) <= '9') && (*(deviceType + i) >= '0')) {
-            *typeId |= (*(deviceType + i) - '0');
+            *typeId |= (uint16_t)(*(deviceType + i) - '0');
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
             continue;
         } else if ((*(deviceType + i) <= 'F') && (*(deviceType + i) >= 'A')) {
@@ -112,7 +112,7 @@ static uint16_t InterceptTypeId(uint16_t typeId, uint32_t i)
 
 static char *ConvertIntToHexString(uint16_t typeId)
 {
-    int32_t j = 0;
+    uint32_t j = 0;
     for (int32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
         if ((j == 0) && (InterceptTypeId(typeId, i) == 0)) {
             continue;

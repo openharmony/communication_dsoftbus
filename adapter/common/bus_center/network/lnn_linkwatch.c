@@ -47,8 +47,8 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
         return SOFTBUS_ERR;
     }
     rta = ((struct rtattr *) (((void *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
-    rta->rta_type = type;
-    rta->rta_len = len;
+    rta->rta_type = (uint16_t)type;
+    rta->rta_len = (uint16_t)len;
     if (memcpy_s(RTA_DATA(rta), rta->rta_len, data, attrLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddAttr ERROR: memcpy attr failed");
         return SOFTBUS_MEM_ERR;
@@ -84,7 +84,7 @@ static int32_t ProcessNetlinkAnswer(struct nlmsghdr *answer, int32_t bufLen, uin
     return SOFTBUS_ERR;
 }
 
-static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer, int32_t maxlen)
+static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer, uint32_t maxlen)
 {
     int32_t status;
     int32_t fd;
@@ -129,7 +129,7 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
             attr = RTA_NEXT(attr, len);
             continue;
         }
-        if (memcpy_s(value, valueLen, RTA_DATA(attr), RTA_PAYLOAD(attr)) != EOK) {
+        if (memcpy_s(value, valueLen, RTA_DATA(attr), (uint32_t)RTA_PAYLOAD(attr)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get attr fail: %d, %d",
                 valueLen, RTA_PAYLOAD(attr));
             break;
@@ -172,7 +172,7 @@ bool LnnIsLinkReady(const char *iface, uint32_t len)
         return false;
     }
     info = NLMSG_DATA(&answer.hdr);
-    infoDataLen = answer.hdr.nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
+    infoDataLen = (int32_t)answer.hdr.nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
     if (GetRtAttr(IFLA_RTA(info), infoDataLen, IFLA_CARRIER, &carrier, sizeof(uint8_t)) != SOFTBUS_OK) {
         return false;
     }

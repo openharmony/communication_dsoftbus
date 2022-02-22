@@ -30,7 +30,7 @@ int32_t TransProxyAuthSessionDataLenCheck(uint32_t dataLen, int32_t type);
 int32_t TransProxyGetNewChanSeq(int32_t channelId);
 int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyCloseProxyChannel(int32_t channelId);
-int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority);
+int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority);
 void TransProxyDelByConnId(uint32_t connId);
 void TransProxyOpenProxyChannelSuccess(int32_t chanId);
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo);

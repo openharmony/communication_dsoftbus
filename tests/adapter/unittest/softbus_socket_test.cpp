@@ -1887,9 +1887,10 @@ HWTEST_F(DsoftbusSocketTest, SoftBusNtoHsTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 {
     const char *cp = "127.0.0.1";
-    int32_t ret = SoftBusInetAddr(cp);
+    uint32_t ret = SoftBusInetAddr(cp);
     EXPECT_EQ(LOCAL_HOST_VALUE, ret);
 }
+
 
 /*
 * @tc.name: SoftBusInetAddrTest002
@@ -1899,9 +1900,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 {
-    const char *cp = "abcde";
-    int32_t ret = SoftBusInetAddr(cp);
-    EXPECT_EQ(-1, ret);
+    const char *cp = "0x1234";
+    uint32_t ret = SoftBusInetAddr(cp);
+    EXPECT_EQ(0x34120000, ret);
 }
 
 /*
@@ -1912,36 +1913,11 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest003, TestSize.Level0)
 {
-    const char *cp = "0x1234";
-    int32_t ret = SoftBusInetAddr(cp);
-    EXPECT_EQ(0x34120000, ret);
-}
-
-/*
-* @tc.name: SoftBusInetAddrTest004
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest004, TestSize.Level0)
-{
     const char *cp = "1234";
-    int32_t ret = SoftBusInetAddr(cp);
+    uint32_t ret = SoftBusInetAddr(cp);
     EXPECT_EQ(0xD2040000, ret);
 }
 
-/*
-* @tc.name: SoftBusInetAddrTest005
-* @tc.desc: invalid cp
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest005, TestSize.Level0)
-{
-    const char *cp = "adc1234";
-    int32_t ret = SoftBusInetAddr(cp);
-    EXPECT_EQ(-1, ret);
-}
 
 /*
 * @tc.name: SoftBusSocketFullFunc001

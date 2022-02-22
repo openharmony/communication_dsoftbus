@@ -27,7 +27,7 @@ typedef struct {
 } P2pLinkCb;
 
 typedef struct {
-    int requestId;
+    int32_t requestId;
     int64_t authId;
     char peerMac[P2P_MAC_LEN];
     P2pLinkRole expectedRole;
