@@ -209,14 +209,12 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
                 }
 
                 if (type == TRANS_SESSION_FILE_ALLFILE_SENT) {
-                    ret = ProcessFileListData(sessionId, fileListener, data, len);
-                    if (ret != SOFTBUS_OK) {
+                    if (ProcessFileListData(sessionId, fileListener, data, len) != SOFTBUS_OK) {
                         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process filelist data failed");
                         return SOFTBUS_ERR;
                     }
                 } else {
-                    ret = ProcessFileFrameData(sessionId, fileListener, data, len, type);
-                    if (ret != SOFTBUS_OK) {
+                    if (ProcessFileFrameData(sessionId, fileListener, data, len, type) != SOFTBUS_OK) {
                         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
                         return SOFTBUS_ERR;
                     }
