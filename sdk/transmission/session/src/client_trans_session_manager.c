@@ -51,11 +51,6 @@ int TransClientInit(void)
         return SOFTBUS_ERR;
     }
 
-    if (RegisterTimeoutCallback(SOFTBUS_SESSION_TIMER_FUN, TransSessionTimer) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init trans timer failed");
-        return SOFTBUS_ERR;
-    }
-
     if (TransServerProxyInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init trans ipc proxy failed");
         return SOFTBUS_ERR;

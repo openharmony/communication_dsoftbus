@@ -48,6 +48,42 @@ static int32_t ReceivedHeadCheck(BrConnectionInfo *conn)
     return SOFTBUS_OK;
 }
 
+static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
+{
+    if (ReceivedHeadCheck(conn) != SOFTBUS_OK) {
+        return NULL;
+    }
+    int32_t bufLen = conn->recvPos;
+    ConnPktHead *head = (ConnPktHead *)(conn->recvBuf);
+    int32_t packLen = head->len + sizeof(ConnPktHead);
+    if (bufLen < packLen) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "not a complete package, continue");
+        return NULL;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] a complete package packLen: %d", packLen);
+    char *dataCopy = SoftBusMalloc(packLen);
+    if (dataCopy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] SoftBusMalloc failed");
+        return NULL;
+    }
+    if (memcpy_s(dataCopy, packLen, conn->recvBuf, packLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memcpy_s failed");
+        SoftBusFree(dataCopy);
+        return NULL;
+    }
+
+    if (bufLen > packLen &&
+        memmove_s(conn->recvBuf, conn->recvSize, conn->recvBuf + packLen, bufLen - packLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memmove_s failed");
+        SoftBusFree(dataCopy);
+        return NULL;
+    }
+    conn->recvPos = bufLen - packLen;
+    *outLen = packLen;
+    return dataCopy;
+}
+
 int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDriver, int32_t clientId, char **outBuf)
 {
     BrConnectionInfo *conn = GetConnectionRef(connectionId);
@@ -55,8 +91,14 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
         return BR_READ_FAILED;
     }
     int32_t recvLen;
-    int32_t bufLen;
     while (1) {
+        int32_t packLen;
+        char *dataBuf = BrRecvDataParse(conn, &packLen);
+        if (dataBuf != NULL) {
+            *outBuf = dataBuf;
+            ReleaseConnectionRef(conn);
+            return packLen;
+        }
         if (conn->recvSize - conn->recvPos > 0) {
             recvLen = sppDriver->Read(clientId, conn->recvBuf + conn->recvPos, conn->recvSize - conn->recvPos);
             if (recvLen == BR_READ_SOCKET_CLOSED) {
@@ -70,35 +112,12 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
             }
             conn->recvPos += recvLen;
         }
-        if (ReceivedHeadCheck(conn) != SOFTBUS_OK) {
-            continue;
+        dataBuf = BrRecvDataParse(conn, &packLen);
+        if (dataBuf != NULL) {
+            *outBuf = dataBuf;
+            ReleaseConnectionRef(conn);
+            return packLen;
         }
-        bufLen = conn->recvPos;
-        ConnPktHead *head = (ConnPktHead *)(conn->recvBuf);
-        int32_t packLen = head->len + sizeof(ConnPktHead);
-        if (bufLen < packLen) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "not a complete package, continue");
-            continue;
-        }
-
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] a complete package packLen: %d", packLen);
-        char *dataCopy = SoftBusMalloc(packLen);
-        if (dataCopy == NULL || memcpy_s(dataCopy, packLen, conn->recvBuf, packLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memcpy_s failed");
-            SoftBusFree(dataCopy);
-            continue;
-        }
-
-        if (bufLen > packLen &&
-            memmove_s(conn->recvBuf, conn->recvSize, conn->recvBuf + packLen, bufLen - packLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memmove_s failed");
-            SoftBusFree(dataCopy);
-            continue;
-        }
-        conn->recvPos = bufLen - packLen;
-        *outBuf = dataCopy;
-        ReleaseConnectionRef(conn);
-        return packLen;
     }
 }
 
@@ -195,7 +214,7 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t 
     head.flag = 0;
     head.len = strlen(data) + 1;
 
-    if (memcpy_s(buf, dataLen, (void *)&head, headSize)) {
+    if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);
         SoftBusFree(buf);
