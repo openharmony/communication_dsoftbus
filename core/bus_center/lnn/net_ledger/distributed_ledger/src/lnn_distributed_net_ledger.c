@@ -740,8 +740,8 @@ static void MergeLnnRelation(const NodeInfo *oldInfo, NodeInfo *info)
     int32_t i;
 
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
-        info->lnnRelation[i] += oldInfo->lnnRelation[i];
-        info->lnnRelation[i] &= LNN_RELATION_MASK;
+        info->relation[i] += oldInfo->relation[i];
+        info->relation[i] &= LNN_RELATION_MASK;
     }
 }
 
@@ -815,8 +815,8 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
-    if (type != CONNECTION_ADDR_MAX && info->lnnRelation[type] > 0) {
-        info->lnnRelation[type]--;
+    if (type != CONNECTION_ADDR_MAX && info->relation[type] > 0) {
+        info->relation[type]--;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
@@ -939,7 +939,7 @@ int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, ui
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    if (memcpy_s(relation, len, info->lnnRelation, CONNECTION_ADDR_MAX) != EOK) {
+    if (memcpy_s(relation, len, info->relation, CONNECTION_ADDR_MAX) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy relation fail");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_MEM_ERR;

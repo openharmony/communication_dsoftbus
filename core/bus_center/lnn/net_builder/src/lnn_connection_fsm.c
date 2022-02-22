@@ -450,7 +450,7 @@ static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
     connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
     connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
-    connInfo->nodeInfo->lnnRelation[connInfo->addr.type]++;
+    connInfo->nodeInfo->relation[connInfo->addr.type]++;
 }
 
 static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *connInfo)
