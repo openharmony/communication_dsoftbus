@@ -48,7 +48,7 @@ typedef struct {
 } LnnHeartbeatStateHandler;
 
 static SoftBusHandler g_beatHandler = {0};
-static int32_t g_curentState = -1;
+static int32_t g_currentState = -1;
 
 static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg);
 static int32_t OnDetectDeviceLost(const SoftBusMessage *msg);
@@ -99,7 +99,7 @@ static LnnHeartbeatEventHandler g_masterNodeStateHandler[] = {
     {EVENT_HB_EXIT, OnMasterStateExit}
 };
 
-static LnnHeartbeatStateHandler g_beatStatHandler[] = {
+static LnnHeartbeatStateHandler g_beatStateHandler[] = {
     [STATE_HB_NONE_INDEX] = {
         .eventNum = sizeof(g_noneHbStateHandler) / sizeof(LnnHeartbeatEventHandler),
         .eventHandler = g_noneHbStateHandler,
@@ -142,8 +142,8 @@ static SoftBusMessage *CreateHbHandlerMsg(int32_t what, uint64_t arg1, uint64_t 
 
 static void HbFsmTransactState(int32_t fromState, int32_t toState, const SoftBusMessage *msg)
 {
-    int32_t eventNum = g_beatStatHandler[fromState].eventNum;
-    LnnHeartbeatEventHandler *eventHandler = g_beatStatHandler[fromState].eventHandler;
+    int32_t eventNum = g_beatStateHandler[fromState].eventNum;
+    LnnHeartbeatEventHandler *eventHandler = g_beatStateHandler[fromState].eventHandler;
 
     if (eventHandler[eventNum - 1].eventType != EVENT_HB_EXIT) {
         return;
@@ -152,7 +152,7 @@ static void HbFsmTransactState(int32_t fromState, int32_t toState, const SoftBus
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB FSM process exit err, stateIndex=%d", fromState);
         return;
     }
-    eventHandler = g_beatStatHandler[toState].eventHandler;
+    eventHandler = g_beatStateHandler[toState].eventHandler;
     if (eventHandler[0].eventType != EVENT_HB_ENTER) {
         return;
     }
@@ -170,14 +170,14 @@ static void HbMsgHandler(SoftBusMessage *msg)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB msg handler get invalid param");
         return;
     }
-    if (g_curentState < 0 || g_curentState >= STATE_HB_INDEX_MAX) {
+    if (g_currentState < 0 || g_currentState >= STATE_HB_INDEX_MAX) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unknow state or not init yet");
         return;
     }
     eventType = msg->what;
-    nextStatus = g_curentState;
-    eventNum = g_beatStatHandler[g_curentState].eventNum;
-    LnnHeartbeatEventHandler *eventHandler = g_beatStatHandler[g_curentState].eventHandler;
+    nextStatus = g_currentState;
+    eventNum = g_beatStateHandler[g_currentState].eventNum;
+    LnnHeartbeatEventHandler *eventHandler = g_beatStateHandler[g_currentState].eventHandler;
     for (actIdx = 0; actIdx < eventNum; ++actIdx) {
         if (eventHandler[actIdx].eventType == eventType) {
             ret = (eventHandler[actIdx].handler)(msg);
@@ -186,18 +186,18 @@ static void HbMsgHandler(SoftBusMessage *msg)
                 return;
             }
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB FSM process msg(%d) done, ret=%d, nowstatus=%d",
-                eventType, ret, g_curentState);
+                eventType, ret, g_currentState);
             nextStatus = ret;
             break;
         }
     }
     if (actIdx == eventNum) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB no handler what=%d in status=%d", eventType, g_curentState);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB no handler what=%d in status=%d", eventType, g_currentState);
     }
-    if (nextStatus != g_curentState) {
-        HbFsmTransactState(g_curentState, nextStatus, msg);
+    if (nextStatus != g_currentState) {
+        HbFsmTransactState(g_currentState, nextStatus, msg);
     }
-    g_curentState = nextStatus;
+    g_currentState = nextStatus;
 }
 
 static int32_t PostMsgToHbHandler(int32_t what, uint64_t arg1, uint64_t arg2, void *obj)
@@ -329,7 +329,7 @@ int32_t LnnHbFsmStop(uint64_t delayMillis)
 
 int32_t LnnHbFsmInit(void)
 {
-    g_curentState = STATE_HB_NONE_INDEX;
+    g_currentState = STATE_HB_NONE_INDEX;
     g_beatHandler.name = "heartbeat_handler";
     g_beatHandler.HandleMessage = HbMsgHandler;
     g_beatHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -342,7 +342,7 @@ int32_t LnnHbFsmInit(void)
 
 void LnnHbFsmDeinit(void)
 {
-    g_curentState = -1;
+    g_currentState = -1;
 }
 
 static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
@@ -352,7 +352,7 @@ static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
 
     LnnDumpHbMgrUpdateList();
     LnnDumpHbOnlineNodeList();
-    if (g_curentState == STATE_HB_MASTER_NODE_INDEX) {
+    if (g_currentState == STATE_HB_MASTER_NODE_INDEX) {
         return STATE_HB_MASTER_NODE_INDEX;
     }
     if (LnnRemoveHbFsmMsg(EVENT_HB_AS_MASTER_NODE, 0, NULL) != SOFTBUS_OK) {
@@ -435,7 +435,7 @@ static int32_t OnRepeatCycle(const SoftBusMessage *msg)
 static int32_t OnElectAsMasterNode(const SoftBusMessage *msg)
 {
     (void)msg;
-    g_curentState = STATE_HB_NONE_INDEX;
+    g_currentState = STATE_HB_NONE_INDEX;
 
     if (LnnRemoveHbFsmMsg(EVENT_HB_AS_MASTER_NODE, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -447,7 +447,7 @@ static int32_t OnElectAsMasterNode(const SoftBusMessage *msg)
 static int32_t OnElectAsNormalNode(const SoftBusMessage *msg)
 {
     (void)msg;
-    g_curentState = STATE_HB_NONE_INDEX;
+    g_currentState = STATE_HB_NONE_INDEX;
 
     if (LnnRemoveHbFsmMsg(EVENT_HB_AS_MASTER_NODE, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -469,7 +469,7 @@ static int32_t OnOneCycleBegin(const SoftBusMessage *msg)
     if (LnnHbCheckDevStatus((ConnectionAddrType)msg->arg2, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    return g_curentState;
+    return g_currentState;
 }
 
 static int32_t OnOneCycleEnd(const SoftBusMessage *msg)
@@ -480,12 +480,12 @@ static int32_t OnOneCycleEnd(const SoftBusMessage *msg)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop once HB adv fail");
         return SOFTBUS_ERR;
     }
-    return g_curentState;
+    return g_currentState;
 }
 
 static int32_t OnHeartbeatStart(const SoftBusMessage *msg)
 {
-    g_curentState = STATE_HB_NONE_INDEX;
+    g_currentState = STATE_HB_NONE_INDEX;
     int32_t stateIndex = (int32_t)msg->arg1;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) start in status: %d", stateIndex);
     return stateIndex;
@@ -513,7 +513,7 @@ static int32_t OnOneCycleTimeout(const SoftBusMessage *msg)
     if (LnnRemoveHbFsmMsg(EVENT_HB_ONCE_END, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    return g_curentState;
+    return g_currentState;
 }
 
 static bool HbCheckActiveConn(ConnectionAddrType addrType, const char *networkId)
@@ -567,7 +567,7 @@ static int32_t OnDetectDeviceLost(const SoftBusMessage *msg)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set new offline check err");
             return SOFTBUS_ERR;
         }
-        return g_curentState;
+        return g_currentState;
     }
     if (addrType == CONNECTION_ADDR_MAX) {
     /* heartbeat dont support medium type except ble now, so only offline ble devices */
@@ -575,13 +575,13 @@ static int32_t OnDetectDeviceLost(const SoftBusMessage *msg)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify device lost fail");
             return SOFTBUS_ERR;
         }
-        return g_curentState;
+        return g_currentState;
     }
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify device lost fail");
         return SOFTBUS_ERR;
     }
-    return g_curentState;
+    return g_currentState;
 }
 
 static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
@@ -599,7 +599,7 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
     }
     if (info == NULL || infoNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB no online node");
-        return g_curentState;
+        return g_currentState;
     }
     SoftBusGetTime(&times);
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
@@ -631,5 +631,5 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
         }
     }
     SoftBusFree(info);
-    return g_curentState;
+    return g_currentState;
 }

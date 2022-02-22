@@ -21,7 +21,7 @@
 
 static char const *g_pkgName = "ohos.dsoftbus.tool";
 
-static void PrintNodeProperty(NodeBasicInfo *nodeInfo)
+static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
 {
     printf("DeviceName = %s\n", nodeInfo->deviceName);
     printf("NetworkId = %s\n", nodeInfo->networkId);
