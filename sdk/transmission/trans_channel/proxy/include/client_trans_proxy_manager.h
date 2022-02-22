@@ -30,7 +30,6 @@ extern "C" {
 #define MAX_FILE_NUM 1
 #endif
 #define MAX_FILE_PATH_NAME_LEN (256)
-//#define MAX_PATH_LEN 256
 #define MAX_REMOTE_PATH_LEN (512)
 
 #define FRAME_DATA_SEQ_OFFSET (4)
@@ -70,7 +69,7 @@ typedef struct {
     int32_t index;
     uint32_t seq;
     int32_t fileFd;
-    int32_t fileStatus;/*0: idle 1:busy*/
+    int32_t fileStatus; /*0: idle 1:busy */
     uint64_t fileOffset;
     int32_t timeOut;
     char filePath[MAX_REMOTE_PATH_LEN];

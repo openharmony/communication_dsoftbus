@@ -89,7 +89,7 @@ static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, i
         return ;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, 
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d\n",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX],
         transport, reqType, number);
