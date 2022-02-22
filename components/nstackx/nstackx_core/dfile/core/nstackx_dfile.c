@@ -42,8 +42,6 @@ static pthread_mutex_t g_dFileSessionIdMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t g_dFileSessionChainMutex = PTHREAD_MUTEX_INITIALIZER;
 static List g_dFileSessionChain = {&(g_dFileSessionChain), &(g_dFileSessionChain)};
 static uint16_t g_dFileSessionId = 0;
-static int32_t g_sockRecvBufLen;
-static int32_t g_sockSendBufLen;
 /* currently enabled capabilities */
 static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY;
 /* wlan catagory from APP */
@@ -1024,13 +1022,7 @@ static int32_t DFileRecverInit(DFileSession *session, struct sockaddr_in *sockAd
     if (getsockopt(socket->sockfd, SOL_SOCKET, SO_RCVBUF, (void *)&optVal, &optLen) == 0) {
         LOGI(TAG, "default recv buf is %d bytes", optVal);
     }
-    g_sockRecvBufLen = SOCKET_RECV_BUFFER;
-    if (setsockopt(socket->sockfd, SOL_SOCKET, SO_RCVBUF, (void *)&g_sockRecvBufLen, sizeof(g_sockRecvBufLen)) != 0) {
-        LOGE(TAG, "set receiver socket recv buffer size failed");
-    }
-    if (getsockopt(socket->sockfd, SOL_SOCKET, SO_RCVBUF, (void *)&optVal, &optLen) == 0) {
-        LOGI(TAG, "recv buf is %d bytes", optVal);
-    }
+
     return NSTACKX_EOK;
 }
 
@@ -1224,10 +1216,6 @@ static int32_t DFileSenderInitWithTargetDev(DFileSession *session, const struct 
 
     session->socket[socketIndex] = socket;
     session->protocol = protocol;
-    g_sockSendBufLen = SOCKET_SEND_BUFFER;
-    if (setsockopt(socket->sockfd, SOL_SOCKET, SO_SNDBUF, (void *)&g_sockSendBufLen, sizeof(g_sockSendBufLen)) != 0) {
-        LOGE(TAG, "set sender socket send buffer size failed");
-    }
 
     if (CapsTcp(session)) {
         SetTcpKeepAlive(socket->sockfd);
