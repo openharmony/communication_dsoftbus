@@ -109,6 +109,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener001, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
 {
     int i;
+    int port = 666;
     for (i = PROXY; i <= UNUSE_BUTT; i++) {
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(i), nullptr));
     }
@@ -122,7 +123,9 @@ HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
             free(setListener);
             return;
         }
+        ++port;
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
         EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
         EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
         EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
