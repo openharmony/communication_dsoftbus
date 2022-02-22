@@ -24,17 +24,18 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_transmission_interface.h"
 
 #define MSG_HEAD_LEN 4
 #define MAX_SYNC_INFO_MSG_LEN 4096
 #define UNUSED_CHANNEL_CLOSED_DELAY (60 * 1000)
+#define TIME_CONVERSION_UNIT 1000
 #define CHANNEL_NAME "com.huawei.hwddmp.service.DeviceInfoSynchronize"
 
 typedef struct {
@@ -199,7 +200,8 @@ static void CloseUnusedChannel(void *para)
         if (item->clientChannelId == INVALID_CHANNEL_ID) {
             continue;
         }
-        diff = (now.sec - item->accessTime.sec) * 1000 + (now.usec - item->accessTime.usec) / 1000;
+        diff = (now.sec - item->accessTime.sec) * TIME_CONVERSION_UNIT +
+            (now.usec - item->accessTime.usec) / TIME_CONVERSION_UNIT;
         if (diff <= UNUSED_CHANNEL_CLOSED_DELAY) {
             continue;
         }

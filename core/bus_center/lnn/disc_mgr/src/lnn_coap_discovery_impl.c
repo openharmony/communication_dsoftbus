@@ -18,7 +18,6 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
-#include "lnn_discovery_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
