@@ -295,7 +295,7 @@ static void OnConnOpened(uint32_t requestId, int64_t authId)
         requestId, authId);
     SetAuthIdToItem(requestId, authId);
     P2pLinkConnectInfo info = {0};
-    info.requestId = requestId;
+    info.requestId = (int32_t)requestId;
     info.authId = authId;
     if (GetP2pMacAndPid(requestId, info.peerMac, sizeof(info.peerMac), &info.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");

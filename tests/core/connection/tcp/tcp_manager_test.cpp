@@ -121,7 +121,7 @@ void CreateServer(void *arg)
     int listenfd, connfd, n;
     struct sockaddr_in servaddr;
     char buff[MAXLNE];
-    int port = 6667;
+    unsigned int port = 6667;
     int defaultListen = 5;
 
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -159,7 +159,7 @@ void CreateServer(void *arg)
             break;
         }
         printf("recv msg with length:%d from client\n", n);
-        n = send(connfd, buff, n, 0);
+        n = send(connfd, buff, static_cast<unsigned int>(n), 0);
         printf("send msg with length:%d to client\n", n);
     }
     close(connfd);
@@ -321,7 +321,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
             continue;
         }
         (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
-        (void)memcpy_s(data + sizeof(head), head.len, g_data, head.len);
+        (void)memcpy_s(data + sizeof(head), (unsigned int)head.len, g_data, (unsigned int)head.len);
         EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0));
         sleep(1);
         EXPECT_EQ(int(sizeof(ConnPktHead) + head.len), g_receivedDatalength);
@@ -412,7 +412,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
         return;
     }
     (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
-    (void)memset_s(data + sizeof(head), head.len, 0x1, head.len);
+    (void)memset_s(data + sizeof(head), (unsigned int)head.len, 0x1, (unsigned int)head.len);
 
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));

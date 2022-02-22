@@ -43,7 +43,7 @@ typedef struct {
     int32_t module;
     int64_t seq;
     int32_t flag;
-    int32_t len;
+    uint32_t len;
 } ConnPktHead;
 
 #ifdef __cplusplus
