@@ -150,10 +150,25 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
     return ret;
 }
 
-int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
+int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
-    return TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    int32_t ret = SOFTBUS_OK;
+    switch (type) {
+        case CHANNEL_TYPE_UDP : {
+            ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+            break;
+        }
+        case CHANNEL_TYPE_PROXY : {
+            ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+            break;
+        }
+        default : {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport channel type");
+            return SOFTBUS_ERR;
+        }
+    }
+    return ret;
 }
 
 void DeleteFileListener(const char *sessionName)
