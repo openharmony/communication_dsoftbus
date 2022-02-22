@@ -14,6 +14,7 @@
  */
 
 #include <sys/prctl.h>
+#include <ctype.h>
 
 #include "br_connection_manager.h"
 
@@ -42,6 +43,20 @@ static pthread_mutex_t g_connectionLock;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static int16_t g_nextConnectionId = 0;
+
+static int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
+{
+    int32_t ca;
+    int32_t cb;
+    do {
+        ca = (int32_t)(*src1++);
+        cb = (int32_t)(*src2++);
+        ca = toupper(ca);
+        cb = toupper(cb);
+        len--;
+    } while (ca == cb && ca != '\0' && len);
+    return ca - cb;
+}
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {
@@ -440,7 +455,7 @@ bool HasDiffMacDeviceExit(const ConnectOption *option)
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->sideType == BR_CLIENT_TYPE) {
-            if (memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) != 0) {
+            if (Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) != 0) {
                 res = true;
                 break;
             }
@@ -459,7 +474,7 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCoun
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (strncmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
+        if (Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
             if (outCountId != NULL) {
                 *outCountId = itemNode->connectionId;
             }
@@ -504,7 +519,7 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
     BrConnectionInfo *itemNode = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) {
+        if (Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) {
             *socketFd = itemNode->socketFd;
             *sideType = itemNode->sideType;
             itemNode->state = BR_CONNECTION_STATE_CLOSING;
@@ -532,7 +547,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if ((memcmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) &&
+        if ((Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) &&
             (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection true");
             (void)pthread_mutex_unlock(&g_connectionLock);
