@@ -250,7 +250,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         return;
     }
     if (laneId >= LNN_LINK_TYPE_BR) {
-        g_lanes[laneId].laneInfo.isSupportUdp = false
+        g_lanes[laneId].laneInfo.isSupportUdp = false;
         (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
         return;
     }
