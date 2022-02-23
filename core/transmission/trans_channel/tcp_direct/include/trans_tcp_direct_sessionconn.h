@@ -65,7 +65,7 @@ void ReleaseSessonConnLock(void);
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId);
 
-SessionConn *GetSessionConnByChannelId(uint32_t channelId);
+SessionConn *GetSessionConnByChannelId(int32_t channelId);
 
 SessionConn *GetSessionConnByReq(int64_t req);
 
@@ -83,7 +83,7 @@ int32_t TransTdcAddSessionConn(SessionConn *conn);
 
 void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen);
 
-int32_t SetSessionConnStatusById(int32_t channelId, int32_t status);
+int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status);
 
 #ifdef __cplusplus
 #if __cplusplus
