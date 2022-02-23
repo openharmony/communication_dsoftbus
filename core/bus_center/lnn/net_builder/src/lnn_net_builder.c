@@ -35,6 +35,7 @@
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
 #include "lnn_sync_info_manager.h"
+#include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -1213,12 +1214,13 @@ static void OnRecvPeerDeviceInfo(int64_t authId, AuthSideFlag side,
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     char *udid = NULL;
-    int32_t udidLen;
+    uint32_t udidLen;
 
     if (peerUdid == NULL) {
         return;
     }
     udidLen = strlen(peerUdid) + 1;
+
     udid = (char *)SoftBusMalloc(udidLen);
     if (udid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");
@@ -1375,6 +1377,7 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync info manager fail");
         return SOFTBUS_ERR;
     }
+    LnnInitTopoManager();
     if (LnnInitP2p() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
         return SOFTBUS_ERR;
@@ -1433,6 +1436,7 @@ void LnnDeinitNetBuilder(void)
         StopConnectionFsm(item);
     }
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
+    LnnDeinitTopoManager();
     LnnDeinitP2p();
     LnnDeinitSyncInfoManager();
     g_netBuilder.isInit = false;
@@ -1629,7 +1633,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
     bool *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {
@@ -1675,7 +1679,7 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc specific msg fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strncpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+    if (strcpy_s(para->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;

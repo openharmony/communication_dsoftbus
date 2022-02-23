@@ -306,6 +306,7 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
         return SOFTBUS_ERR;
     }
     AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,
         .module = MODULE_UDP_INFO,
         .flag = FLAG_REPLY,
@@ -481,6 +482,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
     }
 
     AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,
         .module = MODULE_UDP_INFO,
         .flag = FLAG_REQUEST,

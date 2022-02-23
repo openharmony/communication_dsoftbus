@@ -138,7 +138,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
     return NULL;
 }
 
-SessionConn *CreateNewSessinConn(bool isServerSid)
+SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
@@ -149,8 +149,9 @@ SessionConn *CreateNewSessinConn(bool isServerSid)
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = -1;
-    conn->authId = -1;
+    conn->authId = AUTH_INVALID_ID;
     conn->requestId = 0; // invalid num
+    conn->listenMod = module;
     return conn;
 }
 

@@ -61,8 +61,8 @@ int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state);
 int32_t LnnFsmStart(FsmStateMachine *fsm, FsmState *initialState);
 int32_t LnnFsmStop(FsmStateMachine *fsm);
 
-int32_t LnnFsmPostMessage(FsmStateMachine *fsm, int32_t msgType, void *data);
-int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, int32_t msgType,
+int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data);
+int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     void *data, uint64_t delayMillis);
 int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType);
 

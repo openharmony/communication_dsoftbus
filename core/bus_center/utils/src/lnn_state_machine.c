@@ -295,7 +295,7 @@ int32_t LnnFsmStop(FsmStateMachine *fsm)
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_STOP, 0, 0, NULL);
 }
 
-int32_t LnnFsmPostMessage(FsmStateMachine *fsm, int32_t msgType, void *data)
+int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data)
 {
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -303,7 +303,7 @@ int32_t LnnFsmPostMessage(FsmStateMachine *fsm, int32_t msgType, void *data)
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_DATA, msgType, 0, data);
 }
 
-int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, int32_t msgType,
+int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     void *data, uint64_t delayMillis)
 {
     SoftBusMessage *msg = NULL;

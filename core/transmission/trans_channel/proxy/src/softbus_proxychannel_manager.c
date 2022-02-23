@@ -43,8 +43,8 @@
 
 static SoftBusList *g_proxyChannelList = NULL;
 static SoftBusMutex g_myIdLock;
-static int32_t g_authMaxByteBufSize;
-static int32_t g_authMaxMessageBufSize;
+static uint32_t g_authMaxByteBufSize;
+static uint32_t g_authMaxMessageBufSize;
 
 static int32_t MyIdIsValid(int16_t myId)
 {
@@ -107,11 +107,11 @@ int16_t TransProxyGetNewMyId(void)
     while (cnt) {
         cnt--;
         myId++;
-        int16_t ret = myId % MYID_MAX_NUM + 1;
+        uint16_t ret = myId % MYID_MAX_NUM + 1;
         ret = EndianSwap16(ret);
-        if (MyIdIsValid(ret) == SOFTBUS_OK) {
+        if (MyIdIsValid((int16_t)ret) == SOFTBUS_OK) {
             SoftBusMutexUnlock(&g_myIdLock);
-            return ret;
+            return (int16_t)ret;
         }
     }
     SoftBusMutexUnlock(&g_myIdLock);
@@ -542,7 +542,7 @@ int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side)
     return SOFTBUS_ERR;
 }
 
-int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int32_t sessionKeySize)
+int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -805,10 +805,6 @@ void TransProxyonMessageReceived(const ProxyMessage *msg)
             break;
         }
     }
-
-    if (msg->msgHead.chiper != 0) {
-        SoftBusFree(msg->data);
-    }
 }
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
@@ -908,7 +904,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
+int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
 {
     int32_t ret;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -1067,6 +1063,10 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
 
+    if (TransSliceManagerInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Trans slice manager init failed");
+    }
+
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH,
         (unsigned char*)&g_authMaxByteBufSize, sizeof(g_authMaxByteBufSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get auth proxy channel max bytes length fail");
@@ -1111,6 +1111,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 
 void TransProxyManagerDeinit(void)
 {
+    TransSliceManagerDeInit();
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
     PendingDeinit(PENDING_TYPE_PROXY);
 }

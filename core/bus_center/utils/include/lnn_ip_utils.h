@@ -41,7 +41,7 @@ int32_t LnnClearNetConfigList(void);
 
 int32_t LnnGetLocalIp(char *ip, uint32_t len, char *ifName, uint32_t ifNameLen);
 
-int32_t LnnGetAddrTypeByIfName(const char *ifName, int32_t ifNameLen, ConnectionAddrType *type);
+int32_t LnnGetAddrTypeByIfName(const char *ifName, uint32_t ifNameLen, ConnectionAddrType *type);
 
 #ifdef __cplusplus
 }

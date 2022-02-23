@@ -52,7 +52,7 @@ static void AuthP2pOnKeyGenerated(int64_t authId, ConnectOption *option, SoftBus
         return;
     }
     SoftBusFree(buf);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send device info succ, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send device info succ, authId = %lld.", authId);
 }
 
 static void AuthP2pOnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUuid,

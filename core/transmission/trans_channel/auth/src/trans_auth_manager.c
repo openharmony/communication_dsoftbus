@@ -502,6 +502,7 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, i
         return SOFTBUS_PARSE_JSON_ERR;
     }
     AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,
         .module = MODULE_AUTH_CHANNEL,
         .flag = flag,
@@ -522,6 +523,7 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         return;
     }
     AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,
         .module = MODULE_AUTH_CHANNEL,
         .flag = AUTH_CHANNEL_REPLY,
@@ -628,10 +630,11 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
     }
 
     AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,
         .module = MODULE_AUTH_MSG,
     };
-    return AuthPostData(&head, (const uint8_t *)data, len);
+    return AuthPostData(&head, (const uint8_t *)data, (uint32_t)len);
 }
 
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)

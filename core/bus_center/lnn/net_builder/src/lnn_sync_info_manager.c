@@ -24,17 +24,18 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_transmission_interface.h"
 
 #define MSG_HEAD_LEN 4
 #define MAX_SYNC_INFO_MSG_LEN 4096
 #define UNUSED_CHANNEL_CLOSED_DELAY (60 * 1000)
+#define TIME_CONVERSION_UNIT 1000
 #define CHANNEL_NAME "com.huawei.hwddmp.service.DeviceInfoSynchronize"
 
 typedef struct {
@@ -199,7 +200,8 @@ static void CloseUnusedChannel(void *para)
         if (item->clientChannelId == INVALID_CHANNEL_ID) {
             continue;
         }
-        diff = (now.sec - item->accessTime.sec) * 1000 + (now.usec - item->accessTime.usec) / 1000;
+        diff = (now.sec - item->accessTime.sec) * TIME_CONVERSION_UNIT +
+            (now.usec - item->accessTime.usec) / TIME_CONVERSION_UNIT;
         if (diff <= UNUSED_CHANNEL_CLOSED_DELAY) {
             continue;
         }
@@ -328,6 +330,8 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
 {
     SyncChannelInfo *info = NULL;
     LnnSyncInfoType type;
+    LnnSyncInfoMsgHandler handler;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "data recevied, channelId: %d", channelId);
     if (data == NULL || len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
@@ -345,12 +349,19 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
         return;
     }
     type = (LnnSyncInfoType)(*(int32_t *)data);
-    if (g_syncInfoManager.handlers[type] != NULL) {
-        SoftBusGetTime(&info->accessTime);
-        g_syncInfoManager.handlers[type](type, info->networkId,
-            (const uint8_t *)&data[MSG_HEAD_LEN], len - MSG_HEAD_LEN);
+    handler = g_syncInfoManager.handlers[type];
+    if (handler == NULL) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
     }
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
+    }
+    SoftBusGetTime(&info->accessTime);
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    handler(type, networkId, (const uint8_t *)&data[MSG_HEAD_LEN], len - MSG_HEAD_LEN);
 }
 
 static INetworkingListener g_networkListener = {
@@ -472,7 +483,7 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     SyncInfoMsg *syncMsg = NULL;
     int32_t rc;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync info msg for type: %d", type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync info msg for type: %d, len=%d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;

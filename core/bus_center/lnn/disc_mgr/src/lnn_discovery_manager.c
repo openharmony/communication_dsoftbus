@@ -22,7 +22,6 @@
 #include "discovery_service.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_net_builder.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"

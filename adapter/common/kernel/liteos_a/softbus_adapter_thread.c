@@ -257,10 +257,13 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
         return SOFTBUS_ERR;
     }
 
-    ret = pthread_attr_setstacksize(attr, threadAttr->stackSize);
-    if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_setstacksize failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
+    uint64_t stackSize = threadAttr->stackSize;
+    if (stackSize != 0) {
+        ret = pthread_attr_setstacksize(attr, stackSize);
+        if (ret != 0) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_setstacksize failed, ret[%{public}d]", ret);
+            return SOFTBUS_ERR;
+        }
     }
 
     return SOFTBUS_OK;
@@ -313,6 +316,11 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
 
 int32_t SoftBusThreadJoin(SoftBusThread thread, void **value)
 {
+    if (thread <= 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = pthread_join((pthread_t)thread, value);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread join failed, ret[%{public}d]", ret);
@@ -324,6 +332,11 @@ int32_t SoftBusThreadJoin(SoftBusThread thread, void **value)
 
 int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name)
 {
+    if (thread <= 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     if (name == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "name is null");
         return SOFTBUS_INVALID_PARAM;

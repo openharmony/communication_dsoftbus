@@ -69,6 +69,7 @@ extern "C" {
 #define SOFTBUS_O_NONBLOCK (04000)
 
 /* select.h */
+/* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE (1024)
 
 /* netinet/in.h */
@@ -136,6 +137,8 @@ uint32_t SoftBusNtoHl(uint32_t netlong);
 uint16_t SoftBusNtoHs(uint16_t netshort);
 
 uint32_t SoftBusInetAddr(const char *cp);
+
+int32_t SoftBusSocketGetError(int32_t socketFd);
 
 #ifdef __cplusplus
 #if __cplusplus

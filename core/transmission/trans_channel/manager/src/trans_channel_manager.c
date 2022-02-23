@@ -96,7 +96,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -282,11 +282,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     transInfo->channelType = TransGetChannelType(info);
-    if (TransOpenChannelProc(transInfo->channelType, appInfo, &connOpt, &(transInfo->channelId)) != SOFTBUS_OK) {
+    if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
+        &(transInfo->channelId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
-    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, object) != SOFTBUS_OK) {
+    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, object,
+        appInfo->myData.pkgName) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
@@ -321,7 +323,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get deviceId failed");
         goto EXIT_ERR;
@@ -405,9 +407,9 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return TransSendAuthMsg(channelId, data, len);
+            return TransSendAuthMsg(channelId, data, (int32_t)len);
         case CHANNEL_TYPE_PROXY:
-            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, msgType);
+            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
             return SOFTBUS_ERR;
@@ -418,6 +420,7 @@ void TransChannelDeathCallback(const char *pkgName)
 {
     TransProxyDeathCallback(pkgName);
     TransTdcDeathCallback(pkgName);
+    TransLaneMgrDeathCallback(pkgName);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
