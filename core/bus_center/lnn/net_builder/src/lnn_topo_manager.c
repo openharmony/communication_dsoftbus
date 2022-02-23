@@ -26,11 +26,10 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_json_utils.h"
+#include "softbus_log.h"
 
 #define JSON_KEY_TYPE "type"
 #define JSON_KEY_SEQ "seq"
@@ -46,7 +45,7 @@
 
 #define LNN_RELATION_JOIN_THREAD 1
 #define RELATION_CHANGED_MSG_DELAY (5 * 1000)
-#define STR_OFFSET 50
+#define STR_OFFSET 20
 
 #define TOPO_HASH_TABLE_SIZE 16
 
@@ -69,12 +68,14 @@ typedef enum {
 typedef struct {
     ListNode table[TOPO_HASH_TABLE_SIZE];
     bool isSupportTopo;
+    uint32_t totalCount;
     SoftBusMutex lock;
 } TopoHashTable;
 
 typedef struct {
     ListNode node;
     char udid[UDID_BUF_LEN];
+    uint32_t count;
     ListNode joinList;
 } TopoTableItem;
 
@@ -124,6 +125,7 @@ static TopoTableItem *CreateTopoItem(const char *udid)
     }
     ListInit(&item->joinList);
     ListInit(&item->node);
+    item->count = 0;
     if (strcpy_s(item->udid, UDID_BUF_LEN, udid) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid to topo item fail");
         SoftBusFree(item);
@@ -208,6 +210,7 @@ static void ClearTopoTable(void)
             SoftBusFree(item);
         }
     }
+    g_topoTable.totalCount = 0;
 }
 
 static int32_t PackCommonTopoMsg(cJSON **json, cJSON **info)
@@ -371,6 +374,8 @@ static int32_t AddTopoInfo(const char *udid, const char *peerUdid, const uint8_t
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&topoItem->joinList, &topoInfo->node);
+    topoItem->count++;
+    g_topoTable.totalCount++;
     return SOFTBUS_OK;
 }
 
@@ -405,6 +410,8 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
                 topoItem->udid + STR_OFFSET, topoInfo->peerUdid + STR_OFFSET);
             ListDelete(&topoInfo->node);
             SoftBusFree(topoInfo);
+            topoItem->count--;
+            g_topoTable.totalCount--;
         }
         if (IsListEmpty(&topoItem->joinList)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "delete topo item");
@@ -661,10 +668,10 @@ static void OnLnnRelationChangedDelay(void *para)
     int32_t rc;
     RelationChangedMsg *msg = (RelationChangedMsg *)para;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
     if (msg == NULL || msg->type == CONNECTION_ADDR_MAX) {
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
     rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
     if (rc != SOFTBUS_OK && rc != SOFTBUS_NOT_FIND) { // NOT_FIND means node is offline
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new lnn relation fail");
@@ -722,6 +729,38 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
     }
 }
 
+static int32_t FillAllRelation(LnnRelation *relation, uint32_t relationNum)
+{
+    TopoTableItem *item = NULL;
+    TopoTableItem *itemNext = NULL;
+    TopoInfo *info = NULL;
+    TopoInfo *infoNext = NULL;
+    uint32_t i, index;
+
+    index = 0;
+    for (i = 0; i < TOPO_HASH_TABLE_SIZE; ++i) {
+        LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &g_topoTable.table[i], TopoTableItem, node) {
+            LIST_FOR_EACH_ENTRY_SAFE(info, infoNext, &item->joinList, TopoInfo, node) {
+                if (strcpy_s(relation[index].udid, UDID_BUF_LEN, item->udid) != EOK) {
+                    return SOFTBUS_MEM_ERR;
+                }
+                if (strcpy_s(relation[index].peerUdid, UDID_BUF_LEN, info->peerUdid) != EOK) {
+                    return SOFTBUS_MEM_ERR;
+                }
+                if (memcpy_s(relation[index].relation, sizeof(relation[index].relation), info->relation,
+                    sizeof(info->relation)) != EOK) {
+                    return SOFTBUS_MEM_ERR;
+                }
+                index++;
+            }
+        }
+    }
+    if (index != relationNum) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitTopoManager(void)
 {
     int32_t i;
@@ -738,6 +777,8 @@ int32_t LnnInitTopoManager(void)
     for (i = 0; i < TOPO_HASH_TABLE_SIZE; ++i) {
         ListInit(&g_topoTable.table[i]);
     }
+    g_topoTable.totalCount = 0;
+    SoftBusMutexInit(&g_topoTable.lock, NULL);
     if (LnnRegisterEventHandler(LNN_EVENT_RELATION_CHANGED, OnLnnRelationChanged) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg discovery type changed event fail");
         return SOFTBUS_ERR;
@@ -746,7 +787,7 @@ int32_t LnnInitTopoManager(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg recv topo update msg fail");
         return SOFTBUS_ERR;
     }
-    return SoftBusMutexInit(&g_topoTable.lock, NULL);
+    return SOFTBUS_OK;
 }
 
 void LnnDeinitTopoManager(void)
@@ -758,4 +799,61 @@ void LnnDeinitTopoManager(void)
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, OnReceiveTopoUpdateMsg);
     LnnUnregisterEventHandler(LNN_EVENT_RELATION_CHANGED, OnLnnRelationChanged);
     SoftBusMutexDestroy(&g_topoTable.lock);
+}
+
+int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
+{
+    int32_t rc;
+    if (relation == NULL || relationNum == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_topoTable.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock topo table fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    *relation = NULL;
+    *relationNum = g_topoTable.totalCount;
+    if (*relationNum == 0) {
+        (void)SoftBusMutexUnlock(&g_topoTable.lock);
+        return SOFTBUS_OK;
+    }
+    *relation = SoftBusMalloc(*relationNum * sizeof(LnnRelation));
+    if (*relation == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc LnnRelation error");
+        (void)SoftBusMutexUnlock(&g_topoTable.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    rc = FillAllRelation(*relation, *relationNum);
+    (void)SoftBusMutexUnlock(&g_topoTable.lock);
+    if (rc != SOFTBUS_OK) {
+        SoftBusFree(*relation);
+    }
+    return rc;
+}
+
+int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len)
+{
+    TopoTableItem *topoItem = NULL;
+    TopoInfo *topoInfo = NULL;
+    int32_t rc;
+    if (udid == NULL || peerUdid == NULL || relation == NULL || len != CONNECTION_ADDR_MAX) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_topoTable.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock topo table fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    rc = FindTopoInfo(udid, peerUdid, &topoItem, &topoInfo);
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "FindTopoInfo error");
+        (void)SoftBusMutexUnlock(&g_topoTable.lock);
+        return rc;
+    }
+    if (memcpy_s(relation, len * sizeof(relation[0]), topoInfo->relation, sizeof(topoInfo->relation)) != EOK) {
+        rc = SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_topoTable.lock);
+    return rc;
 }

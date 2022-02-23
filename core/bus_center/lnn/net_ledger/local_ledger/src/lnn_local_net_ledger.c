@@ -503,7 +503,7 @@ int32_t UpdateLocalStatus(ConnectStatus status)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateLocalWeight(uint32_t weight)
+int32_t UpdateLocalWeight(int32_t weight)
 {
     g_localNetLedger.localInfo.masterWeight = weight;
     return SOFTBUS_OK;
@@ -670,7 +670,7 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 
 static bool JudgeString(const char *info, int32_t len)
 {
-    return (len <= 0) ? false : IsValidString(info, len);
+    return (len <= 0) ? false : IsValidString(info, (uint32_t)len);
 }
 
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)

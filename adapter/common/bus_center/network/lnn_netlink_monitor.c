@@ -114,7 +114,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
 
-    len = nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
+    len = (int32_t)nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
     ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
 
     if (tb[IFLA_IFNAME] == NULL) {

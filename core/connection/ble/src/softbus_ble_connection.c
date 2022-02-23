@@ -84,9 +84,9 @@ static SoftBusMutex g_connectionLock;
 static void PackRequest(int32_t delta, uint32_t connectionId);
 static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType);
 
-static int32_t AllocBleConnectionIdLocked()
+static uint32_t AllocBleConnectionIdLocked()
 {
-    static int16_t nextConnectionId = 0;
+    static uint16_t nextConnectionId = 0;
     uint32_t tempId;
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -742,7 +742,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
 {
     ListNode *bleItem = NULL;
     (void)SoftBusMutexLock(&g_connectionLock);
-    int32_t connId = 0;
+    uint32_t connId = 0;
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
         if (itemNode->halConnId != halConnId) {
@@ -867,7 +867,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     ListNode *bleItem = NULL;
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
-    int32_t connectionId = -1;
+    uint32_t connectionId = 0;
     ListNode notifyList;
     ListInit(&notifyList);
     ConnectionInfo connectionInfo;
@@ -893,7 +893,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
         }
     }
     ReleaseBleConnectionInfo(bleNode);
-    if (connectionId != -1) {
+    if (connectionId != 0) {
         BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, isServer);
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);
@@ -1030,7 +1030,7 @@ static void BleOnDataReceived(bool isBleConn, int32_t halConnId, uint32_t len, c
             RecvConnectedComd(targetNode->connId, (const cJSON*)data);
             cJSON_Delete(data);
         } else {
-            if (head->len + sizeof(ConnPktHead) > len) {
+            if (head->len + sizeof(ConnPktHead) > (int32_t)len) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BLEINFOPRTINT: recv a big data:%d, not support",
                     head->len + sizeof(ConnPktHead));
             }

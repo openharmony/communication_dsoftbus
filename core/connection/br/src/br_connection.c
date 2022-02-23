@@ -492,24 +492,24 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
     return ret;
 }
 
-static int32_t ServerOnBrConnect(int32_t socketFd)
+static uint32_t ServerOnBrConnect(int32_t socketFd)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[new connection, socket = %d]", socketFd);
     if (IsExitBrConnectByFd(socketFd)) {
         return SOFTBUS_ERR;
     }
-    int32_t connectionId = SOFTBUS_ERR;
+    uint32_t connectionId = 0;
     BrConnectionInfo *newConnectionInfo = CreateBrconnectionNode(false);
     if (newConnectionInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[service node create fail]");
         g_sppDriver->DisConnect(socketFd);
-        return SOFTBUS_ERR;
+        return connectionId;
     }
     RequestInfo *requestInfo = (RequestInfo *)SoftBusCalloc(sizeof(RequestInfo));
     if (requestInfo == NULL) {
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
-        return SOFTBUS_ERR;
+        return connectionId;
     }
     ListInit(&requestInfo->node);
     ListAdd(&newConnectionInfo->requestList, &requestInfo->node);
@@ -518,13 +518,13 @@ static int32_t ServerOnBrConnect(int32_t socketFd)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetRemoteDeviceInfo fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
-        return SOFTBUS_ERR;
+        return connectionId;
     }
     if (ConvertBtMacToStr(newConnectionInfo->mac, BT_MAC_LEN, (uint8_t *)deviceInfo.mac, BT_ADDR_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrServer convert bt mac to str fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
-        return SOFTBUS_ERR;
+        return connectionId;
     }
     newConnectionInfo->socketFd = socketFd;
     newConnectionInfo->state = BR_CONNECTION_STATE_CONNECTED;
@@ -535,12 +535,12 @@ static int32_t ServerOnBrConnect(int32_t socketFd)
         ListDelete(&newConnectionInfo->node);
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
-        return SOFTBUS_ERR;
+        return connectionId;
     }
     if (NotifyServerConn(connectionId, mac, BR_SERVICE_TYPE) != SOFTBUS_OK) {
         g_sppDriver->DisConnect(socketFd);
         ReleaseConnectionRefByConnId(connectionId);
-        connectionId = SOFTBUS_ERR;
+        connectionId = 0;
     }
     return connectionId;
 }
@@ -609,7 +609,7 @@ static DataPidQueueStruct *GetPidQueue(int pid)
     return pidQueue;
 }
 
-static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, const char *data)
+static int32_t CreateNewSendItem(int pid, int flag, uint32_t connectionId, int len, const char *data)
 {
     SendItemStruct *sendItem = (SendItemStruct *)SoftBusCalloc(sizeof(SendItemStruct));
     if (sendItem == NULL) {
@@ -620,7 +620,7 @@ static int32_t CreateNewSendItem(int pid, int flag, int connectionId, int len, c
     sendItem->pid = pid;
     sendItem->priority = GetPriority(flag);
     sendItem->connectionId = connectionId;
-    sendItem->dataLen = len;
+    sendItem->dataLen = (uint32_t)len;
     sendItem->data = (char*)data;
 
     ListNode *item = NULL;
@@ -971,18 +971,18 @@ void *ConnBrRead(void *arg)
     return NULL;
 }
 
-int32_t BrConnectedEventHandle(bool isClient, int32_t value)
+void BrConnectedEventHandle(bool isClient, uint32_t value)
 {
-    int32_t connInfoId;
+    uint32_t connInfoId;
     int32_t socketFd = -1;
     if (isClient) {
-        connInfoId = value;
+        connInfoId = (uint32_t)value;
     } else {
         socketFd = value;
         connInfoId = ServerOnBrConnect(socketFd);
     }
-    if (connInfoId == -1) {
-        return SOFTBUS_ERR;
+    if (connInfoId == 0) {
+        return;
     }
     pthread_t tid;
     BrReadThreadParams *args = (BrReadThreadParams *)SoftBusCalloc(sizeof(BrReadThreadParams));
@@ -995,7 +995,7 @@ int32_t BrConnectedEventHandle(bool isClient, int32_t value)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create ConnBrRead failed");
         goto EXIT;
     }
-    return SOFTBUS_OK;
+    return;
 EXIT:
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrConnectedEventHandle EXIT");
     if (!isClient) {
@@ -1004,10 +1004,10 @@ EXIT:
         ClientNoticeResultBrConnect(connInfoId, false, socketFd);
         ReleaseConnectionRefByConnId(connInfoId);
     }
-    return SOFTBUS_ERR;
+    return;
 }
 
-static void OnPackResponse(int32_t delta, int32_t peerRef, int32_t connectionId)
+static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "[OnPackResponse: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
@@ -1157,13 +1157,15 @@ static void UpdateLocalBtMac(void)
 static void StateChangedCallback(int32_t listenerId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChanged id: %d, status: %d", listenerId, status);
-    g_brEnable = status;
+
     LocalListenerInfo info;
     info.type = CONNECT_BR;
     if (status == SOFTBUS_BR_STATE_TURN_ON) {
+        g_brEnable = status;
         UpdateLocalBtMac();
         (void)StartLocalListening(&info);
     } else if (status == SOFTBUS_BR_STATE_TURN_OFF) {
+        g_brEnable = status;
         (void)StopLocalListening(&info);
     }
 }

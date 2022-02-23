@@ -44,6 +44,8 @@
 
 #define TO_CONN_FSM(ptr) CONTAINER_OF(ptr, LnnConnectionFsm, fsm)
 
+#define CONN_CODE_SHIFT 16
+
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
     FSM_MSG_TYPE_AUTH_KEY_GENERATED,
@@ -445,12 +447,12 @@ static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
 {
     SoftBusSysTime times;
     SoftBusGetTime(&times);
-    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HEARTBEAT_TIME_FACTOR +
-        (uint64_t)times.usec / HEARTBEAT_TIME_FACTOR;
+    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
+        (uint64_t)times.usec / HB_TIME_FACTOR;
     connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
     connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
-    connInfo->nodeInfo->lnnRelation[connInfo->addr.type]++;
+    connInfo->nodeInfo->relation[connInfo->addr.type]++;
 }
 
 static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *connInfo)
@@ -761,7 +763,7 @@ static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid not exist!");
         return SOFTBUS_INVALID_PARAM;
     }
-    combinedInt = ((uint16_t)code << 16) | ((uint16_t)DISCOVERY_TYPE_BR & 0x7FFF);
+    combinedInt = ((uint16_t)code << CONN_CODE_SHIFT) | ((uint16_t)DISCOVERY_TYPE_BR & 0x7FFF);
     combinedInt = SoftBusHtoNl(combinedInt);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetOfflineMsg combinedInt: 0x%04x", combinedInt);
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, connFsm->connInfo.peerNetworkId,

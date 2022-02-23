@@ -66,7 +66,7 @@ static int32_t SoftBusCreateFile(const char *fileName)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen)
+int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
     if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
         return SOFTBUS_FILE_ERR;
@@ -99,7 +99,7 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, int32_t maxLen)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, int32_t len)
+int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len)
 {
     if (fileName == NULL || writeBuf == NULL || len <= 0) {
         return SOFTBUS_FILE_ERR;

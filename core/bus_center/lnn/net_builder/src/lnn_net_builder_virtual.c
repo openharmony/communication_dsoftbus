@@ -51,7 +51,7 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, int32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
     (void)type;
     (void)typeLen;
