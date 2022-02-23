@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "p2plink_interface.h"
 
-#include <pthread.h>
 #include <securec.h>
 #include <semaphore.h>
 

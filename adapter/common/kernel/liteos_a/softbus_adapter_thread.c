@@ -17,10 +17,12 @@
 #endif
 
 #include "softbus_adapter_thread.h"
+
 #include <pthread.h>
 #include <securec.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -184,16 +186,16 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
 {
 #ifdef __linux__
     /* periorityParam is between 1 and 99 in linux */
-    #define PTHREAD_PERIOR_LOWEST (1)
-    #define PTHREAD_PERIOR_LOW (33)
-    #define PTHREAD_PERIOR_HIGH (66)
-    #define PTHREAD_PERIOR_HIGHEST (99)
+    #define PTHREAD_PERIOR_LOWEST 1
+    #define PTHREAD_PERIOR_LOW 33
+    #define PTHREAD_PERIOR_HIGH 66
+    #define PTHREAD_PERIOR_HIGHEST 99
 #else
     /* periorityParam is between 0 and 31 in liteOS */
-    #define PTHREAD_PERIOR_LOWEST (30)
-    #define PTHREAD_PERIOR_LOW (20)
-    #define PTHREAD_PERIOR_HIGH (10)
-    #define PTHREAD_PERIOR_HIGHEST (0)
+    #define PTHREAD_PERIOR_LOWEST 30
+    #define PTHREAD_PERIOR_LOW 20
+    #define PTHREAD_PERIOR_HIGH 10
+    #define PTHREAD_PERIOR_HIGHEST 0
 #endif
 
     struct sched_param periorityParam;
@@ -201,30 +203,24 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
     struct sched_param defaultPeri;
     pthread_attr_getschedparam(attr, &defaultPeri);
     switch (threadAttr->prior) {
-        case SOFTBUS_PRIORITY_DEFAULT : {
+        case SOFTBUS_PRIORITY_DEFAULT:
             periorityParam.sched_priority = defaultPeri.sched_priority;
             break;
-        }
-        case SOFTBUS_PRIORITY_LOWEST : {
+        case SOFTBUS_PRIORITY_LOWEST:
             periorityParam.sched_priority = PTHREAD_PERIOR_LOWEST;
             break;
-        }
-        case SOFTBUS_PRIORITY_LOW : {
+        case SOFTBUS_PRIORITY_LOW:
             periorityParam.sched_priority = PTHREAD_PERIOR_LOW;
             break;
-        }
-        case SOFTBUS_PRIORITY_HIGH : {
+        case SOFTBUS_PRIORITY_HIGH:
             periorityParam.sched_priority = PTHREAD_PERIOR_HIGH;
             break;
-        }
-        case SOFTBUS_PRIORITY_HIGHEST : {
+        case SOFTBUS_PRIORITY_HIGHEST:
             periorityParam.sched_priority = PTHREAD_PERIOR_HIGHEST;
             break;
-        }
-        default: {
+        default:
             periorityParam.sched_priority = defaultPeri.sched_priority;
             break;
-        }
     }
     pthread_attr_setschedparam(attr, &periorityParam);
 
@@ -269,8 +265,8 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)
-    (void *), void *arg)
+int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *),
+    void *arg)
 {
     if (thread == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");

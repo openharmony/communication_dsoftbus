@@ -160,7 +160,7 @@ static bool IsRepeatedUpdateReq(const char *udidHash, ConnectionAddrType type, u
     return false;
 }
 
-static int32_t GenHexStringHash(const unsigned char *str, int32_t len, char *hashStr)
+static int32_t GenHexStringHash(const unsigned char *str, uint32_t len, char *hashStr)
 {
     int32_t ret;
     unsigned char hashResult[HB_SHA_HASH_LEN] = {0};
