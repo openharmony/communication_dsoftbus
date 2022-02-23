@@ -28,6 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+
 typedef struct {
     int32_t requestId;
     int32_t pid;
@@ -196,16 +197,14 @@ static int32_t GetP2pMacAndPid(int32_t requestId, char *mac, uint32_t size, int3
     return SOFTBUS_ERR;
 }
 
-static int32_t GetConnectDeviceResult(const ConnRequestItem *item, bool *isConnected, LnnLaneP2pInfo *p2pInfo)
+static void GetConnectDeviceResult(const ConnRequestItem *item, bool *isConnected, LnnLaneP2pInfo *p2pInfo)
 {
     *isConnected = item->isConnected;
     if (*isConnected) {
         if (memcpy_s(p2pInfo, sizeof(LnnLaneP2pInfo), &item->p2pInfo, sizeof(item->p2pInfo)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p ip fail.");
-            return SOFTBUS_ERR;
         }
     }
-    return SOFTBUS_OK;
 }
 
 static int32_t WaitConnectDeviceResult(int32_t requestId, bool *isConnected, LnnLaneP2pInfo *p2pInfo)
@@ -222,7 +221,7 @@ static int32_t WaitConnectDeviceResult(int32_t requestId, bool *isConnected, Lnn
     if (item->isResultSet) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "p2p connect result has been set, requestId = %d, result = %d.",
             requestId, item->isConnected);
-        (void)GetConnectDeviceResult(item, isConnected, p2pInfo);
+        GetConnectDeviceResult(item, isConnected, p2pInfo);
         (void)SoftBusMutexUnlock(&g_pendingList->lock);
         return SOFTBUS_OK;
     }
@@ -236,7 +235,7 @@ static int32_t WaitConnectDeviceResult(int32_t requestId, bool *isConnected, Lnn
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv p2p connect signal, requestId = %d, result = %d.",
         requestId, item->isConnected);
-    (void)GetConnectDeviceResult(item, isConnected, p2pInfo);
+    GetConnectDeviceResult(item, isConnected, p2pInfo);
     (void)SoftBusMutexUnlock(&g_pendingList->lock);
     return SOFTBUS_OK;
 }
@@ -295,7 +294,7 @@ static void OnConnOpened(uint32_t requestId, int64_t authId)
         requestId, authId);
     SetAuthIdToItem(requestId, authId);
     P2pLinkConnectInfo info = {0};
-    info.requestId = requestId;
+    info.requestId = (int32_t)requestId;
     info.authId = authId;
     if (GetP2pMacAndPid(requestId, info.peerMac, sizeof(info.peerMac), &info.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");

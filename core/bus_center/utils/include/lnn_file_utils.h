@@ -28,7 +28,7 @@ typedef enum {
     LNN_FILE_ID_MAX
 } LnnFileId;
 
-int32_t LnnGetFullStoragePath(LnnFileId id, char *path, int32_t len);
+int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
 
 #ifdef __cplusplus
 }

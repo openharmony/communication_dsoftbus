@@ -36,7 +36,7 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
 int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data,
     const StreamData *ext, const StreamFrameInfo *param);
 
-int32_t ClientTransChannelSendFile(int32_t channelId, const char *sFileList[],
+int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt);
 
 void DeleteFileListener(const char *sessionName);

@@ -62,7 +62,7 @@ int32_t LnnStartHeartbeatDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnStopHeartbeat(void)
+void LnnStopHeartbeatNow(void)
 {
 }
 

@@ -634,7 +634,7 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
         .authId = authId,
         .module = MODULE_AUTH_MSG,
     };
-    return AuthPostData(&head, (const uint8_t *)data, len);
+    return AuthPostData(&head, (const uint8_t *)data, (uint32_t)len);
 }
 
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)

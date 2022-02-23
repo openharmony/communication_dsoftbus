@@ -164,8 +164,13 @@ static bool SetPeerIPInfo(const char *netWorkId, LnnLaneLinkType type, bool mode
     int32_t port = 0;
     ret = LnnGetRemoteStrInfo(netWorkId, STRING_KEY_WLAN_IP,
         g_lanes[type].laneInfo.conOption.info.ip.ip, IP_STR_MAX_LEN);
-    if (ret < 0 || strncmp(g_lanes[type].laneInfo.conOption.info.ip.ip, "127.0.0.1", strlen("127.0.0.1")) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo error.");
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo error, ret = %d", ret);
+        return false;
+    }
+    if (strnlen(g_lanes[type].laneInfo.conOption.info.ip.ip, IP_STR_MAX_LEN) == 0 ||
+        strncmp(g_lanes[type].laneInfo.conOption.info.ip.ip, "127.0.0.1", strlen("127.0.0.1")) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wlan ip not found.");
         return false;
     }
     if (mode) {
@@ -242,6 +247,11 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
     }
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    if (laneId >= LNN_LINK_TYPE_BR) {
+        g_lanes[laneId].laneInfo.isSupportUdp = false;
+        (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
         return;
     }
     if (isSupport) {

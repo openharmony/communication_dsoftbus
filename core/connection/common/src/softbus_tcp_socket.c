@@ -169,7 +169,7 @@ int32_t OpenTcpServerSocket(const char *ip, int32_t port)
     }
 
     SetServerOption(fd);
-    ret = BindLocalIP(fd, ip, port);
+    ret = BindLocalIP(fd, ip, (uint16_t)port);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
         TcpShutDown(fd);
@@ -213,7 +213,7 @@ int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, 
     }
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, peerIp, &addr.sinAddr);
-    addr.sinPort = SoftBusHtoNs(port);
+    addr.sinPort = SoftBusHtoNs((uint16_t)port);
     int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
@@ -233,11 +233,11 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
         return SOFTBUS_ERR;
     }
-    if (isNonBlock && (flags & O_NONBLOCK) == 0) {
-        flags |= O_NONBLOCK;
+    if (isNonBlock && ((uint32_t)flags & O_NONBLOCK) == 0) {
+        flags = (int32_t)((uint32_t)flags | O_NONBLOCK);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to nonblock", fd);
-    } else if (!isNonBlock && (flags & O_NONBLOCK) != 0) {
-        flags = flags & ~O_NONBLOCK;
+    } else if (!isNonBlock && ((uint32_t)flags & O_NONBLOCK) != 0) {
+        flags = (int32_t)((uint32_t)flags & ~O_NONBLOCK);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to block", fd);
     } else {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);

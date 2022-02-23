@@ -53,9 +53,9 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
 }
 
-int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, int32_t infoLen)
+int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
 {
-    bool isLocalNetowrkId = false;
+    bool isLocalNetworkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
     if (networkId == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
@@ -66,17 +66,17 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, int32_t
         return SOFTBUS_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
-        isLocalNetowrkId = true;
+        isLocalNetworkId = true;
     }
     switch (key) {
         case NODE_KEY_UDID:
-            if (isLocalNetowrkId) {
+            if (isLocalNetworkId) {
                 return LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char *)info, infoLen);
             } else {
                 return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, (char *)info, infoLen);
             }
         case NODE_KEY_UUID:
-            if (isLocalNetowrkId) {
+            if (isLocalNetworkId) {
                 return LnnGetLocalStrInfo(STRING_KEY_UUID, (char *)info, infoLen);
             } else {
                 return LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, (char *)info, infoLen);
