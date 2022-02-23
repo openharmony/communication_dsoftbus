@@ -243,9 +243,9 @@ void VtpStreamSocket::FillpAppStatistics()
     gettimeofday(&fillpStatsGetTime, nullptr);
     if (getStatisticsRet == 0) {
         metricList.type = STREAM_TRAFFIC_STASTICS;
-        metricList.info.appStatistics.statisticsGotTime = (uint64_t)(fillpStatsGetTime.tv_sec * MS_PER_SECOND +
-            fillpStatsGetTime.tv_usec / US_PER_MS); /* ms */
-        metricList.info.appStatistics.periodRecvBits = (uint64_t)fillpPcbStats.appFcStastics.periodRecvBits;
+        metricList.info.appStatistics.statisticsGotTime = fillpStatsGetTime.tv_sec * MS_PER_SECOND +
+            fillpStatsGetTime.tv_usec / US_PER_MS; /* ms */
+        metricList.info.appStatistics.periodRecvBits = fillpPcbStats.appFcStastics.periodRecvBits;
         metricList.info.appStatistics.pktNum = fillpPcbStats.appFcStastics.pktNum;
         metricList.info.appStatistics.periodRecvPkts = fillpPcbStats.appFcStastics.periodRecvPkts;
         metricList.info.appStatistics.periodRecvPktLoss = fillpPcbStats.appFcStastics.periodRecvPktLoss;
