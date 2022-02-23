@@ -127,7 +127,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     unsigned char *outBuf = NULL;
     uint32_t outBufLen = 0;
     const char *inBuf = "41424344";
-    int32_t inLen = 8;
+    uint32_t inLen = 8;
     int32_t ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -172,7 +172,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
     unsigned char outBuf[5] = "\0";
     uint32_t outBufLen = 5;
     const char *inBuf = "41424344";
-    int32_t inLen = 8;
+    uint32_t inLen = 8;
     int32_t ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -193,7 +193,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
     char *outBuf = NULL;
     uint32_t outBufLen = 0;
     const unsigned char inBuf[5] = "ABCD";
-    int32_t inLen = 4;
+    uint32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -222,7 +222,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_002, TestSiz
     char outBuf[9] = "\0";
     uint32_t outBufLen = 9;
     unsigned char inBuf[5] = "abcd";
-    int32_t inLen = 4;
+    uint32_t inLen = 4;
     int32_t ret = ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -279,9 +279,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.Level1)
 {
     const char *strMac = NULL;
-    int32_t strMacLen = 0;
+    uint32_t strMacLen = 0;
     uint8_t *binMac = NULL;
-    int32_t binMacLen = 0;
+    uint32_t binMacLen = 0;
     int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -295,9 +295,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Level1)
 {
     char *strMac = NULL;
-    int32_t strMacLen = 0;
+    uint32_t strMacLen = 0;
     const uint8_t *binMac = NULL;
-    int32_t binMacLen = 0;
+    uint32_t binMacLen = 0;
     int32_t ret = ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -311,9 +311,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Leve
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Level1)
 {
     char strMac[19] = "\0";
-    int32_t strMacLen = 18;
+    uint32_t strMacLen = 18;
     const uint8_t binMac[6] = { 101, 102, 103, 104, 105, 106 };
-    int32_t binMacLen = 6;
+    uint32_t binMacLen = 6;
     int32_t ret = ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

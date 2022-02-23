@@ -28,8 +28,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 void SoftbusConfigInit(void);
-int SoftbusGetConfig(ConfigType type, unsigned char *val, int32_t len);
-int SoftbusSetConfig(ConfigType type, const unsigned char *val, int32_t len);
+int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
+int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

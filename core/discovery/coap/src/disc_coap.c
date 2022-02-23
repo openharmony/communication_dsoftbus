@@ -15,7 +15,6 @@
 
 #include "disc_coap.h"
 
-#include <pthread.h>
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"

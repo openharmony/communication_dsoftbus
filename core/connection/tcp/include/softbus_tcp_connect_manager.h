@@ -16,7 +16,6 @@
 #ifndef SOFTBUS_TCP_CONNECT_MANAGER_H
 #define SOFTBUS_TCP_CONNECT_MANAGER_H
 
-#include <pthread.h>
 #include <sys/select.h>
 
 #include "common_list.h"

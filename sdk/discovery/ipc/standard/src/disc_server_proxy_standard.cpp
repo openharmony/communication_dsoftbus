@@ -131,7 +131,7 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "PublishService send request ret = %d!", err);
     if (err != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService send request failed!");
         return SOFTBUS_ERR;
@@ -161,7 +161,7 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_UNPUBLISH_SERVICE, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UnPublishService send request ret = %d!", err);
     if (err != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService send request failed!");
         return SOFTBUS_ERR;

@@ -16,6 +16,7 @@
 #include "softbus_log.h"
 
 #include <securec.h>
+#include <string.h>
 
 #include "softbus_feature_config.h"
 
@@ -43,7 +44,7 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
 
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...)
 {
-    int32_t ulPos;
+    uint32_t ulPos;
     char szStr[LOG_PRINT_MAX_LEN] = {0};
     va_list arg;
     int32_t ret;

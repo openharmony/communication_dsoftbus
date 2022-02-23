@@ -17,7 +17,6 @@
 
 #include "p2plink_loop.h"
 #include "securec.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
