@@ -14,13 +14,14 @@
       "subsystem": "communication",
       "adapted_system_type": [
         "mini",
-        "small",  
+        "small",
         "standard"
       ],
       "features": [
         "dsoftbus_standard_feature_conn_p2p",
         "dsoftbus_standard_feature_disc_ble",
         "dsoftbus_standard_feature_conn_br",
+        "dsoftbus_standard_feature_conn_ble",
         "dsoftbus_standard_feature_conn_ble"
       ],
       "rom": "967KB",
