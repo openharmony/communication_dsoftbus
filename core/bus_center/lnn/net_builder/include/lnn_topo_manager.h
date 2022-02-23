@@ -35,7 +35,6 @@ void LnnDeinitTopoManager(void);
 
 int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum);
 int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len);
-
 #ifdef __cplusplus
 }
 #endif
