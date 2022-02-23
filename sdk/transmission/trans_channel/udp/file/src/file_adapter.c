@@ -97,7 +97,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     struct sockaddr_in localAddr;
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
-    localAddr.sin_port = (uint16_t)port;
+    localAddr.sin_port = port;
     localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIP));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
