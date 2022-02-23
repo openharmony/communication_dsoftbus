@@ -403,7 +403,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             if (item->state == PROXY_CHANNEL_STATUS_PYH_CONNECTED) {
-                TransProxyChanProcessByReqId(chan->requestId, item->connId);
+                TransProxyChanProcessByReqId((int32_t)chan->requestId, item->connId);
             }
             return SOFTBUS_ERR;
         }
@@ -554,7 +554,7 @@ static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, c
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
     TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
-    TransProxyChanProcessByReqId(requestId, connectionId);
+    TransProxyChanProcessByReqId((int32_t)requestId, connectionId);
 }
 
 static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
@@ -564,7 +564,7 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Connect fail del reqid %u fail", requestId);
     }
 
-    TransProxyDelChanByReqId(requestId);
+    TransProxyDelChanByReqId((int32_t)requestId);
 }
 
 int32_t TransProxyCloseConnChannel(uint32_t connectionId)
@@ -587,7 +587,7 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     }
 
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
-        chan->reqId = conn->requestId;
+        chan->reqId = (int32_t)conn->requestId;
         chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
         if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyCreateChanInfo err");
@@ -629,7 +629,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
     }
-    chan->reqId = reqId;
+    chan->reqId = (int32_t)reqId;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     chan->type = connInfo->type;
     if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
@@ -687,6 +687,9 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         return;
     }
     TransProxyonMessageReceived(&msg);
+    if (msg.msgHead.chiper & ENCRYPTED) {
+        SoftBusFree(msg.data);
+    }
 }
 
 int32_t TransProxyTransInit(void)

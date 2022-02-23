@@ -113,12 +113,10 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (type != CHANNEL_TYPE_UDP) {
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
-    }
+
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
-    return ClientTransChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    return ClientTransChannelSendFile(channelId, type, sFileList, dFileList, fileCnt);
 }

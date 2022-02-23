@@ -33,6 +33,10 @@ extern "C" {
 #define BLE_DISABLE 0
 #define BLE_ENABLE 1
 
+#define MAC_FIRST_INDEX 0
+#define MAC_ONE_INDEX 1
+#define MAC_FIVE_INDEX 5
+
 typedef enum {
     SOFTBUS_BT_STATUS_SUCCESS = 0x00,
     SOFTBUS_BT_STATUS_FAIL,

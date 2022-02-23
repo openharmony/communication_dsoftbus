@@ -15,7 +15,6 @@
 #include "p2plink_broadcast_receiver.h"
 
 #include "auth_interface.h"
-
 #include "p2plink_adapter.h"
 #include "p2plink_common.h"
 #include "p2plink_device.h"
@@ -80,7 +79,10 @@ static void UpdateP2pGcGroup(void)
 void UpdateP2pGroup(const P2pLinkGroup *group)
 {
     if (group == NULL) {
-        P2pLinkClean();
+        if (P2pLinkGetRole() != ROLE_NONE) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean role %d", P2pLinkGetRole());
+            P2pLinkClean();
+        }
         return;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "UpdateP2pGroup role %d num %d", group->role, group->peerMacNum);

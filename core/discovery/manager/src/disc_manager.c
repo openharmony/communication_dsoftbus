@@ -404,7 +404,7 @@ static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
         ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
         return NULL;
     }
-    BitmapSet(&(infoNode->option.publishOption.capabilityBitmap[0]), ret);
+    BitmapSet(&(infoNode->option.publishOption.capabilityBitmap[0]), (uint32_t)ret);
     return infoNode;
 }
 
@@ -445,7 +445,7 @@ static DiscInfo *CreateNewSubscribeInfoNode(const SubscribeInfo *info)
         ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
         return NULL;
     }
-    BitmapSet(&(infoNode->option.subscribeOption.capabilityBitmap[0]), ret);
+    BitmapSet(&(infoNode->option.subscribeOption.capabilityBitmap[0]), (uint32_t)ret);
     return infoNode;
 }
 

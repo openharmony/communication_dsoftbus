@@ -516,7 +516,7 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
     }
     int32_t ret = SOFTBUS_OK;
     if (infoNum > 0) {
-        if (!reply.WriteRawData(nodeInfo, infoTypeLen * infoNum)) {
+        if (!reply.WriteRawData(nodeInfo, (int32_t)infoTypeLen * infoNum)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner write node info failed!");
             ret = SOFTBUS_ERR;
         }

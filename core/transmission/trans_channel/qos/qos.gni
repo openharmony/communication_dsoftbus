@@ -21,7 +21,10 @@ trans_qos_deps = []
 if (dsoftbus_standard_feature_qos == true) {
   native_source_path = rebase_path("$dsoftbus_root_path")
   dep_qos = "dsoftbus_enhance/core/transmission/trans_channel/qos/BUILD.gn"
-  enhanced_qos = false
+  enhanced_qos = exec_script(
+          "$dsoftbus_root_path/run_shell_cmd.py",
+          [ "cd $native_source_path; if [ -f $dep_qos ]; then echo true; else echo false; fi" ],
+          "value")
   if (enhanced_qos) {
     trans_qos_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/qos:dsoftbus_trans_qos" ]
   } else {

@@ -51,7 +51,7 @@ int32_t LnnInitDistributedLedger(void);
 void LnnDeinitDistributedLedger(void);
 
 ReportCategory LnnAddOnlineNode(NodeInfo *info);
-ReportCategory LnnSetNodeOffline(const char *udid, int32_t authId);
+ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
@@ -64,8 +64,9 @@ int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 int32_t LnnGetLaneCount(int32_t laneId);
 int32_t LnnSetLaneCount(int32_t laneId, int32_t num);
 int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
-int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t *timestamp);
+int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
+int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 
 #ifdef __cplusplus
 }

@@ -48,7 +48,7 @@ static void OnSesssionOpenFailProc(const SessionConn *node)
     int32_t fd = node->appInfo.fd;
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, RW_TRIGGER);
+        DelTrigger(node->listenMod, fd, RW_TRIGGER);
         TcpShutDown(fd);
     }
 }
@@ -151,7 +151,7 @@ void TransTdcDeathCallback(const char *pkgName)
     SoftBusList *sessionList = GetSessionConnList();
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            DelTrigger(DIRECT_CHANNEL_SERVER, item->appInfo.fd, RW_TRIGGER);
+            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             ListDelete(&item->node);
             SoftBusFree(item);
             sessionList->cnt--;

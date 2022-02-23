@@ -41,7 +41,7 @@
 static pthread_mutex_t g_connectionLock;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
-static int16_t g_nextConnectionId = 0;
+static uint16_t g_nextConnectionId = 0;
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {

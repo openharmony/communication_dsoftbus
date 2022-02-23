@@ -92,6 +92,23 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  v
     return SOFTBUS_ADAPTER_OK;
 }
 
+int32_t SoftBusSocketGetError(int32_t socketFd)
+{
+    int32_t err = 0;
+    int32_t errSize = sizeof(err);
+
+    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, (socklen_t *)&errSize);
+    if (ret < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
+        return ret;
+    }
+    if (err != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, err=%{public}d", socketFd, err);
+        return err;
+    }
+    return err;
+}
+
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen)
 {
     int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)addrLen);
@@ -270,6 +287,11 @@ int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
     *toAddr, int32_t toAddrLen)
 {
+    if ((toAddr == NULL) || (toAddrLen <= 0)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "toAddr is null or toAddrLen <= 0");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
     int32_t ret = sendto(socketFd, buf, len, flags, (struct sockaddr *)toAddr, toAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "sendto : %{public}s", strerror(errno));
@@ -293,6 +315,11 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
 int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
     *fromAddr, int32_t *fromAddrLen)
 {
+    if ((fromAddr == NULL) || (fromAddrLen == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fromAddr or fromAddrLen is null");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
     int32_t ret = recvfrom(socketFd, buf, len, flags, (struct sockaddr *)fromAddr, (socklen_t *)fromAddrLen);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "recvfrom : %{public}s", strerror(errno));

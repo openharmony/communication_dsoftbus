@@ -15,6 +15,7 @@
 
 #include "trans_lane_manager.h"
 
+#include <securec.h>
 #include <unistd.h>
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -28,6 +29,7 @@ typedef struct {
     ListNode node;
     int32_t channelId;
     int32_t channelType;
+    char pkgName[PKG_NAME_SIZE_MAX];
     LnnLanesObject *lanesObj;
 } TransLaneInfo;
 
@@ -69,7 +71,7 @@ void TransLaneMgrDeinit(void)
     g_channelLaneList = NULL;
 }
 
-int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObject *lanesObj)
+int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObject *lanesObj, const char *pkgName)
 {
     if (g_channelLaneList == NULL) {
         return SOFTBUS_ERR;
@@ -82,6 +84,10 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
     newLane->channelId = channelId;
     newLane->channelType = channelType;
     newLane->lanesObj = lanesObj;
+    if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), pkgName) != EOK) {
+        SoftBusFree(newLane);
+        return SOFTBUS_ERR;
+    }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         SoftBusFree(newLane);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
@@ -122,10 +128,10 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
             ListDelete(&(laneItem->node));
-            LnnReleaseLanesObject(laneItem->lanesObj);
-            SoftBusFree(laneItem);
             g_channelLaneList->cnt--;
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            LnnReleaseLanesObject(laneItem->lanesObj);
+            SoftBusFree(laneItem);
             return SOFTBUS_OK;
         }
     }
@@ -133,6 +139,34 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]",
         channelId, channelType);
     return SOFTBUS_ERR;
+}
+
+void TransLaneMgrDeathCallback(const char *pkgName)
+{
+    if (g_channelLaneList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
+        return;
+    }
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    TransLaneInfo *laneItem = NULL;
+    TransLaneInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
+        if (strcmp(laneItem->pkgName, pkgName) == 0) {
+            ListDelete(&(laneItem->node));
+            g_channelLaneList->cnt--;
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
+                pkgName, laneItem->channelId, laneItem->channelType);
+            LnnReleaseLanesObject(laneItem->lanesObj);
+            SoftBusFree(laneItem);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    return;
 }
 
 LnnLanesObject *TransLaneMgrGetLane(int32_t channelId, int32_t channelType)

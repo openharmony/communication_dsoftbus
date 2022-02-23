@@ -34,6 +34,37 @@
 
 static SoftbusBaseListener g_sessionListener;
 
+uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
+{
+    switch (type) {
+        case AUTH_LINK_TYPE_BR:
+            return FLAG_BR;
+        case AUTH_LINK_TYPE_BLE:
+            return FLAG_BLE;
+        case AUTH_LINK_TYPE_P2P:
+            return FLAG_P2P;
+        default:
+            return FLAG_WIFI;
+    }
+}
+
+uint32_t GetCipherFlagByAuthId(int64_t authId)
+{
+    AuthConnInfo info = {0};
+    uint32_t flag = FLAG_WIFI;
+
+    if (authId == AUTH_INVALID_ID) {
+        return flag;
+    }
+    if (AuthGetConnInfo(authId, &info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get authinfo fail %lld", authId);
+        return flag;
+    }
+    flag = SwitchAuthLinkTypeToFlagType(info.type);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth link type %d flag 0x%x", info.type, flag);
+    return flag;
+}
+
 static int32_t StartVerifySession(SessionConn *conn)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartVerifySession");
@@ -50,11 +81,12 @@ static int32_t StartVerifySession(SessionConn *conn)
     }
 
     uint32_t dataLen = strlen(bytes) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
+    uint32_t cipherFlag = GetCipherFlagByAuthId(conn->authId);
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
         .seq = seq,
-        .flags = FLAG_REQUEST,
+        .flags = (FLAG_REQUEST | cipherFlag),
         .dataLen = dataLen,
     };
 
@@ -69,48 +101,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-static void GetP2pAuthOptionUuid(ConnectOption *option)
-{
-    int32_t ret;
-    char p2pMac[P2P_MAC_LEN] = {0};
-    ConnectOption authOption = {0};
-
-    ret = P2pLinkGetPeerMacByPeerIp(option->info.ipOption.ip, p2pMac, sizeof(p2pMac));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UUID is not p2p ip %s", option->info.ipOption.ip);
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UUID get auth p2pmac %s", p2pMac);
-    ret = AuthGetConnectOptionByP2pMac(p2pMac, AUTH_LINK_TYPE_WIFI, &authOption);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UUID %s get auth opthon fail", p2pMac);
-        return;
-    }
-    (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
-    return;
-}
-
-static int32_t GetUuidFromAuth(const char *ip, char *uuid, uint32_t len)
-{
-    if (ip == NULL || uuid == NULL) {
-        return SOFTBUS_ERR;
-    }
-    ConnectOption option = {0};
-    option.type = CONNECT_TCP;
-    if (strcpy_s(option.info.ipOption.ip, IP_LEN, ip) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err.");
-        return SOFTBUS_MEM_ERR;
-    }
-    GetP2pAuthOptionUuid(&option);
-    if (AuthGetUuidByOption(&option, uuid, len) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid fail.");
-        return SOFTBUS_ERR;
-    }
-
-    return SOFTBUS_OK;
-}
-
-static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const char *ip)
+static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, int32_t chanId, const char *ip)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
@@ -123,17 +114,13 @@ static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const c
     conn->channelId = chanId;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
     conn->timeout = 0;
+    conn->listenMod = module;
+    conn->authId = AUTH_INVALID_ID;
 
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId,
         sizeof(conn->appInfo.myData.deviceId)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local deviceId failed.");
         SoftBusFree(conn);
-        return SOFTBUS_ERR;
-    }
-
-    if (GetUuidFromAuth(ip, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusFree(conn);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid from from auth failed.");
         return SOFTBUS_ERR;
     }
 
@@ -156,7 +143,7 @@ static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const c
         return SOFTBUS_ERR;
     }
 
-    if (AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(conn->listenMod, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
         return SOFTBUS_ERR;
@@ -165,7 +152,7 @@ static int32_t CreateSessionConnNode(int events, int fd, int32_t chanId, const c
     return SOFTBUS_OK;
 }
 
-static int32_t OnConnectEvent(int events, int cfd, const char *ip)
+static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const char *ip)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Exception occurred");
@@ -184,7 +171,7 @@ static int32_t OnConnectEvent(int events, int cfd, const char *ip)
         return ret;
     }
 
-    ret = CreateSessionConnNode(events, cfd, channelId, ip);
+    ret = CreateSessionConnNode(module, events, cfd, channelId, ip);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
@@ -201,10 +188,10 @@ static void CloseTcpDirectFd(int fd)
 #endif
 }
 
-static void TransProcDataRes(int32_t ret, int32_t channelId, int32_t fd)
+static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
 {
     if (ret != SOFTBUS_OK) {
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        DelTrigger(module, fd, READ_TRIGGER);
         TcpShutDown(fd);
         NotifyChannelOpenFailed(channelId);
     } else {
@@ -223,33 +210,33 @@ static int32_t OnDataEvent(int events, int fd)
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info.", fd);
+        DelTrigger(conn->listenMod, fd, READ_TRIGGER);
+        DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
+        DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
         SoftBusFree(conn);
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
         TcpShutDown(fd);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
-        ret = TransTdcSrvRecvData(conn->channelId);
+        ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Trans Srv Recv Data ret %d. ", ret);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
             SoftBusFree(conn);
             return SOFTBUS_OK;
         }
-        TransProcDataRes(ret, conn->channelId, fd);
+        TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
     } else if (events == SOFTBUS_SOCKET_OUT) {
         if (conn->serverSide == true) {
             SoftBusFree(conn);
             return ret;
         }
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, WRITE_TRIGGER);
-        AddTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+        DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
+        AddTrigger(conn->listenMod, fd, READ_TRIGGER);
         ret = StartVerifySession(conn);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
-            DelTrigger(DIRECT_CHANNEL_SERVER, fd, READ_TRIGGER);
+            DelTrigger(conn->listenMod, fd, READ_TRIGGER);
             TcpShutDown(fd);
             NotifyChannelOpenFailed(conn->channelId);
             TransDelSessionConnById(conn->channelId);
@@ -257,13 +244,33 @@ static int32_t OnDataEvent(int events, int fd)
         }
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
-        DelTrigger(DIRECT_CHANNEL_SERVER, fd, EXCEPT_TRIGGER);
+        DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
         TcpShutDown(fd);
         TransDelSessionConnById(conn->channelId);
         TransSrvDelDataBufNode(conn->channelId);
     }
     SoftBusFree(conn);
     return ret;
+}
+
+static int32_t OnConnectEventWifi(int32_t events, int32_t cfd, const char *ip)
+{
+    return OnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, events, cfd, ip);
+}
+
+static int32_t OnDataEventWifi(int32_t events, int32_t fd)
+{
+    return OnDataEvent(events, fd);
+}
+
+static int32_t OnConnectEventP2P(int32_t events, int32_t cfd, const char *ip)
+{
+    return OnConnectEvent(DIRECT_CHANNEL_SERVER_P2P, events, cfd, ip);
+}
+
+static int32_t OnDataEventP2P(int32_t events, int32_t fd)
+{
+    return OnDataEvent(events, fd);
 }
 
 int32_t TransTdcStartSessionListener(const char *ip, const int port)
@@ -273,23 +280,23 @@ int32_t TransTdcStartSessionListener(const char *ip, const int port)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    g_sessionListener.onConnectEvent = OnConnectEvent;
-    g_sessionListener.onDataEvent = OnDataEvent;
+    g_sessionListener.onConnectEvent = OnConnectEventWifi;
+    g_sessionListener.onDataEvent = OnDataEventWifi;
 
-    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER, &g_sessionListener);
+    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_WIFI, &g_sessionListener);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
         return ret;
     }
-    int serverPort = StartBaseListener(DIRECT_CHANNEL_SERVER, ip, port, SERVER_MODE);
+    int serverPort = StartBaseListener(DIRECT_CHANNEL_SERVER_WIFI, ip, port, SERVER_MODE);
     return serverPort;
 }
 
 int32_t TransTdcStopSessionListener(void)
 {
     TransTdcStopSessionProc();
-    int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER);
-    DestroyBaseListener(DIRECT_CHANNEL_SERVER);
+    int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER_WIFI);
+    DestroyBaseListener(DIRECT_CHANNEL_SERVER_WIFI);
     return ret;
 }
 
@@ -298,7 +305,7 @@ int32_t GetTdcBaseListener(SoftbusBaseListener *listener)
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    listener->onConnectEvent = OnConnectEvent;
-    listener->onDataEvent = OnDataEvent;
+    listener->onConnectEvent = OnConnectEventP2P;
+    listener->onDataEvent = OnDataEventP2P;
     return SOFTBUS_OK;
 }

@@ -19,7 +19,6 @@
 #include "softbus_log.h"
 #include "sys_mgr_client.h"
 
-
 extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
 {
     if (pkgName == NULL) {

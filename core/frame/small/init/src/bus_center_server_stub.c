@@ -370,7 +370,7 @@ int32_t ServerDeactiveMetaNode(const void *origin, IpcIo *req, IpcIo *reply)
     const char *metaNodeId = (const char*)IpcIoPopString(req, &size);
     if (metaNodeId == NULL || size != (NETWORK_ID_BUF_LEN - 1)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "ServerDeactiveMetaNode read meta node id failed, size=%d, 0x%p", size, metaNodeId);
+            "ServerDeactiveMetaNode read meta node id failed, size=%d", size);
         IpcIoPushInt32(reply, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }

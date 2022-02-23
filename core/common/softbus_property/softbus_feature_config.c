@@ -36,7 +36,7 @@
 #endif
 
 #define CONN_RFCOM_SEND_MAX_LEN 990
-#define CONN_BR_RECEIVE_MAX_LEN 10
+#define CONN_BR_RECEIVE_MAX_LEN 20
 #define CONN_TCP_MAX_LENGTH 3072
 #define CONN_TCP_MAX_CONN_NUM 30
 #define CONN_TCP_TIME_OUT 100
@@ -96,6 +96,7 @@ typedef struct {
     char lnnNetIfName[MAX_NET_IF_NAME_LEN];
     int32_t lnnMaxConcurentNum;
     bool lnnAutoNetworkingSwitch;
+    bool isSupportTopo;
 } ConfigItem;
 
 typedef struct {
@@ -121,6 +122,7 @@ ConfigItem g_config = {
     LNN_UDID_INIT_DELAY_LEN,
     LNN_NET_IF_NAME,
     LNN_MAX_CONCURENT_NUM,
+    true,
     true,
 };
 
@@ -250,6 +252,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_AUTO_NETWORKING_SWITCH,
         (unsigned char*)&(g_config.lnnAutoNetworkingSwitch),
         sizeof(g_config.lnnAutoNetworkingSwitch)
+    },
+    {
+        SOFTBUS_BOOL_SUPPORT_TOPO,
+        (unsigned char*)&(g_config.isSupportTopo),
+        sizeof(g_config.isSupportTopo)
     },
 };
 

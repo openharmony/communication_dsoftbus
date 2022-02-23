@@ -106,7 +106,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
         return NULL;
     }
 
-    pool->pthreads = (SoftBusThread *)SoftBusCalloc(sizeof(SoftBusThread) * threadNum);
+    pool->pthreads = (SoftBusThread *)SoftBusCalloc((int32_t)(sizeof(SoftBusThread) * threadNum));
     if (pool->pthreads == NULL) {
         SoftBusFree(pool);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to malloc pthreads");

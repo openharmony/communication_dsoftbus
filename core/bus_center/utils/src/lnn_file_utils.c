@@ -50,7 +50,7 @@ static int32_t InitStorageConfigPath(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetFullStoragePath(LnnFileId id, char *path, int32_t len)
+int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
 {
     if (strlen(g_storagePath) == 0) {
         if (InitStorageConfigPath() != SOFTBUS_OK) {

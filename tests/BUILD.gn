@@ -22,7 +22,6 @@ lite_component("softbus_test") {
       features += [
         "sdk/discovery/unittest:DiscSdkTest",
         "sdk/transmission/trans_channel:TransSdkTest",
-        "adapter/unittest:AdapterTest",
       ]
     }
   }
