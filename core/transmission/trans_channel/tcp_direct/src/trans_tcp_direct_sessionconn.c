@@ -106,7 +106,7 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
     return NULL;
 }
 
-SessionConn *GetSessionConnByChannelId(uint32_t channelId)
+SessionConn *GetSessionConnByChannelId(int32_t channelId)
 {
     if (g_sessionConnList == NULL) {
         return NULL;
@@ -118,7 +118,7 @@ SessionConn *GetSessionConnByChannelId(uint32_t channelId)
             return item;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%u", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%d", channelId);
     return NULL;
 }
 
@@ -279,7 +279,7 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
     ReleaseSessonConnLock();
 }
 
-int32_t SetSessionConnStatusById(int32_t channelId, int32_t status)
+int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
