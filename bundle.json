@@ -22,7 +22,7 @@
         "dsoftbus_standard_feature_disc_ble",
         "dsoftbus_standard_feature_conn_br",
         "dsoftbus_standard_feature_conn_ble",
-        "dsoftbus_standard_feature_conn_ble"
+        "dsoftbus_standard_feature_lnn_net"
       ],
       "rom": "967KB",
       "ram": "28MB",
