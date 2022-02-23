@@ -69,15 +69,16 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthTransDataRegCallback(AuthModuleId moduleId, AuthTransCallback *cb)
+int32_t AuthTransDataRegCallback(AuthTransModule moduleId, AuthTransCallback *cb)
 {
     (void)moduleId;
     (void)cb;
     return SOFTBUS_OK;
 }
 
-void AuthTransDataUnRegCallback(void)
+void AuthTransDataUnRegCallback(AuthTransModule moduleId)
 {
+    (void)moduleId;
 }
 
 int64_t AuthOpenChannel(const ConnectOption *option)
@@ -90,4 +91,69 @@ int32_t AuthCloseChannel(int64_t authId)
 {
     (void)authId;
     return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
+{
+    (void)info;
+    (void)requestId;
+    (void)callback;
+    return SOFTBUS_OK;
+}
+
+void AuthCloseConn(int64_t authId)
+{
+    (void)authId;
+}
+
+uint32_t AuthGenRequestId(void)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *info)
+{
+    (void)authId;
+    (void)info;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetDeviceUuid(int64_t authId, char *buf, uint32_t size)
+{
+    (void)authId;
+    (void)buf;
+    (void)size;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
+{
+    (void)uuid;
+    (void)connInfo;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthSetP2pMac(int64_t authId, const char *mac)
+{
+    (void)authId;
+    (void)info;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, ConnectOption *option)
+{
+    (void)mac;
+    (void)type;
+    (void)option;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf)
+{
+    (void)seq;
+    (void)side;
+    (void)data;
+    (void)len;
+    (void)outBuf;
+    return SOFTBUS_OK;
 }
