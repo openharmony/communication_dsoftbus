@@ -30,7 +30,7 @@ std::unique_ptr<IStream> IStream::MakeCommonStream(StreamData &data, const Strea
 StreamCommonData::StreamCommonData(uint32_t streamId, uint16_t seq)
 {
     curSeqNum_ = seq;
-    curStreamId_ = (int32_t)streamId;
+    curStreamId_ = streamId;
 }
 
 int StreamCommonData::InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t bufSize,
