@@ -37,7 +37,7 @@
         }                                                               \
         (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID)); \
         if ((info) == NULL) {                                           \
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get node info fail.");                             \
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get node info fail."); \
             return SOFTBUS_ERR;                                         \
         }                                                               \
     } while (0)                                                        \
