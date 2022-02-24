@@ -66,3 +66,10 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
     (void)len;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    (void)id;
+    (void)type;
+    return true;
+}
