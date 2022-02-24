@@ -249,7 +249,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    if (laneId >= LNN_LINK_TYPE_BR) {
+    if (laneId == LNN_LINK_TYPE_BR) {
         g_lanes[laneId].laneInfo.isSupportUdp = false;
         (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
         return;
