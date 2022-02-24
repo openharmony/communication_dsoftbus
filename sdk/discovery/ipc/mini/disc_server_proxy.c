@@ -24,6 +24,11 @@ int32_t DiscServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void DiscServerProxyDeInit(void)
+{
+    return;
+}
+
 int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     return DiscIpcPublishService(pkgName, info);
