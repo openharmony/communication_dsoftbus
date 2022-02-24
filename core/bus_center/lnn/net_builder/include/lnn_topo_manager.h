@@ -18,13 +18,23 @@
 
 #include <stdint.h>
 
+#include "softbus_common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    char peerUdid[UDID_BUF_LEN];
+    uint8_t relation[CONNECTION_ADDR_MAX];
+} LnnRelation;
+
 int32_t LnnInitTopoManager(void);
 void LnnDeinitTopoManager(void);
 
+int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum);
+int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len);
 #ifdef __cplusplus
 }
 #endif
