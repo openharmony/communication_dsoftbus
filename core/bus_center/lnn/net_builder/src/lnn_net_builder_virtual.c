@@ -15,6 +15,7 @@
 
 #include "lnn_net_builder.h"
 
+#include "lnn_p2p_info.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -56,4 +57,10 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     (void)type;
     (void)typeLen;
     return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnInitLocalP2pInfo(NodeInfo *info)
+{
+    (void)info;
+    return SOFTBUS_OK;
 }
