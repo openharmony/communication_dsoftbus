@@ -294,7 +294,7 @@ static char *DecryptVerifyP2pData(int64_t authId, const ConnectOption *option,
         return NULL;
     }
     int32_t ret;
-    int32_t len;
+    uint32_t len;
     char *data = NULL;
     OutBuf buf = {0};
 
