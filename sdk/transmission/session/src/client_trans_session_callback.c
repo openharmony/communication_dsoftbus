@@ -41,7 +41,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->peerUid = channel->peerUid;
     session->isServer = channel->isServer;
     session->isEnable = true;
-    session->info.flag = flag;
+    session->info.flag = (int32_t)flag;
     session->routeType = channel->routeType;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
