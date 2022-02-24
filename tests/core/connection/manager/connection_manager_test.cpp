@@ -223,12 +223,17 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger001, TestSize.Level1)
 
     ret = ConnTypeIsSupport(CONNECT_TCP);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
+#ifdef connection_enable_br_test
     ret = ConnTypeIsSupport(CONNECT_BR);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    GTEST_LOG_(INFO) << "BR Support";
+#endif
 
+#ifdef connection_enable_ble_test
     ret = ConnTypeIsSupport(CONNECT_BLE);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    GTEST_LOG_(INFO) << "BLE Support";
+#endif
 };
 
 /*
