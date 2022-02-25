@@ -155,18 +155,15 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *
 {
     int32_t ret = SOFTBUS_OK;
     switch (type) {
-        case CHANNEL_TYPE_UDP : {
+        case CHANNEL_TYPE_UDP:
             ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
-        }
-        case CHANNEL_TYPE_PROXY : {
+        case CHANNEL_TYPE_PROXY:
             ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
-        }
-        default : {
+        default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport channel type");
             return SOFTBUS_ERR;
-        }
     }
     return ret;
 }

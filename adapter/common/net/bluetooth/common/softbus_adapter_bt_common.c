@@ -72,7 +72,7 @@ static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
 {
     if (bdAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairRequestedCallback addr is null");
-        return ;
+        return;
     }
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
@@ -87,7 +87,7 @@ static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, i
 {
     if (bdAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairConfirmedCallback addr is null");
-        return ;
+        return;
     }
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
