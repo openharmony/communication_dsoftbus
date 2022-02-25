@@ -136,7 +136,7 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 int32_t AuthSetP2pMac(int64_t authId, const char *mac)
 {
     (void)authId;
-    (void)info;
+    (void)mac;
     return SOFTBUS_OK;
 }
 
