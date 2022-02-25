@@ -226,7 +226,7 @@ static int32_t GetIdleIndexNode(int32_t *index)
         return SOFTBUS_ERR;
     }
     int32_t i;
-    for (i = 0; i < MAX_FILE_NUM; i ++) {
+    for (i = 0; i < MAX_FILE_NUM; i++) {
         if (g_recvFileInfo.recvFileInfo[i].fileStatus == NODE_IDLE) {
             *index = i;
             return SOFTBUS_OK;
@@ -250,7 +250,7 @@ int32_t GetRecvFileInfoBySeq(uint32_t seq, SingleFileInfo *fileInfo)
     }
 
     int32_t i;
-    for (i = 0; i < MAX_FILE_NUM; i ++) {
+    for (i = 0; i < MAX_FILE_NUM; i++) {
         if (g_recvFileInfo.recvFileInfo[i].seq == seq) {
             fileInfo->index = g_recvFileInfo.recvFileInfo[i].index;
             fileInfo->seq = seq;
@@ -276,7 +276,7 @@ int32_t GetRecvFileInfoBySeq(uint32_t seq, SingleFileInfo *fileInfo)
 int32_t RemoveFromRecvListBySeq(uint32_t seq)
 {
     int32_t i;
-    for (i = 0; i < MAX_FILE_NUM; i ++) {
+    for (i = 0; i < MAX_FILE_NUM; i++) {
         if (g_recvFileInfo.recvFileInfo[i].seq == seq) {
             g_recvFileInfo.curIndex = 0;
             g_recvFileInfo.recvFileInfo[i].index = 0;
@@ -513,7 +513,7 @@ int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, const char
     uint64_t fileOffset = 0;
     uint64_t remainedSendSize = fileSize;
     uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
-    for (uint64_t index = 0; index < frameNum; index ++) {
+    for (uint64_t index = 0; index < frameNum; index++) {
         fileFrame.frameType = FrameIndexToType(index, frameNum);
         fileFrame.data = buffer;
         if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&channelId, FRAME_DATA_SEQ_OFFSET) != EOK) {
@@ -527,7 +527,7 @@ int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, const char
             }
             fileFrame.frameLength = FRAME_DATA_SEQ_OFFSET + destFileNameSize;
         } else {
-            int32_t len = 0;
+            int32_t len;
             uint64_t readLength = (remainedSendSize < frameDataSize) ? remainedSendSize : frameDataSize;
             len = pread(fd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
             if (len >= 0) {
@@ -571,11 +571,11 @@ int32_t FileToFrameAndSendFile(int32_t channelId, const char *sourceFile, const 
     uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
     uint64_t frameNum = fileSize / frameDataSize;
     if ((fileSize % frameDataSize) != 0) {
-        frameNum ++;
+        frameNum++;
     }
 
     /* add 1 means reserve frame to send destFile string */
-    frameNum ++;
+    frameNum++;
 
     if (FileToFrame(channelId, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "File To Frame fail");
@@ -866,7 +866,7 @@ int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const
     oneFrame.frameLength = len;
     oneFrame.data = (uint8_t *)data;
     switch (oneFrame.frameType) {
-        case FILE_FIRST_FRAME : {
+        case FILE_FIRST_FRAME:
             ret = CreateFileFromFrame(sessionId, oneFrame, fileListener);
             if (ret != SOFTBUS_OK) {
                 if (fileListener.recvListener.OnFileTransError != NULL) {
@@ -874,10 +874,9 @@ int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const
                 }
             }
             break;
-        }
-        case FILE_ONGOINE_FRAME :
-        case FILE_ONLYONE_FRAME :
-        case FILE_LAST_FRAME : {
+        case FILE_ONGOINE_FRAME:
+        case FILE_ONLYONE_FRAME:
+        case FILE_LAST_FRAME:
             ret = WriteFrameToFile(oneFrame);
             if (ret != SOFTBUS_OK) {
                 if (fileListener.recvListener.OnFileTransError != NULL) {
@@ -885,11 +884,9 @@ int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const
                 }
             }
             break;
-        }
-        default : {
+        default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frame type is invalid");
             return SOFTBUS_ERR;
-        }
     }
     return ret;
 }
@@ -981,7 +978,7 @@ int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int32_t *fi
             }
         }
         offset += fileNameLength;
-        count ++;
+        count++;
     }
 
     *fileCount = count;
@@ -1072,7 +1069,7 @@ static int32_t ProxySendFile(int32_t channelId, const char *sFileList[], const c
         return SOFTBUS_ERR;
     }
 
-    int ret = SOFTBUS_ERR;
+    int ret;
     if ((fileCnt == 0) || (fileCnt > MAX_FILE_NUM)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile arg filecnt[%d] error", fileCnt);
         SoftBusMutexUnlock(&g_sendFileInfo.lock);

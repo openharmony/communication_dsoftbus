@@ -218,7 +218,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "aaa SoftBusGattClientConnect addr=%s", bleAddr->addr);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect addr=%s", bleAddr->addr);
     return infoNode->clientId;
 }
 
