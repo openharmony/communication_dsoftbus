@@ -16,7 +16,6 @@
 #ifndef BLE_GATT_SERVER_H
 #define BLE_GATT_SERVER_H
 
-#include "common_list.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_ble_connection_inner.h"
 #include "softbus_conn_manager.h"
