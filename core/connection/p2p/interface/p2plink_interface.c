@@ -328,7 +328,7 @@ int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
     int32_t ret;
 
     if (peerMac == NULL) {
-         return SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
 
     if (P2pLinkGetRole() == ROLE_NONE) {
