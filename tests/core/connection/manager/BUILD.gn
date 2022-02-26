@@ -18,6 +18,15 @@ module_output_path = "dsoftbus_standard/connection"
 
 ohos_unittest("softbus_conn_manager_test") {
   module_out_path = module_output_path
+
+  if (dsoftbus_standard_feature_conn_br == true) {
+    defines = [ "connection_enable_br_test" ]
+  }
+
+  if (dsoftbus_standard_feature_conn_ble == true) {
+    defines += [ "connection_enable_ble_test" ]
+  }
+
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
