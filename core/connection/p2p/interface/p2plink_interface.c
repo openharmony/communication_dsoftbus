@@ -41,6 +41,12 @@ typedef struct {
     sem_t wait;
 } QueryP2pMacLoopInfo;
 
+typedef struct {
+    char peerMac[P2P_MAC_LEN];
+    int32_t result;
+    sem_t wait;
+} QueryP2pDevIsOnline;
+
 int32_t P2pLinkGetRequestId(void)
 {
     static int32_t requestId = 0;
@@ -225,11 +231,6 @@ int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* peerMac, int32_t mac
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query ip %s", peerIp);
-    if (P2pLinkIsEnable() == false) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get peermac p2p state is closed");
-        return SOFTBUS_ERR;
-    }
-
     if (P2pLinkGetRole() == ROLE_NONE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p role is none");
         return SOFTBUS_ERR;
@@ -298,4 +299,63 @@ int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static void LoopP2pLinkQueryDevOnline(P2pLoopMsg msgType, void *arg)
+{
+    QueryP2pDevIsOnline *queryInfo = NULL;
+    ConnectedNode *connedItem = NULL;
+
+    (void)msgType;
+    if (arg == NULL) {
+        return;
+    }
+
+    queryInfo = (QueryP2pDevIsOnline *)arg;
+    connedItem = P2pLinkGetConnedDevByMac(queryInfo->peerMac);
+    if (connedItem != NULL) {
+        queryInfo->result = SOFTBUS_OK;
+    } else {
+        queryInfo->result = SOFTBUS_ERR;
+    }
+    sem_post(&queryInfo->wait);
+    return;
+}
+
+int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
+{
+    QueryP2pDevIsOnline queryInfo = {0};
+    int32_t ret;
+
+    if (peerMac == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    if (P2pLinkGetRole() == ROLE_NONE) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "isonline role is none");
+        return SOFTBUS_ERR;
+    }
+
+    (void)memset_s(&queryInfo, sizeof(queryInfo), 0, sizeof(queryInfo));
+    ret = strcpy_s(queryInfo.peerMac, sizeof(queryInfo.peerMac), peerMac);
+    if (ret != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (sem_init(&queryInfo.wait, 0, 0)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sem init fail");
+        return SOFTBUS_ERR;
+    }
+
+    ret = P2pLoopProc(LoopP2pLinkQueryDevOnline, (void *)&queryInfo, P2PLOOP_MSG_PROC);
+    if (ret != SOFTBUS_OK) {
+        sem_destroy(&queryInfo.wait);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopP2pLinkIsRoleConfict loop fail");
+        return SOFTBUS_ERR;
+    }
+    sem_wait(&queryInfo.wait);
+    sem_destroy(&queryInfo.wait);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "peerMac %s, query result %d", peerMac, queryInfo.result);
+    return queryInfo.result;
 }

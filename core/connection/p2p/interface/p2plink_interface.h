@@ -65,4 +65,5 @@ int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen);
 int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info);
 
 int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char *peerMac, int32_t macLen);
+int32_t P2pLinkQueryDevIsOnline(const char *peerMac);
 #endif
