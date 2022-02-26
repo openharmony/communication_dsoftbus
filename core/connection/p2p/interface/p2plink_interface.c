@@ -314,9 +314,9 @@ static void LoopP2pLinkQueryDevOnline(P2pLoopMsg msgType, void *arg)
     queryInfo = (QueryP2pDevIsOnline *)arg;
     connedItem = P2pLinkGetConnedDevByMac(queryInfo->peerMac);
     if (connedItem != NULL) {
-        queryInfo.result = SOFTBUS_OK;
+        queryInfo->result = SOFTBUS_OK;
     } else {
-        queryInfo.result = SOFTBUS_ERR;
+        queryInfo->result = SOFTBUS_ERR;
     }
     sem_post(&queryInfo->wait);
     return;
