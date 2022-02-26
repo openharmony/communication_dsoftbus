@@ -16,7 +16,9 @@
 #include "bus_center_event.h"
 
 #include <stdlib.h>
+#include <securec.h>
 
+#include "message_handler.h"
 #include "lnn_bus_center_ipc.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -34,7 +36,118 @@ typedef struct {
     SoftBusMutex lock;
 } BusCenterEventCtrl;
 
+typedef enum {
+    NOTIFY_ONLINE_STATE_CHANGED = 0,
+    NOTIFY_NODE_BASIC_INFO_CHANGED,
+} NotifyType;
+
 static BusCenterEventCtrl g_eventCtrl;
+static SoftBusHandler g_notifyHandler = { "NotifyHandler", NULL, NULL };
+
+static int32_t PostMessageToHandler(SoftBusMessage *msg)
+{
+    if (g_notifyHandler.looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "NotifyHandler not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (g_notifyHandler.looper->PostMessage == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid looper.");
+        return SOFTBUS_ERR;
+    }
+    g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
+    return SOFTBUS_OK;
+}
+
+static void HandleOnlineStateChangedMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid online state message.");
+        return;
+    }
+    bool isOnline = (bool)msg->arg1;
+    LnnIpcNotifyOnlineState(isOnline, msg->obj, sizeof(NodeBasicInfo));
+}
+
+static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node basic info message.");
+        return;
+    }
+    int32_t type = (int32_t)msg->arg1;
+    LnnIpcNotifyBasicInfoChanged(msg->obj, sizeof(NodeBasicInfo), type);
+}
+
+static void HandleNotifyMessage(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid notify message.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "handle notify message, type = %d.", msg->what);
+    switch (msg->what) {
+        case NOTIFY_ONLINE_STATE_CHANGED:
+            HandleOnlineStateChangedMessage(msg);
+            break;
+        case NOTIFY_NODE_BASIC_INFO_CHANGED:
+            HandleNodeBasicInfoChangedMessage(msg);
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unknown notify message, type = %d.", msg->what);
+            break;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "handle notify message done, type = %d.", msg->what);
+}
+
+static void FreeNotifyMessage(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+        msg->obj = NULL;
+    }
+    SoftBusFree(msg);
+}
+
+static NodeBasicInfo *DupNodeBasicInfo(const NodeBasicInfo *info)
+{
+    if (info == NULL) {
+        return NULL;
+    }
+    NodeBasicInfo *dupInfo = SoftBusMalloc(sizeof(NodeBasicInfo));
+    if (dupInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc NodeBasicInfo err.");
+        return NULL;
+    }
+    if (memcpy_s(dupInfo, sizeof(NodeBasicInfo), info, sizeof(NodeBasicInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy NodeBasicInfo fail.");
+        SoftBusFree(dupInfo);
+        return NULL;
+    }
+    return dupInfo;
+}
+
+static int32_t PostNotifyMessage(int32_t what, uint64_t arg, const NodeBasicInfo *info)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc msg err.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->arg1 = arg;
+    msg->obj = DupNodeBasicInfo(info);
+    if (msg->obj == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dup NodeBasicInfo err.");
+        SoftBusFree(msg);
+        return SOFTBUS_MEM_ERR;
+    }
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandler(msg);
+}
 
 static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
 {
@@ -82,9 +195,10 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s", (isOnline == true) ? "online" : "offline");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s, networkId = %s.",
+        (isOnline == true) ? "online" : "offline", info->networkId);
     SetDefaultQdisc();
-    LnnIpcNotifyOnlineState(isOnline, info, sizeof(NodeBasicInfo));
+    (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
     eventInfo.isOnline = isOnline;
     eventInfo.networkId = info->networkId;
@@ -100,7 +214,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     if (type == TYPE_DEVICE_NAME) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify peer device name changed %s", info->deviceName);
     }
-    LnnIpcNotifyBasicInfoChanged(info, sizeof(NodeBasicInfo), type);
+    (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -157,6 +271,13 @@ void LnnNotifyMonitorEvent(const LnnMonitorEventInfo *info)
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;
+    SoftBusLooper *looper = CreateNewLooper("NotifyLooper");
+    if (looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create notify looper fail.");
+        return SOFTBUS_ERR;
+    }
+    g_notifyHandler.looper = looper;
+    g_notifyHandler.HandleMessage = HandleNotifyMessage;
 
     SoftBusMutexInit(&g_eventCtrl.lock, NULL);
     for (i = 0; i < LNN_EVENT_TYPE_MAX; ++i) {
@@ -167,6 +288,11 @@ int32_t LnnInitBusCenterEvent(void)
 
 void LnnDeinitBusCenterEvent(void)
 {
+    if (g_notifyHandler.looper != NULL) {
+        DestroyLooper(g_notifyHandler.looper);
+        g_notifyHandler.looper = NULL;
+        g_notifyHandler.HandleMessage = NULL;
+    }
     SoftBusMutexDestroy(&g_eventCtrl.lock);
 }
 
