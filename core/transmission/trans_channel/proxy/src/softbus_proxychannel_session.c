@@ -428,8 +428,12 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
             return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "slice: i:%d", i);
-        if (TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
+        int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+        if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "normal proxy send queue full!!");
+            return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
+        } else if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "normal proxy send msg error");
             return SOFTBUS_TRANS_PROXY_SENDMSG_ERR;
         }
     }
