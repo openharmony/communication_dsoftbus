@@ -401,10 +401,10 @@ void LnnDumpHbMgrUpdateList(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get deviceType fail, devId:%s", item->device->devId);
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbMgrUpdateList count:%d [udidHash:%s, deviceType:%s,"
-            "ConnectionAddrType:%02X, weight:%d, localMasterWeight:%d, lastUpdateTime:%llu]",
-            g_hbUpdateInfoList->cnt, item->device->devId, deviceType, item->device->addr[0].type, item->weight,
-            item->localMasterWeight, item->lastUpdateTime);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbMgrUpdateList count:%d [i:%d, udidHash:%s, "
+            "deviceType:%s, ConnectionAddrType:%02X, weight:%d, localMasterWeight:%d, lastUpdateTime:%llu]",
+            g_hbUpdateInfoList->cnt, dumpCount, item->device->devId, deviceType, item->device->addr[0].type,
+            item->weight, item->localMasterWeight, item->lastUpdateTime);
     }
     (void)SoftBusMutexUnlock(&g_hbUpdateInfoList->lock);
 }
@@ -434,7 +434,7 @@ void LnnDumpHbOnlineNodeList(void)
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbOnlineNodeList count:%d [i:%d, deviceName:%s,"
-            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%llu]", infoNum, i,
+            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%llu]", infoNum, i + 1,
             nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId, nodeInfo->masterWeight,
             nodeInfo->discoveryType, oldTimeStamp);
     }
@@ -443,13 +443,14 @@ void LnnDumpHbOnlineNodeList(void)
 
 int32_t LnnHbMgrInit(void)
 {
-    uint32_t i;
+    int32_t i, ret;
     for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
         if (g_hbImpl[i].init == NULL) {
             continue;
         }
-        if (g_hbImpl[i].init(&g_hbCallback) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB init heartbeat impl(%d) fail", i);
+        ret = g_hbImpl[i].init(&g_hbCallback);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB init heartbeat impl(%d) fail, ret=%d", i, ret);
             return SOFTBUS_ERR;
         }
     }
@@ -462,14 +463,18 @@ int32_t LnnHbMgrInit(void)
 
 int32_t LnnHbMgrOneCycleBegin(void)
 {
-    uint32_t i;
+    int32_t i, ret;
     for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
         if (g_hbImpl[i].onOnceBegin == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_hbImpl[i].onOnceBegin() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat impl(%d) fail", i);
+        ret = g_hbImpl[i].onOnceBegin();
+        if (ret == SOFTBUS_NOT_IMPLEMENT) {
+            continue;
+        }
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat impl(%d) fail, ret=%d", i, ret);
             return SOFTBUS_ERR;
         }
     }
@@ -478,14 +483,18 @@ int32_t LnnHbMgrOneCycleBegin(void)
 
 int32_t LnnHbMgrOneCycleEnd(void)
 {
-    uint32_t i;
+    int32_t i, ret;
     for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
         if (g_hbImpl[i].onOnceEnd == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_hbImpl[i].onOnceEnd() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB once heartbeat impl(%d) fail", i);
+        ret = g_hbImpl[i].onOnceEnd();
+        if (ret == SOFTBUS_NOT_IMPLEMENT) {
+            continue;
+        }
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB once heartbeat impl(%d) fail, ret=%d", i, ret);
             return SOFTBUS_ERR;
         }
     }
@@ -494,14 +503,18 @@ int32_t LnnHbMgrOneCycleEnd(void)
 
 int32_t LnnHbMgrStop(void)
 {
-    uint32_t i;
+    int32_t i, ret;
     for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
         if (g_hbImpl[i].stop == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat(%d)", i);
             continue;
         }
-        if (g_hbImpl[i].stop() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat impl(%d) fail", i);
+        ret = g_hbImpl[i].stop();
+        if (ret == SOFTBUS_NOT_IMPLEMENT) {
+            continue;
+        }
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat impl(%d) fail, ret=%d", i, ret);
             continue;
         }
     }
@@ -510,7 +523,7 @@ int32_t LnnHbMgrStop(void)
 
 void LnnHbMgrDeinit(void)
 {
-    uint32_t i;
+    int32_t i;
     for (i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
         if (g_hbImpl[i].deinit == NULL) {
             continue;
