@@ -166,6 +166,36 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
     return SOFTBUS_OK;
 }
 
+static int32_t ProcessReceivedFileData(int32_t sessionId, const char *data, uint32_t len, SessionPktType type)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME)
+        != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get peer session name failed");
+        return SOFTBUS_ERR;
+    }
+
+    FileListener fileListener;
+    memset_s(&fileListener, sizeof(fileListener), 0, sizeof(fileListener));
+    if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (type == TRANS_SESSION_FILE_ALLFILE_SENT) {
+        if (ProcessFileListData(sessionId, fileListener, data, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process filelist data failed");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        if (ProcessFileFrameData(sessionId, fileListener, data, len, type) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
@@ -194,31 +224,7 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
         case TRANS_SESSION_FILE_ONLYONE_FRAME:
         case TRANS_SESSION_FILE_ALLFILE_SENT:
             if (channelType == CHANNEL_TYPE_PROXY) {
-                char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-                if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME)
-                    != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get peer session name failed");
-                    return SOFTBUS_ERR;
-                }
-
-                FileListener fileListener;
-                memset_s(&fileListener, sizeof(fileListener), 0, sizeof(fileListener));
-                if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
-                    return SOFTBUS_ERR;
-                }
-
-                if (type == TRANS_SESSION_FILE_ALLFILE_SENT) {
-                    if (ProcessFileListData(sessionId, fileListener, data, len) != SOFTBUS_OK) {
-                        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process filelist data failed");
-                        return SOFTBUS_ERR;
-                    }
-                } else {
-                    if (ProcessFileFrameData(sessionId, fileListener, data, len, type) != SOFTBUS_OK) {
-                        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
-                        return SOFTBUS_ERR;
-                    }
-                }
+                return ProcessReceivedFileData(sessionId, data, len, type);
             }
             break;
         default:
