@@ -226,13 +226,12 @@ static int32_t AcceptUdpChannelAsClient(AppInfo *appInfo)
 static int32_t CloseUdpChannel(AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process udp channel close state");
-    if (NotifyUdpChannelClosed(appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify app udp channel closed failed.");
-        return SOFTBUS_ERR;
-    }
     if (TransDelUdpChannel(appInfo->myData.channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete udp channel failed.");
         return SOFTBUS_ERR;
+    }
+    if (NotifyUdpChannelClosed(appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "notify app udp channel closed failed.");
     }
     return SOFTBUS_OK;
 }
