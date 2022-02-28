@@ -277,7 +277,6 @@ static int32_t RemoveFromRecvListBySeq(uint32_t seq)
     int32_t i;
     for (i = 0; i < MAX_RECV_FILE_NUM; i++) {
         if (g_recvFileInfo.recvFileInfo[i].seq == seq) {
-            g_recvFileInfo.curIndex = 0;
             g_recvFileInfo.recvFileInfo[i].index = 0;
             g_recvFileInfo.recvFileInfo[i].seq = 0;
             g_recvFileInfo.recvFileInfo[i].fileFd = INVALID_FD;
@@ -336,7 +335,6 @@ static int32_t UpdateRecvInfo(SingleFileInfo fileInfo)
         return SOFTBUS_ERR;
     }
     g_recvFileInfo.sessionId = 0;
-    g_recvFileInfo.curIndex = index;
     g_recvFileInfo.recvFileInfo[index].index = fileInfo.index;
     g_recvFileInfo.recvFileInfo[index].seq = fileInfo.seq;
     g_recvFileInfo.recvFileInfo[index].fileFd = fileInfo.fileFd;
@@ -716,7 +714,7 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
         return NULL;
     }
 
-    if (GetDestFileFrameSeq(fileFrame, &seq) != SOFTBUS_OK) {
+    if (GetDestFileFrameSeq(fileFrame, seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
         return NULL;
     }
@@ -800,7 +798,7 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
     int32_t frameDataLength = frameLength - FRAME_DATA_SEQ_OFFSET;
     int32_t writeLength = pwrite(fileInfo.fileFd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, frameDataLength,
         (uint64_t)fileInfo.fileOffset);
-    if (*writeLength < 0) {
+    if (writeLength < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pwrite file failed");
         return SOFTBUS_ERR;
     }
