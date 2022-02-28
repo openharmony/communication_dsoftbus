@@ -745,7 +745,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
     uint32_t connId = 0;
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
-        if (itemNode->halConnId != halConnId) {
+        if (itemNode->halConnId != halConnId || itemNode->info.isServer != BLE_CLIENT_TYPE) {
             continue;
         }
         connId = itemNode->connId;
@@ -795,7 +795,7 @@ static void BleServerConnectCallback(int32_t halConnId, const char *bleStrMac, c
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnId) {
+        if (itemNode->halConnId == halConnId && itemNode->info.isServer == BLE_SERVER_TYPE) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectCallback exist same connId, exit");
             (void)SoftBusMutexUnlock(&g_connectionLock);
             return;
@@ -878,7 +878,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     }
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnId) {
+        if (itemNode->halConnId == halConnId && itemNode->info.isServer == isServer) {
             bleNode = itemNode;
             itemNode->state = BLE_CONNECTION_STATE_CLOSED;
             (void)memcpy_s(&connectionInfo, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo));

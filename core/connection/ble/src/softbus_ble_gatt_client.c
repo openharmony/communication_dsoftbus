@@ -218,7 +218,9 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect addr=%s", bleAddr->addr);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "SoftBusGattClientConnect, addr:%02X:%02X:***%02X\n",
+        bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
     return infoNode->clientId;
 }
 
