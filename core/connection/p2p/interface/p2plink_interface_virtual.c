@@ -68,3 +68,9 @@ int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
     (void)localIpLen;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
+{
+    (void)peerMac;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
