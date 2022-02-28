@@ -104,22 +104,14 @@ static int32_t ResetHeartbeatParam(int32_t callingUid, GearMode mode, const Hear
 int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId,
     GearMode mode, const HeartbeatImplPolicy *implPolicy)
 {
-    NodeInfo *nodeInfo = NULL;
-
     if (pkgName == NULL || callingUid <= HB_INVALID_UID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (targetNetworkId != NULL) {
-        nodeInfo = LnnGetNodeInfoById(targetNetworkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get node info fail");
-            return SOFTBUS_ERR;
-        }
-        if (!LnnIsNodeOnline(nodeInfo)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB target networkId has offline");
-            return SOFTBUS_ERR;
-        }
+    if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB target networkId:%s is offline",
+            AnonymizesNetworkID(targetNetworkId));
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     if (ResetHeartbeatParam(callingUid, mode, implPolicy) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB reset gearMode param fail");
@@ -165,9 +157,10 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 {
     uint64_t delayMillis;
     GearMode gearMode;
-
-    if (networkId == NULL || addrType != CONNECTION_ADDR_BLE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB offline timing get invalid param: %d", addrType);
+    /* heartbeat dont support WLAN/ETH/BR medium type yet, so dont take the dev offline */
+    if (networkId == NULL || addrType == CONNECTION_ADDR_WLAN || addrType == CONNECTION_ADDR_ETH ||
+        addrType == CONNECTION_ADDR_BR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB offline timing get invalid param, addrType:%d", addrType);
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
