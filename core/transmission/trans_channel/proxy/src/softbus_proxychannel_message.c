@@ -89,19 +89,19 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
             return SOFTBUS_ERR;
         }
 
-        deBuf.buf = SoftBusCalloc(len - PROXY_CHANNEL_HEAD_LEN);
+        deBuf.buf = SoftBusCalloc((uint32_t)len - PROXY_CHANNEL_HEAD_LEN);
         if (deBuf.buf == NULL) {
             return SOFTBUS_ERR;
         }
-        deBuf.bufLen = len - PROXY_CHANNEL_HEAD_LEN;
+        deBuf.bufLen = (uint32_t)len - PROXY_CHANNEL_HEAD_LEN;
         if (AuthDecrypt(&option, (AuthSideFlag)isServer, (uint8_t *)(data + PROXY_CHANNEL_HEAD_LEN),
-            len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != 0) {
+            (uint32_t)len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != 0) {
             SoftBusFree(deBuf.buf);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg decrypt fail isServer");
             return SOFTBUS_ERR;
         }
         msg->data = (char *)deBuf.buf;
-        msg->dateLen = deBuf.outLen;
+        msg->dateLen = (int32_t)deBuf.outLen;
     }
 
     return SOFTBUS_OK;
@@ -111,13 +111,13 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
     const char *payload, int32_t payloadLen, char **data, int32_t *dataLen)
 {
     char *buf = NULL;
-    int32_t bufLen;
-    int32_t connHeadLen;
+    uint32_t bufLen;
+    uint32_t connHeadLen;
     connHeadLen = ConnGetHeadSize();
     AuthSideFlag isServer = AUTH_SIDE_ANY;
 
     if (msg->chiper == 0) {
-        bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen;
+        bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)payloadLen;
         buf = (char*)SoftBusCalloc(bufLen);
         if (buf == NULL) {
             return SOFTBUS_ERR;
@@ -132,7 +132,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             return SOFTBUS_ERR;
         }
         *data = buf;
-        *dataLen = bufLen;
+        *dataLen = (int32_t)bufLen;
     } else {
         OutBuf enBuf = {0};
         ConnectOption option;
@@ -142,14 +142,14 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg GetConnectOption fail connId[%u]", connId);
             return SOFTBUS_ERR;
         }
-        bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen + AuthGetEncryptHeadLen();
+        bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)payloadLen + AuthGetEncryptHeadLen();
         buf = (char *)SoftBusCalloc(bufLen);
         if (buf == NULL) {
             return SOFTBUS_ERR;
         }
         enBuf.buf = (unsigned char *)(buf + PROXY_CHANNEL_HEAD_LEN + connHeadLen);
         enBuf.bufLen = bufLen - PROXY_CHANNEL_HEAD_LEN - connHeadLen;
-        ret = AuthEncrypt(&option, &isServer, (uint8_t *)payload, payloadLen, &enBuf);
+        ret = AuthEncrypt(&option, &isServer, (uint8_t *)payload, (uint32_t)payloadLen, &enBuf);
         if (ret != SOFTBUS_OK) {
             SoftBusFree(buf);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg encrypt fail %d", ret);
@@ -170,7 +170,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
             return SOFTBUS_ERR;
         }
         *data = buf;
-        *dataLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + enBuf.outLen;
+        *dataLen = (int32_t)(PROXY_CHANNEL_HEAD_LEN + connHeadLen + enBuf.outLen);
     }
 
     return SOFTBUS_OK;
