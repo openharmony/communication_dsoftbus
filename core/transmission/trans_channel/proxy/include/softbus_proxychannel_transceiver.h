@@ -37,6 +37,7 @@ void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId);
+int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect);
 int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, int32_t priority);
 int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info);

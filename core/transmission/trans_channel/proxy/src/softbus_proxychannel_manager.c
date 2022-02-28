@@ -611,7 +611,7 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         }
     }
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, chan->appInfo.myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, chan->appInfo.myData.deviceId,
                            sizeof(chan->appInfo.myData.deviceId)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Handshake get local info fail");
         return SOFTBUS_ERR;
@@ -638,6 +638,12 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         SoftBusFree(chan);
         return;
     }
+    ConnectionInfo info = {0};
+    if (ConnGetConnectionInfo(msg->connId, &info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetConnectionInfo fail connectionId %u", msg->connId);
+        SoftBusFree(chan);
+        return;
+    }
 
     int16_t newChanId = TransProxyGetNewMyId();
     int32_t ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
@@ -654,6 +660,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
     chan->chiperSide = msg->chiperSide;
+    chan->type = info.type;
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");
         OnProxyChannelClosed(newChanId, &(chan->appInfo));
@@ -699,7 +706,12 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     } else {
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
     }
-    (void)TransProxyCloseConnChannel(msg->connId);
+    if ((info->type == CONNECT_BR || info->type == CONNECT_BLE) &&
+        info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
+        (void)TransProxyCloseConnChannelReset(msg->connId, false);
+    } else {
+        (void)TransProxyCloseConnChannel(msg->connId);
+    }
     SoftBusFree(info);
 }
 
