@@ -64,6 +64,12 @@ int32_t DiscServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void DiscServerProxyDeInit(void)
+{
+    delete g_serverProxy;
+    g_serverProxy = nullptr;
+}
+
 int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     if (g_serverProxy == nullptr) {

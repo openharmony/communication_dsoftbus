@@ -26,6 +26,11 @@ int32_t TransServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void TransServerProxyDeInit(void)
+{
+    return;
+}
+
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     return TransCreateSessionServer(pkgName, sessionName, 0, 0);
