@@ -354,6 +354,7 @@ void BusCenterClientDeinit(void)
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock in deinit");
     }
+    BusCenterServerProxyDeInit();
 }
 
 int BusCenterClientInit(void)

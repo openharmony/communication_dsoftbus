@@ -62,6 +62,11 @@ int32_t DiscServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void DiscServerProxyDeInit(void)
+{
+    g_serverProxy = NULL;
+}
+
 int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "publish service ipc client push.");

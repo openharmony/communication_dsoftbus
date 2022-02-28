@@ -29,6 +29,12 @@ int32_t BusCenterServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void BusCenterServerProxyDeInit(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center delete server proxy ok");
+    return SOFTBUS_OK;
+}
+
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     return LnnIpcGetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);

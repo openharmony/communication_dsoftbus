@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 int32_t DiscServerProxyInit(void);
+void DiscServerProxyDeInit(void);
 int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info);
 int32_t ServerIpcUnPublishService(const char *pkgName, int32_t publishId);
 int32_t ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info);

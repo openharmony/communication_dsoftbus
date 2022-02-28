@@ -99,6 +99,7 @@ void DiscClientDeinit(void)
     }
     SoftBusFree(g_discInfo);
     g_discInfo = NULL;
+    DiscServerProxyDeInit();
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DeInit success");
 }
 

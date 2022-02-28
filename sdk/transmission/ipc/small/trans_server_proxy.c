@@ -91,6 +91,11 @@ int32_t TransServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void TransServerProxyDeInit(void)
+{
+    g_serverProxy = NULL;
+}
+
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcCreateSessionServer");
