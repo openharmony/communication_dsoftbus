@@ -423,6 +423,13 @@ static int32_t FrameTypeToSessionType(int32_t type)
     }
 }
 
+static void DoTransErrorCallBack()
+{
+    if (g_recvFileInfo.fileListener.recvListener.OnFileTransError != NULL) {
+        g_recvFileInfo.fileListener.recvListener.OnFileTransError(g_recvFileInfo.sessionId);
+    }
+}
+
 static void ProxyFileTransTimerProc(void)
 {
 #define FILE_TRANS_TIMEOUT 10
@@ -442,10 +449,7 @@ static void ProxyFileTransTimerProc(void)
                 g_recvFileInfo.recvFileInfo[index].timeOut = 0;
                 close(g_recvFileInfo.recvFileInfo[index].fileFd);
                 remove(g_recvFileInfo.recvFileInfo[index].filePath);
-
-                if (g_recvFileInfo.fileListener.recvListener.OnFileTransError != NULL) {
-                    g_recvFileInfo.fileListener.recvListener.OnFileTransError(g_recvFileInfo.sessionId);
-                }
+                DoTransErrorCallBack();
             } else {
                 g_recvFileInfo.recvFileInfo[index].timeOut++;
             }
@@ -1066,7 +1070,7 @@ static int32_t SendSingleFile(int32_t channelId, const char *sourceFile, const c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourfile or dstfile is null");
         return SOFTBUS_ERR;
     }
-   SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file[%s] begin, dest is :%s", sourceFile, destFile);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file[%s] begin, dest is :%s", sourceFile, destFile);
 
     int32_t ret;
     ret = FileToFrameAndSendFile(channelId, sourceFile, destFile);
@@ -1075,7 +1079,7 @@ static int32_t SendSingleFile(int32_t channelId, const char *sourceFile, const c
         return SOFTBUS_ERR;
     }
 
-   SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file[%s] success", sourceFile);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file[%s] success", sourceFile);
 
     return SOFTBUS_OK;
 }
