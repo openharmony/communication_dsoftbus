@@ -144,6 +144,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     }
     uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
+        SoftBusFree(buf);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
     ssize_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
@@ -198,7 +199,7 @@ static int32_t TransTdcSendAck(const TcpDirectChannelInfo *channel, int32_t seq)
     return TransTdcProcessPostData(channel, (char*)(&seq), ACK_SIZE, FLAG_ACK);
 }
 
-static int32_t TransGetDataBufSize(void)
+static uint32_t TransGetDataBufSize(void)
 {
     return MIN_BUF_LEN;
 }
@@ -299,7 +300,7 @@ static ClientDataBuf *TransGetDataBufNodeById(int32_t channelId)
     return NULL;
 }
 
-static int32_t TransTdcProcessDataByFlag(int32_t flag, int32_t seqNum, const TcpDirectChannelInfo *channel,
+static int32_t TransTdcProcessDataByFlag(uint32_t flag, int32_t seqNum, const TcpDirectChannelInfo *channel,
     const char *plain, uint32_t plainLen)
 {
     switch (flag) {
@@ -333,7 +334,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
     int32_t seqNum = pktHead->seq;
-    int32_t flag = pktHead->flags;
+    uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
