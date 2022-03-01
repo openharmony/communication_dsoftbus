@@ -423,7 +423,7 @@ static int32_t FrameTypeToSessionType(int32_t type)
     }
 }
 
-static void DoTransErrorCallBack()
+static void DoTransErrorCallBack(void)
 {
     if (g_recvFileInfo.fileListener.recvListener.OnFileTransError != NULL) {
         g_recvFileInfo.fileListener.recvListener.OnFileTransError(g_recvFileInfo.sessionId);
