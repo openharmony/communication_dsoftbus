@@ -1016,18 +1016,15 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
         return SOFTBUS_ERR;
     }
     cJSON_Delete(data);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wrc log:devid = %s", connInfo->peerDevId);
     char deviceIdHash[UDID_HASH_LEN];
     if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId), (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse GenerateStrHash failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wrc log:devid hash = %s", deviceIdHash);
     if (memcpy_s(connInfo->info.info.bleInfo.deviceIdHash, UDID_HASH_LEN, deviceIdHash, UDID_HASH_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse memcpy_s failed");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
