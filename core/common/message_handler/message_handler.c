@@ -308,7 +308,7 @@ static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
 
 static void LooperPostMessageDelay(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis)
 {
-    msg->time = UptimeMicros() + delayMillis * TIME_THOUSANDS_MULTIPLIER;
+    msg->time = UptimeMicros() + (int64_t)delayMillis * TIME_THOUSANDS_MULTIPLIER;
     PostMessageAtTime(looper, msg);
 }
 

@@ -355,11 +355,13 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
+        SoftBusFree(buffer);
         return SOFTBUS_ERR;
     }
 
     if (GetSessionConnById(channelId, conn) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get SessionConn fail");
+        SoftBusFree(buffer);
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }

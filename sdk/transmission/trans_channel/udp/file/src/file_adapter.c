@@ -97,7 +97,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     struct sockaddr_in localAddr;
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
-    localAddr.sin_port = port;
+    localAddr.sin_port = (uint16_t)port;
     localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIP));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
@@ -121,7 +121,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     struct sockaddr_in localAddr;
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
-    localAddr.sin_port = peerPort;
+    localAddr.sin_port = (uint16_t)peerPort;
     localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(peerIp));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
