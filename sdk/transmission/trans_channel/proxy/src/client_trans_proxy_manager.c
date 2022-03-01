@@ -206,7 +206,7 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
 
 static bool IntToByte(uint32_t value, char *buffer, uint32_t len)
 {
-    if ((buffer == NULL) || (len < (int32_t)sizeof(int32_t))) {
+    if ((buffer == NULL) || (len < sizeof(uint32_t))) {
         return false;
     }
 
@@ -219,7 +219,7 @@ static bool IntToByte(uint32_t value, char *buffer, uint32_t len)
 
 static bool ByteToInt(char *buffer, uint32_t len, uint32_t *outValue)
 {
-    if ((outValue == NULL) || (buffer == NULL) || (len < (int32_t)sizeof(int32_t))) {
+    if ((outValue == NULL) || (buffer == NULL) || (len < sizeof(uint32_t))) {
         return false;
     }
     uint32_t value = 0;
@@ -1221,7 +1221,7 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
     uint32_t offset = 0;
     int32_t count = 0;
     uint32_t fileNameLength = 0;
-    uint32_t byteLen = sizeof(int32_t);
+    uint32_t byteLen = sizeof(uint32_t);
     char byteBuff[sizeof(int32_t)] = {0};
     while (offset < bufferInfo.bufferSize) {
         offset += sizeof(uint32_t);
@@ -1233,7 +1233,7 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
             return SOFTBUS_ERR;
         }
         offset += byteLen;
-        if ((fileNameLength < 0) || (fileNameLength > bufferInfo.bufferSize - offset)) {
+        if (fileNameLength > bufferInfo.bufferSize - offset) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList invalid fileLength");
             return SOFTBUS_ERR;
         }
