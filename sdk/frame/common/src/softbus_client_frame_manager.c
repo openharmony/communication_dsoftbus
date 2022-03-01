@@ -27,6 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 static bool g_isInited = false;
 static pthread_mutex_t g_isInitedLock = PTHREAD_MUTEX_INITIALIZER;
@@ -96,6 +97,12 @@ int32_t InitSoftBus(const char *pkgName)
         pthread_mutex_unlock(&g_isInitedLock);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_MEM_ERR;
+    }
+
+    if (SoftBusTimerInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client timer init fail");
+        pthread_mutex_unlock(&g_isInitedLock);
+        return SOFTBUS_ERR;
     }
 
     if (ClientModuleInit() != SOFTBUS_OK) {
