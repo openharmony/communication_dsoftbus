@@ -577,6 +577,18 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId)
     return SOFTBUS_OK;
 }
 
+int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect)
+{
+    if (TransDecConnRefByConnId(connectionId) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "reset(%d) disconnect device connid %d",
+            isDisconnect, connectionId);
+        if (isDisconnect) {
+            (void)ConnDisconnectDevice(connectionId);
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int32_t chanNewId)
 {
     ProxyChannelInfo *chan = NULL;
