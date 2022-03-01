@@ -56,7 +56,7 @@ typedef struct {
 
 typedef struct {
     int32_t frameType;
-    int32_t frameLength;
+    uint32_t frameLength;
     uint8_t *data;
 } FileFrame;
 

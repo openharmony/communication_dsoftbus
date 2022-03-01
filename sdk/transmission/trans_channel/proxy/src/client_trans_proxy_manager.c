@@ -190,25 +190,25 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
     return ret;
 }
 
-static bool IntToByte(int32_t value, char *buffer, int32_t len)
+static bool IntToByte(uint32_t value, char *buffer, uint32_t len)
 {
-    if ((buffer == NULL) || (len < (int32_t)sizeof(int32_t))) {
+    if ((buffer == NULL) || (len < sizeof(uint32_t))) {
         return false;
     }
 
-    for (int32_t i = 0; i < BYTE_INT_NUM; i++) {
-        int32_t offset = BIT_INT_NUM - (i + 1) * BIT_BYTE_NUM;
+    for (uint32_t i = 0; i < BYTE_INT_NUM; i++) {
+        uint32_t offset = BIT_INT_NUM - (i + 1) * BIT_BYTE_NUM;
         buffer[i] = (char)((value >> offset) & 0xFF);
     }
     return true;
 }
 
-static bool ByteToInt(char *buffer, int32_t len, int32_t *outValue)
+static bool ByteToInt(char *buffer, uint32_t len, uint32_t *outValue)
 {
-    if ((outValue == NULL) || (buffer == NULL) || (len < (int32_t)sizeof(int32_t))) {
+    if ((outValue == NULL) || (buffer == NULL) || (len < sizeof(uint32_t))) {
         return false;
     }
-    int32_t value = 0;
+    uint32_t value = 0;
     for (int32_t i = 0; i < BYTE_INT_NUM; i++) {
         value <<= BIT_BYTE_NUM;
         value |= buffer[i] & 0xFF;
@@ -592,7 +592,7 @@ static char *GetDestFilePath(FileFrame fileFrame)
         return NULL;
     }
 
-    int32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET + 1;
+    uint32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET + 1;
     if (filePathSize > MAX_REMOTE_PATH_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is too long");
         return NULL;
@@ -793,13 +793,13 @@ EXIT_ERR:
 
 static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int32_t seq)
 {
-    int32_t frameLength = fileFrame.frameLength;
+    uint32_t frameLength = fileFrame.frameLength;
     if (fileFrame.frameLength <= FRAME_DATA_SEQ_OFFSET) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "WriteFrameToFile framelength less then offset");
         return SOFTBUS_ERR;
     }
 
-    int32_t frameDataLength = frameLength - FRAME_DATA_SEQ_OFFSET;
+    uint32_t frameDataLength = frameLength - FRAME_DATA_SEQ_OFFSET;
     int32_t writeLength = pwrite(fileInfo.fileFd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, frameDataLength,
         (uint64_t)fileInfo.fileOffset);
     if (writeLength < 0) {
@@ -912,16 +912,16 @@ static int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileLis
     }
     outbufferInfo->buffer = NULL;
     outbufferInfo->bufferSize = 0;
-    int32_t totalLength = 0;
-    int32_t offset = 0;
+    uint32_t totalLength = 0;
+    uint32_t offset = 0;
     uint32_t index;
     for (index = 0; index < fileCnt; index++) {
         totalLength += strlen(destFile[index]);
     }
 
-    int32_t fileNameSize = 0;
-    int32_t indexSize  = sizeof(index);
-    int32_t bufferSize = totalLength + (indexSize + sizeof(fileNameSize)) * fileCnt;
+    uint32_t fileNameSize = 0;
+    uint32_t indexSize  = sizeof(index);
+    uint32_t bufferSize = totalLength + (indexSize + sizeof(fileNameSize)) * fileCnt;
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(bufferSize);
     if (buffer == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc filelist failed");
@@ -969,8 +969,8 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
     uint8_t *buffer = bufferInfo.buffer;
     uint32_t offset = 0;
     int32_t count = 0;
-    int32_t fileNameLength = 0;
-    int32_t byteLen = sizeof(int32_t);
+    uint32_t fileNameLength = 0;
+    uint32_t byteLen = sizeof(uint32_t);
     char byteBuff[sizeof(int32_t)] = {0};
     while (offset < bufferInfo.bufferSize) {
         offset += sizeof(uint32_t);
@@ -982,7 +982,7 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
             return SOFTBUS_ERR;
         }
         offset += byteLen;
-        if ((fileNameLength < 0) || (fileNameLength > (int32_t)(bufferInfo.bufferSize - offset))) {
+        if (fileNameLength > bufferInfo.bufferSize - offset) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList invalid fileLength");
             return SOFTBUS_ERR;
         }
