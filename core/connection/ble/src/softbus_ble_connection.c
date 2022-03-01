@@ -228,7 +228,8 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
     return SOFTBUS_OK;
 }
 
-static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash, BleConnectionInfo **server, BleConnectionInfo **client)
+static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash,
+    BleConnectionInfo **server, BleConnectionInfo **client)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -1017,7 +1018,8 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
     }
     cJSON_Delete(data);
     char deviceIdHash[UDID_HASH_LEN];
-    if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId), (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId),
+        (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse GenerateStrHash failed");
         return SOFTBUS_ERR;
     }
