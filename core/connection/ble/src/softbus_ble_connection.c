@@ -26,12 +26,14 @@
 #include "securec.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_ble_gatt_client.h"
 #include "softbus_ble_gatt_server.h"
 #include "softbus_ble_queue.h"
 #include "softbus_ble_trans_manager.h"
 #include "softbus_conn_manager.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
@@ -225,6 +227,36 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
     (void)SoftBusMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
+
+static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash, BleConnectionInfo **server, BleConnectionInfo **client)
+{
+    ListNode *item = NULL;
+    BleConnectionInfo *itemNode = NULL;
+    bool findServer = false;
+    bool findClient = false;
+    if (SoftBusMutexLock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
+    }
+    LIST_FOR_EACH(item, &g_connection_list) {
+        itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
+        if (memcmp(itemNode->info.info.bleInfo.deviceIdHash, deviceIdHash, UDID_HASH_LEN) == 0) {
+            if (itemNode->info.isServer) {
+                *server = itemNode;
+                findServer = true;
+            } else {
+                *client = itemNode;
+                findClient = true;
+            }
+            if (findServer && findClient) {
+                break;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
+    return SOFTBUS_OK;
+}
+
 
 static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId, const ConnectResult *result)
 {
@@ -713,7 +745,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         return false;
     }
-    ret = GetBleConnInfoByAddr(option->info.bleOption.bleMac, &server, &client);
+    ret = GetBleConnInfoByDeviceIdHash(option->info.bleOption.deviceIdHash, &server, &client);
     if ((ret != SOFTBUS_OK) || (server == NULL && client == NULL)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleCheckActiveConnection no active conn");
         (void)SoftBusMutexUnlock(&g_connectionLock);
@@ -984,6 +1016,18 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
         return SOFTBUS_ERR;
     }
     cJSON_Delete(data);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wrc log:devid = %s", connInfo->peerDevId);
+    char deviceIdHash[UDID_HASH_LEN];
+    if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId), (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse GenerateStrHash failed");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wrc log:devid hash = %s", deviceIdHash);
+    if (memcpy_s(connInfo->info.info.bleInfo.deviceIdHash, UDID_HASH_LEN, deviceIdHash, UDID_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse memcpy_s failed");
+        return SOFTBUS_ERR;
+    }
+
     return SOFTBUS_OK;
 }
 
