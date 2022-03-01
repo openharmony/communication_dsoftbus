@@ -390,12 +390,7 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         return SOFTBUS_ERR;
     }
 
-    int32_t retReply = CheckCloseChannelPermission(channelId, channelType);
-    if (retReply != SOFTBUS_OK) {
-        goto EXIT;
-    }
-    retReply = CloseChannel(channelId, channelType);
-EXIT:
+    int32_t retReply = CloseChannel(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CloseChannelInner write reply failed!");
         return SOFTBUS_ERR;
