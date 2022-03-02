@@ -194,7 +194,7 @@ EXIT:
     return SOFTBUS_ERR;
 }
 
-static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
+static char *RecvData(const ConnPktHead *head, int32_t fd, uint32_t len)
 {
     uint32_t headSize = sizeof(ConnPktHead);
     uint32_t recvLen = 0;
