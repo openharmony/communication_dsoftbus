@@ -64,10 +64,15 @@ typedef struct {
 } BleConnectionInfo;
 
 typedef struct {
-    void (*BleOnDataReceived)(bool isBleConn, int32_t halConnId, uint32_t len, const char *value);
-    void (*BleDisconnectCallback)(int32_t halConnId, int32_t isServer);
+    int32_t halConnId;
+    bool isServer;
+} BleHalConnInfo;
+
+typedef struct {
+    void (*BleOnDataReceived)(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value);
+    void (*BleDisconnectCallback)(BleHalConnInfo halConnInfo);
     void (*BleConnectCallback)(int32_t halConnId, const char *bleStrMac, const SoftBusBtAddr *btAddr);
-    BleConnectionInfo* (*GetBleConnInfoByHalConnId)(int32_t halConnectionId);
+    BleConnectionInfo* (*GetBleConnInfoByHalConnId)(BleHalConnInfo halConnInfo);
 } SoftBusBleConnCalback;
 
 #ifdef __cplusplus
