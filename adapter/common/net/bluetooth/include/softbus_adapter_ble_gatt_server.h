@@ -164,6 +164,7 @@ typedef struct {
 } SoftBusGattsNotify;
 
 int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback);
+void SoftBusUnRegisterGattsCallbacks(void);
 int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number);
 int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties, int permissions);
 int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions);
