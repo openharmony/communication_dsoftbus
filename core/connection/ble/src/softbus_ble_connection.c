@@ -181,7 +181,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
     return itemNode;
 }
 
-BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
+BleConnectionInfo* GetBleConnInfoByHalConnId(BleHalConnInfo halConnInfo)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -191,7 +191,7 @@ BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnectionId) {
+        if (itemNode->halConnId == halConnInfo.halConnId && itemNode->info.isServer == halConnInfo.isServer) {
             break;
         }
     }
@@ -895,7 +895,7 @@ static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId
     }
 }
 
-static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
+static void BleDisconnectCallback(BleHalConnInfo halConnInfo)
 {
     ListNode *bleItem = NULL;
     ListNode *item = NULL;
@@ -911,7 +911,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     }
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnId && itemNode->info.isServer == isServer) {
+        if (itemNode->halConnId == halConnInfo.halConnId && itemNode->info.isServer == halConnInfo.isServer) {
             bleNode = itemNode;
             itemNode->state = BLE_CONNECTION_STATE_CLOSED;
             (void)memcpy_s(&connectionInfo, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo));
@@ -927,7 +927,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     }
     ReleaseBleConnectionInfo(bleNode);
     if (connectionId != 0) {
-        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, isServer);
+        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, halConnInfo.isServer);
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);
 }
@@ -1048,13 +1048,13 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
     return SOFTBUS_OK;
 }
 
-static void BleOnDataReceived(bool isBleConn, int32_t halConnId, uint32_t len, const char *value)
+static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived unknown device");
         (void)SoftBusMutexUnlock(&g_connectionLock);
