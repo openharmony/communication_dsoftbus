@@ -84,13 +84,13 @@ static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleT
     return SOFTBUS_OK;
 }
 
-char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
+char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv invalid data");
         return NULL;
     }
-    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv unknown device");
         return NULL;
@@ -130,9 +130,9 @@ char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLe
     return NULL;
 }
 
-void BleTransCacheFree(int32_t halConnId, int32_t index)
+void BleTransCacheFree(BleHalConnInfo halConnInfo, int32_t index)
 {
-    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransCacheFree unknown device");
         return;

@@ -27,13 +27,13 @@ extern "C" {
 #define MAX_DATA_LEN 4096
 
 typedef struct {
-    BleConnectionInfo* (*GetBleConnInfoByHalConnId)(int32_t halConnectionId);
+    BleConnectionInfo* (*GetBleConnInfoByHalConnId)(BleHalConnInfo halConnInfo);
 } SoftBusBleTransCalback;
 
 int32_t BleTransInit(SoftBusBleTransCalback *cb);
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module);
-char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index);
-void BleTransCacheFree(int32_t halConnId, int32_t index);
+char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32_t *outLen, int32_t *index);
+void BleTransCacheFree(BleHalConnInfo halConnInfo, int32_t index);
 
 #ifdef __cplusplus
 #if __cplusplus
