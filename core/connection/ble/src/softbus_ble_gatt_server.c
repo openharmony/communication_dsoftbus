@@ -426,6 +426,7 @@ static void BleServiceDeleteCallback(int status, int srvcHandle)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStopCallback stop failed");
     }
     UpdateGattService(&g_gattService, status);
+    SoftBusUnRegisterGattsCallbacks();
 }
 
 static void BleConnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
@@ -452,12 +453,15 @@ static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAd
         return;
     }
     char bleStrMac[BT_MAC_LEN];
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = halConnId;
+    halConnInfo.isServer = BLE_SERVER_TYPE;
     int ret = ConvertBtMacToStr(bleStrMac, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
         return;
     }
-    g_softBusBleConnCb->BleDisconnectCallback(halConnId, 1);
+    g_softBusBleConnCb->BleDisconnectCallback(halConnInfo);
 }
 
 static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
@@ -467,7 +471,10 @@ static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, u
         return;
     }
     bool isBleConn = handle == g_gattService.bleConnCharaId;
-    g_softBusBleConnCb->BleOnDataReceived(isBleConn, halConnId, len, value);
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = halConnId;
+    halConnInfo.isServer = BLE_SERVER_TYPE;
+    g_softBusBleConnCb->BleOnDataReceived(isBleConn, halConnInfo, len, value);
 }
 
 static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
@@ -510,14 +517,17 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
         "BLEINFOPRTINT:BleRequestWriteCallback valuelen:%d", writeCbPara.length);
     uint32_t len;
     int32_t index = -1;
-    char *value = BleTransRecv(writeCbPara.connId, (char *)writeCbPara.value,
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = writeCbPara.connId;
+    halConnInfo.isServer = BLE_SERVER_TYPE;
+    char *value = BleTransRecv(halConnInfo, (char *)writeCbPara.value,
         (uint32_t)writeCbPara.length, &len, &index);
     if (value == NULL) {
         return;
     }
     SoftBusGattServerOnDataReceived(writeCbPara.attrHandle, writeCbPara.connId, len, (const char *)value);
     if (index != -1) {
-        BleTransCacheFree(writeCbPara.connId, index);
+        BleTransCacheFree(halConnInfo, index);
     }
 }
 
@@ -535,7 +545,10 @@ static void BleNotifySentCallback(int connId, int status)
 static void BleMtuChangeCallback(int connId, int mtu)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
-    BleConnectionInfo *connInfo = g_softBusBleConnCb->GetBleConnInfoByHalConnId(connId);
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = connId;
+    halConnInfo.isServer = BLE_SERVER_TYPE;
+    BleConnectionInfo *connInfo = g_softBusBleConnCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleMtuChangeCallback GetBleConnInfo failed");
         return;
@@ -635,13 +648,19 @@ static int BleConnLooperInit(void)
 
 void SoftBusGattServerOnBtStateChanged(int state)
 {
+    if (state != SOFTBUS_BT_STATE_TURN_ON && state != SOFTBUS_BT_STATE_TURN_OFF) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattServerOnBtStateChanged state:%d", state);
     if (state == SOFTBUS_BT_STATE_TURN_ON) {
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_SERVICE_MSG, 0, 0, SOFTBUS_SERVICE_UUID);
         if (msg == NULL) {
             return;
         }
         g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
+        return;
     }
+    ResetGattService(&g_gattService);
 }
 
 int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
