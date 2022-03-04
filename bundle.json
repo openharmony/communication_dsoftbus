@@ -14,14 +14,17 @@
       "subsystem": "communication",
       "adapted_system_type": [
         "mini",
-        "small",  
+        "small",
         "standard"
       ],
       "features": [
         "dsoftbus_standard_feature_conn_p2p",
         "dsoftbus_standard_feature_disc_ble",
         "dsoftbus_standard_feature_conn_br",
-        "dsoftbus_standard_feature_conn_ble"
+        "dsoftbus_standard_feature_conn_ble",
+        "dsoftbus_standard_feature_lnn_net",
+        "dsoftbus_standard_feature_trans_udp_stream",
+        "dsoftbus_standard_feature_trans_udp_file"
       ],
       "rom": "967KB",
       "ram": "28MB",

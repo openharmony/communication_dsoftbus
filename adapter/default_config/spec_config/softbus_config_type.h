@@ -53,7 +53,7 @@ typedef enum {
 } ConfigType;
 
 typedef struct {
-    int32_t (* SetConfig)(ConfigType type, const unsigned char *val, int32_t len);
+    int32_t (* SetConfig)(ConfigType type, const unsigned char *val, uint32_t len);
 } ConfigSetProc;
 
 #ifdef __cplusplus

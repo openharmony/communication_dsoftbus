@@ -32,12 +32,14 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
-    const char* sn = NULL;
+    const char *sn = NULL;
+    const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
             sn = GetSerial();
             if (sn == NULL) {
                 HILOG_ERROR(SOFTBUS_HILOG_ID, "GetSerial failed!");
+                return SOFTBUS_ERR;
             }
             if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
                 return SOFTBUS_ERR;
@@ -53,6 +55,14 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
             }
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
+            devType = GetDeviceType();
+            if (devType == NULL) {
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDeviceType failed!");
+                return SOFTBUS_ERR;
+            }
+            if (strncpy_s(value, len, devType, strlen(devType)) != EOK) {
+                return SOFTBUS_ERR;
+            }
             break;
         default:
             break;

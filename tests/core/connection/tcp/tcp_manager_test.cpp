@@ -245,7 +245,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
@@ -314,6 +314,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(clientPort, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
+    sleep(1);
     EXPECT_EQ(1, TcpGetConnNum());
     for (int i = 0; i < 3; i++) {
         char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);

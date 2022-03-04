@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_SESSION_CONNECT_H
 #define SOFTBUS_SESSION_CONNECT_H
 
-#include <pthread.h>
-
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
 #include "stdbool.h"

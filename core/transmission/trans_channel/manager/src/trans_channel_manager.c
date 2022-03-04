@@ -26,6 +26,7 @@
 #include "softbus_log.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
+#include "softbus_qos.h"
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
@@ -393,6 +394,8 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
             (void)TransLaneMgrDelLane(channelId, channelType);
             return SOFTBUS_OK;
         case CHANNEL_TYPE_UDP:
+            (void)NotifyQosChannelClosed(channelId, channelType);
+            (void)TransLaneMgrDelLane(channelId, channelType);
             return TransCloseUdpChannel(channelId);
         case CHANNEL_TYPE_AUTH:
             return TransCloseAuthChannel(channelId);

@@ -102,8 +102,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_
 
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen);
 int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog);
-int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen,
-    int32_t *acceptFd);
+int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen, int32_t *acceptFd);
 int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen);
 
 void SoftBusSocketFdZero(SoftBusFdSet *set);
@@ -111,18 +110,18 @@ void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set);
 void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set);
 int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set);
 
-int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet
-    *exceptFds, struct timeval *timeOut);
+int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
+    struct timeval *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
-int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags, const SoftBusSockAddr
-    *toAddr, int32_t toAddrLen);
+int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags,
+    const SoftBusSockAddr *toAddr, int32_t toAddrLen);
 
 int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t flags);
-int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr
-    *fromAddr, int32_t *fromAddrLen);
+int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr *fromAddr,
+    int32_t *fromAddrLen);
 
 
 int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how);

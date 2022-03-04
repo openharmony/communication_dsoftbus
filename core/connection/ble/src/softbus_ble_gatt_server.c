@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "softbus_ble_gatt_server.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/prctl.h>
-#include <time.h>
 
 #include "cJSON.h"
 #include "message_handler.h"
@@ -25,7 +26,6 @@
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_ble_connection_inner.h"
-#include "softbus_ble_gatt_server.h"
 #include "softbus_ble_queue.h"
 #include "softbus_ble_trans_manager.h"
 #include "softbus_conn_manager.h"
