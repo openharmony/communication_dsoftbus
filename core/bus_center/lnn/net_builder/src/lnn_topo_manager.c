@@ -182,7 +182,7 @@ static int32_t FindTopoInfo(const char *udid, const char *peerUdid, TopoTableIte
     }
     *item = topoItem;
     LIST_FOR_EACH_ENTRY(topoInfo, &topoItem->joinList, TopoInfo, node) {
-        if (strcmp(compareUdid, topoInfo->peerUdid) == 0 || strcmp(compareUdid, topoInfo->peerUdid) == 0) {
+        if (strcmp(compareUdid, topoInfo->peerUdid) == 0) {
             *info = topoInfo;
             return SOFTBUS_OK;
         }
@@ -369,6 +369,7 @@ static int32_t AddTopoInfo(const char *udid, const char *peerUdid, const uint8_t
     topoInfo = CreateTopoInfo(isKeyUdid ? peerUdid : udid, relation, len);
     if (topoInfo == NULL) {
         if (isCreateTopoItem) {
+            ListDelete(&topoItem->node);
             SoftBusFree(topoItem);
         }
         return SOFTBUS_MEM_ERR;
@@ -633,7 +634,7 @@ static void TryClearTopoTable(void)
     ClearTopoTable();
 }
 
-static void PorcessLnnRelationChange(const char *udid, const uint8_t *relation, uint32_t len, bool isJoin)
+static void ProcessLnnRelationChange(const char *udid, const uint8_t *relation, uint32_t len, bool isJoin)
 {
     char localUdid[UDID_BUF_LEN];
 
