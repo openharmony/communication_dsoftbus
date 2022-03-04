@@ -173,9 +173,9 @@ static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)
         if (len <= 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth recv data len not correct, len %d", len);
             break;
-        } else if (len < remainLen) {
+        } else if ((uint32_t)len < remainLen) {
             data = data + len;
-            remainLen = remainLen - len;
+            remainLen = remainLen - (uint32_t)len;
         } else {
             AuthIpOnDataReceived(fd, head, ipData, head->len);
             remainLen = 0;
