@@ -694,7 +694,7 @@ static void OnLnnRelationChangedDelay(void *para)
             return;
         }
     }
-    PorcessLnnRelationChange(msg->udid, newRelation, CONNECTION_ADDR_MAX, msg->isJoin);
+    ProcessLnnRelationChange(msg->udid, newRelation, CONNECTION_ADDR_MAX, msg->isJoin);
     SoftBusFree(msg);
 }
 
