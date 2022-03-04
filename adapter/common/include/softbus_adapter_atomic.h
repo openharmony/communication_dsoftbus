@@ -20,7 +20,7 @@
 #include "stdint.h"
 #include "stdio.h"
 
-static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, uint32_t value)
+static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, int32_t value)
 {
 #ifdef _WIN32
     InterlockedExchangeAdd(ptr, value);
@@ -29,7 +29,7 @@ static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, uint32_t value)
 #endif
 }
 
-static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, uint32_t value)
+static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, int32_t value)
 {
 #ifdef _WIN32
     return InterlockedExchangeAdd(ptr, value) + value;
@@ -40,7 +40,7 @@ static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, uint32
 #endif
 }
 
-static inline void SoftBusAtomicAdd64(uint64_t* ptr, uint64_t value)
+static inline void SoftBusAtomicAdd64(uint64_t* ptr, int64_t value)
 {
 #ifdef _WIN32
     InterlockedExchangeAdd64((volatile long long*)ptr, value);
@@ -49,7 +49,7 @@ static inline void SoftBusAtomicAdd64(uint64_t* ptr, uint64_t value)
 #endif
 }
 
-static inline bool SoftBusAtomicCmpAndSwap32(volatile uint32_t* ptr, uint32_t oldValue, uint32_t newValue)
+static inline bool SoftBusAtomicCmpAndSwap32(volatile uint32_t* ptr, int32_t oldValue, int32_t newValue)
 {
 #ifdef _WIN32
     uint32_t initial = InterlockedCompareExchange(ptr, newValue, oldValue);

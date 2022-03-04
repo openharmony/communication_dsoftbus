@@ -146,13 +146,14 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
         return SOFTBUS_TCP_SOCKET_ERR;
     }
-    uint32_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
-    if (ret != outLen + DC_DATA_HEAD_SIZE) {
+    ssize_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
+    if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to send tcp data.");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
     SoftBusFree(buf);
+    buf = NULL;
     return SOFTBUS_OK;
 }
 

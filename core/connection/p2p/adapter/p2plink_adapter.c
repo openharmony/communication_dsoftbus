@@ -290,7 +290,7 @@ static bool GetIpAddr(const char *ifName, char *ipAddr, int32_t len)
     }
     close(fd);
     struct sockaddr_in *sin = (struct sockaddr_in *)(&ifr.ifr_addr);
-    if (inet_ntop(sin->sin_family, sin->sin_addr, ipAddr, len) == NULL) {
+    if (inet_ntop(sin->sin_family, &sin->sin_addr, ipAddr, len) == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "inet_ntop ip addr failed.");
         return false;
     }

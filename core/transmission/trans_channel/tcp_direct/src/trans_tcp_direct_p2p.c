@@ -98,7 +98,7 @@ static void ClearP2pSessionConn(void)
 
 static int32_t StartP2pListener(const char *ip, int32_t *port)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener: ip=%d, port=%d", ip, *port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener: ip=%s, port=%d", ip, *port);
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
         ClearP2pSessionConn();
         StopP2pSessionListener();
@@ -294,7 +294,7 @@ static char *DecryptVerifyP2pData(int64_t authId, const ConnectOption *option,
         return NULL;
     }
     int32_t ret;
-    int32_t len;
+    uint32_t len;
     char *data = NULL;
     OutBuf buf = {0};
 

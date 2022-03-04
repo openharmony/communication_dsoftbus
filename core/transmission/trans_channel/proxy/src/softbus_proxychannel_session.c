@@ -19,8 +19,8 @@
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_property.h"
@@ -531,6 +531,12 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
             return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
         case PROXY_FLAG_ACK:
             return TransProxyProcSendMsgAck(channelId, data, (int32_t)len);
+        case PROXY_FILE_FIRST_FRAME:
+        case PROXY_FILE_ONGOINE_FRAME:
+        case PROXY_FILE_LAST_FRAME:
+        case PROXY_FILE_ONLYONE_FRAME:
+        case PROXY_FILE_ALLFILE_SENT:
+            return NotifyClientMsgReceived(pkgName, channelId, data, len, PacketTypeToSessionType(flags));
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid flags(%d)", flags);
             return SOFTBUS_INVALID_PARAM;
