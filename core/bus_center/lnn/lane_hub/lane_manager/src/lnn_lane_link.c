@@ -491,6 +491,10 @@ static int32_t CheckP2pRoleConflict(const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p mac fail.");
         return SOFTBUS_ERR;
     }
+    if (strnlen(info.peerMac, P2P_MAC_LEN) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p mac is empty.");
+        return SOFTBUS_ERR;
+    }
     info.isBridgeSupported = false;
     if (P2pLinkIsRoleConflict(&info) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
