@@ -25,6 +25,7 @@ extern "C" {
 
 typedef enum {
     LNN_FILE_ID_UUID,
+    LNN_FILE_ID_SQLITE,
     LNN_FILE_ID_MAX
 } LnnFileId;
 

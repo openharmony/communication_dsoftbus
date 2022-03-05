@@ -25,6 +25,7 @@ ohos_unittest("LNNTest") {
     "unittest/lane_test.cpp",
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/net_builder_test.cpp",
+    "unittest/sqlite3_utils_test.cpp",
   ]
 
   include_dirs = [
@@ -61,6 +62,8 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/security/device_auth/services:deviceauth_sdk",
     "//third_party/googletest:gtest_main",
+    "//third_party/sqlite:sqlite",
+    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
