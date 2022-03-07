@@ -676,7 +676,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu, destPath:%s",
         sendInfo.channelId, realSrcPath, fileSize, frameNum, destFile);
-    if (FileToFrame(sendInfo.channelId, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
+    if (FileToFrame(sendInfo, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "File To Frame fail");
         if (sendInfo.fileListener.sendListener.OnFileTransError != NULL) {
             sendInfo.fileListener.sendListener.OnFileTransError(sendInfo.channelId);
@@ -761,7 +761,7 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
     }
     int32_t i = 0;
     int32_t dirFullLen = (int32_t)strlen(fullPath);
-    for i = dirFullLen - 1; i >= 0; i--) {
+    for (i = dirFullLen - 1; i >= 0; i--) {
         if (fullPath[i] == PATH_SEPARATOR) {
             i++;
             break;
@@ -941,7 +941,7 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
         return NULL;
     }
 
-    if (strstr(rootDir, "..") != NULL)) {
+    if (strstr(rootDir, "..") != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rootDir[%s] is not cannoical form", rootDir);
         SoftBusFree(destFilePath);
         return NULL;
