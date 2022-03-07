@@ -50,6 +50,7 @@ void ClientTransChannelDeinit(void)
 {
     TransTdcManagerDeinit();
     ClientTransUdpMgrDeinit();
+    ClientTransProxyDeinit();
 }
 
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
