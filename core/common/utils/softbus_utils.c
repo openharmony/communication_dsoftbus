@@ -252,7 +252,7 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
             SoftBusFree(tmpMac);
             return SOFTBUS_ERR;
         }
-        binMac[i] = (uint8_t)strtol(token, &endptr, BT_ADDR_BASE);
+        binMac[i] = strtoul(token, &endptr, BT_ADDR_BASE);
         token = strtok_r(NULL, BT_ADDR_DELIMITER, &nextTokenPtr);
     }
     SoftBusFree(tmpMac);

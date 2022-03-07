@@ -859,14 +859,14 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->custData = option->publishOption->capabilityData;
         bleOption->isSameAccount = false;
         bleOption->isWakeRemote = false;
-        bleOption->freq = option->publishOption->freq;
+        bleOption->freq = (uint32_t)(option->publishOption->freq);
     } else {
         bleOption->optionCapBitMap = option->subscribeOption->capabilityBitmap;
         bleOption->custDataLen = option->subscribeOption->dataLen;
         bleOption->custData = option->subscribeOption->capabilityData;
         bleOption->isSameAccount = option->subscribeOption->isSameAccount;
         bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
-        bleOption->freq = option->subscribeOption->freq;
+        bleOption->freq = (uint32_t)(option->subscribeOption->freq);
     }
     bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(bleOption->optionCapBitMap[0]);
 }

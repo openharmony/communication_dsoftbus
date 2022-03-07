@@ -138,8 +138,13 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
 {
     uint32_t outLen;
     char *buf = TransTdcPackData(channel, data, len, flags, &outLen);
-    if (buf == NULL || outLen != len + OVERHEAD_LEN) {
+    if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    if (outLen != len + OVERHEAD_LEN) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack bytes len error, len: %d", outLen);
+        SoftBusFree(buf);
         return SOFTBUS_ENCRYPT_ERR;
     }
     uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
