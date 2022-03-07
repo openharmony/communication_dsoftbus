@@ -676,7 +676,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu, destPath:%s",
         sendInfo.channelId, realSrcPath, fileSize, frameNum, destFile);
-    if (FileToFrame(channelId, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
+    if (FileToFrame(sendInfo.channelId, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "File To Frame fail");
         if (sendInfo.fileListener.sendListener.OnFileTransError != NULL) {
             sendInfo.fileListener.sendListener.OnFileTransError(sendInfo.channelId);
@@ -759,9 +759,9 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
         return SOFTBUS_ERR;
     }
-
+    int32_t i = 0;
     int32_t dirFullLen = (int32_t)strlen(fullPath);
-    for (int32_t i = dirFullLen - 1; i >= 0; i--) {
+    for i = dirFullLen - 1; i >= 0; i--) {
         if (fullPath[i] == PATH_SEPARATOR) {
             i++;
             break;
@@ -802,7 +802,7 @@ static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNam
         }
     }
 
-    if (strncpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
+    if (strcpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s filename error, fileNameLen[%d]", fileNameLen);
         return SOFTBUS_ERR;
     }
@@ -941,7 +941,7 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
         return NULL;
     }
 
-    if (strstr(rootDir, ".." != NULL)) {
+    if (strstr(rootDir, "..") != NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rootDir[%s] is not cannoical form", rootDir);
         SoftBusFree(destFilePath);
         return NULL;
@@ -959,13 +959,13 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
 
     SoftBusFree(destFilePath);
     int32_t pathSize = strlen(fullRecvPath) + 1;
-    char absFullPath = (char *)SoftBusCalloc(pathSize);
+    char *absFullPath = (char *)SoftBusCalloc(pathSize);
     if (absFullPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "absFullPath is null");
         SoftBusFree(fullRecvPath);
         return NULL;
     }
-    if (CreateDirAndGetAbsPath(fullRecvPath, absFullPath,pathSize) != SOFTBUS_OK) {
+    if (CreateDirAndGetAbsPath(fullRecvPath, absFullPath, pathSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create dest dir failed");
         SoftBusFree(fullRecvPath);
         SoftBusFree(absFullPath);
@@ -1347,7 +1347,7 @@ static int32_t ProxySendFile(SendListenerInfo sendInfo, const char *sFileList[],
     }
 
     for (uint32_t index = 0; index < fileCnt; index++) {
-        ret = SendSingleFile(sendInfo.channelId, sFileList[index], dFileList[index]);
+        ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file %s, failed", sFileList[index]);
             return SOFTBUS_ERR;
