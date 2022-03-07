@@ -170,6 +170,7 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
         if (memcpy_s(*info, infoSize, reply.data, infoSize) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo copy node info failed!");
             SoftBusFree(*info);
+            *info = NULL;
             return SOFTBUS_ERR;
         }
     }
