@@ -1121,7 +1121,7 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
-int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const char *data, int32_t len,
+int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len,
     int32_t type)
 {
     int32_t ret;
@@ -1226,7 +1226,7 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
     while (offset < bufferInfo.bufferSize) {
         offset += sizeof(uint32_t);
 
-        if (memcpy_s(byteBuff, byteLen, buffer + offset, byteLen) != EOK) {
+        if (memcpy_s(byteBuff, sizeof(byteBuff), buffer + offset, byteLen) != EOK) {
             return SOFTBUS_ERR;
         }
         if (ByteToInt(byteBuff, byteLen, &fileNameLength) == false) {
@@ -1251,7 +1251,7 @@ static int32_t BufferToFileList(FileListBuffer bufferInfo, char *firstFile, int3
     return SOFTBUS_OK;
 }
 
-int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, int32_t len)
+int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len)
 {
     if (SoftBusMutexLock(&g_recvFileInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock filelist data fail");
@@ -1262,7 +1262,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     char firstFilePath[MAX_FILE_PATH_NAME_LEN] = {0};
     int32_t fileCount = 0;
     bufferInfo.buffer = (uint8_t *)data;
-    bufferInfo.bufferSize = (uint32_t)len;
+    bufferInfo.bufferSize = len;
     int32_t ret = BufferToFileList(bufferInfo, firstFilePath, &fileCount);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Buffer To File List failed");

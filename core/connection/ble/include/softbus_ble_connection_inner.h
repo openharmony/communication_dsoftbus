@@ -37,8 +37,8 @@ extern "C" {
 typedef struct {
     int32_t isUsed;
     int32_t timeStamp;
-    int32_t seq;
-    int32_t currentSize;
+    uint32_t seq;
+    uint32_t currentSize;
     char *cache;
 } BleRecvCache;
 
