@@ -315,6 +315,7 @@ static bool CheckRecvFileExist(const char *absFullPath)
 {
     if (absFullPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "absFullPath is null");
+        return false;
     }
 
     int32_t i;
@@ -574,7 +575,8 @@ static int32_t FileToFrame(SendListenerInfo sendInfo, uint64_t frameNum, int32_t
     for (uint64_t index = 0; index < frameNum; index++) {
         fileFrame.frameType = FrameIndexToType(index, frameNum);
         fileFrame.data = buffer;
-        if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&sendInfo.channelId, FRAME_DATA_SEQ_OFFSET) != EOK) {
+        if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&sendInfo.channelId,
+            FRAME_DATA_SEQ_OFFSET) != EOK) {
             goto EXIT_ERR;
         }
         if (index == 0) {
@@ -846,7 +848,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recvAbsPath[%s]", recvAbsPath);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recvAbsPath[%s]", recvAbsPath);
     return SOFTBUS_OK;
 }
 
