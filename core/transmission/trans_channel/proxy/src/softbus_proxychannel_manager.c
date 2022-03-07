@@ -97,7 +97,7 @@ static uint16_t EndianSwap16(uint16_t num)
 int16_t TransProxyGetNewMyId(void)
 {
 #define MYID_MAX_NUM 100
-    static int16_t myId = 0;
+    static uint16_t myId = 0;
     int32_t cnt = MYID_MAX_NUM;
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
