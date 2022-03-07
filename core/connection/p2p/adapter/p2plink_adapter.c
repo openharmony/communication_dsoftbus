@@ -61,7 +61,7 @@ static void ConvertMacStrToBinary(char *macStr, const char *delimit, uint8_t *bi
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mac string over max mac bin len.");
             break;
         }
-        binMac[i++] = strtol(itemStr, &endptr, MAC_HEX);
+        binMac[i++] = strtoul(itemStr, &endptr, MAC_HEX);
         itemStr = strtok_s(NULL, delimit, &saveItemPtr);
     }
 }
