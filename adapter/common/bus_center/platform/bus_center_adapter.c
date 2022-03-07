@@ -25,6 +25,8 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
+#define DEFAULT_DEVICE_NAME "OpenHarmony"
+
 int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
@@ -32,16 +34,10 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
-    const char *sn = NULL;
     const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            sn = GetSerial();
-            if (sn == NULL) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetSerial failed!");
-                return SOFTBUS_ERR;
-            }
-            if (strncpy_s(value, len, sn, strlen(sn)) != EOK) {
+            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
