@@ -15,6 +15,7 @@ import(
     "//foundation/communication/dsoftbus/adapter/common/bus_center/bus_center_adapter.gni")
 import(
     "//foundation/communication/dsoftbus/adapter/common/net/wifi/net_wifi.gni")
+import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import(
     "//foundation/communication/dsoftbus/core/bus_center/lnn/disc_mgr/bus_center_disc_mgr.gni")
 import(
@@ -31,17 +32,20 @@ import(
     "//foundation/communication/dsoftbus/core/bus_center/utils/bus_center_utils.gni")
 
 bus_center_server_src =
-    bus_center_adapter_src + bus_center_disc_mgr_src + bus_center_hub_src +
-    bus_center_builder_src + bus_center_net_mgr_src + bus_center_ledger_src +
-    bus_center_monitor_src + bus_center_utils_src + adapter_wifi_src
+    bus_center_adapter_src + bus_center_core_adapter_src +
+    bus_center_disc_mgr_src + bus_center_hub_src + bus_center_builder_src +
+    bus_center_net_mgr_src + bus_center_ledger_src + bus_center_monitor_src +
+    bus_center_utils_src + adapter_wifi_src
 bus_center_server_inc =
-    bus_center_adapter_inc + bus_center_disc_mgr_inc + bus_center_hub_inc +
-    bus_center_builder_inc + bus_center_net_mgr_inc + bus_center_ledger_inc +
-    bus_center_monitor_inc + bus_center_utils_inc + adapter_wifi_inc
+    bus_center_adapter_inc + bus_center_core_adapter_inc +
+    bus_center_disc_mgr_inc + bus_center_hub_inc + bus_center_builder_inc +
+    bus_center_net_mgr_inc + bus_center_ledger_inc + bus_center_monitor_inc +
+    bus_center_utils_inc + adapter_wifi_inc
 bus_center_server_deps =
-    bus_center_adapter_deps + bus_center_disc_mgr_deps + bus_center_hub_deps +
-    bus_center_builder_deps + bus_center_net_mgr_deps + bus_center_ledger_deps +
-    bus_center_monitor_deps + bus_center_utils_deps + adapter_wifi_deps
+    bus_center_adapter_deps + bus_center_core_adapter_deps +
+    bus_center_disc_mgr_deps + bus_center_hub_deps + bus_center_builder_deps +
+    bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
+    bus_center_utils_deps + adapter_wifi_deps
 
 bus_center_server_src +=
     [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c" ]
