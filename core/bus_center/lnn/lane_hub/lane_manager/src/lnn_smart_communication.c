@@ -112,7 +112,10 @@ int32_t LnnGetRightLane(const char *netWorkId, int32_t pid, LnnLaneProperty prop
 
 static bool IsProxyPort(LnnLaneProperty prop, LnnLaneLinkType type)
 {
-    if (prop == LNN_MESSAGE_LANE || prop == LNN_FILE_LANE) {
+    if (prop == LNN_MESSAGE_LANE) {
+        return true;
+    }
+    if (type == LNN_LINK_TYPE_BR && prop == LNN_FILE_LANE) {
         return true;
     }
     return false;

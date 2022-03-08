@@ -15,6 +15,7 @@
 
 #include "softbus_utils.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 
 #include "securec.h"
@@ -272,4 +273,25 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
+{
+    if (src1 == NULL || src2 == NULL ||
+        strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
+        return SOFTBUS_ERR;
+    }
+    char *tmpSrc1 = (char *)src1;
+    char *tmpSrc2 = (char *)src2;
+    int32_t ca;
+    int32_t cb;
+    int32_t i = len;
+    do {
+        ca = (int32_t)(*tmpSrc1++);
+        cb = (int32_t)(*tmpSrc2++);
+        ca = toupper(ca);
+        cb = toupper(cb);
+        i--;
+    } while (ca == cb && i > 0);
+    return ca - cb;
 }
