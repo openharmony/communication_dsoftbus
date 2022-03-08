@@ -66,6 +66,7 @@
           }
         ],
         "test": [
+          "//foundation/communication/dsoftbus/tests/adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",

@@ -1352,8 +1352,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
+    strncpy_s(buf.data, sizeof(buf.data), "softbus test", sizeof(buf.data));
     ret = SoftBusSocketSend(socketFd, (void *)&buf, 0, 0);
+    EXPECT_TRUE(ret <= 0);
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     buf.cmd = CMD_EXIT;
     ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
@@ -1484,7 +1485,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
     ClientConnect(&socketFd);
 
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, NULL, sizeof(SoftBusSockAddr));
-    EXPECT_TRUE(ret >= 0);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 
     ClientExit(socketFd);
 }
@@ -1512,11 +1513,8 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
     ClientConnect(&socketFd);
 
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, 0);
-#ifdef __LITEOS__
-    EXPECT_TRUE(ret == -1);
-#else
-    EXPECT_TRUE(ret >= 0);
-#endif
+
+    EXPECT_TRUE(ret < 0);
 
     ClientExit(socketFd);
 }
@@ -1593,12 +1591,12 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusSocketRecvToTest001
+* @tc.name:  SoftBusSocketRecvFromTest001
 * @tc.desc: positive
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvToTest001, TestSize.Level0)
+HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvFromTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
     SoftBusSockAddr fromAddr = { 0 };
@@ -1835,8 +1833,8 @@ HWTEST_F(DsoftbusSocketTest, SoftBusHtoNsTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusNtoHlTest001, TestSize.Level0)
 {
     int32_t netlong = 0x12345678;
-    int32_t ret = SoftBusHtoNs(netlong);
-    EXPECT_EQ(0x7856, ret);
+    int32_t ret = SoftBusNtoHl(netlong);
+    EXPECT_EQ(0x78563412, ret);
 }
 
 /*
@@ -1848,8 +1846,8 @@ HWTEST_F(DsoftbusSocketTest, SoftBusNtoHlTest001, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusNtoHlTest002, TestSize.Level0)
 {
     uint32_t netlong = 0x12;
-    uint32_t ret = SoftBusHtoNs(netlong);
-    EXPECT_EQ(0x1200, ret);
+    uint32_t ret = SoftBusNtoHl(netlong);
+    EXPECT_EQ(0x12000000, ret);
 }
 
 /*
@@ -1887,10 +1885,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusNtoHsTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 {
     const char *cp = "127.0.0.1";
-    uint32_t ret = SoftBusInetAddr(cp);
+    int32_t ret = SoftBusInetAddr(cp);
     EXPECT_EQ(LOCAL_HOST_VALUE, ret);
 }
-
 
 /*
 * @tc.name: SoftBusInetAddrTest002
@@ -1900,9 +1897,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest001, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 {
-    const char *cp = "0x1234";
-    uint32_t ret = SoftBusInetAddr(cp);
-    EXPECT_EQ(0x34120000, ret);
+    const char *cp = "abcde";
+    int32_t ret = SoftBusInetAddr(cp);
+    EXPECT_EQ(-1, ret);
 }
 
 /*
@@ -1913,11 +1910,36 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest002, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest003, TestSize.Level0)
 {
+    const char *cp = "0x1234";
+    int32_t ret = SoftBusInetAddr(cp);
+    EXPECT_EQ(0x34120000, ret);
+}
+
+/*
+* @tc.name: SoftBusInetAddrTest004
+* @tc.desc: invalid cp
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest004, TestSize.Level0)
+{
     const char *cp = "1234";
-    uint32_t ret = SoftBusInetAddr(cp);
+    int32_t ret = SoftBusInetAddr(cp);
     EXPECT_EQ(0xD2040000, ret);
 }
 
+/*
+* @tc.name: SoftBusInetAddrTest005
+* @tc.desc: invalid cp
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(DsoftbusSocketTest, SoftBusInetAddrTest005, TestSize.Level0)
+{
+    const char *cp = "adc1234";
+    int32_t ret = SoftBusInetAddr(cp);
+    EXPECT_EQ(-1, ret);
+}
 
 /*
 * @tc.name: SoftBusSocketFullFunc001

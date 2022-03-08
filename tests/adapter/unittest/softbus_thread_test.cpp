@@ -178,6 +178,8 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest002, Function | MediumTest | Le
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -193,6 +195,8 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest003, Function | MediumTest | Le
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -244,7 +248,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest001, Function | MediumTest | 
 HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest002, Function | MediumTest | Level2)
 {
     SoftBusMutex mutex = 0;
-    int32_t ret = SoftBusMutexLock(&mutex);
+    int32_t ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -298,6 +302,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest005, Function | MediumTest | 
 {
     SoftBusMutex mutex;
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
@@ -324,7 +329,8 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest001, Function | MediumTest |
 */
 HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest002, Function | MediumTest | Level2)
 {
-    int32_t ret = SoftBusMutexDestroy(nullptr);
+    SoftBusMutex mutex = 0;
+    int32_t ret = SoftBusMutexDestroy(&mutex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -452,8 +458,8 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-    EXPECT_TRUE(thread == 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_TRUE(thread != 0);
 }
 
 /*
@@ -478,7 +484,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, Function | MediumTest |
 
 /*
 * @tc.name: SoftBusThreadCreateTest005
-* @tc.desc: threadAttr add taskName
+* @tc.desc: threadAttr modify prior
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -490,10 +496,10 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     threadAttr.stackSize = 0x800;
-    threadAttr.taskName = "ThreadTask";
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
 }
 
@@ -511,7 +517,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
+    threadAttr.prior = SOFTBUS_PRIORITY_HIGH;
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -532,7 +538,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_HIGH;
+    threadAttr.prior = SOFTBUS_PRIORITY_DEFAULT;
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -553,7 +559,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_DEFAULT;
+    threadAttr.prior = SOFTBUS_PRIORITY_LOW;
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -574,190 +580,11 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, Function | MediumTest |
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_LOW;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-}
-
-/*
-* @tc.name: SoftBusThreadCreateTest010
-* @tc.desc: threadAttr modify prior
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, Function | MediumTest | Level2)
-{
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
     threadAttr.prior = SOFTBUS_PRIORITY_LOWEST;
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
-}
-
-/*
-* @tc.name: SoftBusThreadCreateTest011
-* @tc.desc: threadEntry is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest011, Function | MediumTest | Level2)
-{
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest001
-* @tc.desc: name is nullptr
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest01, Function | MediumTest | Level2)
-{
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest002
-* @tc.desc: name is large than TASK_NAME_MAX_LEN
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, Function | MediumTest | Level2)
-{
-    const char *name = "abcdefghijklmnopqrstuvwxyz";
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest003
-* @tc.desc: name is equal to TASK_NAME_MAX_LEN
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, Function | MediumTest | Level2)
-{
-    const char *name = "abcdefghijklmnop";
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
-    threadAttr.prior = SOFTBUS_PRIORITY_HIGHEST;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest004
-* @tc.desc: name include chinese character
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, Function | MediumTest | Level2)
-{
-    const char *name = "a中文p";
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest005
-* @tc.desc: name is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, Function | MediumTest | Level2)
-{
-    const char *name = "testThread";
-    SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    threadAttr.stackSize = 0x800;
-
-    ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/*
-* @tc.name: SoftBusThreadSetNameTest006
-* @tc.desc: threadAttr is nullptr, name is valid
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest006, Function | MediumTest | Level2)
-{
-    const char *name = "testThread";
-    SoftBusThread thread = 0;
-
-    int32_t ret = SoftBusThreadCreate(&thread, nullptr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread != 0);
-
-    ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /*
