@@ -74,6 +74,10 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub::OnReceived, code = %{public}u", code);
+    if (data.ReadInterfaceToken() != GetDescriptor()) { 
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusClientStub: ReadInterfaceToken faild!");
+        return SOFTBUS_ERR;
+    }
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;

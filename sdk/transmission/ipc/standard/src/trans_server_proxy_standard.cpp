@@ -76,6 +76,10 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
@@ -110,6 +114,10 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
@@ -145,6 +153,10 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(param->sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
@@ -195,6 +207,10 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     }
     
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
@@ -226,6 +242,10 @@ int32_t TransServerProxy::NotifyAuthSuccess(int channelId)
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel id failed!");
         return SOFTBUS_ERR;
@@ -253,6 +273,10 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel id failed!");
         return SOFTBUS_ERR;
@@ -285,6 +309,10 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel id failed!");
         return SOFTBUS_ERR;
@@ -328,6 +356,10 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport channelId failed!");
         return SOFTBUS_ERR;
