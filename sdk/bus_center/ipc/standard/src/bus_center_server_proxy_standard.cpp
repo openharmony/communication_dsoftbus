@@ -123,6 +123,10 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinLNN write client name failed!");
         return SOFTBUS_ERR;
@@ -161,6 +165,10 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN write client name failed!");
@@ -200,6 +208,10 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo write client name failed!");
@@ -254,6 +266,10 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo write client name failed!");
@@ -295,6 +311,10 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t ret = data.WriteCString(pkgName);
     if (!ret) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write client name failed!");
@@ -343,6 +363,10 @@ int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *tar
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartTimeSync write client name failed!");
         return SOFTBUS_ERR;
@@ -386,6 +410,10 @@ int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targ
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopTimeSync write client name failed!");
         return SOFTBUS_ERR;
@@ -421,6 +449,10 @@ int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const void *info, 
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write client name failed!");
         return SOFTBUS_ERR;
@@ -454,6 +486,10 @@ int32_t BusCenterServerProxy::StopPublishLNN(const char *pkgName, int32_t publis
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write client name failed!");
         return SOFTBUS_ERR;
@@ -488,6 +524,10 @@ int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const void *info, 
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write client name failed!");
         return SOFTBUS_ERR;
@@ -521,6 +561,10 @@ int32_t BusCenterServerProxy::StopRefreshLNN(const char *pkgName, int32_t refres
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopRefreshLNN write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StopRefreshLNN write client name failed!");
         return SOFTBUS_ERR;
@@ -552,6 +596,10 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteRawData(info, sizeof(MetaNodeConfigInfo))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode write meta node config failed!");
         return SOFTBUS_ERR;
@@ -583,6 +631,10 @@ int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeactiveMetaNode write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(metaNodeId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeactiveMetaNode write meta node id failed!");
         return SOFTBUS_ERR;
@@ -605,6 +657,10 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
     }
 
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(*infoNum)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write infoNum failed!");
         return SOFTBUS_ERR;
