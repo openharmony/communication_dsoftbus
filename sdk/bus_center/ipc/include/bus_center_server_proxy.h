@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 int32_t BusCenterServerProxyInit(void);
+void BusCenterServerProxyDeInit(void);
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);

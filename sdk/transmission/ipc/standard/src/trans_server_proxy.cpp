@@ -64,6 +64,12 @@ int32_t TransServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void TransServerProxyDeInit(void)
+{
+    delete g_serverProxy;
+    g_serverProxy = nullptr;
+}
+
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {

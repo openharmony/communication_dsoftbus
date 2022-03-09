@@ -130,6 +130,7 @@ void TransClientDeinit(void)
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
     ClientTransChannelDeinit();
+    TransServerProxyDeInit();
 }
 
 void TransSessionTimer(void)

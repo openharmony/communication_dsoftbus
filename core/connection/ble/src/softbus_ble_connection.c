@@ -26,12 +26,14 @@
 #include "securec.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_ble_gatt_client.h"
 #include "softbus_ble_gatt_server.h"
 #include "softbus_ble_queue.h"
 #include "softbus_ble_trans_manager.h"
 #include "softbus_conn_manager.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
@@ -179,7 +181,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
     return itemNode;
 }
 
-BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
+BleConnectionInfo* GetBleConnInfoByHalConnId(BleHalConnInfo halConnInfo)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -189,7 +191,7 @@ BleConnectionInfo* GetBleConnInfoByHalConnId(int32_t halConnectionId)
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnectionId) {
+        if (itemNode->halConnId == halConnInfo.halConnId && itemNode->info.isServer == halConnInfo.isServer) {
             break;
         }
     }
@@ -225,6 +227,37 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
     (void)SoftBusMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
+
+static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash,
+    BleConnectionInfo **server, BleConnectionInfo **client)
+{
+    ListNode *item = NULL;
+    BleConnectionInfo *itemNode = NULL;
+    bool findServer = false;
+    bool findClient = false;
+    if (SoftBusMutexLock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
+    }
+    LIST_FOR_EACH(item, &g_connection_list) {
+        itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
+        if (memcmp(itemNode->info.info.bleInfo.deviceIdHash, deviceIdHash, UDID_HASH_LEN) == 0) {
+            if (itemNode->info.isServer) {
+                *server = itemNode;
+                findServer = true;
+            } else {
+                *client = itemNode;
+                findClient = true;
+            }
+            if (findServer && findClient) {
+                break;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
+    return SOFTBUS_OK;
+}
+
 
 static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId, const ConnectResult *result)
 {
@@ -713,7 +746,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         return false;
     }
-    ret = GetBleConnInfoByAddr(option->info.bleOption.bleMac, &server, &client);
+    ret = GetBleConnInfoByDeviceIdHash(option->info.bleOption.deviceIdHash, &server, &client);
     if ((ret != SOFTBUS_OK) || (server == NULL && client == NULL)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleCheckActiveConnection no active conn");
         (void)SoftBusMutexUnlock(&g_connectionLock);
@@ -745,7 +778,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
     uint32_t connId = 0;
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
-        if (itemNode->halConnId != halConnId) {
+        if (itemNode->halConnId != halConnId || itemNode->info.isServer != BLE_CLIENT_TYPE) {
             continue;
         }
         connId = itemNode->connId;
@@ -795,7 +828,7 @@ static void BleServerConnectCallback(int32_t halConnId, const char *bleStrMac, c
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnId) {
+        if (itemNode->halConnId == halConnId && itemNode->info.isServer == BLE_SERVER_TYPE) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectCallback exist same connId, exit");
             (void)SoftBusMutexUnlock(&g_connectionLock);
             return;
@@ -862,7 +895,7 @@ static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId
     }
 }
 
-static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
+static void BleDisconnectCallback(BleHalConnInfo halConnInfo)
 {
     ListNode *bleItem = NULL;
     ListNode *item = NULL;
@@ -878,7 +911,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     }
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
-        if (itemNode->halConnId == halConnId) {
+        if (itemNode->halConnId == halConnInfo.halConnId && itemNode->info.isServer == halConnInfo.isServer) {
             bleNode = itemNode;
             itemNode->state = BLE_CONNECTION_STATE_CLOSED;
             (void)memcpy_s(&connectionInfo, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo));
@@ -894,7 +927,7 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
     }
     ReleaseBleConnectionInfo(bleNode);
     if (connectionId != 0) {
-        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, isServer);
+        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, halConnInfo.isServer);
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);
 }
@@ -984,6 +1017,16 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
         return SOFTBUS_ERR;
     }
     cJSON_Delete(data);
+    char deviceIdHash[UDID_HASH_LEN];
+    if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId),
+        (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse GenerateStrHash failed");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connInfo->info.info.bleInfo.deviceIdHash, UDID_HASH_LEN, deviceIdHash, UDID_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse memcpy_s failed");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1005,13 +1048,13 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
     return SOFTBUS_OK;
 }
 
-static void BleOnDataReceived(bool isBleConn, int32_t halConnId, uint32_t len, const char *value)
+static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
+    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived unknown device");
         (void)SoftBusMutexUnlock(&g_connectionLock);
