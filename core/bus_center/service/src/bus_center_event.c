@@ -198,7 +198,7 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify node %s, networkId = %s.",
         (isOnline == true) ? "online" : "offline", info->networkId);
     SetDefaultQdisc();
-    PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
+    (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
     eventInfo.isOnline = isOnline;
     eventInfo.networkId = info->networkId;
@@ -214,7 +214,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     if (type == TYPE_DEVICE_NAME) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify peer device name changed %s", info->deviceName);
     }
-    PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
+    (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)

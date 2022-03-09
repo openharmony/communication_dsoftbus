@@ -464,10 +464,13 @@ int32_t AuthHandleLeaveLNN(int64_t authId)
     (void)SoftBusMutexUnlock(&g_authLock);
     if (IsWiFiLink(auth)) {
         AuthCloseTcpFd(auth->fd);
+        DeleteAuth(auth);
     } else if (auth->status != AUTH_PASSED || auth->option.type == CONNECT_BR) {
         ConnDisconnectDevice(auth->connectionId);
+    } else {
+        DeleteAuth(auth);
     }
-    DeleteAuth(auth);
+
     return SOFTBUS_OK;
 }
 
@@ -897,6 +900,9 @@ static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
     info->flag = *(int32_t *)data;
     data += sizeof(int32_t);
     info->dataLen = *(uint32_t *)data;
+    if ((info->dataLen + sizeof(AuthDataInfo)) > len) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
