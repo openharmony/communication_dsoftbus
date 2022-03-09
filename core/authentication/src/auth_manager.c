@@ -655,8 +655,7 @@ static void AuthOnSessionKeyReturned(int64_t authId, const uint8_t *sessionKey, 
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
-    AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(authId);
+    AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found on sessionkey returned", authId);
         return;
@@ -885,9 +884,9 @@ static void HandleReceiveConnectionData(const AuthManager *auth, const AuthDataI
     AuthHandleTransInfo(auth, &head, (char *)data);
 }
 
-static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
+static int32_t AnalysisData(char *data, uint32_t len, AuthDataInfo *info)
 {
-    if (len < (int32_t)sizeof(AuthDataInfo)) {
+    if (len < sizeof(AuthDataInfo)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AnalysisData: invalid length.");
         return SOFTBUS_ERR;
     }
@@ -981,16 +980,16 @@ static void HandleReceiveData(AuthManager *auth, const AuthDataInfo *info, uint8
     }
 }
 
-void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int len)
+void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    if (data == NULL || moduleId != MODULE_DEVICE_AUTH) {
+    if (data == NULL || moduleId != MODULE_DEVICE_AUTH || len <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
     AuthDataInfo info = {0};
-    if (AnalysisData(data, len, &info) != SOFTBUS_OK) {
+    if (AnalysisData(data, (uint32_t)len, &info) != SOFTBUS_OK) {
         return;
     }
     AuthManager *auth = AuthGetManagerByAuthId(info.seq);
@@ -1175,11 +1174,11 @@ static int32_t HichainServiceInit(void)
 
 void AuthHandleTransInfo(const AuthManager *auth, const ConnPktHead *head, char *data)
 {
-    int32_t i;
     if (g_transCallback == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth trans callback is null");
         return;
     }
+    int32_t i;
     for (i = 0; i < TRANS_MODULE_NUM; i++) {
         if (g_transCallback[i].onTransUdpDataRecv != NULL) {
             AuthTransDataInfo info = {0};
@@ -1328,8 +1327,7 @@ int64_t AuthOpenChannel(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    int32_t fd;
-    fd = AuthOpenTcpChannel(option, false);
+    int32_t fd = AuthOpenTcpChannel(option, false);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AuthOpenTcpChannel failed");
         return SOFTBUS_ERR;
