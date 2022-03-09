@@ -137,8 +137,8 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
         }
         case CONNECT_BLE:
             if (strcpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
-                strcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
-                connInfo->info.bleInfo.deviceIdHash) != EOK) {
+                memcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
+                connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }

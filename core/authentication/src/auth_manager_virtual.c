@@ -98,7 +98,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     (void)info;
     (void)requestId;
     (void)callback;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void AuthCloseConn(int64_t authId)
@@ -108,14 +108,14 @@ void AuthCloseConn(int64_t authId)
 
 uint32_t AuthGenRequestId(void)
 {
-    return SOFTBUS_OK;
+    return 0;
 }
 
 int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *info)
 {
     (void)authId;
     (void)info;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthGetDeviceUuid(int64_t authId, char *buf, uint32_t size)
@@ -123,21 +123,21 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *buf, uint32_t size)
     (void)authId;
     (void)buf;
     (void)size;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     (void)uuid;
     (void)connInfo;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *mac)
 {
     (void)authId;
     (void)mac;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, ConnectOption *option)
@@ -145,7 +145,7 @@ int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, Connect
     (void)mac;
     (void)type;
     (void)option;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_t len, OutBuf *outBuf)
@@ -155,5 +155,13 @@ int32_t AuthEncryptBySeq(int32_t seq, AuthSideFlag *side, uint8_t *data, uint32_
     (void)data;
     (void)len;
     (void)outBuf;
-    return SOFTBUS_OK;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option)
+{
+    (void)uuid;
+    (void)type;
+    (void)option;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
