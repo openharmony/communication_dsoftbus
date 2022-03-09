@@ -64,6 +64,12 @@ int32_t BusCenterServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void BusCenterServerProxyDeInit(void)
+{
+    delete g_serverProxy;
+    g_serverProxy = nullptr;
+}
+
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (g_serverProxy == nullptr) {

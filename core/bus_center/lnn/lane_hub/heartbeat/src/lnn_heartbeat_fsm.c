@@ -26,6 +26,8 @@
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
 #include "message_handler.h"
+#include "p2plink_interface.h"
+#include "p2plink_type.h"
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -342,7 +344,7 @@ int32_t LnnHbFsmInit(void)
 
 void LnnHbFsmDeinit(void)
 {
-    g_currentState = -1;
+    g_currentState = STATE_HB_UNINIT_INDEX;
 }
 
 static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
@@ -516,12 +518,70 @@ static int32_t OnOneCycleTimeout(const SoftBusMessage *msg)
     return g_currentState;
 }
 
-static bool HbCheckActiveConn(ConnectionAddrType addrType, const char *networkId)
+static bool HbHasActiveBrConnection(const char *networkId)
 {
+    bool ret = false;
     ConnectOption option = {0};
-    NodeInfo *nodeInfo = NULL;
-    const char *mac = NULL;
+    char brMac[BT_MAC_LEN] = {0};
 
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, sizeof(brMac)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get br mac err");
+        return false;
+    }
+    option.type = CONNECT_BR;
+    if (strcpy_s(option.info.brOption.brMac, BT_MAC_LEN, brMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strcpy_s bt mac err");
+        return false;
+    }
+    ret = CheckActiveConnection(&option);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node has active bt connection:%s", ret ? "true" : "false");
+    return ret;
+}
+
+static bool HbHasActiveBleConnection(const char *networkId)
+{
+    bool ret = false;
+    ConnectOption option = {0};
+    char udid[UDID_BUF_LEN] = {0};
+    char udidHash[UDID_HASH_LEN] = {0};
+
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, sizeof(udid)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get udid err");
+        return false;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid),
+        (unsigned char *)udidHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get udid hash err");
+        return false;
+    }
+    option.type = CONNECT_BLE;
+    if (memcpy_s(option.info.bleOption.deviceIdHash, UDID_HASH_LEN, udidHash, sizeof(udidHash)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB memcpy_s udid hash err");
+        return false;
+    }
+    ret = CheckActiveConnection(&option);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node has active ble connection:%s", ret ? "true" : "false");
+    return ret;
+}
+
+static bool HbHasActiveP2pConnection(const char *networkId)
+{
+    int32_t ret;
+    char peerMac[P2P_MAC_LEN] = {0};
+
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get peer p2p mac err");
+        return false;
+    }
+    ret = P2pLinkQueryDevIsOnline(peerMac);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node has active p2p connection:%s, ret=%d",
+        ret == SOFTBUS_OK ? "true" : "false", ret);
+    return ret == SOFTBUS_OK ? true : false;
+}
+
+static bool HbHasActiveConnection(ConnectionAddrType addrType, const char *networkId)
+{
+    bool ret = false;
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_ETH:
@@ -530,26 +590,15 @@ static bool HbCheckActiveConn(ConnectionAddrType addrType, const char *networkId
             return true;
         case CONNECTION_ADDR_MAX:
         case CONNECTION_ADDR_BLE:
-            nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-            if (nodeInfo == NULL) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB not find node, no need to notify lost");
-                return true;
-            }
-            mac = LnnGetBtMac(nodeInfo);
-            if (mac == NULL) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get bt mac err");
-                return true;
-            }
-            option.type = CONNECT_BR;
-            if (strcpy_s(option.info.brOption.brMac, BT_MAC_LEN, mac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strcpy_s bt mac err");
-                return true;
-            }
-            break;
+            ret = HbHasActiveBrConnection(networkId) || HbHasActiveBleConnection(networkId) ||
+                HbHasActiveP2pConnection(networkId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB get networkId:%s has active BT/BLE/P2P connection:%s",
+                AnonymizesNetworkID(networkId), ret ? "true" : "false");
+            return ret;
         default:
             break;
     }
-    return CheckActiveConnection(&option);
+    return false;
 }
 
 static int32_t OnDetectDeviceLost(const SoftBusMessage *msg)
@@ -559,16 +608,23 @@ static int32_t OnDetectDeviceLost(const SoftBusMessage *msg)
 
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB device networkId is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (HbCheckActiveConn(addrType, networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB cannot offline dev, set new offline check begin");
+    if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB node is offline, no need to process dev lost. "
+            "networkId:%s", AnonymizesNetworkID(networkId));
+        return g_currentState;
+    }
+    if (HbHasActiveConnection(addrType, networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB cannot offline node, set offline timing again, "
+            "networkId:%s", AnonymizesNetworkID(networkId));
         if (LnnOfflineTimingByHeartbeat(networkId, addrType) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set new offline check err");
             return SOFTBUS_ERR;
         }
         return g_currentState;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB notify offline, networkId:%s", AnonymizesNetworkID(networkId));
     if (addrType == CONNECTION_ADDR_MAX) {
     /* heartbeat dont support medium type except ble now, so only offline ble devices */
         if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
@@ -587,12 +643,13 @@ static int32_t OnDetectDeviceLost(const SoftBusMessage *msg)
 static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
 {
     int32_t infoNum, i;
+    uint64_t nowTime, oldTimeStamp, offlineMillis;
     GearMode gearMode;
     SoftBusSysTime times;
-    uint64_t nowTime, oldTimeStamp, offlineMillis;
     NodeBasicInfo *info = NULL;
 
-    DiscoveryType discType = LnnGetDiscoveryType(msg->arg2);
+    ConnectionAddrType addrType = (ConnectionAddrType)msg->arg2;
+    DiscoveryType discType = LnnGetDiscoveryType(addrType);
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get node info fail");
         return SOFTBUS_ERR;
@@ -603,28 +660,31 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
     }
     SoftBusGetTime(&times);
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
+        SoftBusFree(info);
         return SOFTBUS_ERR;
     }
-    offlineMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    offlineMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR;
     nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     for (i = 0; i < infoNum; i++) {
         NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL || (msg->arg2 != CONNECTION_ADDR_MAX && !LnnHasDiscoveryType(nodeInfo, discType))) {
+        if (nodeInfo == NULL || (addrType != CONNECTION_ADDR_MAX && !LnnHasDiscoveryType(nodeInfo, discType))) {
             continue;
         }
         if (LnnGetDistributedHeartbeatTimestamp(info[i].networkId, &oldTimeStamp) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, nodeInfo i=%d", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, networkId:%s",
+                AnonymizesNetworkID(info[i].networkId));
             continue;
         }
         if ((nowTime - oldTimeStamp) > offlineMillis) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB notify nodeInfo i=%d offline, timestamp:%llu, now:%llu",
-                i, oldTimeStamp, nowTime);
-            if (LnnRemoveHbFsmMsg(EVENT_HB_DEVICE_LOST, msg->arg2, info[i].networkId) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB notify node lost heartbeat, networkId:%s, "
+                "timestamp:%llu, now:%llu", AnonymizesNetworkID(info[i].networkId), oldTimeStamp, nowTime);
+            if (LnnRemoveHbFsmMsg(EVENT_HB_DEVICE_LOST, (uint64_t)addrType, info[i].networkId) != SOFTBUS_OK) {
                 SoftBusFree(info);
                 return SOFTBUS_ERR;
             }
-            if (LnnHbProcessDeviceLost(info[i].networkId, (ConnectionAddrType)msg->arg2, 0) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err, nodeInfo i=%d", i);
+            if (LnnHbProcessDeviceLost(info[i].networkId, addrType, 0) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err, networkId:%s",
+                    AnonymizesNetworkID(info[i].networkId));
                 SoftBusFree(info);
                 return SOFTBUS_ERR;
             }

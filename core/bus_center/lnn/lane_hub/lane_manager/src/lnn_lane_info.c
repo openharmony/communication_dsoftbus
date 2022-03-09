@@ -209,17 +209,15 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. type = %d", type);
         return false;
     }
-    if (!g_lanes[type].isUse) {
-        if (SoftBusMutexLock(&g_lanes[type].lock) != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
-            return false;
-        }
-        if (g_lanes[type].isUse) {
-            (void)SoftBusMutexUnlock(&g_lanes[type].lock);
-            return true;
-        }
+    if (SoftBusMutexLock(&g_lanes[type].lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        return false;
     }
-
+    if (g_lanes[type].isUse) {
+        (void)SoftBusMutexUnlock(&g_lanes[type].lock);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "reuse lane, type = %d.", type);
+        return true;
+    }
     bool ret = false;
     switch (type) {
         case LNN_LINK_TYPE_WLAN_5G:

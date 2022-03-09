@@ -132,6 +132,8 @@ int SoftBusGattsStopService(int srvcHandle)
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "BLEINFOPRTINT:SoftBusGattsStopService(%d, %d)", g_halServerId, srvcHandle);
     if (BleGattsStopService(g_halServerId, srvcHandle) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -429,4 +431,22 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
     }
     g_gattsCallback = callback;
     return SOFTBUS_OK;
+}
+
+void SoftBusUnRegisterGattsCallbacks(void)
+{
+    if (g_gattsCallback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "no need to unregist gatts callback.");
+        return;
+    }
+    if (g_halRegFlag == -1) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "no need to unregist gatt server.");
+        return;
+    }
+    if (BleGattsUnRegister(g_halServerId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsUnRegister error.");
+        return;
+    }
+    g_gattsCallback = NULL;
+    g_halRegFlag = -1;
 }

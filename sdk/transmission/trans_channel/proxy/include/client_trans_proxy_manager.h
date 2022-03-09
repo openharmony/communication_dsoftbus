@@ -29,11 +29,12 @@ extern "C" {
 #else
 #define MAX_FILE_NUM 1
 #endif
-#define MAX_FILE_PATH_NAME_LEN (256)
-#define MAX_REMOTE_PATH_LEN (512)
+#define MAX_RECV_FILE_NUM 50
+#define MAX_FILE_PATH_NAME_LEN 512
+#define MAX_REMOTE_PATH_LEN 512
 
 #define FRAME_DATA_SEQ_OFFSET (4)
-#define PROXY_MAX_PACKET_SIZE (1 * 1024)
+#define PROXY_MAX_PACKET_SIZE (1024 - 48)
 #define MAX_FILE_SIZE (0x500000) /* 5M */
 
 #define PATH_SEPARATOR '/'
@@ -46,16 +47,16 @@ typedef struct {
     uint32_t seqCount;
     SoftBusMutex lock;
     uint32_t seqLockInitFlag;
-}SendFileInfo;
+} SendFileInfo;
 
 typedef struct {
     uint8_t *buffer;
     uint32_t bufferSize;
-}FileListBuffer;
+} FileListBuffer;
 
 typedef struct {
     int32_t frameType;
-    int32_t frameLength;
+    uint32_t frameLength;
     uint8_t *data;
 } FileFrame;
 
@@ -73,15 +74,14 @@ typedef struct {
     uint64_t fileOffset;
     int32_t timeOut;
     char filePath[MAX_REMOTE_PATH_LEN];
-}SingleFileInfo;
+} SingleFileInfo;
 
 typedef struct {
     SoftBusMutex lock;
-    int32_t curIndex;
     int32_t sessionId;
     FileListener fileListener;
-    SingleFileInfo recvFileInfo[MAX_FILE_NUM];
-}RecvFileInfo;
+    SingleFileInfo recvFileInfo[MAX_RECV_FILE_NUM];
+} RecvFileInfo;
 
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb);
 

@@ -351,7 +351,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
     head->magic = MAGIC_NUMBER;
     head->flag = data->flag;
     head->module = data->module;
-    head->len = data->len - sizeof(ConnPktHead);
+    head->len = (uint32_t)(data->len) - sizeof(ConnPktHead);
     head->seq = data->seq;
 
     return g_connManager[type]->PostBytes(connectionId, data->buf, data->len, data->pid, data->flag);

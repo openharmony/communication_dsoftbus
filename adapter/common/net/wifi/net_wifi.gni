@@ -20,7 +20,8 @@ adapter_wifi_inc = []
 adapter_wifi_deps = []
 
 if (defined(ohos_lite) ||
-    (defined(device_name) && device_name == "qemu-arm-linux")) {
+    (defined(global_parts_info) &&
+     !defined(global_parts_info.communication_wifi_standard))) {
   if (dsoftbus_standard_feature_lnn_net) {
     adapter_wifi_src += [
       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",

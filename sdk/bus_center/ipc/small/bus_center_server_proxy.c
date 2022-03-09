@@ -125,6 +125,11 @@ int32_t BusCenterServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+void BusCenterServerProxyDeInit(void)
+{
+    g_serverProxy = NULL;
+}
+
 int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (info == NULL || infoNum == NULL) {

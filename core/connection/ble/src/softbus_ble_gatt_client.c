@@ -218,7 +218,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect addr=%s", bleAddr->addr);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect ok.\n");
     return infoNode->clientId;
 }
 
@@ -309,7 +309,10 @@ EXIT:
     SoftBusFree(infoNode);
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     (void)SoftbusGattcUnRegister(clientId);
-    (void)g_softBusBleConnCb->BleDisconnectCallback(clientId, 0); // 0  == client
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = clientId;
+    halConnInfo.isServer = BLE_CLIENT_TYPE;
+    (void)g_softBusBleConnCb->BleDisconnectCallback(halConnInfo);
 }
 
 static void SearchedMsgHandler(int32_t clientId, int status)
@@ -458,7 +461,10 @@ static void DisconnectedMsgHandler(int32_t clientId, int status)
     SoftBusFree(infoNode);
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     (void)SoftbusGattcUnRegister(clientId);
-    (void)g_softBusBleConnCb->BleDisconnectCallback(clientId, 0); // 0  == client
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = clientId;
+    halConnInfo.isServer = BLE_CLIENT_TYPE;
+    (void)g_softBusBleConnCb->BleDisconnectCallback(halConnInfo);
 }
 
 static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
@@ -612,16 +618,19 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
     }
     uint32_t len;
     int32_t index = -1;
-    char *value = BleTransRecv(clientId, (char *)param->data,
+    BleHalConnInfo halConnInfo;
+    halConnInfo.halConnId = clientId;
+    halConnInfo.isServer = BLE_CLIENT_TYPE;
+    char *value = BleTransRecv(halConnInfo, (char *)param->data,
         (uint32_t)param->dataLen, &len, &index);
     if (value == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "data not enough");
         return;
     }
-    (void)g_softBusBleConnCb->BleOnDataReceived(isBleConn, clientId, (uint32_t)len, (char *)value);
+    (void)g_softBusBleConnCb->BleOnDataReceived(isBleConn, halConnInfo, (uint32_t)len, (char *)value);
     if (index != -1) {
-        BleTransCacheFree(clientId, index);
+        BleTransCacheFree(halConnInfo, index);
     }
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
 }

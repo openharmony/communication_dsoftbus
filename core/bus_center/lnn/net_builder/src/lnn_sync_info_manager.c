@@ -218,16 +218,15 @@ static void CloseUnusedChannel(void *para)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
-static int32_t OnChannelOpened(int32_t channelId, const char *peerId, unsigned char isServer)
+static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
 {
     char networkId[NETWORK_ID_BUF_LEN];
     SyncChannelInfo *info = NULL;
     SyncInfoMsg *msg = NULL;
     SyncInfoMsg *msgNext = NULL;
-    IdCategory category = (isServer != 0) ? CATEGORY_UUID : CATEGORY_UDID;
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnChannelOpened channelId: %d, server: %u", channelId, isServer);
-    if (LnnConvertDlId(peerId, category, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer device not online");
         return SOFTBUS_ERR;
     }
