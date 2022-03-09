@@ -85,6 +85,10 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteUint32(addrTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
@@ -127,6 +131,10 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(networkId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
         return SOFTBUS_ERR;
@@ -161,6 +169,10 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteBool(isOnline)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write online state failed");
         return SOFTBUS_ERR;
@@ -200,6 +212,10 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTy
     }
     MessageParcel data;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged type: %d", type);
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(type)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write type failed");
         return SOFTBUS_ERR;
@@ -238,6 +254,10 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteUint32(infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info length failed");
         return SOFTBUS_ERR;
@@ -272,6 +292,10 @@ void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
         return;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(publishId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write publishId failed");
         return;
@@ -295,6 +319,10 @@ void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
         return;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(refreshId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write refreshId failed");
         return;
@@ -318,6 +346,10 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
         return;
     }
     MessageParcel data;
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteUint32(deviceLen)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device length failed");
         return;
