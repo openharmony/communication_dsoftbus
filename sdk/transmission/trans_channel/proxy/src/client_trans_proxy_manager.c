@@ -17,6 +17,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <securec.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -50,6 +51,7 @@ static void ProxyFileTransTimerProc(void);
 #define BYTE_INT_NUM 4
 #define BIT_INT_NUM 32
 #define BIT_BYTE_NUM 8
+#define SEND_DELAY_TIME 20
 
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
 {
@@ -86,6 +88,18 @@ int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "proxy auth byteSize[%u], messageSize[%u]",
         g_authMaxByteBufSize, g_authMaxMessageBufSize);
     return SOFTBUS_OK;
+}
+
+void ClientTransProxyDeinit(void)
+{
+    if (SoftBusMutexDestroy(&g_sendFileInfo.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destory send file lock fail");
+        return;
+    }
+    if (SoftBusMutexDestroy(&g_recvFileInfo.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destory recv file lock fail");
+        return;
+    }
 }
 
 int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -256,8 +270,8 @@ static int32_t GetRecvFileInfoBySeq(uint32_t seq, SingleFileInfo *fileInfo)
             fileInfo->fileFd = g_recvFileInfo.recvFileInfo[i].fileFd;
             fileInfo->fileStatus = g_recvFileInfo.recvFileInfo[i].fileStatus;
             fileInfo->fileOffset = g_recvFileInfo.recvFileInfo[i].fileOffset;
-            if (memcpy_s(fileInfo->filePath, MAX_REMOTE_PATH_LEN, g_recvFileInfo.recvFileInfo[i].filePath,
-                MAX_REMOTE_PATH_LEN) != EOK) {
+            if (memcpy_s(fileInfo->filePath, MAX_FILE_PATH_NAME_LEN, g_recvFileInfo.recvFileInfo[i].filePath,
+                MAX_FILE_PATH_NAME_LEN) != EOK) {
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -283,18 +297,36 @@ static int32_t RemoveFromRecvListBySeq(uint32_t seq)
             g_recvFileInfo.recvFileInfo[i].fileStatus = NODE_IDLE;
             g_recvFileInfo.recvFileInfo[i].fileOffset = 0;
             g_recvFileInfo.recvFileInfo[i].timeOut = 0;
-            memset_s(g_recvFileInfo.recvFileInfo[i].filePath, MAX_REMOTE_PATH_LEN, 0, MAX_REMOTE_PATH_LEN);
+            memset_s(g_recvFileInfo.recvFileInfo[i].filePath, MAX_FILE_PATH_NAME_LEN, 0, MAX_FILE_PATH_NAME_LEN);
             memset_s(&g_recvFileInfo.fileListener, sizeof(FileListener), 0, sizeof(FileListener));
             return SOFTBUS_OK;
         }
     }
 
     if (i == MAX_RECV_FILE_NUM) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "there is no match seq ti clear");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "there is no match seq to clear");
         return SOFTBUS_ERR;
     }
 
     return SOFTBUS_OK;
+}
+
+static bool CheckRecvFileExist(const char *absFullPath)
+{
+    if (absFullPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "absFullPath is null");
+        return false;
+    }
+
+    int32_t i;
+    for (i = 0; i < MAX_RECV_FILE_NUM; i++) {
+        if ((strcmp(g_recvFileInfo.recvFileInfo[i].filePath, absFullPath) == 0) &&
+            (g_recvFileInfo.recvFileInfo[i].fileStatus == NODE_BUSY)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 static int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath, FileListener fileListener,
@@ -316,8 +348,8 @@ static int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath,
     g_recvFileInfo.recvFileInfo[index].fileStatus = NODE_BUSY;
     g_recvFileInfo.recvFileInfo[index].fileOffset = 0;
     g_recvFileInfo.recvFileInfo[index].timeOut = 0;
-    if (memcpy_s(g_recvFileInfo.recvFileInfo[index].filePath, MAX_REMOTE_PATH_LEN,
-        destFilePath, MAX_REMOTE_PATH_LEN) != EOK) {
+    if (memcpy_s(g_recvFileInfo.recvFileInfo[index].filePath, MAX_FILE_PATH_NAME_LEN,
+        destFilePath, MAX_FILE_PATH_NAME_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s(&g_recvFileInfo.fileListener, sizeof(FileListener),
@@ -341,8 +373,8 @@ static int32_t UpdateRecvInfo(SingleFileInfo fileInfo)
     g_recvFileInfo.recvFileInfo[index].fileStatus = fileInfo.fileStatus;
     g_recvFileInfo.recvFileInfo[index].fileOffset = fileInfo.fileOffset;
     g_recvFileInfo.recvFileInfo[index].timeOut = fileInfo.timeOut;
-    if (memcpy_s(g_recvFileInfo.recvFileInfo[index].filePath, MAX_REMOTE_PATH_LEN, fileInfo.filePath,
-        MAX_REMOTE_PATH_LEN) != EOK) {
+    if (memcpy_s(g_recvFileInfo.recvFileInfo[index].filePath, MAX_FILE_PATH_NAME_LEN, fileInfo.filePath,
+        MAX_FILE_PATH_NAME_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -460,7 +492,36 @@ static void ProxyFileTransTimerProc(void)
     return;
 }
 
-static int32_t CheckAndGetFileSize(const char *sourceFile, uint64_t *fileSize)
+static char *GetAndCheckRealPath(const char *filePath, char *absPath)
+{
+    if ((filePath == NULL) || (absPath == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "input invalid");
+        return NULL;
+    }
+
+    char *realPath = NULL;
+    if (realpath(filePath, absPath) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "realpath failed, err[%s]", strerror(errno));
+        return NULL;
+    } else {
+        realPath = absPath;
+    }
+
+    if (strstr(realPath, "..") != NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "real path is not canonical form");
+        return NULL;
+    }
+
+    int32_t pathLength = strlen(realPath);
+    if ((pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) || (pathLength > PATH_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pathLength[%d] is too large", pathLength);
+        return NULL;
+    }
+
+    return realPath;
+}
+
+static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize)
 {
     if ((sourceFile == NULL) || (fileSize == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourceFile or fileSize is null");
@@ -500,13 +561,12 @@ static int32_t SendOneFrame(int32_t channelId, FileFrame fileFrame)
     return SOFTBUS_OK;
 }
 
-static int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, const char *destFile, uint64_t fileSize)
+static int32_t FileToFrame(SendListenerInfo sendInfo, uint64_t frameNum, int32_t fd,
+    const char *destFile, uint64_t fileSize)
 {
-#define SEND_DELAY_TIME 20
     FileFrame fileFrame;
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(PROXY_MAX_PACKET_SIZE);
     if (buffer == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc send file buffer failed");
         return SOFTBUS_ERR;
     }
     uint64_t fileOffset = 0;
@@ -515,18 +575,16 @@ static int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, con
     for (uint64_t index = 0; index < frameNum; index++) {
         fileFrame.frameType = FrameIndexToType(index, frameNum);
         fileFrame.data = buffer;
-        if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&channelId, FRAME_DATA_SEQ_OFFSET) != EOK) {
-            SoftBusFree(fileFrame.data);
-            return SOFTBUS_ERR;
+        if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&sendInfo.channelId,
+            FRAME_DATA_SEQ_OFFSET) != EOK) {
+            goto EXIT_ERR;
         }
         if (index == 0) {
-            uint32_t destFileNameSize = strlen(destFile);
-            if (memcpy_s(fileFrame.data + FRAME_DATA_SEQ_OFFSET, destFileNameSize,
-                destFile, destFileNameSize) != SOFTBUS_OK) {
-                SoftBusFree(fileFrame.data);
-                return SOFTBUS_ERR;
+            uint32_t dNameSize = strlen(destFile);
+            if (memcpy_s(fileFrame.data + FRAME_DATA_SEQ_OFFSET, dNameSize, destFile, dNameSize) != SOFTBUS_OK) {
+                goto EXIT_ERR;
             }
-            fileFrame.frameLength = FRAME_DATA_SEQ_OFFSET + destFileNameSize;
+            fileFrame.frameLength = FRAME_DATA_SEQ_OFFSET + dNameSize;
         } else {
             uint64_t readLength = (remainedSendSize < frameDataSize) ? remainedSendSize : frameDataSize;
             int32_t len = pread(fd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
@@ -536,37 +594,81 @@ static int32_t FileToFrame(int32_t channelId, uint64_t frameNum, int32_t fd, con
                 remainedSendSize -= readLength;
             } else {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pread src file failed");
-                SoftBusFree(fileFrame.data);
-                return SOFTBUS_ERR;
+                goto EXIT_ERR;
             }
         }
-        if (SendOneFrame(channelId, fileFrame) != SOFTBUS_OK) {
+
+        if (sendInfo.fileListener.sendListener.OnSendFileProcess != NULL) {
+            sendInfo.fileListener.sendListener.OnSendFileProcess(sendInfo.channelId, fileOffset, fileSize);
+        }
+        if (SendOneFrame(sendInfo.channelId, fileFrame) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send one frame failed");
-            SoftBusFree(fileFrame.data);
-            return SOFTBUS_ERR;
+            goto EXIT_ERR;
         }
         memset_s(fileFrame.data, PROXY_MAX_PACKET_SIZE, 0, PROXY_MAX_PACKET_SIZE);
         SoftBusSleepMs(SEND_DELAY_TIME);
     }
     SoftBusFree(fileFrame.data);
     return SOFTBUS_OK;
+EXIT_ERR:
+    SoftBusFree(fileFrame.data);
+    return SOFTBUS_ERR;
 }
 
-static int32_t FileToFrameAndSendFile(int32_t channelId, const char *sourceFile, const char *destFile)
+
+static bool CheckDestFilePathValid(const char *destFile)
+{
+    if (destFile == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile is null");
+        return false;
+    }
+    int32_t len = strlen(destFile);
+    if ((len == 0) || (destFile[0] == PATH_SEPARATOR)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile first char is '/'");
+        return false;
+    }
+
+    if (strstr(destFile, "..") != NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path is not canonical form");
+        return false;
+    }
+    return true;
+}
+
+static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sourceFile, const char *destFile)
 {
     uint64_t fileSize = 0;
-    if (CheckAndGetFileSize(sourceFile, &fileSize) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
-        return SOFTBUS_FILE_ERR;
+    char *absSrcPath = (char *)SoftBusCalloc(PATH_MAX + 1);
+    if (absSrcPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
+        return SOFTBUS_ERR;
     }
-    int32_t fd = open(sourceFile, O_RDONLY);
+    const char *realSrcPath = GetAndCheckRealPath(sourceFile, absSrcPath);
+    if (realSrcPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get src abs file failed");
+        goto EXIT_ERR;
+    }
+
+    if (CheckDestFilePathValid(destFile) == false) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path's form is wrong");
+        goto EXIT_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srcPath:%s, srcAbsPath:%s, destPath:%s",
+        sourceFile, realSrcPath, destFile);
+
+    if (GetAndCheckFileSize(realSrcPath, &fileSize) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
+        goto EXIT_ERR;
+    }
+    int32_t fd = open(realSrcPath, O_RDONLY);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open file fail");
-        return SOFTBUS_FILE_ERR;
+        goto EXIT_ERR;
     }
     if (PROXY_MAX_PACKET_SIZE <= FRAME_DATA_SEQ_OFFSET) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stat file fail");
-        return SOFTBUS_ERR;
+        goto EXIT_ERR;
     }
     uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
     uint64_t frameNum = fileSize / frameDataSize;
@@ -576,13 +678,18 @@ static int32_t FileToFrameAndSendFile(int32_t channelId, const char *sourceFile,
 
     /* add 1 means reserve frame to send destFile string */
     frameNum++;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu",
-        channelId, sourceFile, fileSize, frameNum);
-    if (FileToFrame(channelId, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu, destPath:%s",
+        sendInfo.channelId, realSrcPath, fileSize, frameNum, destFile);
+    if (FileToFrame(sendInfo, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "File To Frame fail");
-        return SOFTBUS_ERR;
+        goto EXIT_ERR;
     }
+    SoftBusFree(absSrcPath);
     return SOFTBUS_OK;
+EXIT_ERR:
+    SoftBusFree(absSrcPath);
+    return SOFTBUS_ERR;
 }
 
 static char *GetDestFilePath(FileFrame fileFrame)
@@ -593,7 +700,7 @@ static char *GetDestFilePath(FileFrame fileFrame)
     }
 
     uint32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET + 1;
-    if (filePathSize > MAX_REMOTE_PATH_LEN) {
+    if (filePathSize > MAX_FILE_PATH_NAME_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is too long");
         return NULL;
     }
@@ -605,6 +712,12 @@ static char *GetDestFilePath(FileFrame fileFrame)
     if (memcpy_s(filePath, filePathSize, fileFrame.data + FRAME_DATA_SEQ_OFFSET,
         fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed");
+        SoftBusFree(filePath);
+        return NULL;
+    }
+
+    if (CheckDestFilePathValid(filePath) == false) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv file path[%s] form is wrong", filePath);
         SoftBusFree(filePath);
         return NULL;
     }
@@ -633,8 +746,8 @@ static int32_t GetDestFileFrameSeq(FileFrame fileFrame, uint32_t *seq)
 static bool IsPathValid(char *filePath)
 {
     if ((filePath == NULL) || (strlen(filePath) == 0) ||
-        (strlen(filePath) > (MAX_REMOTE_PATH_LEN - 1))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size is wrong");
+        (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size[%d] is wrong", (int32_t)strlen(filePath));
         return false;
     }
 
@@ -646,8 +759,115 @@ static bool IsPathValid(char *filePath)
     return true;
 }
 
-static int32_t CreateDestDir(const char *filePath)
+static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLen)
 {
+    if ((fullPath == NULL) || (strlen(fullPath) < 1) || (fullPath[strlen(fullPath) - 1] == PATH_SEPARATOR)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
+        return SOFTBUS_ERR;
+    }
+    int32_t i = 0;
+    int32_t dirFullLen = (int32_t)strlen(fullPath);
+    for (i = dirFullLen - 1; i >= 0; i--) {
+        if (fullPath[i] == PATH_SEPARATOR) {
+            i++;
+            break;
+        }
+        if (i == 0) {
+            break;
+        }
+    }
+    int32_t dirLen = i;
+    if (dirLen > dirPathLen) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dirLen[%d] > dirPathLen[%d]", dirLen, dirPathLen);
+        return SOFTBUS_ERR;
+    }
+
+    if (strncpy_s(dirPath, dirPathLen, fullPath, dirLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s dir path error, dirLen[%d]", dirLen);
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNameLen)
+{
+    if ((fullPath == NULL) || (strlen(fullPath) < 1) || (fullPath[strlen(fullPath) - 1] == PATH_SEPARATOR)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
+        return SOFTBUS_ERR;
+    }
+    int32_t i;
+    int32_t dirFullLen = (int32_t)strlen(fullPath);
+    for (i = dirFullLen - 1; i >= 0; i--) {
+        if (fullPath[i] == PATH_SEPARATOR) {
+            i++;
+            break;
+        }
+        if (i == 0) {
+            break;
+        }
+    }
+
+    if (strcpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s filename error, fileNameLen[%d]", fileNameLen);
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t pathSize)
+{
+    char dirPath[MAX_FILE_PATH_NAME_LEN] = { 0 };
+    char fileName[MAX_FILE_PATH_NAME_LEN] = { 0 };
+    if (GetDirPath(fullPath, dirPath, sizeof(dirPath)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dir path failed");
+        return SOFTBUS_ERR;
+    }
+    if (GetFileName(fullPath, fileName, sizeof(fileName)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file name failed");
+        return SOFTBUS_ERR;
+    }
+
+    char *absFullDir = (char *)SoftBusCalloc(PATH_MAX + 1);
+    if (absFullDir == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
+        return SOFTBUS_ERR;
+    }
+    const char *realFullDir = GetAndCheckRealPath(dirPath, absFullDir);
+    if (realFullDir == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get full abs file failed");
+        SoftBusFree(absFullDir);
+        return SOFTBUS_ERR;
+    }
+
+    int32_t fileNameLength = strlen(fileName);
+    int32_t dirPathLength = strlen(realFullDir);
+    if (pathSize < (fileNameLength + dirPathLength + 1)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy name is too large, dirLen:%d, fileNameLen:%d",
+            dirPathLength, fileNameLength);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s]len[%d], fileName[%s][%d], realFullDir[%s]",
+        dirPath, dirPathLength, fileName, fileNameLength, realFullDir);
+
+    if (sprintf_s(recvAbsPath, pathSize, "%s/%s", realFullDir, fileName) == -1) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy filename error");
+        SoftBusFree(absFullDir);
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recvAbsPath[%s]", recvAbsPath);
+    SoftBusFree(absFullDir);
+    return SOFTBUS_OK;
+}
+
+static int32_t CreateDirAndGetAbsPath(const char *filePath, char *recvAbsPath, int32_t pathSize)
+{
+    if ((filePath == NULL) || (recvAbsPath == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input");
+        return SOFTBUS_ERR;
+    }
     uint32_t len = (uint32_t)strlen(filePath);
     int32_t ret;
     char *tempPath = (char *)SoftBusCalloc(len + 1);
@@ -671,10 +891,14 @@ static int32_t CreateDestDir(const char *filePath)
     }
 
     SoftBusFree(tempPath);
+    if (GetAbsFullPath(filePath, recvAbsPath, pathSize) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest dir is invalid");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
-static char *CreateFullRecvPath(const char *filePath, const char *recvRootDir)
+static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
 {
     if ((filePath == NULL) || (recvRootDir == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is null or rootDir is null");
@@ -729,7 +953,15 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
         return NULL;
     }
 
-    char *fullRecvPath = CreateFullRecvPath(destFilePath, rootDir);
+    if (strstr(rootDir, "..") != NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rootDir[%s] is not cannoical form", rootDir);
+        SoftBusFree(destFilePath);
+        return NULL;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destFilePath[%s], rootDir[%s]", destFilePath, rootDir);
+
+    char *fullRecvPath = GetFullRecvPath(destFilePath, rootDir);
     if (IsPathValid(fullRecvPath) == false) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFilePath is invalid");
         SoftBusFree(destFilePath);
@@ -738,7 +970,21 @@ static char *GetFileAbsPathAndSeq(FileFrame fileFrame, const char *rootDir, uint
     }
 
     SoftBusFree(destFilePath);
-    return fullRecvPath;
+    int32_t pathSize = strlen(fullRecvPath) + 1;
+    char *absFullPath = (char *)SoftBusCalloc(pathSize);
+    if (absFullPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "absFullPath is null");
+        SoftBusFree(fullRecvPath);
+        return NULL;
+    }
+    if (CreateDirAndGetAbsPath(fullRecvPath, absFullPath, pathSize) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create dest dir failed");
+        SoftBusFree(fullRecvPath);
+        SoftBusFree(absFullPath);
+        return NULL;
+    }
+    SoftBusFree(fullRecvPath);
+    return absFullPath;
 }
 
 static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileListener fileListener)
@@ -747,6 +993,7 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock fileFromFrame fail");
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create file from frame start");
     uint32_t seq = 0;
 
     char *fullRecvPath = GetFileAbsPathAndSeq(fileFrame, fileListener.rootDir, &seq);
@@ -757,8 +1004,8 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fullRecvPath %s, seq:%u", fullRecvPath, seq);
-    if (CreateDestDir(fullRecvPath) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateDestFile failed");
+    if (CheckRecvFileExist(fullRecvPath) == true) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is already exist and busy");
         goto EXIT_ERR;
     }
 
@@ -840,7 +1087,7 @@ static int32_t WriteFrameToFile(FileFrame fileFrame)
     uint32_t seq = 0;
     SingleFileInfo fileInfo = {0};
     if (GetDestFileFrameSeq(fileFrame, &seq) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dest file frame failed");
         SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
@@ -852,6 +1099,7 @@ static int32_t WriteFrameToFile(FileFrame fileFrame)
     }
 
     if (fileInfo.fileStatus == NODE_ERR) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fileStatus is error");
         goto EXIT_ERR;
     }
     if (ProcessOneFrame(fileFrame, fileInfo, seq) != SOFTBUS_OK) {
@@ -1008,32 +1256,47 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     }
 
     FileListBuffer bufferInfo;
-    char firtFilePath[MAX_REMOTE_PATH_LEN] = {0};
+    char firstFilePath[MAX_FILE_PATH_NAME_LEN] = {0};
     int32_t fileCount = 0;
     bufferInfo.buffer = (uint8_t *)data;
     bufferInfo.bufferSize = (uint32_t)len;
-    int32_t ret = BufferToFileList(bufferInfo, firtFilePath, &fileCount);
+    int32_t ret = BufferToFileList(bufferInfo, firstFilePath, &fileCount);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Buffer To File List failed");
         SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
-
-    char *fullRecvPath = CreateFullRecvPath(firtFilePath, fileListener.rootDir);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "rootDir:%s, firstFilePath:%s", fileListener.rootDir, firstFilePath);
+    char *fullRecvPath = GetFullRecvPath(firstFilePath, fileListener.rootDir);
     if (IsPathValid(fullRecvPath) == false) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fullRecvPath is invalid");
         SoftBusFree(fullRecvPath);
         SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fullRecvPath:%s", fullRecvPath);
+
+    char *absRecvPath = (char *)SoftBusCalloc(PATH_MAX + 1);
+    if (absRecvPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
+        return SOFTBUS_ERR;
+    }
+    const char *realRecvPath = GetAndCheckRealPath(fullRecvPath, absRecvPath);
+    if (realRecvPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get recv abs file path failed");
+        SoftBusFree(fullRecvPath);
+        SoftBusFree(absRecvPath);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fullRecvPath:%s", realRecvPath);
 
     if (fileListener.recvListener.OnReceiveFileFinished != NULL) {
-        fileListener.recvListener.OnReceiveFileFinished(sessionId, fullRecvPath, fileCount);
+        fileListener.recvListener.OnReceiveFileFinished(sessionId, realRecvPath, fileCount);
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Process File List Data success!!!");
     SoftBusFree(fullRecvPath);
+    SoftBusFree(absRecvPath);
     SoftBusMutexUnlock(&g_recvFileInfo.lock);
     return SOFTBUS_OK;
 }
@@ -1064,7 +1327,7 @@ static int32_t SendFileList(int32_t channelId, const char **destFile, uint32_t f
     return SOFTBUS_OK;
 }
 
-static int32_t SendSingleFile(int32_t channelId, const char *sourceFile, const char *destFile)
+static int32_t SendSingleFile(SendListenerInfo sendInfo, const char *sourceFile, const char *destFile)
 {
     if ((sourceFile == NULL) || (destFile == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourfile or dstfile is null");
@@ -1073,7 +1336,7 @@ static int32_t SendSingleFile(int32_t channelId, const char *sourceFile, const c
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file[%s] begin, dest is :%s", sourceFile, destFile);
 
     int32_t ret;
-    ret = FileToFrameAndSendFile(channelId, sourceFile, destFile);
+    ret = FileToFrameAndSendFile(sendInfo, sourceFile, destFile);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FileToFrameAndSendFile failed");
         return SOFTBUS_ERR;
@@ -1084,50 +1347,81 @@ static int32_t SendSingleFile(int32_t channelId, const char *sourceFile, const c
     return SOFTBUS_OK;
 }
 
-static int32_t ProxySendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
+static int32_t ProxySendFile(SendListenerInfo sendInfo, const char *sFileList[], const char *dFileList[],
     uint32_t fileCnt)
 {
-    if (SoftBusMutexLock(&g_sendFileInfo.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        return SOFTBUS_ERR;
-    }
-
     int32_t ret;
     if ((fileCnt == 0) || (fileCnt > MAX_FILE_NUM)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile arg filecnt[%d] error", fileCnt);
-        SoftBusMutexUnlock(&g_sendFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
     if (!IsValidFileString(sFileList, fileCnt, MAX_FILE_PATH_NAME_LEN) ||
-        !IsValidFileString(dFileList, fileCnt, MAX_REMOTE_PATH_LEN)) {
+        !IsValidFileString(dFileList, fileCnt, MAX_FILE_PATH_NAME_LEN)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile invalid arg input");
-        SoftBusMutexUnlock(&g_sendFileInfo.lock);
         return SOFTBUS_ERR;
     }
 
     for (uint32_t index = 0; index < fileCnt; index++) {
-        ret = SendSingleFile(channelId, sFileList[index], dFileList[index]);
+        ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendSingleFile %s, failed", sFileList[index]);
-            SoftBusMutexUnlock(&g_sendFileInfo.lock);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file %s, failed", sFileList[index]);
             return SOFTBUS_ERR;
         }
     }
 
-    ret = SendFileList(channelId, dFileList, fileCnt);
+    ret = SendFileList(sendInfo.channelId, dFileList, fileCnt);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendFileList failed");
-        SoftBusMutexUnlock(&g_sendFileInfo.lock);
         return SOFTBUS_ERR;
     }
-    
-    SoftBusMutexUnlock(&g_sendFileInfo.lock);
+
+    if (sendInfo.fileListener.sendListener.OnSendFileFinished != NULL) {
+        sendInfo.fileListener.sendListener.OnSendFileFinished(sendInfo.sessionId, dFileList[0]);
+    }
     return SOFTBUS_OK;
 }
 
 int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
     uint32_t fileCnt)
 {
-    return ProxySendFile(channelId, sFileList, dFileList, fileCnt);
+    if (SoftBusMutexLock(&g_sendFileInfo.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+    SendListenerInfo sendInfo;
+    memset_s(&sendInfo, sizeof(sendInfo), 0, sizeof(sendInfo));
+    int32_t sessionId;
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get sessionId failed, channelId [%d]", channelId);
+        goto EXIT_ERR;
+    }
+
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME)
+        != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get sessionId name failed");
+        goto EXIT_ERR;
+    }
+
+    sendInfo.channelId = channelId;
+    sendInfo.sessionId = sessionId;
+    if (TransGetFileListener(sessionName, &sendInfo.fileListener) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
+        goto EXIT_ERR;
+    }
+    if (ProxySendFile(sendInfo, sFileList, dFileList, fileCnt) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file failed");
+        goto EXIT_ERR;
+    }
+    SoftBusMutexUnlock(&g_sendFileInfo.lock);
+    return SOFTBUS_OK;
+EXIT_ERR:
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file trans error failed");
+    if (sendInfo.fileListener.sendListener.OnFileTransError != NULL) {
+        sendInfo.fileListener.sendListener.OnFileTransError(sendInfo.sessionId);
+    }
+    SoftBusMutexUnlock(&g_sendFileInfo.lock);
+    return SOFTBUS_ERR;
 }
