@@ -699,7 +699,6 @@ static char *GetDestFilePath(FileFrame fileFrame)
         return NULL;
     }
 
-
     int32_t filePathSize = fileFrame.frameLength - FRAME_DATA_SEQ_OFFSET + 1;
     if (filePathSize > MAX_FILE_PATH_NAME_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is too long");
