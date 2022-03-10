@@ -85,8 +85,8 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(addrTypeLen)) {
@@ -131,8 +131,8 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(networkId)) {
@@ -169,8 +169,8 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteBool(isOnline)) {
@@ -212,8 +212,8 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTy
     }
     MessageParcel data;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged type: %d", type);
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(type)) {
@@ -254,8 +254,8 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
@@ -292,8 +292,8 @@ void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
         return;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteInt32(publishId)) {
@@ -319,8 +319,8 @@ void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
         return;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteInt32(refreshId)) {
@@ -346,8 +346,8 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
         return;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteUint32(deviceLen)) {

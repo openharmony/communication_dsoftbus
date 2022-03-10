@@ -30,8 +30,8 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
@@ -118,8 +118,8 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
@@ -156,8 +156,8 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(networkId)) {
@@ -191,8 +191,8 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
@@ -227,8 +227,8 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
@@ -276,8 +276,8 @@ int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelTy
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
