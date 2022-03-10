@@ -49,8 +49,8 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -90,8 +90,8 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -123,8 +123,8 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -163,8 +163,8 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
