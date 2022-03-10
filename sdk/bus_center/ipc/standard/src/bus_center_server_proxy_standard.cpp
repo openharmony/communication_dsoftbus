@@ -196,8 +196,8 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info,
-    uint32_t infoTypeLen, int *infoNum)
+int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName,
+    void **info, uint32_t infoTypeLen, int *infoNum)
 {
     if (info == nullptr || infoNum == nullptr) {
         return SOFTBUS_ERR;
