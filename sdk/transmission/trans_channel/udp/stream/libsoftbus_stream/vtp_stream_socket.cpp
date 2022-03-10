@@ -918,7 +918,7 @@ void VtpStreamSocket::DoStreamRecv()
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv stream");
         dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame lenth error, dataLength = %d", dataLength);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame length error, dataLength = %d", dataLength);
             break;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
