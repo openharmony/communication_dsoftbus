@@ -70,8 +70,8 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     int ret = data.WriteRemoteObject(clientStub);
