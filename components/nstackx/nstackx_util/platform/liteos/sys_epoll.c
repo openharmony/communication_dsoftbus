@@ -831,9 +831,11 @@ int32_t EpollLoop(EpollDesc epollfd, int32_t timeout)
     }
 
     epollSetPtr = container_of(epollfd, EpollSet, epollfd);
-    memcpy_s(&readfds, sizeof(fd_set), &epollSetPtr->readfds, sizeof(fd_set));
-    memcpy_s(&writefds, sizeof(fd_set), &epollSetPtr->writefds, sizeof(fd_set));
-    memcpy_s(&exceptfds, sizeof(fd_set), &epollSetPtr->exceptfds, sizeof(fd_set));
+    if (memcpy_s(&readfds, sizeof(fd_set), &epollSetPtr->readfds, sizeof(fd_set)) != EOK ||
+        memcpy_s(&writefds, sizeof(fd_set), &epollSetPtr->writefds, sizeof(fd_set)) != EOK ||
+        memcpy_s(&exceptfds, sizeof(fd_set), &epollSetPtr->exceptfds, sizeof(fd_set)) != EOK) {
+        return NSTACKX_EFAILED;
+    }
 
     ret = select(epollSetPtr->maxfd + 1, &readfds, &writefds, &exceptfds, tvp);
     if (ret < 0) {
