@@ -745,8 +745,11 @@ static int32_t GetDestFileFrameSeq(FileFrame fileFrame, uint32_t *seq)
 
 static bool IsPathValid(char *filePath)
 {
-    if ((filePath == NULL) || (strlen(filePath) == 0) ||
-        (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
+    if (filePath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is null");
+        return false;
+    }
+    if ((strlen(filePath) == 0) || (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size[%d] is wrong", (int32_t)strlen(filePath));
         return false;
     }
