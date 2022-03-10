@@ -88,7 +88,7 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed write InterfaceToken failed!");
         return;
     }
@@ -113,7 +113,7 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
     }
 
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess write InterfaceToken failed!");
         return;
     }
