@@ -17,3 +17,9 @@ int ClientStubInit(void)
 {
     return 0;
 }
+
+int ClientRegisterService(const char *pkgName)
+{
+    (void)pkgName;
+    return 0;
+}

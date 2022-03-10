@@ -22,9 +22,11 @@
 extern "C" {
 #endif
 
+#define SOFTBUS_PKGNAME_MAX_NUM 2
+
 int32_t InitSoftBus(const char *pkgName);
-int32_t GetSoftBusClientName(char *name, uint32_t len);
 int32_t CheckPackageName(const char *pkgName);
+uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len);
 
 #ifdef __cplusplus
 }

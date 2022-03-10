@@ -22,6 +22,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_client_death_recipient.h"
 #include "softbus_client_frame_manager.h"
@@ -53,14 +54,18 @@ static int InnerRegisterService(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    char clientName[PKG_NAME_SIZE_MAX] = {0};
-    if (GetSoftBusClientName(clientName, sizeof(clientName)) != SOFTBUS_OK) {
+    char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
+    uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
+    if (clientNameNum == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
         return SOFTBUS_ERR;
     }
-    while (serverProxyFrame->SoftbusRegisterService(clientName, nullptr) != SOFTBUS_OK) {
-        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-        continue;
+    for (uint32_t i = 0; i < clientNameNum; i++) {
+        while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr) != SOFTBUS_OK) {
+            SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+            continue;
+        }
+        SoftBusFree(clientName[i]);
     }
     int32_t ret = ReCreateSessionServerToServer();
     if (ret != SOFTBUS_OK) {
@@ -140,5 +145,25 @@ int32_t ClientStubInit(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed\n");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int ClientRegisterService(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "g_serverProxy is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
+    if (serverProxyFrame == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "serverProxyFrame is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
+        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        continue;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s softbus server register service success!\n", pkgName);
     return SOFTBUS_OK;
 }
