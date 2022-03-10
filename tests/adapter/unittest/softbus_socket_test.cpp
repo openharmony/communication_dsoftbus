@@ -112,7 +112,7 @@ static void SocketServiceStart(int localFlag)
         } else if (buf.cmd == CMD_RECV) {
             memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
             buf.cmd = CMD_REPLY;
-            strncpy_s(buf.data, sizeof(buf.data), "Beautiful World!", sizeof(buf.data));
+            (void)strncpy_s(buf.data, sizeof(buf.data), "Beautiful World!", sizeof(buf.data));
             ret = SoftBusSocketSend(acceptFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
             EXPECT_TRUE(ret != -1);
         } else {
@@ -1352,7 +1352,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
+    (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
     ret = SoftBusSocketSend(socketFd, (void *)&buf, 0, 0);
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     buf.cmd = CMD_EXIT;
@@ -1382,7 +1382,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
+    (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
     int32_t ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 1);
     EXPECT_TRUE(ret >= 0);
 
@@ -1429,7 +1429,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
+    (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddr));
     EXPECT_TRUE(ret >= 0);
 
@@ -1582,7 +1582,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Hello World!", sizeof(buf.data));
+    (void)strncpy_s(buf.data, sizeof(buf.data), "Hello World!", sizeof(buf.data));
     int32_t ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
 
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
@@ -1942,7 +1942,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
     EXPECT_TRUE(socketFd != -1);
 
     buf.cmd = CMD_RECV;
-    strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
+    (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
     ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     sleep(1);
     EXPECT_TRUE(ret >= 0);

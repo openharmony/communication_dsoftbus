@@ -119,7 +119,9 @@ static void TestDeviceFound(const DeviceInfo *device)
     if (strcmp(g_addr1.info.ble.bleMac, g_addr.info.ble.bleMac) != 0) {
         EXPECT_TRUE(g_testCount == TEST_BEGIN);
         g_testCount++;
-        strcpy_s(g_addr1.info.ble.bleMac, BT_MAC_LEN, g_addr.info.ble.bleMac);
+        if (strcpy_s(g_addr1.info.ble.bleMac, BT_MAC_LEN, g_addr.info.ble.bleMac) != EOK) {
+            return;
+        }
         printf("[client]TestDeviceFound\r\n");
         printf("addr mac = %s\r\n", g_addr1.info.ble.bleMac);
         printf("account = %s\r\n", device->hwAccountHash);
