@@ -275,7 +275,7 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write InterfaceToken failed!");
-         return SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel id failed!");
@@ -356,7 +356,7 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }

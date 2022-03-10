@@ -254,7 +254,7 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if(!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
