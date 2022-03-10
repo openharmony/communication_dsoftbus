@@ -1490,15 +1490,15 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
         goto EXIT;
     }
     if (DiscBleLooperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init looper falied");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init looper failed");
         goto EXIT;
     }
     if (DiscBleInitPublish() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init publish falied");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init publish failed");
         goto EXIT;
     }
     if (DiscBleInitSubscribe() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init subscribe falied");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc ble Init subscribe failed");
         goto EXIT;
     }
     if (InitBleListener() != SOFTBUS_OK) {

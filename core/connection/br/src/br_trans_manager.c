@@ -150,17 +150,17 @@ int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
         }
         (void)pthread_mutex_unlock(&brConnInfo->lock);
 
-        int32_t sendLenth = tempLen;
-        if (sendLenth > brSendPeerLen) {
-            sendLenth = brSendPeerLen;
+        int32_t sendLength = tempLen;
+        if (sendLength > brSendPeerLen) {
+            sendLength = brSendPeerLen;
         }
-        writeRet = sppDriver->Write(socketFd, tempData, sendLenth);
+        writeRet = sppDriver->Write(socketFd, tempData, sendLength);
         if (writeRet == -1) {
             ret = SOFTBUS_ERR;
             break;
         }
-        tempData += sendLenth;
-        tempLen -= sendLenth;
+        tempData += sendLength;
+        tempLen -= sendLength;
     }
     ReleaseConnectionRef(brConnInfo);
     return ret;
