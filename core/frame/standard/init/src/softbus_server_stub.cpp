@@ -139,6 +139,10 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServerStub::OnReceived, code = %u", code);
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SOFTBUS_SERVER_NOT_INIT ReadInterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (GetServerIsInit() == false) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
         if (!reply.WriteInt32(SOFTBUS_SERVER_NOT_INIT)) {
