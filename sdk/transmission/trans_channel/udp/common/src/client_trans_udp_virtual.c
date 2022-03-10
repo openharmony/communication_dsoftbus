@@ -19,6 +19,7 @@
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
 {
+    (void)callback;
     return SOFTBUS_OK;
 }
 
@@ -56,17 +57,24 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     const StreamFrameInfo *param)
 {
     (void)channelId;
+    (void)data;
+    (void)ext;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     (void)channelId;
+    (void)sFileList;
+    (void)dFileList;
+    (void)fileCnt;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 {
+    (void)dfileId;
+    (void)udpChannel;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
