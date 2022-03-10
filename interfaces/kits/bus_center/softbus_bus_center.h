@@ -419,7 +419,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
  * @since 1.0
  * @version 1.0
  */
-int32_t LeaveLNN(const char *networkId, OnLeaveLNNResult cb);
+int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 
 /**
  * @brief Registers a callback for device state changes.
