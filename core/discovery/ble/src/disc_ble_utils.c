@@ -141,7 +141,7 @@ int32_t DiscBleGetDeviceName(char *deviceName)
     if (deviceName == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local device name failed.");
         return SOFTBUS_ERR;
     }

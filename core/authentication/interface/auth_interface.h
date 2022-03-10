@@ -303,6 +303,16 @@ int32_t AuthSetP2pMac(int64_t authId, const char *mac);
  */
 int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, ConnectOption *option);
 
+/**
+ * @brief Get ConnectOption info by uuid and ConnectType.
+ *
+ * @param uuid device uuid string.
+ * @param type connect type.
+ * @param option connect option info {@link ConnectOption}.
+ * @return return SOFTBUS_OK if get successfully, otherwise return an error code.
+ */
+int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option);
+
 #ifdef __cplusplus
 }
 #endif
