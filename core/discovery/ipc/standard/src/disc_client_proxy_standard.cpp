@@ -64,8 +64,8 @@ void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound write InterfaceToken failed!");
         return;
     }
     data.WriteBuffer(deviceInfo, sizeof(DeviceInfo));
@@ -88,8 +88,8 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed write InterfaceToken failed!");
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed write InterfaceToken failed!");
         return;
     }
     data.WriteInt32(subscribeId);
@@ -113,8 +113,8 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess write InterfaceToken failed!");
+    if(!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess write InterfaceToken failed!");
         return;
     }
     data.WriteInt32(subscribeId);
@@ -137,8 +137,8 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess write InterfaceToken failed!");
         return;
     }
     data.WriteInt32(publishId);
@@ -161,8 +161,8 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
     }
 
     MessageParcel data;
-	if(!data.WriteInterfaceToken(GetDescriptor())) {
-		SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail write InterfaceToken failed!");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail write InterfaceToken failed!");
         return;
     }
     data.WriteInt32(publishId);
