@@ -61,7 +61,7 @@ public:
     virtual ssize_t GetExtBufferLen() const = 0;
 
     virtual int GetSeqNum() const = 0;
-    virtual int GetStreamId() const = 0;
+    virtual uint32_t GetStreamId() const = 0;
 };
 }; // namespace SoftBus
 }; // namespace Communication

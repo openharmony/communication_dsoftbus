@@ -55,7 +55,7 @@ static void ParseHwAccountHash(const cJSON *data, DeviceInfo *device)
     }
 }
 
-static void ParseItemDataFromServiceData(char *serviceData, const char *key, char *targetStr, int32_t len)
+static void ParseItemDataFromServiceData(char *serviceData, const char *key, char *targetStr, uint32_t len)
 {
     const char *itemDelimit = ",";
     const char *keyStr = NULL;

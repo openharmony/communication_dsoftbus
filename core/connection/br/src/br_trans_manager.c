@@ -39,7 +39,7 @@ static int32_t ReceivedHeadCheck(BrConnectionInfo *conn)
         return SOFTBUS_ERR;
     }
 
-    if (head->len + pktHeadLen > conn->recvSize) {
+    if ((int32_t)(head->len) + pktHeadLen > conn->recvSize) {
         conn->recvPos = 0;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
             "[ReceivedHeadCheck]data too large. module=%d, seq=%lld, datalen=%d", head->module, head->seq, head->len);
@@ -55,7 +55,7 @@ static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
     }
     int32_t bufLen = conn->recvPos;
     ConnPktHead *head = (ConnPktHead *)(conn->recvBuf);
-    int32_t packLen = head->len + sizeof(ConnPktHead);
+    int32_t packLen = (int32_t)(head->len) + sizeof(ConnPktHead);
     if (bufLen < packLen) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "not a complete package, continue");
         return NULL;
