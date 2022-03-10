@@ -528,13 +528,9 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         ListAdd(&g_busCenterClient.nodeStateCbList, &item->node);
         g_busCenterClient.nodeStateCbListCnt++;
         rc = SOFTBUS_OK;
-        item = NULL;
     } while (false);
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock node state cb list");
-    }
-    if (item != NULL) {
-        SoftBusFree(item);
     }
     return rc;
 }
