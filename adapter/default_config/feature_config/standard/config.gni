@@ -12,12 +12,12 @@
 # limitations under the License.
 
 declare_args() {
-  dsoftbus_standard_feature_disc_ble = false
+  dsoftbus_standard_feature_disc_ble = true
   dsoftbus_standard_feature_disc_coap = true
 
   dsoftbus_standard_feature_conn_tcp = true
-  dsoftbus_standard_feature_conn_br = false
-  dsoftbus_standard_feature_conn_ble = false
+  dsoftbus_standard_feature_conn_br = true
+  dsoftbus_standard_feature_conn_ble = true
   dsoftbus_standard_feature_conn_p2p = false
 
   dsoftbus_standard_feature_trans_udp = true
