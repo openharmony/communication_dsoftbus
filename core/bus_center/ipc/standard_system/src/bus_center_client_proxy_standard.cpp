@@ -294,7 +294,7 @@ void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
     MessageParcel data;
     if(!data.WriteInterfaceToken(GetDescriptor())) {
 		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return;
     }
     if (!data.WriteInt32(publishId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write publishId failed");
@@ -321,7 +321,7 @@ void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
     MessageParcel data;
     if(!data.WriteInterfaceToken(GetDescriptor())) {
 		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return;
     }
     if (!data.WriteInt32(refreshId)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write refreshId failed");
@@ -348,7 +348,7 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
     MessageParcel data;
     if(!data.WriteInterfaceToken(GetDescriptor())) {
 		SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
+        return;
     }
     if (!data.WriteUint32(deviceLen)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device length failed");
