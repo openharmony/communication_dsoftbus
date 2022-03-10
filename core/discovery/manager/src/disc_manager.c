@@ -467,7 +467,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
         }
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
             if (infoNode->id == info->id) {
-                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "id already exsisted");
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "id already existed");
                 (void)SoftBusMutexUnlock(&(serviceList->lock));
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }

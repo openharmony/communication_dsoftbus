@@ -571,7 +571,7 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId)
 {
     if (TransDecConnRefByConnId(connectionId) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "disconnect device connid %d", connectionId);
-        // BR dont disconect
+        // BR don't disconnect
         (void)ConnDisconnectDevice(connectionId);
     }
     return SOFTBUS_OK;

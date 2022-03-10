@@ -93,11 +93,11 @@ int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
 void ClientTransProxyDeinit(void)
 {
     if (SoftBusMutexDestroy(&g_sendFileInfo.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destory send file lock fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destroy send file lock fail");
         return;
     }
     if (SoftBusMutexDestroy(&g_recvFileInfo.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destory recv file lock fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destroy recv file lock fail");
         return;
     }
 }
