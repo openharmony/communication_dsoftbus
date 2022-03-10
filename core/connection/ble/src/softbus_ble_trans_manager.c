@@ -26,23 +26,23 @@
 #include "softbus_log.h"
 
 typedef struct {
-    int32_t seq;
-    int32_t size;
-    int32_t offset;
-    int32_t total;
+    uint32_t seq;
+    uint32_t size;
+    uint32_t offset;
+    uint32_t total;
 } BleTransHeader;
 
 static const int MTU_HEADER_SIZE = 3;
 static SoftBusBleTransCalback *g_softBusBleTransCb = NULL;
 
-static int32_t GetTransHeader(char *value, int32_t len, BleTransHeader *header)
+static int32_t GetTransHeader(char *value, uint32_t len, BleTransHeader *header)
 {
     BleTransHeader *tmpHeader = (BleTransHeader *)value;
     header->seq = ntohl(tmpHeader->seq);
     header->size = ntohl(tmpHeader->size);
     header->offset = ntohl(tmpHeader->offset);
     header->total = ntohl(tmpHeader->total);
-    if ((header->size != len - (int32_t)sizeof(BleTransHeader)) ||
+    if ((header->size != len - sizeof(BleTransHeader)) ||
         (header->total < header->size + header->offset) ||
         (header->offset < 0) || (header->total > MAX_DATA_LEN)) {
         return SOFTBUS_ERR;
@@ -102,7 +102,7 @@ char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32
     }
     if (header.size == header.total) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransRecv a full pack");
-        *outLen = (uint32_t)header.total;
+        *outLen = header.total;
         *index = -1;
         return value + sizeof(BleTransHeader);
     }
