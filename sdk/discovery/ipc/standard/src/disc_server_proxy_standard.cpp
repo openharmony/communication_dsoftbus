@@ -189,84 +189,129 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
 
 int32_t DiscServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
 {
+    (void)clientPkgName;
+    (void)object;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
 {
+    (void)pkgName;
+    (void)sessionName;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
+    (void)pkgName;
+    (void)sessionName;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
+    (void)param;
+    (void)info;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
+    (void)sessionName;
+    (void)addrInfo;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId)
 {
+    (void)channelId;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
+    (void)channelId;
+    (void)channelType;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *data,
     uint32_t len, int32_t msgType)
 {
+    (void)channelId;
+    (void)channelType;
+    (void)data;
+    (void)len;
+    (void)msgType;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
+    (void)pkgName;
+    (void)addr;
+    (void)addrTypeLen;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::LeaveLNN(const char *pkgName, const char *networkId)
 {
+    (void)pkgName;
+    (void)networkId;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
 {
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    (void)infoNum;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
     uint32_t len)
 {
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {
+    (void)pkgName;
+    (void)targetNetworkId;
+    (void)accuracy;
+    (void)period;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
+    (void)pkgName;
+    (void)targetNetworkId;
     return SOFTBUS_OK;
 }
 
 int32_t DiscServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
+    (void)channelId;
+    (void)chanType;
+    (void)appType;
+    (void)quality;
     return SOFTBUS_OK;
 }
 }
