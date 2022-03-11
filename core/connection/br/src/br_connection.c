@@ -976,9 +976,9 @@ void BrConnectedEventHandle(bool isClient, uint32_t value)
     uint32_t connInfoId;
     int32_t socketFd = -1;
     if (isClient) {
-        connInfoId = (uint32_t)value;
+        connInfoId = value;
     } else {
-        socketFd = value;
+        socketFd = (int32_t)value;
         connInfoId = ServerOnBrConnect(socketFd);
     }
     if (connInfoId == 0) {

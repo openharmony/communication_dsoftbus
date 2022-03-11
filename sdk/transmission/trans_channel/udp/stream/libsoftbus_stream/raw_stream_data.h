@@ -65,7 +65,7 @@ private:
         return 0;
     }
 
-    int GetStreamId() const override
+    uint32_t GetStreamId() const override
     {
         return 0;
     }

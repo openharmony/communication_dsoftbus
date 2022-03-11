@@ -464,10 +464,13 @@ int32_t AuthHandleLeaveLNN(int64_t authId)
     (void)SoftBusMutexUnlock(&g_authLock);
     if (IsWiFiLink(auth)) {
         AuthCloseTcpFd(auth->fd);
+        DeleteAuth(auth);
     } else if (auth->status != AUTH_PASSED || auth->option.type == CONNECT_BR) {
         ConnDisconnectDevice(auth->connectionId);
+    } else {
+        DeleteAuth(auth);
     }
-    DeleteAuth(auth);
+
     return SOFTBUS_OK;
 }
 
@@ -897,6 +900,9 @@ static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
     info->flag = *(int32_t *)data;
     data += sizeof(int32_t);
     info->dataLen = *(uint32_t *)data;
+    if ((info->dataLen + sizeof(AuthDataInfo)) > len) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1885,38 +1891,6 @@ int32_t AuthInit(void)
     return SOFTBUS_OK;
 }
 
-int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *connInfo)
-{
-    AuthManager *item = NULL;
-    AuthManager *next = NULL;
-    if (SoftBusMutexLock(&g_authLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authClientHead, AuthManager, node) {
-        if (IsP2PLink(item) || item->option.type != type) {
-            continue;
-        }
-        if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
-            (void)ConvertOptionToAuthConnInfo(&item->option, item->isAuthP2p, connInfo);
-            (void)SoftBusMutexUnlock(&g_authLock);
-            return SOFTBUS_OK;
-        }
-    }
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authServerHead, AuthManager, node) {
-        if (IsP2PLink(item) || item->option.type != type) {
-            continue;
-        }
-        if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
-            (void)ConvertOptionToAuthConnInfo(&item->option, item->isAuthP2p, connInfo);
-            (void)SoftBusMutexUnlock(&g_authLock);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_authLock);
-    return SOFTBUS_ERR;
-}
-
 static AuthManager *GetAuthManagerInner(int64_t authId)
 {
     AuthManager *item = NULL;
@@ -2028,5 +2002,57 @@ int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, Connect
     }
     (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth not found by peer p2p mac: %d.", type);
+    return SOFTBUS_ERR;
+}
+
+int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *connInfo)
+{
+    ConnectOption option = {0};
+    if (uuid == NULL || strlen(uuid) == 0 || connInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (AuthGetActiveConnectOption(uuid, type, &option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get active auth fail, type = %d.", type);
+        return SOFTBUS_ERR;
+    }
+    (void)ConvertOptionToAuthConnInfo(&option, false, connInfo);
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option)
+{
+    if (uuid == NULL || strlen(uuid) == 0 || option == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *item = NULL;
+    AuthManager *next = NULL;
+    if (SoftBusMutexLock(&g_authLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authClientHead, AuthManager, node) {
+        if (IsP2PLink(item) || item->option.type != type) {
+            continue;
+        }
+        if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
+            (void)memcpy_s(option, sizeof(ConnectOption), &item->option, sizeof(ConnectOption));
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authServerHead, AuthManager, node) {
+        if (IsP2PLink(item) || item->option.type != type) {
+            continue;
+        }
+        if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
+            (void)memcpy_s(option, sizeof(ConnectOption), &item->option, sizeof(ConnectOption));
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authLock);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "active auth not found, type = %d.", type);
     return SOFTBUS_ERR;
 }
