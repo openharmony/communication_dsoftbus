@@ -99,11 +99,11 @@ static BleGattcInfo *GetBleGattcInfoByClientIdInner(int32_t clientId)
     BleGattcInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &(g_gattcInfoList->list), BleGattcInfo, node) {
         if (clientId == infoNode->clientId) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBleGattcInfoByClientId exsist");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBleGattcInfoByClientId exist");
             return infoNode;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
     return NULL;
 }
 
@@ -119,7 +119,7 @@ static int32_t AddGattcInfoToList(BleGattcInfo *info)
         if (memcmp(infoNode->peerAddr.addr, info->peerAddr.addr, BT_ADDR_LEN) != 0) {
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "peer bleaddr already exsisted");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "peer bleaddr already existed");
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         return SOFTBUS_GATTC_DUPLICATE_PARAM;
     }
@@ -170,7 +170,7 @@ int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t 
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientIdInner not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientIdInner not exist");
         return SOFTBUS_ERR;
     }
     if (infoNode->state != BLE_GATT_CLIENT_CONNECTED) {
@@ -241,7 +241,7 @@ int32_t SoftBusGattClientDisconnect(int32_t clientId)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return SOFTBUS_BLEGATTC_NODE_NOT_EXIST;
     }
     infoNode->state = BLE_GATT_CLIENT_STOPPING;
@@ -286,7 +286,7 @@ static void ConnectedMsgHandler(int32_t clientId, int status)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
 
@@ -325,7 +325,7 @@ static void SearchedMsgHandler(int32_t clientId, int status)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
     if (infoNode->state != BLE_GATT_CLIENT_SERVICE_SEARCHING) {
@@ -407,7 +407,7 @@ static void NotificatedMsgHandler(int32_t clientId, int status)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
 
@@ -449,7 +449,7 @@ static void DisconnectedMsgHandler(int32_t clientId, int status)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
     if ((status != SOFTBUS_GATT_SUCCESS) ||
@@ -477,7 +477,7 @@ static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
     if (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_MTU_SETTED) != true) {
@@ -602,7 +602,7 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exsist");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
         return;
     }
     if ((status != SOFTBUS_GATT_SUCCESS) || infoNode->state != BLE_GATT_CLIENT_CONNECTED) {

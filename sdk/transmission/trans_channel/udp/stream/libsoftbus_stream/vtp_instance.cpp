@@ -150,7 +150,7 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
         }
         initVtpCount_++;
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "vtp instance is already created, return ture. PKG(%s)", pkgName.c_str());
+            "vtp instance is already created, return true. PKG(%s)", pkgName.c_str());
         return true;
     }
 

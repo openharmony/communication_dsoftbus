@@ -160,16 +160,16 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
     int32_t dataLenMax = connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader);
     int32_t offset = 0;
     while (tempLen > 0) {
-        int32_t sendLenth = tempLen;
-        if (sendLenth > dataLenMax) {
-            sendLenth = dataLenMax;
+        int32_t sendLength = tempLen;
+        if (sendLength > dataLenMax) {
+            sendLength = dataLenMax;
         }
-        char *buff = (char *)SoftBusCalloc(sendLenth + sizeof(BleTransHeader));
+        char *buff = (char *)SoftBusCalloc(sendLength + sizeof(BleTransHeader));
         if (buff == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc failed");
             return SOFTBUS_MALLOC_ERR;
         }
-        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendLenth, sendData, sendLenth);
+        int ret = memcpy_s(buff + sizeof(BleTransHeader), sendLength, sendData, sendLength);
         if (ret != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend big msg, len:%d\n", tempLen);
             SoftBusFree(buff);
@@ -177,20 +177,20 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
         }
         BleTransHeader *transHeader = (BleTransHeader *)buff;
         transHeader->total = htonl(len);
-        transHeader->size = htonl(sendLenth);
+        transHeader->size = htonl(sendLength);
         transHeader->offset = htonl(offset);
         transHeader->seq = htonl(seq);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend  module:%d", module);
-        ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLenth + sizeof(BleTransHeader), module);
+        ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLength + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend BleHalSend failed");
             SoftBusFree(buff);
             return ret;
         }
         SoftBusFree(buff);
-        sendData += sendLenth;
-        tempLen -= sendLenth;
-        offset += sendLenth;
+        sendData += sendLength;
+        tempLen -= sendLength;
+        offset += sendLength;
     }
     return SOFTBUS_OK;
 }
