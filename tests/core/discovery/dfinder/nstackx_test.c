@@ -148,12 +148,14 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
     char *devIdStr = GetDeviceId();
     if (devIdStr == NULL) {
         printf("get device id string failed.\n");
+        free(localDevInfo);
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), devIdStr) != EOK) {
         cJSON_free(devIdStr);
         printf("strcpy_s device id failed.\n");
+        free(localDevInfo);
         return SOFTBUS_ERR;
     }
     cJSON_free(devIdStr);
@@ -162,6 +164,7 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
         strcpy_s(localDevInfo->networkName, sizeof(localDevInfo->networkName), NET_WORK_NAME) != EOK ||
         strcpy_s(localDevInfo->version, sizeof(localDevInfo->version), VERSION) != EOK) {
         printf("strcpy_s failed.\n");
+        free(localDevInfo);
         return SOFTBUS_ERR;
     }
     localDevInfo->deviceType = DEVICE_TYPE;

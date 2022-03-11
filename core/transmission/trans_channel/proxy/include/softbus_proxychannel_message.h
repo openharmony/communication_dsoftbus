@@ -50,7 +50,7 @@ typedef enum {
 #define JSON_KEY_REQUEST_ID "REQUEST_ID"
 
 typedef struct {
-    uint8_t type; // MsgType //VESION
+    uint8_t type; // MsgType
     uint8_t chiper;
     int16_t myId;
     int16_t peerId;

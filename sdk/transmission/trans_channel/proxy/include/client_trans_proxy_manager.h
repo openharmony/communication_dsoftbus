@@ -31,7 +31,6 @@ extern "C" {
 #endif
 #define MAX_RECV_FILE_NUM 50
 #define MAX_FILE_PATH_NAME_LEN 512
-#define MAX_REMOTE_PATH_LEN 512
 
 #define FRAME_DATA_SEQ_OFFSET (4)
 #define PROXY_MAX_PACKET_SIZE (1024 - 48)
@@ -42,6 +41,12 @@ extern "C" {
 
 #define INVALID_NODE_INDEX (-1)
 #define INVALID_FD (-1)
+
+typedef struct {
+    int32_t channelId;
+    int32_t sessionId;
+    FileListener fileListener;
+} SendListenerInfo;
 
 typedef struct {
     uint32_t seqCount;
@@ -73,7 +78,7 @@ typedef struct {
     int32_t fileStatus; /* 0: idle 1:busy */
     uint64_t fileOffset;
     int32_t timeOut;
-    char filePath[MAX_REMOTE_PATH_LEN];
+    char filePath[MAX_FILE_PATH_NAME_LEN];
 } SingleFileInfo;
 
 typedef struct {
@@ -84,6 +89,8 @@ typedef struct {
 } RecvFileInfo;
 
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb);
+
+void ClientTransProxyDeinit(void);
 
 int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 
@@ -103,10 +110,10 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
 int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
     uint32_t fileCnt);
 
-int32_t ProcessFileFrameData(int32_t        sessionId, FileListener fileListener, const char *data, int32_t len,
+int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len,
     int32_t type);
 
-int32_t ProcessFileListData(int32_t        sessionId, FileListener fileListener, const char *data, int32_t len);
+int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len);
 
 #ifdef __cplusplus
 }

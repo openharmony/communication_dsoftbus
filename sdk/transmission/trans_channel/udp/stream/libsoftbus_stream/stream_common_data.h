@@ -73,7 +73,7 @@ public:
         return curSeqNum_;
     }
 
-    int GetStreamId() const override
+    uint32_t GetStreamId() const override
     {
         return curStreamId_;
     }
@@ -89,7 +89,7 @@ protected:
     ssize_t extBufLen_ = 0;
 
     uint16_t curSeqNum_ = 0;
-    int curStreamId_ = 0;
+    uint32_t curStreamId_ = 0;
 };
 } // namespace SoftBus
 } // namespace Communication
