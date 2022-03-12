@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback);
+int32_t LnnInitBleHeartbeat(const LnnHeartbeatImplCallback *callback);
 int32_t LnnOnceBleHbBegin(void);
 int32_t LnnOnceBleHbEnd(void);
 int32_t LnnStopBleHeartbeat(void);
