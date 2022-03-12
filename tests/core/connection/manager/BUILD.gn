@@ -21,6 +21,8 @@ ohos_unittest("softbus_conn_manager_test") {
 
   if (dsoftbus_standard_feature_conn_br == true) {
     defines = [ "connection_enable_br_test" ]
+  } else {
+    defines = []
   }
 
   if (dsoftbus_standard_feature_conn_ble == true) {

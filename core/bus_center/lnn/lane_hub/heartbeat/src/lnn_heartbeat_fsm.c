@@ -50,7 +50,7 @@ typedef struct {
 } LnnHeartbeatStateHandler;
 
 static SoftBusHandler g_beatHandler = {0};
-static int32_t g_currentState = -1;
+static int32_t g_currentState = STATE_HB_UNINIT_INDEX;
 
 static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg);
 static int32_t OnDetectDeviceLost(const SoftBusMessage *msg);
@@ -69,6 +69,8 @@ static int32_t OnTryAsMasterNode(const SoftBusMessage *msg);
 static LnnHeartbeatEventHandler g_noneHbStateHandler[] = {
     {EVENT_HB_ENTER, OnHeartbeatStop},
     {EVENT_HB_START, OnHeartbeatStart},
+    {EVENT_HB_DEVICE_LOST, OnDetectDeviceLost},
+    {EVENT_HB_CHECK_DEV, OnCheckDeviceStatus},
     {EVENT_HB_EXIT, NULL}
 };
 
@@ -206,7 +208,7 @@ static int32_t PostMsgToHbHandler(int32_t what, uint64_t arg1, uint64_t arg2, vo
 {
     SoftBusMessage *msg = CreateHbHandlerMsg(what, arg1, arg2, obj);
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     g_beatHandler.looper->PostMessage(g_beatHandler.looper, msg);
     return SOFTBUS_OK;
@@ -218,8 +220,7 @@ static int32_t PostDelayMsgToHbHandler(int32_t what, uint64_t arg1, uint64_t arg
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB post delay msg, what=%d delayMillis=%llu msec",
-        what, delayMillis);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB post delay msg, what=%d delay=%llu msec", what, delayMillis);
     g_beatHandler.looper->PostMessageDelay(g_beatHandler.looper, msg, delayMillis);
     return SOFTBUS_OK;
 }
@@ -231,15 +232,11 @@ static int32_t RemoveHbMsgFunc(const SoftBusMessage *msg, void *args)
         return 1;
     }
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
-    if (delMsg->obj == NULL) {
-        if (msg->what == delMsg->what) {
-            return 0;
-        }
-    } else {
-        if ((msg->obj != NULL) && (msg->what == delMsg->what) && (msg->arg2 == delMsg->arg2) &&
-            (strcmp((const char *)msg->obj, (const char *)delMsg->obj) == 0)) {
-            return 0;
-        }
+    if ((delMsg->obj == NULL) && (msg->what == delMsg->what)) {
+        return 0;
+    } else if ((delMsg->obj != NULL) && (msg->obj != NULL) && (msg->what == delMsg->what) &&
+        (msg->arg2 == delMsg->arg2) && (strcmp((const char *)msg->obj, (const char *)delMsg->obj) == 0)) {
+        return 0;
     }
     return 1;
 }
@@ -334,9 +331,9 @@ int32_t LnnHbFsmInit(void)
     g_currentState = STATE_HB_NONE_INDEX;
     g_beatHandler.name = "heartbeat_handler";
     g_beatHandler.HandleMessage = HbMsgHandler;
-    g_beatHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    g_beatHandler.looper = CreateNewLooper("Heartbeat-Looper");
     if (g_beatHandler.looper == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get looper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB create looper fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -344,6 +341,11 @@ int32_t LnnHbFsmInit(void)
 
 void LnnHbFsmDeinit(void)
 {
+    if (g_beatHandler.looper != NULL) {
+        DestroyLooper(g_beatHandler.looper);
+        g_beatHandler.looper = NULL;
+        g_beatHandler.HandleMessage = NULL;
+    }
     g_currentState = STATE_HB_UNINIT_INDEX;
 }
 
@@ -377,20 +379,7 @@ static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
 static int32_t OnMasterStateEnter(const SoftBusMessage *msg)
 {
     (void)msg;
-    char udid[UDID_BUF_LEN] = {0};
 
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local udid err");
-        return SOFTBUS_ERR;
-    }
-    if (LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set local master node udid err");
-        return SOFTBUS_ERR;
-    }
-    if (LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight()) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set local master node weight err");
-        return SOFTBUS_ERR;
-    }
     if (LnnRemoveHbFsmMsg(EVENT_HB_REPEAT_CYCLE, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -463,6 +452,15 @@ static int32_t OnOneCycleBegin(const SoftBusMessage *msg)
     if (LnnHbMgrOneCycleBegin() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start mgr to perform one cycle fail");
         (void)LnnRemoveHbFsmMsg(EVENT_HB_TIMEOUT, 0, NULL);
+        return SOFTBUS_ERR;
+    }
+    if (LnnRemoveHbFsmMsg(EVENT_HB_ONCE_END, 0, NULL) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnRemoveHbFsmMsg(EVENT_HB_TIMEOUT, 0, NULL) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnRemoveHbFsmMsg(EVENT_HB_CHECK_DEV, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     if (LnnPostDelayMsgToHbFsm(EVENT_HB_ONCE_END, NULL, HB_ONE_CYCLE_LEN) != SOFTBUS_OK) {

@@ -21,6 +21,7 @@
 
 #include <securec.h>
 
+#include "lnn_connection_addr_utils.h"
 #include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
@@ -735,13 +736,14 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     return (*ptr);
 }
 
-static void MergeLnnRelation(const NodeInfo *oldInfo, NodeInfo *info)
+static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
 {
     int32_t i;
 
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
+        info->authChannelId[i] = oldInfo->authChannelId[i];
     }
 }
 
@@ -786,7 +788,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         } else {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "flag error");
         }
-        MergeLnnRelation(oldInfo, info);
+        MergeLnnInfo(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnMapSet(&map->udidMap, deviceId, info, sizeof(NodeInfo));
@@ -818,16 +820,21 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     if (type != CONNECTION_ADDR_MAX && info->relation[type] > 0) {
         info->relation[type]--;
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnGetDiscoveryType(type) == DISCOVERY_TYPE_BR) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
-
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
-        if (info->authChannelId != authId) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "not need to report offline.");
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnGetDiscoveryType(type) == DISCOVERY_TYPE_WIFI) {
+        if (info->authChannelId[type] != authId) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "authChannelId != authId, not need to report offline.");
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return REPORT_NONE;
         }
+    }
+    LnnClearDiscoveryType(info, LnnGetDiscoveryType(type));
+    if ((uint32_t)info->discoveryType != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%d after clear, not need to report offline.");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return REPORT_NONE;
     }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);

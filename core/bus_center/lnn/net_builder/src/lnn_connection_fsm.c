@@ -451,7 +451,7 @@ static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
         (uint64_t)times.usec / HB_TIME_FACTOR;
     connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
-    connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
+    connInfo->nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
     connInfo->nodeInfo->relation[connInfo->addr.type]++;
 }
 
