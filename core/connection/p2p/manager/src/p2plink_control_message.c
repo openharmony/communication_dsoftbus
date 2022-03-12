@@ -44,7 +44,7 @@ char* P2pLinkPackReuseRequest(const char *mac)
     return buf;
 }
 
-static int32_t P2pLinkUnPackReuseRequest(const cJSON *root, char *mac, int32_t len)
+static int32_t P2pLinkUnPackReuseRequest(const cJSON *root, char *mac, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to UnPackReuseRequest msg mac");
@@ -75,7 +75,7 @@ char* P2pLinkPackReuseResponse(const char *mac, int result)
     return buf;
 }
 
-static int32_t P2pLinkUnPackReuseResponse(const cJSON *root, char *mac, int32_t len, int32_t *result)
+static int32_t P2pLinkUnPackReuseResponse(const cJSON *root, char *mac, uint32_t len, int32_t *result)
 {
     if (!GetJsonObjectInt32Item(root, KEY_RESULT, result) ||
         !GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
@@ -105,10 +105,10 @@ char* P2pLinkPackDisconnectCmd(const char *mac)
     return buf;
 }
 
-static int32_t P2pLinkUnPackDisconnectCmd(const cJSON *root, char *mac, int32_t len)
+static int32_t P2pLinkUnPackDisconnectCmd(const cJSON *root, char *mac, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackReuseResponse");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackDisconnectCmd");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -135,7 +135,7 @@ char* P2pLinkPackHandshake(const char *mac, const char *ip)
     return buf;
 }
 
-static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, int32_t macLen, char *ip, int32_t ipLen)
+static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, uint32_t macLen, char *ip, uint32_t ipLen)
 {
     if (!GetJsonObjectStringItem(root, KEY_IP, ip, ipLen) ||
         !GetJsonObjectStringItem(root, KEY_MAC, mac, macLen)) {
@@ -165,10 +165,10 @@ char* P2pLinkPackWifiCfg(const char* wificfg)
     return buf;
 }
 
-static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, int32_t len)
+static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_SELF_WIFI_CONFIG, wificfg, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackReuseResponse");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackWifiCfg");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
