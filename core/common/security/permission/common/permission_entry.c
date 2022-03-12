@@ -109,8 +109,8 @@ static int32_t ReadConfigJson(const char* permissionFile)
 
 static int32_t GetPeMapValue(const char *string)
 {
-    int32_t mapSize = sizeof(g_peMap) / sizeof(PeMap);
-    int index;
+    uint32_t mapSize = sizeof(g_peMap) / sizeof(PeMap);
+    uint32_t index;
     for (index = 0; index < mapSize; index++) {
         if (strcmp(string, g_peMap[index].key) == 0) {
             return g_peMap[index].value;
@@ -132,12 +132,12 @@ static bool StrStartWith(const char *string, const char *target)
     if (string == NULL || target == NULL) {
         return false;
     }
-    int32_t stringLen = strlen(string);
-    int32_t targetLen = strlen(target);
+    size_t stringLen = strlen(string);
+    size_t targetLen = strlen(target);
     if (stringLen == 0 || targetLen == 0 || stringLen < targetLen) {
         return false;
     }
-    for (int index = 0; index < targetLen; index++) {
+    for (size_t index = 0; index < targetLen; index++) {
         if (string[index] != target[index]) {
             return false;
         }
