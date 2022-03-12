@@ -360,7 +360,7 @@ void NotifyAuthSuccess(int sessionId)
     }
 }
 
-static int CheckSessionIsOpened(int32_t sessionId)
+static int32_t CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 50000
@@ -369,7 +369,7 @@ static int CheckSessionIsOpened(int32_t sessionId)
 
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
         if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_NOT_FIND;
         }
         if (isEnable == true) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
