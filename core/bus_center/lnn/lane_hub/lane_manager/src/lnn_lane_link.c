@@ -77,6 +77,7 @@ static int32_t AddConnRequestItem(int32_t requestId, const char *networkId, int3
     item->authId = SOFTBUS_ERR;
 
     if (SoftBusMutexLock(&g_pendingList->lock) != 0) {
+        SoftBusFree(item);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock fail.");
         return SOFTBUS_LOCK_ERR;
     }
