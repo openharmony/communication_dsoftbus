@@ -41,26 +41,36 @@ static sptr<IRemoteObject> GetSystemAbility()
 
 int32_t TransServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
 {
+    (void)pkgName;
+    (void)subInfo;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 {
+    (void)pkgName;
+    (void)subscribeId;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::PublishService(const char *pkgName, const PublishInfo *pubInfo)
 {
+    (void)pkgName;
+    (void)pubInfo;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::UnPublishService(const char *pkgName, int publishId)
 {
+    (void)pkgName;
+    (void)publishId;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
 {
+    (void)clientPkgName;
+    (void)object;
     return SOFTBUS_OK;
 }
 
@@ -76,6 +86,10 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     }
 
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
@@ -110,6 +124,10 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     }
 
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write pkg name failed!");
         return SOFTBUS_ERR;
@@ -145,6 +163,10 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     }
 
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(param->sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
@@ -195,6 +217,10 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     }
     
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteCString(sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
@@ -226,6 +252,10 @@ int32_t TransServerProxy::NotifyAuthSuccess(int channelId)
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel id failed!");
         return SOFTBUS_ERR;
@@ -253,6 +283,10 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel id failed!");
         return SOFTBUS_ERR;
@@ -285,6 +319,10 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel id failed!");
         return SOFTBUS_ERR;
@@ -328,6 +366,10 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport channelId failed!");
         return SOFTBUS_ERR;
@@ -361,38 +403,61 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
 
 int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
+    (void)pkgName;
+    (void)addr;
+    (void)addrTypeLen;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::LeaveLNN(const char *pkgName, const char *networkId)
 {
+    (void)pkgName;
+    (void)networkId;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
 {
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
+    (void)infoNum;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
+    (void)pkgName;
+    (void)info;
+    (void)infoTypeLen;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
     uint32_t len)
 {
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {
+    (void)pkgName;
+    (void)targetNetworkId;
+    (void)accuracy;
+    (void)period;
     return SOFTBUS_OK;
 }
 
 int32_t TransServerProxy::StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
+    (void)pkgName;
+    (void)targetNetworkId;
     return SOFTBUS_OK;
 }
 }

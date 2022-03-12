@@ -70,6 +70,8 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
+int32_t Strnicmp(const char *src1, const char *src2, int32_t len);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -17,6 +17,7 @@
         "small",
         "standard"
       ],
+      "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
         "dsoftbus_standard_feature_conn_p2p",
         "dsoftbus_standard_feature_disc_ble",
