@@ -31,7 +31,7 @@ typedef struct {
 } SoftBusBleTransCalback;
 
 int32_t BleTransInit(SoftBusBleTransCalback *cb);
-int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module);
+int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module);
 char *BleTransRecv(int32_t halConnId, char *value, uint32_t len, uint32_t *outLen, int32_t *index);
 void BleTransCacheFree(int32_t halConnId, int32_t index);
 

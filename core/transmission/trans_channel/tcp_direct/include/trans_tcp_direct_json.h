@@ -30,7 +30,7 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc);
 
 char *VerifyP2pPack(const char *myIp, int32_t myPort);
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *ip, int32_t ipLen, int32_t *port);
+int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port);
 
 #ifdef __cplusplus
 #if __cplusplus

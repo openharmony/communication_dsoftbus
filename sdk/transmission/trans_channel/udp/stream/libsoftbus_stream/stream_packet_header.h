@@ -88,7 +88,7 @@ public:
 
     void SetTlvVersion(uint16_t version)
     {
-        firstLevelHeader.type |= ((version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
+        firstLevelHeader.type |= (static_cast<uint16_t>(version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
     }
 
     uint16_t GetVersion() const
@@ -264,7 +264,7 @@ public:
         common |= commonHeader_.streamType << STREAM_TYPE_OFFSET;
         common |= commonHeader_.marker << MAKER_OFFSET;
         common |= commonHeader_.flag << FLAG_OFFSET;
-        common |= commonHeader_.streamId << SEQ_NUM_OFFSET;
+        common |= static_cast<uint16_t>(commonHeader_.streamId << SEQ_NUM_OFFSET);
 
         *start++ = htonl(common);
         *start++ = htonl(commonHeader_.timestamp);

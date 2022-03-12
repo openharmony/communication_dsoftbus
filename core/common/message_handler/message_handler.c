@@ -418,8 +418,8 @@ static struct LoopConfigItem g_loopConfig[] = {
 
 SoftBusLooper *GetLooper(int type)
 {
-    int len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
-    for (int i = 0; i < len; i++) {
+    uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
+    for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].type == type) {
             return g_loopConfig[i].looper;
         }
@@ -429,8 +429,8 @@ SoftBusLooper *GetLooper(int type)
 
 static void SetLooper(int type, SoftBusLooper *looper)
 {
-    int len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
-    for (int i = 0; i < len; i++) {
+    uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
+    for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].type == type) {
             g_loopConfig[i].looper = looper;
         }
@@ -439,8 +439,8 @@ static void SetLooper(int type, SoftBusLooper *looper)
 
 static void ReleaseLooper(const SoftBusLooper *looper)
 {
-    int len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
-    for (int i = 0; i < len; i++) {
+    uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
+    for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].looper == looper) {
             g_loopConfig[i].looper = NULL;
             return;
@@ -509,8 +509,8 @@ int LooperInit(void)
 
 void LooperDeinit(void)
 {
-    int len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
-    for (int i = 0; i < len; i++) {
+    uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
+    for (uint32_t i = 0; i < len; i++) {
         if (g_loopConfig[i].looper == NULL) {
             continue;
         }
