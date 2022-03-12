@@ -371,7 +371,7 @@ HWTEST_F(Disc_Test, PublishServiceTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(Disc_Test, PublishServiceTest007, TestSize.Level4)
+HWTEST_F(Disc_Test, PublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
