@@ -616,12 +616,6 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
     int32_t keyReferenceNum = 0;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RecvConnectedComd ID=%u", connectionId);
 
-    char *payload = cJSON_PrintUnformatted(data);
-    if (payload == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
-        return;
-    }
-    cJSON_free(payload);
     if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod)) {
         return;
     }
