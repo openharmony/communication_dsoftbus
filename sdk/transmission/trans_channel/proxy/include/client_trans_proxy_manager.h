@@ -110,10 +110,10 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
 int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
     uint32_t fileCnt);
 
-int32_t ProcessFileFrameData(int32_t        sessionId, FileListener fileListener, const char *data, int32_t len,
+int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len,
     int32_t type);
 
-int32_t ProcessFileListData(int32_t        sessionId, FileListener fileListener, const char *data, int32_t len);
+int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len);
 
 #ifdef __cplusplus
 }

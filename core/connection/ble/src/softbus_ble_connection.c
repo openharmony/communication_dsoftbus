@@ -1073,7 +1073,7 @@ static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32
             RecvConnectedComd(targetNode->connId, (const cJSON*)data);
             cJSON_Delete(data);
         } else {
-            if (head->len + sizeof(ConnPktHead) > (int32_t)len) {
+            if (head->len + sizeof(ConnPktHead) > len) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BLEINFOPRTINT: recv a big data:%d, not support",
                     head->len + sizeof(ConnPktHead));
             }
