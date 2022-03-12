@@ -207,6 +207,7 @@ static void DevOnline(const P2pLinkGroup *group)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "other app use dev %s", onlineMac);
             ret = strcpy_s(nItem->peerMac, sizeof(nItem->peerMac), onlineMac);
             if (ret != EOK) {
+                SoftBusFree(nItem);
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
                 continue;
             }
