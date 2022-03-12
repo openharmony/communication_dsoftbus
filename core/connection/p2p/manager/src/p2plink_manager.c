@@ -376,6 +376,7 @@ static int32_t P2pLinkNegoSuccessAddConnedItem(const P2pLinkNegoConnResult *conn
     }
     if (strcpy_s(connedItem->peerIp, sizeof(connedItem->peerIp), conn->peerIp) != EOK ||
         strcpy_s(connedItem->peerMac, sizeof(connedItem->peerMac), conn->peerMac) != EOK) {
+        SoftBusFree(connedItem);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
         return SOFTBUS_ERR;
     }

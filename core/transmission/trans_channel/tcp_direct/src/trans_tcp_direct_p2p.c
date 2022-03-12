@@ -492,6 +492,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 
     ret = StartP2pListener(conn->appInfo.myData.ip, &conn->appInfo.myData.port);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(conn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel start listener fail");
         return ret;
     }

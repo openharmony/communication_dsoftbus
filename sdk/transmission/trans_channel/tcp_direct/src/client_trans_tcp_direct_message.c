@@ -360,6 +360,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     char *end = node->data + DC_DATA_HEAD_SIZE + dataLen;
     if (memmove_s(node->data, node->size, end, node->w - end) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memmove fail.");
+        SoftBusFree(plain);
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_MEM_ERR;
     }
