@@ -36,7 +36,7 @@
 
 static int32_t g_tcpMaxConnNum;
 static int32_t g_tcpTimeOut;
-static int32_t g_tcpMaxLen;
+static uint32_t g_tcpMaxLen;
 
 typedef struct {
     ListenerModule moduleId;
@@ -196,7 +196,7 @@ EXIT:
 static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
 {
     uint32_t headSize = sizeof(ConnPktHead);
-    ssize_t recvLen = 0;
+    uint32_t recvLen = 0;
     if (len > g_tcpMaxLen) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Tcp recv data out of max data length, shutdown");
         return NULL;
@@ -293,7 +293,7 @@ int32_t TcpOnDataEventIn(int32_t fd)
         DelTcpConnInfo(connectionId);
         return SOFTBUS_ERR;
     }
-    g_tcpConnCallback->OnDataReceived(connectionId, head.module, head.seq, data, (int32_t)headSize + head.len);
+    g_tcpConnCallback->OnDataReceived(connectionId, head.module, head.seq, data, (int32_t)(headSize + head.len));
     SoftBusFree(data);
     return SOFTBUS_OK;
 }
@@ -608,7 +608,7 @@ static int32_t InitProperty(void)
 {
     g_tcpMaxConnNum = INVALID_DATA;
     g_tcpTimeOut = INVALID_DATA;
-    g_tcpMaxLen = INVALID_DATA;
+    g_tcpMaxLen = 0;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
         (unsigned char*)&g_tcpMaxConnNum, sizeof(g_tcpMaxConnNum)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp MaxConnNum fail");
@@ -624,8 +624,7 @@ static int32_t InitProperty(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp TimeOut fail");
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp TimeOut is %u", g_tcpTimeOut);
-    if (g_tcpMaxConnNum == INVALID_DATA || g_tcpTimeOut == INVALID_DATA ||
-        g_tcpMaxLen == INVALID_DATA) {
+    if (g_tcpMaxConnNum == INVALID_DATA || g_tcpTimeOut == INVALID_DATA || g_tcpMaxLen == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
         return SOFTBUS_ERR;
     }

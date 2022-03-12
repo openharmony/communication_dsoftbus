@@ -376,7 +376,7 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     node->isServer = connInfo->info.isServer;
     node->pid = pid;
     node->flag = flag;
-    node->len = len;
+    node->len = (uint32_t)len;
     node->data = data;
     node->isInner = 0;
     int ret = BleEnqueueNonBlock((const void *)node);
@@ -466,8 +466,8 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         return;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage:%s", data);
-    int32_t headSize = sizeof(ConnPktHead);
-    int32_t dataLen = strlen(data) + 1 + headSize;
+    uint32_t headSize = sizeof(ConnPktHead);
+    uint32_t dataLen = strlen(data) + 1 + headSize;
     char *buf = (char *)SoftBusCalloc(dataLen);
     if (buf == NULL) {
         cJSON_free(data);
@@ -930,7 +930,7 @@ static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         return SOFTBUS_ERR;
     }
-    int32_t dataLen = strlen(data) + 1 + TYPE_HEADER_SIZE;
+    uint32_t dataLen = strlen(data) + 1 + TYPE_HEADER_SIZE;
     int32_t *buf = (int32_t *)SoftBusCalloc(dataLen);
     if (buf == NULL) {
         cJSON_free(data);
@@ -1053,7 +1053,7 @@ static void BleOnDataReceived(bool isBleConn, int32_t halConnId, uint32_t len, c
 static int32_t SendBleData(SendQueueNode *node)
 {
     if (node->len > MAX_DATA_LEN) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendBleData big msg, len:%d\n", node->len);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendBleData big msg, len:%u\n", node->len);
     }
 
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(node->connectionId);
