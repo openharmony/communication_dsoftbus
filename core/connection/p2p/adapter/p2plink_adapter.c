@@ -243,7 +243,7 @@ int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
     return SOFTBUS_OK;
 }
 
-static int32_t GetMacAddr(const char *ifName, unsigned char *macAddr, int32_t len)
+static bool GetMacAddr(const char *ifName, unsigned char *macAddr, int32_t len)
 {
     struct ifreq ifr;
     if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK ||
@@ -337,14 +337,18 @@ int32_t P2pLinkGetBaseMacAddress(char *mac, int32_t len)
 {
     unsigned char macAddr[MAC_BIN_LEN] = {0};
 
-    if (!GetMacAddr(P2P_BASE_INTERFACE, macAddr, sizeof(macAddr))) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetMacAddr fail.");
-        return SOFTBUS_ERR;
+    if (GetMacAddr(P2P_BASE_INTERFACE, macAddr, sizeof(macAddr))) {
+        ConvertMacBinToStr(mac, len, macAddr);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get p2p0 mac %s.", mac);
+        return SOFTBUS_OK;
     }
-
-    ConvertMacBinToStr(mac, len, macAddr);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get p2p0 mac %s", mac);
-    return SOFTBUS_OK;
+    if (GetMacAddr("wlan0", macAddr, sizeof(macAddr))) {
+        ConvertMacBinToStr(mac, len, macAddr);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get wlan0 mac %s.", mac);
+        return SOFTBUS_OK;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get p2p base mac fail.");
+    return SOFTBUS_ERR;
 }
 
 
