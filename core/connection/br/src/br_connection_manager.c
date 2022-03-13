@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <ctype.h>
 #include <sys/prctl.h>
 
 #include "br_connection_manager.h"
@@ -42,24 +41,6 @@ static pthread_mutex_t g_connectionLock;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static uint16_t g_nextConnectionId = 0;
-
-static int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
-{
-    if (src1 == NULL || src2 == NULL ||
-        strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
-        return SOFTBUS_ERR;
-    }
-    int32_t ca;
-    int32_t cb;
-    do {
-        ca = (int32_t)(*src1++);
-        cb = (int32_t)(*src2++);
-        ca = toupper(ca);
-        cb = toupper(cb);
-        len--;
-    } while (ca == cb && len > 0);
-    return ca - cb;
-}
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {
