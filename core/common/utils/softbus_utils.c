@@ -252,7 +252,7 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
             SoftBusFree(tmpMac);
             return SOFTBUS_ERR;
         }
-        binMac[i] = (uint8_t)strtol(token, &endptr, BT_ADDR_BASE);
+        binMac[i] = strtoul(token, &endptr, BT_ADDR_BASE);
         token = strtok_r(NULL, BT_ADDR_DELIMITER, &nextTokenPtr);
     }
     SoftBusFree(tmpMac);
@@ -275,7 +275,7 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
-int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
+int32_t Strnicmp(const char *src1, const char *src2, uint32_t len)
 {
     if (src1 == NULL || src2 == NULL ||
         strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
@@ -285,7 +285,7 @@ int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
     char *tmpSrc2 = (char *)src2;
     int32_t ca;
     int32_t cb;
-    int32_t i = len;
+    uint32_t i = len;
     do {
         ca = (int32_t)(*tmpSrc1++);
         cb = (int32_t)(*tmpSrc2++);

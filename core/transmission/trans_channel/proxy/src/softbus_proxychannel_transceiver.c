@@ -356,10 +356,10 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, in
     data.module = MODULE_PROXY_CHANNEL;
     data.seq = seq++;
     data.flag = priority;
-    data.len = len;
+    data.len = (uint32_t)len;
     data.buf = buf;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "send buf connid %d len %d seq %llu pri %d", connectionId, len, data.seq, priority);
+        "send buf connid %d len %u seq %llu pri %d", connectionId, len, data.seq, priority);
     ret = ConnPostBytes(connectionId, &data);
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send buf fail %d", ret);
@@ -571,7 +571,7 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId)
 {
     if (TransDecConnRefByConnId(connectionId) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "disconnect device connid %d", connectionId);
-        // BR dont disconect
+        // BR don't disconnect
         (void)ConnDisconnectDevice(connectionId);
     }
     return SOFTBUS_OK;

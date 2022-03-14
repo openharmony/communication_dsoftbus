@@ -243,9 +243,10 @@ void VtpStreamSocket::FillpAppStatistics()
     gettimeofday(&fillpStatsGetTime, nullptr);
     if (getStatisticsRet == 0) {
         metricList.type = STREAM_TRAFFIC_STASTICS;
-        metricList.info.appStatistics.statisticsGotTime = fillpStatsGetTime.tv_sec * MS_PER_SECOND +
-            fillpStatsGetTime.tv_usec / US_PER_MS; /* ms */
-        metricList.info.appStatistics.periodRecvBits = fillpPcbStats.appFcStastics.periodRecvBits;
+        metricList.info.appStatistics.statisticsGotTime = static_cast<uint64_t>((fillpStatsGetTime.tv_sec *
+            MS_PER_SECOND + fillpStatsGetTime.tv_usec / US_PER_MS)); /* ms */
+        metricList.info.appStatistics.periodRecvBits =
+            static_cast<uint64_t>(fillpPcbStats.appFcStastics.periodRecvBits);
         metricList.info.appStatistics.pktNum = fillpPcbStats.appFcStastics.pktNum;
         metricList.info.appStatistics.periodRecvPkts = fillpPcbStats.appFcStastics.periodRecvPkts;
         metricList.info.appStatistics.periodRecvPktLoss = fillpPcbStats.appFcStastics.periodRecvPktLoss;
@@ -917,7 +918,7 @@ void VtpStreamSocket::DoStreamRecv()
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "recv stream");
         dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame lenth error, dataLength = %d", dataLength);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "read frame length error, dataLength = %d", dataLength);
             break;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
@@ -1082,8 +1083,10 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
             continue;
         }
 
+        char host[ADDR_MAX_SIZE];
         std::string devName(ifa->ifa_name);
-        if (strcmp(boundIp.c_str(), inet_ntoa(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr)) == 0) {
+        if (strcmp(boundIp.c_str(), inet_ntop(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
+            host, ADDR_MAX_SIZE)) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "current use interface %s to bind to socket", ifa->ifa_name);
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());
             if (err < 0) {

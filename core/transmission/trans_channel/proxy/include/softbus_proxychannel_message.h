@@ -50,7 +50,7 @@ typedef enum {
 #define JSON_KEY_REQUEST_ID "REQUEST_ID"
 
 typedef struct {
-    uint8_t type; // MsgType //VESION
+    uint8_t type; // MsgType
     uint8_t chiper;
     int16_t myId;
     int16_t peerId;
@@ -134,7 +134,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, int32_t identitySize);
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize);
 
 #ifdef __cplusplus
 #if __cplusplus

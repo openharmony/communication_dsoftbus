@@ -93,7 +93,7 @@ typedef struct {
     int64_t seq;
     int32_t flag; // SendPriority
     int32_t pid;
-    int32_t len;
+    uint32_t len;
     char *buf;
 } ConnPostData;
 
