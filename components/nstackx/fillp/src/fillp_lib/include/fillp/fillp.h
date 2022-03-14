@@ -285,7 +285,7 @@ struct FillpPktConnConfirm {
     FILLP_UINT16 tagCookie;    /* for align to 8 bytes */
     FILLP_UINT16 cookieLength; /* client send to server cache , same as server recv cache */
     FillpCookieContent cookieContent;
-    struct sockaddr_in6 remoteAddr; /* 28bytes */ /* Not used, kept because of backward compatiblity */
+    struct sockaddr_in6 remoteAddr; /* 28bytes */ /* Not used, kept because of backward compatibility */
 };
 
 struct FillpPktConnConfirmAck {

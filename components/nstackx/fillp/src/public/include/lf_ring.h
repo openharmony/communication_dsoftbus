@@ -49,7 +49,7 @@ struct FillpLfRing {
     FILLP_BOOL prodSafe;
     FILLP_BOOL consSafe;
     FILLP_UINT8 padd[6];
-    /* Should be last element of the structure. dont reorder or change */
+    /* Should be last element of the structure. DO NOT reorder or change */
     void *ringCache[1]; /* Data */
 };
 

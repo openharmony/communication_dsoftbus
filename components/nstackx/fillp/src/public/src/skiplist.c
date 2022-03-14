@@ -200,7 +200,7 @@ static FILLP_INT SkiplistInsertAtMid(struct SkipList *list, void *item,
     (void)memset_s(prevRecord, sizeof(prevRecord), 0, sizeof(prevRecord));
 
     for (index = list->level - 1; index >= 0; index--) {
-        /* fro each level, find the pre node of the point to insert */
+        /* for each level, find the pre node of the point to insert */
         if (prev == FILLP_NULL_PTR) {
             next = list->hnode[index];
         } else {

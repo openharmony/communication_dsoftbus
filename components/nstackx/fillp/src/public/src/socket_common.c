@@ -53,7 +53,7 @@ void EpollUpdateEpEvent(struct EpItem *epi)
  */
 void EpollEventCallback(struct FtSocket *sock, FILLP_UINT32 upEvent)
 {
-    struct EpItem *sockEpItem = FILLP_NULL_PTR; /* DO NOT remove this intialization */
+    struct EpItem *sockEpItem = FILLP_NULL_PTR;
     struct HlistNode *epNode = FILLP_NULL_PTR;
 
     if (HLIST_EMPTY(&sock->epTaskList)) {
@@ -267,7 +267,7 @@ struct FtSocket *SockAllocSocket(void)
     while (sock == FILLP_NULL_PTR) {
         ret = FillpQueuePop(g_spunge->sockTable->freeQueqe, (void *)&sock, 1);
         if (ret <= 0) {
-            FILLP_LOGDBG("sockets not avaliable from the sockTable->freeQueqe");
+            FILLP_LOGDBG("sockets not available from the sockTable->freeQueqe");
 
             if (SpungeAllocFtSock(g_spunge->sockTable) != FILLP_OK) {
                 return FILLP_NULL_PTR;
@@ -371,7 +371,7 @@ FILLP_INT SockUpdatePktDataOpt(struct FtSocket *sock, FILLP_UINT16 addFlag, FILL
 
     if ((sock->netconn != FILLP_NULL_PTR) && (sock->netconn->pcb != FILLP_NULL_PTR) &&
         ((FILLP_UINT32)((FILLP_UINT32)dataOptLen + FILLP_DATA_OFFSET_LEN) >= (FILLP_UINT32)SOCK_GET_PKTSIZE(sock))) {
-        FILLP_LOGERR("option lenght error. sockIndex= %d, dataOptLen:%u greater than pktsize:%zu", sock->index,
+        FILLP_LOGERR("option length error. sockIndex= %d, dataOptLen:%u greater than pktsize:%zu", sock->index,
             (FILLP_UINT32)dataOptLen + FILLP_DATA_OFFSET_LEN, SOCK_GET_PKTSIZE(sock));
         return FILLP_EINVAL;
     }
