@@ -213,7 +213,7 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return false;
     }
-    if (g_lanes[type].isUse) {
+    if (g_lanes[type].isUse && type >= LNN_LINK_TYPE_P2P && type <= LNN_LINK_TYPE_P2P_MAX) {
         (void)SoftBusMutexUnlock(&g_lanes[type].lock);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "reuse lane, type = %d.", type);
         return true;
