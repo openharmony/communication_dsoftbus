@@ -1673,7 +1673,7 @@ static AuthManager *AuthGetManagerByOption(const ConnectOption *option)
     return NULL;
 }
 
-static bool IsNeedVerifyAgain(const ConnectOption *option, uint32_t requestId,
+static bool IsNeedVerifyAgain(ConnectOption *option, uint32_t requestId,
     const AuthConnCallback *callback)
 {
     ConnectionInfo info;
@@ -1701,8 +1701,11 @@ static bool IsNeedVerifyAgain(const ConnectOption *option, uint32_t requestId,
             return true;
         }
         (void)SoftBusMutexUnlock(&g_authLock);
+        if (auth->option.type == CONNECT_BR) {
+            option->info.brOption.sideType = info.isServer ? CONN_SIDE_SERVER : CONN_SIDE_CLIENT;
+        }
         if (TryCreateConnection(option, requestId, callback) == SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth br/ble connection exist, no neeed verify again.");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth br/ble connection exist, no neeed verify again.");
             return false;
         }
         return true;
