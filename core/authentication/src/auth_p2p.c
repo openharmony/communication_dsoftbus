@@ -75,7 +75,6 @@ static void AuthP2pOnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const
     }
     if (LnnParsePeerNodeInfo(&auth->option, AUTH_BT, nodeInfo, &parseBuf, side, auth->peerVersion) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack peer device info fail");
-        return;
     }
     /* device info not used... */
     SoftBusFree(nodeInfo);

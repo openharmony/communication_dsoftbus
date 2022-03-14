@@ -109,8 +109,7 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthManager *auth = NULL;
-    auth = AuthGetManagerByAuthId(head->authId);
+    AuthManager *auth = AuthGetManagerByAuthId(head->authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%llu), AuthPostData failed",
             head->authId);
@@ -348,13 +347,12 @@ void AuthSendCloseAck(uint32_t connectionId)
 
     PostDataInfo info;
     uint32_t postDataLen = sizeof(AuthDataInfo) + closeDataLen;
-    char *connPostData = NULL;
     char *buf = (char *)SoftBusMalloc(ConnGetHeadSize() + postDataLen);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
         return;
     }
-    connPostData = buf;
+    char *connPostData = buf;
     buf += ConnGetHeadSize();
     *(int32_t *)buf = DATA_TYPE_CLOSE_ACK;
     buf += sizeof(int32_t);
@@ -388,12 +386,11 @@ void AuthTryCloseConnection(uint32_t connectionId)
 
 bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
 {
-    AuthManager *auth = NULL;
     AuthDataHead head;
 
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%lld, len=%u", authId, len);
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
-    auth = AuthGetManagerByAuthId(authId);
+    AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found", authId);
         return false;
