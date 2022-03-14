@@ -73,6 +73,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexInit failed, ret[%{public}d]", ret);
         SoftBusFree(tempMutex);
+        tempMutex = NULL;
         return SOFTBUS_ERR;
     }
 
@@ -125,10 +126,12 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexDestroy failed, ret[%{public}d]", ret);
         SoftBusFree((void *)*mutex);
+        *mutex = (SoftBusMutex)NULL;
         return SOFTBUS_ERR;
     }
 
     SoftBusFree((void *)*mutex);
+    *mutex = (SoftBusMutex)NULL;
     return SOFTBUS_OK;
 }
 
@@ -374,6 +377,7 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondInit failed, ret[%{public}d]", ret);
         SoftBusFree(tempCond);
+        tempCond = NULL;
         return SOFTBUS_ERR;
     }
 
@@ -460,9 +464,11 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond)
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondDestroy failed, ret[%{public}d]", ret);
         SoftBusFree((void *)*cond);
+        *cond = (SoftBusCond)NULL;
         return SOFTBUS_ERR;
     }
 
     SoftBusFree((void *)*cond);
+    *cond = (SoftBusCond)NULL;
     return SOFTBUS_OK;
 }
