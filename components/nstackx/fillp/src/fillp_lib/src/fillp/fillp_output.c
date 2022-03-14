@@ -450,7 +450,7 @@ void FillpSendAdhocpackToDetectRtt(struct FillpPcb *pcb)
     pack.flag |= FILLP_PACK_FLAG_REQURE_RTT;
     pack.pktLoss = 0;
     pack.reserved.rtt =
-        (FILLP_UINT32)((FILLP_ULLONG)curTime & 0xFFFFFFFF); /* rtt isn't much large, so olny use the low 32bit is ok */
+        (FILLP_UINT32)((FILLP_ULLONG)curTime & 0xFFFFFFFF); /* rtt isn't much large, so only use the low 32bit is ok */
     pack.lostSeq = pcb->recv.seqNum;
 
     ftSock = FILLP_GET_SOCKET(pcb);
@@ -490,7 +490,7 @@ static void FillpSetSimplePack(FILLP_CONST struct FillpPcb *pcb, struct FillpPkt
     }
 }
 
-FILLP_BOOL FillpSendPack(struct FillpPcb *pcb, struct FillpPktPack *pack)
+static FILLP_BOOL FillpSendPack(struct FillpPcb *pcb, struct FillpPktPack *pack)
 {
     struct FillpPcbItem *item = FILLP_NULL_PTR;
     struct SkipListNode *node = FILLP_NULL_PTR;

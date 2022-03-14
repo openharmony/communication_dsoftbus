@@ -196,7 +196,7 @@ FILLP_INT32 FtAppValidateConfigParams(IN FILLP_CONST FillpAppGlobalConfigsSt *gl
                   4. pack timer
                   5. close pending
   Input         : FILLP_UINT32    name: Timer name which user wants to change the timeout value (FILLP_TIMER_LIST).
-                  FILLP_UINT32 *value : Will specify the timeout value in miliseconds
+                  FILLP_UINT32 *value : Will specify the timeout value in milliseconds
   Output        : NA
   Return        : FILLP_UINT32 SUCCESS/FAILURE
 ********************************************************************/
@@ -991,7 +991,7 @@ static inline FILLP_INT32 FtAppGetMaxServerSendCache(void *value, FILLP_CONST st
     FILLP_UNUSED_PARA(value);
     FILLP_UNUSED_PARA(resource);
     FILLP_LOGERR("Server feature Not enabled : FT_CONF_MAX_SERVER_ALLOW_SEND_CACHE is "
-        "server only option so cant GET !!!");
+        "server only option so cannot GET !!!");
     return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
 }
@@ -1005,7 +1005,7 @@ static inline FILLP_INT32 FtAppGetMaxServeRecvCache(void *value, FILLP_CONST str
     FILLP_UNUSED_PARA(value);
     FILLP_UNUSED_PARA(resource);
     FILLP_LOGERR("Server feature Not enabled : FT_CONF_MAX_SERVER_ALLOW_RECV_CACHE is "
-        "server only option so cant GET !!!");
+        "server only option so cannot GET !!!");
     return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
 }
@@ -1019,7 +1019,7 @@ static inline FILLP_INT32 FtAppConfigGetOppositeSetRate(void *value, FILLP_CONST
     FILLP_UNUSED_PARA(value);
     FILLP_UNUSED_PARA(resource);
     FILLP_LOGERR("Server feature Not enabled : FT_CONF_OPPOSITE_SET_RATE is "
-        "server only option so cant GET !!!");
+        "server only option so cannot GET !!!");
     return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
 }

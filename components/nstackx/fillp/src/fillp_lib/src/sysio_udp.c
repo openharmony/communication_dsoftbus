@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-#ifdef FILLP_LINUX
-#include <errno.h>
-#endif
-
 #include "sysio.h"
 #include "sockets.h"
 #include "socket_common.h"

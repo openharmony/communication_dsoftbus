@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-#ifdef FILLP_LINUX
-#include <errno.h>
-#endif
-
 #include "epoll_app.h"
 #include "spunge_app.h"
 #include "res.h"
@@ -42,7 +38,7 @@ struct SockOsSocket *SpungeAllocSystemSocket(FILLP_INT domain, FILLP_INT type, F
         return FILLP_NULL_PTR;
     }
 
-    osSock->refrence = 0;
+    osSock->reference = 0;
     osSock->addrType = domain;
 
     osSock->ioSock = SysIoSocketFactory(domain, type, protocol);
@@ -198,7 +194,7 @@ static void RecursiveRbTree(struct RbNode *node)
  * @Description : Closes the epoll socket and releases all associated resources.
  * @param : epoll ft sock index
  * @return : success: ERR_OK  fail: error code
- * @NOTE: caller must have aquired (wait )the close semaphore to protect from MT scenarios. this
+ * @NOTE: caller must have acquired (wait) the close semaphore to protect from MT scenarios. this
  * function on completion will post the event back to semaphore once execution is completed.
  */
 void SpungEpollClose(struct FtSocket *sock)
@@ -347,8 +343,7 @@ void SpungeShutdownSock(void *argSock, FILLP_INT how)
     }
 }
 
-
-int SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn)
+FILLP_BOOL SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn)
 {
     FILLP_ULLONG con;
     FILLP_ULLONG prod;
@@ -387,7 +382,7 @@ int SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn)
     return FILLP_TRUE;
 }
 
-static int SpungeDestoryNoWait(struct FillpPcb *pcb, struct FtSocket *sock, struct FtNetconn *conn)
+static int SpungeDestroyNoWait(struct FillpPcb *pcb, struct FtSocket *sock, struct FtNetconn *conn)
 {
 #if FILLP_DEFAULT_DESTROY_STACK_WITHOUT_WAIT_SOCKET_CLOSE
     /* for miracast, ignore the unSend unAck and unRecv packets, skip the disconnection flow,
@@ -431,7 +426,7 @@ void SpungeCheckDisconn(void *argConn)
             goto TIMER_REPEAT;
         }
 
-        if (SpungeDestoryNoWait(pcb, sock, conn) != 0) {
+        if (SpungeDestroyNoWait(pcb, sock, conn) != 0) {
             return;
         }
         /* Check if all send data are sent out */
@@ -451,7 +446,7 @@ void SpungeCheckDisconn(void *argConn)
         FillpNetconnSetState(conn, CONN_STATE_CLOSING);
         pcb->finCheckTimer.interval =
             (FILLP_UINT32)FILLP_UTILS_MS2US((FILLP_LLONG)sock->resConf.common.disconnectRetryTimeout);
-    } else if (SpungeDestoryNoWait(pcb, sock, conn) != 0) {
+    } else if (SpungeDestroyNoWait(pcb, sock, conn) != 0) {
         return;
     }
 
@@ -540,7 +535,7 @@ void SpungeFreeUnsendBox(struct FillpPcb *pcb)
     For : 1) close() involked and rst send out
           2) recved rst from peer
           3) disconnect send out and disconn recved (local and peer send disconnect both)
-          if close() involked, the recv box data will be droped, or the recv() still returns positive if data remains,
+          if close() involked, the recv box data will be dropped, or the recv() still returns positive if data remains,
           return 0 if all data taken
  */
 void SpungeConnClosed(struct FtNetconn *conn)
