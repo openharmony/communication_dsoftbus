@@ -49,7 +49,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
     if (dsoftbus_standard_feature_lnn_net) {
-      auth_server_deps += [ "//base/security/deviceauth:deviceauth_lite" ]
+      auth_server_deps += [ "//base/security/deviceauth/services:deviceauth" ]
     }
   } else {
     auth_server_inc += [ "//third_party/cJSON" ]
