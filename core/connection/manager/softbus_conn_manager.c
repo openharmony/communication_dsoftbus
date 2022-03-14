@@ -330,7 +330,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (data->len <= (int32_t)sizeof(ConnPktHead)) {
+    if (data->len <= sizeof(ConnPktHead)) {
         SoftBusFree(data->buf);
         return SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID;
     }
@@ -354,7 +354,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
     head->len = data->len - sizeof(ConnPktHead);
     head->seq = data->seq;
 
-    return g_connManager[type]->PostBytes(connectionId, data->buf, data->len, data->pid, data->flag);
+    return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len), data->pid, data->flag);
 }
 
 int32_t ConnDisconnectDevice(uint32_t connectionId)

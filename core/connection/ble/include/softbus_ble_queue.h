@@ -33,7 +33,7 @@ typedef struct {
     int32_t isInner;
     int32_t module;
     int32_t seq;
-    int32_t len;
+    uint32_t len;
     const char *data;
 } SendQueueNode;
 

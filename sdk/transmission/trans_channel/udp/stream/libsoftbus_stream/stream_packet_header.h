@@ -88,7 +88,7 @@ public:
 
     void SetTlvVersion(uint16_t version)
     {
-        firstLevelHeader.type |= ((version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
+        firstLevelHeader.type |= (static_cast<uint16_t>(version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
     }
 
     uint16_t GetVersion() const
@@ -104,7 +104,7 @@ public:
             if (AddFrameExtData(pos + HEADER_LEN + NUMS_LEN) != 0) {
                 return -1;
             }
-            checkSum_ += extTlvAlignSize;
+            checkSum_ += static_cast<uint32_t>(extTlvAlignSize);
         } else {
             return 0; // 目前假设只有ext，其他option后面添加
         }
@@ -138,7 +138,7 @@ public:
             ext_ = std::make_unique<char[]>(tl.length);
             int ret = memcpy_s(ext_.get(), tl.length, reinterpret_cast<void *>(tmp), tl.length);
             if (ret == 0) {
-                extLen_ = tl.length;
+                extLen_ = static_cast<ssize_t>(tl.length);
             }
         }
 
@@ -264,7 +264,7 @@ public:
         common |= commonHeader_.streamType << STREAM_TYPE_OFFSET;
         common |= commonHeader_.marker << MAKER_OFFSET;
         common |= commonHeader_.flag << FLAG_OFFSET;
-        common |= commonHeader_.streamId << SEQ_NUM_OFFSET;
+        common |= static_cast<uint16_t>(commonHeader_.streamId << SEQ_NUM_OFFSET);
 
         *start++ = htonl(common);
         *start++ = htonl(commonHeader_.timestamp);

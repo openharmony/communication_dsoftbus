@@ -27,7 +27,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-static const int CONN_HEAD_SIZE = 24;
+static const uint32_t CONN_HEAD_SIZE = 24;
 #define TEST_BR_MAC "24:DA:33:6A:06:EC"
 
 static unsigned int g_connId = 0;

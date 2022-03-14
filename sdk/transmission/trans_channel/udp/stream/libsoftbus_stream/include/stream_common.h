@@ -77,7 +77,7 @@ enum StreamOptionType {
     STREAM_OPTIONS_MAX = 1400,
 };
 
-// NOTICE: only RAW_STREAM is avaible in 11.1.0
+// NOTICE: only RAW_STREAM is available in 11.1.0
 enum StreamType {
     INVALID = -1,
     /*
