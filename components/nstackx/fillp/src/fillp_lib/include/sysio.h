@@ -31,7 +31,7 @@ typedef struct InnerSysIoOps {
     void *(*fetchPacket)(void *sock, void *buf, void *count);
     int (*select)(void *arg, FILLP_INT timeoutUs);
     void *(*createSocket)(FILLP_INT domain, FILLP_INT type, FILLP_INT protocol);
-    int (*destorySysIoSocket)(void *arg);
+    int (*destroySysIoSocket)(void *arg);
     int (*listen)(void *argSock);
 
     int (*bind)(void *argSock, void *argPcb, FILLP_SOCKADDR *addr, FILLP_UINT16 len);
