@@ -29,6 +29,7 @@ using namespace OHOS;
 
 namespace {
 sptr<TransServerProxy> g_serverProxy = nullptr;
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accesToken";
 uint32_t g_getSystemAbilityId = 2;
 std::mutex g_mutex;
 }
@@ -36,6 +37,11 @@ std::mutex g_mutex;
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
+
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return nullptr;
+    }
+
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
