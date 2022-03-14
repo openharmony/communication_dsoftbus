@@ -129,7 +129,7 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
     option->type = connInfo->type;
     switch (connInfo->type) {
         case CONNECT_BR: {
-            if (strncpy_s(option->info.brOption.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac, BT_MAC_LEN) != EOK) {
+            if (strcpy_s(option->info.brOption.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
                 return SOFTBUS_ERR;
             }
@@ -244,6 +244,9 @@ int32_t ConvertOptionToAuthConnInfo(const ConnectOption *option, bool isAuthP2p,
 
 bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *option2)
 {
+    if (option1 == NULL || option2 == NULL) {
+        return false;
+    }
     switch (option1->type) {
         case CONNECT_TCP:
             if (option2->type == CONNECT_TCP &&

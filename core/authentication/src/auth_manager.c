@@ -885,9 +885,9 @@ static void HandleReceiveConnectionData(const AuthManager *auth, const AuthDataI
     AuthHandleTransInfo(auth, &head, (char *)data);
 }
 
-static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
+static int32_t AnalysisData(char *data, uint32_t len, AuthDataInfo *info)
 {
-    if (len < (int32_t)sizeof(AuthDataInfo)) {
+    if (len < sizeof(AuthDataInfo)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AnalysisData: invalid length.");
         return SOFTBUS_ERR;
     }
@@ -981,16 +981,16 @@ static void HandleReceiveData(AuthManager *auth, const AuthDataInfo *info, uint8
     }
 }
 
-void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int len)
+void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    if (data == NULL || moduleId != MODULE_DEVICE_AUTH) {
+    if (data == NULL || moduleId != MODULE_DEVICE_AUTH || len <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "auth receive data, connectionId is %u, moduleId is %d, seq is %lld", connectionId, moduleId, seq);
     AuthDataInfo info = {0};
-    if (AnalysisData(data, len, &info) != SOFTBUS_OK) {
+    if (AnalysisData(data, (uint32_t)len, &info) != SOFTBUS_OK) {
         return;
     }
     AuthManager *auth = AuthGetManagerByAuthId(info.seq);
