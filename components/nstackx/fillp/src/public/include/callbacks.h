@@ -60,7 +60,7 @@ void *FillpMemCalloc(IN FILLP_UINT32 nitems, IN FILLP_UINT32 size);
 /*******************************************************************************
     Adption     : FillpMemAlloc
 
-    Description : Adp Adption if user has not registered the callbacl for malloc
+    Description : Adp Adption if user has not registered the callback for malloc
 
     Input         :
                     size: Requested size to be allocated
@@ -358,7 +358,7 @@ FILLP_INT FillpFuncSendTo(
 /*******************************************************************************
     Function     : FillpFuncRecvFrom
 
-    Description : Adp function if user has not registered the recieve from callback function
+    Description : Adp function if user has not registered the receive from callback function
  *******************************************************************************/
 FILLP_INT  FillpFuncRecvFrom(
     IN FILLP_INT sockFd,

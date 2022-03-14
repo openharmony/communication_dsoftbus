@@ -83,7 +83,7 @@ extern "C" {
 #define FILLP_DEFAULT_NACK_RETRY_LEN 120
 #define FILLP_FC_MULTI_ADJUST_CONST 1.25
 #define FILLP_FLOW_CONTROL_MULTI_NUM_STEP 0.0392
-#define FILLP_FC_NINTY_PERCENT_VAL(value) ((value) * 0.95)
+#define FILLP_FC_NINETY_PERCENT_VAL(value) ((value) * 0.95)
 
 /* GlobalAppResource structure default values start */
 #ifdef FILLP_LINUX
