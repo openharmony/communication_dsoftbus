@@ -135,8 +135,8 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId para error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
-    for (int32_t i = 0; i < count; i++) {
+    uint32_t count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
+    for (uint32_t i = 0; i < count; i++) {
         if (strcmp(g_typeToIdMap[i].type, deviceType) == 0) {
             *typeId = g_typeToIdMap[i].id;
             return SOFTBUS_OK;
@@ -161,8 +161,8 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
 
 char *LnnConvertIdToDeviceType(uint16_t typeId)
 {
-    int count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
-    for (int32_t i = 0; i < count; i++) {
+    uint32_t count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
+    for (uint32_t i = 0; i < count; i++) {
         if (g_typeToIdMap[i].id == typeId) {
             return g_typeToIdMap[i].type;
         }
