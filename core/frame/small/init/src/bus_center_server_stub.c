@@ -128,16 +128,16 @@ int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply)
     void *nodeInfo = NULL;
     size_t len;
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
+    int32_t callingUid = GetCallingUid(origin);
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
     uint32_t infoTypeLen = sizeof(NodeBasicInfo);
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo malloc info type length failed");
         return SOFTBUS_ERR;
-    }
-    int32_t callingUid = GetCallingUid(origin);
-    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo no permission.");
-        return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcGetLocalDeviceInfo(pkgName, nodeInfo, infoTypeLen);
     if (ret != SOFTBUS_OK) {
