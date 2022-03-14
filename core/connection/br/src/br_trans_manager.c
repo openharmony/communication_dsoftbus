@@ -200,8 +200,8 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t 
         return NULL;
     }
 
-    int32_t headSize = sizeof(ConnPktHead);
-    int32_t dataLen = strlen(data) + 1 + headSize;
+    uint32_t headSize = sizeof(ConnPktHead);
+    uint32_t dataLen = strlen(data) + 1 + headSize;
     char *buf = (char *)SoftBusCalloc(dataLen);
     if (buf == NULL) {
         cJSON_free(data);
@@ -226,7 +226,7 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t 
         SoftBusFree(buf);
         return NULL;
     }
-    *outLen = dataLen;
+    *outLen = (int32_t)dataLen;
     cJSON_free(data);
     return buf;
 }

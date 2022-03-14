@@ -275,7 +275,7 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
-int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
+int32_t Strnicmp(const char *src1, const char *src2, uint32_t len)
 {
     if (src1 == NULL || src2 == NULL ||
         strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
@@ -285,7 +285,7 @@ int32_t Strnicmp(const char *src1, const char *src2, int32_t len)
     char *tmpSrc2 = (char *)src2;
     int32_t ca;
     int32_t cb;
-    int32_t i = len;
+    uint32_t i = len;
     do {
         ca = (int32_t)(*tmpSrc1++);
         cb = (int32_t)(*tmpSrc2++);
