@@ -47,7 +47,7 @@ typedef struct {
 } HeartbeatUpdateReq;
 
 typedef struct {
-    int32_t (*init)(LnnHeartbeatImplCallback *callback);
+    int32_t (*init)(const LnnHeartbeatImplCallback *callback);
     int32_t (*onOnceBegin)(void);
     int32_t (*onOnceEnd)(void);
     int32_t (*stop)(void);
@@ -128,6 +128,7 @@ static int32_t SetUpdateReqTime(DeviceInfo *device, int32_t weight, int32_t loca
             ListDelete(&item->node);
             SoftBusFree(item->device);
             SoftBusFree(item);
+            g_hbUpdateInfoList->cnt--;
         }
     }
     if (FirstSetUpdateReqTime(device, weight, localMasterWeight, updateTime) != SOFTBUS_OK) {

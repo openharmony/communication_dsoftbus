@@ -18,7 +18,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback)
+int32_t LnnInitBleHeartbeat(const LnnHeartbeatImplCallback *callback)
 {
     (void)callback;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl init");
