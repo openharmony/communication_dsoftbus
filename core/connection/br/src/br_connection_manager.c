@@ -449,6 +449,23 @@ bool HasDiffMacDeviceExit(const ConnectOption *option)
     return res;
 }
 
+static bool IsTargetSideType(ConnSideType targetType, int32_t connType)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection: targetType = %d, current connType = %d",
+        targetType, connType);
+    switch (targetType) {
+        case CONN_SIDE_ANY:
+            return true;
+        case CONN_SIDE_CLIENT:
+            return (connType == BR_CLIENT_TYPE);
+        case CONN_SIDE_SERVER:
+            return (connType == BR_SERVICE_TYPE);
+        default:
+            break;
+    }
+    return true;
+}
+
 int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCountId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
@@ -458,7 +475,8 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCoun
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
+        if (IsTargetSideType(option->info.brOption.sideType, itemNode->sideType) &&
+            Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
             if (outCountId != NULL) {
                 *outCountId = itemNode->connectionId;
             }
