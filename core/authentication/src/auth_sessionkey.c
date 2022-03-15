@@ -243,13 +243,12 @@ int32_t AuthEncrypt(const ConnectOption *option, AuthSideFlag *side, uint8_t *da
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret;
     SessionKeyList *sessionKeyList = NULL;
     NecessaryDevInfo devInfo = {0};
     uint32_t outLen;
 
     devInfo.type = option->type;
-    ret = AuthGetDeviceKey(devInfo.deviceKey, MAX_DEVICE_KEY_LEN, &(devInfo.deviceKeyLen), option);
+    int32_t ret = AuthGetDeviceKey(devInfo.deviceKey, MAX_DEVICE_KEY_LEN, &(devInfo.deviceKeyLen), option);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetDeviceKey failed");
         return SOFTBUS_ENCRYPT_ERR;
