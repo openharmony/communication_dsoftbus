@@ -17,43 +17,23 @@
 #define LNN_EVENT_MONITOR_IMPL_H
 
 #include <stdint.h>
+#include "bus_center_event.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    LNN_MONITOR_EVENT_IP_ADDR_CHANGED,
-    LNN_MONITOR_EVENT_WIFI_STATE_CHANGED,
-    LNN_MONITOR_EVENT_WLAN_PARAM,
-    LNN_MONITOR_EVENT_TYPE_MAX,
-} LnnMonitorEventType;
+typedef int32_t (*LnnInitEventMonitorImpl)(void);
 
-typedef struct {
-    uint32_t len;
-    uint8_t value[0];
-} LnnMoniterData;
+int32_t LnnInitNetlinkMonitorImpl(void);
 
-typedef enum {
-    SOFTBUS_WIFI_CONNECTED,
-    SOFTBUS_WIFI_DISCONNECTED,
-    SOFTBUS_WIFI_DISABLED,
-    SOFTBUS_UNKNOWN,
-} SoftBusWifiState;
+int32_t LnnInitProductMonitorImpl(void);
 
-typedef void (*LnnMonitorEventHandler)(LnnMonitorEventType event, const LnnMoniterData *para);
+int32_t LnnInitLwipMonitorImpl(void);
 
-typedef int32_t (*LnnInitEventMonitorImpl)(LnnMonitorEventHandler handler);
+int32_t LnnInitWifiServiceMonitorImpl(void);
 
-int32_t LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler);
-
-int32_t LnnInitDriverMonitorImpl(LnnMonitorEventHandler handler);
+int32_t LnnInitDriverMonitorImpl(void);
 #ifdef __cplusplus
 }
 #endif

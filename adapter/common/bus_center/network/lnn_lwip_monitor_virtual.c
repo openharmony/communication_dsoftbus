@@ -17,8 +17,7 @@
 
 #include "softbus_errcode.h"
 
-int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitLwipMonitorImpl(void)
 {
-    (void)handler;
     return SOFTBUS_OK;
 }

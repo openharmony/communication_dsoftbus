@@ -28,10 +28,10 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
 #include "lnn_heartbeat_strategy.h"
-#include "lnn_ip_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
+#include "lnn_ip_network_impl.h"
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
 #include "lnn_sync_info_manager.h"
@@ -269,7 +269,7 @@ static bool IsNodeOnline(const char *networkId)
     return false;
 }
 
-static void UpdateLocalMasterNode(const char *masterUdid, int32_t weight)
+static void UpdateLocalMasterNode(bool isCurrentNode, const char *masterUdid, int32_t weight)
 {
     if (LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local master udid failed");
@@ -278,9 +278,7 @@ static void UpdateLocalMasterNode(const char *masterUdid, int32_t weight)
     if (LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, weight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local master weight failed");
     }
-    if (LnnNotifyMasterNodeChanged(masterUdid, weight) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify master node change to heartbeat module failed");
-    }
+    LnnNotifyMasterNodeChanged(isCurrentNode, masterUdid, weight);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update local master weight=%d", weight);
 }
 
@@ -906,7 +904,7 @@ static int32_t TryElectMasterNodeOnline(const LnnConnectionFsm *connFsm)
             connFsm->id, rc);
         return SOFTBUS_OK;
     }
-    UpdateLocalMasterNode(peerMasterUdid, peerMasterWeight);
+    UpdateLocalMasterNode(false, peerMasterUdid, peerMasterWeight);
     SendElectMessageToAll(connFsm->connInfo.peerNetworkId);
     return SOFTBUS_OK;
 }
@@ -925,7 +923,7 @@ static int32_t TryElectMasterNodeOffline(const LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local is master node(%u), no need elect again", connFsm->id);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "maybe master node(%u) offline, elect again", connFsm->id);
-        UpdateLocalMasterNode(localUdid, LnnGetLocalWeight());
+        UpdateLocalMasterNode(true, localUdid, LnnGetLocalWeight());
         SendElectMessageToAll(connFsm->connInfo.peerNetworkId);
     }
     return SOFTBUS_OK;
@@ -997,7 +995,7 @@ static int32_t ProcessMasterElect(const void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]weight compare result: %d", connFsm->id, compareRet);
         if (compareRet != 0) {
             if (compareRet < 0) {
-                UpdateLocalMasterNode(msgPara->masterUdid, msgPara->masterWeight);
+                UpdateLocalMasterNode(false, msgPara->masterUdid, msgPara->masterWeight);
                 SendElectMessageToAll(connFsm->connInfo.peerNetworkId);
             } else {
                 rc = SyncElectMessage(connFsm->connInfo.peerNetworkId);
@@ -1115,7 +1113,7 @@ static int32_t GetCurrentConnectType(ConnectionAddrType *type)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalStrInfo getCurrentConnectType failed");
         return SOFTBUS_ERR;
     }
-    if (LnnGetAddrTypeByIfName(ifCurrentName, strlen(ifCurrentName), type) != SOFTBUS_OK) {
+    if (LnnGetAddrTypeByIfName(ifCurrentName, type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType unknown connect type");
         return SOFTBUS_ERR;
     }
@@ -1643,7 +1641,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid typeLen");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnRequestLeaveByAddrType");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnRequestLeaveByAddrType");
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;

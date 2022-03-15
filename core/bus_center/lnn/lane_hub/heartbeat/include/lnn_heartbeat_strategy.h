@@ -73,7 +73,6 @@ int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *target
 int32_t LnnGetHeartbeatGearMode(GearMode *mode);
 int32_t LnnGetHeartbeatImplPolicy(LnnHeartbeatImplType type, HeartbeatImplPolicy *implPolicy);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
-int32_t LnnNotifyMasterNodeChanged(const char *masterUdid, int32_t weight);
 
 int32_t LnnStartHeartbeatDelay(void);
 void LnnStopHeartbeatNow(void);

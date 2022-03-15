@@ -15,11 +15,11 @@
 
 #include "bus_center_event.h"
 
-#include <stdlib.h>
 #include <securec.h>
+#include <stdlib.h>
 
-#include "message_handler.h"
 #include "lnn_bus_center_ipc.h"
+#include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
@@ -42,7 +42,7 @@ typedef enum {
 } NotifyType;
 
 static BusCenterEventCtrl g_eventCtrl;
-static SoftBusHandler g_notifyHandler = { "NotifyHandler", NULL, NULL };
+static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
 
 static int32_t PostMessageToHandler(SoftBusMessage *msg)
 {
@@ -153,7 +153,8 @@ static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node)
+    {
         if (item->handler == handler) {
             return true;
         }
@@ -181,7 +182,8 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed in notify event");
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node)
+    {
         item->handler(info);
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
@@ -259,13 +261,37 @@ void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info
     LnnIpcNotifyTimeSyncResult(pkgName, info, sizeof(TimeSyncResultInfo), retCode);
 }
 
-void LnnNotifyMonitorEvent(const LnnMonitorEventInfo *info)
+void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
 {
-    if (info == NULL || info->basic.event == LNN_EVENT_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid monitr event paramter");
+    if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_UNKNOWN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
         return;
     }
-    NotifyEvent((const LnnEventBasicInfo *)info);
+    LnnMonitorWlanStateChangedEvent event = {.basic.event = LNN_EVENT_WIFI_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyAddressChangedEvent(const char *ifName)
+{
+    LnnMonitorAddressChangedEvent event = {.basic.event = LNN_EVENT_IP_ADDR_CHANGED, .ifName = {0}};
+    if (ifName != NULL) {
+        int32_t ret = strcpy_s(event.ifName, sizeof(event.ifName), ifName);
+        if (ret != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ifName failed!ret=%d", ret);
+            return;
+        }
+    }
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight)
+{
+    LnnMasterNodeChangedEvent event = {.basic.event = LNN_EVENT_NODE_MASTER_STATE_CHANGED,
+        .isMasterNode = isMaster,
+        .masterNodeUDID = masterNodeUdid,
+        .weight = weight};
+
+    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 int32_t LnnInitBusCenterEvent(void)
@@ -336,7 +362,8 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in unregister event handler");
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node)
+    {
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);

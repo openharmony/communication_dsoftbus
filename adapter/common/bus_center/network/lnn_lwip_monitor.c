@@ -15,15 +15,15 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "bus_center_event.h"
 #include "lwip/netif.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-static LnnMonitorEventHandler g_eventHandler;
 #define LWIP_NSC_IPSTATUS_CHANGE 0xf0
 
-static int32_t NetifStatusCallback(struct netif *netif, netif_nsc_reason_t reason,
-    const netif_ext_callback_args_t *args)
+static int32_t NetifStatusCallback(
+    struct netif *netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t *args)
 {
     (void)args;
     if (netif == NULL) {
@@ -33,21 +33,21 @@ static int32_t NetifStatusCallback(struct netif *netif, netif_nsc_reason_t reaso
 
     if (reason == LWIP_NSC_IPSTATUS_CHANGE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip monitor start success");
-        g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+        char ifnameBuffer[NET_IF_NAME_LEN];
+        char *ifName = lwip_if_indextoname(netif->num, ifnameBuffer);
+        if (ifName == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad netif! Cannot found ifName", __func__);
+        } else {
+            LnnNotifyAddressChangedEvent(ifName);
+        }
     }
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitLwipMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitLwipMonitorImpl(void)
 {
-    if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "input handler is NULL!");
-        return SOFTBUS_ERR;
-    }
     NETIF_DECLARE_EXT_CALLBACK(NetifCallback);
     netif_add_ext_callback(&NetifCallback, NetifStatusCallback);
-
-    g_eventHandler = handler;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnInitLwipMonitorImpl start success...");
     return SOFTBUS_OK;
 }

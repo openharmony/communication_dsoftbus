@@ -17,8 +17,7 @@
 
 #include "softbus_errcode.h"
 
-int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitWifiServiceMonitorImpl(void)
 {
-    (void)handler;
     return SOFTBUS_OK;
 }
