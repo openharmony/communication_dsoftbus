@@ -17,6 +17,7 @@
 #include "disc_client_stub.h"
 #include "iproxy_client.h"
 #include "liteipc_adapter.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_client_context_manager.h"
@@ -84,8 +85,9 @@ static int ClientIpcInterfaceMsgHandle(const IpcContext *ctx, void *ipcMsg, IpcI
 
 static int InnerRegisterService(void)
 {
-    char clientName[PKG_NAME_SIZE_MAX] = {0};
-    if (GetSoftBusClientName(clientName, sizeof(clientName)) != SOFTBUS_OK) {
+    char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
+    uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
+    if (clientNameNum == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
         return SOFTBUS_ERR;
     }
@@ -93,12 +95,17 @@ static int InnerRegisterService(void)
     struct CommonScvId svcId = {0};
     if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie, &svcId.ipcCtx) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client identity failed");
+        for (uint32_t i = 0; i < clientNameNum; i++) {
+            SoftBusFree(clientName[i]);
+        }
         return SOFTBUS_ERR;
     }
-
-    while (RegisterService(clientName, &svcId) != SOFTBUS_OK) {
-        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-        continue;
+    for (uint32_t i = 0; i < clientNameNum; i++) {
+        while (RegisterService(clientName[i], &svcId) != SOFTBUS_OK) {
+            SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+            continue;
+        }
+        SoftBusFree(clientName[i]);
     }
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "InnerRegisterService success");
@@ -224,5 +231,22 @@ int ClientStubInit(void)
         return SOFTBUS_ERR;
     }
 
+    return SOFTBUS_OK;
+}
+
+int ClientRegisterService(const char *pkgName)
+{
+    struct CommonScvId svcId = {0};
+    if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie, &svcId.ipcCtx) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client identity failed");
+        return SOFTBUS_ERR;
+    }
+
+    while (RegisterService(pkgName, &svcId) != SOFTBUS_OK) {
+        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        continue;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ClientRegisterService success");
     return SOFTBUS_OK;
 }

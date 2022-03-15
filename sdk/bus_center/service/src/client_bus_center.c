@@ -192,19 +192,13 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
     return JoinLNNInner(pkgName, target, cb);
 }
 
-int32_t LeaveLNN(const char *networkId, OnLeaveLNNResult cb)
+int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
-    if (networkId == NULL || cb == NULL) {
+    if (networkId == NULL || cb == NULL || pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
-    char clientName[PKG_NAME_SIZE_MAX];
-    int ret = GetSoftBusClientName(clientName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN get client name failed!");
-        return SOFTBUS_ERR;
-    }
-    return LeaveLNNInner(clientName, networkId, cb);
+    return LeaveLNNInner(pkgName, networkId, cb);
 }
 
 int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
