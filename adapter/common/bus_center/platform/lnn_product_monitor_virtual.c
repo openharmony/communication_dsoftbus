@@ -17,8 +17,7 @@
 
 #include "softbus_errcode.h"
 
-int32_t LnnInitProductMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitProductMonitorImpl(void)
 {
-    (void)handler;
     return SOFTBUS_OK;
 }

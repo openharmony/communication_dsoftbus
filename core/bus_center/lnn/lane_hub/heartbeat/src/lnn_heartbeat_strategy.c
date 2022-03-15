@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_fsm.h"
@@ -37,9 +38,7 @@ typedef struct {
 } LnnHeartbeatStrategy;
 
 static LnnHeartbeatStrategy g_strategy = {
-    .policy[HB_IMPL_TYPE_BLE] = {
-        .implPolicy = NULL,
-    },
+    .policy[HB_IMPL_TYPE_BLE] = {.implPolicy = NULL},
 };
 
 static int32_t HbMonitorInit(void)
@@ -101,8 +100,8 @@ static int32_t ResetHeartbeatParam(int32_t callingUid, GearMode mode, const Hear
     return SOFTBUS_OK;
 }
 
-int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId,
-    GearMode mode, const HeartbeatImplPolicy *implPolicy)
+int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId, GearMode mode,
+    const HeartbeatImplPolicy *implPolicy)
 {
     if (pkgName == NULL || callingUid <= HB_INVALID_UID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get invalid param");
@@ -175,22 +174,20 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return SOFTBUS_OK;
 }
 
-int32_t LnnNotifyMasterNodeChanged(const char *masterUdid, int32_t weight)
+static void LnnHeartbeatMasterNodeChangeEventHandler(const LnnEventBasicInfo *info)
 {
-    (void)weight;
-    char localUdid[UDID_BUF_LEN] = {0};
+    if (info == NULL || info->event != LNN_EVENT_NODE_MASTER_STATE_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad input");
+        return;
+    }
+    LnnMasterNodeChangedEvent *masterNodeChangeEvent = (LnnMasterNodeChangedEvent *)info;
 
-    if (masterUdid == NULL) {
-        return SOFTBUS_INVALID_PARAM;
+    int32_t ret = LnnPostMsgToHbFsm(
+        masterNodeChangeEvent->isMasterNode ? EVENT_HB_AS_MASTER_NODE : EVENT_HB_AS_NORMAL_NODE, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(
+            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify master node change to heartbeat module failed. ret=%d", ret);
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify master node changed get local udid err");
-        return SOFTBUS_ERR;
-    }
-    if (strcmp(masterUdid, localUdid) == 0) {
-        return LnnPostMsgToHbFsm(EVENT_HB_AS_MASTER_NODE, NULL);
-    }
-    return LnnPostMsgToHbFsm(EVENT_HB_AS_NORMAL_NODE, NULL);
 }
 
 int32_t LnnStartHeartbeatDelay(void)
@@ -234,6 +231,11 @@ int32_t LnnInitHeartbeat(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor init fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, LnnHeartbeatMasterNodeChangeEventHandler) !=
+        SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor regist event fail!");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }
@@ -243,4 +245,5 @@ void LnnDeinitHeartbeat(void)
     LnnHbFsmDeinit();
     HbMonitorDeinit();
     LnnHbMgrDeinit();
+    LnnUnregisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, LnnHeartbeatMasterNodeChangeEventHandler);
 }
