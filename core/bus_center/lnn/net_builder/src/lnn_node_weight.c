@@ -36,7 +36,7 @@ int32_t LnnGetLocalWeight(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate random weight fail");
         return randVal;
     }
-    weight = (randVal * MAX_WEIGHT_VALUE) / UINT8_MAX;
+    weight = (int32_t)((randVal * MAX_WEIGHT_VALUE) / UINT8_MAX);
     isGenWeight = true;
     return weight;
 }
