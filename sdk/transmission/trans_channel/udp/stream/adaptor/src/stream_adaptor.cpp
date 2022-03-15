@@ -91,7 +91,6 @@ void StreamAdaptor::ReleaseAdaptor()
 {
     streamManager_->DestroyStreamDataChannel();
     streamManager_->DestroyEnvironment(pkgName_);
-    streamManager_ = nullptr;
     channelId_ = -1;
 
     size_t len = sessionKey_.length();
