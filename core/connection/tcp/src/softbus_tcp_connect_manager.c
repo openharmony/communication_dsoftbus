@@ -217,7 +217,7 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, int32_t len)
                 "receiveData: error occurred![recvLen=%d][len=%d]", recvLen, len);
             goto EXIT;
         }
-        recvLen += n;
+        recvLen += (uint32_t)n;
     }
     return data;
 EXIT:
