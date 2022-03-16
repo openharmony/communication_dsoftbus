@@ -110,15 +110,15 @@
     ]
   },
   {
-    "SESSION_NAME":"ohos.dhardware.*",
-    "REGEXP":"true",
-    "DEVID":"NETWORKID",
-    "SEC_LEVEL":"public",
+    "SESSION_NAME": "ohos.dhardware.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
-        "PKG_NAME":"ohos.dhardware",
-        "TYPE":"system_app",
-        "ACTIONS":"create,open"
+        "PKG_NAME": "ohos.dhardware",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
       }
     ]
   },
