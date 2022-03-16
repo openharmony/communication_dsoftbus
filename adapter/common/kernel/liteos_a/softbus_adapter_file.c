@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -242,7 +243,7 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 
     struct stat statbuff;
     if (stat(sourceFile, &statbuff) < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stat file fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "stat file fail");
         return SOFTBUS_ERR;
     } else {
         *fileSize = statbuff.st_size;
