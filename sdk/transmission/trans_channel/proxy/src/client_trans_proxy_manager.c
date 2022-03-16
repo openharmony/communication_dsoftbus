@@ -362,7 +362,7 @@ static int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath,
 static int32_t UpdateRecvInfo(SingleFileInfo fileInfo)
 {
     int index = fileInfo.index;
-    if (index > MAX_RECV_FILE_NUM) {
+    if (index >= MAX_RECV_FILE_NUM) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fileInfo.index is large than MAX_RECV_FILE_NUM");
         return SOFTBUS_ERR;
     }
