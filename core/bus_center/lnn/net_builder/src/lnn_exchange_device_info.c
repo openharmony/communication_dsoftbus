@@ -18,11 +18,16 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+
+#define DEFAULT_DEVICE_NAME "OpenHarmony"
+static bool g_tryGetSettingData = true;
 
 static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version)
 {
@@ -190,6 +195,27 @@ static char *PackWifi(const NodeInfo *info, SoftBusVersion version)
     return data;
 }
 
+static void HandlerGetDeviceName(void)
+{
+    char name[DEVICE_NAME_BUF_LEN] = {0};
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HandlerGetDeviceName enter");
+    if (LnnGetSettingDeviceName(name, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HandlerGetDeviceName fail");
+        return;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HandlerGetDeviceName name is %s", name);
+    if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HandlerGetDeviceName set device name fail");
+    }
+}
+
+static void UpdateDeviceNameFromSetting(void)
+{
+    LnnInitGetDeviceName(HandlerGetDeviceName);
+    HandlerGetDeviceName();
+}
+
 static ProcessLedgerInfo g_processFuncs[] = {
     {AUTH_BT, PackBt, UnPackBt},
     {AUTH_WIFI, PackWifi, UnPackWifi},
@@ -198,11 +224,20 @@ static ProcessLedgerInfo g_processFuncs[] = {
 char *PackLedgerInfo(SoftBusVersion version, AuthType type)
 {
     uint32_t i;
+    const char *deviceName = NULL;
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info = null.");
         return NULL;
     }
+    deviceName = LnnGetDeviceName(&info->deviceInfo);
+    if (deviceName != NULL) {
+        if (g_tryGetSettingData && strcmp(deviceName, DEFAULT_DEVICE_NAME) == 0) {
+            UpdateDeviceNameFromSetting();
+            g_tryGetSettingData = false;
+        }
+    }
+
     for (i = 0; i < sizeof(g_processFuncs) / sizeof(ProcessLedgerInfo); i++) {
         if (g_processFuncs[i].type == type) {
             return g_processFuncs[i].pack(info, version);
