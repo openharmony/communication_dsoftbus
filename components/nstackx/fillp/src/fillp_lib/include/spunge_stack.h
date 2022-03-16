@@ -36,7 +36,7 @@ void SpungeShutdownSock(void *argSock, FILLP_INT how);
 void SpungeConnClosed(struct FtNetconn *conn);
 void SpungeConnConnectSuccess(void *argSock);
 void SpungeConnConnectFail(void *argSock);
-int SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn);
+FILLP_BOOL SpungeConnCheckUnsendBoxEmpty(struct FtNetconn *conn);
 void SpungEpollClose(struct FtSocket *sock);
 
 #ifdef __cplusplus
