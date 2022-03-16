@@ -242,7 +242,7 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
     }
 
     struct stat statbuff;
-    if (stat(sourceFile, &statbuff) < 0) {
+    if (stat(fileName, &statbuff) < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "stat file fail");
         return SOFTBUS_ERR;
     } else {
