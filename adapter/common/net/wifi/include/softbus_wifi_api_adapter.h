@@ -17,6 +17,7 @@
 #define SOFTBUS_WIFI_API_ADAPTER_H
 
 #include <stdint.h>
+#include "wifi_device.h" 
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +25,7 @@ extern "C" {
 #define WIFI_MAC_LEN 6
 #define WIFI_MAX_KEY_LEN 65
 #define WIFI_MAX_CONFIG_SIZE 10
+#define MAX_CALLBACK_NUM 5
 
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
@@ -34,9 +36,20 @@ typedef struct {
     int32_t isHiddenSsid;
 } SoftBusWifiDevConf;
 
+typedef struct {
+    /* call back for scan result */
+    void (*onWifiScanResult)(int state, int size);
+} ISoftBusScanResult; 
+
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
 int32_t SoftBusDisconnectDevice(void);
+
+int32_t SoftBusStarWifiScan(void);
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb);
+/* parameter *result is released by the caller. */
+int32_t SoftBusGetWifiScanList(WifiScanInfo **result, unsigned int *size);
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb);
 
 #ifdef __cplusplus
 }
