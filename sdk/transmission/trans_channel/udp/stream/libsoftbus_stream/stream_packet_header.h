@@ -193,7 +193,7 @@ private:
         firstLevelHeader.length++;
 
         TypeLength extTlv {};
-        extTlv.type = 0; // 如果有ext，默认存放在二级TLV首位
+        extTlv.type = 0;
         extTlv.length = static_cast<uint16_t>(extLen_);
 
         auto pos = reinterpret_cast<uint16_t *>(start);
