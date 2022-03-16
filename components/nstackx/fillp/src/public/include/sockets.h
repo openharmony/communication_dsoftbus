@@ -54,12 +54,12 @@ struct GlobalAppCommon {
     FILLP_UINT32 maxServerAllowRecvCache;
     FILLP_UINT32 udpSendBufSize;
     FILLP_UINT32 recvBufSize;
-    FILLP_UINT32 disconnectRetryTimeout; /* Testability addtion in the code it is 100. */
+    FILLP_UINT32 disconnectRetryTimeout; /* Testability addition in the code it is 100. */
     FILLP_UINT32 sendCache;              /* size of send cache */
     FILLP_UINT32 recvCache;              /* size of recv cache  */
     FILLP_UINT32 connectTimeout;         /* seconds */
     FILLP_UINT16 reserve;                /* Now not used, need to remove it */
-    FILLP_UINT16 connRetryTimeout;       /* Testability addtion in the code it is 10. */
+    FILLP_UINT16 connRetryTimeout;       /* Testability addition in the code it is 10. */
     FILLP_BOOL enableNackDelay;
     FILLP_BOOL enlargePackIntervalFlag;
     FILLP_BOOL enableDateOptTimestamp;
@@ -113,7 +113,7 @@ struct FtSocket {
     struct Hlist epTaskList;
     SYS_ARCH_SEM epollTaskListLock;
 
-    /* It means, that A ft-socket can be registered upto 10 epoll instances, not
+    /* It means, that A ft-socket can be registered up to 10 epoll instances, not
        more than that. This value is compile config controlled, App can
        increase the number if expects more epoll instances for its user application
     */
@@ -137,7 +137,7 @@ struct FtSocket {
     FILLP_INT freeTimeCount;
     FILLP_BOOL isSockBind;
     SYS_ARCH_SEM connBlockSem;     /* Used when do connect */
-    SYS_ARCH_RW_SEM sockConnSem;   /* Used to protect socket resource not freeed */
+    SYS_ARCH_RW_SEM sockConnSem;   /* Used to protect socket resource not freed */
     SYS_ARCH_SEM sockCloseProtect; /* To make sure that only one close message posted to fillp thread */
     FILLP_INT err;
     struct GlobalAppResource resConf; /* Total size is 15 * sizeof uint32 */

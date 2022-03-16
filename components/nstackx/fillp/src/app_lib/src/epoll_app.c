@@ -352,7 +352,7 @@ static FILLP_INT EpPoll(
       deadlock as the core thread will not get the lock and update the readylist.
       Also the FtEpollWait is running in another thread, the check here is
       performs only reading and validate for NULL, hence the wait lock is not
-      acquired. Acquire lock here also might reduce performace
+      acquired. Acquire lock here also might reduce performance
     */
     while (needLoopNun == FILLP_TRUE) {
         if (sock->allocState == SOCK_ALLOC_STATE_EPOLL_TO_CLOSE) {
@@ -575,7 +575,7 @@ static FILLP_INT SpungeEpollCtlHandleAddEvent(
         return -1;
     }
 
-    /* It means, that A ft-socket can be registered upto 10 epoll instances, not
+    /* It means, that A ft-socket can be registered up to 10 epoll instances, not
           more than that. This value is compile config controlled.
     */
     if (sock->associatedEpollInstanceIdx >= FILLP_NUM_OF_EPOLL_INSTANCE_SUPPORTED) {

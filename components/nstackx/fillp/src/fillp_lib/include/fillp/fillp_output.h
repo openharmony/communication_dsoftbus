@@ -29,7 +29,6 @@ FILLP_INT FillpSendItem(struct FillpPcbItem *item, struct FillpPcb *fpcb);
 FILLP_UINT32 FillpSendOne(struct FillpPcb *pcb, FILLP_UINT32 totalSendBytes, FILLP_UINT32 sendPktNum);
 void FillpSendAdhocpackToDetectRtt(struct FillpPcb *pcb);
 FILLP_BOOL FillpSendPackWithPcbBuffer(struct FillpPcb *pcb);
-FILLP_BOOL FillpSendPack(struct FillpPcb *pcb, struct FillpPktPack *pack);
 
 #ifdef __cplusplus
 }

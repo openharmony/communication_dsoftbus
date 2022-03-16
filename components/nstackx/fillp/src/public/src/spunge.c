@@ -65,7 +65,7 @@ void SpungeEpollEventCallback(struct FtSocket *sock, FILLP_INT event, FILLP_INT 
 void SockSetOsSocket(struct FtSocket *ftSock, struct SockOsSocket *osSock)
 {
     ftSock->netconn->osSocket[SPUNGE_GET_CUR_INSTANCE()->instIndex] = osSock;
-    osSock->refrence++;
+    osSock->reference++;
 
     return;
 }

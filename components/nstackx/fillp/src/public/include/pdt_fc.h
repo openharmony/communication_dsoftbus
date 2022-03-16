@@ -304,8 +304,8 @@ extern "C" {
 #define FILLP_FLOW_CONTROL_MULTI_NUM_STEP 0.10
 #endif
 
-#ifndef FILLP_FC_NINTY_PERCENT_VAL
-#define FILLP_FC_NINTY_PERCENT_VAL(value) ((value) * 0.8)
+#ifndef FILLP_FC_NINETY_PERCENT_VAL
+#define FILLP_FC_NINETY_PERCENT_VAL(value) ((value) * 0.8)
 #endif
 
 #ifndef FILLP_FLOW_CONTROL_MULTI_NUM_INITIAL_VAL
@@ -400,7 +400,7 @@ extern "C" {
                                       is configured as big value, then the no of cycles of sending the
                                             data will be more. This will make performance dip to the app */
 /* In FillpProcessConnConfirm, there is a multiplication with pktSize which
-   should not cross the FILLP_MAX_INT_VALUE. As thre pktSize cannot be exceeded
+   should not cross the FILLP_MAX_INT_VALUE. As the pktSize cannot be exceeded
    more than 1500, below MAX value is changed from 0x7FFFFFFF to 1431648 (0x15D860).
    This is at the server side, default value is 81920. Thed MAX value is big
    enough for real time usecase scenario, hence no impact with this change
@@ -414,11 +414,11 @@ extern "C" {
 #endif
 
 #ifndef FILLP_MAX_TIMER_RECV_CACHE_PKT_NUMBUFF
-#define FILLP_MAX_TIMER_RECV_CACHE_PKT_NUMBUFF 300 /* max value of recv catche  number bufffer timer */
+#define FILLP_MAX_TIMER_RECV_CACHE_PKT_NUMBUFF 300 /* max value of recv catche  number buffer timer */
 #endif
 
 #ifndef FILLP_MIN_TIMER_RECV_CACHE_PKT_NUMBUFF
-#define FILLP_MIN_TIMER_RECV_CACHE_PKT_NUMBUFF 10 /* min value of recv catche  number bufffer timer */
+#define FILLP_MIN_TIMER_RECV_CACHE_PKT_NUMBUFF 10 /* min value of recv catche  number buffer timer */
 #endif
 
 #ifndef FILLP_MAX_STACK_RECV_CACHE_PKT_NUM_BUFF_SIZE
@@ -525,8 +525,8 @@ extern "C" {
 #define FILLP_FLOW_CONTROL_MULTI_NUM_STEP_EXT 0.042
 #endif
 
-#ifndef FILLP_FC_NINTY_PERCENT_VAL_EXT
-#define FILLP_FC_NINTY_PERCENT_VAL_EXT 0.8
+#ifndef FILLP_FC_NINETY_PERCENT_VAL_EXT
+#define FILLP_FC_NINETY_PERCENT_VAL_EXT 0.8
 #endif
 
 #ifndef FILLP_DEFAULT_BFULL_CPU_THRESHOLD_RATE_EXT

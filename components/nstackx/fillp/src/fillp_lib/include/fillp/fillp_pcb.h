@@ -78,9 +78,9 @@ struct FillpRecvPcb {
     void *itemPool;
     void *privItemPool;
     FILLP_UINT32 oppositeSetRate; /* The Max Opposite Rate Allowed */
-    FILLP_UINT32 seqNum;          /* the newest continuous seq num recieved */
-    FILLP_UINT32 endSeqNum;       /* the newest seq num recieved */
-    FILLP_UINT32 pktNum;          /* the newest pkt num recieved */
+    FILLP_UINT32 seqNum;          /* the newest continuous seq num received */
+    FILLP_UINT32 endSeqNum;       /* the newest seq num received */
+    FILLP_UINT32 pktNum;          /* the newest pkt num received */
     FILLP_UINT32 lastPackSeqNum;
     FILLP_UINT32 lastPackPktNum;
     FILLP_UINT32 pktStartNum;

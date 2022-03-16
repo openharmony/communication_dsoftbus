@@ -201,7 +201,7 @@ static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
     item->dataLen = pktHdr->dataLen;
 
     if (FillpNumIsbigger(item->seqNum, (pcb->recv.seqNum + pcb->recv.pktRecvCache + privRecvCacheSize))) {
-        FILLP_LOGWAR("fillp_sock_id:%d, seqnum recieved = %u from the peer is not in the send window range = %u",
+        FILLP_LOGWAR("fillp_sock_id:%d, seqnum received = %u from the peer is not in the send window range = %u",
             FILLP_GET_SOCKET(pcb)->index, item->seqNum,
             (pcb->recv.seqNum + pcb->recv.pktRecvCache + privRecvCacheSize));
 
@@ -256,7 +256,7 @@ static void ProcessPcbItem(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf,
             item = (struct FillpPcbItem *)node->item;
             lostSeqNum = (item->seqNum - item->dataLen);
         }
-        FILLP_LOGDTL("can not alloc recv bufer ,drop it !!!!!,fillp_sock_id:%d, seqNum:%u, pktNum:%u, "
+        FILLP_LOGDTL("can not alloc recv bufer, drop it !!!!!,fillp_sock_id:%d, seqNum:%u, pktNum:%u, "
             "recv.seqNum:%u, lostSeqNum:%u, recvList:%u, recvBoxPlaceInOrder:%u, recvBox:%lu, "
             "mpRecvSize:%u, curItemCount:%u",
             FILLP_GET_SOCKET(pcb)->index, pktHdr->seqNum, pktHdr->pktNum, pcb->recv.seqNum, lostSeqNum,
@@ -273,7 +273,7 @@ static void FillpHdlDataInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *b
     int netconnState = NETCONN_GET_STATE(FILLP_GET_CONN(pcb));
     if ((netconnState != CONN_STATE_CLOSING) && (netconnState != CONN_STATE_CONNECTED)) {
         // Drop it silently
-        FILLP_LOGDBG("not connected or connecting ,drop it !!!!!");
+        FILLP_LOGDBG("not connected or connecting, drop it !!!!!");
         return;
     }
 
@@ -501,7 +501,7 @@ static FILLP_BOOL FillpCheckPackInput(struct FillpPcb *pcb, FILLP_CONST struct N
 {
     FILLP_UINT8 connState = FILLP_GET_CONN_STATE(pcb);
     if ((connState != CONN_STATE_CLOSING) && (connState != CONN_STATE_CONNECTED)) {
-        /* Changed the log level from WAR to INFO, becasue peer would have sent the outstanding
+        /* Changed the log level from WAR to INFO, because peer would have sent the outstanding
             packs at the time when local side connection is closed.
         */
         FILLP_LOGINF("netconn state not correct for PACK,state:%hhu", connState);
@@ -634,7 +634,7 @@ static void FillpHandleAdhocpackFlag(struct FillpPcb *pcb, struct FillpPktPack *
         FILLP_LLONG curTime = SYS_ARCH_GET_CUR_TIME_LONGLONG();
 
         pack->reserved.rtt = FILLP_NTOHL(pack->reserved.rtt);
-        /* rtt isn't much large, so olny use the low 32bit is ok */
+        /* rtt isn't much large, so only use the low 32bit is ok */
         pcb->statistics.appFcStastics.periodRtt =
             FILLP_UTILS_US2MS(((FILLP_UINT32)((FILLP_ULLONG)curTime & 0xFFFFFFFF) - pack->reserved.rtt));
         FILLP_LOGDBG("fillp_sock_id:%d, rtt = %u", FILLP_GET_SOCKET(pcb)->index,
@@ -672,7 +672,7 @@ static void FillpHdlAdhocpack(struct FillpPcb *pcb, struct FillpPktPack *pack)
 static void FillpChangePackInterval(struct FillpPcb *pcb, FILLP_CONST struct FtSocket *sock,
     FILLP_CONST struct FillpPktPack *pack)
 {
-    // It need to cancle if receiving any data from peer
+    // It need to cancel if receiving any data from peer
     if (sock->resConf.common.enlargePackIntervalFlag && (pack->flag & FILLP_PACK_FLAG_NO_DATA_SEND)) {
         pcb->statistics.pack.packInterval = FILLP_NODATARECV_PACK_INTERVAL;
     } else {
@@ -712,7 +712,7 @@ static FILLP_INT FillpHandlePackFlag(struct FillpPcb *pcb, struct FillpPktPack *
 
 static void MoveUnackToUnrecvByPackInfo(struct FillpPcb *pcb, FILLP_UINT32 ackSeqNum, FILLP_UINT32 lostSeqNum)
 {
-    /* when FILLP_RETRANSMIT_CMP_TIME_EXT is 0, packet item resend is controled by pack cnt with same
+    /* when FILLP_RETRANSMIT_CMP_TIME_EXT is 0, packet item resend is controlled by pack cnt with same
      * ackSeqNum */
     if (g_resource.retransmitCmpTime) {
         FillpMoveUnackToUnrecv(ackSeqNum, lostSeqNum, pcb, FILLP_TRUE);
@@ -745,7 +745,7 @@ static void FillpPackInputLog(FILLP_CONST struct FillpPcb *pcb)
         pcb->statistics.traffic.totalSend - pcb->statistics.traffic.totalSendFailed,
         pcb->statistics.traffic.totalSendBytes, pcb->statistics.traffic.totalRetryed);
 
-    FILLP_LOGDBG("fillp_sock_id:%d packIntervalSendPkt:%u,total_recv_bytes:%u,self_peroid_recv_rate:%u,"
+    FILLP_LOGDBG("fillp_sock_id:%d packIntervalSendPkt:%u,total_recv_bytes:%u,self_period_recv_rate:%u,"
         "last_Pack_input_time:%lld",
         FILLP_GET_SOCKET(pcb)->index, pcb->statistics.debugPcb.packIntervalSendPkt,
         pcb->statistics.traffic.totalRecved, pcb->statistics.pack.periodRecvRate,
