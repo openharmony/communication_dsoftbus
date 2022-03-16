@@ -631,9 +631,36 @@ static bool CheckDestFilePathValid(const char *destFile)
     return true;
 }
 
+static int32_t GetFrameNum(uint64_t fileSize, uint64_t *frameNum)
+{
+    if (frameNum == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frame is null");
+        return SOFTBUS_ERR;
+    }
+    if (PROXY_MAX_PACKET_SIZE <= FRAME_DATA_SEQ_OFFSET) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "size error");
+        return SOFTBUS_ERR;
+    }
+    uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
+    uint64_t frameNumTemp = fileSize / frameDataSize;
+    if ((fileSize % frameDataSize) != 0) {
+        frameNumTemp++;
+    }
+
+    /* add 1 means reserve frame to send destFile string */
+    frameNumTemp++;
+    *frameNum = frameNumTemp;
+
+    return SOFTBUS_OK;
+}
+
 static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sourceFile, const char *destFile)
 {
     uint64_t fileSize = 0;
+    if (CheckDestFilePathValid(destFile) == false) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path's form is wrong");
+        return SOFTBUS_ERR;
+    }
     char *absSrcPath = (char *)SoftBusCalloc(PATH_MAX + 1);
     if (absSrcPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
@@ -642,12 +669,8 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
     const char *realSrcPath = GetAndCheckRealPath(sourceFile, absSrcPath);
     if (realSrcPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get src abs file failed");
-        goto EXIT_ERR;
-    }
-
-    if (CheckDestFilePathValid(destFile) == false) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path's form is wrong");
-        goto EXIT_ERR;
+        SoftBusFree(absSrcPath);
+        return SOFTBUS_ERR;
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "srcPath:%s, srcAbsPath:%s, destPath:%s",
@@ -655,25 +678,21 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
 
     if (GetAndCheckFileSize(realSrcPath, &fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
-        goto EXIT_ERR;
+        SoftBusFree(absSrcPath);
+        return SOFTBUS_ERR;
     }
     int32_t fd = SoftBusOpenFile(realSrcPath, SOFTBUS_O_RDONLY);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open file fail");
-        goto EXIT_ERR;
-    }
-    if (PROXY_MAX_PACKET_SIZE <= FRAME_DATA_SEQ_OFFSET) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stat file fail");
-        goto EXIT_ERR;
-    }
-    uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
-    uint64_t frameNum = fileSize / frameDataSize;
-    if ((fileSize % frameDataSize) != 0) {
-        frameNum++;
+        SoftBusFree(absSrcPath);
+        return SOFTBUS_ERR;
     }
 
-    /* add 1 means reserve frame to send destFile string */
-    frameNum++;
+    uint64_t frameNum = 0;
+    if (GetFrameNum(fileSize, &frameNum) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get frame num fail");
+        goto EXIT_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu, destPath:%s",
         sendInfo.channelId, realSrcPath, fileSize, frameNum, destFile);
@@ -684,6 +703,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
     SoftBusFree(absSrcPath);
     return SOFTBUS_OK;
 EXIT_ERR:
+    SoftBusCloseFile(fd);
     SoftBusFree(absSrcPath);
     return SOFTBUS_ERR;
 }
