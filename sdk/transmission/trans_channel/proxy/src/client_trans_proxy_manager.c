@@ -15,16 +15,13 @@
 
 #include "client_trans_proxy_manager.h"
 
-#include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <securec.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_conn_interface.h"
@@ -479,8 +476,8 @@ static void ProxyFileTransTimerProc(void)
                     g_recvFileInfo.recvFileInfo[index].filePath);
                 g_recvFileInfo.recvFileInfo[index].fileStatus = NODE_ERR;
                 g_recvFileInfo.recvFileInfo[index].timeOut = 0;
-                close(g_recvFileInfo.recvFileInfo[index].fileFd);
-                remove(g_recvFileInfo.recvFileInfo[index].filePath);
+                SoftBusCloseFile(g_recvFileInfo.recvFileInfo[index].fileFd);
+                SoftBusRemoveFile(g_recvFileInfo.recvFileInfo[index].filePath);
                 DoTransErrorCallBack();
             } else {
                 g_recvFileInfo.recvFileInfo[index].timeOut++;
@@ -527,14 +524,11 @@ static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourceFile or fileSize is null");
         return SOFTBUS_FILE_ERR;
     }
-    struct stat statbuff;
-    if (stat(sourceFile, &statbuff) < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stat file fail");
-        return SOFTBUS_FILE_ERR;
-    } else {
-        *fileSize = statbuff.st_size;
-    }
 
+    if (SoftBusGetFileSize(sourceFile, fileSize) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file size fail");
+        return SOFTBUS_FILE_ERR;
+    }
     if (*fileSize > MAX_FILE_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, filesize : %llu", *fileSize);
         return SOFTBUS_FILE_ERR;
@@ -587,7 +581,7 @@ static int32_t FileToFrame(SendListenerInfo sendInfo, uint64_t frameNum, int32_t
             fileFrame.frameLength = FRAME_DATA_SEQ_OFFSET + dNameSize;
         } else {
             uint64_t readLength = (remainedSendSize < frameDataSize) ? remainedSendSize : frameDataSize;
-            int32_t len = pread(fd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
+            int64_t len = SoftBusPreadFile(fd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
             if (len >= 0) {
                 fileOffset += readLength;
                 fileFrame.frameLength = readLength + FRAME_DATA_SEQ_OFFSET;
@@ -661,7 +655,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
         goto EXIT_ERR;
     }
-    int32_t fd = open(realSrcPath, O_RDONLY);
+    int32_t fd = SoftBusOpenFile(realSrcPath, O_RDONLY);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open file fail");
         goto EXIT_ERR;
@@ -883,9 +877,9 @@ static int32_t CreateDirAndGetAbsPath(const char *filePath, char *recvAbsPath, i
         if (tempPath[i] != PATH_SEPARATOR) {
             continue;
         }
-        if (access(tempPath, 0) == -1) {
-            ret = mkdir(tempPath, DEFAULT_NEW_PATH_AUTHORITY);
-            if (ret == -1 && errno != EEXIST) {
+        if (SoftBusAccessFile(tempPath, 0) != SOFTBUS_OK) {
+            ret = SoftBusMakeDir(tempPath, DEFAULT_NEW_PATH_AUTHORITY);
+            if (ret == SOFTBUS_ADAPTER_ERR) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mkdir failed(%d)", errno);
                 SoftBusFree(tempPath);
                 return SOFTBUS_ERR;
@@ -1012,7 +1006,7 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
         goto EXIT_ERR;
     }
 
-    int32_t fd = open(fullRecvPath, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int32_t fd = SoftBusOpenFileWithPerms(fullRecvPath, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
         goto EXIT_ERR;
@@ -1020,8 +1014,8 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
 
     if (PutToRecvList(fd, seq, fullRecvPath, fileListener, sessionId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "put seq[%u] failed", seq);
-        close(fd);
-        remove(fullRecvPath);
+        SoftBusCloseFile(fd);
+        SoftBusRemoveFile(fullRecvPath);
         if (RemoveFromRecvListBySeq(seq) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remove from list failed");
         }
@@ -1050,7 +1044,7 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
     }
 
     uint32_t frameDataLength = frameLength - FRAME_DATA_SEQ_OFFSET;
-    int32_t writeLength = pwrite(fileInfo.fileFd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, frameDataLength,
+    int64_t writeLength = SoftBusPwriteFile(fileInfo.fileFd, fileFrame.data + FRAME_DATA_SEQ_OFFSET, frameDataLength,
         (uint64_t)fileInfo.fileOffset);
     if (writeLength < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pwrite file failed");
@@ -1071,10 +1065,10 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
     /* last frame */
     if ((frameType == FILE_LAST_FRAME) || (frameType == FILE_ONLYONE_FRAME)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process last frame, seq:%d", seq);
-        close(fileInfo.fileFd);
+        SoftBusCloseFile(fileInfo.fileFd);
         if (RemoveFromRecvListBySeq(seq) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClearRecvFileInfoBySeq fail");
-            remove(fileInfo.filePath);
+            SoftBusRemoveFile(fileInfo.filePath);
             return SOFTBUS_ERR;
         }
     }
@@ -1112,8 +1106,8 @@ static int32_t WriteFrameToFile(FileFrame fileFrame)
     SoftBusMutexUnlock(&g_recvFileInfo.lock);
     return SOFTBUS_OK;
 EXIT_ERR:
-    close(fileInfo.fileFd);
-    remove(fileInfo.filePath);
+    SoftBusCloseFile(fileInfo.fileFd);
+    SoftBusRemoveFile(fileInfo.filePath);
     if (RemoveFromRecvListBySeq(seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "WriteFrameToFile remove fail");
     }

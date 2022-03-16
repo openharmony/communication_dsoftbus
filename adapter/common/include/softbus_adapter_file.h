@@ -30,7 +30,15 @@ extern "C" {
 /* File operation */
 int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen);
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);
-
+int32_t SoftBusOpenFile(const char *fileName, int32_t flags);
+int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t perms);
+void SoftBusRemoveFile(const char *fileName);
+void SoftBusCloseFile(int32_t fd);
+int32_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t offset);
+int32_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset);
+int32_t SoftBusAccessFile(const char *pathName, int32_t mode);
+int32_t SoftBusMakeDir(const char *pathName, int32_t mode);
+int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize);
 #ifdef __cplusplus
 #if __cplusplus
 }
