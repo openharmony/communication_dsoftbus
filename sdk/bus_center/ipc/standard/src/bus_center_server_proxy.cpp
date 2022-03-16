@@ -30,7 +30,7 @@ using namespace OHOS;
 namespace {
 sptr<BusCenterServerProxy> g_serverProxy = nullptr;
 uint32_t g_getSystemAbilityId = 2;
-const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accesToken";
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 std::mutex g_mutex;
 }
 

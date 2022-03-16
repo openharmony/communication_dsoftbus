@@ -29,7 +29,7 @@ using namespace OHOS;
 
 namespace {
 sptr<TransServerProxy> g_serverProxy = nullptr;
-const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accesToken";
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 uint32_t g_getSystemAbilityId = 2;
 std::mutex g_mutex;
 }

@@ -25,7 +25,7 @@
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
-const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accesToken";
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
