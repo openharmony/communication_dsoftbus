@@ -87,7 +87,7 @@ std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySe
     }
     int sessionId = OpenSessionInner(mySessionName.c_str(), peerSessionName.c_str(),
         peerDeviceId.c_str(), groupId.c_str(), flags);
-    if (sessionId <= 0 || sessionId > MAX_SESSION_ID) {
+    if (sessionId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
         return nullptr;
     }
@@ -110,7 +110,7 @@ int SessionServiceImpl::CloseSession(std::shared_ptr<Session> session)
         return SOFTBUS_ERR;
     }
     int sessionId = session->GetSessionId();
-    if (sessionId <= 0 || sessionId > MAX_SESSION_ID) {
+    if (sessionId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
         return SOFTBUS_ERR;
     }
