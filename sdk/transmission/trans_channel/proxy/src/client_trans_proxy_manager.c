@@ -1008,7 +1008,7 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
         goto EXIT_ERR;
     }
 
-    int32_t fd = SoftBusOpenFileWithPerms(fullRecvPath, 
+    int32_t fd = SoftBusOpenFileWithPerms(fullRecvPath,
         SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE | SOFTBUS_O_TRUNC, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
