@@ -39,7 +39,7 @@
 
 static bool IsValidSessionId(int sessionId)
 {
-    if ((sessionId <= 0) || (sessionId > MAX_SESSION_ID)) {
+    if (sessionId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid sessionId [%d]", sessionId);
         return false;
     }
