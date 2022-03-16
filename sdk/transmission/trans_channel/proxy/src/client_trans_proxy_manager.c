@@ -21,6 +21,7 @@
 
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
@@ -333,7 +334,7 @@ static int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFilePath is null");
         return SOFTBUS_ERR;
     }
-    int index = 0;
+    int32_t index = 0;
     if (GetIdleIndexNode(&index) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetIdleIndexNode fail");
         return SOFTBUS_ERR;
@@ -529,6 +530,7 @@ static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file size fail");
         return SOFTBUS_FILE_ERR;
     }
+
     if (*fileSize > MAX_FILE_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, filesize : %llu", *fileSize);
         return SOFTBUS_FILE_ERR;
@@ -655,7 +657,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sourcefile size err");
         goto EXIT_ERR;
     }
-    int32_t fd = SoftBusOpenFile(realSrcPath, O_RDONLY);
+    int32_t fd = SoftBusOpenFile(realSrcPath, SOFTBUS_O_RDONLY);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open file fail");
         goto EXIT_ERR;
@@ -877,7 +879,7 @@ static int32_t CreateDirAndGetAbsPath(const char *filePath, char *recvAbsPath, i
         if (tempPath[i] != PATH_SEPARATOR) {
             continue;
         }
-        if (SoftBusAccessFile(tempPath, 0) != SOFTBUS_OK) {
+        if (SoftBusAccessFile(tempPath, SOFTBUS_F_OK) != SOFTBUS_OK) {
             ret = SoftBusMakeDir(tempPath, DEFAULT_NEW_PATH_AUTHORITY);
             if (ret == SOFTBUS_ADAPTER_ERR) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mkdir failed(%d)", errno);
@@ -1006,7 +1008,8 @@ static int32_t CreateFileFromFrame(int32_t sessionId, FileFrame fileFrame, FileL
         goto EXIT_ERR;
     }
 
-    int32_t fd = SoftBusOpenFileWithPerms(fullRecvPath, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int32_t fd = SoftBusOpenFileWithPerms(fullRecvPath, 
+        SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE | SOFTBUS_O_TRUNC, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
         goto EXIT_ERR;

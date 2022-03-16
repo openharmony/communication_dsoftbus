@@ -27,6 +27,22 @@ extern "C" {
 #define SOFTBUS_PATH_SEPRATOR '/'
 #define SOFTBUS_MAX_PATH_LEN 256
 
+/* unistd.h */
+#define SOFTBUS_F_OK (0)
+#define SOFTBUS_X_OK (1)
+#define SOFTBUS_W_OK (2)
+#define SOFTBUS_R_OK (4)
+
+/* fcntl.h */
+#define SOFTBUS_O_RDONLY (00)
+#define SOFTBUS_O_WRONLY (01)
+#define SOFTBUS_O_RDWR (02)
+#define SOFTBUS_O_CREATE (0100)
+#define SOFTBUS_O_TRUNC (01000)
+
+#define SOFTBUS_S_IRUSR (0400)
+#define SOFTBUS_S_IWUSR (0200)
+#define SOFTBUS_S_IXUSR (0100)
 /* File operation */
 int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen);
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);

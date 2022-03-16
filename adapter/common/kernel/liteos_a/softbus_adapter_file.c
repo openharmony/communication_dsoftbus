@@ -131,7 +131,7 @@ int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
         return SOFTBUS_INVALID_FD;
     }
     int32_t fd = open(fileName, flags);
-     if (fd < 0) {
+    if (fd < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open file [open fail], %s", strerror(errno));
         return SOFTBUS_INVALID_FD;
     }
@@ -145,7 +145,7 @@ int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t pe
         return SOFTBUS_INVALID_FD;
     }
     int32_t fd = open(fileName, flags, perms);
-     if (fd < 0) {
+    if (fd < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open with perms file [open fail], %s", strerror(errno));
         return SOFTBUS_INVALID_FD;
     }
