@@ -17,7 +17,7 @@
 #define SOFTBUS_WIFI_API_ADAPTER_H
 
 #include <stdint.h>
-#include "wifi_device.h" 
+#include "wifi_device.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,16 +35,14 @@ typedef struct {
     int32_t netId;
     int32_t isHiddenSsid;
 } SoftBusWifiDevConf;
-
 typedef struct {
     /* call back for scan result */
     void (*onWifiScanResult)(int state, int size);
-} ISoftBusScanResult; 
+} ISoftBusScanResult;
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
 int32_t SoftBusDisconnectDevice(void);
-
 int32_t SoftBusStarWifiScan(void);
 int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb);
 /* parameter *result is released by the caller. */

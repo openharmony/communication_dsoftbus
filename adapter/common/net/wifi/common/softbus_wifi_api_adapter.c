@@ -165,7 +165,7 @@ static void SoftBusWifiScanStateChanged(int state, int size)
 {
     for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
         if (g_scanResultCb[i] != NULL) {
-            g_scanResultCb[i]->onWifiScanResult(state, size); 
+            g_scanResultCb[i]->onWifiScanResult(state, size);
         }
     }
 }
@@ -214,7 +214,6 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 
 int32_t SoftBusGetWifiScanList(WifiScanInfo **result, unsigned int *size)
 {
- 
     int32_t ret;
 
     if (size == NULL || result == NULL) {
