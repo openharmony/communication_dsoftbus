@@ -40,7 +40,7 @@ sptr<IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
-const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accesToken";
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
 static int InnerRegisterService(void)
