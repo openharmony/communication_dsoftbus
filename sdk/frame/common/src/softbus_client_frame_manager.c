@@ -127,7 +127,7 @@ static void ClientModuleDeinit(void)
     DiscClientDeinit();
 }
 
-static int32_t ClientModuleInit()
+static int32_t ClientModuleInit(void)
 {
     SoftbusConfigInit();
     if (EventClientInit() == SOFTBUS_ERR) {
