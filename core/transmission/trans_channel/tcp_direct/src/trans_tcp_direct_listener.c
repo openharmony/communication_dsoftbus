@@ -185,6 +185,8 @@ static void CloseTcpDirectFd(int fd)
 {
 #ifndef __LITEOS_M__
     CloseTcpFd(fd);
+#else
+    (void)fd;
 #endif
 }
 
