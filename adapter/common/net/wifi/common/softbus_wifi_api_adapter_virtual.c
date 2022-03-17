@@ -33,7 +33,7 @@ int32_t SoftBusDisconnectDevice(void)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusStarWifiScan(void)
+int32_t SoftBusStartWifiScan(void)
 {
     return SOFTBUS_OK;
 }

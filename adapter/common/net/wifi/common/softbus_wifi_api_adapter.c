@@ -149,7 +149,7 @@ int32_t SoftBusDisconnectDevice(void)
 static ISoftBusScanResult *g_scanResultCb[MAX_CALLBACK_NUM] = {NULL};
 static bool g_registerFlag = true;
 
-int32_t SoftBusStarWifiScan(void)
+int32_t SoftBusStartWifiScan(void)
 {
     int32_t ret;
 
