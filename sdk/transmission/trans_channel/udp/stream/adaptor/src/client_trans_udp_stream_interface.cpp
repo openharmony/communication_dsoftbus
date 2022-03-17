@@ -49,7 +49,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
             return SOFTBUS_ERR;
         }
-        auto adaptor = it->second;
+        adaptor = it->second;
     }
 
     std::unique_ptr<IStream> stream = nullptr;
