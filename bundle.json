@@ -26,7 +26,9 @@
         "dsoftbus_standard_feature_lnn_net",
         "dsoftbus_standard_feature_trans_udp_stream",
         "dsoftbus_standard_feature_trans_udp_file",
-        "dsoftbus_standard_get_devicename"
+        "dsoftbus_standard_get_devicename",
+        "dsoftbus_standard_feature_product_config_path",
+        "dsoftbus_standard_feature_ifname_prefix_path"
       ],
       "rom": "967KB",
       "ram": "28MB",
