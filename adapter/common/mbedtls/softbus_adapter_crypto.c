@@ -278,5 +278,6 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
 int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *decryptData, uint32_t *decryptLen, int32_t seqNum)
 {
+    (void)seqNum;
     return SoftBusDecryptData(cipherKey, input, inLen, decryptData, decryptLen);
 }

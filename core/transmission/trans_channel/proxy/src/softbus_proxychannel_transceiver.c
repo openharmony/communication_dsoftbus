@@ -551,6 +551,7 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
 
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
+    (void)connInfo;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
     TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);

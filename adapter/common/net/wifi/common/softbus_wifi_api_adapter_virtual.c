@@ -20,11 +20,14 @@
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
 {
+    (void)configList;
+    (void)num;
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
 {
+    (void)wifiConfig;
     return SOFTBUS_OK;
 }
 
