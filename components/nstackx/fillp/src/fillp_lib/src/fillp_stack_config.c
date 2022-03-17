@@ -96,7 +96,7 @@ static FILLP_INT32 FtInitConfigSet(IN FILLP_CONST FillpGlobalConfigsSt *globalRe
     g_resource.common.recvCachePktNumBufferSize = globalResource->common.recvCachePktNumBufferSize;
     g_resource.common.outOfOrderCacheEnable = globalResource->common.outOfOrderCacheFeature;
     g_resource.common.recvCachePktNumBufferTimeout = globalResource->timers.recvCachePktNumBufferTimeout;
-    /* Currently this will not be alowed to configure and is always 1. */
+    /* Currently this will not be allowed to configure and is always 1. */
     g_resource.common.maxInstNum = FILLP_DEFAULT_INST_NUM;
 
     g_resource.flowControl.initialRate = globalResource->flowControl.initialRate;
@@ -191,7 +191,7 @@ static FILLP_INT32 FtGetConfigStackHalf1(IN FILLP_UINT32 name, IO void *value)
             *(FILLP_UINT16 *)value = g_resource.flowControl.oppositeSetPercentage;
 #else
             FILLP_LOGERR("Server feature Not enabled :"
-                         "FT_CONF_OPPOSITE_SET_PERCENTAGE is server only option so cant GET !!!");
+                         "FT_CONF_OPPOSITE_SET_PERCENTAGE is server only option so cannot GET !!!");
             return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
             break;
@@ -238,7 +238,7 @@ static FILLP_INT32 FtGetConfigStackHalf2(IN FILLP_UINT32 name, IO void *value)
             break;
 #else
             FILLP_LOGERR("Server feature Not enabled :"
-                         "FT_CONF_CORE_MAX_RECV_RATE is server only option so cant GET !!!");
+                         "FT_CONF_CORE_MAX_RECV_RATE is server only option so cannot GET !!!");
             return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
 
@@ -343,7 +343,7 @@ static FILLP_INT32 FtSetConfigStackHalf1(
             return FtConfigSetOppositeSetPercentage(value);
 #else
             FILLP_LOGERR("Server feature Not enabled :"
-                         "FT_CONF_OPPOSITE_SET_PERCENTAGE is server only option so cant SET !!!");
+                         "FT_CONF_OPPOSITE_SET_PERCENTAGE is server only option so cannot SET !!!");
             return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
 
@@ -383,7 +383,7 @@ static FILLP_INT32 FtSetConfigStackHalf2(
             return FtConfigSetMaxRecvRate(value);
 #else
             FILLP_LOGERR("Server feature Not enabled :"
-                         "FT_CONF_CORE_MAX_RECV_RATE is server only option so cant SET!!!");
+                         "FT_CONF_CORE_MAX_RECV_RATE is server only option so cannot SET!!!");
             return ERR_FEATURE_MACRO_NOT_ENABLED;
 #endif
         case FT_CONF_TIMER_RECV_CACHE_PKT_NUMBUFF: {

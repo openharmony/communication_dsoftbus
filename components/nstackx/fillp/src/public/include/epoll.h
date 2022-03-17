@@ -24,7 +24,7 @@ extern "C" {
 
 /*
  * This structure is stored inside the "private_data" member of the file
- * structure and rapresent the main data sructure for the eventpoll
+ * structure and represent the main data structure for the eventpoll
  * interface.
  */
 struct EventPoll {
