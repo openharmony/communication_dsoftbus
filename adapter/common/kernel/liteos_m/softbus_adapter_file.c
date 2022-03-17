@@ -114,9 +114,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
 {
-
     return SOFTBUS_ADAPTER_ERR;
-
 }
 int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 {
