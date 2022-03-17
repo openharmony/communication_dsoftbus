@@ -41,10 +41,13 @@ int32_t LnnGetLocalWeight(void)
     return weight;
 }
 
-int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1,
-    int32_t weight2, const char *masterUdid2)
+int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2, const char *masterUdid2)
 {
     if (weight1 != weight2) {
+        return weight1 - weight2;
+    }
+    if (masterUdid1 == NULL || masterUdid2 == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:nullptr", __func__);
         return weight1 - weight2;
     }
     return strcmp(masterUdid1, masterUdid2);
