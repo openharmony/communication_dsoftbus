@@ -16,6 +16,7 @@
 #include "softbus_adapter_file.h"
 
 #include "cmsis_os2.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
 #include "utils_file.h"
@@ -74,4 +75,55 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     }
     UtilsFileClose(fd);
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
+{
+    return SOFTBUS_INVALID_FD;
+}
+
+int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t perms)
+{
+    return SOFTBUS_INVALID_FD;
+}
+
+void SoftBusRemoveFile(const char *fileName)
+{
+    return;
+}
+
+void SoftBusCloseFile(int32_t fd)
+{
+    return;
+}
+
+int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t offset)
+{
+    return -1;
+}
+
+int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset)
+{
+    return -1;
+}
+
+int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
+{
+    return SOFTBUS_ERR;
+}
+
+int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
+{
+
+    return SOFTBUS_ADAPTER_ERR;
+
+}
+int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
+{
+    return SOFTBUS_ERR;
+}
+
+char *SoftBusRealPath(const char *path, char *absPath)
+{
+    return NULL;
 }

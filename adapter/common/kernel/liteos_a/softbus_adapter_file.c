@@ -251,3 +251,20 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 
     return SOFTBUS_OK;
 }
+
+char *SoftBusRealPath(const char *path, char *absPath)
+{
+    if ((path == NULL) || (absPath == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus realpath [path or absPath is null]");
+        return NULL;
+    }
+
+    char *realPath = NULL;
+    if (realpath(path, absPath) == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "realpath failed, err[%s]", strerror(errno));
+        return NULL;
+    } else {
+        realPath = absPath;
+    }
+    return realPath;
+}
