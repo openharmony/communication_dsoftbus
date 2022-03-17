@@ -26,7 +26,7 @@ namespace OHOS {
 using namespace testing::ext;
 
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
-constexpr char TEST_PKG_ERROR_NAME[] = "com.softbus.error.test";
+constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
 constexpr int32_t ERRO_CAPDATA_LEN = 514;
@@ -359,9 +359,6 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     g_pInfo.dataLen = sizeof("capdata1");
-
-    ret = PublishLNN(TEST_PKG_ERROR_NAME, &g_pInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
 }
 
 /**
@@ -375,6 +372,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     int32_t ret;
     int tmpId1 = GetPublishId();
     int tmpId2 = GetPublishId();
+    int tmpId3 = GetPublishId();
 
     g_pInfo.publishId = tmpId1;
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
@@ -382,9 +380,14 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     g_pInfo1.publishId = tmpId2;
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo1, &g_publishCb);
     EXPECT_TRUE(ret == 0);
+    g_pInfo1.publishId = tmpId3;
+    ret = PublishLNN(TEST_PKG_NAME_1, &g_pInfo1, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
     ret = StopPublishLNN(TEST_PKG_NAME, tmpId1);
     EXPECT_TRUE(ret == 0);
     ret = StopPublishLNN(TEST_PKG_NAME, tmpId2);
+    EXPECT_TRUE(ret == 0);
+    ret = StopPublishLNN(TEST_PKG_NAME_1, tmpId3);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -399,9 +402,6 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     int ret;
 
     ret = RefreshLNN(NULL, &g_sInfo, &g_refreshCb);
-    EXPECT_TRUE(ret != 0);
-
-    ret = RefreshLNN(TEST_PKG_ERROR_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
 
     ret = RefreshLNN(TEST_PKG_NAME, NULL, &g_refreshCb);
@@ -447,6 +447,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     int32_t ret;
     int tmpId1 = GetSubscribeId();
     int tmpId2 = GetSubscribeId();
+    int tmpId3 = GetSubscribeId();
 
     g_sInfo.subscribeId = tmpId1;
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
@@ -454,9 +455,14 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     g_sInfo1.subscribeId = tmpId2;
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo1, &g_refreshCb);
     EXPECT_TRUE(ret == 0);
+    g_sInfo1.subscribeId = tmpId3;
+    ret = RefreshLNN(TEST_PKG_NAME_1, &g_sInfo1, &g_refreshCb);
+    EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(TEST_PKG_NAME, tmpId1);
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(TEST_PKG_NAME, tmpId2);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
     EXPECT_TRUE(ret == 0);
 }
 } // namespace OHOS
