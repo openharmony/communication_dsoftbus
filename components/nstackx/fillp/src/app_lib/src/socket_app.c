@@ -775,7 +775,7 @@ FILLP_INT SockRecvmsg(FILLP_INT sockIndex, struct msghdr *msg, FILLP_INT flags)
     }
 
     FILLP_SOCK_SET_ERR(sock, FILLP_ECONNRESET);
-    FILLP_LOGERR("recv conect reset  error");
+    FILLP_LOGERR("recv connect reset error");
     SET_ERRNO(FILLP_ECONNRESET);
     return 0;
 }
@@ -995,7 +995,7 @@ static struct FtNetconn *SockPopConn(struct FtSocket *sock, FILLP_INT sockFd)
         if ((SOCK_IS_NONBLOCKING(sock))) {
             (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
 
-            FILLP_LOGINF("SockAccept: connection request not recieved for listenID  = %d \r\n", sockFd);
+            FILLP_LOGINF("SockAccept: connection request not received for listenID  = %d \r\n", sockFd);
             FILLP_SOCK_SET_ERR(sock, FILLP_EINPROGRESS);
             SET_ERRNO(FILLP_EAGAIN);
             /* Returns less than 0 value */
@@ -1069,13 +1069,13 @@ FillpErrorType SockAccept(FILLP_INT sockFd, struct sockaddr *addr, socklen_t *ad
     err = SpungePostMsg(sock->inst, (void *)&acceptMsg, MSG_TYPE_NETCONN_ACCPETED, FILLP_TRUE);
     if (err != ERR_OK) {
         FILLP_LOGERR("Failed to post msg to core, fillp_sock_id:%d", sock->index);
-        SOCK_DESTORY_CONN(&sock->sockConnSem, conn, sock, FILLP_ENOBUFS);
+        SOCK_DESTROY_CONN(&sock->sockConnSem, conn, sock, FILLP_ENOBUFS);
         return -1;
     }
 
     if (sock->coreErrType[MSG_TYPE_NETCONN_ACCPETED] != ERR_OK) {
         FILLP_LOGERR("Failed in core to accept socket Id for listen fillp_sock_id:%d", sockFd);
-        SOCK_DESTORY_CONN(&sock->sockConnSem, conn, sock, FILLP_ENOMEM);
+        SOCK_DESTROY_CONN(&sock->sockConnSem, conn, sock, FILLP_ENOMEM);
         return -1;
     }
 
@@ -1296,7 +1296,7 @@ FILLP_ULLONG SockGetRtt(FILLP_INT sockFd)
     FILLP_UINT8 state;
     struct FtNetconn *conn = FILLP_NULL_PTR;
 
-    /* errno is set inside the fucntion upon failure */
+    /* errno is set inside the function upon failure */
     struct FtSocket *sock = SockApiGetAndCheck(sockFd);
     if (sock == FILLP_NULL_PTR) {
         return FILLP_NULL;
@@ -1324,12 +1324,12 @@ FillpErrorType SockConnect(FILLP_INT sockIndex, FILLP_CONST struct sockaddr *nam
 
     FILLP_LOGINF("fillp_sock_id:%d", sockIndex);
 
-    /* errno is set inside the fucntion upon failure */
+    /* errno is set inside the function upon failure */
     if (sock == FILLP_NULL_PTR) {
         return -1;
     }
 
-    /* errno is set inside the fucntion upon failure */
+    /* errno is set inside the function upon failure */
     err = SockBindConnectValidateParams(sock, name, nameLen);
     if (err != ERR_OK) {
         (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);

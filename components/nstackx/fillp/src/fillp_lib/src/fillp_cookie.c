@@ -31,7 +31,7 @@ extern "C" {
 
     Output         : NONE
 
-    Return         : SUCESS/FAILURE
+    Return         : SUCCESS/FAILURE
 ******************************************************************************/
 void FillpMacTimerExpire(
     FillpMacInfo *macInfo,

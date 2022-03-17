@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 enum FtConnState {
-    CONN_STATE_IDLE = 0,       /* Alloced but not do connnect */
+    CONN_STATE_IDLE = 0,       /* Alloced but not do connect */
     CONN_STATE_LISTENING = 1,  /* Listen socket */
     CONN_STATE_CONNECTING = 2, /* Do connecting, four handshake not finished yet */
     CONN_STATE_CONNECTED = 3,  /* netConn already connected */
@@ -41,7 +41,7 @@ struct SockOsSocket {
     handle SockOsListEntry first */
     struct HlistNode osListNode; /* This has to be the First member of the structure */
     SysIoSock *ioSock;
-    FILLP_INT refrence;
+    FILLP_INT reference;
     FILLP_INT addrType;
 };
 

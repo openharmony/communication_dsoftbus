@@ -87,7 +87,7 @@ extern FILLP_INT DLL_API FtSend(FILLP_INT fd, FILLP_CONST void *data, size_t siz
  * @param[in] data      Indicates a data pointer.
  * @param[in] size      Indicates the size of the message.
  * @param[in] flag      Indicates the status.
- * @param[in] frame     Indicates frame infomation(including the frame type I or P, etc.) of the video frame.
+ * @param[in] frame     Indicates frame information (including the frame type I or P, etc.) of the video frame.
  * @return On success, returns 0
  * On failure, returns -1. You can retrieve the last error number of the socket by calling the FtGetErrno() API.
  */
@@ -277,7 +277,7 @@ extern FILLP_INT DLL_API FtListen(FILLP_INT fd, FILLP_INT backLog);
    <tr><th>Errors                     <th>Error Message String
    <tr><td>FILLP_EINVAL  <td>Invalid argument epNum passed.
    <tr><td>FILLP_ENOMEM  <td>There was insufficient memory to create epoll object.
-   <tr><td>FILLP_EFAULT  <td>Errror occurred due to semaphore or atomic operation.
+   <tr><td>FILLP_EFAULT  <td>Error occurred due to semaphore or atomic operation.
 
    </table>
  */
@@ -342,7 +342,7 @@ extern FILLP_INT DLL_API FtEpollWait(FILLP_INT epFd, struct SpungeEpollEvent *ev
  * @param[in] cmd   Indicates the command to perform on the socket s.
  * @param[in] val   Indicates the flag value used to set the blocking and non blocking socket.
  * @return
- * Upon sucesss, returns the value which depends on command(cmd), or returns error codes on failure.
+ * Upon success, returns the value which depends on command(cmd), or returns error codes on failure.
  * @note
  * This API must be used only in the Linux platform.
  */
@@ -383,7 +383,7 @@ extern FILLP_INT DLL_API FtIoctlSocket(FILLP_INT fd, FILLP_SLONG cmd, FILLP_CONS
 #define FILLP_CONFIG_ALL_SOCKET ((FILLP_UINT16)FILLP_MAX_UNSHORT_VAL)
 
 /**
- * TRCE/ INTERFACE DEFINATION This structure represents the trace direction.
+ * TRCE/ INTERFACE DEFINITION This structure represents the trace direction.
  */
 typedef struct FillpTraceDescriptStruct {
     FILLP_UINT8 traceDirection; /* This is of type TYPE FillpTraceDirectEn. */
@@ -401,7 +401,7 @@ typedef struct FillpTraceDescriptStruct {
     }
 
 /**
- * TRCE/ INTERFACE DEFINATION This enum represents the trace direction.
+ * TRCE/ INTERFACE DEFINITION This enum represents the trace direction.
  */
 typedef enum FillpTraceDirectEnum {
     FILLP_TRACE_DIRECT_RECV = 0, /* Indicates FillP trace receive. */
@@ -412,7 +412,7 @@ typedef enum FillpTraceDirectEnum {
 
 
 /**
- * TRCE/ INTERFACE DEFINATION This enum represents type of FillP trace.
+ * TRCE/ INTERFACE DEFINITION This enum represents type of FillP trace.
  */
 typedef enum FillpTraceTypeEnum {
     FILLP_TRACE_DIRECT_DISABLE = 0,         /* Indicates that FillP/VTP trace is disabled. */
@@ -475,7 +475,7 @@ typedef enum FillpDebugCmdEnum {
     /* Provides the output information  about all other debug commands that you can use. */
     FILLP_DBGCMD_HELP,
     /* Sets the level of debug information which stack provides in the callback. Refer FillpDebugLevel for
-     * differnt levels. If level is set as FILLP_DBG_LVL_ERROR only error info is provided to user, if level is set as
+     * different levels. If level is set as FILLP_DBG_LVL_ERROR only error info is provided to user, if level is set as
      * FILLP_DBG_LVL_WARNING both warning and error info are provided to the user. */
     FILLP_DBGCMD_SET_PRINT_LEVEL,
     /* Shows the current dynamically configured configuration parameters at application level. */
@@ -724,21 +724,21 @@ typedef enum FillpConfigAppListEnum {
 } FtConfigItemList;
 
 typedef struct FillpAppFcStasticsStruct {
-    /* Indicates the peroid trans delay, uint:ms */
+    /* Indicates the period trans delay, uint:ms */
     FILLP_UINT32 periodRtt;
-    /* Indicates the peroid pkt loss rate on recv side, precision xx% lost rate is 1%, then 1 will returned */
+    /* Indicates the period pkt loss rate on recv side, precision xx% lost rate is 1%, then 1 will returned */
     FILLP_UINT32 periodRecvPktLoss;
-    /* Indicates the peroid recv rate, uint:kbps */
+    /* Indicates the period recv rate, uint:kbps */
     FILLP_UINT32 periodRecvRate;
-    /* Indicates the peroid pkt loss rate on recv side, precision xx.xx%, lost rate is 1.10%, then 110 will returned */
+    /* Indicates the period pkt loss rate on recv side, precision xx.xx%, lost rate is 1.10%, then 110 will returned */
     FILLP_UINT32 periodRecvPktLossHighPrecision;
-    /* Indicates the peroid pkt loss rate on send side, precision xx.xx%, lost rate is 1.10%, then 110 will returned */
+    /* Indicates the period pkt loss rate on send side, precision xx.xx%, lost rate is 1.10%, then 110 will returned */
     FILLP_UINT32 periodSendPktLossHighPrecision;
-    /* Indicates the peroid recv rate, uint:bps */
+    /* Indicates the period recv rate, uint:bps */
     FILLP_ULLONG periodRecvRateBps;
-    /* Indicates the peroid send rate, uint:bps */
+    /* Indicates the period send rate, uint:bps */
     FILLP_ULLONG periodSendRateBps;
-    /* Indicates the peroid send rate, uint:ms */
+    /* Indicates the period send rate, uint:ms */
     FILLP_LLONG jitter;
 } FillpAppFcStasticsSt;
 

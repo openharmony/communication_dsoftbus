@@ -42,7 +42,7 @@ static void FillpTimingWheelHandHourTick(struct FillpTimingWheel *wheel, FILLP_L
     FILLP_INT tickLoop = (FILLP_INT)UTILS_MIN(tickDiff, FILLP_TIMING_WHEEL_SLOT_NUM - 1);
     FILLP_INT tmpIndex = hourHand->curTick;
 
-    if (wheel == FILLP_NULL_PTR || (tmpIndex >= FILLP_TIMING_WHEEL_SLOT_NUM) || (tmpIndex < 0)) {
+    if ((tmpIndex >= FILLP_TIMING_WHEEL_SLOT_NUM) || (tmpIndex < 0)) {
         return;
     }
 
@@ -93,7 +93,7 @@ static void FillpTimingWheelHandMinTick(struct FillpTimingWheel *wheel, FILLP_LL
     FILLP_INT minTick = (FILLP_INT)(tickDiff + minHand->curTick);
     FILLP_INT hourTick = minTick / FILLP_TIMING_WHEEL_SLOT_NUM;
 
-    if (wheel == FILLP_NULL_PTR || (tmpIndex >= FILLP_TIMING_WHEEL_SLOT_NUM) || (tmpIndex < 0)) {
+    if ((tmpIndex >= FILLP_TIMING_WHEEL_SLOT_NUM) || (tmpIndex < 0)) {
         return;
     }
 

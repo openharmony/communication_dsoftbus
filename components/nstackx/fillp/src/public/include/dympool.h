@@ -50,7 +50,7 @@ typedef struct DympoolItemOperaCb {
 } DympoolItemOperaCbSt;
 
 typedef struct DympoolTypeStrunct {
-    FillpQueue *mp;        /* Qeueue of memory alloc */
+    FillpQueue *mp;        /* Queue of memory alloc */
     int itemSize;          /* Size of every memory item size */
     int maxSize;           /* Max memory item size,and althrough it is the max size of queue */
     int currentSize;       /* Current size of memory alloced */
