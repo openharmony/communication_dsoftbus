@@ -55,6 +55,8 @@ int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint
 int32_t SoftBusAccessFile(const char *pathName, int32_t mode);
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode);
 int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize);
+char *SoftBusRealPath(const char *path, char *absPath);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
