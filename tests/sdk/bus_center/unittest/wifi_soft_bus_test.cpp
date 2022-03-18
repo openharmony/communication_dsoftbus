@@ -73,7 +73,7 @@ static void WaitSacnResult(void)
     while (scanTimeout > 0) {
         sleep(ONE_SECOND);
         scanTimeout--;
-        if (g_stateScanSuccess == true) {
+        if (g_stateScanSuccess) {
             break;
         }
     }
