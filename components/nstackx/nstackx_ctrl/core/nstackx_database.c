@@ -19,7 +19,7 @@
 #include <string.h>
 #include <securec.h>
 
-#include "nstackx_log.h"
+#include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
 
 #define TAG "nStackXDFinder"
@@ -141,7 +141,7 @@ void *DatabaseAllocRecord(void *dbptr)
     }
 
     if (db->useCount >= db->maxCount) {
-        LOGE(TAG, "DB max limit exceeded maxcnt:%u, usecnt:%u", db->maxCount, db->useCount);
+        DFINDER_LOGE(TAG, "DB max limit exceeded maxcnt:%u, usecnt:%u", db->maxCount, db->useCount);
         return NULL;
     }
 
@@ -173,17 +173,17 @@ void DatabaseFreeRecord(void *dbptr, const void *ptr)
     int64_t recNum;
 
     if (dbptr == NULL || ptr == NULL || db->useCount == 0) {
-        LOGE(TAG, "Sanity chk failed");
+        DFINDER_LOGE(TAG, "Sanity chk failed");
         return;
     }
 
     recNum = GetRecordIndex(db, ptr);
     if (recNum < 0 || recNum >= db->maxCount) {
-        LOGE(TAG, "Invalid record");
+        DFINDER_LOGE(TAG, "Invalid record");
         return;
     }
     if (!IsRecordOccupied(db, (uint32_t)recNum, &i, &off)) {
-        LOGE(TAG, "Unused record");
+        DFINDER_LOGE(TAG, "Unused record");
         return;
     }
 
@@ -212,21 +212,21 @@ void *DatabaseInit(uint32_t recNumber, size_t recSize, RecCompareCallback cb)
 
     db = (DatabaseInfo *)calloc(1U, sizeof(DatabaseInfo));
     if (db == NULL) {
-        LOGE(TAG, "calloc dbinfo failed");
+        DFINDER_LOGE(TAG, "calloc dbinfo failed");
         return NULL;
     }
 
     db->mapSize = recNumber / NSTACKX_USEDMAP_ROW_SIZE + 1;
     db->usedMap = calloc(db->mapSize, sizeof(uint32_t));
     if (db->usedMap == NULL) {
-        LOGE(TAG, "calloc usedmap failed");
+        DFINDER_LOGE(TAG, "calloc usedmap failed");
         free(db);
         return NULL;
     }
 
     db->blk = (uint8_t *)malloc(recNumber * recSize);
     if (db->blk == NULL) {
-        LOGE(TAG, "malloc %u %zu failed", recNumber, recSize);
+        DFINDER_LOGE(TAG, "malloc %u %zu failed", recNumber, recSize);
         free(db->usedMap);
         free(db);
         return NULL;

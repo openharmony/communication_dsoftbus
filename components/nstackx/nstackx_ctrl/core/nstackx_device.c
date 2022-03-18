@@ -26,7 +26,7 @@
 #endif /* SUPPORT_SMARTGENIUS */
 
 #include "cJSON.h"
-#include "nstackx_log.h"
+#include "nstackx_dfinder_log.h"
 #include "nstackx_event.h"
 #include "nstackx_timer.h"
 #include "nstackx_error.h"
@@ -117,9 +117,9 @@ static void LocalDeviceOffline(void *data)
     (void)data;
 
     (void)ClearDevices(g_deviceListBackup);
-    LOGW(TAG, "clear device list backup");
+    DFINDER_LOGW(TAG, "clear device list backup");
     deviceRemoved = ClearDevices(g_deviceList);
-    LOGW(TAG, "clear device list");
+    DFINDER_LOGW(TAG, "clear device list");
 
     CoapServerDestroy();
 
@@ -162,14 +162,14 @@ void DestroyP2pUsbServerInitRetryTimer(void)
 static void CoapP2pServerInitDelayHandler(void *data)
 {
     (void)data;
-    LOGD(TAG, "CoapP2pServerInitDelay, retry %u times", g_p2pRetryCount);
+    DFINDER_LOGD(TAG, "CoapP2pServerInitDelay, retry %u times", g_p2pRetryCount);
     if (CoapP2pServerInit(&g_p2pIp) == NSTACKX_EOK) {
-        LOGE(TAG, "CoapP2pServerInitDelay success");
+        DFINDER_LOGE(TAG, "CoapP2pServerInitDelay success");
         g_p2pRetryCount = 0;
         return;
     }
     if (g_p2pRetryCount >= NSTACKX_P2PUSB_SERVERINIT_MAX_RETRY_TIMES) {
-        LOGE(TAG, "CoapP2pServerInitDelay retry reach max times");
+        DFINDER_LOGE(TAG, "CoapP2pServerInitDelay retry reach max times");
         g_p2pRetryCount = 0;
         (void)memset_s(&g_p2pIp, sizeof(g_p2pIp), 0, sizeof(g_p2pIp));
         return;
@@ -180,16 +180,16 @@ static void CoapP2pServerInitDelayHandler(void *data)
 
 static void CoapUsbServerInitDelayHandler(void *data)
 {
-    LOGD(TAG, "CoapUsbServerInitDelay, retry %u times", g_usbRetryCount);
+    DFINDER_LOGD(TAG, "CoapUsbServerInitDelay, retry %u times", g_usbRetryCount);
     (void)data;
     if (CoapUsbServerInit(&g_usbIp) == NSTACKX_EOK) {
-        LOGE(TAG, "CoapUsbServerInitDelay success");
+        DFINDER_LOGE(TAG, "CoapUsbServerInitDelay success");
         g_usbRetryCount = 0;
         (void)memset_s(&g_usbIp, sizeof(g_usbIp), 0, sizeof(g_usbIp));
         return;
     }
     if (g_usbRetryCount >= NSTACKX_P2PUSB_SERVERINIT_MAX_RETRY_TIMES) {
-        LOGE(TAG, "CoapUsbServerInitDelay retry reach max times");
+        DFINDER_LOGE(TAG, "CoapUsbServerInitDelay retry reach max times");
         g_usbRetryCount = 0;
         (void)memset_s(&g_usbIp, sizeof(g_usbIp), 0, sizeof(g_usbIp));
         return;
@@ -205,13 +205,13 @@ int32_t P2pUsbTimerInit(EpollDesc epollfd)
     g_usbRetryCount = 0;
     g_p2pServerInitDeferredTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapP2pServerInitDelayHandler, NULL);
     if (g_p2pServerInitDeferredTimer == NULL) {
-        LOGE(TAG, "g_p2pServerInitDeferredTimer start failed");
+        DFINDER_LOGE(TAG, "g_p2pServerInitDeferredTimer start failed");
         return NSTACKX_EFAILED;
     }
     (void)memset_s(&g_p2pIp, sizeof(g_p2pIp), 0, sizeof(g_p2pIp));
     g_usbServerInitDeferredTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapUsbServerInitDelayHandler, NULL);
     if (g_usbServerInitDeferredTimer == NULL) {
-        LOGE(TAG, "g_UsbServerInitDeferredTimer start failed");
+        DFINDER_LOGE(TAG, "g_UsbServerInitDeferredTimer start failed");
         return NSTACKX_EFAILED;
     }
     (void)memset_s(&g_usbIp, sizeof(g_usbIp), 0, sizeof(g_usbIp));
@@ -225,7 +225,7 @@ static DeviceInfo *CreateNewDevice(const DeviceInfo *deviceInfo)
     /* Allocate DB for newly joined device */
     internalDevice = DatabaseAllocRecord(g_deviceList);
     if (internalDevice == NULL) {
-        LOGE(TAG, "Failed to allocate device info");
+        DFINDER_LOGE(TAG, "Failed to allocate device info");
         return NULL;
     }
 
@@ -237,7 +237,7 @@ static DeviceInfo *CreateNewDevice(const DeviceInfo *deviceInfo)
 static int32_t UpdateCapabilityBitmap(DeviceInfo *internalDevice, const DeviceInfo *deviceInfo, int8_t *updated)
 {
     if (internalDevice == NULL || deviceInfo == NULL || updated == NULL) {
-        LOGE(TAG, "UpdateCapabilityBitmap, input parameter error");
+        DFINDER_LOGE(TAG, "UpdateCapabilityBitmap, input parameter error");
         return NSTACKX_EFAILED;
     }
 
@@ -253,13 +253,13 @@ static int32_t UpdateCapabilityBitmap(DeviceInfo *internalDevice, const DeviceIn
 
     if (memset_s(internalDevice->capabilityBitmap, sizeof(internalDevice->capabilityBitmap),
         0, sizeof(internalDevice->capabilityBitmap)) != EOK) {
-        LOGE(TAG, "UpdateCapabilityBitmap, memset_s fails");
+        DFINDER_LOGE(TAG, "UpdateCapabilityBitmap, memset_s fails");
         return NSTACKX_EFAILED;
     }
     if (deviceInfo->capabilityBitmapNum) {
         if (memcpy_s(internalDevice->capabilityBitmap, sizeof(internalDevice->capabilityBitmap),
             deviceInfo->capabilityBitmap, deviceInfo->capabilityBitmapNum * sizeof(uint32_t)) != EOK) {
-            LOGE(TAG, "UpdateCapabilityBitmap, capabilityBitmap copy error");
+            DFINDER_LOGE(TAG, "UpdateCapabilityBitmap, capabilityBitmap copy error");
             return NSTACKX_EFAILED;
         }
     }
@@ -269,17 +269,17 @@ static int32_t UpdateCapabilityBitmap(DeviceInfo *internalDevice, const DeviceIn
 static int32_t UpdateDeviceInfoInner(DeviceInfo *internalDevice, const DeviceInfo *deviceInfo, int8_t *updated)
 {
     if (internalDevice == NULL || deviceInfo == NULL) {
-        LOGE(TAG, "UpdateDeviceInfo input error");
+        DFINDER_LOGE(TAG, "UpdateDeviceInfo input error");
         return NSTACKX_EFAILED;
     }
     if (internalDevice->deviceType != deviceInfo->deviceType) {
-        LOGE(TAG, "deviceType is different");
+        DFINDER_LOGE(TAG, "deviceType is different");
         return NSTACKX_EFAILED;
     }
 
     if (strcmp(internalDevice->deviceName, deviceInfo->deviceName)) {
         if (strcpy_s(internalDevice->deviceName, sizeof(internalDevice->deviceName), deviceInfo->deviceName) != EOK) {
-            LOGE(TAG, "deviceName copy error");
+            DFINDER_LOGE(TAG, "deviceName copy error");
             return NSTACKX_EFAILED;
         }
         *updated = NSTACKX_TRUE;
@@ -287,14 +287,14 @@ static int32_t UpdateDeviceInfoInner(DeviceInfo *internalDevice, const DeviceInf
 
     if (strlen(deviceInfo->version) > 0 && strcmp(internalDevice->version, deviceInfo->version)) {
         if (strcpy_s(internalDevice->version, sizeof(internalDevice->version), deviceInfo->version) != EOK) {
-            LOGE(TAG, "hicom version copy error");
+            DFINDER_LOGE(TAG, "hicom version copy error");
             return NSTACKX_EFAILED;
         }
         *updated = NSTACKX_TRUE;
     }
 
     if (UpdateCapabilityBitmap(internalDevice, deviceInfo, updated) != NSTACKX_EOK) {
-        LOGE(TAG, "UpdateCapabilityBitmap fails");
+        DFINDER_LOGE(TAG, "UpdateCapabilityBitmap fails");
         return NSTACKX_EFAILED;
     }
 
@@ -305,13 +305,13 @@ static int32_t UpdateDeviceInfo(DeviceInfo *internalDevice, const DeviceInfo *de
 {
     int8_t updated = NSTACKX_FALSE;
     if (UpdateDeviceInfoInner(internalDevice, deviceInfo, &updated) != NSTACKX_EOK) {
-        LOGE(TAG, "UpdateDeviceInfoInner error");
+        DFINDER_LOGE(TAG, "UpdateDeviceInfoInner error");
         return NSTACKX_EFAILED;
     }
 
     if (strcmp(internalDevice->deviceHash, deviceInfo->deviceHash)) {
         if (strcpy_s(internalDevice->deviceHash, sizeof(internalDevice->deviceHash), deviceInfo->deviceHash) != EOK) {
-            LOGE(TAG, "deviceHash copy error");
+            DFINDER_LOGE(TAG, "deviceHash copy error");
             return NSTACKX_EFAILED;
         }
         updated = NSTACKX_TRUE;
@@ -324,7 +324,7 @@ static int32_t UpdateDeviceInfo(DeviceInfo *internalDevice, const DeviceInfo *de
 
     if (strcmp(internalDevice->serviceData, deviceInfo->serviceData)) {
         if (strcpy_s(internalDevice->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, deviceInfo->serviceData) != EOK) {
-            LOGE(TAG, "serviceData copy error");
+            DFINDER_LOGE(TAG, "serviceData copy error");
             return NSTACKX_EFAILED;
         }
         updated = NSTACKX_TRUE;
@@ -383,21 +383,21 @@ static int32_t GetReservedInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *devic
     }
     cJSON *item = cJSON_Parse(deviceList[0].reservedInfo);
     if (item == NULL) {
-        LOGE(TAG, "pares deviceList fails");
+        DFINDER_LOGE(TAG, "pares deviceList fails");
         return NSTACKX_EFAILED;
     }
 
     if (deviceInfo->mode != DEFAULT_MODE) {
         if (!cJSON_AddNumberToObject(item, "mode", deviceInfo->mode)) {
-            LOGE(TAG, "add mode to object failed");
+            DFINDER_LOGE(TAG, "add mode to object failed");
         }
     }
     if (!cJSON_AddStringToObject(item, "hwAccountHashVal", deviceInfo->deviceHash)) {
-        LOGE(TAG, "add hwAccountHashVal to object failed");
+        DFINDER_LOGE(TAG, "add hwAccountHashVal to object failed");
     }
     const char *ver = (strlen(deviceInfo->version) == 0) ? NSTACKX_DEFAULT_VER : deviceInfo->version;
     if (!cJSON_AddStringToObject(item, "version", ver)) {
-        LOGE(TAG, "add hwAccountHashVal to object failed");
+        DFINDER_LOGE(TAG, "add hwAccountHashVal to object failed");
     }
     char *newData = cJSON_Print(item);
     if (newData == NULL) {
@@ -435,7 +435,7 @@ void PushPublishInfo(DeviceInfo *deviceInfo, NSTACKX_DeviceInfo *deviceList, uin
     }
 
     if (GetReservedInfo(deviceInfo, deviceList) != NSTACKX_EOK) {
-        LOGE(TAG, "GetReservedInfo Failed");
+        DFINDER_LOGE(TAG, "GetReservedInfo Failed");
         return;
     }
     deviceList[0].deviceType = deviceInfo->deviceType;
@@ -495,10 +495,10 @@ void GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr, boo
 
         int8_t result = SetReservedInfoFromDeviceInfo(deviceList, count, deviceInfo);
         if (result == NSTACKX_EAGAIN) {
-            LOGE(TAG, "SetReservedInfoFromDeviceInfo fails, sprintf_s or strcpy_s fails");
+            DFINDER_LOGE(TAG, "SetReservedInfoFromDeviceInfo fails, sprintf_s or strcpy_s fails");
             break;
         } else if (result == NSTACKX_EINVAL || result == NSTACKX_EFAILED) {
-            LOGE(TAG, "SetReservedInfoFromDeviceInfo fails");
+            DFINDER_LOGE(TAG, "SetReservedInfoFromDeviceInfo fails");
             return;
         }
 
@@ -517,7 +517,7 @@ int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t co
     char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
     int ret  = NSTACKX_EFAILED;
     if (deviceList == NULL) {
-        LOGE(TAG, "deviceList or deviceInfo is null");
+        DFINDER_LOGE(TAG, "deviceList or deviceInfo is null");
         return NSTACKX_EINVAL;
     }
 
@@ -525,12 +525,12 @@ int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t co
     (void)inet_ntop(AF_INET, &deviceInfo->netChannelInfo.wifiApInfo.ip, wifiIpAddr, sizeof(wifiIpAddr));
     if (sprintf_s(deviceList[count].reservedInfo, sizeof(deviceList[count].reservedInfo),
         NSTACKX_RESERVED_INFO_JSON_FORMAT, wifiIpAddr) == -1) {
-        LOGE(TAG, "sprintf_s reservedInfo with wifiIpAddr fails");
+        DFINDER_LOGE(TAG, "sprintf_s reservedInfo with wifiIpAddr fails");
         return NSTACKX_EAGAIN;
     }
     cJSON *item = cJSON_Parse(deviceList[count].reservedInfo);
     if (item == NULL) {
-        LOGE(TAG, "pares deviceList fails");
+        DFINDER_LOGE(TAG, "pares deviceList fails");
         return NSTACKX_EINVAL;
     }
 
@@ -557,7 +557,7 @@ int8_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, uint32_t co
                    0, sizeof(deviceList[count].reservedInfo));
     if (strcpy_s(deviceList[count].reservedInfo, sizeof(deviceList[count].reservedInfo), newData) != EOK) {
         free(newData);
-        LOGE(TAG, "strcpy_s fails");
+        DFINDER_LOGE(TAG, "strcpy_s fails");
         goto L_END;
     }
     free(newData);
@@ -597,7 +597,7 @@ static uint8_t IsSameDevice(void *recptr, void *myptr)
     DeviceInfo *my  = myptr;
 
     if (recptr == NULL || myptr == NULL) {
-        LOGE(TAG, "NULL input, can't compare");
+        DFINDER_LOGE(TAG, "NULL input, can't compare");
         return NSTACKX_FALSE;
     }
 
@@ -677,7 +677,7 @@ int32_t UpdateLocalNetworkInterface(const NetworkInterfaceInfo *interfaceInfo)
 
     GetLocalIp(&newIp);
     if (newIp.s_addr == preIp.s_addr) {
-        LOGI(TAG, "ip not changed");
+        DFINDER_LOGI(TAG, "ip not changed");
         return NSTACKX_EOK;
     }
 
@@ -687,9 +687,9 @@ int32_t UpdateLocalNetworkInterface(const NetworkInterfaceInfo *interfaceInfo)
          * We don't cleanup DB and transport immediately.
          * Instead, defer the event for a while in case WiFi connected again.
          */
-        LOGE(TAG, "g_networkType is %s and interfaceInfo is %s", g_networkType,  interfaceInfo->name);
+        DFINDER_LOGE(TAG, "g_networkType is %s and interfaceInfo is %s", g_networkType,  interfaceInfo->name);
         if (strcmp(g_networkType, interfaceInfo->name) != 0 && strcmp(g_networkType, "") != 0) {
-            LOGE(TAG, "into ignore");
+            DFINDER_LOGE(TAG, "into ignore");
             return NSTACKX_EOK;
         }
         TimerSetTimeout(g_offlineDeferredTimer, NSTACKX_OFFLINE_DEFERRED_DURATION, NSTACKX_FALSE);
@@ -697,7 +697,7 @@ int32_t UpdateLocalNetworkInterface(const NetworkInterfaceInfo *interfaceInfo)
         TimerSetTimeout(g_offlineDeferredTimer, 0, NSTACKX_FALSE);
         int ret = memcpy_s(g_networkType, sizeof(g_networkType), interfaceInfo->name, sizeof(interfaceInfo->name));
         if (ret != EOK) {
-            LOGE(TAG, "memcpy_s error");
+            DFINDER_LOGE(TAG, "memcpy_s error");
             return NSTACKX_EFAILED;
         }
         struct in_addr ip;
@@ -714,7 +714,7 @@ void SetP2pIp(const struct in_addr *ip)
         return;
     }
     if (memcpy_s(&g_p2pIp, sizeof(struct in_addr), ip, sizeof(struct in_addr)) != EOK) {
-        LOGE(TAG, "memcpy_s failed");
+        DFINDER_LOGE(TAG, "memcpy_s failed");
     }
 }
 
@@ -722,12 +722,12 @@ static void TryToInitP2pCoapServer(struct in_addr ip)
 {
     /* ignore p2p service when new ip is 0. */
     if (ip.s_addr == 0) {
-        LOGE(TAG, "p2p newIp is 0");
+        DFINDER_LOGE(TAG, "p2p newIp is 0");
         return;
     }
     StopP2pServerInitRetryTimer();
     if (CoapP2pServerInit(&ip) != NSTACKX_EOK) { /* If init fail, start retry */
-        LOGE(TAG, "start p2p init delayed");
+        DFINDER_LOGE(TAG, "start p2p init delayed");
         if (g_p2pServerInitDeferredTimer == NULL) {
             return;
         }
@@ -737,7 +737,7 @@ static void TryToInitP2pCoapServer(struct in_addr ip)
         g_p2pRetryCount++;
         return;
     }
-    LOGD(TAG, "start p2p init success");
+    DFINDER_LOGD(TAG, "start p2p init success");
 }
 
 int32_t UpdateLocalNetworkInterfaceP2pMode(const NetworkInterfaceInfo *interfaceInfo, uint16_t nlmsgType)
@@ -750,7 +750,7 @@ int32_t UpdateLocalNetworkInterfaceP2pMode(const NetworkInterfaceInfo *interface
 
 #ifdef SUPPORT_SMARTGENIUS
     if (nlmsgType == RTM_DELADDR) {
-        LOGD(TAG, "p2p delete address, call CoapP2pServerDestroy()");
+        DFINDER_LOGD(TAG, "p2p delete address, call CoapP2pServerDestroy()");
         CoapP2pServerDestroy();
         StopP2pServerInitRetryTimer();
         (void)memset_s(&g_p2pIp, sizeof(g_p2pIp), 0, sizeof(g_p2pIp));
@@ -764,11 +764,11 @@ int32_t UpdateLocalNetworkInterfaceP2pMode(const NetworkInterfaceInfo *interface
     if (NetworkInterfaceNamePrefixCmp(interfaceInfo->name, g_interfaceList[NSTACKX_P2P_INDEX].name) ||
         NetworkInterfaceNamePrefixCmp(interfaceInfo->name, g_interfaceList[NSTACKX_P2P_INDEX].alias)) {
         if (memcpy_s(&newIp, sizeof(struct in_addr), &interfaceInfo->ip, sizeof(struct in_addr)) != EOK) {
-            LOGE(TAG, "newIp memcpy_s failed");
+            DFINDER_LOGE(TAG, "newIp memcpy_s failed");
             return NSTACKX_EFAILED;
         }
     } else {
-        LOGI(TAG, "NetworkInterfaceNamePrefixCmp p2p fail");
+        DFINDER_LOGI(TAG, "NetworkInterfaceNamePrefixCmp p2p fail");
         return NSTACKX_EINVAL;
     }
     TryToInitP2pCoapServer(newIp);
@@ -781,7 +781,7 @@ void SetUsbIp(const struct in_addr *ip)
         return;
     }
     if (memcpy_s(&g_usbIp, sizeof(struct in_addr), ip, sizeof(struct in_addr)) != EOK) {
-        LOGE(TAG, "memcpy_s failed");
+        DFINDER_LOGE(TAG, "memcpy_s failed");
     }
 }
 
@@ -789,13 +789,13 @@ static void TryToInitUsbCoapServer(struct in_addr ip)
 {
     /* ignore usb service when new ip is 0. */
     if (ip.s_addr == 0) {
-        LOGE(TAG, "usb newIp is 0");
+        DFINDER_LOGE(TAG, "usb newIp is 0");
         return;
     }
 
     StopUsbServerInitRetryTimer();
     if (CoapUsbServerInit(&ip) != NSTACKX_EOK) {
-        LOGE(TAG, "start usb init delayed");
+        DFINDER_LOGE(TAG, "start usb init delayed");
         if (g_usbServerInitDeferredTimer == NULL) {
             return;
         }
@@ -807,7 +807,7 @@ static void TryToInitUsbCoapServer(struct in_addr ip)
         g_usbRetryCount++;
         return;
     }
-    LOGI(TAG, "start usb init success");
+    DFINDER_LOGI(TAG, "start usb init success");
 }
 
 int32_t UpdateLocalNetworkInterfaceUsbMode(const NetworkInterfaceInfo *interfaceInfo, uint16_t nlmsgType)
@@ -820,7 +820,7 @@ int32_t UpdateLocalNetworkInterfaceUsbMode(const NetworkInterfaceInfo *interface
 
 #ifdef SUPPORT_SMARTGENIUS
     if (nlmsgType == RTM_DELADDR) {
-        LOGD(TAG, "usb delete address, call CoapUsbServerDestroy()");
+        DFINDER_LOGD(TAG, "usb delete address, call CoapUsbServerDestroy()");
         CoapUsbServerDestroy();
         StopUsbServerInitRetryTimer();
         (void)memset_s(&g_usbIp, sizeof(g_usbIp), 0, sizeof(g_usbIp));
@@ -833,7 +833,7 @@ int32_t UpdateLocalNetworkInterfaceUsbMode(const NetworkInterfaceInfo *interface
     /* usb new ip does not write to g_interfaceList */
     if (NetworkInterfaceNamePrefixCmp(interfaceInfo->name, g_interfaceList[NSTACKX_USB_INDEX].name)) {
         if (memcpy_s(&newIp, sizeof(struct in_addr), &interfaceInfo->ip, sizeof(struct in_addr)) != EOK) {
-            LOGE(TAG, "newIp memcpy_s failed");
+            DFINDER_LOGE(TAG, "newIp memcpy_s failed");
             return NSTACKX_EFAILED;
         }
     } else {
@@ -859,7 +859,7 @@ void SetDeviceHash(uint64_t deviceHash)
         0, sizeof(g_localDeviceInfo.deviceHash));
     if (sprintf_s(g_localDeviceInfo.deviceHash, DEVICE_HASH_LEN,
         "%ju", deviceHash) == -1) {
-        LOGE(TAG, "set device hash error");
+        DFINDER_LOGE(TAG, "set device hash error");
     }
 }
 
@@ -873,11 +873,11 @@ int32_t ConfigureLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
     /* Backup device id */
     (void)memcpy_s(deviceId, sizeof(deviceId), g_localDeviceInfo.deviceId, sizeof(deviceId));
     if (strcpy_s(g_localDeviceInfo.deviceId, sizeof(g_localDeviceInfo.deviceId), localDeviceInfo->deviceId) != EOK) {
-        LOGE(TAG, "Invalid device id!");
+        DFINDER_LOGE(TAG, "Invalid device id!");
         /* Restore device id if some error happens */
         if (memcpy_s(g_localDeviceInfo.deviceId, sizeof(g_localDeviceInfo.deviceId),
             deviceId, sizeof(deviceId)) != EOK) {
-            LOGE(TAG, "deviceId copy error and can't restore device id!");
+            DFINDER_LOGE(TAG, "deviceId copy error and can't restore device id!");
         }
         return NSTACKX_EINVAL;
     }
@@ -887,17 +887,17 @@ int32_t ConfigureLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
         interfaceInfo.ip = ipAddr;
         UpdateLocalNetworkInterface(&interfaceInfo);
     } else {
-        LOGD(TAG, "Invalid if name or ip address. Ignore");
+        DFINDER_LOGD(TAG, "Invalid if name or ip address. Ignore");
     }
 
     if (strlen(localDeviceInfo->name) == 0 || (strncpy_s(g_localDeviceInfo.deviceName,
         sizeof(g_localDeviceInfo.deviceName), localDeviceInfo->name, NSTACKX_MAX_DEVICE_NAME_LEN - 1) != EOK)) {
-        LOGW(TAG, "Invalid device name. Will use default name");
+        DFINDER_LOGW(TAG, "Invalid device name. Will use default name");
         (void)strcpy_s(g_localDeviceInfo.deviceName, sizeof(g_localDeviceInfo.deviceName), NSTACKX_DEFAULT_DEVICE_NAME);
     }
 
     if (strcpy_s(g_localDeviceInfo.version, sizeof(g_localDeviceInfo.version), localDeviceInfo->version) != EOK) {
-        LOGE(TAG, "Invalid version!");
+        DFINDER_LOGE(TAG, "Invalid version!");
         return NSTACKX_EINVAL;
     }
 
@@ -993,7 +993,7 @@ uint8_t IsWlanIpAddr(const char *ifName)
     }
 
     if (NetworkInterfaceNamePrefixCmp(ifName, g_interfaceList[NSTACKX_WLAN_INDEX].name)) {
-        LOGE(TAG, "IsWlanIpAddr success");
+        DFINDER_LOGE(TAG, "IsWlanIpAddr success");
         return NSTACKX_TRUE;
     }
 
@@ -1007,7 +1007,7 @@ uint8_t IsEthIpAddr(const char *ifName)
     }
 
     if (NetworkInterfaceNamePrefixCmp(ifName, g_interfaceList[NSTACKX_ETH_INDEX].name)) {
-        LOGE(TAG, "IsEthIpAddr success");
+        DFINDER_LOGE(TAG, "IsEthIpAddr success");
         return NSTACKX_TRUE;
     }
 
@@ -1022,7 +1022,7 @@ uint8_t IsP2pIpAddr(const char *ifName)
 
     if (NetworkInterfaceNamePrefixCmp(ifName, g_interfaceList[NSTACKX_P2P_INDEX].name) ||
         NetworkInterfaceNamePrefixCmp(ifName, g_interfaceList[NSTACKX_P2P_INDEX].alias)) {
-        LOGE(TAG, "IsP2pIpAddr success");
+        DFINDER_LOGE(TAG, "IsP2pIpAddr success");
         return NSTACKX_TRUE;
     }
 
@@ -1036,7 +1036,7 @@ uint8_t IsUsbIpAddr(const char *ifName)
     }
 
     if (NetworkInterfaceNamePrefixCmp(ifName, g_interfaceList[NSTACKX_USB_INDEX].name)) {
-        LOGE(TAG, "IsUsbIpAddr success");
+        DFINDER_LOGE(TAG, "IsUsbIpAddr success");
         return NSTACKX_TRUE;
     }
 
@@ -1050,7 +1050,7 @@ int32_t RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitm
     if (capabilityBitmapNum) {
         if (memcpy_s(g_localDeviceInfo.capabilityBitmap, sizeof(g_localDeviceInfo.capabilityBitmap),
             capabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum) != EOK) {
-            LOGE(TAG, "capabilityBitmap copy error");
+            DFINDER_LOGE(TAG, "capabilityBitmap copy error");
             return NSTACKX_EFAILED;
         }
     }
@@ -1065,7 +1065,7 @@ int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBit
     if (capabilityBitmapNum) {
         if (memcpy_s(g_filterCapabilityBitmap, sizeof(g_filterCapabilityBitmap),
             capabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum) != EOK) {
-            LOGE(TAG, "FilterCapabilityBitmap copy error");
+            DFINDER_LOGE(TAG, "FilterCapabilityBitmap copy error");
             return NSTACKX_EFAILED;
         }
     }
@@ -1076,12 +1076,12 @@ int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBit
 int32_t RegisterServiceData(const char *serviceData)
 {
     if (serviceData == NULL) {
-        LOGE(TAG, "device db init failed");
+        DFINDER_LOGE(TAG, "device db init failed");
         return NSTACKX_EINVAL;
     }
 
     if (strcpy_s(g_localDeviceInfo.serviceData, NSTACKX_MAX_SERVICE_DATA_LEN - 1, serviceData) != EOK)  {
-        LOGE(TAG, "serviceData copy error");
+        DFINDER_LOGE(TAG, "serviceData copy error");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
@@ -1098,13 +1098,13 @@ void DeviceModuleClean(void)
 
     if (g_deviceList != NULL) {
         ClearDevices(g_deviceList);
-        LOGW(TAG, "clear device list");
+        DFINDER_LOGW(TAG, "clear device list");
         DatabaseClean(g_deviceList);
         g_deviceList = NULL;
     }
     if (g_deviceListBackup != NULL) {
         ClearDevices(g_deviceListBackup);
-        LOGW(TAG, "clear device list backup");
+        DFINDER_LOGW(TAG, "clear device list backup");
         DatabaseClean(g_deviceListBackup);
         g_deviceListBackup = NULL;
     }
@@ -1124,20 +1124,20 @@ int32_t DeviceModuleInit(EpollDesc epollfd)
     (void)memset_s(g_networkType, sizeof(g_networkType), 0, sizeof(g_networkType));
     g_deviceList = DatabaseInit(NSTACKX_MAX_DEVICE_NUM, sizeof(DeviceInfo), IsSameDevice);
     if (g_deviceList == NULL) {
-        LOGE(TAG, "device db init failed");
+        DFINDER_LOGE(TAG, "device db init failed");
         ret = NSTACKX_ENOMEM;
         goto L_ERR_DEVICE_DB_LIST;
     }
     g_deviceListBackup = DatabaseInit(NSTACKX_MAX_DEVICE_NUM, sizeof(DeviceInfo), IsSameDevice);
     if (g_deviceListBackup == NULL) {
-        LOGE(TAG, "device db backup init failed");
+        DFINDER_LOGE(TAG, "device db backup init failed");
         ret = NSTACKX_ENOMEM;
         goto L_ERR_DEVICE_DB_BACKUP_LIST;
     }
 
     g_offlineDeferredTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, LocalDeviceOffline, NULL);
     if (g_offlineDeferredTimer == NULL) {
-        LOGE(TAG, "device offline deferred timer start failed");
+        DFINDER_LOGE(TAG, "device offline deferred timer start failed");
         goto L_ERR_DEFERRED_TIMER;
     }
     (void)memset_s(g_interfaceList, sizeof(g_interfaceList), 0, sizeof(g_interfaceList));
@@ -1177,7 +1177,7 @@ int32_t BackupDeviceDB(void)
     }
     uint8_t result = ClearDevices(backupDB);
     if (result == NSTACKX_FALSE) {
-        LOGE(TAG, "clear backupDB error");
+        DFINDER_LOGE(TAG, "clear backupDB error");
     }
 
     for (int i = 0; i < NSTACKX_MAX_DEVICE_NUM; i++) {
@@ -1188,11 +1188,11 @@ int32_t BackupDeviceDB(void)
 
         DeviceInfo *newDeviceInfo = DatabaseAllocRecord(backupDB);
         if (newDeviceInfo == NULL) {
-            LOGE(TAG, "allocate device info failure");
+            DFINDER_LOGE(TAG, "allocate device info failure");
             return NSTACKX_EFAILED;
         }
         if (memcpy_s(newDeviceInfo, sizeof(DeviceInfo), deviceInfo, sizeof(DeviceInfo)) != EOK) {
-            LOGE(TAG, "memcpy failure");
+            DFINDER_LOGE(TAG, "memcpy failure");
             return NSTACKX_EFAILED;
         }
     }
@@ -1217,7 +1217,7 @@ static void PadNetworkInterfaceInfo(NetworkInterfaceInfo *intInfo, const struct 
     (void)memset_s(intInfo, sizeof(NetworkInterfaceInfo), 0, sizeof(NetworkInterfaceInfo));
     (void)memcpy_s(&intInfo->ip, sizeof(struct in_addr), addr, sizeof(struct in_addr));
     if (strcpy_s(intInfo->name, sizeof(intInfo->name), name) != EOK) {
-        LOGE(TAG, "interface name copy failed");
+        DFINDER_LOGE(TAG, "interface name copy failed");
     }
 }
 
@@ -1269,11 +1269,11 @@ void GetLocalNetworkInterface(void *arg)
     }
     close(fd);
     if (isUpdated[NSTACKX_ETH_INDEX] && UpdateLocalNetworkInterface(&ethIntInfo) != NSTACKX_EOK) {
-        LOGE(TAG, "Update eth interface failed");
+        DFINDER_LOGE(TAG, "Update eth interface failed");
     }
     if (!isUpdated[NSTACKX_ETH_INDEX] && isUpdated[NSTACKX_WLAN_INDEX] &&
         UpdateLocalNetworkInterface(&wlanIntInfo) != NSTACKX_EOK) {
-        LOGE(TAG, "Update wlan interface failed");
+        DFINDER_LOGE(TAG, "Update wlan interface failed");
     }
 }
 
@@ -1281,24 +1281,24 @@ void ResetDeviceTaskCount(uint8_t isBusy)
 {
     if (g_offlineDeferredTimer != NULL) {
         if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_offlineDeferredTimer task count %llu",
-                 g_offlineDeferredTimer->task.count);
+            DFINDER_LOGI(TAG, "in this busy interval: g_offlineDeferredTimer task count %llu",
+                g_offlineDeferredTimer->task.count);
         }
         g_offlineDeferredTimer->task.count = 0;
     }
 
     if (g_p2pServerInitDeferredTimer != NULL) {
         if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_p2pServerInitDeferredTimer task count %llu",
-                 g_p2pServerInitDeferredTimer->task.count);
+            DFINDER_LOGI(TAG, "in this busy interval: g_p2pServerInitDeferredTimer task count %llu",
+                g_p2pServerInitDeferredTimer->task.count);
         }
         g_p2pServerInitDeferredTimer->task.count = 0;
     }
 
     if (g_usbServerInitDeferredTimer != NULL) {
         if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_usbServerInitDeferredTimer task count %llu",
-                 g_usbServerInitDeferredTimer->task.count);
+            DFINDER_LOGI(TAG, "in this busy interval: g_usbServerInitDeferredTimer task count %llu",
+                g_usbServerInitDeferredTimer->task.count);
         }
         g_usbServerInitDeferredTimer->task.count = 0;
     }
