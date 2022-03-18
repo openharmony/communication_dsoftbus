@@ -82,7 +82,8 @@ static uint16_t ConvertStringToInt(const char *deviceType, uint16_t *typeId)
 {
     *typeId = 0;
     uint16_t tmp;
-    for (uint32_t i = 0; i < strlen(deviceType); i++) {
+    uint32_t len = strlen(deviceType);
+    for (uint32_t i = 0; i < len; i++) {
         if ((*(deviceType + i) <= '9') && (*(deviceType + i) >= '0')) {
             *typeId |= (uint16_t)(*(deviceType + i) - '0');
             *typeId = (*typeId << HEX_OF_BINARY_BITS);
