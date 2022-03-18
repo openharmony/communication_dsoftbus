@@ -993,7 +993,7 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
     if (AnalysisData(data, (uint32_t)len, &info) != SOFTBUS_OK) {
         return;
     }
-    AuthManager *auth = AuthGetManagerByAuthId(info.seq);
+    AuthManager *auth = AuthGetManagerByChannel(connectionId);
     if (auth == NULL) {
         if (info.type == DATA_TYPE_DEVICE_ID && AuthGetSideByRemoteSeq(seq) == SERVER_SIDE_FLAG &&
             AuthIsSupportServerSide()) {
