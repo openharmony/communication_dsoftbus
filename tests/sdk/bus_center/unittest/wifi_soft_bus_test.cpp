@@ -35,7 +35,6 @@ public:
 
 void WifiSoftBusTest::SetUpTestCase()
 {
-
 }
 
 void WifiSoftBusTest::TearDownTestCase()
@@ -53,8 +52,8 @@ void WifiSoftBusTest::TearDown()
 static void OnWifiScanStateChangedHandler(int state, int size);
 static bool g_stateScanSuccess = false;
 
-#define DEF_TIMEOUT 5
-#define ONE_SECOND 1
+constexpr int32_t DEF_TIMEOUT = 5;
+constexpr int32_t ONE_SECOND = 1;
 
 static void OnWifiScanStateChangedHandler(int state, int size)
 {
