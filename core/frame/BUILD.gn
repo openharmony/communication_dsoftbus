@@ -142,7 +142,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/frame/standard/init/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "$softbus_adapter_config/spec_config",
+      "$dsoftbus_standard_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
     ]
     sources = dsoftbus_server_common_src
