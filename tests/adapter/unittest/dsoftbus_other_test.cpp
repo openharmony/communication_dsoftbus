@@ -184,6 +184,54 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, Function | MediumTest | Lev
 }
 
 /**
+ * @tc.name: SoftBusAdapter_ReadFileTest_001
+ * @tc.desc: Read File
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, Function | MediumTest | Level0)
+{
+    const char *writeBuf="abcdef";
+    char readbuf[1024] = {"\0"};
+    int32_t maxLen = 100;
+    int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftBusAdapter_ReadFileTest_002
+ * @tc.desc: g_FileName is null
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, Function | MediumTest | Level0)
+{
+    char readbuf[1024] = {"\0"};
+    int32_t maxLen = 100;
+    int32_t ret = SoftBusReadFile(nullptr, readbuf, maxLen);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+
+    ret = SoftBusReadFile(g_FileName, nullptr, maxLen);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftBusAdapter_ReadFileTest_003
+ * @tc.desc: maxLen is ivaild param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, Function | MediumTest | Level0)
+{
+    char readbuf[1024] = {"\0"};
+    int32_t maxLen = 0;
+    int32_t ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+}
+
+/**
  * @tc.name: SoftBusAdapter_WriterFileTest_001
  * @tc.desc: writeBuf isn't nullptr
  * @tc.type: FUNC
@@ -227,51 +275,6 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, Function | MediumTest | Le
 
     int32_t len1 = -10;
     ret = SoftBusWriteFile(g_FileName, writeBuf, len1);
-    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
-}
-
-/**
- * @tc.name: SoftBusAdapter_ReadFileTest_001
- * @tc.desc: Read File
- * @tc.type: FUNC
- * @tc.require: 1
- */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, Function | MediumTest | Level0)
-{
-    char readbuf[1024] = {"\0"};
-    int32_t maxLen = 100;
-    int32_t ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: SoftBusAdapter_ReadFileTest_002
- * @tc.desc: g_FileName is null
- * @tc.type: FUNC
- * @tc.require: 1
- */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, Function | MediumTest | Level0)
-{
-    char readbuf[1024] = {"\0"};
-    int32_t maxLen = 100;
-    int32_t ret = SoftBusReadFile(nullptr, readbuf, maxLen);
-    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
-
-    ret = SoftBusReadFile(g_FileName, nullptr, maxLen);
-    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
-}
-
-/**
- * @tc.name: SoftBusAdapter_ReadFileTest_003
- * @tc.desc: maxLen is ivaild param
- * @tc.type: FUNC
- * @tc.require: 1
- */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, Function | MediumTest | Level0)
-{
-    char readbuf[1024] = {"\0"};
-    int32_t maxLen = 0;
-    int32_t ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
