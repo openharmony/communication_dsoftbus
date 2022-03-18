@@ -61,12 +61,11 @@ static void OnWifiScanStateChangedHandler(int state, int size)
     if (size > 0) {
         g_stateScanSuccess = true;
     }
-    printf("callback function for wifi scan:%d, %d\r\n", state, size);
     return;
 }
 
 static ISoftBusScanResult g_scanResultCb = {
-    .onWifiScanResult = OnWifiScanStateChangedHandler
+    .onSoftBusWifiScanResult = OnWifiScanStateChangedHandler
 };
 
 static void WaitSacnResult(void)
@@ -76,7 +75,6 @@ static void WaitSacnResult(void)
         sleep(ONE_SECOND);
         scanTimeout--;
         if (g_stateScanSuccess == true) {
-            printf("WaitSacnResult:wait success[%d]s\n", (DEF_TIMEOUT - scanTimeout));
             break;
         }
     }
@@ -87,7 +85,7 @@ static void WaitSacnResult(void)
 
 HWTEST_F(WifiSoftBusTest, WifiSoftBusGetWifiScanListTest001, TestSize.Level0)
 {
-    WifiScanInfo* result = NULL;
+    SoftBusWifiScanInfo* result = NULL;
     unsigned int size = WIFI_SCAN_HOTSPOT_LIMIT;
     int32_t ret;
 
