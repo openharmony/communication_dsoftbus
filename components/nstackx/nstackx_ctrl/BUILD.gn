@@ -62,13 +62,13 @@ if (defined(ohos_lite)) {
   }
   ohos_shared_library("nstackx_ctrl") {
     sources = [
+      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_ctrl/core/nstackx_device.c",
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
       "core/coap_discover/coap_discover.c",
       "core/coap_discover/json_payload.c",
       "core/nstackx_common.c",
       "core/nstackx_database.c",
-      "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
     include_dirs = [

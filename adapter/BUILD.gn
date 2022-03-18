@@ -102,7 +102,7 @@ if (defined(ohos_lite)) {
   config("config_adapter_common") {
     include_dirs = [
       "$softbus_adapter_common/include",
-      "$softbus_adapter_config/spec_config",
+      "$dsoftbus_standard_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
     ]
   }
@@ -115,6 +115,7 @@ if (defined(ohos_lite)) {
       "//utils/native/base/include",
     ]
     sources = [
+      "$dsoftbus_standard_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
@@ -124,7 +125,6 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
       "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
-      "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
     ]
     public_deps = [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
