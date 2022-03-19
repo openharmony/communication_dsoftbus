@@ -61,7 +61,7 @@ void P2pLinkSetMyMac(const char *mac)
     if (ret != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my mac %s", g_myMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my mac");
 }
 
 char* P2pLinkGetMyIp(void)
@@ -81,7 +81,7 @@ char* P2pLinkGetMyMac(void)
             if (ret != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my mac %s", g_myMac);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my mac");
         }
     }
     return g_myMac;
@@ -101,7 +101,7 @@ void P2pLinkSetGoMac(const char *mac)
     if (strcpy_s(g_goMac, sizeof(g_goMac), mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go mac %s", g_goMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go mac");
 }
 
 void P2pLinkSetGoPort(int32_t port)

@@ -82,7 +82,7 @@ void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
 {
     ConnectedNode *item = P2pLinkGetConnedDevByMac(peerMac);
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s is no need update authid", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no need update authid");
         return;
     }
     item->chanId.inAuthId = authId;
@@ -129,7 +129,7 @@ void P2pLinkDelConnedByAuthId(int64_t authId)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (item->chanId.p2pAuthId == authId) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev %s is offline by authId %lld", item->peerMac, authId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline by authId %lld", authId);
             P2pLinkDevOffLineNotify(item->peerMac);
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -159,7 +159,7 @@ static void DevOffline(const P2pLinkGroup *group)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (DevIsNeedDel(item->peerMac, group) == true) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev %s is offline", item->peerMac);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline");
             if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close p2p auth chan %llu", item->chanId.p2pAuthId);
                 AuthCloseConn(item->chanId.p2pAuthId);
@@ -197,14 +197,14 @@ static void DevOnline(const P2pLinkGroup *group)
         onlineMac = onlineMacs + i * sizeof(P2pLinkPeerMacList);
         if (DevIsNeedAdd(onlineMac) == true) {
             if (strcmp(onlineMac, P2pLinkNegoGetCurrentPeerMac()) == 0) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "negoing mac %s", P2pLinkNegoGetCurrentPeerMac());
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "negoing mac");
                 continue;
             }
             nItem = SoftBusCalloc(sizeof(ConnectedNode));
             if (nItem == NULL) {
                 continue;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "other app use dev %s", onlineMac);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "other app use dev");
             ret = strcpy_s(nItem->peerMac, sizeof(nItem->peerMac), onlineMac);
             if (ret != EOK) {
                 SoftBusFree(nItem);
@@ -477,21 +477,12 @@ void P2pLinkAddConningDev(ConnectingNode *item)
 
 void P2pLinkDumpDev(void)
 {
-    ConnectedNode *connedItem = NULL;
-    ConnectedNode *connedNext = NULL;
     ConnectingNode *conningItem = NULL;
     ConnectingNode *conningNext = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[dump conned dev]");
-    LIST_FOR_EACH_ENTRY_SAFE(connedItem, connedNext, &(g_connectedDevices), ConnectedNode, node) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev %s ip %s",
-                   connedItem->peerMac, connedItem->peerIp);
-    }
-
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[dump conning dev]");
     LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "deving %s state %d",
-                   conningItem->connInfo.peerMac, conningItem->state);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "deving state %d", conningItem->state);
     }
 }
 
