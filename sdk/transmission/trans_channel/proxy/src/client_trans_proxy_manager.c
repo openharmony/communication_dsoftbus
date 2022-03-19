@@ -849,6 +849,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
     if (pathSize < (fileNameLength + dirPathLength + 1)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy name is too large, dirLen:%d, fileNameLen:%d",
             dirPathLength, fileNameLength);
+        SoftBusFree(absFullDir);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s]len[%d], fileName[%s][%d], realFullDir[%s]",
@@ -1281,6 +1282,8 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     char *absRecvPath = (char *)SoftBusCalloc(PATH_MAX + 1);
     if (absRecvPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
+        SoftBusFree(fullRecvPath);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     const char *realRecvPath = GetAndCheckRealPath(fullRecvPath, absRecvPath);

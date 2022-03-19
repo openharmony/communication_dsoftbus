@@ -697,8 +697,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     if (option == NULL || option->type != CONNECT_BLE) {
         return false;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection: bleM ac=%s",
-        option->info.bleOption.bleMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection");
     int32_t ret;
     BleConnectionInfo *server = NULL;
     BleConnectionInfo *client = NULL;
