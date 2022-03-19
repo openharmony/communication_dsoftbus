@@ -119,8 +119,7 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, const char *networkId,
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s, networkId=%s",
-        pkgName, networkId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
 
     if (ClientIpcOnChannelLinkDown(pkgName, networkId, routeType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
