@@ -60,7 +60,7 @@ static int32_t PostDataByConn(const PostDataInfo *info, char *buf, uint32_t post
     ConnPostData postParam;
     postParam.module = info->connModule;
     postParam.seq = seq;
-    postParam.flag = info->side;
+    postParam.flag = CONN_HIGH;
     postParam.pid = 0;
     postParam.buf = buf;
     postParam.len = postDataLen + ConnGetHeadSize();
