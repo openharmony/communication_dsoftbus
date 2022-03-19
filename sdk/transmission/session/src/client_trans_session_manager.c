@@ -56,17 +56,46 @@ int TransClientInit(void)
     return SOFTBUS_OK;
 }
 
+static bool SessionIdIsAvailable(int32_t sessionId)
+{
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 static int32_t GenerateSessionId(void)
 {
     if (g_sessionIdNum > MAX_SESSION_ID) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionid num cross the line error");
         return INVALID_SESSION_ID;
     }
-    int32_t id = g_sessionId++;
-    if (g_sessionId < 0) {
-        g_sessionId = 1;
+    int32_t cnt = MAX_SESSION_ID + 1;
+    int32_t id = INVALID_SESSION_ID;
+
+    while (cnt) {
+        id = g_sessionId++;
+        if (g_sessionId < 0) {
+            g_sessionId = 1;
+        }
+        if (SessionIdIsAvailable(id)) {
+            g_sessionIdNum++;
+            return id;
+        }
+        cnt--;
     }
-    g_sessionIdNum++;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate id error");
     return id;
 }
 
