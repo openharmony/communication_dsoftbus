@@ -173,11 +173,10 @@ static int32_t GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherF
         return SOFTBUS_ERR;
     }
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth peerIp %s, p2pmac %s linktype %d flag 0x%x",
-        peerIp, p2pMac, linkType, cipherFlag);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth linktype %d flag 0x%x", linkType, cipherFlag);
     ret = AuthGetConnectOptionByP2pMac(p2pMac, linkType, &authOption);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s get auth opthon fail", p2pMac);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth opthon fail");
         return SOFTBUS_ERR;
     }
     (void)memcpy_s(option, sizeof(ConnectOption), &authOption, sizeof(ConnectOption));
