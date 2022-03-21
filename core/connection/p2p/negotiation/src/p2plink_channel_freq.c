@@ -165,18 +165,26 @@ static bool IsInChannelList(int32_t channelItem, const P2pLink5GList *channelLis
 int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList)
 {
     int32_t freq = P2pLinkGetFrequency();
+    if (freq < FREQUENCY_2G_FIRST) {
+        return FREQUENCY_INVALID;
+    }
     int32_t channel = GetChannelByFreq(freq);
     if (freq > FREQUENCY_2G_LAST && !IsInChannelList(channel, channelList)) {
-        freq = -1;
+        freq = FREQUENCY_INVALID;
     }
 
     return freq;
 }
 
-static int32_t GenerateRandom(int32_t start, int32_t end)
+static int32_t GetFreqByChannel(int32_t channel)
 {
-    srand((uint32_t)time(NULL));
-    return (rand() % (end - start + 1)) + start;
+    if (channel >= CHANNEL_2G_FIRST && channel <= CHANNEL_2G_LAST) {
+        return (channel - CHANNEL_2G_FIRST) * FREQUENCY_STEP + FREQUENCY_2G_FIRST;
+    } else if (channel >= CHANNEL_5G_FIRST && channel <= CHANNEL_5G_LAST) {
+        return (channel - CHANNEL_5G_FIRST) * FREQUENCY_STEP + FREQUENCY_5G_FIRST;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "channel to freq, channel = %d.", channel);
+    return FREQUENCY_INVALID;
 }
 
 static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink5GList *gcChannelList,
@@ -185,41 +193,33 @@ static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink
     (void)gcScoreList;
     if (channelList == NULL || channelList->num == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "local 5g channel list is null.");
-        return -1;
+        return FREQUENCY_INVALID;
     }
 
-    int32_t size = 0;
+    P2pLink5GList *result = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) + sizeof(int32_t) * channelList->num);
+    if (result == NULL) {
+        return FREQUENCY_INVALID;
+    }
+    result->num = 0;
     for (int32_t i = 0; i < channelList->num; i++) {
         if (channelList->chans[i] == INVALID_5G_CHANNEL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "can not use 5g channel 165.");
             continue;
         }
         if (IsInChannelList(channelList->chans[i], gcChannelList)) {
-            size++;
+            result->chans[result->num] = channelList->chans[i];
+            result->num++;
         }
     }
-
-    if (size == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "can not use 5g channel.");
-        return -1;
+    if (result->num == 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "can not use 5G channel.");
+        SoftBusFree(result);
+        return FREQUENCY_INVALID;
     }
-
-    P2pLink5GList *result = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) + sizeof(int32_t) * size);
-    if (result == NULL) {
-        return -1;
-    }
-    result->num = size;
-    for (int32_t i = 0; i < channelList->num; i++) {
-        int32_t index = 0;
-        if (IsInChannelList(channelList->chans[i], gcChannelList)) {
-            result->chans[index++] = channelList->chans[i];
-        }
-    }
-    int32_t randomIndex = GenerateRandom(0, result->num - 1);
-    int32_t bestChannel = result->chans[randomIndex];
+    int32_t bestFreq = GetFreqByChannel(result->chans[0]);
     // not suppot local channel scores, so don't caculate local channel and peer channel scores
     SoftBusFree(result);
-    return bestChannel;
+    return bestFreq;
 }
 
 static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channelList,
@@ -236,19 +236,14 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
             return gcStationFreq;
         }
 
-        P2pLink5GList *gcScoreList = StringToChannelList(gc->channelScore);
-        if (gcScoreList != NULL) {
-            int32_t freq = GenerateFrequency(channelList, gcChannelList, gcScoreList);
-            SoftBusFree(gcScoreList);
-            if (freq != -1) {
-                return freq;
-            }
+        /* channel score will be supported soon. */
+        int32_t freq = GenerateFrequency(channelList, gcChannelList, NULL);
+        if (freq != FREQUENCY_INVALID) {
+            return freq;
         }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "no suitable 5G frequency");
     }
-
-    // -1 : invalid freq
-    return -1;
+    return FREQUENCY_INVALID;
 }
 
 int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
