@@ -11,16 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+defines = []
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+  defines += [ "HAVE_PRO = 0" ]
 
   if (ohos_build_type == "debug") {
     unittest("AdapterTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = [
+        "dsoftbus_crypto_test.cpp",
+        "dsoftbus_other_test.cpp",
         "softbus_socket_test.cpp",
         "softbus_thread_test.cpp",
       ]
@@ -37,10 +42,13 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
+  defines += [ "HAVE_PRO = 0" ]
   module_output_path = "dsoftbus_standard/adapter"
   ohos_unittest("AdapterTest") {
     module_out_path = module_output_path
     sources = [
+      "dsoftbus_crypto_test.cpp",
+      "dsoftbus_other_test.cpp",
       "softbus_socket_test.cpp",
       "softbus_thread_test.cpp",
     ]

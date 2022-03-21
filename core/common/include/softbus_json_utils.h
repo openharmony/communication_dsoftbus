@@ -28,7 +28,7 @@ extern "C" {
 #endif
 #endif
 
-bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, int targetLen);
+bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, uint32_t targetLen);
 
 bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target);
 

@@ -72,94 +72,56 @@ typedef enum {
 } SoftBusGattAttrPermission;
 
 typedef struct {
-    /** 连接索引 */
     int connId;
-    /** transport Id，reserved */
     int transId;
-    /** 设备地址 */
     SoftBusBtAddr *btAddr;
-    /** 请求读的attribute的handle号 */
     int attrHandle;
-    /** 从第一个字节偏移offset个字节开始读，从头读则设置为0 */
     int offset;
-    /** 如果设置为true则这个请求读是Long Read方式 */
     bool isLong;
 } SoftBusGattReadRequest;
 
 typedef struct {
-    /** 连接索引 */
     int connId;
-    /** transport Id，reserved */
     int transId;
-    /** 设备地址 */
     SoftBusBtAddr *btAddr;
-    /** 请求写的attribute的handle号 */
     int attrHandle;
-    /** 从第一个字节偏移offset个字节开始写，从头写则设置为0 */
     int offset;
-    /** 写的数据长度 */
     int length;
-    /** 设置为true表示需要给远端client回复响应，设置为false则不需要回复响应 */
     bool needRsp;
-    /** 设置为true表示Prepare write，设置为false表示立即写 */
     bool isPrep;
-    /** 写的数据 */
     unsigned char *value;
 } SoftBusGattWriteRequest;
 
 
 typedef struct {
-    /** 添加service后回调 */
     void (*ServiceAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle);
-    /** 添加characteristic后回调 */
     void (*CharacteristicAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int characteristicHandle);
-    /** 添加descriptor后回调 */
     void (*DescriptorAddCallback)(int status, SoftBusBtUuid *uuid, int srvcHandle, int descriptorHandle);
-    /** 启动service后回调 */
     void (*ServiceStartCallback)(int status, int srvcHandle);
-    /** 停止service后回调 */
     void (*ServiceStopCallback)(int status, int srvcHandle);
-    /** 删除service后回调 */
     void (*ServiceDeleteCallback)(int status, int srvcHandle);
-    /** 和远端client连接上回调 */
     void (*ConnectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
-    /** 和远端client断连回调 */
     void (*DisconnectServerCallback)(int connId, const SoftBusBtAddr *btAddr);
-    /** 收到client请求读回调 */
     void (*RequestReadCallback)(SoftBusGattReadRequest readCbPara);
-    /** 收到client请求写回调 */
     void (*RequestWriteCallback)(SoftBusGattWriteRequest writeCbPara);
-    /** 发送响应给远端client后回调 */
     void (*ResponseConfirmationCallback)(int status, int handle);
-    /** 发送indication/notification的回调 */
     void (*NotifySentCallback)(int connId, int status);
-    /** MTU发生变化时回调 */
     void (*MtuChangeCallback)(int connId, int mtu);
 } SoftBusGattsCallback;
 
 typedef struct {
-    /** 连接索引 */
     int connectId;
-    /** 读/写的结果状态，{@link SoftBusGattStatus} */
     int status;
-    /** attribute的handle号 */
     int attrHandle;
-    /** 响应的数据长度 */
     int valueLen;
-    /** 响应的数据 */
     char *value;
 } SoftBusGattsResponse;
 
 typedef struct {
-    /** 连接索引 */
     int connectId;
-    /** attribute的handle号 */
     int attrHandle;
-    /** 1表示发送indication且client需要回复确认，0表示发送notification */
     int confirm;
-    /** 发送的数据长度 */
     int valueLen;
-    /** 发送的数据 */
     char *value;
 } SoftBusGattsNotify;
 

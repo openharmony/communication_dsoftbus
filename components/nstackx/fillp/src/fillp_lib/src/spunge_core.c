@@ -847,7 +847,7 @@ void SpungeDestroyInstance(struct SpungeInstance *inst)
         SpungZeroInstance();
     }
 
-    FILLP_LOGERR("Destory finish index: %d", instIdx);
+    FILLP_LOGERR("Destroy finish index: %d", instIdx);
 }
 
 static void FtDestroyInner(FILLP_INT block)
@@ -875,7 +875,7 @@ static void FtDestroyInner(FILLP_INT block)
         (void)SYS_ARCH_SEM_DESTROY(&g_resDeinitSem);
     }
 
-    FILLP_LOGERR("Destory finished");
+    FILLP_LOGERR("Destroy finished");
     return;
 }
 
@@ -1571,7 +1571,7 @@ static void SpungeSetThreadInfo(FILLP_CONST struct SpungeInstance *inst)
         pthread_t self;
         self = pthread_self();
         FILLP_LOGINF("FillP Core threadId:%ld", self);
-        /* thread resource will be auto recyled
+        /* thread resource will be auto recycled
            only this detach set if no other thread try to join it */
         if (pthread_detach(self)) {
             FILLP_LOGERR("Set Detach fail");

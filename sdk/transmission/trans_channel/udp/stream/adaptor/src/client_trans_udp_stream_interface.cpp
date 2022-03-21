@@ -41,13 +41,16 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid argument!");
         return SOFTBUS_ERR;
     }
-
-    auto it = g_adaptorMap.find(channelId);
-    if (it == g_adaptorMap.end()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
-        return SOFTBUS_ERR;
+    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_adaptorMap.find(channelId);
+        if (it == g_adaptorMap.end()) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
+            return SOFTBUS_ERR;
+        }
+        adaptor = it->second;
     }
-    auto adaptor = it->second;
 
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {

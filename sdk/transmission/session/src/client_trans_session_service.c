@@ -39,7 +39,7 @@
 
 static bool IsValidSessionId(int sessionId)
 {
-    if ((sessionId <= 0) || (sessionId > MAX_SESSION_ID)) {
+    if (sessionId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid sessionId [%d]", sessionId);
         return false;
     }
@@ -360,7 +360,7 @@ void NotifyAuthSuccess(int sessionId)
     }
 }
 
-static void CheckSessionIsOpened(int32_t sessionId)
+static int32_t CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
 #define SESSION_CHECK_PERIOD 50000
@@ -369,11 +369,11 @@ static void CheckSessionIsOpened(int32_t sessionId)
 
     while (i < SESSION_STATUS_CHECK_MAX_NUM) {
         if (ClientGetChannelBySessionId(sessionId, NULL, NULL, &isEnable) != SOFTBUS_OK) {
-            return;
+            return SOFTBUS_NOT_FIND;
         }
         if (isEnable == true) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
-            return;
+            return SOFTBUS_OK;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session is opening, i=%d", i);
         usleep(SESSION_CHECK_PERIOD);
@@ -381,7 +381,7 @@ static void CheckSessionIsOpened(int32_t sessionId)
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session open timeout");
-    return;
+    return SOFTBUS_ERR;
 }
 
 int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
@@ -431,7 +431,12 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         return INVALID_SESSION_ID;
     }
 
-    CheckSessionIsOpened(sessionId);
+    ret = CheckSessionIsOpened(sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened err: ret=%d", ret);
+        (void)ClientDeleteSession(sessionId);
+        return INVALID_SESSION_ID;
+    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%d, channelId=%d",
         sessionId, transInfo.channelId);
     return sessionId;

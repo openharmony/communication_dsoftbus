@@ -65,9 +65,9 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort)
     return data;
 }
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *ip, int32_t ipLen, int32_t *port)
+int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
 {
-    if (json == NULL || ip == NULL || ipLen <= 0 || port == NULL) {
+    if (json == NULL || ip == NULL || port == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t errCode;

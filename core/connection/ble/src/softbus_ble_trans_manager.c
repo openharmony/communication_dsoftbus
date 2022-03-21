@@ -153,14 +153,14 @@ static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, i
     }
 }
 
-int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len, int32_t seq, int32_t module)
+int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module)
 {
-    int32_t tempLen = len;
+    uint32_t tempLen = len;
     char *sendData = (char *)data;
-    int32_t dataLenMax = connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader);
-    int32_t offset = 0;
+    uint32_t dataLenMax = (uint32_t)(connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader));
+    uint32_t offset = 0;
     while (tempLen > 0) {
-        int32_t sendLength = tempLen;
+        uint32_t sendLength = tempLen;
         if (sendLength > dataLenMax) {
             sendLength = dataLenMax;
         }
@@ -171,7 +171,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, int32_t len,
         }
         int ret = memcpy_s(buff + sizeof(BleTransHeader), sendLength, sendData, sendLength);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend big msg, len:%d\n", tempLen);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend big msg, len:%u\n", tempLen);
             SoftBusFree(buff);
             return ret;
         }

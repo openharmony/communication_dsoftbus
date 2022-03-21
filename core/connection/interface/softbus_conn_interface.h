@@ -88,12 +88,18 @@ typedef enum {
     CONN_HIGH
 } SendPriority;
 
+typedef enum {
+    CONN_SIDE_ANY = 0,
+    CONN_SIDE_CLIENT,
+    CONN_SIDE_SERVER
+} ConnSideType;
+
 typedef struct {
     int32_t module; // ConnModule
     int64_t seq;
     int32_t flag; // SendPriority
     int32_t pid;
-    int32_t len;
+    uint32_t len;
     char *buf;
 } ConnPostData;
 
@@ -107,6 +113,7 @@ typedef struct {
     union {
         struct BrOption {
             char brMac[BT_MAC_LEN];
+            ConnSideType sideType;
         } brOption;
         struct BleOption {
             char bleMac[BT_MAC_LEN];

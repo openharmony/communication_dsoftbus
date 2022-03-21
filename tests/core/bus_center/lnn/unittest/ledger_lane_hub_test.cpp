@@ -357,7 +357,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_FILE_LANE_Test_001, TestSize.Level
     LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE2_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
-    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == true &&
+    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_2P4G && laneInfo != NULL && laneInfo->isProxy == false &&
         laneInfo->conOption.type == CONNECTION_ADDR_WLAN &&
         strncmp(laneInfo->conOption.info.ip.ip, LOCAL_WLAN_IP, strlen(LOCAL_WLAN_IP)) == 0 &&
         laneInfo->conOption.info.ip.port == REMOTE_AUTH_PORT);
@@ -446,7 +446,7 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN5G_FILE_LANE_Test_001, TestSize.Level1)
     LnnLanesObject *lanesObj = LnnRequestLanesObject(NODE3_NETWORK_ID, DEFAULT_PID, LNN_FILE_LANE, NULL, LANES_NUM);
     int32_t laneId = LnnGetLaneId(lanesObj, 0);
     const LnnLaneInfo *laneInfo = LnnGetLaneInfo(laneId);
-    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == true &&
+    EXPECT_TRUE(laneId == LNN_LINK_TYPE_WLAN_5G && laneInfo != NULL && laneInfo->isProxy == false &&
         laneInfo->conOption.type == CONNECTION_ADDR_WLAN &&
         strncmp(laneInfo->conOption.info.ip.ip, LOCAL_WLAN_IP, strlen(LOCAL_WLAN_IP)) == 0 &&
         laneInfo->conOption.info.ip.port == REMOTE_AUTH_PORT);

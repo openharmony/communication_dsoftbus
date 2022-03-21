@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 int32_t ClientStubInit(void);
+int32_t ClientRegisterService(const char *pkgName);
 
 #ifdef __cplusplus
 }

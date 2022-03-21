@@ -29,15 +29,15 @@ static void NetconnFreeOsSocket(struct SockOsSocket *osSock, struct SpungeInstan
     if ((osSock == FILLP_NULL_PTR) || (curInst == FILLP_NULL_PTR)) {
         /* No need to prin the error log in this case, because the param 'ftSock->osSocket'
            can be set to NULL only in this function below, so printing log here is
-           not usefull
+           not useful
         */
         return;
     }
 
-    osSock->refrence--;
-    if (osSock->refrence <= 0) {
-        if (OS_SOCK_OPS_FUNC_VALID(osSock, destorySysIoSocket)) {
-            (void)osSock->ioSock->ops->destorySysIoSocket(osSock->ioSock);
+    osSock->reference--;
+    if (osSock->reference <= 0) {
+        if (OS_SOCK_OPS_FUNC_VALID(osSock, destroySysIoSocket)) {
+            (void)osSock->ioSock->ops->destroySysIoSocket(osSock->ioSock);
         }
         HlistDelete(&curInst->osSockist, &osSock->osListNode);
         SpungeFree(osSock, SPUNGE_ALLOC_TYPE_CALLOC);

@@ -323,7 +323,7 @@ static void FillpAckUnackList(struct FillpPcb *pcb, FILLP_UINT32 curSeq, FILLP_I
     FILLP_UINT32 curSeqIndex = (curSeq / FILLP_UNACK_HASH_MOD) & hashModSize;
 
     // Still need to check if should loop all list
-    if (((curSeq - pcb->send.ackSeqNum) / FILLP_UNACK_HASH_MOD) >= unackListSize) {
+    if (((curSeq / FILLP_UNACK_HASH_MOD) - (pcb->send.ackSeqNum / FILLP_UNACK_HASH_MOD)) >= unackListSize) {
         loopCount = unackListSize;
     } else {
         loopCount = UTILS_MIN((curSeqIndex + unackListSize - lastSeqIndex) & hashModSize, unackListSize);
