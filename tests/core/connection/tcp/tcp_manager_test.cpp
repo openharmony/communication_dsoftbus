@@ -185,7 +185,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BR;

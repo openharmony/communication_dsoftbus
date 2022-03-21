@@ -229,7 +229,6 @@ int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* peerMac, int32_t mac
     if (peerIp == NULL || peerMac == NULL) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query ip %s", peerIp);
     if (P2pLinkGetRole() == ROLE_NONE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p role is none");
         return SOFTBUS_ERR;
