@@ -108,8 +108,7 @@ void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p conn auth %lld req %d ex-role %d",
         requestInfo->authId, requestInfo->requestId, requestInfo->expectedRole);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[connecting] dev %s %d",
-        requestInfo->peerMac, GetP2pLinkNegoStatus());
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[connecting] dev %d", GetP2pLinkNegoStatus());
     connedDev = P2pLinkGetConnedDevByMac(requestInfo->peerMac);
     if (connedDev != NULL) {
         if (strlen(connedDev->peerIp) == 0) {
@@ -175,7 +174,7 @@ void P2pLinkLoopDisconnectDev(P2pLoopMsg msgType, void *arg)
     (void)msgType;
     if (strlen(info.peerMac) != 0) {
         P2pLinkUpdateInAuthId(info.peerMac, info.authId);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d mac %s", info.pid, info.peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info.pid);
         if (P2pLinGetMacRefCnt(info.pid, info.peerMac) == 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer mac not ref");
             return;
@@ -283,13 +282,13 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
 
     connedItem = P2pLinkGetConnedDevByMac(peerMac);
     if (connedItem == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p auth can not find %s", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p auth can not find");
         SoftBusFree(arg);
         return;
     }
 
     if (P2pLinkIsDisconnectState() == true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p dev %s is disconnect", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p dev is disconnect");
         SoftBusFree(arg);
         return;
     }
@@ -398,8 +397,7 @@ static void P2pLinkNegoSuccess(int32_t requestId, const P2pLinkNegoConnResult *c
         return;
     }
     P2pLinkRole role = P2pLinkGetRole();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego ok ip %s mac %s, port %d, role %d",
-        conn->peerIp, conn->peerMac, conn->goPort, role);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego ok port %d, role %d", conn->goPort, role);
     ConnectedNode *connedItem = P2pLinkGetConnedDevByMac(conn->peerMac);
     if (connedItem != NULL) {
         ret = strcpy_s(connedItem->peerIp, sizeof(connedItem->peerIp), conn->peerIp);
@@ -481,8 +479,7 @@ static void P2pLinkNegoConnected(const P2pLinkNegoConnResult *conn)
         return;
     }
     role = P2pLinkGetRole();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego conned ip %s mac %s, port %d role %d",
-               conn->peerIp, conn->peerMac, conn->goPort, role);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Nego conned port %d role %d",  conn->goPort, role);
     connedDev = P2pLinkGetConnedDevByMac(conn->peerMac);
     if (connedDev != NULL) {
         if (strcpy_s(connedDev->peerIp, sizeof(connedDev->peerIp), conn->peerIp) != EOK) {
