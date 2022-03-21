@@ -57,9 +57,9 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
+      "//foundation/aafwk/standard/interfaces/innerkits/uri:zuri",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability:native_dataability",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb:native_rdb",
-      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
     ]
   }
 }
