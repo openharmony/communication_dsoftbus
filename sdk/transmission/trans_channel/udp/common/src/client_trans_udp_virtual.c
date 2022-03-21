@@ -59,6 +59,7 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     (void)channelId;
     (void)data;
     (void)ext;
+    (void)param;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

@@ -360,7 +360,7 @@ static int32_t PutToRecvList(int32_t fd, uint32_t seq, const char *destFilePath,
 static int32_t UpdateRecvInfo(SingleFileInfo fileInfo)
 {
     int index = fileInfo.index;
-    if (index > MAX_RECV_FILE_NUM) {
+    if (index >= MAX_RECV_FILE_NUM) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fileInfo.index is large than MAX_RECV_FILE_NUM");
         return SOFTBUS_ERR;
     }
@@ -1295,6 +1295,7 @@ int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const 
     if (absRecvPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir failed");
         SoftBusFree(fullRecvPath);
+        SoftBusMutexUnlock(&g_recvFileInfo.lock);
         return SOFTBUS_ERR;
     }
     if (GetAndCheckRealPath(fullRecvPath, absRecvPath) != SOFTBUS_OK) {

@@ -725,6 +725,7 @@ static int32_t TransProxyFirstSliceProcess(SliceProcessor *processor, const Slic
 static int32_t TransProxySliceProcessChkPkgIsValid(const SliceProcessor *processor, const SliceHead *head,
     const char *data, uint32_t len)
 {
+    (void)data;
     if (head->sliceNum != processor->sliceNumber ||
         head->sliceSeq != processor->expectedSeq) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unmatched normal slice received");

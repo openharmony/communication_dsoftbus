@@ -27,24 +27,14 @@
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
-#define ID_NOT_USED 0
-#define ID_USED 1
-#define SHIFT_3 3
-#define SESSION_MAP_COUNT ((MAX_SESSION_ID + 0x7) >> SHIFT_3)
-
-static uint8_t g_idFlagBitmap[SESSION_MAP_COUNT];
-
+static int32_t g_sessionIdNum = 0;
+static int32_t g_sessionId = 1;
 static SoftBusList *g_clientSessionServerList = NULL;
 
 void TransSessionTimer(void);
 
 int TransClientInit(void)
 {
-    if (memset_s(g_idFlagBitmap, sizeof(g_idFlagBitmap), 0, sizeof(g_idFlagBitmap)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init id bitmap failed");
-        return SOFTBUS_ERR;
-    }
-
     g_clientSessionServerList = CreateSoftBusList();
     if (g_clientSessionServerList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init list failed");
@@ -66,23 +56,55 @@ int TransClientInit(void)
     return SOFTBUS_OK;
 }
 
-static int32_t GenerateSessionId(void)
+static bool SessionIdIsAvailable(int32_t sessionId)
 {
-#define SESSION_ID_INIT_VALUE 1
-    /* need get lock before */
-    for (uint32_t id = SESSION_ID_INIT_VALUE; id <= MAX_SESSION_ID; id++) {
-        if (((g_idFlagBitmap[(id >> SHIFT_3)] >> (id & 0x7)) & ID_USED) == ID_NOT_USED) {
-            g_idFlagBitmap[(id >> SHIFT_3)] |= (ID_USED << (id & 0x7));
-            return (int32_t)id;
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                return false;
+            }
         }
     }
-    return INVALID_SESSION_ID;
+
+    return true;
 }
 
-static void DestroySessionId(int32_t sessionId)
+static int32_t GenerateSessionId(void)
 {
-    uint32_t id = (uint32_t)sessionId;
-    g_idFlagBitmap[(id >> SHIFT_3)] &= (~(ID_USED << (id & 0x7)));
+    if (g_sessionIdNum > MAX_SESSION_ID) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionid num cross the line error");
+        return INVALID_SESSION_ID;
+    }
+    int32_t cnt = MAX_SESSION_ID + 1;
+    int32_t id = INVALID_SESSION_ID;
+
+    while (cnt) {
+        id = g_sessionId++;
+        if (g_sessionId < 0) {
+            g_sessionId = 1;
+        }
+        if (SessionIdIsAvailable(id)) {
+            g_sessionIdNum++;
+            return id;
+        }
+        cnt--;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate id error");
+    return id;
+}
+
+static void DestroySessionId(void)
+{
+    if (g_sessionIdNum > 0) {
+        g_sessionIdNum--;
+    }
+    return;
 }
 
 static void DestroyClientSessionServer(ClientSessionServer *server)
@@ -98,7 +120,7 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
             int id = sessionNode->sessionId;
             (void) ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-            DestroySessionId(sessionNode->sessionId);
+            DestroySessionId();
             ListDelete(&sessionNode->node);
             SoftBusFree(sessionNode);
             server->listener.session.OnSessionClosed(id);
@@ -166,7 +188,7 @@ void TransSessionTimer(void)
             if (sessionNode->timeout >= TRANS_SESSION_TIMEOUT) {
                 serverNode->listener.session.OnSessionClosed(sessionNode->sessionId);
                 (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-                DestroySessionId(sessionNode->sessionId);
+                DestroySessionId();
                 ListDelete(&(sessionNode->node));
                 SoftBusFree(sessionNode);
             }
@@ -358,7 +380,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
         ListAdd(&serverNode->sessionList, &session->node);
         return SOFTBUS_OK;
     }
-    DestroySessionId(session->sessionId);
+    DestroySessionId();
     return SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED;
 }
 
@@ -534,7 +556,7 @@ int32_t ClientDeleteSession(int32_t sessionId)
                 continue;
             }
             ListDelete(&(sessionNode->node));
-            DestroySessionId(sessionId);
+            DestroySessionId();
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             SoftBusFree(sessionNode);
             return SOFTBUS_OK;
@@ -968,7 +990,7 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server,
 
         int id = sessionNode->sessionId;
         (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
-        DestroySessionId(sessionNode->sessionId);
+        DestroySessionId();
         ListDelete(&sessionNode->node);
         SoftBusFree(sessionNode);
         server->listener.session.OnSessionClosed(id);
@@ -1043,8 +1065,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_clientSessionServerList == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransOnLinkDown: networkId=%s, routeType=%d",
-        networkId, routeType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransOnLinkDown: routeType=%d", routeType);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");

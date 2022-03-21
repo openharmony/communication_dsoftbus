@@ -23,7 +23,7 @@
 
 int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
-    if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
+    if (fileName == NULL || readBuf == NULL || maxLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t fileLen = 0;
@@ -68,7 +68,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
-    if (ret != len) {
+    if (ret != (int32_t)len) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "UtilsFileOpen UtilsFileWrite fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;

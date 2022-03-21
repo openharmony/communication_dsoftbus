@@ -63,9 +63,9 @@ static FILLP_INT FillpConnReqStateCheck(struct FillpPcb *pcb, FILLP_CONST struct
     FILLP_UINT8 connState = FILLP_GET_CONN_STATE(pcb);
     if (connState == CONN_STATE_CONNECTED) {
         if ((pcb->recv.seqNum == pcb->recv.seqStartNum) && (pcb->send.maxAckNumFromReceiver ==
-            pcb->send.seqStartNum)) { /* Only if no data recved or no data acked */
+            pcb->send.seqStartNum)) { /* Only if no data received or no data acked */
             FILLP_LOGINF("fillp_sock_id:%d Conn req in open state"
-                         "as data not recieved, so sending conn resp,state = %u",
+                         "as data not received, so sending conn resp,state = %u",
                          sock->index, connState);
 
             FillpSendConnConfirmAck(pcb);
@@ -565,7 +565,7 @@ static FILLP_INT FillpInitNewConnByConfirm(struct FillpPcb *pcb, struct FtNetcon
          then fc_cyle() will run and coredump can happen as the netconn->sock will be NULL
 
     */
-    newConn->sock = sock; // It is very important to set this , because it is neccesary to make netconn has a socket
+    newConn->sock = sock; // It is very important to set this , because it is necessary to make netconn has a socket
     if (FillpInitNewPcbByNewConn(newConn, maxSendCache, maxRecvCache) != 0) {
         return -1;
     }
@@ -628,7 +628,7 @@ static void FillpProcessConnConfirm(struct FillpPcb *pcb, FILLP_CONST struct Net
         parameter, so used current node pkt size */
     FillpInitPeerOfNewconn(newConn, sock->resConf.flowControl.pktSize);
 
-    /* Decode connection confirm extention parameters */
+    /* Decode connection confirm extension parameters */
     (void)FillpDecodeExtPara((FILLP_UCHAR *)(p->p) + sizeof(struct FillpPktConnConfirm),
         (FILLP_INT)(p->len - ((FILLP_INT)sizeof(struct FillpPktConnConfirm) - FILLP_HLEN)), newConn);
 
@@ -648,7 +648,7 @@ static void FillpProcessConnConfirm(struct FillpPcb *pcb, FILLP_CONST struct Net
 
     /* Here we need to set newConn->osSock, or it will be null pointer, and when do accept, it will be rewrite */
     newConn->osSocket[SPUNGE_GET_CUR_INSTANCE()->instIndex] = osSock;
-    osSock->refrence++;
+    osSock->reference++;
     if (err != ERR_OK) {
         FILLP_LOGERR("sysio connect fail");
         FillpNetconnDestroy(newConn);
@@ -703,7 +703,7 @@ static FILLP_BOOL FillpConfirmCheckState(FILLP_UINT8 connState, struct FtSocket 
         if ((pcb->recv.seqNum == pcb->recv.seqStartNum) && (pcb->send.maxAckNumFromReceiver ==
             pcb->send.seqStartNum)) { /* Only if no data recved or no data acked */
             FILLP_LOGDBG("fillp_sock_id:%d Conn confirm in open state "
-                         "as data not recieved, so sending conn confirm ack, state = %u",
+                         "as data not received, so sending conn confirm ack, state = %u",
                          sock->index, connState);
 
             FillpSendConnConfirmAck(pcb);
@@ -753,7 +753,7 @@ void FillpConnConfirmInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, s
     confirm->tagCookie = FILLP_NTOHS(confirm->tagCookie);
 
     if ((confirm->tagCookie != FILLP_COOKIE_TAG) || (confirm->cookieLength != sizeof(FillpCookieContent))) {
-        FILLP_LOGINF("fillp_sock_id:%d, received cookie lenght = %u,"
+        FILLP_LOGINF("fillp_sock_id:%d, received cookie length = %u,"
                      "actual cookie size = %zu, discarding the packet",
                      sock->index, confirm->cookieLength, sizeof(FillpCookieContent));
         return;
@@ -770,7 +770,7 @@ void FillpConnConfirmInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, s
 
     if (sock->listenBacklog <= 0) {
         FILLP_UINT32 localUniqueIdBk = pcb->localUniqueId;
-        FILLP_LOGINF("fillp_sock_id:%d listen backLog is not avaliable, backLog = %d",
+        FILLP_LOGINF("fillp_sock_id:%d listen backLog is not available, backLog = %d",
             sock->index, sock->listenBacklog);
         /*
             We are not using 3rd parmeter , so removed to fix leval 4
@@ -799,7 +799,7 @@ void FillpHandleConnConfirmAckInput(struct FtSocket *sock, struct FtNetconn *con
     }
 
     FILLP_LOGINF("FillpConnConfirmAckInput: fillp_sock_id:%d client connection "
-                 "estabished, time = %lld, local seq num = %u, local pkt num = %u, peer seq num = %u, "
+                 "established, time = %lld, local seq num = %u, local pkt num = %u, peer seq num = %u, "
                  "peer pkt num = %u, maxRate:%u, maxRecvRate:%u",
                  sock->index, SYS_ARCH_GET_CUR_TIME_LONGLONG(), pcb->send.seqNum, pcb->send.pktNum, pcb->recv.seqNum,
                  pcb->recv.pktNum, sock->resConf.flowControl.maxRate, sock->resConf.flowControl.maxRecvRate);
@@ -842,7 +842,7 @@ static FILLP_BOOL FillpCheckConfirmAckInfoIsValid(struct FillpPcb *pcb, struct F
     serverRecvCache = confirmAck->recvCache;
 
     if ((serverSendCache > pcb->mpRecvSize) || (serverRecvCache > pcb->mpSendSize)) {
-        FILLP_LOGINF("FillpConnConfirmAckInput: fillp_sock_id:%d Connection response send cache or recive "
+        FILLP_LOGINF("FillpConnConfirmAckInput: fillp_sock_id:%d Connection response send cache or receive "
                      "cache is more than what client requested sendCache : %u receive_cache:%u \r\n",
                      sock->index, serverSendCache, serverRecvCache);
         return FILLP_FALSE;
@@ -1062,7 +1062,7 @@ void FillpConnConfirmAckInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p
 }
 
 static void ConnectingHandleFinInput(struct FillpPcb *pcb, struct FtSocket *sock,
-    struct FtNetconn *conn, FILLP_CONST struct NetBuf *p, struct FillpFinFlags *flags)
+    struct FtNetconn *conn, FILLP_CONST struct NetBuf *p, FILLP_CONST struct FillpFinFlags *flags)
 {
     /* If this socket is not accepted then no event need to given to application as listen socket
         IN event is already gives and current socket is accepted by application. No need to change state also.
@@ -1302,7 +1302,7 @@ void FillpFinInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, FILLP_BOO
     fillpHead = (struct FillpPktHead *)fin->head;
 
     if (fillpHead->seqNum != pcb->peerUniqueId) {
-        FILLP_LOGWAR("FillpFinInput: fillp_sock_id:%d Stale fin recevied peerUniqueId = %u,"
+        FILLP_LOGWAR("FillpFinInput: fillp_sock_id:%d Stale fin received peerUniqueId = %u,"
             "fin->head.seqNum %u\r\n", sock->index, pcb->peerUniqueId, fillpHead->seqNum);
         return;
     }
@@ -1487,7 +1487,7 @@ void FillpSendConnReqAck(struct FillpPcb *pcb, FILLP_CONST FillpCookieContent *s
         return;
     }
 
-    if (AF_INET == stateCookie->addresType) {
+    if (AF_INET == stateCookie->addressType) {
         *((struct sockaddr_in *)&tempPcb->remoteAddr) = *((struct sockaddr_in *)&stateCookie->remoteSockIpv6Addr);
         tempPcb->addrType = AF_INET;
         tempPcb->addrLen = sizeof(struct sockaddr_in);
@@ -1808,7 +1808,7 @@ static void FillpSendFinInner(struct FillpPcb *pcb, FILLP_BOOL wrSet, FILLP_BOOL
     flags.ackSet = ackSet;
     flags.verSet = FILLP_FALSE;
 
-    return FillpSendFinInnerImpl(pcb, &flags, remoteAddr);
+    FillpSendFinInnerImpl(pcb, &flags, remoteAddr);
 }
 
 void FillpSendRstWithVersionImcompatible(struct FillpPcb *pcb, struct sockaddr *remoteAddr)
@@ -1819,7 +1819,7 @@ void FillpSendRstWithVersionImcompatible(struct FillpPcb *pcb, struct sockaddr *
     flags.ackSet = FILLP_TRUE;
     flags.verSet = FILLP_TRUE;
 
-    return FillpSendFinInnerImpl(pcb, &flags, remoteAddr);
+    FillpSendFinInnerImpl(pcb, &flags, remoteAddr);
 }
 
 void FillpSendFin(struct FillpPcb *pcb)
@@ -1838,8 +1838,6 @@ void FillpSendFin(struct FillpPcb *pcb)
 
     FillpSendFinInner(pcb, wrSet, rdSet, ackSet,
         (struct sockaddr *)(&((struct SpungePcb*)(pcb->spcb))->remoteAddr));
-
-    return;
 }
 
 void FillpSendFinAck(struct FillpPcb *pcb, struct sockaddr *remoteAddr)
@@ -1892,7 +1890,7 @@ void FillpGenerateCookie(IN FILLP_CONST struct FillpPcb *pcb, IN struct FillpPkt
     stateCookie->localPacketSeqNumber = FILLP_CRYPTO_RAND();
     stateCookie->remoteMessageSeqNumber = pktHdr->seqNum;
     stateCookie->remotePacketSeqNumber = pktHdr->pktNum;
-    stateCookie->addresType = addr->sa_family;
+    stateCookie->addressType = addr->sa_family;
     stateCookie->srcPort = serverPort;
     if (req->cookiePreserveTime <= FILLP_MAX_COOKIE_LIFETIME) {
         stateCookie->lifeTime = FILLP_INITIAL_COOKIE_LIFETIME + req->cookiePreserveTime;

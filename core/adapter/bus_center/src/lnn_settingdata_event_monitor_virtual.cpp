@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-#include "securec.h"
+#include "lnn_settingdata_event_monitor.h"
+
 #include "softbus_errcode.h"
-#include "softbus_wifi_api_adapter.h"
 
-int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
+int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
-    (void)configList;
-    (void)num;
-    return SOFTBUS_OK;
+    (void)deviceName;
+    (void)len;
+    return SOFTBUS_ERR;
 }
 
-int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
+int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 {
-    (void)wifiConfig;
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusDisconnectDevice(void)
-{
+    (void)handler;
     return SOFTBUS_OK;
 }

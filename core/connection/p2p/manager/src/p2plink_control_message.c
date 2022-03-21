@@ -289,10 +289,10 @@ void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
     }
     connedDev = P2pLinkGetConnedDevByMac(mac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "handshake can not find dev mac = %s ip = %s", mac, ip);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "handshake can not find dev");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handshake rec mac %s ip %s authid %lld", mac, ip, authId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handshake rec authid %lld", authId);
     connedDev->chanId.p2pAuthId = authId;
     connedDev->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
     ret = strcpy_s(connedDev->peerIp, sizeof(connedDev->peerIp), ip);
@@ -315,7 +315,7 @@ void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
     }
     conningItem = P2pLinkGetConningByPeerMacState(peerMac, P2PLINK_MANAGER_STATE_REUSE);
     if (conningItem == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReuseResponse can not find dev mac = %s ", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReuseResponse can not find dev mac");
         return;
     }
 
@@ -327,7 +327,7 @@ void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
     }
     connedDev = P2pLinkGetConnedDevByMac(peerMac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reuse dev(%s) is offline ", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reuse dev is offline ");
         P2pLinkConningCallback(conningItem, SOFTBUS_ERR, ERROR_REUSE_FAILED);
         P2pLinkDelConning(conningItem->connInfo.requestId);
         return;
@@ -357,7 +357,7 @@ void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack ReuseResponse fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv peer %s reuse request", peerMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv peer reuse request");
     if (myRole == ROLE_GC) {
         if (P2pLinkConnedIsEmpty() == SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "used by others");
@@ -417,7 +417,7 @@ void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
 
     connedDev = P2pLinkGetConnedDevByMac(peerMac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev not online %s", peerMac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev not online");
         return;
     }
 
@@ -428,7 +428,7 @@ void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
     }
     P2pLinkDelMyP2pRef();
     P2pLinkDumpRef();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handle disconnect ok %s", peerMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handle disconnect ok");
 }
 
 void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const cJSON *root)

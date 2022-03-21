@@ -20,6 +20,10 @@ declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
   softbus_adapter_config =
       "//foundation/communication/dsoftbus/adapter/default_config"
+  dsoftbus_standard_feature_product_config_path =
+      "//foundation/communication/dsoftbus/adapter/default_config"
+  dsoftbus_standard_feature_ifname_prefix_path =
+      "//foundation/communication/dsoftbus/components/nstackx"
 }
 
 if (defined(ohos_lite)) {
@@ -39,5 +43,6 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/ohos.gni")
-  import("$softbus_adapter_config/feature_config/standard/config.gni")
+  import(
+      "$dsoftbus_standard_feature_product_config_path/feature_config/standard/config.gni")
 }

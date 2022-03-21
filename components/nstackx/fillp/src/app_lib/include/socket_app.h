@@ -93,7 +93,7 @@ struct msghdr {
 
 FILLP_INT SockEventInfoGet(int s, FtEventCbkInfo *info);
 
-#define SOCK_DESTORY_CONN(lock, conn, sock, err) \
+#define SOCK_DESTROY_CONN(lock, conn, sock, err) \
 do { \
     (void)SYS_ARCH_RWSEM_RDPOST(lock); \
     FillpNetconnDestroy(conn); \
