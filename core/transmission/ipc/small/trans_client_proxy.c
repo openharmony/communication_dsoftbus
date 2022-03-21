@@ -128,8 +128,7 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, i
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientIpcOnChannelLinkDown: pkgName=%s, networkId=%s",
-        pkgName, networkId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientIpcOnChannelLinkDown: pkgName=%s", pkgName);
 
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];

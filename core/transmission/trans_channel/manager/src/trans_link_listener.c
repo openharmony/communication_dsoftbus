@@ -36,7 +36,7 @@ static void FreeMem(const NodeBasicInfo *info)
 
 static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_t len)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac: mac=%s", peerMac);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac");
     NodeBasicInfo *info = NULL;
     int32_t num = 0;
 
@@ -63,7 +63,7 @@ static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_
             }
 
             FreeMem(info);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac end: networkId=%s", networkId);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac end");
             return SOFTBUS_OK;
         }
     }
@@ -78,7 +78,7 @@ static void OnP2pLinkDisconnected(const char *peerMac)
     if (peerMac == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnP2pLinkDisconnected peerMac=%s", peerMac);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnP2pLinkDisconnected");
 
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     if (GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
