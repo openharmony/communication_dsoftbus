@@ -273,8 +273,7 @@ void P2pLinkDumpRef(void)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "my ref cnt:");
     LIST_FOR_EACH_ENTRY_SAFE(pItem, pNext, &g_pidList, RefPidItem, node) {
         LIST_FOR_EACH_ENTRY_SAFE(mItem, mNext, &pItem->macList, RefMacItem, node) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                       "pid %d peer mac %s ref %d", pItem->pid, mItem->mac, mItem->refCnt);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "pid %d peer ref %d", pItem->pid, mItem->refCnt);
         }
     }
 }

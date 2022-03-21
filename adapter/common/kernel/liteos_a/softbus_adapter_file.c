@@ -68,7 +68,7 @@ static int32_t SoftBusCreateFile(const char *fileName)
 
 int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
-    if (fileName == NULL || readBuf == NULL || maxLen <= 0) {
+    if (fileName == NULL || readBuf == NULL || maxLen == 0) {
         return SOFTBUS_FILE_ERR;
     }
 
@@ -78,7 +78,7 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
         return SOFTBUS_FILE_ERR;
     }
     int32_t fileLen = lseek(fd, 0, SEEK_END);
-    if (fileLen <= 0 || fileLen > maxLen) {
+    if (fileLen <= 0 || fileLen > (int32_t)maxLen) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile maxLen failed or over maxLen");
         close(fd);
         return SOFTBUS_FILE_ERR;
@@ -101,7 +101,7 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
 
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len)
 {
-    if (fileName == NULL || writeBuf == NULL || len <= 0) {
+    if (fileName == NULL || writeBuf == NULL || len == 0) {
         return SOFTBUS_FILE_ERR;
     }
     if (access(fileName, F_OK) != 0 && SoftBusCreateFile(fileName) != SOFTBUS_OK) {
@@ -114,7 +114,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = write(fd, writeBuf, len);
-    if (ret != len) {
+    if (ret != (int32_t)len) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFile write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;

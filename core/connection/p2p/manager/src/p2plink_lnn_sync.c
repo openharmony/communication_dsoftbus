@@ -75,7 +75,7 @@ void P2pLinkLnnSync(void)
 
     if (role == ROLE_GC) {
         if (strcmp(P2pLinkGetGoMac(), g_lnnGoMac) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync gomac %s->%s", g_lnnGoMac, P2pLinkGetGoMac());
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync gomac");
             if (P2pLinkLnnSyncSetGoMac() == SOFTBUS_OK) {
                 change = 1;
             }
