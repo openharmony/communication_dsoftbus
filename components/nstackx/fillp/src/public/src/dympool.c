@@ -51,7 +51,7 @@ DympoolType *DympCreatePool(int initSize, int maxSize, int itemSize, FILLP_BOOL 
 
     pool->currentSize = DympAskMoreMemory(pool, initSize, FILLP_FALSE);
     if (pool->currentSize <= 0) {
-        FILLP_LOGERR("Inital memory fail");
+        FILLP_LOGERR("Initial memory fail");
         goto CREATE_FAIL;
     }
 
@@ -164,7 +164,7 @@ static int DympExpandMemory(DympoolType *pool, int stepSizeWork)
     }
 
     pool->currentSize += itemCount;
-    if (itemCount) {
+    if (itemCount != 0) {
         mem->itemCnt = itemCount;
         FILLP_LOGINF("stepSize:%d, Current pool size:%d", itemCount, pool->currentSize);
     } else {

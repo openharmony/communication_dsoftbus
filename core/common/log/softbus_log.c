@@ -70,7 +70,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
     ret = vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, fmt, arg);
     va_end(arg);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM]softbus log len error");
+        HILOG_WARN(SOFTBUS_HILOG_ID, "[COMM]softbus log len error");
         return;
     }
     SoftBusOutPrint(szStr, level);

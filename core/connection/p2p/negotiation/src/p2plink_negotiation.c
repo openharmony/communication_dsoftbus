@@ -389,7 +389,7 @@ static int32_t FillRequestInfo(P2pRequestMsg *request, int32_t myRole, int32_t e
 static int32_t PostConnRequest(int64_t authId, const char *peerMac, int32_t expectRole, int32_t myRole)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "post connect requset msg, myRole = %d, myExpected role = %d, peerMac = %s.", myRole, expectRole, peerMac);
+        "post connect requset msg, myRole = %d, myExpected role = %d.", myRole, expectRole);
     P2pRequestMsg *request = NULL;
     if (myRole == ROLE_GO) {
         request = (P2pRequestMsg *)SoftBusCalloc(sizeof(P2pRequestMsg) + sizeof(GoInfo));
@@ -535,8 +535,8 @@ int32_t P2pLinkNegoGetFinalRole(int32_t peerRole, int32_t peerExpectRole, const 
 {
     int32_t myRole = P2pLinkGetRole();
     char *myGoMac = P2pLinkGetGoMac();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "current my role = %d, current my go mac = %s, peer role = %d, \
-        peer expected role = %d, peer go mac = %s.", myRole, myGoMac, peerRole, peerExpectRole, peerGoMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "current my role = %d, peer role = %d, \
+        peer expected role = %d.", myRole, peerRole, peerExpectRole);
 
     switch (myRole) {
         case ROLE_GO:
@@ -796,7 +796,7 @@ static void SetCurrentPeerMac(const cJSON *data)
         goto EXIT;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, set current peer mac = %s", peerMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, set current peer mac");
     return;
 EXIT:
     P2pLinkFsmTransactState(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_IDLE);
@@ -821,8 +821,7 @@ static void IdleStateProcess(P2pLoopMsg msgType, void *param)
 
 static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connected, peer ip = %s, peer mac = %s.",
-        conneResult->peerIp, conneResult->peerMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connected success");
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {
         if (g_p2pLinkNegoCb.onConnected != NULL) {
             g_p2pLinkNegoCb.onConnected(g_p2pLinkNegoFsm.linkInfo.requestId, conneResult);
@@ -933,7 +932,7 @@ static void WaitStateOnConnectEventRecv(const P2pLinkGroup *group)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid p2p link group item, null.");
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "gc item %d, gc mac = %s.", i, macItem->mac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "gc item %d.", i);
         if (!strcmp(g_p2pLinkNegoFsm.linkInfo.peerMac, macItem->mac)) {
             int32_t ret = FillConnResult(&(g_p2pLinkNegoFsm.result), NULL, g_p2pLinkNegoFsm.linkInfo.peerMac);
             if (ret == SOFTBUS_OK) {
@@ -1291,7 +1290,7 @@ static void P2pLinkNeoConnRequestProc(int64_t authId, const cJSON *data)
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, peer mac = %s, authId = %lld.", peerMac, authId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, authId = %lld.", authId);
     g_p2pLinkNegoFsm.linkInfo.authId = authId;
 
     if (P2pLinkIsDisconnectState() == true) {

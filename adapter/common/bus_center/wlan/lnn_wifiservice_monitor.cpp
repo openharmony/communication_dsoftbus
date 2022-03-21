@@ -61,10 +61,10 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
-            case int(OHOS::Wifi::ConnectionState::CONNECT_AP_CONNECTED):
+            case int(OHOS::Wifi::ConnState::CONNECTED):
                 state = SOFTBUS_WIFI_CONNECTED;
                 break;
-            case int(OHOS::Wifi::ConnectionState::DISCONNECT_DISCONNECTED):
+            case int(OHOS::Wifi::ConnState::DISCONNECTED):
                 state = SOFTBUS_WIFI_DISCONNECTED;
                 break;
             default: {

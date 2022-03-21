@@ -74,7 +74,7 @@ extern "C" {
 typedef struct FillpLmGlobalStruct {
     FILLP_ULLONG logModules; /* Modules for which logs needs to enabled */
     FILLP_UINT8 debugLevel;  /* dbg level : FillpDebugLevel */
-    FILLP_UINT8 funcTrace;   /* Open(1) and Close(0) function trc falg */
+    FILLP_UINT8 funcTrace;   /* Open(1) and Close(0) function trc flag */
     FILLP_UINT8 reserve;     /* for padding */
 #ifdef FILLP_64BIT_ALIGN
     FILLP_UINT8 padd;

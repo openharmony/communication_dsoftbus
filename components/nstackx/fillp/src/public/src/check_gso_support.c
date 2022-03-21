@@ -36,7 +36,7 @@ FILLP_INT g_gsoSupport = FILLP_FALSE;
 static FILLP_INT SendUdpSegment(struct sockaddr_in *sa)
 {
     FILLP_INT err;
-    FILLP_CHAR ctrl[CMSG_SPACE(sizeof(CFG_MSS))] = {0};
+    FILLP_CHAR ctrl[CMSG_SPACE(sizeof(FILLP_UINT16))] = {0};
     struct msghdr mh;
     struct cmsghdr *cm = FILLP_NULL_PTR;
     FILLP_CHAR buf[CFG_MSS];

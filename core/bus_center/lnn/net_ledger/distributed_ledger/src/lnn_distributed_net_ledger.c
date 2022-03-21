@@ -1146,7 +1146,7 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 int32_t LnnGetLaneCount(int32_t laneId)
 {
     if (laneId < 0 || laneId >= LNN_LINK_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:", laneId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId: %d", laneId);
         return SOFTBUS_ERR;
     }
     return g_distributedNetLedger.laneCount[laneId];

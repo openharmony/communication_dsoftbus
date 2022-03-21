@@ -21,3 +21,45 @@ br_adapter_inc = [
   "$dsoftbus_root_path/core/adapter/br/include",
   "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
 ]
+
+declare_args() {
+  dsoftbus_standard_get_devicename = true
+}
+
+if (defined(ohos_lite)) {
+  bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
+
+  bus_center_core_adapter_inc =
+      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+
+  bus_center_core_adapter_deps = []
+} else {
+  if (dsoftbus_standard_get_devicename == false) {
+    bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
+
+    bus_center_core_adapter_inc =
+        [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+
+    bus_center_core_adapter_deps = []
+  } else {
+    bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp" ]
+
+    bus_center_core_adapter_inc = [
+      "$dsoftbus_root_path/adapter/common/bus_center/include",
+      "$dsoftbus_root_path/core/adapter/bus_center/include",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
+      "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
+      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager/include",
+    ]
+
+    bus_center_core_adapter_deps = [
+      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability:native_dataability",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb:native_rdb",
+      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
+    ]
+  }
+}

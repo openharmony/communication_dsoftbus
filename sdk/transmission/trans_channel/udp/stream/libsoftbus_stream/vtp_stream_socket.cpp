@@ -641,7 +641,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     }
 
     char host[ADDR_MAX_SIZE];
-    localIpPort_.port = ntohs(localSockAddr.sin_port);
+    localIpPort_.port = static_cast<int32_t>(ntohs(localSockAddr.sin_port));
     localIpPort_.ip = inet_ntop(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
     local.port = localIpPort_.port;
 

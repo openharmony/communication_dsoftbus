@@ -21,7 +21,7 @@ extern "C" {
 
 FILLP_INT32 FillpApiSetDebugLogLevel(IN FILLP_UINT8 logLevel)
 {
-    if (logLevel > FILLP_DBG_LVL_ERROR) {
+    if (logLevel < FILLP_DBG_LVL_DEBUG || logLevel > FILLP_DBG_LVL_ERROR) {
         return ERR_PARAM;
     }
 

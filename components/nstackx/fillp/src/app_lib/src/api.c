@@ -526,7 +526,7 @@ FILLP_INT32 FtStartStopTrace(IN FILLP_UINT8 traceObjType, IN FILLP_INT traceObj,
                   traceObj    - user should pass the FtSocket identification.
                           to set the indication for that particular socket.
                           (0xFFFFFFFF - means for all the sockets)
-                  traceHandle  - traceHandle which will be transperantly
+                  traceHandle  - traceHandle which will be transparently
                           passed to user while giving indication. 0xFFFFFFFF is the invalid handle.
 
     Output      : None
@@ -736,7 +736,7 @@ void FillpDebugCmdSetPrintLevel(FILLP_CONST void  *content)
     Description : This function will be invoked by the Adapter to print debg/
                     information related socket level stack config.
 
-    Input       : resource : config resorce structure to print info
+    Input       : resource : config resource structure to print info
 
     Output      : None
 
@@ -949,7 +949,7 @@ void FillpDebugControl(
             FillpDebugCmdShowInitRes();
             break;
 
-        case FILLP_DBGCMD_SHOW_SOCKET_INFO: /* SHOW all the information about the FILLP socket/conection */
+        case FILLP_DBGCMD_SHOW_SOCKET_INFO: /* SHOW all the information about the FILLP socket/connection */
 
             FILLP_SHOWDATABUTT("Operation Not Supported ");
 
@@ -971,7 +971,7 @@ void FillpDebugControl(
                   Adapter's callback function for LM functionality.
                   If A function Pointer is passed as NULL, then it is omitted
                   to Copy. So User/Adapter can call this function to Register
-                  the function pointers seperately also.
+                  the function pointers separately also.
 
     Input       :
                   lmFuncCallback - Pointer to LM callback function struct

@@ -453,7 +453,7 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
 
 static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int64_t seq)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start exchange udp info: channelId=%d, authId=%lld",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start exchange udp info: channelId=%lld, authId=%lld",
         channel->info.myData.channelId, authId);
     cJSON *requestMsg = cJSON_CreateObject();
     if (requestMsg == NULL) {

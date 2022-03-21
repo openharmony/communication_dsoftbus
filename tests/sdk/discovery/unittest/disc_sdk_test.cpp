@@ -29,6 +29,7 @@ namespace OHOS {
 static int g_subscribeId = 0;
 static int g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
+static const char *g_pkgName_1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
 
 const int32_t ERRO_CAPDATA_LEN = 514;
@@ -197,9 +198,6 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level0)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
-
-    ret = PublishService(g_erroPkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
 }
 /**
  * @tc.name: PublishServiceTest002
@@ -217,6 +215,10 @@ HWTEST_F(Disc_Test, PublishServiceTest002, TestSize.Level0)
 
     g_pInfo1.publishId = GetPublishId();
     ret = PublishService(g_pkgName, &g_pInfo1, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+
+    g_pInfo1.publishId = GetPublishId();
+    ret = PublishService(g_pkgName_1, &g_pInfo1, &g_publishCb);
     EXPECT_TRUE(ret == 0);
 }
 /**
@@ -255,9 +257,6 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
     };
 
     ret = StartDiscovery(NULL, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret != 0);
-
-    ret = StartDiscovery(g_erroPkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret != 0);
 
     ret = StartDiscovery(g_pkgName, NULL, &g_subscribeCb);
@@ -308,6 +307,10 @@ HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level0)
 
     g_sInfo1.subscribeId = GetSubscribeId();
     ret = StartDiscovery(g_pkgName, &g_sInfo1, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+
+    g_sInfo1.subscribeId = GetSubscribeId();
+    ret = StartDiscovery(g_pkgName_1, &g_sInfo1, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
 }
 /**
