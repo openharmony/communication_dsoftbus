@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifdef FILLP_LINUX
-#include <errno.h>
-#endif /* FILLP_LINUX */
 #include "spunge_stack.h"
 #include "spunge_app.h"
 #include "res.h"
@@ -526,7 +523,7 @@ static void SpungeHandleMsgConnAccepted(void *value, struct SpungeInstance *inst
                                                       g_resource.flowControl.maxRecvRate);
 
     FILLP_LOGINF("fillp_sock_id:%d "
-        "Accepted connection estabished time = %lld, local seq num = %u, "
+        "Accepted connection established time = %lld, local seq num = %u, "
         "local pkt num = %u, peer seq num = %u peer pkt num = %u, maxRate= %u maxRecvRate= %u",
         sock->index, SYS_ARCH_GET_CUR_TIME_LONGLONG(), netconn->pcb->fpcb.send.seqNum, netconn->pcb->fpcb.send.pktNum,
         netconn->pcb->fpcb.recv.seqNum, netconn->pcb->fpcb.recv.pktNum, sock->resConf.flowControl.maxRate,

@@ -590,8 +590,9 @@ static void NotifyLnnRelationChange(const char *localUdid, const char *udid,
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     NodeBasicInfo *info = NULL;
-    int32_t infoNum, i, msgLen;
+    int32_t infoNum, i;
     const char *msg = NULL;
+    uint32_t msgLen;
 
     LnnConvertDlId(udid, CATEGORY_UDID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
     msg = PackOneLnnRelation(localUdid, udid, relation, len);

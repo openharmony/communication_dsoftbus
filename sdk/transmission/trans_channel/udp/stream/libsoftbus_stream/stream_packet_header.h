@@ -88,7 +88,7 @@ public:
 
     void SetTlvVersion(uint16_t version)
     {
-        firstLevelHeader.type |= ((version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
+        firstLevelHeader.type |= (static_cast<uint16_t>(version << TopOffset::VERSION_OFFSET) & TopMask::VERSION_MASK);
     }
 
     uint16_t GetVersion() const
@@ -193,7 +193,7 @@ private:
         firstLevelHeader.length++;
 
         TypeLength extTlv {};
-        extTlv.type = 0; // 如果有ext，默认存放在二级TLV首位
+        extTlv.type = 0;
         extTlv.length = static_cast<uint16_t>(extLen_);
 
         auto pos = reinterpret_cast<uint16_t *>(start);
@@ -264,7 +264,7 @@ public:
         common |= commonHeader_.streamType << STREAM_TYPE_OFFSET;
         common |= commonHeader_.marker << MAKER_OFFSET;
         common |= commonHeader_.flag << FLAG_OFFSET;
-        common |= commonHeader_.streamId << SEQ_NUM_OFFSET;
+        common |= static_cast<uint16_t>(commonHeader_.streamId << SEQ_NUM_OFFSET);
 
         *start++ = htonl(common);
         *start++ = htonl(commonHeader_.timestamp);

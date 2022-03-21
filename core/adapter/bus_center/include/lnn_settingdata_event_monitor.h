@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-int ClientStubInit(void)
-{
-    return 0;
-}
+#ifndef LNN_SETTINGDATA_EVENT_MONITOR_H
+#define LNN_SETTINGDATA_EVENT_MONITOR_H
 
-int ClientRegisterService(const char *pkgName)
-{
-    (void)pkgName;
-    return 0;
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef void (*LnnDeviceNameHandler)(void);
+int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len);
+int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
+
+#ifdef __cplusplus
 }
+#endif
+#endif /* LNN_SETTINGDATA_EVENT_MONITOR_H */

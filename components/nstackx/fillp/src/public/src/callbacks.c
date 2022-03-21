@@ -190,7 +190,7 @@ static FILLP_INT FillpSysAdptArchAtomicSet(SysArchAtomic *target, FILLP_INT newV
 
 static FILLP_INT FillpSysAdptArchAtomicInc(SysArchAtomic *v, long value)
 {
-    return InterlockedExchangeAdd((LONG volatile *)(uintptr_t)v, value);
+    return InterlockedExchangeAdd((LONG volatile *)(uintptr_t)v, value) + value;
 }
 
 static FILLP_BOOL FillpSysAdptArchAtomicIncAndTest(SysArchAtomic *v)
@@ -200,7 +200,7 @@ static FILLP_BOOL FillpSysAdptArchAtomicIncAndTest(SysArchAtomic *v)
 
 static FILLP_INT FillpSysAdptArchAtomicDec(SysArchAtomic *v, long value)
 {
-    return InterlockedExchangeAdd((LONG volatile *)(uintptr_t)v, (-value));
+    return InterlockedExchangeAdd((LONG volatile *)(uintptr_t)v, (-value)) - value;
 }
 
 static FILLP_BOOL FillpSysAdptArchAtomicDecAndTest(SysArchAtomic *v)
@@ -224,7 +224,7 @@ static FILLP_INT FillpSysAdptArchAtomicSet(SysArchAtomic *target, IN FILLP_INT v
 /*******************************************************************************
     Adption     : FillpMemCalloc
 
-    Description : Adp Adption if user has not registered the callbacl for malloc
+    Description : Adp Adption if user has not registered the callback for malloc
 
     Input         :
                     nitems                   : Partition number
@@ -1200,7 +1200,7 @@ FILLP_INT FillpFuncSendTo(IN FILLP_INT sockFd, IN const void *buf, IN FILLP_SIZE
 
 /*******************************************************************************
     Function     : FillpFuncRecvFrom
-    Description  : Adp function if user has not registered the recieve from callback function
+    Description  : Adp function if user has not registered the receive from callback function
  *******************************************************************************/
 FILLP_INT FillpFuncRecvFrom(IN FILLP_INT sockFd, OUT void *buf, IN FILLP_SIZE_T len, IN FILLP_INT flags,
     OUT void *from, IO FILLP_SIZE_T *fromLen)

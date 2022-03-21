@@ -27,8 +27,8 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-static const int CONN_HEAD_SIZE = 24;
-static const int SHIFT_BITS = 16;
+static const uint32_t CONN_HEAD_SIZE = 24;
+static const uint32_t SHIFT_BITS = 16;
 
 static ConnectCallback *g_mangerCb = 0;
 static ConnectionInfo g_connInfo = {0};
