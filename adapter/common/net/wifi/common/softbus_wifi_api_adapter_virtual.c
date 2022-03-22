@@ -35,3 +35,24 @@ int32_t SoftBusDisconnectDevice(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusStartWifiScan(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

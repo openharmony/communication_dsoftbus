@@ -145,3 +145,124 @@ int32_t SoftBusDisconnectDevice(void)
 {
     return Disconnect();
 }
+
+static ISoftBusScanResult *g_scanResultCb[MAX_CALLBACK_NUM] = {NULL};
+static bool g_registerFlag = true;
+
+int32_t SoftBusStartWifiScan(void)
+{
+    int32_t ret;
+
+    ret = Scan();
+    if (ret != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus start wifi scan failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void SoftBusWifiScanStateChanged(int state, int size)
+{
+    for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
+        if (g_scanResultCb[i] != NULL) {
+            g_scanResultCb[i]->onSoftBusWifiScanResult(state, size);
+        }
+    }
+}
+
+static WifiEvent g_event = {
+    .OnWifiConnectionChanged = NULL,
+    .OnWifiScanStateChanged = SoftBusWifiScanStateChanged,
+    .OnHotspotStateChanged = NULL,
+    .OnHotspotStaJoin = NULL,
+    .OnHotspotStaLeave = NULL,
+};
+
+static int32_t FindFreeCallbackIndex(void)
+{
+    int i;
+    for (i = 0; i < MAX_CALLBACK_NUM; i++) {
+        if (g_scanResultCb[i] == NULL) {
+            break;
+        }
+    }
+    return i;
+}
+
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    int32_t ret;
+
+    int index = FindFreeCallbackIndex();
+    if (index == MAX_CALLBACK_NUM) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register callback index invalid.");
+        return SOFTBUS_ERR;
+    }
+    g_scanResultCb[index] = cb;
+
+    if (g_registerFlag) {
+        ret = RegisterWifiEvent(&g_event);
+        if (ret == WIFI_SUCCESS) {
+            g_registerFlag = false;
+        } else {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus register wifi event failed.");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+{
+    int32_t ret;
+
+    if (size == NULL || result == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para size or result is NULL.");
+        return SOFTBUS_ERR;
+    }
+    *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * WIFI_SCAN_HOTSPOT_LIMIT);
+    if (*result == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi scan information failed.");
+        return SOFTBUS_ERR;
+    }
+    *size = WIFI_SCAN_HOTSPOT_LIMIT;
+    ret = GetScanInfoList((WifiScanInfo *)*result, size);
+    if (ret != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus get wifi scan list failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool IsScanResultCbEmpty(void)
+{
+    for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
+        if (g_scanResultCb[i] != NULL) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    int32_t ret;
+
+    for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
+        if (g_scanResultCb[i] == cb) {
+            g_scanResultCb[i] = NULL;
+        }
+    }
+ 
+    if (IsScanResultCbEmpty()) {
+        ret = UnRegisterWifiEvent(&g_event);
+        if (ret == WIFI_SUCCESS) {
+            g_registerFlag = true;
+        } else {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus unRegister wifi event failed.");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
