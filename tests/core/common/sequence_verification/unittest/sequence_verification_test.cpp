@@ -522,4 +522,4 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
         }
     }
 }
-}
+} // namespace OHOS

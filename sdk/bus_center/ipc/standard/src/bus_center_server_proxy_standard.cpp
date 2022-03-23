@@ -690,4 +690,4 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
     *infoNum = retInfoNum;
     return SOFTBUS_OK;
 }
-}
+} // namespace OHOS

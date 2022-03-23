@@ -948,4 +948,4 @@ HWTEST_F(LedgerLaneHubTest, LANE_HUB_LOCALINFO_LANE_Test_001, TestSize.Level1)
     LnnSetLaneCount(LNN_LINK_TYPE_WLAN_5G, -LANES_COUNT_MAX);
     EXPECT_TRUE(LnnGetLaneCount(LNN_LINK_TYPE_WLAN_5G) == 0);
 }
-}
+} // namespace OHOS
