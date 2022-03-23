@@ -268,7 +268,7 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 
 static int32_t OpenAuthConn(const char *uuid, uint32_t reqId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: udid=%s, requestId=%u", uuid, reqId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: requestId=%u", reqId);
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
