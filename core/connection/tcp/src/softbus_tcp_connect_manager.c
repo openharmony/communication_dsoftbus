@@ -667,7 +667,6 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
         g_tcpConnInfoList = CreateSoftBusList();
         if (g_tcpConnInfoList == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Create tcpConnInfoList failed.");
-            SoftBusFree(interface);
             return NULL;
         }
         g_tcpConnInfoList->cnt = 0;
