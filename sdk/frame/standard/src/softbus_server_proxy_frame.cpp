@@ -141,10 +141,6 @@ int32_t ClientStubInit(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerProxyInit failed\n");
         return SOFTBUS_ERR;
     }
-    if (InnerRegisterService() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed\n");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
