@@ -124,4 +124,4 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
     ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
     TEST_ASSERT_TRUE(ret != 0);
 }
-}
+} // namespace OHOS

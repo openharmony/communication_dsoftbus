@@ -140,6 +140,8 @@ static bool GetNumInfo(const char *netWorkId, int32_t *local, int32_t *remote)
 static int32_t GetLaneOf5GWlan(const char* netWorkId, int32_t pid, LnnLaneProperty prop)
 {
     int32_t local, remote;
+
+    (void)pid;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNumInfo error.");
         return SOFTBUS_ERR;
@@ -158,6 +160,8 @@ static int32_t GetLaneOf5GWlan(const char* netWorkId, int32_t pid, LnnLaneProper
 static int32_t GetLaneOf2P4GWlan(const char* netWorkId, int32_t pid, LnnLaneProperty prop)
 {
     int32_t local, remote;
+
+    (void)pid;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLaneOf2P4GWlan error.");
         return SOFTBUS_ERR;
@@ -176,6 +180,8 @@ static int32_t GetLaneOf2P4GWlan(const char* netWorkId, int32_t pid, LnnLaneProp
 static int32_t GetLaneOfBR(const char *netWorkId, int32_t pid, LnnLaneProperty prop)
 {
     int32_t local, remote;
+
+    (void)pid;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLaneOfBR error.");
         return SOFTBUS_ERR;
@@ -195,6 +201,8 @@ static int32_t GetLaneOfP2p(const char *netWorkId, int32_t pid, LnnLaneProperty 
     int32_t laneId;
     int32_t local, remote;
     LnnLaneP2pInfo p2pInfo = {0};
+
+    (void)prop;
     if (!GetNumInfo(netWorkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNumInfo error.");
         return SOFTBUS_ERR;

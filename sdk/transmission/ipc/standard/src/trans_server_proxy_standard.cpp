@@ -460,4 +460,4 @@ int32_t TransServerProxy::StopTimeSync(const char *pkgName, const char *targetNe
     (void)targetNetworkId;
     return SOFTBUS_OK;
 }
-}
+} // namespace OHOS
