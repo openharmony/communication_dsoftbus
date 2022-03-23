@@ -1006,6 +1006,7 @@ static void FillpSaveConfirmActToPcb(struct FillpPktConnConfirmAck *confirmAck, 
 {
     struct FillpPktHead *tmpHeader = (struct FillpPktHead *)(void *)confirmAck->head;
     pcb->peerUniqueId = tmpHeader->seqNum;
+    pcb->recv.prePackPktNum = tmpHeader->pktNum;
     pcb->recv.pktNum = tmpHeader->pktNum;
     pcb->recv.seqNum = tmpHeader->seqNum;
     pcb->recv.pktStartNum = tmpHeader->pktNum;
