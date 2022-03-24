@@ -528,7 +528,6 @@ void ClearSendFileList(FileManager *fileManager, FileListTask *fileList)
     PthreadMutexDestroy(&fileList->newReadOutSet.lock);
     (void)memset_s(fileList, sizeof(FileListTask), 0, sizeof(FileListTask));
     free(fileList);
-    fileList = NULL;
 }
 
 uint8_t PushRetranBlockFrame(FileManager *fileManager, const FileListTask *fileList, const FileDataFrame *fileDataFrame)
@@ -662,7 +661,7 @@ static int32_t AddTarFileInfo(const char *tarFileName, FileListTask *fmFileList,
     fmFileList->tarFileInfo.maxSequenceSend = -1;
     fmFileList->tarFileInfo.tarData = NULL;
     fmFileList->tarFileInfo.writeOffset = 0;
-    LOGI(TAG, "tarLen: %llu, blockNum: %llu, endLen: %u", tarFilesTotalLen,
+    LOGI(TAG, "tarLen: %llu, blockNum: %u, endLen: %llu", tarFilesTotalLen,
          fmFileList->tarFileInfo.totalBlockNum, tarFilesTotalLen % standardBlockSize);
     fmFileList->tarFileInfo.fileName = realpath(tarFileName, NULL);
     if ((fmFileList->tarFileInfo.fileName == NULL) ||
@@ -1265,11 +1264,11 @@ int32_t FileManagerGetLastSequence(FileManager *fileManager, uint16_t transId, u
     if (isErrorOccured) {
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
-        LOGE(TAG, "failed to get target fileList %u", transId);
+        LOGE(TAG, "failed to get target fileList %hu", transId);
         return NSTACKX_EFAILED;
     }
     if (fileList == NULL || fileId > fileList->fileNum) {
-        LOGE(TAG, "failed to get target fileList %u", transId);
+        LOGE(TAG, "failed to get target fileList %hu", transId);
         return NSTACKX_EFAILED;
     }
 
