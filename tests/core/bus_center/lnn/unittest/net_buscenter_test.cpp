@@ -234,5 +234,4 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_003, TestSize.Le
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strncmp(ipAddr, "127.0.0.1", IP_LEN) == 0);
 }
-}
-
+} // namespace OHOS

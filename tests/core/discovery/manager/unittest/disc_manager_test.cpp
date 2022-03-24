@@ -1272,4 +1272,4 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
 
     DiscMgrDeinit();
 }
-}
+} // namespace OHOS

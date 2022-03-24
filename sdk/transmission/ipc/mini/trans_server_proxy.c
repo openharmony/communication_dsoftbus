@@ -15,6 +15,7 @@
 
 #include "trans_server_proxy.h"
 
+#include "lnn_connection_addr_utils.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "trans_channel_manager.h"
