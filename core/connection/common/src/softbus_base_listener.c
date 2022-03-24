@@ -627,23 +627,16 @@ int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener 
         listener->onConnectEvent == NULL || listener->onDataEvent == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (pthread_mutex_lock(&g_listenerList[module].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
     if (g_listenerList[module].listener == NULL) {
         g_listenerList[module].listener = (SoftbusBaseListener *)SoftBusCalloc(sizeof(SoftbusBaseListener));
         if (g_listenerList[module].listener == NULL) {
-            pthread_mutex_unlock(&g_listenerList[module].lock);
             return SOFTBUS_MALLOC_ERR;
         }
     }
     if (memcpy_s(g_listenerList[module].listener, sizeof(SoftbusBaseListener),
         listener, sizeof(SoftbusBaseListener)) != EOK) {
-        pthread_mutex_unlock(&g_listenerList[module].lock);
         return SOFTBUS_MEM_ERR;
     }
-    pthread_mutex_unlock(&g_listenerList[module].lock);
     return SOFTBUS_OK;
 }
 
