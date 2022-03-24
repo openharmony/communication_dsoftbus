@@ -1272,8 +1272,6 @@ static uint16_t GetClientSendThreadNum(uint16_t connType)
 {
     if (connType == CONNECT_TYPE_WLAN) {
         return NSTACKX_WLAN_CLIENT_SEND_THREAD_NUM;
-    } else if (connType == CONNECT_TYPE_P2P) {
-        return 1;
     } else {
         return 1;
     }
