@@ -246,7 +246,7 @@ int32_t P2pLinkBroadCastInit(void)
     cb.connResult = ConnResult;
     cb.groupStateChanged = GroupStateChanged;
     cb.wifiCfgChanged = WifiCfgChanged;
-
+    cb.enterDiscState = P2pLinkDevEnterDiscState;
     P2pLinkAdapterInit(&cb);
 
     return SOFTBUS_OK;
