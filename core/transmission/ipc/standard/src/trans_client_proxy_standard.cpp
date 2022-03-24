@@ -42,9 +42,11 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteFileDescriptor(channel->fd)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
-        return SOFTBUS_ERR;
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        if (!data.WriteFileDescriptor(channel->fd)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
+            return SOFTBUS_ERR;
+        }
     }
     if (!data.WriteBool(channel->isServer)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
