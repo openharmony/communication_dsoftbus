@@ -119,8 +119,8 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
     }
     return SOFTBUS_OK;
 }
-}
-}
+} // namespace EventFwkc
+} // namespace OHOS
 
 static void LnnSubscribeWifiService(void *para)
 {

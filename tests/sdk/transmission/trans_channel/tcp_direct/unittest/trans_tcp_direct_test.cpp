@@ -298,4 +298,4 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     ret = SendMessage(sessionId, data, maxLen + 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
-}
+} // namespace OHOS
