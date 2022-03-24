@@ -53,6 +53,7 @@ typedef struct TcpConnInfoNode {
 
 static SoftBusList *g_tcpConnInfoList = NULL;
 static const ConnectCallback *g_tcpConnCallback;
+static ConnectFuncInterface g_tcpInterface;
 
 static int32_t AddTcpConnInfo(TcpConnInfoNode *item);
 static void DelTcpConnInfo(uint32_t connectionId);
@@ -637,6 +638,18 @@ static bool TcpCheckActiveConnection(const ConnectOption *info)
     return false;
 }
 
+static void InitTcpInterface(void)
+{
+    g_tcpInterface.ConnectDevice = TcpConnectDevice;
+    g_tcpInterface.DisconnectDevice = TcpDisconnectDevice;
+    g_tcpInterface.DisconnectDeviceNow = TcpDisconnectDeviceNow;
+    g_tcpInterface.PostBytes = TcpPostBytes;
+    g_tcpInterface.GetConnectionInfo = TcpGetConnectionInfo;
+    g_tcpInterface.StartLocalListening = TcpStartListening;
+    g_tcpInterface.StopLocalListening = TcpStopListening;
+    g_tcpInterface.CheckActiveConnection = TcpCheckActiveConnection;
+}
+
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     if (callback == NULL) {
@@ -647,29 +660,16 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Can not InitProperty");
         return NULL;
     }
-    ConnectFuncInterface *interface = SoftBusCalloc(sizeof(ConnectFuncInterface));
-    if (interface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitTcp failed.");
-        return NULL;
-    }
-    interface->ConnectDevice = TcpConnectDevice;
-    interface->DisconnectDevice = TcpDisconnectDevice;
-    interface->DisconnectDeviceNow = TcpDisconnectDeviceNow;
-    interface->PostBytes = TcpPostBytes;
-    interface->GetConnectionInfo = TcpGetConnectionInfo;
-    interface->StartLocalListening = TcpStartListening;
-    interface->StopLocalListening = TcpStopListening;
-    interface->CheckActiveConnection = TcpCheckActiveConnection;
+    InitTcpInterface();
     g_tcpConnCallback = callback;
 
     if (g_tcpConnInfoList == NULL) {
         g_tcpConnInfoList = CreateSoftBusList();
         if (g_tcpConnInfoList == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Create tcpConnInfoList failed.");
-            SoftBusFree(interface);
             return NULL;
         }
         g_tcpConnInfoList->cnt = 0;
     }
-    return interface;
+    return &g_tcpInterface;
 }

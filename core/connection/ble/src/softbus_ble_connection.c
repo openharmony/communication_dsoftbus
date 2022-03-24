@@ -358,16 +358,19 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     }
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        SoftBusFree((void *)data);
         return SOFTBUS_ERR;
     }
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes GetBleConnInfo failed");
+        SoftBusFree((void *)data);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
     SendQueueNode *node = SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
+        SoftBusFree((void *)data);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -382,6 +385,7 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
+        SoftBusFree((void *)data);
         SoftBusFree(node);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return ret;
@@ -495,7 +499,6 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendRefMessage BlePostBytes");
     if (BlePostBytes(connectionId, buf, dataLen, 0, 0) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage BlePostBytes failed");
-        SoftBusFree(buf);
     }
     return;
 }
