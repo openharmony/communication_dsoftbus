@@ -190,18 +190,8 @@ int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac)
     return mItem->refCnt;
 }
 
-
-static void P2pLinkDevDisconnectTimeOut(P2pLoopMsg msgType, void *arg)
-{
-    (void)msgType;
-    (void)arg;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timeout disconnecting state");
-    P2pLinkSetDisconnectState(false);
-}
-
 void P2pLinkDelMyP2pRef(void)
 {
-#define DISCONNING_TIMER_3S 3000
     if (g_myP2pRef == 0) {
         return;
     }
@@ -211,9 +201,7 @@ void P2pLinkDelMyP2pRef(void)
     }
 
     if (g_myP2pRef == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "enter disconnecting state");
-        P2pLinkSetDisconnectState(true);
-        P2pLoopProcDelay(P2pLinkDevDisconnectTimeOut, NULL, DISCONNING_TIMER_3S, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
+        P2pLinkDevEnterDiscState();
     }
 }
 
@@ -293,8 +281,6 @@ void P2pLinkRefClean(void)
         P2pLinkDelPidRef(item->pid);
     }
     g_myP2pRef = 0;
-    P2pLoopProcDelayDel(NULL, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
-    P2pLinkSetDisconnectState(false);
 }
 
 void P2pLinkMyP2pRefClean(void)
