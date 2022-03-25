@@ -319,7 +319,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     if (AddRecvMessage(key, foundInfo->capabilityBitmap, true) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ReplyPassiveNonBroadcast");
         ReplyPassiveNonBroadcast();
-    };
+    }
 }
 
 static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
