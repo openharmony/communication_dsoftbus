@@ -33,8 +33,6 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
     char p2pIp[P2P_IP_LEN] = {0};
     int32_t ret;
     int32_t port;
-    int32_t myRef;
-    int32_t i;
     AuthListennerInfo listenInfo = {0};
 
     P2pLinkUpdateDeviceByMagicGroups(group);
@@ -54,11 +52,8 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
         }
     }
     if (group->peerMacNum == 0) {
-        myRef = P2pLinkGetMyP2pRef();
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ref num %d ", myRef);
-        for (i = 0; i < myRef; i++) {
-            P2pLinkSharelinkRemoveGroup();
-        }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "client is null, clean myref");
+        P2pLinkMyP2pRefClean();
     }
 }
 
