@@ -64,6 +64,7 @@ typedef struct {
     SoftbusBaseListener *listener;
     SoftbusBaseListenerInfo *info;
     SoftBusMutex lock;
+    bool lockInit;
 } SoftbusListenerNode;
 
 typedef struct {
@@ -71,7 +72,7 @@ typedef struct {
     bool lockInit;
 }SoftBusSetLock;
 
-static SoftbusListenerNode g_listenerList[UNUSE_BUTT];
+static SoftbusListenerNode g_listenerList[UNUSE_BUTT] = {0};
 static ThreadPool *g_threadPool = NULL;
 static SoftBusFdSet g_readSet;
 static SoftBusFdSet g_writeSet;
@@ -265,12 +266,22 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
     if (CheckModule(module) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    SoftbusBaseListener *listener = g_listenerList[module].listener;
-    if (listenerInfo == NULL || listener == NULL) {
+    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "event lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (g_listenerList[module].info == NULL || g_listenerList[module].listener == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "info or listener is null");
+        SoftBusMutexUnlock(&g_listenerList[module].lock);
         return SOFTBUS_ERR;
     }
-    if (fd == listenerInfo->listenFd) {
+    int32_t listenFd = g_listenerList[module].info->listenFd;
+    SoftbusBaseListener listener = {0};
+    listener.onConnectEvent = g_listenerList[module].listener->onConnectEvent;
+    listener.onDataEvent = g_listenerList[module].listener->onDataEvent;
+    SoftBusMutexUnlock(&g_listenerList[module].lock);
+
+    if (fd == listenFd) {
         SoftBusSockAddrIn addr;
         if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
@@ -278,8 +289,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         }
         uint32_t addrLen = sizeof(addr);
         int32_t cfd;
-        int ret;
-        ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, &cfd));
+        int32_t ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, &cfd));
         if (ret < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
                 "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
@@ -287,15 +297,15 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         }
         char ip[IP_LEN] = {0};
         SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, ip, sizeof(ip));
-        if (listener->onConnectEvent != NULL) {
-            listener->onConnectEvent(events, cfd, ip);
+        if (listener.onConnectEvent != NULL) {
+            listener.onConnectEvent(events, cfd, ip);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
             SoftBusSocketClose(cfd);
         }
     } else {
-        if (listener->onDataEvent != NULL) {
-            listener->onDataEvent(events, fd);
+        if (listener.onDataEvent != NULL) {
+            listener.onDataEvent(events, fd);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onDataEvent callback");
         }
@@ -348,12 +358,13 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
-        SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
-        if (listenerInfo == NULL || listenerInfo->status != LISTENER_RUNNING) {
-            continue;
-        }
         if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            continue;
+        }
+        SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
+        if (listenerInfo == NULL || listenerInfo->status != LISTENER_RUNNING) {
+            SoftBusMutexUnlock(&g_listenerList[i].lock);
             continue;
         }
         int32_t listenFd = listenerInfo->listenFd;
@@ -607,9 +618,12 @@ int32_t StartBaseClient(ListenerModule module)
             return SOFTBUS_MALLOC_ERR;
         }
 
-        SoftBusMutexAttr mutexAttr;
-        mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-        SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
+        if (g_listenerList[module].lockInit == false) {
+            SoftBusMutexAttr mutexAttr;
+            mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+            SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
+            g_listenerList[module].lockInit = true;
+        }
     }
     if (g_listenerList[module].info->status != LISTENER_IDLE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
@@ -636,7 +650,7 @@ int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, M
         }
         g_fdSetLock.lockInit = true;
     }
-    
+
     int32_t ret;
 
     g_listenerList[module].module = module;
@@ -650,9 +664,12 @@ int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, M
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc listenerInfo err");
             return SOFTBUS_MALLOC_ERR;
         }
-        SoftBusMutexAttr mutexAttr;
-        mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-        SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
+        if (g_listenerList[module].lockInit == false) {
+            SoftBusMutexAttr mutexAttr;
+            mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+            SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
+            g_listenerList[module].lockInit = true;
+        }
     }
     if (g_listenerList[module].info->status != LISTENER_IDLE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
