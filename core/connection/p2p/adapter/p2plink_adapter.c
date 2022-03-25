@@ -218,6 +218,7 @@ int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
     g_p2pLinkCallBack.groupStateChanged = cb->groupStateChanged;
     g_p2pLinkCallBack.connResult = cb->connResult;
     g_p2pLinkCallBack.wifiCfgChanged = cb->wifiCfgChanged;
+    g_p2pLinkCallBack.enterDiscState = cb->enterDiscState;
     ret = RegisterP2pStateChangedCallback(InnerP2pStateChangedProc);
     if (ret != WIFI_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reg p2p state fail %d.", ret);
@@ -785,6 +786,9 @@ void P2pLinkRemoveGroup(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "remove group faul [%d].", ret);
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "remove group ok");
+    if (g_p2pLinkCallBack.enterDiscState != 0) {
+        g_p2pLinkCallBack.enterDiscState();
+    }
 }
 
 void P2pLinkRemoveGcGroup(void)
@@ -812,4 +816,7 @@ void P2pLinkRemoveGcGroup(void)
     }
     SoftBusFree(groupInfo);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkRemoveGcGroup ok.");
+    if (g_p2pLinkCallBack.enterDiscState != 0) {
+        g_p2pLinkCallBack.enterDiscState();
+    }
 }
