@@ -28,6 +28,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
+static pthread_mutex_t g_adapterStaticLock = PTHREAD_MUTEX_INITIALIZER;
 /* mutex */
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 {
@@ -42,15 +43,25 @@ int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
+    if (pthread_mutex_lock(&g_adapterStaticLock) != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex init : g_adapterStaticLock lock failed");
+        return SOFTBUS_ERR;
+    }
     if (mutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_INVALID_PARAM;
     }
-
+    if ((void *)*mutex != NULL) {
+        HILOG_WARN(SOFTBUS_HILOG_ID, "mutex is already init");
+        (void)pthread_mutex_unlock(&g_adapterStaticLock);
+        return SOFTBUS_OK;
+    }
     pthread_mutex_t *tempMutex;
     tempMutex = (pthread_mutex_t *)SoftBusCalloc(sizeof(pthread_mutex_t));
     if (tempMutex == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "tempMutex is null");
+        (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -74,10 +85,12 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexInit failed, ret[%{public}d]", ret);
         SoftBusFree(tempMutex);
         tempMutex = NULL;
+        (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_ERR;
     }
 
     *mutex = (SoftBusMutex)tempMutex;
+    (void)pthread_mutex_unlock(&g_adapterStaticLock);
     return SOFTBUS_OK;
 }
 
