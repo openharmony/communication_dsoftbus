@@ -113,7 +113,6 @@ void SoftbusTcpManagerTest::SetUp(void)
 
 void SoftbusTcpManagerTest::TearDown(void)
 {
-    free(g_interface);
     g_interface = nullptr;
 }
 
