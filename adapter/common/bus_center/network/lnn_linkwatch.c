@@ -46,7 +46,7 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddAttr ERROR: message exceeded bound of %d\n", maxLen);
         return SOFTBUS_ERR;
     }
-    rta = ((struct rtattr *) (((void *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
+    rta = ((struct rtattr *) (((uint8_t *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
     rta->rta_type = (uint16_t)type;
     rta->rta_len = (uint16_t)len;
     if (memcpy_s(RTA_DATA(rta), rta->rta_len, data, attrLen) != EOK) {
@@ -139,7 +139,7 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
     return SOFTBUS_ERR;
 }
 
-bool LnnIsLinkReady(const char *iface, uint32_t len)
+bool LnnIsLinkReady(const char *iface)
 {
     struct ifinfomsg *info = NULL;
     struct {
@@ -165,7 +165,7 @@ bool LnnIsLinkReady(const char *iface, uint32_t len)
     }
     req.hdr.nlmsg_seq = ++seq;
     (void)memset_s(&answer, sizeof(answer), 0, sizeof(answer));
-    if (AddAttr(&req.hdr, sizeof(req), IFLA_IFNAME, (const uint8_t *)iface, len + 1) != SOFTBUS_OK) {
+    if (AddAttr(&req.hdr, sizeof(req), IFLA_IFNAME, (const uint8_t *)iface, strlen(iface) + 1) != SOFTBUS_OK) {
         return false;
     }
     if (RtNetlinkTalk(&req.hdr, &answer.hdr, sizeof(answer)) != SOFTBUS_OK) {

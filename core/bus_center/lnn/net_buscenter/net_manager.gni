@@ -17,6 +17,7 @@ if (dsoftbus_standard_feature_lnn_net) {
   bus_center_net_mgr_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_network_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_ip_network_impl.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_physical_subnet_manager.c",
   ]
 } else {
   bus_center_net_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_network_manager_virtual.c" ]

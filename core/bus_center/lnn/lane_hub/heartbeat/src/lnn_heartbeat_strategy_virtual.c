@@ -50,13 +50,6 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnNotifyMasterNodeChanged(const char *masterUdid, int32_t weight)
-{
-    (void)masterUdid;
-    (void)weight;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t LnnStartHeartbeatDelay(void)
 {
     return SOFTBUS_OK;

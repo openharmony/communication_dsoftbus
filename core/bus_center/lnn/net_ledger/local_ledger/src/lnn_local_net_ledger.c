@@ -68,7 +68,7 @@ static int32_t LlGetDeviceUdid(void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     if (strlen(udid) <= 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid invaild!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid invalid!\n");
         return SOFTBUS_ERR;
     }
     if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
@@ -586,6 +586,20 @@ static int32_t UpdateP2pRole(const void *p2pRole)
     return LnnSetP2pRole(&g_localNetLedger.localInfo, *(int32_t *)p2pRole);
 }
 
+static int32_t LlUpdateSupportedProtocols(const void *transProtos)
+{
+    return LnnSetSupportedProtocols(&g_localNetLedger.localInfo, *((uint64_t*)transProtos));
+}
+
+static int32_t LlGetSupportedProtocols(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)buf) = LnnGetSupportedProtocols(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -606,6 +620,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
+    {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols}
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -638,7 +653,7 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
 {
     uint32_t i;
     int32_t ret;
@@ -657,7 +672,7 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].getInfo != NULL) {
-                ret = g_localKeyTable[i].getInfo((void *)info, NUM_BUF_SIZE);
+                ret = g_localKeyTable[i].getInfo(info, infoSize);
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
@@ -706,7 +721,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+static int32_t LnnSetLocalInfo(InfoKey key, void* info)
 {
     uint32_t i;
     int32_t ret;
@@ -721,7 +736,7 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].setInfo != NULL) {
-                ret = g_localKeyTable[i].setInfo((void *)&info);
+                ret = g_localKeyTable[i].setInfo(info);
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
@@ -733,6 +748,26 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key not exist.");
     return SOFTBUS_ERR;
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
+}
+
+int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
+}
+
+int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
+}
+
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
 }
 
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
@@ -824,4 +859,18 @@ void LnnDeinitLocalLedger(void)
         SoftBusMutexDestroy(&g_localNetLedger.lock);
     }
     g_localNetLedger.status = LL_INIT_UNKNOWN;
+}
+
+bool LnnIsMasterNode(void)
+{
+    bool ret = false;
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return ret;
+    }
+    const char* masterUdid = g_localNetLedger.localInfo.masterUdid;
+    const char* deviceUdid = g_localNetLedger.localInfo.deviceInfo.deviceUdid;
+    ret = strncmp(masterUdid, deviceUdid, strlen(deviceUdid)) == 0;
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return ret;
 }

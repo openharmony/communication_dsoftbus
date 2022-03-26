@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
@@ -56,14 +57,15 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity) ||
         !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
         !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
-        !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info))) {
+        !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
+        !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)info->supportedProtocols)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static void UnPackCommon(const cJSON* json, NodeInfo *info, SoftBusVersion version)
+static void UnPackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion version)
 {
     char deviceType[DEVICE_TYPE_BUF_LEN] = {0};
     uint16_t typeId;
@@ -106,14 +108,13 @@ static char *PackBt(const NodeInfo *info, SoftBusVersion version)
         return NULL;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "PackBt enter!");
-    cJSON* json = cJSON_CreateObject();
+    cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create cjson object error!");
         return NULL;
     }
 
-    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT) ||
-        !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info))) {
+    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT) || !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddToJsonObject error!");
         cJSON_Delete(json);
         return NULL;
@@ -140,11 +141,14 @@ static int32_t UnPackBt(const cJSON *json, NodeInfo *info, SoftBusVersion versio
         return SOFTBUS_INVALID_PARAM;
     }
     (void)GetJsonObjectStringItem(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN);
+    if (!GetJsonObjectNumber64Item(json, TRANSPORT_PROTOCOL, (int64_t *)&info->supportedProtocols)) {
+        info->supportedProtocols = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE;
+    }
     UnPackCommon(json, info, version);
     return SOFTBUS_OK;
 }
 
-static int32_t UnPackWifi(const cJSON* json, NodeInfo *info, SoftBusVersion version)
+static int32_t UnPackWifi(const cJSON *json, NodeInfo *info, SoftBusVersion version)
 {
     if (info == NULL || json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -153,6 +157,9 @@ static int32_t UnPackWifi(const cJSON* json, NodeInfo *info, SoftBusVersion vers
     (void)GetJsonObjectNumberItem(json, AUTH_PORT, &info->connectInfo.authPort);
     (void)GetJsonObjectNumberItem(json, SESSION_PORT, &info->connectInfo.sessionPort);
     (void)GetJsonObjectNumberItem(json, PROXY_PORT, &info->connectInfo.proxyPort);
+    if (!GetJsonObjectNumber64Item(json, TRANSPORT_PROTOCOL, (int64_t *)&info->supportedProtocols)) {
+        info->supportedProtocols = LNN_PROTOCOL_IP;
+    }
     UnPackCommon(json, info, version);
     return SOFTBUS_OK;
 }
@@ -164,14 +171,13 @@ static char *PackWifi(const NodeInfo *info, SoftBusVersion version)
         return NULL;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "PackWifi enter!");
-    cJSON* json = cJSON_CreateObject();
+    cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create cjson object error!");
         return NULL;
     }
 
-    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_IP) ||
-        !AddNumberToJsonObject(json, BUS_MAX_VERSION, BUS_V2) ||
+    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_IP) || !AddNumberToJsonObject(json, BUS_MAX_VERSION, BUS_V2) ||
         !AddNumberToJsonObject(json, BUS_MIN_VERSION, BUS_V1) ||
         !AddNumberToJsonObject(json, AUTH_PORT, LnnGetAuthPort(info)) ||
         !AddNumberToJsonObject(json, SESSION_PORT, LnnGetSessionPort(info)) ||
@@ -217,7 +223,7 @@ static void UpdateDeviceNameFromSetting(void)
 }
 
 static ProcessLedgerInfo g_processFuncs[] = {
-    {AUTH_BT, PackBt, UnPackBt},
+    {AUTH_BT,   PackBt,   UnPackBt  },
     {AUTH_WIFI, PackWifi, UnPackWifi},
 };
 
@@ -246,8 +252,7 @@ char *PackLedgerInfo(SoftBusVersion version, AuthType type)
     return NULL;
 }
 
-static int32_t UnPackLedgerInfo(const cJSON *json, NodeInfo *info,
-    SoftBusVersion version, AuthType type)
+static int32_t UnPackLedgerInfo(const cJSON *json, NodeInfo *info, SoftBusVersion version, AuthType type)
 {
     uint32_t i;
     if (info == NULL || json == NULL) {
@@ -262,8 +267,8 @@ static int32_t UnPackLedgerInfo(const cJSON *json, NodeInfo *info,
     return SOFTBUS_ERR;
 }
 
-uint8_t *LnnGetExchangeNodeInfo(int32_t seq, AuthType authType, SoftBusVersion version,
-    uint32_t *outSize, int32_t *side)
+uint8_t *LnnGetExchangeNodeInfo(
+    int32_t seq, AuthType authType, SoftBusVersion version, uint32_t *outSize, int32_t *side)
 {
     char *data = NULL;
     uint8_t *encryptData = NULL;
@@ -301,8 +306,8 @@ uint8_t *LnnGetExchangeNodeInfo(int32_t seq, AuthType authType, SoftBusVersion v
     return encryptData;
 }
 
-int32_t LnnParsePeerNodeInfo(ConnectOption *option, AuthType authType, NodeInfo *info,
-    const ParseBuf *bufInfo, AuthSideFlag side, SoftBusVersion version)
+int32_t LnnParsePeerNodeInfo(ConnectOption *option, AuthType authType, NodeInfo *info, const ParseBuf *bufInfo,
+    AuthSideFlag side, SoftBusVersion version)
 {
     cJSON *json = NULL;
     int ret = SOFTBUS_OK;
