@@ -127,4 +127,4 @@ HWTEST_F(TransQosStatServerTest, QosStatServerTest001, TestSize.Level0)
         }
     }
 }
-}
+} // namespace OHOS

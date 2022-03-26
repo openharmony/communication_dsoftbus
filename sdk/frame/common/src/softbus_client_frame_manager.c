@@ -50,7 +50,6 @@ static bool CheckPkgNameInfo(const char *pkgName)
         totalNum++;
         info = LIST_ENTRY(item, PkgNameInfo, node);
         if (strcmp(info->pkgName, pkgName) == 0) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "exist same pkg name");
             return false;
         }
     }
@@ -61,14 +60,13 @@ static bool CheckPkgNameInfo(const char *pkgName)
     return true;
 }
 
-static int32_t AddClientPkgName(const char *pkgName, bool isInit)
+static int32_t AddClientPkgName(const char *pkgName)
 {
     if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (CheckPkgNameInfo(pkgName) == false) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Add CheckPkgNameInfo failed.");
         (void)pthread_mutex_unlock(&g_pkgNameLock);
         return SOFTBUS_ERR;
     }
@@ -84,20 +82,43 @@ static int32_t AddClientPkgName(const char *pkgName, bool isInit)
         (void)pthread_mutex_unlock(&g_pkgNameLock);
         return SOFTBUS_MEM_ERR;
     }
+    ListInit(&info->node);
     ListAdd(&g_pkgNameList, &info->node);
-    if (!isInit) {
-        (void)pthread_mutex_unlock(&g_pkgNameLock);
-        return SOFTBUS_OK;
+    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    return SOFTBUS_OK;
+}
+
+static void DelClientPkgName(const char *pkgName)
+{
+    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "del lock init failed");
+        return;
     }
-    int32_t ret = ClientRegisterService(info->pkgName);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService failed. ret = %d", ret);
-        ListDelete(&info->node);
-        SoftBusFree(info);
-        (void)pthread_mutex_unlock(&g_pkgNameLock);
-        return ret;
+    ListNode *item = NULL;
+    ListNode *nextItem = NULL;
+    PkgNameInfo *info = NULL;
+    LIST_FOR_EACH_SAFE(item, nextItem, &g_pkgNameList) {
+        info = LIST_ENTRY(item, PkgNameInfo, node);
+        if (strcmp(pkgName, info->pkgName) == 0) {
+            ListDelete(&info->node);
+            SoftBusFree(info);
+            break;
+        }
     }
     (void)pthread_mutex_unlock(&g_pkgNameLock);
+}
+
+static int32_t ClientRegisterPkgName(const char *pkgName)
+{
+    if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = ClientRegisterService(pkgName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService failed. ret = %d", ret);
+        DelClientPkgName(pkgName);
+        return ret;
+    }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService success");
     return SOFTBUS_OK;
 }
@@ -166,9 +187,9 @@ int32_t InitSoftBus(const char *pkgName)
     }
 
     if (g_isInited == true) {
-        //(void)SoftBusMutexLock(&g_isInitedLock);
-        (void)AddClientPkgName(pkgName, g_isInited);
-        //SoftBusMutexUnlock(&g_isInitedLock);
+        //(void)pthread_mutex_lock(&g_isInitedLock);
+        (void)ClientRegisterPkgName(pkgName);
+        //pthread_mutex_unlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
 
@@ -182,41 +203,42 @@ int32_t InitSoftBus(const char *pkgName)
         return SOFTBUS_LOCK_ERR;
     }
     if (g_isInited == true) {
-        (void)AddClientPkgName(pkgName, g_isInited);
+        (void)ClientRegisterPkgName(pkgName);
         SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
 
-    if (AddClientPkgName(pkgName, g_isInited) != SOFTBUS_OK) {
+    if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_isInitedLock);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddClientPkgName failed.");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client timer init fail");
-        FreeClientPkgName();
-        SoftBusMutexUnlock(&g_isInitedLock);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
 
     if (ClientModuleInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
-        FreeClientPkgName();
-        SoftBusMutexUnlock(&g_isInitedLock);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
 
     if (ClientStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
-        FreeClientPkgName();
-        SoftBusMutexUnlock(&g_isInitedLock);
-        return SOFTBUS_ERR;
+        goto EXIT;
     }
-
+    if (ClientRegisterService(pkgName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService fail");
+        goto EXIT;
+    }
     g_isInited = true;
     SoftBusMutexUnlock(&g_isInitedLock);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus sdk frame init success.");
     return SOFTBUS_OK;
+EXIT:
+    FreeClientPkgName();
+    SoftBusMutexUnlock(&g_isInitedLock);
+    return SOFTBUS_ERR;
 }
 
 uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)

@@ -56,6 +56,7 @@ static int32_t DiscoveryResultTransfer(int32_t retCode)
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
 {
+    (void)pkgName;
     if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online, no need to notify sdk");
         return SOFTBUS_OK;
@@ -158,6 +159,7 @@ int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
+    (void)addrTypeLen;
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
@@ -168,11 +170,13 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 {
+    (void)infoTypeLen;
     return LnnOnNodeOnlineStateChanged(isOnline, info);
 }
 
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
+    (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(info, type);
 }
 

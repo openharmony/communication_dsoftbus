@@ -314,4 +314,4 @@ int32_t DiscServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t 
     (void)quality;
     return SOFTBUS_OK;
 }
-}
+} // namespace OHOS
