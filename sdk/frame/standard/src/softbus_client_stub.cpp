@@ -92,7 +92,7 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
 int32_t SoftBusClientStub::OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply)
 {
     const unsigned char *info = data.ReadBuffer(sizeof(DeviceInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return SOFTBUS_ERR;
     }
     DeviceInfo deviceInfo;
