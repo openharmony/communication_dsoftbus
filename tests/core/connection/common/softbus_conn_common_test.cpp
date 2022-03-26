@@ -513,4 +513,4 @@ HWTEST_F(SoftbusCommonTest, testThreadPool005, TestSize.Level1)
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 };
-}
+} // namespace OHOS

@@ -219,12 +219,6 @@ int ClientStubInit(void)
     SetClientIdentity(clientIdentity.handle, clientIdentity.token, clientIdentity.cookie, NULL);
 #endif
 
-    if (InnerRegisterService() != SOFTBUS_OK) {
-        ClientContextDeinit();
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "register service failed");
-        return SOFTBUS_ERR;
-    }
-
     if (RegisterServerDeathCb() != SOFTBUS_OK) {
         ClientContextDeinit();
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "reg server death cb failed");

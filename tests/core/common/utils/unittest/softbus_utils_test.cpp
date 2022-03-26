@@ -320,4 +320,4 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Leve
     const char *expect = "65:66:67:68:69:6a";
     EXPECT_STREQ(expect, strMac);
 }
-} // OHOS
+} // namespace OHOS

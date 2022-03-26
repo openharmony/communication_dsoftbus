@@ -231,7 +231,7 @@ public:
 
     static constexpr uint32_t WORD_SIZE = 16;
 
-    StreamPacketHeader() {};
+    StreamPacketHeader() {}
     StreamPacketHeader(uint8_t streamType, bool extended, uint16_t seqNum, uint16_t streamId, uint32_t dataLen)
     {
         SetVersion(VERSION, SUB_VERSION);

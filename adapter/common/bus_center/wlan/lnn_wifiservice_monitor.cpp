@@ -38,7 +38,7 @@ namespace EventFwk {
 class WifiServiceMonitor : public CommonEventSubscriber {
 public:
     explicit WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
-    virtual ~WifiServiceMonitor(){};
+    virtual ~WifiServiceMonitor(){}
     virtual void OnReceiveEvent(const CommonEventData &data);
 };
 
@@ -119,8 +119,8 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
     }
     return SOFTBUS_OK;
 }
-}
-}
+} // namespace EventFwkc
+} // namespace OHOS
 
 static void LnnSubscribeWifiService(void *para)
 {

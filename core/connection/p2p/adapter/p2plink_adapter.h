@@ -47,6 +47,7 @@ typedef struct  {
     void (*groupStateChanged)(const P2pLinkGroup *group);
     void (*connResult)(P2pLinkConnState state);
     void (*wifiCfgChanged)(const char *cfgData);
+    void (*enterDiscState)(void);
 } BroadcastRecvCb;
 
 int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb);

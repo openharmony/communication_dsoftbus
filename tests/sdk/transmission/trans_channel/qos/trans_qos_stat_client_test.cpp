@@ -426,4 +426,4 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME.c_str(), UDP_TEST_SESSION_NAME.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-}
+} // namespace OHOS

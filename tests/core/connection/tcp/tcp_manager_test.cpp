@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <arpa/inet.h>
 #include <cerrno>
 #include <cstdio>
@@ -185,7 +186,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BR;
@@ -425,4 +426,4 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(0, TcpGetConnNum());
 }
-}
+} // namespace OHOS
