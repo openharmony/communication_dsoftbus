@@ -97,7 +97,7 @@ static PublishInfo g_pInfo1 = {
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0
 };
 
@@ -109,7 +109,7 @@ static SubscribeInfo g_sInfo1 = {
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "hicall",
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
 };
 
@@ -180,9 +180,9 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Join_Lnn_Test_001, TestSize.Level0)
 {
     ConnectionAddr addr;
 
-    EXPECT_TRUE(JoinLNN(NULL, &addr, OnJoinLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, NULL, OnJoinLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, &addr, NULL) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(nullptr, &addr, OnJoinLNNDone) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, nullptr, OnJoinLNNDone) != SOFTBUS_OK);
+    EXPECT_TRUE(JoinLNN(TEST_PKG_NAME, &addr, nullptr) != SOFTBUS_OK);
 }
 
 /*
@@ -196,9 +196,9 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Leave_Lnn_Test_001, TestSize.Level0)
     char errNetIdLenMore[] = "012345678998765432100123456789987654321001234567899876543210abcde";
     char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
 
-    EXPECT_TRUE(LeaveLNN(NULL, networkId, OnLeaveLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(LeaveLNN(TEST_PKG_NAME, NULL, OnLeaveLNNDone) != SOFTBUS_OK);
-    EXPECT_TRUE(LeaveLNN(TEST_PKG_NAME, networkId, NULL) != SOFTBUS_OK);
+    EXPECT_TRUE(LeaveLNN(nullptr, networkId, OnLeaveLNNDone) != SOFTBUS_OK);
+    EXPECT_TRUE(LeaveLNN(TEST_PKG_NAME, nullptr, OnLeaveLNNDone) != SOFTBUS_OK);
+    EXPECT_TRUE(LeaveLNN(TEST_PKG_NAME, networkId, nullptr) != SOFTBUS_OK);
     EXPECT_TRUE(LeaveLNN(TEST_PKG_NAME, errNetIdLenMore, OnLeaveLNNDone) != SOFTBUS_OK);
 }
 
@@ -240,13 +240,13 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.Level0)
 {
-    NodeBasicInfo *info = NULL;
+    NodeBasicInfo *info = nullptr;
     int infoNum;
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum) == SOFTBUS_OK);
-    EXPECT_TRUE(info == NULL);
+    EXPECT_TRUE(info == nullptr);
     EXPECT_TRUE(infoNum == 0);
-    if (info != NULL) {
+    if (info != nullptr) {
         FreeNodeInfo(info);
     }
 }
@@ -297,10 +297,10 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_001, TestSize.Lev
 {
     char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
 
-    EXPECT_TRUE(StartTimeSync(NULL, networkId, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
-    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, NULL, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(nullptr, networkId, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, nullptr, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
     EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, networkId, LOW_ACCURACY, SHORT_PERIOD, &g_timeSyncCb) != SOFTBUS_OK);
-    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, networkId, LOW_ACCURACY, SHORT_PERIOD, NULL) != SOFTBUS_OK);
+    EXPECT_TRUE(StartTimeSync(TEST_PKG_NAME, networkId, LOW_ACCURACY, SHORT_PERIOD, nullptr) != SOFTBUS_OK);
 }
 
 /*
@@ -313,8 +313,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
 {
     char networkId[] = "0123456789987654321001234567899876543210012345678998765432100123";
 
-    EXPECT_TRUE(StopTimeSync(NULL, networkId) != SOFTBUS_OK);
-    EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, NULL) != SOFTBUS_OK);
+    EXPECT_TRUE(StopTimeSync(nullptr, networkId) != SOFTBUS_OK);
+    EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, nullptr) != SOFTBUS_OK);
     EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, networkId) != SOFTBUS_OK);
 }
 
@@ -326,13 +326,13 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
  */
 HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
 {
-    int32_t ret = PublishLNN(NULL, &g_pInfo, &g_publishCb);
+    int32_t ret = PublishLNN(nullptr, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
 
-    ret = PublishLNN(TEST_PKG_NAME, NULL, &g_publishCb);
+    ret = PublishLNN(TEST_PKG_NAME, nullptr, &g_publishCb);
     EXPECT_TRUE(ret != 0);
 
-    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, NULL);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     g_pInfo.medium = (ExchanageMedium)(COAP + 1);
@@ -350,7 +350,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     g_pInfo.freq = LOW;
 
-    g_pInfo.capabilityData = NULL;
+    g_pInfo.capabilityData = nullptr;
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     g_pInfo.capabilityData = (unsigned char *)"capdata1";
@@ -401,13 +401,13 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
 {
     int ret;
 
-    ret = RefreshLNN(NULL, &g_sInfo, &g_refreshCb);
+    ret = RefreshLNN(nullptr, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, NULL, &g_refreshCb);
+    ret = RefreshLNN(TEST_PKG_NAME, nullptr, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, NULL);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     g_sInfo.medium = (ExchanageMedium)(COAP + 1);
@@ -425,7 +425,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     g_sInfo.freq = LOW;
 
-    g_sInfo.capabilityData = NULL;
+    g_sInfo.capabilityData = nullptr;
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
     g_sInfo.capabilityData = (unsigned char *)"capdata1";
