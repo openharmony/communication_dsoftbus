@@ -287,3 +287,22 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
     }
     return info->p2pInfo.goMac;
 }
+
+uint64_t LnnGetSupportedProtocols(NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        return 0;
+    }
+    return info->supportedProtocols;
+}
+
+int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_OK;
+    }
+    info->supportedProtocols = protocols;
+    return SOFTBUS_OK;
+}

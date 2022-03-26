@@ -70,12 +70,12 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     }
     struct ifreq ifr;
     if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), ifName, strlen(ifName)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "copy netIfName:%s fail", ifName);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "copy netIfName:%{public}s fail", ifName);
         close(fd);
         return SOFTBUS_ERR;
     }
     if (GetNetworkIfIp(fd, &ifr, ip, netmask, len) != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "GetNetworkIfIp ifName:%s fail", ifName);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "GetNetworkIfIp ifName:%{public}s fail", ifName);
         close(fd);
         return SOFTBUS_ERR;
     }

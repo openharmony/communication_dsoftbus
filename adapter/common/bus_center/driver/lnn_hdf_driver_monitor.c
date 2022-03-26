@@ -21,23 +21,22 @@
 
 #include "lnn_async_callback_utils.h"
 #include "lnn_driver_request.h"
-#include "lnn_ip_utils.h"
+#include "lnn_network_manager.h"
 #include "message_handler.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_mem.h"
 
 #define DRIVER_SERVICE_NAME "hdf_dsoftbus"
 
 #define NETIF_NAME_LENGTH 16
 
-#define BIND_HDF_DELAY 1000
+#define BIND_HDF_DELAY           1000
 #define MAX_BIND_HDF_RETRY_COUNT 10
 
 typedef struct {
     struct HdfIoService *softbusService;
     struct HdfDevEventlistener eventListener;
-    LnnMonitorEventHandler handler;
 } HdfDriverEventCtrl;
 
 typedef struct {
@@ -50,74 +49,59 @@ typedef struct {
 
 static HdfDriverEventCtrl g_driverCtrl;
 
-static void ProcessLwipEvent(const LnnMoniterData *monitorData)
+static void ProcessLwipEvent(struct HdfSBuf *data)
 {
-    const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)monitorData->value;
-    ConnectionAddrType type = CONNECTION_ADDR_MAX;
-
-    if (monitorData->len != sizeof(LwipMonitorReportInfo)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor not correct size: %d<->%d",
-            monitorData->len, sizeof(LwipMonitorReportInfo));
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor event(%d) for %s",
-        info->event, info->ifName);
-    if (LnnGetAddrTypeByIfName(info->ifName, strlen(info->ifName), &type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessLwipEvent LnnGetAddrTypeByIfName error");
-        return;
-    }
-    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "network addr changed, type:%d", type);
-        g_driverCtrl.handler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
-    }
-}
-
-static void DispatchModuleEvent(int32_t moduleId, const LnnMoniterData *monitorData)
-{
-    switch (moduleId) {
-        case LNN_DRIVER_MODULE_WLAN_PARAM:
-            g_driverCtrl.handler(LNN_MONITOR_EVENT_WLAN_PARAM, monitorData);
-            break;
-        case LNN_DRIVER_MODULE_LWIP_MONITOR:
-            ProcessLwipEvent(monitorData);
-            break;
-        default:
-            break;
-    }
-}
-
-static int32_t OnReceiveDriverEvent(struct HdfDevEventlistener *listener,
-    struct HdfIoService *service, uint32_t moduleId, struct HdfSBuf *data)
-{
+    LnnNetIfType type = LNN_NETIF_TYPE_ETH;
+    uint32_t eventDataSize = 0;
     uint8_t *eventData = NULL;
-    uint32_t eventDataSize;
-    LnnMoniterData *monitorData = NULL;
 
+    if (!HdfSbufReadBuffer(data, (const void **)&eventData, &eventDataSize)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read data from sbuff failed!");
+        return;
+    }
+
+    if (eventData == NULL || eventDataSize != sizeof(LwipMonitorReportInfo)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor not correct size: %d<->%d", eventDataSize,
+            sizeof(LwipMonitorReportInfo));
+        return;
+    }
+    const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)eventData;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor event(%d) for %s", info->event, info->ifName);
+    if (LnnGetNetIfTypeByName(info->ifName, &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessLwipEvent LnnGetNetIfTypeByName error");
+        return;
+    }
+    if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "network addr changed, type:%d", type);
+        LnnNotifyAddressChangedEvent(info->ifName);
+    }
+}
+
+static void ProcessWlanEvent(struct HdfSBuf *data)
+{
+    LnnNotifyWlanStateChangeEvent(SOFTBUS_UNKNOWN);
+}
+
+static int32_t OnReceiveDriverEvent(
+    struct HdfDevEventlistener *listener, struct HdfIoService *service, uint32_t moduleId, struct HdfSBuf *data)
+{
     (void)listener;
     (void)service;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive hdf moudle(%d) event", moduleId);
     if (moduleId >= LNN_DRIVER_MODULE_MAX_INDEX) {
         return SOFTBUS_OK;
     }
-    if (!HdfSbufReadBuffer(data, (const void **)&eventData, &eventDataSize)) {
-        eventData = NULL;
-        eventDataSize = 0;
+    switch (moduleId) {
+        case LNN_DRIVER_MODULE_WLAN_PARAM:
+            ProcessWlanEvent(data);
+            break;
+        case LNN_DRIVER_MODULE_LWIP_MONITOR:
+            ProcessLwipEvent(data);
+            break;
+        default:
+            break;
     }
-    monitorData = (LnnMoniterData *)SoftBusMalloc(sizeof(LnnMoniterData) + eventDataSize);
-    if (monitorData == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc monitor data fail");
-        return SOFTBUS_ERR;
-    }
-    monitorData->len = eventDataSize;
-    if (eventData != NULL) {
-        if (memcpy_s(monitorData->value, eventDataSize, eventData, eventDataSize) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcopy monitor data fail");
-            SoftBusFree(monitorData);
-            return SOFTBUS_ERR;
-        }
-    }
-    DispatchModuleEvent(moduleId, monitorData);
-    SoftBusFree(monitorData);
     return SOFTBUS_OK;
 }
 
@@ -146,10 +130,9 @@ static void DelayInitFunction(void *para)
     ++retry;
 }
 
-int32_t LnnInitDriverMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitDriverMonitorImpl(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hdf driver monitor init enter");
     g_driverCtrl.eventListener.onReceive = OnReceiveDriverEvent;
-    g_driverCtrl.handler = handler;
     return LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayInitFunction, NULL, BIND_HDF_DELAY);
 }

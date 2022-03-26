@@ -45,6 +45,7 @@ extern "C" {
 #define BLE_P2P "BLE_P2P"
 #define P2P_MAC_ADDR "P2P_MAC_ADDR"
 #define P2P_ROLE "P2P_ROLE"
+#define TRANSPORT_PROTOCOL "TRANSPORT_PROTOCOL"
 
 #define CODE_VERIFY_IP 1
 #define CODE_VERIFY_BT 5

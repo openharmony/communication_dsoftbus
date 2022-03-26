@@ -16,11 +16,13 @@
 #include "lnn_event_monitor.h"
 
 #include <pthread.h>
+#include <securec.h>
 
 #include "bus_center_event.h"
 #include "lnn_event_monitor_impl.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_adapter_mem.h"
 
 typedef enum {
     MONITOR_IMPL_NETLINK_TYPE = 0,
@@ -39,28 +41,13 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitDriverMonitorImpl,
 };
 
-static void EventMonitorHandler(LnnMonitorEventType event, const LnnMoniterData *para)
-{
-    LnnMonitorEventInfo info;
-
-    if (event == LNN_MONITOR_EVENT_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event");
-        return;
-    }
-    info.basic.event = (LnnEventType)event;
-    info.data = para;
-    LnnNotifyMonitorEvent(&info);
-}
-
 int32_t LnnInitEventMonitor(void)
 {
-    uint32_t i;
-
-    for (i = 0; i < MONITOR_IMPL_MAX_TYPE; ++i) {
+    for (uint32_t i = 0; i < MONITOR_IMPL_MAX_TYPE; ++i) {
         if (g_monitorImplInit[i] == NULL) {
             continue;
         }
-        if (g_monitorImplInit[i](EventMonitorHandler) != SOFTBUS_OK) {
+        if (g_monitorImplInit[i]() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor impl(%u) failed", i);
             return SOFTBUS_ERR;
         }

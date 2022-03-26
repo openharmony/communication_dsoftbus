@@ -15,9 +15,8 @@
 
 #include "lnn_linkwatch.h"
 
-bool LnnIsLinkReady(const char *iface, uint32_t len)
+bool LnnIsLinkReady(const char *iface)
 {
     (void)iface;
-    (void)len;
     return true;
 }
