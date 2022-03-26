@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_event_manager.h"
 #include "softbus_client_stub_interface.h"
@@ -31,8 +32,7 @@
 #include "softbus_utils.h"
 
 static bool g_isInited = false;
-static pthread_mutex_t g_isInitedLock = PTHREAD_MUTEX_INITIALIZER;
-
+static SoftBusMutex g_isInitedLock;
 typedef struct PkgNameInfo {
     ListNode node;
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -166,51 +166,55 @@ int32_t InitSoftBus(const char *pkgName)
     }
 
     if (g_isInited == true) {
-        (void)pthread_mutex_lock(&g_isInitedLock);
+        //(void)SoftBusMutexLock(&g_isInitedLock);
         (void)AddClientPkgName(pkgName, g_isInited);
-        pthread_mutex_unlock(&g_isInitedLock);
+        //SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
 
-    if (pthread_mutex_lock(&g_isInitedLock) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
 
+    if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (g_isInited == true) {
         (void)AddClientPkgName(pkgName, g_isInited);
-        pthread_mutex_unlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
 
     if (AddClientPkgName(pkgName, g_isInited) != SOFTBUS_OK) {
-        pthread_mutex_unlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddClientPkgName failed.");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client timer init fail");
         FreeClientPkgName();
-        pthread_mutex_unlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     if (ClientModuleInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
         FreeClientPkgName();
-        pthread_mutex_unlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     if (ClientStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
         FreeClientPkgName();
-        pthread_mutex_unlock(&g_isInitedLock);
+        SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
 
     g_isInited = true;
-    pthread_mutex_unlock(&g_isInitedLock);
+    SoftBusMutexUnlock(&g_isInitedLock);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 }
