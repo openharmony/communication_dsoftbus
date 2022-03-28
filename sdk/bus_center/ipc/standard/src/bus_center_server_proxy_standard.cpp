@@ -92,7 +92,7 @@ int32_t BusCenterServerProxy::OpenAuthSession(const char *sessionName, const Con
 
 int32_t BusCenterServerProxy::NotifyAuthSuccess(int channelId)
 {
-    return SOFTBUS_OK;    
+    return SOFTBUS_OK;
 }
 
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
@@ -231,7 +231,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read infoNum failed!");
         return SOFTBUS_ERR;
     }
-    
+
     *info = nullptr;
     if ((*infoNum) > 0) {
         uint32_t infoSize = (uint32_t)(*infoNum) * infoTypeLen;

@@ -115,7 +115,7 @@ static BleConnectionInfo* CreateBleConnectionNode(void)
 {
     BleConnectionInfo *newConnectionInfo = SoftBusCalloc(sizeof(BleConnectionInfo));
     if (newConnectionInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnectDeviceFristTime malloc fail.]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[CreateBleConnectionNode malloc fail.]");
         return NULL;
     }
     ListInit(&newConnectionInfo->node);

@@ -91,7 +91,7 @@ std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySe
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
         return nullptr;
     }
-     
+
     std::shared_ptr<Session> session;
     std::lock_guard<std::mutex> autoLock(sessionMutex_);
     auto iter = sessionMap_.find(sessionId);

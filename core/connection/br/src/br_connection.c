@@ -427,9 +427,9 @@ static int32_t ConnectDeviceStateConnecting(const uint32_t connId, uint32_t requ
     return SOFTBUS_OK;
 }
 
-static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceFristTime]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceFirstTime]");
     if (g_sppDriver == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[sppDriver null]");
         return SOFTBUS_ERR;
@@ -493,7 +493,7 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
             result->OnConnectFailed(requestId, 0);
             ret = SOFTBUS_ERR;
         } else {
-            ret = ConnectDeviceFristTime(option, requestId, result);
+            ret = ConnectDeviceFirstTime(option, requestId, result);
         }
     }
     (void)pthread_mutex_unlock(&g_brConnLock);
