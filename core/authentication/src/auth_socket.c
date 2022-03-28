@@ -88,6 +88,7 @@ static bool IsAuthTransModule(int32_t module)
 
 static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data, int len)
 {
+    (void)len;
     if (head == NULL || data == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;

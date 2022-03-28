@@ -180,7 +180,7 @@ static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
             recvAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         memcpy_s(recvAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
             channelAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX, 
+        memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX,
             recvAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
@@ -218,7 +218,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
             SoftBusFree(item);
             SoftBusMutexUnlock(&g_authChannelList->lock);
             return SOFTBUS_ERR;
-        } 
+        }
     }
     if (CopyPeerAppInfo(appInfo, &item->appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CopyPeerAppInfo failed");
@@ -228,7 +228,7 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
-} 
+}
 
 
 static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t len)
@@ -238,7 +238,7 @@ static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t l
     }
 
     AppInfo appInfo;
-    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo); 
+    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpackRequest failed");
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
@@ -517,7 +517,7 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         return;
     }
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
-    int32_t ret = TransAuthChannelErrorPack(errcode, errMsg, cJsonStr, ERR_MSG_MAX_LEN); 
+    int32_t ret = TransAuthChannelErrorPack(errcode, errMsg, cJsonStr, ERR_MSG_MAX_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAuthChannelErrorPack failed");
         return;

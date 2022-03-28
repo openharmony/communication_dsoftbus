@@ -421,7 +421,7 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData calloc advData failed");
             return SOFTBUS_MALLOC_ERR;
         }
-        if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength, 
+        if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength,
             data->advData, data->advLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
@@ -437,7 +437,7 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MALLOC_ERR;
         }
-        if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength, 
+        if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength,
             data->scanRspData, data->scanRspLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetAdvData memcpy scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
@@ -697,7 +697,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     g_scanListener[listenerId].isScanning = true;
     if (g_scanListener[listenerId].listener != NULL &&
         g_scanListener[listenerId].listener->OnScanStart != NULL) {
-        g_scanListener[listenerId].listener->OnScanStart(listenerId, SOFTBUS_BT_STATUS_SUCCESS);        
+        g_scanListener[listenerId].listener->OnScanStart(listenerId, SOFTBUS_BT_STATUS_SUCCESS);
     }
     SoftBusMutexUnlock(&g_scanerLock);
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {
@@ -730,7 +730,7 @@ int SoftBusStopScan(int listenerId)
     g_scanListener[listenerId].isScanning = false;
     if (g_scanListener[listenerId].listener != NULL &&
         g_scanListener[listenerId].listener->OnScanStop != NULL) {
-        g_scanListener[listenerId].listener->OnScanStop(listenerId, status);    
+        g_scanListener[listenerId].listener->OnScanStop(listenerId, status);
     }
     SoftBusMutexUnlock(&g_scanerLock);
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {

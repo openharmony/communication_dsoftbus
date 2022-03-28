@@ -25,6 +25,8 @@
 
 static void AuthP2pOnKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
 {
+    (void)option;
+    (void)peerVersion;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onKeyGenerated, authId = %lld.", authId);
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
@@ -58,6 +60,7 @@ static void AuthP2pOnKeyGenerated(int64_t authId, ConnectOption *option, SoftBus
 static void AuthP2pOnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUuid,
     uint8_t *data, uint32_t len)
 {
+    (void)peerUuid;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onRecvSyncDeviceInfo, authId = %lld.", authId);
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
@@ -87,7 +90,8 @@ static void AuthP2pOnDeviceVerifyPass(int64_t authId)
 
 static void AuthP2pOnDeviceVerifyFail(int64_t authId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyFail, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyFail, authId = %lld, reason = %d.",
+        authId, reason);
 }
 
 static void AuthP2pOnDisconnect(int64_t authId)

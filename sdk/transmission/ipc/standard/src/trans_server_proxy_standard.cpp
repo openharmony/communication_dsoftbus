@@ -183,7 +183,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
-    
+
     if (!data.WriteRawData(param->attr, sizeof(SessionAttribute))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
@@ -215,7 +215,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
-    
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
