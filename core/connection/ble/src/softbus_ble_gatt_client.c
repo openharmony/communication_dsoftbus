@@ -111,7 +111,7 @@ static int32_t AddGattcInfoToList(BleGattcInfo *info)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -164,7 +164,7 @@ int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t 
     clientData.value = (char *)data;
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
@@ -235,7 +235,7 @@ int32_t SoftBusGattClientDisconnect(int32_t clientId)
     }
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
@@ -281,7 +281,7 @@ static void ConnectedMsgHandler(int32_t clientId, int status)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
@@ -320,7 +320,7 @@ static void SearchedMsgHandler(int32_t clientId, int status)
     BleGattcInfo *infoNode = NULL;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%d  %d", clientId, status);
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
@@ -402,7 +402,7 @@ static void NotificatedMsgHandler(int32_t clientId, int status)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
@@ -444,7 +444,7 @@ static void DisconnectedMsgHandler(int32_t clientId, int status)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
@@ -472,7 +472,7 @@ static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
     BleGattcInfo *infoNode = NULL;
     char bleStrMac[BT_MAC_LEN];
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
     if (infoNode == NULL) {
@@ -596,7 +596,7 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     infoNode = GetBleGattcInfoByClientIdInner(clientId);
