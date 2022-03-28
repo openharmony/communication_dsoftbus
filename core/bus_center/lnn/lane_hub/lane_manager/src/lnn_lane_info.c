@@ -50,7 +50,7 @@ int32_t LnnGetLaneScore(int32_t laneId)
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
     if (count >= LANE_COUNT_THRESHOLD) {
@@ -101,7 +101,7 @@ static bool IsValidLaneId(int32_t laneId)
         return false;
     }
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return false;
     }
     if (!g_lanes[laneId].isUse) {
@@ -125,7 +125,7 @@ void LnnReleaseLane(int32_t laneId)
     }
 
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     if (laneId >= LNN_LINK_TYPE_P2P && laneId <= LNN_LINK_TYPE_P2P_MAX) {
@@ -210,7 +210,7 @@ bool LnnUpdateLaneRemoteInfo(const char *netWorkId, LnnLaneLinkType type, bool m
         return false;
     }
     if (SoftBusMutexLock(&g_lanes[type].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return false;
     }
     if (g_lanes[type].isUse && type >= LNN_LINK_TYPE_P2P && type <= LNN_LINK_TYPE_P2P_MAX) {
@@ -244,7 +244,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
         return;
     }
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     if (laneId == LNN_LINK_TYPE_BR) {
@@ -272,7 +272,7 @@ void LnnLaneSetNetworkIdAndPid(int32_t laneId, const char *networkId, int32_t pi
         return;
     }
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     g_lanes[laneId].pid = pid;
