@@ -49,13 +49,13 @@ static void SetReceiveState(DFileTrans *dFileTrans, DFileReceiveState nextState)
 
 int32_t DFileTransSendFiles(DFileTrans *trans, FileListInfo *fileListInfo)
 {
-    LOGI(TAG, "transId %u, fileNum %u", trans->transId, fileListInfo->fileNum);
+    LOGI(TAG, "transId %hu, fileNum %u", trans->transId, fileListInfo->fileNum);
     return FileListSetSendFileList(trans->fileList, fileListInfo);
 }
 
 int32_t DFileTransAddExtraInfo(DFileTrans *trans, uint16_t pathType, uint8_t noticeFileNameType, char *userData)
 {
-    LOGI(TAG, "transId %u, pathType %u", trans->transId, pathType);
+    LOGI(TAG, "transId %hu, pathType %hu", trans->transId, pathType);
     return FileListAddExtraInfo(trans->fileList, pathType, noticeFileNameType, userData);
 }
 
@@ -1559,7 +1559,6 @@ void DFileTransDestroyInner(DFileTrans *dFileTrans)
 
     FileListDestroy(dFileTrans->fileList);
     free(dFileTrans);
-    dFileTrans = NULL;
 }
 
 uint64_t DFileTransGetTotalBytes(const DFileTrans *dFileTrans)

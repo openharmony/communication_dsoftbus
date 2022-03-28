@@ -30,10 +30,10 @@ static int32_t GetConnectionTypeByDevName(const char *devName, uint32_t devNameL
     if (devNameLen >= p2pNameLen && memcmp(devName, P2P_DEV_NAME_PRE, p2pNameLen) == 0) {
         *connectType = CONNECT_TYPE_P2P;
         ret = NSTACKX_EOK;
-        LOGI(TAG, "connType is P2P(%u)", *connectType);
+        LOGI(TAG, "connType is P2P(%hu)", *connectType);
     } else if (devNameLen >= wlanNameLen && memcmp(devName, WLAN_DEV_NAME_PRE, wlanNameLen) == 0) {
         *connectType = CONNECT_TYPE_WLAN;
-        LOGI(TAG, "connType is WLAN(%u)", *connectType);
+        LOGI(TAG, "connType is WLAN(%hu)", *connectType);
         ret = NSTACKX_EOK;
     }
     return ret;

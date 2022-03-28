@@ -30,10 +30,10 @@ static int32_t GetConnectionTypeByDevName(const char *devName, uint32_t devNameL
     if (devNameLen >= p2pNameLen && memcmp(devName, P2P_DEV_NAME_PRE, p2pNameLen) == 0) {
         *connectType = CONNECT_TYPE_P2P;
         ret = NSTACKX_EOK;
-        LOGI(TAG, "connType is P2P(%u)", *connectType);
+        LOGI(TAG, "connType is P2P(%hu)", *connectType);
     } else if (devNameLen >= wlanNameLen && memcmp(devName, WLAN_DEV_NAME_PRE, wlanNameLen) == 0) {
         *connectType = CONNECT_TYPE_WLAN;
-        LOGI(TAG, "connType is WLAN(%u)", *connectType);
+        LOGI(TAG, "connType is WLAN(%hu)", *connectType);
         ret = NSTACKX_EOK;
     }
     return ret;
@@ -194,7 +194,7 @@ static int32_t BindToDeviceInner(int32_t sockfd, const struct ifreq *ifBinding)
 
 /*
  * If localAddr isn't NULL, bind to interface correspond to ip,
- * otherwise, bind to interface which is choosed by strategy.
+ * otherwise, bind to interface which is chosen by strategy.
  */
 int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
 {
@@ -343,7 +343,7 @@ int32_t GetTargetInterface(const struct sockaddr_in *dstAddr, struct ifreq *loca
             continue;
         }
         netMask = ((struct sockaddr_in *)&(buf[i].ifr_netmask))->sin_addr.s_addr;
-        /* if localIp and dstIp are in the same LAN, fetch the interface name of thie localIp and return */
+        /* if localIp and dstIp are in the same LAN, fetch the interface name of this localIp and return */
         if ((dstAddr->sin_addr.s_addr & netMask) == (localIp & netMask)) {
             if (strncpy_s(localDev->ifr_ifrn.ifrn_name, IFNAMSIZ, buf[i].ifr_name, strlen(buf[i].ifr_name)) != EOK) {
                 LOGE(TAG, "ifreq name copy failed");
