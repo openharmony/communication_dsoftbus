@@ -77,7 +77,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     }
     TcpConnInfoNode *temp = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     if ((int32_t)g_tcpConnInfoList->cnt >= g_tcpMaxConnNum) {
@@ -107,7 +107,7 @@ static void DelTcpConnInfo(uint32_t connectionId)
     }
     TcpConnInfoNode *item = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -135,7 +135,7 @@ static void DelTcpConnNode(uint32_t connectionId)
     }
     TcpConnInfoNode *item = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -232,7 +232,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
     TcpConnInfoNode *item = NULL;
@@ -320,7 +320,7 @@ static void DelAllConnInfo(ListenerModule moduleId)
         return;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     TcpConnInfoNode *item = NULL;
@@ -432,7 +432,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     TcpConnInfoNode *item = NULL;
@@ -467,7 +467,7 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
     }
     int32_t fd = -1;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
     }
@@ -503,7 +503,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     }
     TcpConnInfoNode *item = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {

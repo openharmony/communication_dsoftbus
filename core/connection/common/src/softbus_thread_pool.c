@@ -115,7 +115,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
     pool->queueClose = 0;
     pool->poolClose = 0;
     if (SoftBusMutexLock(&(pool->mutex)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         goto EXIT;
     }
 
@@ -184,7 +184,7 @@ static void ThreadPoolWorker(void *arg)
     SoftBusThreadSetName(SoftBusThreadGetSelf(), THREAD_POOL_NAME);
     while (1) {
         if (SoftBusMutexLock(&(pool->mutex)) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             return;
         }
         while ((pool->queueCurNum == 0) && !pool->poolClose) {
@@ -198,7 +198,7 @@ static void ThreadPoolWorker(void *arg)
         job = pool->head;
         if (SoftBusMutexLock(&(job->mutex)) != 0) {
             pool->queueCurNum++;
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             SoftBusMutexUnlock(&(pool->mutex));
             continue;
         }
@@ -232,7 +232,7 @@ static int32_t CheckThreadPoolAddReady(ThreadPool *pool, int32_t (*callbackFunct
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(pool->mutex)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     if (pool->queueCurNum == pool->queueMaxNum) {
@@ -301,7 +301,7 @@ int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(pool->mutex)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     Job* job = pool->head;
@@ -313,7 +313,7 @@ int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
     }
     if (job != NULL && job->runnable == true && job->jobMode == PERSISTENT) {
         if (SoftBusMutexLock(&(job->mutex)) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             SoftBusMutexUnlock(&(job->mutex));
             return SOFTBUS_LOCK_ERR;
         }
@@ -330,7 +330,7 @@ int32_t ThreadPoolDestroy(ThreadPool *pool)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(pool->mutex)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     if (pool->queueClose || pool->poolClose) {
