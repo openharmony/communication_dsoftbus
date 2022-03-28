@@ -186,14 +186,7 @@ int32_t InitSoftBus(const char *pkgName)
         return SOFTBUS_ERR;
     }
 
-    if (g_isInited == true) {
-        //(void)pthread_mutex_lock(&g_isInitedLock);
-        (void)ClientRegisterPkgName(pkgName);
-        //pthread_mutex_unlock(&g_isInitedLock);
-        return SOFTBUS_OK;
-    }
-
-    if (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK) {
+    if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }

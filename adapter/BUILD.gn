@@ -25,6 +25,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_adapter_common_interface") {
     include_dirs = [
       "$softbus_adapter_common/include",
+      "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/include",
       "$hilog_lite_include_path",
@@ -102,6 +103,7 @@ if (defined(ohos_lite)) {
   config("config_adapter_common") {
     include_dirs = [
       "$softbus_adapter_common/include",
+      "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$dsoftbus_standard_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
     ]
