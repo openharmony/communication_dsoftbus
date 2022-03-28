@@ -137,7 +137,7 @@ typedef struct {
 
 typedef struct {
     uint8_t recvListOverIo;
-    uint8_t recvBufThreshold; /* for reserve */
+    uint8_t recvBufThreshold; /* for reserved */
     uint32_t stopSendPeriod;
 } DataBackPressure;
 

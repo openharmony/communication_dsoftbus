@@ -59,13 +59,11 @@ uint8_t IsFileNameLegal(const char *fileName)
 
 int32_t GetCpuNum(void)
 {
-    /* @todo: liteos support multiple cpu core */
     return 1;
 }
 
 void StartThreadBindCore(int32_t cpu)
 {
-    /* @todo: liteos support thread bind core */
     (void)cpu;
 }
 
