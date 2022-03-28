@@ -61,8 +61,8 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         printf("deviceId = %s.\n", nstackxDeviceInfo->deviceId);
         printf("deviceName = %s.\n", nstackxDeviceInfo->deviceName);
         printf("capabilityBitmapNum = %d.\n", nstackxDeviceInfo->capabilityBitmapNum);
-        for (uint32_t i = 0; i < nstackxDeviceInfo->capabilityBitmapNum; i++) {
-            printf("capabilityBitmap = %d.\n", nstackxDeviceInfo->capabilityBitmap[i]);
+        for (uint32_t j = 0; j < nstackxDeviceInfo->capabilityBitmapNum; j++) {
+            printf("capabilityBitmap = %d.\n", nstackxDeviceInfo->capabilityBitmap[j]);
         }
         printf("deviceType = %d.\n", nstackxDeviceInfo->deviceType);
         printf("reservedInfo = %s.\n", nstackxDeviceInfo->reservedInfo);
