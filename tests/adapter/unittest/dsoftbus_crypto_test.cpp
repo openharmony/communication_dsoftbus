@@ -48,7 +48,7 @@ void DsoftbusCryptoTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -63,7 +63,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -84,7 +84,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -104,7 +104,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -121,7 +121,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -145,7 +145,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode003, TestSize.Level0)
 {
     char dst[100];
     char src[] = "abcde";
@@ -167,7 +167,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode003, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey001, TestSize.Level0)
 {
     char key[10];
     int32_t ret = SoftBusGenerateSessionKey(key, sizeof(key));
@@ -180,7 +180,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey001, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey002, TestSize.Level0)
 {
     int32_t len = 10;
     int32_t ret = SoftBusGenerateSessionKey(NULL, len);
@@ -193,7 +193,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey002, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey003, TestSize.Level0)
 {
     char key[10];
     int32_t len = 0;
@@ -207,7 +207,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey003, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash001, TestSize.Level0)
 {
     char str[] = "abcde";
     char hash[100];
@@ -221,7 +221,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash001, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash002, TestSize.Level0)
 {
     char str[] = "abcde";
     char hash[100];
@@ -242,7 +242,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash002, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest001, TestSize.Level0)
 {
     char randStr[64];
     int32_t ret = SoftBusGenerateRandomArray((unsigned char *)randStr, sizeof(randStr));
@@ -255,7 +255,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest001, Function | Mediu
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
 {
     uint32_t len = 1;
     char randStr[64];
@@ -272,7 +272,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, Function | Mediu
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -291,7 +291,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -314,7 +314,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData002, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -334,7 +334,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -354,7 +354,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -376,7 +376,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq002, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -396,7 +396,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq003, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -419,7 +419,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -443,7 +443,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -474,7 +474,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -501,7 +501,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, Function | MediumTest | Leve
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -526,7 +526,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -554,7 +554,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
@@ -580,7 +580,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
     cipherKey.keyLen = 32;
