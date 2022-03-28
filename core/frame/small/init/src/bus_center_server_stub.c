@@ -20,6 +20,7 @@
 #include "lnn_bus_center_ipc.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -133,8 +134,7 @@ int32_t ServerGetLocalDeviceInfo(void *origin, IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo read pkgName failed!");
         return SOFTBUS_ERR;
     }
-
-    uint32_t infoTypeLen = IpcIoPopUint32(req);
+    uint32_t infoTypeLen = sizeof(NodeBasicInfo);
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo malloc info type length failed");

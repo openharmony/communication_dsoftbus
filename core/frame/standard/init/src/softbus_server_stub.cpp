@@ -20,6 +20,7 @@
 #include "ipc_types.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
@@ -509,10 +510,8 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner read clientName failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner read info type length failed");
-        return SOFTBUS_ERR;
-    }
+    
+    infoTypeLen = sizeof(NodeBasicInfo);
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner malloc info type length failed");
