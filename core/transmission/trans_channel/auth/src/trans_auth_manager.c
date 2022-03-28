@@ -473,7 +473,7 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-void TransAuthDeinit()
+void TransAuthDeinit(void)
 {
     AuthTransDataUnRegCallback(TRANS_AUTH_CHANNEL);
     g_channelId = 1;
