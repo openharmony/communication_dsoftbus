@@ -98,7 +98,7 @@ static void ClearP2pSessionConn(void)
 
 static int32_t StartP2pListener(const char *ip, int32_t *port)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener: ip=%s, port=%d", ip, *port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener: port=%d", *port);
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
         ClearP2pSessionConn();
         StopP2pSessionListener();
@@ -118,7 +118,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
         StopP2pSessionListener();
         return SOFTBUS_MEM_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener end:ip=%s, port=%d", ip, *port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener end: port=%d", *port);
     return SOFTBUS_OK;
 }
 
@@ -268,7 +268,7 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 
 static int32_t OpenAuthConn(const char *uuid, uint32_t reqId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: udid=%s, requestId=%u", uuid, reqId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: requestId=%u", reqId);
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
@@ -468,7 +468,7 @@ static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const Au
 
 static void OnAuthChannelClose(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthChannelClose: authId=%d", authId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthChannelClose: authId=%lld", authId);
     return;
 }
 

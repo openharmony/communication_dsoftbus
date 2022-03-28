@@ -538,7 +538,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "option check fail");
         return false;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection brMac=%s", option->info.brOption.brMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection");
 
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;

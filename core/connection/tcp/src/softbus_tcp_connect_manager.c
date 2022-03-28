@@ -528,9 +528,9 @@ static int32_t OnProxyServerConnectEvent(int32_t events, int32_t cfd, const char
 
 static int32_t OnAuthP2pServerConnectEvent(int32_t events, int32_t cfd, const char *ip)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv p2p conned %d %s", cfd, ip);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv p2p conned %d", cfd);
     if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set %s keepalive fail", ip);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive fail");
         TcpShutDown(cfd);
         return SOFTBUS_ERR;
     }

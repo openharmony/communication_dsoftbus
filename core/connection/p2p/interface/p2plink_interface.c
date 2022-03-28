@@ -79,8 +79,8 @@ int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
         SoftBusFree(arg);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conn info reqid %d, peermac %s pid %d role %d",
-               info->requestId, info->peerMac, info->pid, info->expectedRole);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conn info reqid %d, pid %d role %d",
+               info->requestId, info->pid, info->expectedRole);
     ret = P2pLoopProc(P2pLinkLoopConnectDevice, (void *)arg, P2PLOOP_INTERFACE_LOOP_CONNECT);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkLoopConnectDevice loop fail.");
@@ -103,8 +103,7 @@ int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link Disconnect malloc fail.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "disconn info, peermac %s pid %d",
-               info->peerMac, info->pid);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "disconn info, pid %d", info->pid);
     ret = memcpy_s(arg, sizeof(P2pLinkDisconnectInfo), info, sizeof(P2pLinkDisconnectInfo));
     if (ret != SOFTBUS_OK) {
         SoftBusFree(arg);
@@ -265,7 +264,7 @@ int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* peerMac, int32_t mac
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query ok ip %s mac %s", peerIp, peerMac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query ok ip");
     return SOFTBUS_OK;
 }
 
@@ -356,6 +355,6 @@ int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
     }
     sem_wait(&queryInfo.wait);
     sem_destroy(&queryInfo.wait);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "peerMac %s, query result %d", peerMac, queryInfo.result);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query result %d", queryInfo.result);
     return queryInfo.result;
 }

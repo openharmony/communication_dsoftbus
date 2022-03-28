@@ -234,8 +234,7 @@ void TransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown: networkId=%s, routeType=%d",
-        networkId, routeType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown: routeType=%d", routeType);
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;

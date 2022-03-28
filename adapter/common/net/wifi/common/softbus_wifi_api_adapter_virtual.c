@@ -20,11 +20,14 @@
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
 {
+    (void)configList;
+    (void)num;
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
 {
+    (void)wifiConfig;
     return SOFTBUS_OK;
 }
 
@@ -32,3 +35,24 @@ int32_t SoftBusDisconnectDevice(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusStartWifiScan(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

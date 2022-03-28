@@ -66,9 +66,6 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
     ret = GetSessionKey(-1, key, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetSessionKey(MAX_SESSION_ID + 1, key, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     ret = GetSessionKey(sessionId, NULL, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
@@ -111,9 +108,6 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
     ret = GetSessionHandle(-1, &handle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetSessionHandle(MAX_SESSION_ID + 1, &handle);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     ret = GetSessionHandle(sessionId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -145,9 +139,6 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level0)
     int32_t ret;
 
     ret = DisableSessionListener(-1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = DisableSessionListener(MAX_SESSION_ID + 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
