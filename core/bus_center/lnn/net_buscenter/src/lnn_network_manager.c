@@ -111,12 +111,16 @@ static LnnNetIfMgr *NetifMgrFactory(LnnNetIfNameType type, const char *ifName)
     return netifMgr;
 }
 
-static int32_t ParseIfNameConfig(char *buf)
+static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
 {
     char *outerPtr = NULL;
     char *innerPtr = NULL;
     char *value1 = NULL;
     char *value2 = NULL;
+    if (buf == NULL || bufLen <= 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invaild!");
+        return SOFTBUS_ERR;
+    }
     char *key = strtok_r(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
     while (key != NULL) {
         value1 = strtok_r(key, LNN_DELIMITER_INSIDE, &innerPtr);
@@ -163,7 +167,7 @@ static int32_t LnnInitManagerByConfig(void)
         }
         return SOFTBUS_OK;
     }
-    if (ParseIfNameConfig(netIfName) != SOFTBUS_OK) {
+    if (ParseIfNameConfig(netIfName, strlen(netIfName)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName str parse fail!");
         return SOFTBUS_ERR;
     }
