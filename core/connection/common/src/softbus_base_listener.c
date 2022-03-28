@@ -103,7 +103,7 @@ static void UpdateMaxFd(void)
         }
 
         if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             continue;
         }
 
@@ -124,7 +124,7 @@ static void UpdateMaxFd(void)
     }
 
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     g_maxFd = tmpMax;
@@ -154,7 +154,7 @@ static void ClearListenerFdList(const ListNode *cfdList)
     FdNode *item = NULL;
 
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     while (!IsListEmpty(cfdList)) {
@@ -203,7 +203,7 @@ static int32_t InitListenFd(ListenerModule module, const char *ip, int32_t port)
     }
 
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         ResetBaseListener(module);
         return SOFTBUS_ERR;
     }
@@ -220,7 +220,7 @@ void ResetBaseListener(ListenerModule module)
         return;
     }
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
@@ -247,7 +247,7 @@ void ResetBaseListenerSet(ListenerModule module)
         return;
     }
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
@@ -358,12 +358,16 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
+        if (g_listenerList[i].info == NULL) {
+            continue;
+        }
         if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             continue;
         }
         SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
-        if (listenerInfo == NULL || listenerInfo->status != LISTENER_RUNNING) {
+        if (listenerInfo->status != LISTENER_RUNNING) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!", i);
             SoftBusMutexUnlock(&g_listenerList[i].lock);
             continue;
         }
@@ -399,7 +403,7 @@ static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFd
 static int32_t SetSelect(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
     if (FdCopy(readSet, &g_readSet) != EOK) {
@@ -533,7 +537,7 @@ static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
 {
     int32_t ret = SOFTBUS_OK;
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
     switch (triggerType) {
@@ -564,7 +568,7 @@ static int32_t DelTriggerFromSet(int32_t fd, TriggerType triggerType)
 {
     int32_t ret = SOFTBUS_OK;
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
     switch (triggerType) {
@@ -697,7 +701,7 @@ int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *liste
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     if (g_listenerList[module].listener != NULL) {
@@ -739,7 +743,7 @@ int32_t StopBaseListener(ListenerModule module)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
@@ -773,7 +777,7 @@ void DestroyBaseListener(ListenerModule module)
     }
     ResetBaseListener(module);
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     if (g_listenerList[module].info != NULL) {
@@ -836,7 +840,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     }
 
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     SoftbusBaseListenerInfo *info = g_listenerList[module].info;
@@ -865,7 +869,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     SoftBusMutexUnlock(&g_listenerList[module].lock);
 
     if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_OK;
     }
     g_maxFd = MaxFd(fd, g_maxFd);
@@ -884,7 +888,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     SoftbusBaseListenerInfo *info = g_listenerList[module].info;
