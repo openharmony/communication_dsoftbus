@@ -109,7 +109,7 @@ if (defined(ohos_lite)) {
 
   config("nstackx_util_header") {
     include_dirs = [
-      "interface",
+      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_util/interface",
       "platform/unix",
     ]
   }
@@ -123,7 +123,7 @@ if (defined(ohos_lite)) {
     cflags_cc = cflags
     include_dirs = [
       "include",
-      "interface",
+      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_util/interface",
       "platform/unix",
       "$NSTACKX_ROOT/nstackx_core/",
       "//utils/native/base/include/",

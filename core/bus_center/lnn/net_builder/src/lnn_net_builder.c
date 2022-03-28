@@ -814,7 +814,7 @@ static bool IsInvalidConnectionFsm(const LnnConnectionFsm *connFsm, const LeaveI
     }
     if (msgPara->addrType != CONNECTION_ADDR_MAX && msgPara->addrType != connFsm->connInfo.addr.type) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection type not match %d,%d",
-            msgPara->addrType, connFsm->connInfo.addr.type);
+            connFsm->id, msgPara->addrType, connFsm->connInfo.addr.type);
         return false;
     }
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
@@ -1220,7 +1220,10 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         return;
     }
     udidLen = strlen(peerUdid) + 1;
-
+    if (udidLen > UDID_BUF_LEN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not trusted udid is too long");
+        return;
+    }
     udid = (char *)SoftBusMalloc(udidLen);
     if (udid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");

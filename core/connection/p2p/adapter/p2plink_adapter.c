@@ -89,7 +89,7 @@ static void DumpGroupInfo(WifiP2pGroupInfo *groupInfo)
     for (i = 0; i < groupInfo->clientDevicesSize; i++) {
         macStr[0] = '\0';
         ConvertMacBinToStr(macStr, sizeof(macStr), groupInfo->clientDevices[i].devAddr);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "mac dev[%d]= %s.", i, macStr);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "mac dev[%d].", i);
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "group interface %s.",
         groupInfo->interface);
@@ -167,8 +167,8 @@ static void InnerConnResultProc(WifiP2pLinkedInfo info)
     char mac[P2P_MAC_LEN] = {0};
 
     ConvertMacBinToStr(mac, sizeof(mac), info.groupOwnerAddress);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn state change conn %d grp %d mac = %s",
-        info.connectState, info.isP2pGroupOwner, mac);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn state change conn %d grp %d",
+        info.connectState, info.isP2pGroupOwner);
 
     if (info.isP2pGroupOwner == 0) {
         if (info.connectState == P2P_CONNECTED) {
@@ -328,7 +328,7 @@ int32_t P2pLinkGetP2pIpAddress(char *ip, int32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkGet P2p IpAddress %s.", ip);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkGet P2p IpAddress.");
     return SOFTBUS_OK;
 }
 
@@ -339,12 +339,12 @@ int32_t P2pLinkGetBaseMacAddress(char *mac, int32_t len)
 
     if (GetMacAddr(P2P_BASE_INTERFACE, macAddr, sizeof(macAddr))) {
         ConvertMacBinToStr(mac, len, macAddr);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get p2p0 mac %s.", mac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get p2p0 mac.");
         return SOFTBUS_OK;
     }
     if (GetMacAddr("wlan0", macAddr, sizeof(macAddr))) {
         ConvertMacBinToStr(mac, len, macAddr);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get wlan0 mac %s.", mac);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get wlan0 mac.");
         return SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get p2p base mac fail.");
@@ -498,7 +498,7 @@ char *P2pLinkGetGroupConfigInfo(void)
     }
 
     ConvertMacBinToStr(macStr, sizeof(macStr), macAddr);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "p2p interface = %s, mac addr = %s", groupInfo->interface, macStr);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "p2p interface = %s", groupInfo->interface);
     // 4: \n and \0
     int32_t cfgSize = strlen(groupInfo->groupName) + strlen(macStr) + strlen(groupInfo->passphrase) + FREQ_MAX_LEN + 4;
     char *groupCfgStr = (char *)SoftBusCalloc(cfgSize);
@@ -641,8 +641,7 @@ int32_t P2pLinkConfigGcIp(const char *ip)
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "config ip, interface = %s, ip = %s.",
-        groupInfo->interface, ip);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "config ip, interface = %s.", groupInfo->interface);
     IpAddrInfo addrInfo = {0};
     if (ConvertIpStringToIntArray(addrInfo.ip, ip) != SOFTBUS_OK ||
         ConvertIpStringToIntArray(addrInfo.gateway, ip) != SOFTBUS_OK ||

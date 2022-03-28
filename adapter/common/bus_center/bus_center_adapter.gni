@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/appexecfwk/standard/appexecfwk.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 adapter_bus_center_path = "$softbus_adapter_common/bus_center"
@@ -72,6 +73,8 @@ if (defined(ohos_lite)) {
     }
   }
 } else {
+  bus_center_adapter_inc += [ "//utils/native/base/include" ]
+  bus_center_adapter_external_deps = []
   if (dsoftbus_standard_feature_lnn_net) {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
@@ -80,13 +83,22 @@ if (defined(ohos_lite)) {
       "$adapter_bus_center_path/network/lnn_lwip_monitor_virtual.c",
       "$adapter_bus_center_path/network/lnn_netlink_monitor.c",
       "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
-      "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
     ]
+
+    if (dsoftbus_standard_feature_lnn_wifiservice_dependence) {
+      bus_center_adapter_src +=
+          [ "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor.cpp" ]
+      bus_center_adapter_inc += [
+        "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
+        "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
+      ]
+      bus_center_adapter_deps +=
+          [ "${aafwk_path}/interfaces/innerkits/want:want" ]
+      bus_center_adapter_external_deps += [ "ces_standard:cesfwk_innerkits" ]
+    } else {
+      bus_center_adapter_src += [
+        "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
+      ]
+    }
   }
-  bus_center_adapter_inc += [
-    "//utils/native/base/include",
-    "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
-  ]
-  bus_center_adapter_external_deps = []
 }

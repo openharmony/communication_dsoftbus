@@ -345,6 +345,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSetOptTest006, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 }
 
+#if HAVE_PRO
 /*
 * @tc.name: SoftBusSocketSetOptTest007
 * @tc.desc: optValLen is illegal
@@ -363,6 +364,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSetOptTest007, TestSize.Level0)
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 }
+#endif
 
 /*
 * @tc.name: SoftBusSocketGetOptTest001
