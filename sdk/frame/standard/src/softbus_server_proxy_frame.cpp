@@ -41,6 +41,7 @@ sptr<IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
 static int InnerRegisterService(void)
@@ -79,6 +80,11 @@ static int InnerRegisterService(void)
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
+
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return nullptr;
+    }
+
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
