@@ -289,6 +289,11 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (threadEntry == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadEntry is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret;
     if (threadAttr == NULL) {
         ret = pthread_create((pthread_t *)thread, NULL, threadEntry, arg);
