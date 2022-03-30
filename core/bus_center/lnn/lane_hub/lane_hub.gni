@@ -18,8 +18,8 @@ core_lane_hub_path = "$dsoftbus_root_path/core/bus_center/lnn/lane_hub"
 native_source_path = rebase_path("$dsoftbus_root_path")
 dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
 enhanced = exec_script(
-        "$dsoftbus_root_path/run_shell_cmd.py",
-        [ "cd $native_source_path; if [ -d $dep_dir ]; then echo true; else echo false; fi" ],
+        "$dsoftbus_root_path/check_sub_module.py",
+        [ "$native_source_path","dep_dir"],
         "value")
 
 bus_center_hub_inc = [

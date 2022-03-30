@@ -1080,9 +1080,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest001, TestSize.Level0)
 {
     int32_t socketFd;
     SoftBusFdSet readFds;
-    struct timeval tv = {
-        .tv_sec = 5,
-        .tv_usec = 1
+    SoftBusSockTimeOut tv = {
+        .sec = 5,
+        .usec = 1
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -1107,9 +1107,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest002, TestSize.Level0)
     int32_t socketFd;
     SoftBusFdSet writeFds;
     SoftBusFdSet fdSelect;
-    struct timeval tv = {
-        .tv_sec = 5,
-        .tv_usec = 1
+    SoftBusSockTimeOut tv = {
+        .sec = 5,
+        .usec = 1
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -1135,9 +1135,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest003, TestSize.Level0)
     int32_t socketFd;
     SoftBusFdSet exceptFds;
     SoftBusFdSet fdSelect;
-    struct timeval tv = {
-        .tv_sec = 5,
-        .tv_usec = 1
+    SoftBusSockTimeOut tv = {
+        .sec = 5,
+        .usec = 1
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -1161,9 +1161,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest003, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest004, TestSize.Level0)
 {
     SoftBusFdSet readFds, writeFds, exceptFds;
-    struct timeval tv = {
-        .tv_sec = 5,
-        .tv_usec = 1
+    SoftBusSockTimeOut tv = {
+        .sec = 5,
+        .usec = 1
     };
     SoftBusSocketFdZero(&readFds);
     SoftBusSocketFdZero(&writeFds);
@@ -1180,9 +1180,9 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest004, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketSelectTest005, TestSize.Level0)
 {
-    struct timeval tv = {
-        .tv_sec = 5,
-        .tv_usec = 1
+    SoftBusSockTimeOut tv = {
+        .sec = 5,
+        .usec = 1
     };
     int32_t ret = SoftBusSocketSelect(SET_SIZE, NULL, NULL, NULL, &tv);
     EXPECT_TRUE(ret >= 0);
