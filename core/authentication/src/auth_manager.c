@@ -1027,6 +1027,8 @@ static void AuthOnError(int64_t authId, int operationCode, int errorCode, const 
 
 static char *AuthOnRequest(int64_t authReqId, int authForm, const char *reqParams)
 {
+    (void)reqParams;
+    (void)authForm;
     AuthManager *auth = NULL;
     auth = AuthGetManagerByAuthId(authReqId);
     if (auth == NULL) {

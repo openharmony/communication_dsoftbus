@@ -336,7 +336,7 @@ static void RemoveAllStartTimeSyncReq(TimeSyncReqInfo *info)
     }
     (void)LnnStopTimeSyncImpl(info->targetNetworkId);
     ListDelete(&info->node);
-    SoftBusFree(info);    
+    SoftBusFree(info);
 }
 
 static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
