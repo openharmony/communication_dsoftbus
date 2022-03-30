@@ -16,8 +16,6 @@
 #include "softbus_tcp_socket.h"
 #include <fcntl.h>
 #include <securec.h>
-#include <sys/select.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "softbus_adapter_errcode.h"
@@ -85,9 +83,9 @@ static int WaitEvent(int fd, short events, int timeout)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d invalid params", __func__, __LINE__, fd);
         return -1;
     }
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = timeout;
+    SoftBusSockTimeOut tv = {0};
+    tv.sec = 0;
+    tv.usec = timeout;
     int rc = 0;
     switch (events) {
         case SOFTBUS_SOCKET_OUT: {

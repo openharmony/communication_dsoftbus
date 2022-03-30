@@ -17,9 +17,9 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <stdint.h>
-#include <sys/select.h>
 #include <unistd.h>
 #include "softbus_adapter_define.h"
+#include "softbus_adapter_timer.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -72,6 +72,7 @@ extern "C" {
 /* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE SOFTBUS_FD_SETSIZE_
 
+typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {
     unsigned short saFamily; /* address family */
@@ -111,7 +112,7 @@ void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set);
 int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set);
 
 int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
-    struct timeval *timeOut);
+    SoftBusSockTimeOut *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 
