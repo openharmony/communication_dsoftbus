@@ -366,7 +366,7 @@ static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFd
             continue;
         }
         SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
-        if (listenerInfo->status != LISTENER_RUNNING) {
+        if (listenerInfo == NULL || listenerInfo->status != LISTENER_RUNNING) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!", i);
             SoftBusMutexUnlock(&g_listenerList[i].lock);
             continue;
