@@ -25,7 +25,7 @@
 #include <arpa/inet.h>
 #endif /* SUPPORT_SMARTGENIUS */
 
-#include "nstackx_log.h"
+#include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
 #include "nstackx_util.h"
 #include "nstackx_epoll.h"
@@ -93,9 +93,9 @@ static void IfAddrMsgHandle(struct nlmsghdr *msgHdr)
         if (!(IsUsbIpAddr((char *)RTA_DATA(tb[IFA_LABEL])) || IsP2pIpAddr((char *)RTA_DATA(tb[IFA_LABEL])))) {
             TimerSetTimeout(g_postponeTimer, NSTACKX_POSTPONE_DELAY_MS, NSTACKX_FALSE);
         }
-        LOGD(TAG, "Interface %s got new address.", interfaceInfo.name);
+        DFINDER_LOGD(TAG, "Interface %s got new address.", interfaceInfo.name);
     } else {
-        LOGD(TAG, "Interface %s delete address.", interfaceInfo.name);
+        DFINDER_LOGD(TAG, "Interface %s delete address.", interfaceInfo.name);
     }
 
     if (IsP2pIpAddr((char *)RTA_DATA(tb[IFA_LABEL]))) {
@@ -120,7 +120,7 @@ static void SmartGeniusCallback(void *arg)
     socklen = sizeof(struct sockaddr_nl);
     len = recvfrom(task->taskfd, innerBuf, BUFLEN, 0, (struct sockaddr *)&peer, &socklen);
     if (len <= 0) {
-        LOGE(TAG, "recvfrom error %d", errno);
+        DFINDER_LOGE(TAG, "recvfrom error %d", errno);
         return;
     }
 
@@ -134,9 +134,9 @@ static void SmartGeniusCallback(void *arg)
         case NLMSG_ERROR: {
             nlmErr = NLMSG_DATA(innerNlmsghdr);
             if (nlmErr->error == 0) {
-                LOGD(TAG, "NLMSG_ACK");
+                DFINDER_LOGD(TAG, "NLMSG_ACK");
             } else {
-                LOGE(TAG, "NLMSG_ERROR");
+                DFINDER_LOGE(TAG, "NLMSG_ERROR");
             }
             break;
         }
@@ -169,18 +169,18 @@ int32_t SmartGeniusInit(EpollDesc epollfd)
 
     fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (fd < 0) {
-        LOGE(TAG, "unable to create netlink socket: %d", errno);
+        DFINDER_LOGE(TAG, "unable to create netlink socket: %d", errno);
         return NSTACKX_EFAILED;
     }
 
     if (bind(fd, (struct sockaddr *)&local, sizeof(local)) < 0) {
-        LOGE(TAG, "bind for netlink socket failed: %d", errno);
+        DFINDER_LOGE(TAG, "bind for netlink socket failed: %d", errno);
         close(fd);
         return NSTACKX_EFAILED;
     }
 
     if (getsockname(fd, (struct sockaddr *)&local, &len) < 0) {
-        LOGE(TAG, "getsockname failed: %d", errno);
+        DFINDER_LOGE(TAG, "getsockname failed: %d", errno);
         close(fd);
         return NSTACKX_EFAILED;
     }
@@ -194,7 +194,7 @@ int32_t SmartGeniusInit(EpollDesc epollfd)
     g_netlinkTask.count = 0;
     if (RegisterEpollTask(&g_netlinkTask, EPOLLIN) != NSTACKX_EOK) {
         close(fd);
-        LOGE(TAG, "RegisterEpollTask fail");
+        DFINDER_LOGE(TAG, "RegisterEpollTask fail");
         return NSTACKX_EFAILED;
     }
 
@@ -202,7 +202,7 @@ int32_t SmartGeniusInit(EpollDesc epollfd)
     if (g_postponeTimer == NULL) {
         DeRegisterEpollTask(&g_netlinkTask);
         close(g_netlinkTask.taskfd);
-        LOGE(TAG, "Create timer fail");
+        DFINDER_LOGE(TAG, "Create timer fail");
         return NSTACKX_EFAILED;
     }
 
@@ -226,13 +226,13 @@ void SmartGeniusClean(void)
 void ResetSmartGeniusTaskCount(uint8_t isBusy)
 {
     if (isBusy) {
-        LOGI(TAG, "in this busy interval: g_netlinkTask count %llu", g_netlinkTask.count);
+        DFINDER_LOGI(TAG, "in this busy interval: g_netlinkTask count %llu", g_netlinkTask.count);
     }
     g_netlinkTask.count = 0;
 
     if (g_postponeTimer != NULL) {
         if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_postponeTimer task count %llu", g_postponeTimer->task.count);
+            DFINDER_LOGI(TAG, "in this busy interval: g_postponeTimer task count %llu", g_postponeTimer->task.count);
         }
         g_postponeTimer->task.count = 0;
     }
