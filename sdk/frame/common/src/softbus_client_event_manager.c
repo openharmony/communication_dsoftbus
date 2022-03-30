@@ -40,7 +40,7 @@ int EventClientInit(void)
     if (g_isInited) {
         return SOFTBUS_OK;
     }
-    
+
     if (g_observerList != NULL) {
         SoftBusFree(g_observerList);
     }

@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 int32_t TransAuthInit(IServerChannelCallBack *cb);
-void TransAuthDeinit();
+void TransAuthDeinit(void);
 int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt, int32_t *channedId);

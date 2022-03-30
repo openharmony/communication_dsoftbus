@@ -193,12 +193,12 @@ static void OnSessionClosed(int sessionId)
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG2_INFO("session msg received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session msg received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void TestSessionListenerInit(void)
