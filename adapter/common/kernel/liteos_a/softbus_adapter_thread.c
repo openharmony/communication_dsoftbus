@@ -366,14 +366,24 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    pthread_condattr_t attr = {0};
+    int ret = pthread_condattr_init(&attr);
+    if (ret != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_condattr_init failed, ret[%{public}d]", ret);
+        return SOFTBUS_ERR;
+    }
+    ret = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC_RAW);
+    if (ret != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "set clock failed, ret[%{public}d]", ret);
+        return SOFTBUS_ERR;
+    }
 
     pthread_cond_t *tempCond = (pthread_cond_t *)SoftBusCalloc(sizeof(pthread_cond_t));
     if (tempCond == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "tempCond is null");
         return SOFTBUS_ERR;
     }
-    int ret;
-    ret = pthread_cond_init(tempCond, NULL);
+    ret = pthread_cond_init(tempCond, &attr);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondInit failed, ret[%{public}d]", ret);
         SoftBusFree(tempCond);
