@@ -26,11 +26,11 @@
 #include "coap.h"
 #include "coap_client.h"
 #include "coap_discover.h"
-#include "nstackx_util.h"
 #include "nstackx_device.h"
+#include "nstackx_dfinder_log.h"
 #include "nstackx_epoll.h"
 #include "nstackx_error.h"
-#include "nstackx_log.h"
+#include "nstackx_util.h"
 
 #define TAG "nStackXCoAP"
 
@@ -114,24 +114,24 @@ static void CoAPEpollErrorHandle(void *data)
     coap_socket_t *socket = task->ptr;
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     if (IsCoapCtxEndpointSocket(g_ctx, socket->fd)) {
-        LOGE(TAG, "error of g_ctx's socket occurred");
+        DFINDER_LOGE(TAG, "error of g_ctx's socket occurred");
         g_ctxSocketErrFlag = NSTACKX_TRUE;
         return;
     }
 
     if (IsCoapCtxEndpointSocket(g_p2pCtx, socket->fd)) {
-        LOGE(TAG, "error of g_p2pCtx's socket occurred");
+        DFINDER_LOGE(TAG, "error of g_p2pCtx's socket occurred");
         g_p2pCtxSocketErrFlag = NSTACKX_TRUE;
         return;
     }
 
     if (IsCoapCtxEndpointSocket(g_usbCtx, socket->fd)) {
-        LOGE(TAG, "error of g_usbCtx's socket occurred");
+        DFINDER_LOGE(TAG, "error of g_usbCtx's socket occurred");
         g_usbCtxSocketErrFlag = NSTACKX_TRUE;
         return;
     }
 
-    LOGE(TAG, "coap session socket error occurred and close it");
+    DFINDER_LOGE(TAG, "coap session socket error occurred and close it");
     DeRegisterEpollTask(task);
     CloseDesc(socket->fd);
     socket->fd = -1;
@@ -179,7 +179,7 @@ uint32_t GetTimeout(struct coap_context_t *ctx, uint32_t *socketNum, EpollTask *
     }
     if (*socketNum > MAX_COAP_SOCKET_NUM) {
         *socketNum = MAX_COAP_SOCKET_NUM;
-        LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
+        DFINDER_LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
     }
     for (i = 0; i < *socketNum; i++) {
         events = 0;
@@ -210,21 +210,21 @@ uint32_t GetTimeout(struct coap_context_t *ctx, uint32_t *socketNum, EpollTask *
 void DeRegisterCoAPEpollTask(void)
 {
     if (g_ctxSocketErrFlag) {
-        LOGI(TAG, "error of g_ctx's socket occurred and destroy g_ctx");
+        DFINDER_LOGI(TAG, "error of g_ctx's socket occurred and destroy g_ctx");
         g_ctxSocketErrFlag = NSTACKX_FALSE;
         NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
     } else {
         DeRegisteCoAPEpollTaskCtx(g_ctx, &g_socketNum, g_taskList);
     }
     if (g_p2pCtxSocketErrFlag) {
-        LOGI(TAG, "error of g_p2pctx's socket occurred and destroy g_ctx");
+        DFINDER_LOGI(TAG, "error of g_p2pctx's socket occurred and destroy g_ctx");
         CoapP2pServerDestroy();
     } else {
         DeRegisteCoAPEpollTaskCtx(g_p2pCtx, &g_p2pSocketNum, g_p2pTaskList);
     }
 
     if (g_usbCtxSocketErrFlag) {
-        LOGI(TAG, "error of g_usbCtx's socket occurred and destroy g_ctx");
+        DFINDER_LOGI(TAG, "error of g_usbCtx's socket occurred and destroy g_ctx");
         CoapUsbServerDestroy();
     } else {
         DeRegisteCoAPEpollTaskCtx(g_usbCtx, &g_usbSocketNum, g_usbTaskList);
@@ -242,7 +242,7 @@ void DeRegisteCoAPEpollTaskCtx(struct coap_context_t *ctx, uint32_t *socketNum, 
 
     if (*socketNum > MAX_COAP_SOCKET_NUM) {
         *socketNum = MAX_COAP_SOCKET_NUM;
-        LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
+        DFINDER_LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
     }
 
     for (i = 0; i < *socketNum; i++) {
@@ -259,25 +259,25 @@ void DeRegisteCoAPEpollTaskCtx(struct coap_context_t *ctx, uint32_t *socketNum, 
 
 int32_t CoapServerInit(const struct in_addr *ip)
 {
-    LOGD(TAG, "CoapServerInit is called");
+    DFINDER_LOGD(TAG, "CoapServerInit is called");
 
     char addrStr[NI_MAXHOST] = COAP_SRV_DEFAULT_ADDR;
     char portStr[NI_MAXSERV] = COAP_SRV_DEFAULT_PORT;
 
     if (!IsWifiApConnected()) {
-        LOGD(TAG, "wifi not connected");
+        DFINDER_LOGD(TAG, "wifi not connected");
         return NSTACKX_EOK;
     }
 
     if (g_ctx != NULL) {
-        LOGI(TAG, "coap server need to change");
+        DFINDER_LOGI(TAG, "coap server need to change");
         CoapServerDestroy();
     }
 
     coap_startup();
     g_ctx = CoapGetContext(addrStr, portStr, NSTACKX_TRUE, ip);
     if (g_ctx == NULL) {
-        LOGE(TAG, "coap init get context failed");
+        DFINDER_LOGE(TAG, "coap init get context failed");
         return NSTACKX_EFAILED;
     }
 
@@ -289,13 +289,13 @@ int32_t CoapServerInit(const struct in_addr *ip)
 
 int32_t CoapP2pServerInit(const struct in_addr *ip)
 {
-    LOGD(TAG, "CoapP2pServerInit is called");
+    DFINDER_LOGD(TAG, "CoapP2pServerInit is called");
 
     char addrStr[NI_MAXHOST] = {0};
     char portStr[NI_MAXSERV] = COAP_SRV_DEFAULT_PORT;
 
     if (g_p2pCtx != NULL) {
-        LOGI(TAG, "coap p2p server init has finished");
+        DFINDER_LOGI(TAG, "coap p2p server init has finished");
         return NSTACKX_EOK;
     }
 
@@ -304,14 +304,14 @@ int32_t CoapP2pServerInit(const struct in_addr *ip)
     }
 
     if (inet_ntop(AF_INET, ip, addrStr, NI_MAXHOST) == NULL) {
-        LOGE(TAG, "inet_ntop failed");
+        DFINDER_LOGE(TAG, "inet_ntop failed");
         return NSTACKX_EFAILED;
     }
 
     coap_startup();
     g_p2pCtx = CoapGetContext(addrStr, portStr, NSTACKX_TRUE, ip);
     if (g_p2pCtx == NULL) {
-        LOGE(TAG, "coap p2p init get context failed");
+        DFINDER_LOGE(TAG, "coap p2p init get context failed");
         return NSTACKX_EFAILED;
     }
 
@@ -324,13 +324,13 @@ int32_t CoapP2pServerInit(const struct in_addr *ip)
 
 int32_t CoapUsbServerInit(const struct in_addr *ip)
 {
-    LOGD(TAG, "CoapUsbServerInit is called");
+    DFINDER_LOGD(TAG, "CoapUsbServerInit is called");
 
     char addrStr[NI_MAXHOST] = {0};
     char portStr[NI_MAXSERV] = COAP_SRV_DEFAULT_PORT;
 
     if (g_usbCtx != NULL) {
-        LOGI(TAG, "coap usb server init has finished");
+        DFINDER_LOGI(TAG, "coap usb server init has finished");
         return NSTACKX_EOK;
     }
 
@@ -339,14 +339,14 @@ int32_t CoapUsbServerInit(const struct in_addr *ip)
     }
 
     if (inet_ntop(AF_INET, ip, addrStr, NI_MAXHOST) == NULL) {
-        LOGE(TAG, "inet_ntop failed");
+        DFINDER_LOGE(TAG, "inet_ntop failed");
         return NSTACKX_EFAILED;
     }
 
     coap_startup();
     g_usbCtx = CoapGetContext(addrStr, portStr, NSTACKX_TRUE, ip);
     if (g_usbCtx == NULL) {
-        LOGE(TAG, "coap usb init get context failed");
+        DFINDER_LOGE(TAG, "coap usb init get context failed");
         return NSTACKX_EFAILED;
     }
     SetUsbIp(ip);
@@ -359,7 +359,7 @@ int32_t CoapUsbServerInit(const struct in_addr *ip)
 
 void CoapServerDestroy(void)
 {
-    LOGD(TAG, "CoapServerDestroy is called");
+    DFINDER_LOGD(TAG, "CoapServerDestroy is called");
 
     uint32_t i;
     g_ctxSocketErrFlag = NSTACKX_FALSE;
@@ -381,7 +381,7 @@ void CoapServerDestroy(void)
 
 void CoapP2pServerDestroy(void)
 {
-    LOGD(TAG, "CoapP2pServerDestroy is called");
+    DFINDER_LOGD(TAG, "CoapP2pServerDestroy is called");
 
     uint32_t i;
     g_p2pCtxSocketErrFlag = NSTACKX_FALSE;
@@ -391,7 +391,7 @@ void CoapP2pServerDestroy(void)
 
     if (g_p2pSocketNum > MAX_COAP_SOCKET_NUM) {
         g_p2pSocketNum = MAX_COAP_SOCKET_NUM;
-        LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
+        DFINDER_LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
     }
 
     for (i = 0; i < g_p2pSocketNum; i++) {
@@ -409,7 +409,7 @@ void CoapP2pServerDestroy(void)
 
 void CoapUsbServerDestroy(void)
 {
-    LOGD(TAG, "CoapUsbServerDestroy is called");
+    DFINDER_LOGD(TAG, "CoapUsbServerDestroy is called");
 
     uint32_t i;
     g_usbCtxSocketErrFlag = NSTACKX_FALSE;
@@ -419,7 +419,7 @@ void CoapUsbServerDestroy(void)
 
     if (g_usbSocketNum > MAX_COAP_SOCKET_NUM) {
         g_usbSocketNum = MAX_COAP_SOCKET_NUM;
-        LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
+        DFINDER_LOGI(TAG, "socketNum exccedd MAX_COAP_SOCKET_NUM, and set it to MAX_COAP_SOCKET_NUM");
     }
 
     for (i = 0; i < g_usbSocketNum; i++) {
@@ -459,7 +459,7 @@ void ResetCoapSocketTaskCount(uint8_t isBusy)
         g_usbTaskList[i].count = 0;
     }
     if (isBusy) {
-        LOGI(TAG, "in this busy interval, socket task count: wifi %llu, p2p %llu, usb %llu,"
+        DFINDER_LOGI(TAG, "in this busy interval, socket task count: wifi %llu, p2p %llu, usb %llu,"
             "read %llu, write %llu, error %llu",
             totalTaskCount, totalP2pTaskCount, totalUsbTaskCount,
             g_socketEventNum[SOCKET_READ_EVENT],
