@@ -17,8 +17,8 @@ libsoftbus_stream_sdk_path = "$dsoftbus_root_path/sdk/transmission/trans_channel
 dstream_native_source_path = rebase_path("$dsoftbus_root_path")
 dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
 enhanced = exec_script(
-        "$dsoftbus_root_path/run_shell_cmd.py",
-        [ "cd $dstream_native_source_path; if [ -f $dstream_dep_file ]; then echo true; else echo false; fi" ],
+        "$dsoftbus_root_path/check_sub_module.py",
+        [ "$dstream_native_source_path","dstream_dep_file"],
         "value")
 
 libsoftbus_stream_inc = [

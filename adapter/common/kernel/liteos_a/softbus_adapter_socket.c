@@ -316,7 +316,7 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
 
     sysTimeOut.tv_sec = timeOut->sec;
     sysTimeOut.tv_usec = timeOut->usec;
-    int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, sysTimeOut);
+    int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, &sysTimeOut);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));
         return GetErrorCode();
