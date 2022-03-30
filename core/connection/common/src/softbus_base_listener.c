@@ -358,6 +358,9 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
+        if (g_listenerList[i].info == NULL) {
+            continue;
+        }
         if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock failed");
             continue;
