@@ -37,15 +37,15 @@ if (defined(ohos_lite)) {
   }
 } else {
   disc_sdk_inc += [
-    "$dsoftbus_root_path/sdk/discovery/ipc/standard/include",
-    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "//utils/system/safwk/native/include",
   ]
   disc_sdk_src += [
-    "$dsoftbus_root_path/sdk/discovery/ipc/standard/src/disc_server_proxy.cpp",
-    "$dsoftbus_root_path/sdk/discovery/ipc/standard/src/disc_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/src/disc_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/discovery/ipc/$os_type/src/disc_server_proxy_standard.cpp",
     "$dsoftbus_root_path/sdk/discovery/manager/src/client_disc_manager.c",
   ]
 }

@@ -20,13 +20,13 @@ if (defined(ohos_lite)) {
     "//base/security/permission/interfaces/kits/permission_lite",
   ]
   if (ohos_kernel_type == "liteos_m") {
-    softbus_permission_src = [ "$dsoftbus_core_path/common/security/permission/mini_system/softbus_permission.c" ]
+    softbus_permission_src = [ "$dsoftbus_core_path/common/security/permission/mini/softbus_permission.c" ]
     softbus_permission_deps = []
   } else {
     softbus_permission_src = [
       "$dsoftbus_core_path/common/security/permission/common/permission_entry.c",
-      "$dsoftbus_core_path/common/security/permission/small_system/permission_utils.c",
-      "$dsoftbus_core_path/common/security/permission/small_system/softbus_permission.c",
+      "$dsoftbus_core_path/common/security/permission/small/permission_utils.c",
+      "$dsoftbus_core_path/common/security/permission/small/softbus_permission.c",
     ]
     softbus_permission_deps = [
       "//base/security/permission/services/permission_lite/pms_client:pms_client",
@@ -36,16 +36,16 @@ if (defined(ohos_lite)) {
 } else {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
-    "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include",
+    "//foundation/appexecfwk/$os_type/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
+    "//foundation/aafwk/$os_type/frameworks/kits/appkit/native/app/include",
+    "//foundation/appexecfwk/$os_type/interfaces/innerkits/appexecfwk_base/include",
+    "//foundation/aafwk/$os_type/interfaces/innerkits/want/include",
     "//utils/system/safwk/native/include",
   ]
   softbus_permission_src = [
     "$dsoftbus_core_path/common/security/permission/common/permission_entry.c",
-    "$dsoftbus_core_path/common/security/permission/standard_system/permission_utils.cpp",
-    "$dsoftbus_core_path/common/security/permission/standard_system/softbus_permission.cpp",
+    "$dsoftbus_core_path/common/security/permission/$os_type/permission_utils.cpp",
+    "$dsoftbus_core_path/common/security/permission/$os_type/softbus_permission.cpp",
   ]
   softbus_permission_deps = [
     "//third_party/cJSON:cjson_static",

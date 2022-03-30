@@ -31,12 +31,12 @@ if (defined(ohos_lite)) {
   }
 } else {
   trans_ipc_proxy_sdk_inc += [
-    "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/include",
     "//utils/system/safwk/native/include",
   ]
 
   trans_ipc_proxy_sdk_src = [
-    "$dsoftbus_root_path/sdk/transmission/ipc/standard/src/trans_server_proxy.cpp",
-    "$dsoftbus_root_path/sdk/transmission/ipc/standard/src/trans_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/src/trans_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/src/trans_server_proxy_standard.cpp",
   ]
 }

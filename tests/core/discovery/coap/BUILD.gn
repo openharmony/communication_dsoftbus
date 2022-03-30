@@ -56,7 +56,7 @@ if (defined(ohos_lite)) {
       "-Wall",
       "-std=c99",
     ]
-    deps = [ "$dsoftbus_root_path/core/frame/standard/server:softbus_server" ]
+    deps = [ "$dsoftbus_root_path/core/frame/$os_type/server:softbus_server" ]
     part_name = "softbus_L2"
     subsystem_name = "communication"
   }

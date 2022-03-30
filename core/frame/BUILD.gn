@@ -122,10 +122,10 @@ if (defined(ohos_lite)) {
   ohos_prebuilt_etc("softbus_server.rc") {
     relative_install_dir = "init"
     if (use_musl) {
-      source = "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server_musl.cfg"
+      source = "$dsoftbus_root_path/core/frame/$os_type/init/src/softbus_server_musl.cfg"
     } else {
       source =
-          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
+          "$dsoftbus_root_path/core/frame/$os_type/init/src/softbus_server.cfg"
     }
 
     part_name = "dsoftbus_standard"
@@ -142,8 +142,8 @@ if (defined(ohos_lite)) {
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [
       "$dsoftbus_root_path/core/frame/common/include",
-      "$dsoftbus_root_path/core/frame/standard/client_manager/include",
-      "$dsoftbus_root_path/core/frame/standard/init/include",
+      "$dsoftbus_root_path/core/frame/$os_type/client_manager/include",
+      "$dsoftbus_root_path/core/frame/$os_type/init/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_standard_feature_product_config_path/spec_config",
@@ -151,13 +151,13 @@ if (defined(ohos_lite)) {
     ]
     sources = dsoftbus_server_common_src
     sources += [
-      "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",
+      "$dsoftbus_root_path/sdk/frame/$os_type/src/if_softbus_client.cpp",
       "common/src/softbus_server_frame.c",
-      "standard/client_manager/src/softbus_client_info_manager.cpp",
-      "standard/init/src/if_softbus_server.cpp",
-      "standard/init/src/softbus_server.cpp",
-      "standard/init/src/softbus_server_death_recipient.cpp",
-      "standard/init/src/softbus_server_stub.cpp",
+      "$os_type/client_manager/src/softbus_client_info_manager.cpp",
+      "$os_type/init/src/if_softbus_server.cpp",
+      "$os_type/init/src/softbus_server.cpp",
+      "$os_type/init/src/softbus_server_death_recipient.cpp",
+      "$os_type/init/src/softbus_server_stub.cpp",
     ]
     deps = dsoftbus_server_common_deps
     deps += [
