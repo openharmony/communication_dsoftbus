@@ -31,7 +31,7 @@ ohos_executable("softbus_test") {
   if (is_standard_system) {
     defines = [ "STANDARD_SYSTEM_ENABLE" ]
 
-    deps = [ "$dsoftbus_root_path/core/frame/standard/client:softbus_client" ]
+    deps = [ "$dsoftbus_root_path/core/frame/$os_type/client:softbus_client" ]
     part_name = "softbus_L2"
   }
   subsystem_name = "communication"

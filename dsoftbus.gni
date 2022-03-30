@@ -42,6 +42,11 @@ if (defined(ohos_lite)) {
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared"
   }
 } else {
+  if (defined(os_win)) {
+    os_type = "windows"
+  } else {
+    os_type = "standard"
+  }
   import("//build/ohos.gni")
   import(
       "$dsoftbus_standard_feature_product_config_path/feature_config/standard/config.gni")
