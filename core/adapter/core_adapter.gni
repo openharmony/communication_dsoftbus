@@ -47,17 +47,17 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "//foundation/aafwk/$os_type/frameworks/kits/ability/native/include",
-      "//foundation/aafwk/$os_type/interfaces/innerkits/want/include/ohos/aafwk/content",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
+      "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
-      "//foundation/aafwk/$os_type/interfaces/innerkits/dataobs_manager/include",
+      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager/include",
     ]
 
     bus_center_core_adapter_deps = [
-      "//foundation/aafwk/$os_type/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/aafwk/$os_type/interfaces/innerkits/dataobs_manager:dataobs_manager",
-      "//foundation/aafwk/$os_type/interfaces/innerkits/uri:zuri",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
+      "//foundation/aafwk/standard/interfaces/innerkits/uri:zuri",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability:native_dataability",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb:native_rdb",
     ]

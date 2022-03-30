@@ -36,10 +36,10 @@ if (defined(ohos_lite)) {
 } else {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
-    "//foundation/appexecfwk/$os_type/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
-    "//foundation/aafwk/$os_type/frameworks/kits/appkit/native/app/include",
-    "//foundation/appexecfwk/$os_type/interfaces/innerkits/appexecfwk_base/include",
-    "//foundation/aafwk/$os_type/interfaces/innerkits/want/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core/include/bundlemgr",
+    "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//utils/system/safwk/native/include",
   ]
   softbus_permission_src = [
