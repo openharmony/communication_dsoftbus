@@ -372,7 +372,7 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_condattr_init failed, ret[%{public}d]", ret);
         return SOFTBUS_ERR;
     }
-    ret = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC_RAW);
+    ret = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set clock failed, ret[%{public}d]", ret);
         return SOFTBUS_ERR;
