@@ -27,24 +27,15 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
-<<<<<<< HEAD
-#include <pthread.h>
-=======
-#include <securec.h>
->>>>>>> 15ddbbd2 (LNN replace south interface.)
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-<<<<<<< HEAD
 #include "bus_center_event.h"
 #include "lnn_network_manager.h"
 #include "securec.h"
-=======
-#include "lnn_ip_utils.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
->>>>>>> 15ddbbd2 (LNN replace south interface.)
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -194,18 +185,10 @@ static void *NetlinkMonitorThread(void *para)
 
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
-<<<<<<< HEAD
     pthread_t tid;
     if (pthread_create(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
-=======
-    SoftBusThread tid;
 
-    if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink event handler is null");
-        return SOFTBUS_ERR;
-    }
     if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
->>>>>>> 15ddbbd2 (LNN replace south interface.)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
