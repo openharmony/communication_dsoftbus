@@ -185,9 +185,7 @@ static void *NetlinkMonitorThread(void *para)
 
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
-    pthread_t tid;
-    if (pthread_create(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
-
+    SoftBusThread tid;
     if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
