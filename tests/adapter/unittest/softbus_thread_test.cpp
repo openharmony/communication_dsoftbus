@@ -17,25 +17,15 @@
 #include "gtest/gtest.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
-#include <unistd.h>
-#include <pthread.h>
 
 using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-typedef struct {
-    uint32_t value;
-    SoftBusMutex mutexStatic;
-}DataInfo;
-
-static DataInfo g_dataInfo = {
-    .value = 200,
-};
 static SoftBusCond g_cond;
 static SoftBusMutex g_mutex;
 const int32_t DELAY_TIME = 1000;
-static pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
+
 class DsoftbusThreadTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
@@ -60,14 +50,14 @@ void DsoftbusThreadTest::TearDown()
 {
 }
 
-void *SoftBusThreadTask(void *arg)
+static void *SoftBusThreadTask(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
     SoftBusSleepMs(DELAY_TIME);
     return static_cast<void *>(const_cast<char *>("SoftBusThreadTask"));
 }
 
-void *ThreadSelfTest(void *arg)
+static void *ThreadSelfTest(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
     SoftBusThread thread = SoftBusThreadGetSelf();
@@ -76,7 +66,7 @@ void *ThreadSelfTest(void *arg)
     return nullptr;
 }
 
-void *ThreadWaitTest(void *arg)
+static void *ThreadWaitTest(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
     int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, NULL);
@@ -85,7 +75,7 @@ void *ThreadWaitTest(void *arg)
     return nullptr;
 }
 
-void *ThreadSignalTest(void *arg)
+static void *ThreadSignalTest(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
     SoftBusSleepMs(DELAY_TIME);
@@ -93,78 +83,7 @@ void *ThreadSignalTest(void *arg)
     EXPECT_EQ(SOFTBUS_OK, ret);
     return nullptr;
 }
-static bool isInit = false;
-static void InitModule(void)
-{
-    SoftBusThread tid = SoftBusThreadGetSelf();
-    printf("InitModule tid: %u success\r\n", (uint32_t)tid);
-}
-static int32_t InitCfg(void)
-{
-    SoftBusThread tid = SoftBusThreadGetSelf();
 
-    if (isInit == true) {
-        printf("cfg is already init, tid:%u \r\n", (uint32_t)tid);
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusMutexInit(&g_dataInfo.mutexStatic, NULL) != SOFTBUS_OK) {
-        printf("SoftBusMutexInit failed, tid:%u \r\n", (uint32_t)tid);
-        return SOFTBUS_ERR;
-    }
-    
-    if (SoftBusMutexLock(&g_dataInfo.mutexStatic) != SOFTBUS_OK) {
-        printf("SoftBusMutexLock failed, tid:%u \r\n", (uint32_t)tid);
-        return SOFTBUS_ERR;
-    }
-    if (isInit == true) {
-        printf("cfg is already init again, tid:%u \r\n", (uint32_t)tid);
-        return SOFTBUS_ERR;
-    }
-    InitModule();
-
-    SoftBusSleepMs(DELAY_TIME * 5);
-    isInit = true;
-    (void)SoftBusMutexUnlock(&g_dataInfo.mutexStatic);
-    printf("InitCfg tid:%u success\r\n", (uint32_t)tid);
-    return SOFTBUS_OK;
-    
-}
-
-static void *Thread1Test(void *arg)
-{
-    SoftBusThread tid = SoftBusThreadGetSelf();
-    printf("----------%s[%u]--------\n", __FUNCTION__, (uint32_t)tid);
-    int32_t ret;
-    pthread_rwlock_rdlock(&rwlock);
-    ret = InitCfg();
-
-    if (ret != SOFTBUS_OK) {
-        printf("----------%s InitCfg fail--------\n", __FUNCTION__);
-        pthread_rwlock_unlock(&rwlock);
-        return nullptr;
-    }
-    printf("----------%s success--------\n", __FUNCTION__);
-    pthread_rwlock_unlock(&rwlock);
-    return nullptr;
-}
-
-static void *Thread2Test(void *arg)
-{
-    SoftBusThread tid = SoftBusThreadGetSelf();
-    printf("----------%s[%u]--------\n", __FUNCTION__, (uint32_t)tid);
-    int32_t ret;
-    pthread_rwlock_rdlock(&rwlock);
-    ret = InitCfg();
-    if (ret != SOFTBUS_OK) {
-        printf("----------%s InitCfg fail--------\n", __FUNCTION__);
-        pthread_rwlock_unlock(&rwlock);
-        return nullptr;
-    }
-    pthread_rwlock_unlock(&rwlock);
-    return nullptr;
-}
-
-#if 1
 /*
 * @tc.name: SoftbusMutexAttrInitTest001
 * @tc.desc: mutexAttr is nullptr
@@ -1126,48 +1045,6 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
     ret = SoftBusThreadJoin(threadWait, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusThreadJoin(threadSignal, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-#endif
-/*
-* @tc.name: SoftBusThreadFullTest001
-* @tc.desc: thread process test
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest002, Function | MediumTest | Level2)
-{
-    SoftBusThread thread1 = 0;
-    SoftBusThread thread2 = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
-    int32_t ret;
-    ret = SoftBusThreadAttrInit(&threadAttr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    //ret = SoftBusCondInit(&g_cond);
-    //EXPECT_EQ(SOFTBUS_OK, ret);
-    //ret = SoftBusMutexInit(&g_mutex, NULL);
-    //EXPECT_EQ(SOFTBUS_OK, ret);
-    pthread_rwlock_wrlock(&rwlock);
-    SoftBusSleepMs(DELAY_TIME);
-    
-    ret = SoftBusThreadCreate(&thread1, &threadAttr, Thread1Test, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread1 != 0);
-
-    ret = SoftBusThreadCreate(&thread2, &threadAttr, Thread2Test, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_TRUE(thread2 != 0);
-
-
-    SoftBusSleepMs(DELAY_TIME * 5);
-    printf("----------start unlock rw lock--------\n");
-    //ret = SoftBusCondBroadcast(&g_cond);
-    //EXPECT_EQ(SOFTBUS_OK, ret);
-    pthread_rwlock_unlock(&rwlock);
-    ret = SoftBusThreadJoin(thread1, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusThreadJoin(thread2, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }
