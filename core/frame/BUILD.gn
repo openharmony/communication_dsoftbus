@@ -152,12 +152,12 @@ if (defined(ohos_lite)) {
     sources = dsoftbus_server_common_src
     sources += [
       "$dsoftbus_root_path/sdk/frame/$os_type/src/if_softbus_client.cpp",
-      "common/src/softbus_server_frame.c",
       "$os_type/client_manager/src/softbus_client_info_manager.cpp",
       "$os_type/init/src/if_softbus_server.cpp",
       "$os_type/init/src/softbus_server.cpp",
       "$os_type/init/src/softbus_server_death_recipient.cpp",
       "$os_type/init/src/softbus_server_stub.cpp",
+      "common/src/softbus_server_frame.c",
     ]
     deps = dsoftbus_server_common_deps
     deps += [
