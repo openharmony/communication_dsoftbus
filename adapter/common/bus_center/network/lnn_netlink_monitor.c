@@ -53,7 +53,7 @@ static int32_t CreateNetlinkSocket(void)
     struct sockaddr_nl nladdr;
     int32_t sz = DEFAULT_NETLINK_RECVBUF;
 
-    int32_t ret= SoftBusSocketCreate(SOFTBUS_PF_NETLINK, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_CLOEXEC,
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_PF_NETLINK, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_CLOEXEC,
         NETLINK_ROUTE, &sockFd);
     if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open netlink socket failed");

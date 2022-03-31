@@ -293,7 +293,6 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
 int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
     SoftBusSockTimeOut *timeOut)
 {
-    
     if (timeOut == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timeOut is null");
         return SOFTBUS_ADAPTER_ERR;
