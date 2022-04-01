@@ -39,7 +39,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \
     (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= sizeof(struct nlmsghdr)) && \

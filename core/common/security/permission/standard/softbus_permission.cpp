@@ -26,8 +26,12 @@
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
+#ifndef PERMISSION_JSON_FILE_PATH
+#define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"
+#endif
+
 namespace {
-    const std::string PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
+    const std::string PERMISSION_JSON_FILE = PERMISSION_JSON_FILE_PATH;
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
