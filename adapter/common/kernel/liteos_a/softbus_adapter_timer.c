@@ -118,7 +118,7 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
         return SOFTBUS_INVALID_PARAM;
     }
     struct timespec time = {0};
-    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &time);
+    (void)clock_gettime(CLOCK_MONOTONIC, &time);
 
     sysTime->sec = time.tv_sec;
     sysTime->usec = time.tv_nsec / NS_PER_USECOND;
