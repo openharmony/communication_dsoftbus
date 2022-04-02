@@ -15,6 +15,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 NSTACKX_ROOT = "//foundation/communication/dsoftbus/components/nstackx"
 cflags = [ "-DENABLE_DFINDER_HILOG" ]
+if (dsoftbus_standard_feature_ifname_prefix) {
+  cflags += [ "-DETH_DEV_NAME_PRE=\"br\"" ]
+}
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_a") {
@@ -115,7 +118,7 @@ if (defined(ohos_lite)) {
 
   config("nstackx_util_header") {
     include_dirs = [
-      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_util/interface",
+      "interface",
       "platform/unix",
     ]
   }
@@ -129,7 +132,7 @@ if (defined(ohos_lite)) {
     cflags_cc = cflags
     include_dirs = [
       "include",
-      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_util/interface",
+      "interface",
       "platform/unix",
       "$NSTACKX_ROOT/nstackx_core/",
       "//utils/native/base/include/",
