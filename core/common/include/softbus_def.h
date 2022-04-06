@@ -117,6 +117,7 @@ typedef struct {
     char *peerIp;
     int32_t peerPort;
     int32_t routeType;
+    int32_t streamType;
 } ChannelInfo;
 
 #ifdef __cplusplus
