@@ -60,7 +60,7 @@ void DsoftbusOtherTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, Function | MediumTest | Level1)
+HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 {
     char value[] = "abcdefg";
     int32_t len = 10;
@@ -80,7 +80,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, Function | MediumTest | Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, Function | MediumTest | Level1)
+HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, TestSize.Level0)
 {
     int32_t len = 10;
     int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, NULL, len);
@@ -105,7 +105,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, Function | MediumTest | Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
 {
     char value[] = "abcdefg";
     int32_t len = 0;
@@ -122,7 +122,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, Function | MediumTest | Level0)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
 {
     char value[] = "abcdefg";
     int32_t len = 10;
@@ -139,7 +139,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, Function | MediumTest | Level0)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char netmask[] = "abcdefd";
@@ -155,7 +155,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName001, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char netmask[] = "abcdefd";
@@ -174,7 +174,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName002, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char ip[32] = "0";
@@ -189,7 +189,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, Function | MediumTest | Lev
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, TestSize.Level0)
 {
     const char *writeBuf="abcdef";
     char readbuf[1024] = {"\0"};
@@ -206,7 +206,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 100;
@@ -223,7 +223,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 0;
@@ -237,7 +237,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
 {
     const char *writeBuf="abcdef";
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
@@ -250,7 +250,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, Function | MediumTest | Le
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
 {
     const char *writeBuf="abcdef";
     int32_t ret = SoftBusWriteFile(nullptr, writeBuf, strlen(writeBuf));
@@ -266,7 +266,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, Function | MediumTest | Le
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
 {
     const char *writeBuf="abcdef";
     int32_t len = 0;
@@ -284,7 +284,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, Function | MediumTest | Le
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(0);
     EXPECT_TRUE(ret != NULL);
@@ -297,7 +297,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest001, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(MAX_MALLOC_SIZE + 1);
     EXPECT_EQ(NULL, ret);
@@ -309,7 +309,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest002, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(-1);
     EXPECT_EQ(NULL, ret);
@@ -321,7 +321,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest003, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(12);
     EXPECT_TRUE(ret != NULL);
@@ -334,7 +334,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest004, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusFreeTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(256);
     EXPECT_TRUE(ret != NULL);
@@ -347,7 +347,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusFreeTest001, Function | MediumTest | Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(0);
     EXPECT_TRUE(ret != NULL);
@@ -360,7 +360,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest001, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(22);
     EXPECT_TRUE(ret != NULL);
@@ -373,7 +373,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest002, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(-1);
     EXPECT_EQ(NULL, ret);
@@ -385,7 +385,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest003, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(MAX_MALLOC_SIZE + 1);
     EXPECT_EQ(NULL, ret);
@@ -397,7 +397,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest004, Function | MediumTest | Level0
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest001, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest001, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_DBG);
@@ -409,7 +409,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest001, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest002, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest002, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_INFO);
@@ -421,7 +421,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest002, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest003, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest003, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_WARN);
@@ -433,7 +433,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest003, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest004, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest004, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_ERROR);
@@ -445,7 +445,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest004, Function | MediumTest | Leve
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest005, Function | MediumTest | Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest005, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_LEVEL_MAX);

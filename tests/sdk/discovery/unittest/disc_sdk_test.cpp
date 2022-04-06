@@ -437,4 +437,4 @@ HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level0)
     ret = StopDiscovery(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
 }
-}
+} // namespace OHOS

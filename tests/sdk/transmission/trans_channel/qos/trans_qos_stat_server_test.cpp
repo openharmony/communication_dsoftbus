@@ -21,8 +21,8 @@
 
 using namespace testing::ext;
 namespace OHOS {
-const std::string UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.server";
-const std::string UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStream_0";
+static const char *UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.server";
+static const char *UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStream_0";
 int32_t g_testWay = 0;
 class TransQosStatServerTest : public testing::Test {
 public:
@@ -116,9 +116,9 @@ HWTEST_F(TransQosStatServerTest, QosStatServerTest001, TestSize.Level0)
 {
     int32_t ret;
     if (g_testWay == 0) {
-        ret = CreateSessionServer(UDP_TEST_PKG_NAME.c_str(), UDP_TEST_SESSION_NAME.c_str(), &g_hasQosCb);
+        ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_hasQosCb);
     } else {
-        ret = CreateSessionServer(UDP_TEST_PKG_NAME.c_str(), UDP_TEST_SESSION_NAME.c_str(), &g_noQosCb);
+        ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_noQosCb);
     }
     EXPECT_EQ(ret, SOFTBUS_OK);
     if (ret == SOFTBUS_OK) {
@@ -127,4 +127,4 @@ HWTEST_F(TransQosStatServerTest, QosStatServerTest001, TestSize.Level0)
         }
     }
 }
-}
+} // namespace OHOS

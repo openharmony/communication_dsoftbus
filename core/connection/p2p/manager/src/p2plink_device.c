@@ -475,6 +475,17 @@ void P2pLinkAddConningDev(ConnectingNode *item)
     }
 }
 
+static void P2pLinkCleanConningDev(void)
+{
+    ConnectingNode *conningItem = NULL;
+    ConnectingNode *conningNext = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
+        P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
+        P2pLinkDelConningDev(conningItem);
+    }
+}
+
 void P2pLinkDumpDev(void)
 {
     ConnectingNode *conningItem = NULL;
@@ -484,6 +495,22 @@ void P2pLinkDumpDev(void)
     LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "deving state %d", conningItem->state);
     }
+}
+
+static void P2pLinkDevExistDiscState(P2pLoopMsg msgType, void *arg)
+{
+    (void)msgType;
+    (void)arg;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timeout disconnecting state");
+    P2pLinkSetDisconnectState(false);
+}
+
+void P2pLinkDevEnterDiscState(void)
+{
+#define DISCONNING_TIMER_3S 3000
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "enter disconnecting state");
+    P2pLinkSetDisconnectState(true);
+    P2pLoopProcDelay(P2pLinkDevExistDiscState, NULL, DISCONNING_TIMER_3S, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
 }
 
 int32_t P2pLinkDevInit(void)
@@ -498,4 +525,7 @@ int32_t P2pLinkDevInit(void)
 void P2pLinkDevClean(void)
 {
     P2pLinkCleanConnedDev();
+    P2pLinkCleanConningDev();
+    P2pLoopProcDelayDel(NULL, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
+    P2pLinkSetDisconnectState(false);
 }

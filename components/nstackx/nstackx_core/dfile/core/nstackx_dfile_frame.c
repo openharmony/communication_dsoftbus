@@ -118,13 +118,13 @@ static int32_t EncodeFileInfo(FileList *fileList, uint16_t fileId, uint8_t *buff
 
     if (length <= offsetof(FileInfoUnit, fileName)) {
         /* Running out of buffer */
-        LOGE(TAG, "buffer length %u is not enough", length);
+        LOGE(TAG, "buffer length %zu is not enough", length);
         return NSTACKX_EAGAIN;
     }
     remainLength = length - offsetof(FileInfoUnit, fileName);
     if (memcpy_s(fileInfoUnit->fileName, remainLength, fileName, fileNameLen) != EOK) {
         /* Running out of buffer */
-        LOGE(TAG, "memcpy_s fileName error. remain length %u, fileNameLen %u", remainLength, fileNameLen);
+        LOGE(TAG, "memcpy_s fileName error. remain length %zu, fileNameLen %hu", remainLength, fileNameLen);
         return NSTACKX_EAGAIN;
     }
     fileInfoUnit->fileId = htons(fileId);

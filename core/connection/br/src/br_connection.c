@@ -121,6 +121,14 @@ static SoftBusBtStateListener g_sppBrCallback;
 static bool g_startListenFlag = false;
 static int32_t g_brEnable = SOFTBUS_BR_STATE_TURN_OFF;
 
+static void BrFreeMessage(SoftBusMessage *msg)
+{
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+    }
+    SoftBusFree((void *)msg);
+}
+
 static SoftBusMessage *BrConnCreateLoopMsg(BrConnLoopMsgType what, uint64_t arg1, uint64_t arg2, const char *data)
 {
     SoftBusMessage *msg = NULL;
@@ -133,7 +141,7 @@ static SoftBusMessage *BrConnCreateLoopMsg(BrConnLoopMsgType what, uint64_t arg1
     msg->arg1 = arg1;
     msg->arg2 = arg2;
     msg->handler = &g_brAsyncHandler;
-    msg->FreeMessage = NULL;
+    msg->FreeMessage = BrFreeMessage;
     msg->obj = (void *)data;
     return msg;
 }
@@ -419,9 +427,9 @@ static int32_t ConnectDeviceStateConnecting(const uint32_t connId, uint32_t requ
     return SOFTBUS_OK;
 }
 
-static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceFristTime]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceFirstTime]");
     if (g_sppDriver == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[sppDriver null]");
         return SOFTBUS_ERR;
@@ -485,7 +493,7 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
             result->OnConnectFailed(requestId, 0);
             ret = SOFTBUS_ERR;
         } else {
-            ret = ConnectDeviceFristTime(option, requestId, result);
+            ret = ConnectDeviceFirstTime(option, requestId, result);
         }
     }
     (void)pthread_mutex_unlock(&g_brConnLock);
@@ -1118,6 +1126,7 @@ static void BrConnMsgHandler(SoftBusMessage *msg)
             int32_t len = (int32_t)msg->arg2;
             BrRecvDataHandle(connId, (const char *)msg->obj, len);
             SoftBusFree((void *)msg->obj);
+            msg->obj = NULL;
             break;
         }
         default:

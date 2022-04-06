@@ -76,7 +76,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
             return SOFTBUS_ERR;
         }
     }
-    item = (PendingPktInfo *)SoftBusMalloc(sizeof(PendingPktInfo));
+    item = (PendingPktInfo *)SoftBusCalloc(sizeof(PendingPktInfo));
     if (item == NULL) {
         SoftBusMutexUnlock(&pendingList->lock);
         return SOFTBUS_MALLOC_ERR;

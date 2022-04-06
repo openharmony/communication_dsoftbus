@@ -75,6 +75,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo)
 
 int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr, int32_t maxLen)
 {
+    (void)maxLen;
     if (errMsg == NULL || cJsonStr == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }

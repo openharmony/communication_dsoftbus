@@ -317,7 +317,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
 
     bool connectRet = Connect(remote);
 #ifdef FILLP_SUPPORT_BW_DET
-    if (connectRet == true) {
+    if (connectRet) {
         bool isServer = false;
         RegisterMetricCallback(isServer); /* register the callback function */
     }
@@ -365,7 +365,7 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::
 
     bool &isDestroyed = isDestroyed_;
     std::thread([self, &isDestroyed]() {
-        while (isDestroyed == false) {
+        while (!isDestroyed) {
             self->FillpAppStatistics();
             std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
         }
@@ -462,7 +462,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
 
     bool &isDestroyed = isDestroyed_;
     std::thread([self, &isDestroyed]() {
-        while (isDestroyed == false) {
+        while (!isDestroyed) {
             self->FillpAppStatistics();
             std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
         }
@@ -645,7 +645,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     localIpPort_.ip = inet_ntop(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
     local.port = localIpPort_.port;
 
-    if (SetSocketBoundInner(sockFd, localIpPort_.ip) == false) {
+    if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSocketBoundInner failed, errorcode :%d", FtGetErrno());
     }
     return sockFd;
@@ -656,7 +656,7 @@ bool VtpStreamSocket::EnableBwEstimationAlgo(int streamFd, bool isServer) const
 {
 #ifdef FILLP_SUPPORT_BW_DET
     int errBwDet;
-    if (isServer == true) {
+    if (isServer) {
         int32_t enableBwDet = FILLP_BW_DET_RX_ENABLE;
         errBwDet = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_BW_DET_ALGO,
             &enableBwDet, sizeof(enableBwDet));
@@ -704,7 +704,7 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
     VtpStreamSocket::AddStreamSocketListener(streamFd_, streamReceiver_);
 #if (defined(FILLP_SUPPORT_BW_DET) && defined(FILLP_SUPPORT_BW_DET))
     int regStatisticsRet = FtApiRegEventCallbackFunc(streamFd_, FillpBwAndJitterStatistics);
-    if (isServer == true) {
+    if (isServer) {
         if (regStatisticsRet == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
                 "Success to register the stream callback function at server side with Fd = %d", streamFd_);

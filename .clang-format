@@ -1,0 +1,29 @@
+BasedOnStyle: Webkit
+ColumnLimit: 120
+PointerAlignment: Right
+AlignAfterOpenBracket: DontAlign
+AlignTrailingComments: true
+AlignConsecutiveMacros: Consecutive
+IndentCaseLabels: true
+BreakBeforeBinaryOperators: None
+SpaceBeforeParens: ControlStatementsExceptControlMacros
+SpacesInCStyleCastParentheses: false
+AlignEscapedNewlines: Left
+NamespaceIndentation: None
+FixNamespaceComments: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+BreakConstructorInitializers: AfterColon
+AlignArrayOfStructures: Left
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: Empty
+AlwaysBreakTemplateDeclarations: true
+SpaceInEmptyBlock: false
+LambdaBodyIndentation: Signature
+BreakBeforeTernaryOperators: false
+Cpp11BracedListStyle: true
+SpaceAroundPointerQualifiers: Both
+
+ForEachMacros:
+  - 'DLIST_FOR_EACH_ENTRY'
+  - 'DLIST_FOR_EACH_ENTRY_REVERSE'
+  - 'DLIST_FOR_EACH_ENTRY_SAFE'

@@ -96,6 +96,6 @@ public:
 private:
     std::shared_ptr<StreamAdaptor> adaptor_ = nullptr;
 };
-}
+} // namespace OHOS
 
 #endif // !defined(CLIENT_TRANS_UDP_STREAM_ADAPTOR_LISTENER_H_)

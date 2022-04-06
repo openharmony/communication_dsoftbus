@@ -197,7 +197,7 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_001, TestSize.Le
 {
     char ipAddr[IP_LEN] = {0};
     char ip[IP_LEN] = "192.168.50.10";
-    
+
     EXPECT_TRUE(SetIpaddr(ip) == SOFTBUS_OK);
     sleep(2);
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
@@ -234,5 +234,4 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_003, TestSize.Le
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strncmp(ipAddr, "127.0.0.1", IP_LEN) == 0);
 }
-}
-
+} // namespace OHOS

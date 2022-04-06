@@ -84,6 +84,7 @@ typedef struct {
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
+    uint64_t supportedProtocols;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -112,6 +113,8 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
 const char *LnnGetP2pMac(const NodeInfo *info);
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
+uint64_t LnnGetSupportedProtocols(NodeInfo *info);
+int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 
 #ifdef __cplusplus
 }

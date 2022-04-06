@@ -28,23 +28,24 @@
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <pthread.h>
-#include <securec.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "lnn_ip_utils.h"
+#include "bus_center_event.h"
+#include "lnn_network_manager.h"
+#include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+
 #undef NLMSG_OK
-#define NLMSG_OK(nlh, len) (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= \
-    sizeof(struct nlmsghdr)) && ((int32_t)((nlh)->nlmsg_len) <= (len)))
+#define NLMSG_OK(nlh, len)                                                                               \
+    (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= sizeof(struct nlmsghdr)) && \
+        ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
 #define DEFAULT_NETLINK_RECVBUF (4 * 1024)
-
-static LnnMonitorEventHandler g_eventHandler;
 
 static int32_t CreateNetlinkSocket(void)
 {
@@ -89,30 +90,29 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
-    char name[IFNAMSIZ];
-    ConnectionAddrType type = CONNECTION_ADDR_MAX;
-
-    if (if_indextoname(ifa->ifa_index, name) == 0) {
+    LnnNetIfType type = LNN_NETIF_TYPE_ETH;
+    char ifnameBuffer[NET_IF_NAME_LEN];
+    char *ifName = if_indextoname(ifa->ifa_index, ifnameBuffer);
+    if (ifName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid iface index");
         return;
     }
-    if (LnnGetAddrTypeByIfName(name, strlen(name), &type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
+    if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetNetIfTypeByName error");
         return;
     }
-    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+    if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network addr changed, type:%d", type);
-        g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+        LnnNotifyAddressChangedEvent(ifName);
     }
 }
-
 
 static void ProcessLinkEvent(struct nlmsghdr *nlh)
 {
     int len;
     struct rtattr *tb[IFLA_MAX + 1] = {NULL};
     struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
-    ConnectionAddrType type = CONNECTION_ADDR_MAX;
+    LnnNetIfType type = LNN_NETIF_TYPE_ETH;
 
     len = (int32_t)nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
     ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
@@ -121,13 +121,15 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
         return;
     }
-    if (LnnGetAddrTypeByIfName(RTA_DATA(tb[IFLA_IFNAME]), strlen(RTA_DATA(tb[IFLA_IFNAME])), &type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetAddrTypeByIfName error");
+
+    if (LnnGetNetIfTypeByName(RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetNetIfTypeByName error");
         return;
     }
-    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "link status changed, type:%d", type);
-        g_eventHandler(LNN_MONITOR_EVENT_IP_ADDR_CHANGED, NULL);
+    if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
+        SoftBusLog(
+            SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "%s:link status changed, type:%d", RTA_DATA(tb[IFLA_IFNAME]), type);
+        LnnNotifyAddressChangedEvent(RTA_DATA(tb[IFLA_IFNAME]));
     }
 }
 
@@ -180,18 +182,12 @@ static void *NetlinkMonitorThread(void *para)
     return NULL;
 }
 
-int32_t LnnInitNetlinkMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitNetlinkMonitorImpl(void)
 {
     pthread_t tid;
-
-    if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink event handler is null");
-        return SOFTBUS_ERR;
-    }
     if (pthread_create(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
-    g_eventHandler = handler;
     return SOFTBUS_OK;
 }

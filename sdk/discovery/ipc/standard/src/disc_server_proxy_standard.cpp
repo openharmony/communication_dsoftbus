@@ -25,9 +25,15 @@
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
+
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return nullptr;
+    }
+
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
@@ -314,4 +320,4 @@ int32_t DiscServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t 
     (void)quality;
     return SOFTBUS_OK;
 }
-}
+} // namespace OHOS

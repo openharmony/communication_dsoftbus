@@ -139,7 +139,7 @@
     "APP_INFO": [
       {
         "TYPE": "native_app",
-        "UID": "1000",
+        "UID": "3046",
         "PKG_NAME": "ohos.dslm",
         "ACTIONS": "create,open"
       }

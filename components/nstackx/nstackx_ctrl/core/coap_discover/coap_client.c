@@ -28,8 +28,8 @@
 #include <netinet/in.h>
 #include "coap_session_internal.h"
 #include "nstackx_device.h"
+#include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
-#include "nstackx_log.h"
 #include "nstackx_util.h"
 #include "utlist.h"
 
@@ -64,12 +64,12 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
     (void)memset_s(addrstr, sizeof(addrstr), 0, sizeof(addrstr));
     if (server->length) {
         if (memcpy_s(addrstr, sizeof(addrstr), server->s, server->length) != EOK) {
-            LOGD(TAG, "addrstr copy error");
+            DFINDER_LOGD(TAG, "addrstr copy error");
             return len;
         }
     } else {
         if (memcpy_s(addrstr, sizeof(addrstr), "localhost", strlen("localhost")) != EOK) {
-            LOGD(TAG, "addrstr copy error");
+            DFINDER_LOGD(TAG, "addrstr copy error");
             return len;
         }
     }
@@ -80,7 +80,7 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
 
     error = getaddrinfo(addrstr, NULL, &hints, &res);
     if (error != 0) {
-        LOGE(TAG, "getaddrinfo error");
+        DFINDER_LOGE(TAG, "getaddrinfo error");
         return error;
     }
 
@@ -91,7 +91,7 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
             case AF_INET:
                 len = ainfo->ai_addrlen;
                 if (memcpy_s(dst, sizeof(struct sockaddr), ainfo->ai_addr, len) != EOK) {
-                    LOGE(TAG, "ai_addr copy error");
+                    DFINDER_LOGE(TAG, "ai_addr copy error");
                     len = -1;
                     break;
                 }
@@ -113,7 +113,7 @@ void CoapMessageHandler(struct coap_context_t *ctx,
                         const coap_tid_t id)
 {
     if (received == NULL) {
-        LOGE(TAG, "received error");
+        DFINDER_LOGE(TAG, "received error");
         return;
     }
     (void)ctx;
@@ -126,22 +126,22 @@ void CoapMessageHandler(struct coap_context_t *ctx,
 
     (void)memset_s(&optIter, sizeof(optIter), 0, sizeof(optIter));
     if (received->type == COAP_MESSAGE_RST) {
-        LOGD(TAG, "got RST");
+        DFINDER_LOGD(TAG, "got RST");
         return;
     }
 
     if (coap_check_option(received, COAP_OPTION_OBSERVE, &optIter)) {
-        LOGE(TAG, "observe not support.");
+        DFINDER_LOGE(TAG, "observe not support.");
         return;
     }
     blockOpt2 = coap_check_option(received, COAP_OPTION_BLOCK2, &optIter);
     blockOpt1 = coap_check_option(received, COAP_OPTION_BLOCK1, &optIter);
     if ((blockOpt1 != NULL) || (blockOpt2 != NULL)) {
-        LOGE(TAG, "block not support.");
+        DFINDER_LOGE(TAG, "block not support.");
         return;
     }
 
-    LOGD(TAG, "%u.%02u", (received->code >> COAP_CODE_RIGHT_PART_LENGTH), received->code & 0x1F);
+    DFINDER_LOGD(TAG, "%u.%02u", (received->code >> COAP_CODE_RIGHT_PART_LENGTH), received->code & 0x1F);
 }
 
 static void InitAddrinfo(struct addrinfo *hints)
@@ -195,10 +195,10 @@ coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needB
                 sockIpPtr = &sockIp;
             }
             if (needBind && BindToDevice(ep->sock.fd, sockIpPtr) != NSTACKX_EOK) {
-                LOGE(TAG, "bind to device fail");
+                DFINDER_LOGE(TAG, "bind to device fail");
             }
         } else {
-            LOGE(TAG, "coap_new_endpoint get null");
+            DFINDER_LOGE(TAG, "coap_new_endpoint get null");
             coap_free_context(ctx);
             ctx = NULL;
         }
@@ -217,7 +217,7 @@ static coap_session_t *CoapGetSessionInner(struct addrinfo *result, coap_context
     const coap_address_t *dst = coapServerParameter->dst;
 
     if (proto != COAP_PROTO_UDP) {
-        LOGE(TAG, "unsupported proto");
+        DFINDER_LOGE(TAG, "unsupported proto");
         return NULL;
     }
 
@@ -229,7 +229,7 @@ static coap_session_t *CoapGetSessionInner(struct addrinfo *result, coap_context
         coap_address_init(&bindAddr);
         bindAddr.size = rp->ai_addrlen;
         if (memcpy_s(&bindAddr.addr, sizeof(bindAddr.addr), rp->ai_addr, rp->ai_addrlen) != EOK) {
-            LOGE(TAG, "ai_addr copy error");
+            DFINDER_LOGE(TAG, "ai_addr copy error");
             continue;
         }
         session = coap_new_client_session(ctx, &bindAddr, dst, proto);
@@ -263,7 +263,7 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
     proto = coapServerParameter->proto;
     dst = coapServerParameter->dst;
     if (proto != COAP_PROTO_UDP) {
-        LOGE(TAG, "unsupported proto");
+        DFINDER_LOGE(TAG, "unsupported proto");
         return NULL;
     }
 
@@ -285,7 +285,7 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
         hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
         s = getaddrinfo(localAddr, localPort, &hints, &result);
         if (s != 0) {
-            LOGE(TAG, "getaddrinfo error");
+            DFINDER_LOGE(TAG, "getaddrinfo error");
             return NULL;
         }
         session = CoapGetSessionInner(result, ctx, coapServerParameter);

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "bus_center_event.h"
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
@@ -38,25 +39,20 @@ namespace EventFwk {
 class WifiServiceMonitor : public CommonEventSubscriber {
 public:
     explicit WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
-    virtual ~WifiServiceMonitor(){};
+    virtual ~WifiServiceMonitor(){}
     virtual void OnReceiveEvent(const CommonEventData &data);
 };
 
 WifiServiceMonitor::WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo)
-    : CommonEventSubscriber(subscriberInfo)
-{}
+    :CommonEventSubscriber(subscriberInfo)
+{
+}
 
 void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
     SoftBusWifiState state = SOFTBUS_UNKNOWN;
-    LnnMoniterData *para = (LnnMoniterData *)SoftBusCalloc(sizeof(LnnMoniterData) + sizeof(int));
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnMoniterData malloc failed");
-        return;
-    }
-    para->len = sizeof(int);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
@@ -83,11 +79,8 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
         }
     }
     if (state != SOFTBUS_UNKNOWN) {
-        (void)memcpy_s(para->value, para->len, &state, sizeof(int));
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send wifi state change event to LNN");
-        g_eventHandler(LNN_MONITOR_EVENT_WIFI_STATE_CHANGED, para);
+        LnnNotifyWlanStateChangeEvent(state);
     }
-    SoftBusFree(para);
 }
 
 class SubscribeEvent {
@@ -119,8 +112,8 @@ int32_t SubscribeEvent::SubscribeWifiPowerStateEvent()
     }
     return SOFTBUS_OK;
 }
-}
-}
+} // namespace EventFwk
+} // namespace OHOS
 
 static void LnnSubscribeWifiService(void *para)
 {
@@ -149,13 +142,8 @@ static void LnnSubscribeWifiService(void *para)
     delete subscriberPtr;
 }
 
-int32_t LnnInitWifiServiceMonitorImpl(LnnMonitorEventHandler handler)
+int32_t LnnInitWifiServiceMonitorImpl(void)
 {
-    if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");
-        return SOFTBUS_ERR;
-    }
-    g_eventHandler = handler;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {

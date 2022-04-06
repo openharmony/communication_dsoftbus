@@ -405,4 +405,4 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
     SoftBusFree(testData);
     EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
 };
-}
+} // namespace OHOS

@@ -90,7 +90,7 @@ static void *ThreadSignalTest(void *arg)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexAttrInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -102,7 +102,7 @@ HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest001, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest002, TestSize.Level0)
 {
     SoftBusMutexAttr mutexAttr;
     int32_t ret = SoftBusMutexAttrInit(&mutexAttr);
@@ -116,9 +116,9 @@ HWTEST_F(DsoftbusThreadTest, SoftbusMutexAttrInitTest002, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest001, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -129,9 +129,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest001, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -145,9 +145,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest002, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -161,7 +161,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexInitTest003, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexLock(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -173,9 +173,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest001, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -191,9 +191,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest002, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -209,9 +209,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest003, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -223,7 +223,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest004, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest005, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest005, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexLock(&mutex);
@@ -236,7 +236,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexLockTest005, Function | MediumTest | Le
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexUnlock(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -248,7 +248,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest001, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexUnlock(&mutex);
@@ -261,9 +261,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest002, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -281,9 +281,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest003, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -301,9 +301,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest004, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest005, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest005, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexLock(&mutex);
@@ -318,7 +318,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexUnlockTest005, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexDestroy(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -330,7 +330,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest001, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest002, TestSize.Level0)
 {
     SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexDestroy(&mutex);
@@ -343,9 +343,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest002, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -359,9 +359,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest003, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -378,9 +378,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest004, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest005, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -397,7 +397,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusMutexDestroyTest005, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusThreadAttrInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -409,7 +409,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest001, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, TestSize.Level0)
 {
     SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
@@ -422,7 +422,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, Function | MediumTest
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest001, TestSize.Level0)
 {
     SoftBusThreadAttr threadAttr = { 0 };
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
@@ -438,7 +438,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest001, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest002, TestSize.Level0)
 {
     SoftBusThread thread = 0;
 
@@ -453,7 +453,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest002, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -472,7 +472,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -492,7 +492,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -511,7 +511,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -530,7 +530,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -549,7 +549,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -568,7 +568,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -588,7 +588,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -605,7 +605,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, Function | MediumTest |
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -628,7 +628,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest001, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnopqrstuvwxyz";
     SoftBusThread thread = 0;
@@ -652,7 +652,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnop";
     SoftBusThread thread = 0;
@@ -676,7 +676,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
 {
     const char *name = "a中文p";
     SoftBusThread thread = 0;
@@ -698,7 +698,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
 {
     const char *name = "testThread";
     SoftBusThread thread = 0;
@@ -720,7 +720,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest006, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
 {
     const char *name = "testThread";
     SoftBusThread thread = 0;
@@ -740,7 +740,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest006, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadGetSelfTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadGetSelfTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
 
@@ -755,7 +755,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadGetSelfTest001, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -767,7 +767,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest001, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondInit(&cond);
@@ -781,7 +781,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondInitTest002, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondSignal(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -793,7 +793,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest001, Function | MediumTest | L
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondSignal(&cond);
@@ -806,7 +806,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest002, Function | MediumTest | L
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondInit(&cond);
@@ -822,7 +822,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondSignalTest003, Function | MediumTest | L
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondBroadcast(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -834,7 +834,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest001, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
 
@@ -848,7 +848,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest002, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondInit(&cond);
@@ -865,9 +865,9 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondBroadcastTest003, Function | MediumTest 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest001, TestSize.Level0)
 {
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -883,10 +883,10 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest001, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
-    SoftBusMutex mutex;
+    SoftBusMutex mutex = 0;
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -902,7 +902,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest002, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondInit(&cond);
@@ -918,10 +918,10 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest003, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest004, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest004, TestSize.Level0)
 {
     SoftBusCond cond = 0;
-    SoftBusMutex mutex = { 0 };
+    SoftBusMutex mutex = 0;
     int32_t ret = SoftBusCondInit(&cond);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(cond != 0);
@@ -936,7 +936,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondWaitTest004, Function | MediumTest | Lev
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusCondDestroy(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -948,7 +948,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest001, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondInit(&cond);
@@ -965,7 +965,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest002, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest003, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest003, TestSize.Level0)
 {
     SoftBusCond cond = 0;
     int32_t ret = SoftBusCondDestroy(&cond);
@@ -978,7 +978,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest003, Function | MediumTest | 
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
     SoftBusThreadAttr threadAttr = { 0 };
@@ -998,7 +998,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest001, Function | MediumTest | L
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest002, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
 {
     char *value = nullptr;
     SoftBusThread thread = 0;
@@ -1020,7 +1020,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest002, Function | MediumTest | L
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest001, Function | MediumTest | Level2)
+HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 {
     int32_t ret = SoftBusMutexInit(&g_mutex, NULL);
     EXPECT_EQ(SOFTBUS_OK, ret);

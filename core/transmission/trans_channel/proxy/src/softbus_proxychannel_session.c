@@ -234,7 +234,7 @@ static int32_t TransProxyProcSendMsgAck(int32_t channelId, const char *data, int
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
-    seq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
+    seq = *(int32_t *)data;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransProxyProcSendMsgAck. chanid %d,seq :%d", channelId, seq);
     return SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
 }
