@@ -311,7 +311,7 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32
     return ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
 }
 
-void RemoveJoinRequestInfoByPkgName(const char *pkgName)
+static void RemoveJoinRequestInfoByPkgName(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter, iter2;
@@ -326,7 +326,7 @@ void RemoveJoinRequestInfoByPkgName(const char *pkgName)
     }
 }
 
-void RemoveLeaveRequestInfoByPkgName(const char *pkgName)
+static void RemoveLeaveRequestInfoByPkgName(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<LeaveLnnRequestInfo *>::iterator iter, iter2;
