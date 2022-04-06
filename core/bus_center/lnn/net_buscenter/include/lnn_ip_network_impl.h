@@ -17,6 +17,9 @@
 #define LNN_IP_NETWORK_IMPL_H
 
 #include <stdint.h>
+#include "softbus_common.h"
+
+#define LNN_LOOPBACK_IP "127.0.0.1"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -24,13 +27,7 @@ extern "C" {
 #endif
 #endif
 
-int32_t LnnInitIpNetwork(void);
-
-int32_t LnnDeinitIpNetwork(void);
-
-int32_t LnnInitIpNetworkDelay(void);
-
-void LnnNotifyOfflineMsg(void);
+void LnnNotifyAllTypeOffline(ConnectionAddrType type);
 
 #ifdef __cplusplus
 #if __cplusplus

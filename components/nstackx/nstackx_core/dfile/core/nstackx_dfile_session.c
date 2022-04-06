@@ -539,7 +539,7 @@ static void DFileSessionHandleClientSetting(DFileSession *session, DFileFrame *d
     }
     PeerInfo *peerInfo = SearchPeerInfoNode(session, peerAddr);
     if (peerInfo == NULL) {
-        LOGE(TAG, "recv unknow peer setting, maybe be attacked");
+        LOGE(TAG, "recv unknown peer setting, maybe be attacked");
         return;
     }
     peerInfo->remoteDFileVersion = hostSettingFrame.dFileVersion;
@@ -716,7 +716,7 @@ static void HandleWithoutSettingError(DFileSession *session, const struct sockad
 
     PeerInfo *peerInfo = SearchPeerInfoNode(session, peerAddr);
     if (peerInfo == NULL) {
-        LOGE(TAG, "recv unknow peer rst, maybe be attacked");
+        LOGE(TAG, "recv unknown peer rst, maybe be attacked");
         return;
     }
 
@@ -753,14 +753,14 @@ static void DFileSessionHandleRst(DFileSession *session, DFileFrame *dFileFrame,
     }
 
     uint16_t transId = ntohs(dFileFrame->header.transId);
-    LOGD(TAG, "handle RST (%u) frame, transId %u", errCode, transId);
+    LOGD(TAG, "handle RST (%hu) frame, transId %hu", errCode, transId);
 
     switch (errCode) {
         case NSTACKX_DFILE_WITHOUT_SETTING_ERROR:
             HandleWithoutSettingError(session, peerAddr);
             break;
         default:
-            LOGE(TAG, "Unspported error code %u", errCode);
+            LOGE(TAG, "Unspported error code %hu", errCode);
             break;
     }
 }
@@ -1668,7 +1668,7 @@ static int32_t DFileAddInboundQueue(DFileSession *session, const uint8_t *frame,
     session->recvBlockNumDirect++;
 
     if (PthreadMutexUnlock(&session->inboundQueueLock) != 0) {
-        /* queue node is pushed to list, don't need to destory here. */
+        /* queue node is pushed to list, don't need destroy here. */
         return NSTACKX_EFAILED;
     }
 
@@ -1857,7 +1857,6 @@ static void FreeTransFileListInfo(FileListInfo *fileListInfo)
         fileListInfo->remotePath = NULL;
     }
     free(fileListInfo);
-    fileListInfo = NULL;
 }
 
 static int32_t DFileStartTransInner(DFileSession *session, FileListInfo *fileListInfo)

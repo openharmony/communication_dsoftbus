@@ -34,7 +34,6 @@ void CloseSocket(Socket *socket)
     CloseSocketInner(socket->sockfd);
     socket->sockfd = INVALID_SOCKET;
     free(socket);
-    socket = NULL;
 }
 
 static void GetTcpSocketBufSize(SocketDesc fd)
@@ -45,14 +44,14 @@ static void GetTcpSocketBufSize(SocketDesc fd)
 
     ret = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &bufSize, &optLen);
     if (ret < 0) {
-        LOGE(TAG, "getsockopt SO_SNDBUF fail");
+        LOGE(TAG, "getsockopt SO_SNDBUF failed");
         return;
     }
     LOGD(TAG, "SO_SNDBUF = %d", bufSize);
 
     ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &bufSize, &optLen);
     if (ret < 0) {
-        LOGE(TAG, "getsockopt SO_RCVBUF fail");
+        LOGE(TAG, "getsockopt SO_RCVBUF failed");
         return;
     }
     LOGD(TAG, "SO_RCVBUF = %d", bufSize);
@@ -70,14 +69,14 @@ static int32_t SetTcpSocketBufSize(SocketDesc fd, int32_t bufSize)
     GetTcpSocketBufSize(fd);
     ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &bufSize, optLen);
     if (ret < 0) {
-        LOGE(TAG, "setsockopt SO_SNDBUF fail");
+        LOGE(TAG, "setsockopt SO_SNDBUF failed");
         return NSTACKX_EFAILED;
     }
     LOGD(TAG, "setsockopt SO_SNDBUF = %d", bufSize);
 
     ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &bufSize, optLen);
     if (ret < 0) {
-        LOGE(TAG, "setsockopt SO_RCVBUF fail");
+        LOGE(TAG, "setsockopt SO_RCVBUF failed");
         return NSTACKX_EFAILED;
     }
     LOGD(TAG, "setsockopt SO_RCVBUF = %d", bufSize);
@@ -92,14 +91,14 @@ static int32_t ConnectTcpServerWithTargetDev(Socket *clientSocket, const struct 
 
     clientSocket->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (clientSocket->sockfd == INVALID_SOCKET) {
-        LOGE(TAG, "socket create fail, error :%d", GetErrno());
+        LOGE(TAG, "socket create failed, error :%d", GetErrno());
         return NSTACKX_EFAILED;
     }
     if (SetTcpSocketBufSize(clientSocket->sockfd, NSTACKX_TCP_SOCKET_BUFFER_SIZE) != NSTACKX_EOK) {
-        LOGE(TAG, "set socket buf fail");
+        LOGE(TAG, "set socket buf failed");
     }
     if (SetSocketNonBlock(clientSocket->sockfd) != NSTACKX_EOK) {
-        LOGE(TAG, "set socket nonblock fail");
+        LOGE(TAG, "set socket nonblock failed");
     }
     if (localInterface == NULL) {
         BindToDevInTheSameLan(clientSocket->sockfd, sockAddr);
@@ -136,7 +135,7 @@ static int32_t ConnectUdpServerWithTargetDev(Socket *clientSocket, const struct 
 
     clientSocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (clientSocket->sockfd == INVALID_SOCKET) {
-        LOGE(TAG, "socket create fail, error :%d", GetErrno());
+        LOGE(TAG, "socket create failed, error :%d", GetErrno());
         return NSTACKX_EFAILED;
     }
     if (SetSocketNonBlock(clientSocket->sockfd) != NSTACKX_EOK) {
@@ -183,7 +182,7 @@ static int32_t CreateTcpServer(Socket *serverSocket, const struct sockaddr_in *s
 
     serverSocket->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket->sockfd == INVALID_SOCKET) {
-        LOGE(TAG, "create socket fail, error :%d", GetErrno());
+        LOGE(TAG, "create socket failed, error :%d", GetErrno());
         return NSTACKX_EFAILED;
     }
     if (SetSocketNonBlock(serverSocket->sockfd) != NSTACKX_EOK) {
@@ -249,7 +248,7 @@ static int32_t CreateUdpServer(Socket *serverSocket, const struct sockaddr_in *s
     socklen_t len = sizeof(localAddr);
     serverSocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (serverSocket->sockfd == INVALID_SOCKET) {
-        LOGE(TAG, "create socket fail, error :%d", GetErrno());
+        LOGE(TAG, "create socket failed, error :%d", GetErrno());
         return NSTACKX_EFAILED;
     }
 
@@ -298,7 +297,7 @@ Socket *ClientSocketWithTargetDev(SocketProtocol protocol, const struct sockaddr
     }
     Socket *socket = calloc(1, sizeof(Socket));
     if (socket == NULL) {
-        LOGE(TAG, "malloc Socket fail\n");
+        LOGE(TAG, "malloc Socket failed\n");
         return NULL;
     }
 
@@ -343,7 +342,7 @@ Socket *ServerSocket(SocketProtocol protocol, const struct sockaddr_in *sockAddr
     }
     Socket *socket = calloc(1, sizeof(Socket));
     if (socket == NULL) {
-        LOGE(TAG, "malloc Socket fail\n");
+        LOGE(TAG, "malloc Socket failed\n");
         return NULL;
     }
 
@@ -397,7 +396,7 @@ static int32_t SetAcceptSocket(SocketDesc acceptFd)
     }
     /* It will always failed on devices without system authority, such as third-party devices. */
     if (BindToDevice(acceptFd, &localAddr) != NSTACKX_EOK) {
-        LOGW(TAG, "Accept client bind to device fail");
+        LOGW(TAG, "Accept client bind to device failed");
     }
 
     if (SetSocketNonBlock(acceptFd) != NSTACKX_EOK) {
@@ -420,7 +419,7 @@ Socket *AcceptSocket(Socket *serverSocket)
 
     Socket *clientSocket = calloc(1, sizeof(Socket));
     if (clientSocket == NULL) {
-        LOGE(TAG, "client socket malloc fail\n");
+        LOGE(TAG, "client socket malloc failed\n");
         return NULL;
     }
     clientSocket->protocol = NSTACKX_PROTOCOL_TCP;
@@ -432,7 +431,7 @@ Socket *AcceptSocket(Socket *serverSocket)
     }
 
     if (SetAcceptSocket(clientSocket->sockfd) != NSTACKX_EOK) {
-        LOGE(TAG, "set accept socket fail");
+        LOGE(TAG, "set accept socket failed");
         goto L_SOCKET_FAIL;
     }
 

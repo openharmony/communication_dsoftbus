@@ -23,29 +23,16 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-#include "permission/permission.h"
-#include "permission/permission_kit.h"
-
-using namespace OHOS::Security::Permission;
-
 #define LOG2_DBG(fmt, ...) printf("DEBUG:%s:%s:%d " fmt "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define LOG2_INFO(fmt, ...) printf("INFO:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define LOG2_WARN(fmt, ...) printf("WARN:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define LOG2_ERR(fmt, ...)  printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 namespace {
-const std::string SYSTEM_APP_PERMISSION = "com.huawei.permission.MANAGE_DISTRIBUTED_PERMISSION";
-const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
-const std::string BIND_DISCOVER_SERVICE = "com.huawei.hwddmp.permission.BIND_DISCOVER_SERVICE";
-const std::string TEST_LABEL = "test label";
-const std::string TEST_DESCRIPTION = "test description";
-const int TEST_LABEL_ID = 9527;
-const int TEST_DESCRIPTION_ID = 9528;
 const int NETWORK_ID_LEN = 65;
 const int ARG_NUM = 2;
 const int FILE_NUM = 4;
 
-const std::string PERMISSION_PKGNAME  = "com.huawei.plrdtest.dsoftbus";
 const char *g_testModuleName   = "com.huawei.plrdtest.dsoftbus";
 const char *g_testSessionName  = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSession";
 const char *g_testSessionNamE2 = "com.huawei.plrdtest.dsoftbus.JtOpenFileSession";
@@ -77,59 +64,6 @@ SessionAttribute g_sessionAttr;
 int32_t g_sessionId = -1;
 char g_networkId[NETWORK_ID_LEN] = {0};
 int32_t g_stateDebug = LNN_STATE_JOINLNN;
-}
-
-static void AddPermission(const std::string &pkgName)
-{
-    std::vector<PermissionDef> permDefList;
-    PermissionDef permissionDefAlpha = {
-        .permissionName = SYSTEM_APP_PERMISSION,
-        .bundleName = pkgName,
-        .grantMode = GrantMode::SYSTEM_GRANT,
-        .availableScope = AVAILABLE_SCOPE_ALL,
-        .label = TEST_LABEL,
-        .labelId = TEST_LABEL_ID,
-        .description = TEST_DESCRIPTION,
-        .descriptionId = TEST_DESCRIPTION_ID
-    };
-    PermissionDef permissionDefBeta = {
-        .permissionName = DANGER_APP_PERMISSION,
-        .bundleName = pkgName,
-        .grantMode = GrantMode::SYSTEM_GRANT,
-        .availableScope = AVAILABLE_SCOPE_ALL,
-        .label = TEST_LABEL,
-        .labelId = TEST_LABEL_ID,
-        .description = TEST_DESCRIPTION,
-        .descriptionId = TEST_DESCRIPTION_ID
-    };
-    PermissionDef permissionDefGamma = {
-        .permissionName = BIND_DISCOVER_SERVICE,
-        .bundleName = pkgName,
-        .grantMode = GrantMode::SYSTEM_GRANT,
-        .availableScope = AVAILABLE_SCOPE_ALL,
-        .label = TEST_LABEL,
-        .labelId = TEST_LABEL_ID,
-        .description = TEST_DESCRIPTION,
-        .descriptionId = TEST_DESCRIPTION_ID
-    };
-    permDefList.emplace_back(permissionDefAlpha);
-    permDefList.emplace_back(permissionDefBeta);
-    permDefList.emplace_back(permissionDefGamma);
-    PermissionKit::AddDefPermissions(permDefList);
-    std::vector<std::string> permList;
-    permList.push_back(SYSTEM_APP_PERMISSION);
-    permList.push_back(DANGER_APP_PERMISSION);
-    permList.push_back(BIND_DISCOVER_SERVICE);
-    PermissionKit::AddSystemGrantedReqPermissions(pkgName, permList);
-    PermissionKit::GrantSystemGrantedPermission(pkgName, SYSTEM_APP_PERMISSION);
-    PermissionKit::GrantSystemGrantedPermission(pkgName, DANGER_APP_PERMISSION);
-    PermissionKit::GrantSystemGrantedPermission(pkgName, BIND_DISCOVER_SERVICE);
-}
-
-static void RemovePermission(const std::string &pkgName)
-{
-    int ret = PermissionKit::RemoveDefPermissions(pkgName);
-    ret = PermissionKit::RemoveSystemGrantedReqPermissions(pkgName);
 }
 
 static void TestChangeDebugState(int32_t state)
@@ -193,12 +127,12 @@ static void OnSessionClosed(int sessionId)
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG2_INFO("session msg received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session msg received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void TestSessionListenerInit(void)
@@ -300,7 +234,7 @@ static void TestActiveSendFile(int state)
             break;
         }
         case LNN_STATE_LEAVELNN: {
-            LeaveLNN(g_networkId, OnLeaveLNNDone);
+            LeaveLNN(g_testModuleName, g_networkId, OnLeaveLNNDone);
             TestChangeDebugState(-1);
             break;
         }
@@ -368,7 +302,6 @@ int main(int argc, char *argv[])
     if (argc >= ARG_NUM) {
         testWay = atoi(argv[1]);
     }
-    AddPermission(PERMISSION_PKGNAME);
     TestSessionListenerInit();
 
     if (RegNodeDeviceStateCb(g_testModuleName, &g_nodeStateCallback) != SOFTBUS_OK) {
@@ -391,7 +324,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    RemovePermission(PERMISSION_PKGNAME);
     LOG2_INFO("\n############### TEST PASS ###############\n");
     return 0;
 }

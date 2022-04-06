@@ -143,7 +143,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SOFTBUS_SERVER_NOT_INIT ReadInterfaceToken failed!");
         return SOFTBUS_ERR;
     }
-    if (GetServerIsInit() == false) {
+    if (!GetServerIsInit()) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
         if (!reply.WriteInt32(SOFTBUS_SERVER_NOT_INIT)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SOFTBUS_SERVER_NOT_INIT write reply failed!");

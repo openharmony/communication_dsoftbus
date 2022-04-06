@@ -418,4 +418,4 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger006, TestSize.Level1)
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     printf("testConnmanger006 ConnUnSetConnectCallback end 11\r\n");
 };
-}
+} // namespace OHOS

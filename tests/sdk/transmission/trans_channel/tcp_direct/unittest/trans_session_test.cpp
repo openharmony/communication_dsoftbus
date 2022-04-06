@@ -203,4 +203,4 @@ HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
 
     NotifyAuthSuccess(sessionId);
 }
-}
+} // namespace OHOS

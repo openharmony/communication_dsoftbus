@@ -63,4 +63,4 @@ HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level0)
     ret = QosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
-}
+} // namespace OHOS

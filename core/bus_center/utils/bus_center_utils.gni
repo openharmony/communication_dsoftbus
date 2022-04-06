@@ -22,10 +22,8 @@ bus_center_utils_src = [
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ipc_utils.c",
 ]
 if (dsoftbus_standard_feature_lnn_net) {
-  bus_center_utils_src += [
-    "$core_bus_center_utils_path/src/lnn_ip_utils.c",
-    "$core_bus_center_utils_path/src/lnn_state_machine.c",
-  ]
+  bus_center_utils_src +=
+      [ "$core_bus_center_utils_path/src/lnn_state_machine.c" ]
 }
 if (dsoftbus_standard_feature_lnn_net ||
     dsoftbus_standard_feature_lnn_meta_node) {

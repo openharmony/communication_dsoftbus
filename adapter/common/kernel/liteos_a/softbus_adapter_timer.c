@@ -31,6 +31,7 @@
 
 #define MS_PER_SECOND 1000
 #define US_PER_MSECOND 1000
+#define NS_PER_USECOND 1000
 
 static unsigned int g_timerType;
 
@@ -116,10 +117,10 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
         HILOG_INFO(SOFTBUS_HILOG_ID, "sysTime is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    struct timeval time = {0};
-    gettimeofday(&time, NULL);
+    struct timespec time = {0};
+    (void)clock_gettime(CLOCK_MONOTONIC, &time);
 
     sysTime->sec = time.tv_sec;
-    sysTime->usec = time.tv_usec;
+    sysTime->usec = time.tv_nsec / NS_PER_USECOND;
     return SOFTBUS_OK;
 }

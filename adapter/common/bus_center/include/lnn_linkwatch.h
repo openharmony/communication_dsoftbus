@@ -25,7 +25,7 @@ extern "C" {
 #endif
 #endif
 
-bool LnnIsLinkReady(const char *iface, uint32_t len);
+bool LnnIsLinkReady(const char *iface);
 
 #ifdef __cplusplus
 #if __cplusplus

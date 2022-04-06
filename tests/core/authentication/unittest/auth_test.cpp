@@ -201,7 +201,7 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_AND_DECRYPT_Test_001, TestSize.Level0)
     OutBuf outBuf;
     outBuf.buf = sendBuf;
     outBuf.bufLen = totalLen;
-    ret= AuthEncrypt(&option, &clientSide, (uint8_t *)ENCRYPT_DATA, strlen((char *)ENCRYPT_DATA), &outBuf);
+    ret = AuthEncrypt(&option, &clientSide, (uint8_t *)ENCRYPT_DATA, strlen((char *)ENCRYPT_DATA), &outBuf);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ConnectOption option1;
@@ -279,4 +279,4 @@ HWTEST_F(AuthTest, AUTH_DEINIT_Test_001, TestSize.Level0)
     AuthDeinit();
     LooperDeinit();
 }
-}
+} // namespace OHOS

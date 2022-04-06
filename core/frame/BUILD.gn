@@ -121,8 +121,12 @@ if (defined(ohos_lite)) {
 } else {
   ohos_prebuilt_etc("softbus_server.rc") {
     relative_install_dir = "init"
-    source =
-        "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
+    if (use_musl) {
+      source = "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server_musl.cfg"
+    } else {
+      source =
+          "$dsoftbus_root_path/core/frame/standard/init/src/softbus_server.cfg"
+    }
 
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

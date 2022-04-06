@@ -38,8 +38,8 @@ extern "C" {
 
 /*
  * Description: Out of memory.
- * Solution: 1. Verify that the memory usage exceeds the threshold.
- *           2. Release the memory and try again
+ * Solution: 1. Verify whether the memory has exceeded the threshold.
+ *           2. Release the memory and try again.
  */
 #define NSTACKX_ENOMEM (-5)
 #define NSTACKX_EEXIST (-6) /* Resource already exist */

@@ -122,7 +122,7 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
 {
     WifiDeviceConfig wifiDevConfig;
-    
+
     if (wifiConfig == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para wifiConfig is NULL");
         return SOFTBUS_ERR;
@@ -253,7 +253,7 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
             g_scanResultCb[i] = NULL;
         }
     }
- 
+
     if (IsScanResultCbEmpty()) {
         ret = UnRegisterWifiEvent(&g_event);
         if (ret == WIFI_SUCCESS) {

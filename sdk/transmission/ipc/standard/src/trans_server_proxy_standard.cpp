@@ -24,9 +24,15 @@
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
+const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static sptr<IRemoteObject> GetSystemAbility()
 {
     MessageParcel data;
+
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return nullptr;
+    }
+    
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
@@ -183,7 +189,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
     }
-    
+
     if (!data.WriteRawData(param->attr, sizeof(SessionAttribute))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
         return SOFTBUS_ERR;
@@ -215,7 +221,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
-    
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
@@ -460,4 +466,4 @@ int32_t TransServerProxy::StopTimeSync(const char *pkgName, const char *targetNe
     (void)targetNetworkId;
     return SOFTBUS_OK;
 }
-}
+} // namespace OHOS
