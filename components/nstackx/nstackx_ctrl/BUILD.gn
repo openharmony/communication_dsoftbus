@@ -13,6 +13,9 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+if (dsoftbus_standard_feature_ifname_prefix) {
+  cflags = [ "-DNSTACKX_ETH_INTERFACE_NAME_PREFIX=\"br\"" ]
+}
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dfinder_interface") {
@@ -46,11 +49,19 @@ if (defined(ohos_lite)) {
         "LWIP_LITEOS_A_COMPAT",
       ]
     }
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
+    if (dsoftbus_standard_feature_ifname_prefix) {
+      cflags += [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+    } else {
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+    }
     cflags_cc = cflags
     ldflags = [ "-fPIC" ]
   }
@@ -61,14 +72,17 @@ if (defined(ohos_lite)) {
     include_dirs = [ "interface" ]
   }
   ohos_shared_library("nstackx_ctrl") {
+    if (dsoftbus_standard_feature_ifname_prefix) {
+      cflags_cc = cflags
+    }
     sources = [
-      "$dsoftbus_standard_feature_ifname_prefix_path/nstackx_ctrl/core/nstackx_device.c",
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
       "core/coap_discover/coap_discover.c",
       "core/coap_discover/json_payload.c",
       "core/nstackx_common.c",
       "core/nstackx_database.c",
+      "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
     include_dirs = [
