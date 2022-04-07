@@ -22,8 +22,6 @@ declare_args() {
       "//foundation/communication/dsoftbus/adapter/default_config"
   dsoftbus_standard_feature_product_config_path =
       "//foundation/communication/dsoftbus/adapter/default_config"
-  dsoftbus_standard_feature_ifname_prefix_path =
-      "//foundation/communication/dsoftbus/components/nstackx"
 }
 
 if (defined(ohos_lite)) {

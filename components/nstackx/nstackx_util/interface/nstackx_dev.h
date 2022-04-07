@@ -36,7 +36,9 @@ typedef enum {
 
 #define P2P_DEV_NAME_PRE "p2p"
 #define WLAN_DEV_NAME_PRE "wlan"
+#ifndef ETH_DEV_NAME_PRE
 #define ETH_DEV_NAME_PRE "eth"
+#endif
 #define USB_DEV_NAME_PRE "rndis"
 #define WIFI_DIRECT_NAME "Wi-Fi Direct"
 #define INTERFCAE_NAME_MAX_LENGTH (128 + 4)
