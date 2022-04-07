@@ -217,7 +217,7 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
     }
     struct sockaddr sysAddr;
     if (SoftBusAddrToSysAddr(addr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept sys addr to softbus addr failed");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept softbus addr to sys addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
     int32_t ret = accept(socketFd, &sysAddr, (socklen_t *)addrLen);
@@ -225,6 +225,10 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
         HILOG_ERROR(SOFTBUS_HILOG_ID, "accept : %{public}s", strerror(errno));
         return GetErrorCode();
     } else {
+        if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept sys addr to softbus addr failed");
+            return SOFTBUS_ADAPTER_ERR;
+        }
         *acceptFd = ret;
         return SOFTBUS_ADAPTER_OK;
     }
