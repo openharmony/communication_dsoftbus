@@ -199,6 +199,7 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 }
+
 /**
  * @tc.name: PublishServiceTest002
  * @tc.desc: Verify normal case
@@ -221,6 +222,7 @@ HWTEST_F(Disc_Test, PublishServiceTest002, TestSize.Level0)
     ret = PublishService(g_pkgName_1, &g_pInfo1, &g_publishCb);
     EXPECT_TRUE(ret == 0);
 }
+
 /**
  * @tc.name: PublishServiceTest003
  * @tc.desc: Verify same parameter again
@@ -235,6 +237,179 @@ HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level0)
     ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
 }
+
+/**
+ * @tc.name: PublishServiceTest004
+ * @tc.desc: Verify correct parameter with active mode and "COAP" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, PublishServiceTest004, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = COAP,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest005
+ * @tc.desc: Verify correct parameter with passive mode and "AUTO" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, PublishServiceTest005, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = AUTO,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest006
+ * @tc.desc: Verify correct parameter with passive mode and "COAP" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, PublishServiceTest006, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = COAP,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest007
+ * @tc.desc: Verify correct parameter with active mode and "AUTO" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, PublishServiceTest007, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = AUTO,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+}
+
 /**
  * @tc.name: StartDiscoveryTest001
  * @tc.desc: Verify wrong parameter
@@ -290,6 +465,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     testInfo.dataLen = sizeof("capdata1");
 }
+
 /**
  * @tc.name: StartDiscoveryTest002
  * @tc.desc: Verify normal case
@@ -313,6 +489,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level0)
     ret = StartDiscovery(g_pkgName_1, &g_sInfo1, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
 }
+
 /**
  * @tc.name: StartDiscoveryTest003
  * @tc.desc: Verify same parameter again
@@ -327,6 +504,142 @@ HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level0)
     ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
 }
+
+/**
+ * @tc.name: StartDiscoveryTest004
+ * @tc.desc: Verify correct parameter with active mode and "AUTO" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest004, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = AUTO,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StartDiscoveryTest005
+ * @tc.desc: Verify correct parameter with passive mode and "COAP" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest005, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = COAP,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StartDiscoveryTest006
+ * @tc.desc: Verify correct parameter with passive mode and "AUTO" medium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest006, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = AUTO,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
 /**
  * @tc.name: UnPublishServiceTest001
  * @tc.desc: Verify wrong parameter
@@ -345,6 +658,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest001, TestSize.Level0)
     ret = UnPublishService(g_erroPkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
+
 /**
  * @tc.name: UnPublishServiceTest002
  * @tc.desc: Verify normal case
@@ -366,6 +680,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest002, TestSize.Level0)
     ret = UnPublishService(g_pkgName, tmpId2);
     EXPECT_TRUE(ret == 0);
 }
+
 /**
  * @tc.name: UnPublishServiceTest003
  * @tc.desc: Verify same parameter again
@@ -382,6 +697,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level0)
     ret = UnPublishService(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
 }
+
 /**
  * @tc.name: StopDiscoveryTest001
  * @tc.desc: Verify wrong parameter
@@ -400,6 +716,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest001, TestSize.Level0)
     ret = StopDiscovery(g_erroPkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
+
 /**
  * @tc.name: StopDiscoveryTest002
  * @tc.desc: Verify normal case
@@ -421,6 +738,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest002, TestSize.Level0)
     ret = StopDiscovery(g_pkgName, tmpId2);
     EXPECT_TRUE(ret == 0);
 }
+
 /**
  * @tc.name: StopDiscoveryTest003
  * @tc.desc: Verify same parameter again
