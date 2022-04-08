@@ -22,7 +22,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 
-#define DEFAULT_STORAGE_PATH "/data/data"
+#define DEFAULT_STORAGE_PATH "/data/service/el1/public"
 
 typedef struct {
     LnnFileId fileId;
