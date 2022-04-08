@@ -264,18 +264,22 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
 static int32_t PublishInfoCheck(const PublishInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -285,6 +289,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -294,18 +299,22 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -315,6 +324,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
 

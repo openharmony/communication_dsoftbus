@@ -68,13 +68,13 @@ static int32_t AddClientPkgName(const char *pkgName)
     }
     if (CheckPkgNameInfo(pkgName) == false) {
         (void)pthread_mutex_unlock(&g_pkgNameLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     PkgNameInfo *info = (PkgNameInfo *)SoftBusCalloc(sizeof(PkgNameInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Create PkgNameInfo malloc fail.");
         pthread_mutex_unlock(&g_pkgNameLock);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Add strcpy_s failed.");
@@ -111,7 +111,7 @@ static void DelClientPkgName(const char *pkgName)
 static int32_t ClientRegisterPkgName(const char *pkgName)
 {
     if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = ClientRegisterService(pkgName);
     if (ret != SOFTBUS_OK) {
@@ -182,8 +182,9 @@ ERR_EXIT:
 int32_t InitSoftBus(const char *pkgName)
 {
     if (pkgName == NULL || strlen(pkgName) >= PKG_NAME_SIZE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init softbus sdk fail.");
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+                   "init softbus sdk fail. Package name is empty or length exceeds");
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
@@ -281,7 +282,7 @@ int32_t CheckPackageName(const char *pkgName)
 #endif
     if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
-        return SOFTBUS_INVALID_PKGNAME;
+        return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
     PkgNameInfo *info = NULL;

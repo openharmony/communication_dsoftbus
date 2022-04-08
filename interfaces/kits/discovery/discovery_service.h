@@ -87,57 +87,60 @@ typedef struct {
 } IDiscoveryCallback;
 
 /**
- * @brief Publishes a specified service.
- *
+ * @brief Publishing service, the discovered end publishes its own information,
+ * which can be discovered by other devices.
  * Peer devices in the same LAN as the device that publishes this service can discover this service as needed.
  * The service is identified by <b>publicId</b> and <b>pkgName</b>.
- *
- * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param info Indicates the pointer to the service publishing information. For details, see {@link PublishInfo}.
- * @param cb Indicates the pointer to the service publishing callback {@link IPublishCallback}.
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
- * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
- * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
- * @return Returns <b>SOFTBUS_OK</b> if the service is successfully published.
+ * @see {@link UnPublishService}
+ * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param[in] info Indicates the pointer to the service publishing information.
+ * For details, see {@link PublishInfo}.
+ * @param[in] cb Indicates the pointer to the service publishing callback.
+ * For details, see {@link IPublishCallback}.
+ * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return <b>SOFTBUS_OK</b> if the service is successfully published.
  */
 int PublishService(const char *pkgName, const PublishInfo *info, const IPublishCallback *cb);
 
 /**
- * @brief Unpublishes a specified service.
- *
- * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param publishId Indicates the service ID.
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
- * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
- * @return Returns <b>SOFTBUS_OK</b> if the service is successfully unpublished.
+ * @brief Stop publishing service functions, stop publishing its own capability information,
+ * and other devices cannot find it.
+ * @see {@link PublishService}
+ * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param[in] publishId Indicates the service ID.
+ * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_OK</b> if the service is successfully unpublished.
  */
 int UnPublishService(const char *pkgName, int publishId);
 
 /**
- * @brief Subscribes to a specified service.
- *
+ * @brief Start the discovery function, the discovered end begins to discover other devices
+ * and obtains the information of the remote device.
  * Information about the device that publishes the service will be reported to the device that subscribes to
- * the service.
- * The service is identified by <b>subscribeId</b> and <b>pkgName</b>.
- *
- * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param info Indicates the pointer to the service subscription information. For details, see {@link SubscribeInfo}.
- * @param cb Indicates the service subscription callback {@link IDiscoveryCallback}.
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
- * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
- * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
- * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful.
+ * the service. The service is identified by <b>subscribeId</b> and <b>pkgName</b>.
+ * @see {@link StopDiscovery}
+ * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param[in] info Indicates the pointer to the service subscription information.
+ * For details, see {@link SubscribeInfo}.
+ * @param[in] cb Indicates the service subscription callback. For details, see {@link IDiscoveryCallback}.
+ * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return <b>SOFTBUS_OK</b> if the service subscription is successful.
  */
 int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscoveryCallback *cb);
 
 /**
- * @brief Unsubscribes from a specified service.
- *
- * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param subscribeId Indicates the service ID.
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
- * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
- * @return Returns <b>SOFTBUS_OK</b> if the service unsubscription is successful.
+ * @brief Stop the discovery function, at this time no longer capture device information of other devices at this time.
+ * @see {@link StartDiscovery}
+ * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param[in] subscribeId Indicates the service ID.
+ * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_OK</b> if the service unsubscription is successful.
  */
 int StopDiscovery(const char *pkgName, int subscribeId);
 
