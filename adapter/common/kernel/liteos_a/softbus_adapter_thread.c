@@ -105,7 +105,7 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
     ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexLock failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -121,7 +121,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
     ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexUnlock failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     return SOFTBUS_OK;
