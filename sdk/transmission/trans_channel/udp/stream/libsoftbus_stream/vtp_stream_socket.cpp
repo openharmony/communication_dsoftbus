@@ -27,7 +27,9 @@
 #include "fillpinc.h"
 #include "raw_stream_data.h"
 #include "session.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "stream_depacketizer.h"
@@ -237,14 +239,14 @@ void VtpStreamSocket::FillpAppStatistics()
     int32_t tvCount = 1;
     QosTv metricList = {};
     FillpStatisticsPcb fillpPcbStats = {};
-    struct timeval fillpStatsGetTime = {};
+    SoftBusSysTime fillpStatsGetTime = {0};
 
     int getStatisticsRet = FtFillpStatsGet(streamFd_, &fillpPcbStats);
-    gettimeofday(&fillpStatsGetTime, nullptr);
+    SoftBusGetTime(&fillpStatsGetTime);
     if (getStatisticsRet == 0) {
         metricList.type = STREAM_TRAFFIC_STASTICS;
-        metricList.info.appStatistics.statisticsGotTime = static_cast<uint64_t>((fillpStatsGetTime.tv_sec *
-            MS_PER_SECOND + fillpStatsGetTime.tv_usec / US_PER_MS)); /* ms */
+        metricList.info.appStatistics.statisticsGotTime = static_cast<uint64_t>((fillpStatsGetTime.sec *
+            MS_PER_SECOND + fillpStatsGetTime.usec / US_PER_MS)); /* ms */
         metricList.info.appStatistics.periodRecvBits =
             static_cast<uint64_t>(fillpPcbStats.appFcStastics.periodRecvBits);
         metricList.info.appStatistics.pktNum = fillpPcbStats.appFcStastics.pktNum;
@@ -642,7 +644,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
 
     char host[ADDR_MAX_SIZE];
     localIpPort_.port = static_cast<int32_t>(ntohs(localSockAddr.sin_port));
-    localIpPort_.ip = inet_ntop(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
+    localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
     local.port = localIpPort_.port;
 
     if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
@@ -746,11 +748,11 @@ bool VtpStreamSocket::Accept()
     char host[ADDR_MAX_SIZE];
     if (remoteAddr.sa_family == AF_INET) {
         auto v4Addr = reinterpret_cast<const sockaddr_in *>(&remoteAddr);
-        remoteIpPort_.ip = inet_ntop(AF_INET, &(v4Addr->sin_addr), host, ADDR_MAX_SIZE);
+        remoteIpPort_.ip = SoftBusInetNtoP(AF_INET, &(v4Addr->sin_addr), host, ADDR_MAX_SIZE);
         remoteIpPort_.port = v4Addr->sin_port;
     } else {
         auto v6Addr = reinterpret_cast<const sockaddr_in6 *>(&remoteAddr);
-        remoteIpPort_.ip = inet_ntop(AF_INET6, &(v6Addr->sin6_addr), host, ADDR_MAX_SIZE);
+        remoteIpPort_.ip = SoftBusInetNtoP(AF_INET6, &(v6Addr->sin6_addr), host, ADDR_MAX_SIZE);
         remoteIpPort_.port = v6Addr->sin6_port;
     }
 
@@ -1085,7 +1087,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
 
         char host[ADDR_MAX_SIZE];
         std::string devName(ifa->ifa_name);
-        if (strcmp(boundIp.c_str(), inet_ntop(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
+        if (strcmp(boundIp.c_str(), SoftBusInetNtoP(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
             host, ADDR_MAX_SIZE)) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "current use interface %s to bind to socket", ifa->ifa_name);
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());

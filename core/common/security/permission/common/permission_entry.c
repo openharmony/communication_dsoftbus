@@ -100,7 +100,7 @@ static PeMap g_peMap[] = {
 
 static int32_t ReadConfigJson(const char* permissionFile)
 {
-    if (SoftBusReadFile(permissionFile, g_permissonJson, PERMISSION_JSON_LEN) != SOFTBUS_OK) {
+    if (SoftBusReadFullFile(permissionFile, g_permissonJson, PERMISSION_JSON_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadConfigJson failed.");
         return SOFTBUS_FILE_ERR;
     }

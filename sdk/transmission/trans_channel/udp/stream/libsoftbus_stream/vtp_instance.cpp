@@ -23,6 +23,7 @@
 #include "common_inner.h"
 #include "fillptypes.h"
 #include "securec.h"
+#include "softbus_adapter_crypto.h"
 #include "stream_common.h"
 
 namespace Communication {
@@ -58,15 +59,7 @@ std::shared_ptr<VtpInstance> VtpInstance::GetVtpInstance()
 
 FILLP_UINT32 VtpInstance::CryptoRand()
 {
-    int fd = open("/dev/urandom", O_RDONLY);
-    if (fd < 0) {
-        return 0;
-    }
-
-    FILLP_UINT32 value = 0;
-    read(fd, &value, sizeof(FILLP_UINT32));
-    close(fd);
-    return value;
+    return SoftBusCryptoRand();
 }
 
 void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel, FILLP_UINT32 debugId,
