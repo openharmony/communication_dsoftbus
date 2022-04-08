@@ -620,6 +620,9 @@ static int32_t AnalysisData(char *data, int len, AuthDataInfo *info)
     info->flag = *(int32_t *)data;
     data += sizeof(int32_t);
     info->dataLen = *(uint32_t *)data;
+    if ((info->dataLen + sizeof(AuthDataInfo)) > len) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
