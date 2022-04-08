@@ -77,6 +77,8 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *key, const unsigned char *input, uin
 
 int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *encryptData, uint32_t *encryptLen, int32_t seqNum);
+    
+uint32_t SoftBusCryptoRand(void);
 
 #endif
 
