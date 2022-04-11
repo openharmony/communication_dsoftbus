@@ -344,7 +344,6 @@ static int32_t SetLocalDeviceInfo(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device type failed.");
         return SOFTBUS_ERR;
     }
-    deviceType = DEFAULT_DEVICE_TYPE;
     g_localDeviceInfo->deviceType = (uint8_t)deviceType;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name,
                            sizeof(g_localDeviceInfo->name)) != SOFTBUS_OK ||
