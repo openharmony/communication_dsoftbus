@@ -237,6 +237,9 @@ void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan)
 {
     SoftBusMessage *msg  = TransProxyCreateLoopMsg(LOOP_RESETPEER_MSG, 0, 0, (char *)chan);
     if (msg == NULL) {
+        if (chan != NULL) {
+            SoftBusFree((void *)chan);
+        }
         return;
     }
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
@@ -252,6 +255,7 @@ void TransProxyPostHandshakeMsgToLoop(int32_t chanId)
     *chanIdMsg = chanId;
     SoftBusMessage *msg  = TransProxyCreateLoopMsg(LOOP_HANDSHAKE_MSG, 0, 0, (char *)chanIdMsg);
     if (msg == NULL) {
+        SoftBusFree((void *)chanIdMsg);
         return;
     }
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
@@ -272,6 +276,9 @@ void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan)
 {
     SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_KEEPALIVE_MSG, 0, 0, (char *)chan);
     if (msg == NULL) {
+        if (chan != NULL) {
+            SoftBusFree((void *)chan);
+        }
         return;
     }
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
@@ -282,6 +289,9 @@ void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan)
 {
     SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_OPENFAIL_MSG, 0, 0, (char *)chan);
     if (msg == NULL) {
+        if (chan != NULL) {
+            SoftBusFree((void *)chan);
+        }
         return;
     }
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
@@ -292,6 +302,9 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan)
 {
     SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_OPENCLOSE_MSG, 0, 0, (char *)chan);
     if (msg == NULL) {
+        if (chan != NULL) {
+            SoftBusFree((void *)chan);
+        }
         return;
     }
     g_transLoophandler.looper->PostMessage(g_transLoophandler.looper, msg);
