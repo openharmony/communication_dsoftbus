@@ -138,7 +138,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    return g_channelCb->OnChannelOpened(&appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
+    return g_channelCb->OnChannelOpened((const char *)&appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
 }
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info)
