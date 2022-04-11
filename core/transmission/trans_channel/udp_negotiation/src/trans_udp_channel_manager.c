@@ -428,7 +428,6 @@ void TransUdpDeathCallback(const char *pkgName)
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[ysh_test]myData.pkgName = %s,pkgName=%s",udpChannelNode->info.myData.pkgName, pkgName);
         if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) { 
             udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
             if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {

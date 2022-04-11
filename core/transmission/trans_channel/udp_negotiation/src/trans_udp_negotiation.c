@@ -122,7 +122,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
     if (GetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId,
-            NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set network id fail.");
         return SOFTBUS_ERR;
     }
@@ -133,7 +133,8 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         info.peerPort = appInfo->peerData.port;
         info.peerIp = (char*)appInfo->peerData.ip;
     }
-    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName, &appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
+        (char *)&appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
