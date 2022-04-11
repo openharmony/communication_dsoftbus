@@ -20,6 +20,7 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
+#include "trans_udp_channel_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,7 +31,7 @@ void TransUdpChannelDeinit(void);
 
 int32_t TransOpenUdpChannel(AppInfo* appInfo, const ConnectOption *connOpt, int32_t *channelId);
 int32_t TransCloseUdpChannel(int32_t channelId);
-
+int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel);
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info);
 int32_t NotifyUdpChannelClosed(const AppInfo *info);
 int32_t NotifyUdpQosEvent(const AppInfo *info, int eventId, int tvCount, const QosTv *tvList);

@@ -16,12 +16,20 @@
 #ifndef CLIENT_TRANS_CHANNEL_MANAGER_H
 #define CLIENT_TRANS_CHANNEL_MANAGER_H
 
+#include "client_trans_session_manager.h"
 #include "session.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+    ChannelType channelType;
+    void (*OnSessionClosed)(int sessionId);
+} DestroySessionInfo;
 
 int32_t ClientTransChannelInit(void);
 

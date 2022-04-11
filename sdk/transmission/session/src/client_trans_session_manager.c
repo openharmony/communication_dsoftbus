@@ -107,7 +107,56 @@ static void DestroySessionId(void)
     return;
 }
 
-static void DestroyClientSessionServer(ClientSessionServer *server)
+static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server)
+{
+    DestroySessionInfo *destroyNode = (DestroySessionInfo *)SoftBusMalloc(sizeof(DestroySessionInfo));
+    if (destroyNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroyList malloc fail.");
+        return NULL;
+    }
+    destroyNode->sessionId = sessionNode->sessionId;
+    destroyNode->channelId = sessionNode->channelId;
+    destroyNode->channelType = sessionNode->channelType; 
+    destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
+    return destroyNode;
+}
+
+static void CleanDestroySessionNode(ListNode *destroyList)
+{
+    if (IsListEmpty(destroyList)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Clean destroyList is empty fail.");
+        return;
+    }
+    DestroySessionInfo *destroyNode = NULL;
+    DestroySessionInfo *destroyNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
+        ListDelete(&(destroyNode->node));
+        SoftBusFree(destroyNode);
+    }
+}
+
+static void ClientDestroySession(const ListNode *destroyList)
+{
+    if (IsListEmpty(destroyList)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroyList is empty fail.");
+        return;
+    }
+    DestroySessionInfo *destroyNode = NULL;
+    DestroySessionInfo *destroyNodeNext = NULL;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DestroyClientSession start");
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
+        int32_t id = destroyNode->sessionId;
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        if (destroyNode->OnSessionClosed != NULL) {
+            destroyNode->OnSessionClosed(id);
+        }
+        ListDelete(&(destroyNode->node));
+        SoftBusFree(destroyNode);
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DestroyClientSession end");
+}
+
+static void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyList)
 {
     if (server == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -118,12 +167,15 @@ static void DestroyClientSessionServer(ClientSessionServer *server)
         SessionInfo *sessionNode = NULL;
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-            int id = sessionNode->sessionId;
-            (void) ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+            DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+            if (destroyNode == NULL) {
+                CleanDestroySessionNode(destroyList);
+                return;
+            }
             DestroySessionId();
             ListDelete(&sessionNode->node);
+            ListAdd(destroyList, &(destroyNode->node));
             SoftBusFree(sessionNode);
-            server->listener.session.OnSessionClosed(id);
         }
     }
 
@@ -143,11 +195,14 @@ void TransClientDeinit(void)
     }
     ClientSessionServer *serverNode = NULL;
     ClientSessionServer *serverNodeNext = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY_SAFE(serverNode, serverNodeNext, &(g_clientSessionServerList->list),
         ClientSessionServer, node) {
-        DestroyClientSessionServer(serverNode);
+        DestroyClientSessionServer(serverNode, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    ClientDestroySession(&destroyList);
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -177,6 +232,8 @@ void TransSessionTimer(void)
     }
 
     ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if (IsListEmpty(&(serverNode->sessionList))) {
             continue;
@@ -186,15 +243,20 @@ void TransSessionTimer(void)
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(serverNode->sessionList), SessionInfo, node) {
             sessionNode->timeout++;
             if (sessionNode->timeout >= TRANS_SESSION_TIMEOUT) {
-                serverNode->listener.session.OnSessionClosed(sessionNode->sessionId);
-                (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+                DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
+                if (destroyNode == NULL) {
+                    CleanDestroySessionNode(&destroyList);
+                    return;
+                }
                 DestroySessionId();
                 ListDelete(&(sessionNode->node));
+                ListAdd(&destroyList, &(destroyNode->node));
                 SoftBusFree(sessionNode);
             }
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    (void)ClientDestroySession(&destroyList);
     return;
 }
 
@@ -515,17 +577,18 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
     }
 
     ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if ((strcmp(serverNode->sessionName, sessionName) == 0) && (serverNode->type == type)) {
-            DestroyClientSessionServer(serverNode);
+            DestroyClientSessionServer(serverNode, &destroyList);
             g_clientSessionServerList->cnt--;
-            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            return SOFTBUS_OK;
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found [%s]", sessionName);
-    return SOFTBUS_ERR;
+    (void)ClientDestroySession(&destroyList);
+    return SOFTBUS_OK;
 }
 
 int32_t ClientDeleteSession(int32_t sessionId)
@@ -974,10 +1037,11 @@ int32_t ClientGetSessionSide(int32_t sessionId)
 }
 
 static void DestroyClientSessionByDevId(const ClientSessionServer *server,
-    const char *devId, int32_t routeType)
+    const char *devId, int32_t routeType, ListNode *destroyList)
 {
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
+
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         if (strcmp(sessionNode->info.peerDeviceId, devId) != 0) {
             continue;
@@ -985,15 +1049,18 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server,
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             continue;
         }
+        
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByDevId info={%d, %d, %d}",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
-
-        int id = sessionNode->sessionId;
-        (void)ClientTransCloseChannel(sessionNode->channelId, sessionNode->channelType);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        if (destroyNode == NULL) {
+            CleanDestroySessionNode(destroyList);
+            return;
+        }
         DestroySessionId();
         ListDelete(&sessionNode->node);
+        ListAdd(destroyList, &(destroyNode->node));
         SoftBusFree(sessionNode);
-        server->listener.session.OnSessionClosed(id);
     }
 }
 
@@ -1014,10 +1081,13 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
     }
 
     ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionByDevId(serverNode, info->networkId, ROUTE_TYPE_ALL);
+        DestroyClientSessionByDevId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    (void)ClientDestroySession(&destroyList);
     return;
 }
 
@@ -1072,10 +1142,13 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
         return;
     }
     ClientSessionServer *serverNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionByDevId(serverNode, networkId, routeType);
+        DestroyClientSessionByDevId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    (void)ClientDestroySession(&destroyList);
     return;
 }
 

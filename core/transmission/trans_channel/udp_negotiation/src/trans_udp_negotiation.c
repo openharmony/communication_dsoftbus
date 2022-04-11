@@ -90,10 +90,29 @@ static int64_t GenerateSeq(bool isServer)
     return seq;
 }
 
+static int32_t GetNetworkIdByUuid(const char *Uuid, char *peerDeviceId, const int32_t peerDeviceIdLen)
+{
+    if (Uuid == NULL) {
+        return SOFTBUS_ERR;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = LnnGetNetworkIdByUuid(Uuid, networkId, sizeof(networkId));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed, ret = %d.", ret);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(peerDeviceId, peerDeviceIdLen, networkId, sizeof(networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s network id failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel opened.");
     ChannelInfo info = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
     info.channelId = appInfo->myData.channelId;
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = isServerSide;
@@ -102,20 +121,24 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
-    info.peerDeviceId = (char*)appInfo->peerData.deviceId;
+    if (GetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId,
+            NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set network id fail.");
+        return SOFTBUS_ERR;
+    }
+    info.peerDeviceId = (char*)networkId;
     info.peerSessionName = (char*)appInfo->peerData.sessionName;
     info.routeType = (int32_t)appInfo->routeType;
     if (!isServerSide) {
         info.peerPort = appInfo->peerData.port;
         info.peerIp = (char*)appInfo->peerData.ip;
     }
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName, &appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    return g_channelCb->OnChannelOpened(pkgName, appInfo->myData.sessionName, &info);
+    return g_channelCb->OnChannelOpened(&appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
 }
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info)
@@ -330,15 +353,8 @@ static int32_t SetPeerDeviceIdByAuth(int64_t authId, AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
 
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUuid(peerUuid, networkId, sizeof(networkId));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed, ret = %d.", ret);
-        return SOFTBUS_ERR;
-    }
-
     if (memcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
-        networkId, sizeof(networkId)) != EOK) {
+        peerUuid, sizeof(peerUuid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s network id failed.");
         return SOFTBUS_MEM_ERR;
     }
@@ -571,7 +587,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
     return SOFTBUS_OK;
 }
 
-static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
+int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConnForUdpNegotiation");
     if (channel == NULL) {
