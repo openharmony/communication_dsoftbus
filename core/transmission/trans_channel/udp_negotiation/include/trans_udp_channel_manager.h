@@ -35,6 +35,8 @@ typedef struct {
     uint32_t requestId;
 } UdpChannelInfo;
 
+SoftBusList *GetUdpChannelMgrHead(void);
+
 int32_t TransUdpChannelMgrInit(void);
 void TransUdpChannelMgrDeinit(void);
 

@@ -26,6 +26,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 
 #define MAX_CHANNEL_ID_COUNT 20
@@ -569,7 +570,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
     return SOFTBUS_OK;
 }
 
-int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
+static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConnForUdpNegotiation");
     if (channel == NULL) {
@@ -768,4 +769,25 @@ void TransUdpChannelDeinit(void)
     AuthTransDataUnRegCallback(TRANS_UDP_DATA);
     g_channelCb = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
+}
+
+void TransUdpDeathCallback(const char *pkgName)
+{
+    if (GetUdpChannelLock() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    SoftBusList *udpChannelList = GetUdpChannelMgrHead();
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(udpChannelList->list), UdpChannelInfo, node) {
+        if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) { 
+            udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+            if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");
+            }
+        }
+    }
+    void ReleaseUdpChannelLock();
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransUdpDeathCallback end[pkgName = %s]", pkgName);
+    return;
 }

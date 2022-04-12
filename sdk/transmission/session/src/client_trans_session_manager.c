@@ -31,6 +31,14 @@ static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
 static SoftBusList *g_clientSessionServerList = NULL;
 
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+    ChannelType channelType;
+    void (*OnSessionClosed)(int sessionId);
+} DestroySessionInfo;
+
 void TransSessionTimer(void);
 
 int TransClientInit(void)
