@@ -129,20 +129,6 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     return destroyNode;
 }
 
-static void CleanDestroySessionNode(ListNode *destroyList)
-{
-    if (IsListEmpty(destroyList)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Clean destroyList is empty fail.");
-        return;
-    }
-    DestroySessionInfo *destroyNode = NULL;
-    DestroySessionInfo *destroyNodeNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
-        ListDelete(&(destroyNode->node));
-        SoftBusFree(destroyNode);
-    }
-}
-
 static void ClientDestroySession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
@@ -177,8 +163,7 @@ static void DestroyClientSessionServer(ClientSessionServer *server, ListNode *de
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
             DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
             if (destroyNode == NULL) {
-                CleanDestroySessionNode(destroyList);
-                return;
+                continue;
             }
             DestroySessionId();
             ListDelete(&sessionNode->node);
@@ -253,8 +238,7 @@ void TransSessionTimer(void)
             if (sessionNode->timeout >= TRANS_SESSION_TIMEOUT) {
                 DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
                 if (destroyNode == NULL) {
-                    CleanDestroySessionNode(&destroyList);
-                    return;
+                    continue;
                 }
                 DestroySessionId();
                 ListDelete(&(sessionNode->node));
@@ -1062,8 +1046,7 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server,
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
-            CleanDestroySessionNode(destroyList);
-            return;
+            continue;
         }
         DestroySessionId();
         ListDelete(&sessionNode->node);
