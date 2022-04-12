@@ -116,7 +116,7 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     }
     destroyNode->sessionId = sessionNode->sessionId;
     destroyNode->channelId = sessionNode->channelId;
-    destroyNode->channelType = sessionNode->channelType; 
+    destroyNode->channelType = sessionNode->channelType;
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
     return destroyNode;
 }
