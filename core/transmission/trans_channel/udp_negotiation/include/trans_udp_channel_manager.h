@@ -59,5 +59,4 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
 void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
 
 UdpChannelInfo *TransGetChannelObj(int32_t channelId);
-void TransUdpDeathCallback(const char *pkgName);
 #endif // !TRANS_UDP_CHANNEL_MANAGER_H
