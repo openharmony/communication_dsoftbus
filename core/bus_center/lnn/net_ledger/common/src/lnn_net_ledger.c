@@ -81,6 +81,12 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
             } else {
                 return LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, (char *)info, infoLen);
             }
+        case NODE_KEY_BR_MAC:
+            if (isLocalNetworkId) {
+                return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
+            } else {
+                return LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, (char *)info, infoLen);
+            }
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;

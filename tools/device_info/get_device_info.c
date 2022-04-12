@@ -42,6 +42,14 @@ static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
     } else {
         printf("Uuid = %s\n", uuid);
     }
+    key = NODE_KEY_BR_MAC;
+    unsigned char brMac[BT_MAC_LEN] = {0};
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+        brMac, BT_MAC_LEN) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("BrMac = %s\n", brMac);
+    }
 }
 
 int main(void)

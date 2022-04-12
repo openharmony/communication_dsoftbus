@@ -275,8 +275,12 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.Level0)
 {
     NodeBasicInfo info;
+    NodeBasicInfo *remoteNodeInfo = nullptr;
+    int infoNum = 0;
+
     char uuid[UUID_BUF_LEN] = {0};
     char udid[UDID_BUF_LEN] = {0};
+    char brMac[BT_MAC_LEN] = {0};
 
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
@@ -285,6 +289,15 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UUID,
         (uint8_t *)uuid, UUID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strlen(uuid) == (UUID_BUF_LEN - 1));
+
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_BR_MAC,
+        (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
+    for (int i = 0; i < infoNum; i++) {
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC,
+        (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+    }
+    FreeNodeInfo(remoteNodeInfo);
 }
 
 /*
