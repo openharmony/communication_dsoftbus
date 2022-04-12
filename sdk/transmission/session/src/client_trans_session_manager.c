@@ -143,7 +143,7 @@ static void ClientDestroySession(const ListNode *destroyList)
     }
     DestroySessionInfo *destroyNode = NULL;
     DestroySessionInfo *destroyNodeNext = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DestroyClientSession start");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSession start");
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
@@ -153,7 +153,7 @@ static void ClientDestroySession(const ListNode *destroyList)
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DestroyClientSession end");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSession end");
 }
 
 static void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyList)
