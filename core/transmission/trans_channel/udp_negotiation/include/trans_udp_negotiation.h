@@ -30,6 +30,7 @@ void TransUdpChannelDeinit(void);
 
 int32_t TransOpenUdpChannel(AppInfo* appInfo, const ConnectOption *connOpt, int32_t *channelId);
 int32_t TransCloseUdpChannel(int32_t channelId);
+
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info);
 int32_t NotifyUdpChannelClosed(const AppInfo *info);
 int32_t NotifyUdpQosEvent(const AppInfo *info, int eventId, int tvCount, const QosTv *tvList);
