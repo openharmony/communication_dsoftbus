@@ -26,7 +26,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 
 #define MAX_CHANNEL_ID_COUNT 20
