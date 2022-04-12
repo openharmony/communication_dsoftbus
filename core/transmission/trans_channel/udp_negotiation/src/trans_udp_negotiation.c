@@ -787,7 +787,7 @@ void TransUdpDeathCallback(const char *pkgName)
             }
         }
     }
-    void ReleaseUdpChannelLock();
+    (void)ReleaseUdpChannelLock();
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransUdpDeathCallback end[pkgName = %s]", pkgName);
     return;
 }
