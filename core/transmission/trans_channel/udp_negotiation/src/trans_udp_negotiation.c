@@ -94,15 +94,10 @@ static int32_t GetNetworkIdByUuid(const char *Uuid, char *peerDeviceId, const in
     if (Uuid == NULL) {
         return SOFTBUS_ERR;
     }
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUuid(Uuid, networkId, sizeof(networkId));
+    int32_t ret = LnnGetNetworkIdByUuid(Uuid, peerDeviceId, peerDeviceIdLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed, ret = %d.", ret);
         return SOFTBUS_ERR;
-    }
-    if (memcpy_s(peerDeviceId, peerDeviceIdLen, networkId, sizeof(networkId)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s network id failed.");
-        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
