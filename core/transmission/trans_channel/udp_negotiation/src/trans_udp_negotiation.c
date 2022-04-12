@@ -780,7 +780,7 @@ void TransUdpDeathCallback(const char *pkgName)
     SoftBusList *udpChannelList = GetUdpChannelMgrHead();
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(udpChannelList->list), UdpChannelInfo, node) {
-        if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) { 
+        if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) {
             udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
             if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");
