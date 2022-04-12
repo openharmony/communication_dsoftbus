@@ -418,29 +418,3 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetChannelObj not found: channelId=%d", channelId);
     return NULL;
 }
-
-void TransUdpDeathCallback(const char *pkgName)
-{
-    if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
-        return;
-    }
-
-    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
-        return;
-    }
-
-    UdpChannelInfo *udpChannelNode = NULL;
-    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) {
-            udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-            if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");
-            }
-        }
-    }
-    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransUdpDeathCallback end[pkgName = %s]", pkgName);
-    return;
-}
