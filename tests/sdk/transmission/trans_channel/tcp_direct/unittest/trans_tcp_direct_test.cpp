@@ -206,7 +206,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
