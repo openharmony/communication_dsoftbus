@@ -58,6 +58,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
         !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
         !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
+        !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info)) ||
         !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)info->supportedProtocols)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         return SOFTBUS_ERR;
@@ -93,6 +94,7 @@ static void UnPackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     (void)GetJsonObjectStringItem(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
     (void)GetJsonObjectStringItem(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)GetJsonObjectNumberItem(json, CONN_CAP, (int *)&info->netCapacity);
+    (void)GetJsonObjectStringItem(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN);
 
     (void)GetJsonObjectNumberItem(json, P2P_ROLE, &info->p2pInfo.p2pRole);
     info->isBleP2p = false;
@@ -114,7 +116,7 @@ static char *PackBt(const NodeInfo *info, SoftBusVersion version)
         return NULL;
     }
 
-    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT) || !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info))) {
+    if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddToJsonObject error!");
         cJSON_Delete(json);
         return NULL;
@@ -140,7 +142,6 @@ static int32_t UnPackBt(const cJSON *json, NodeInfo *info, SoftBusVersion versio
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    (void)GetJsonObjectStringItem(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN);
     if (!GetJsonObjectNumber64Item(json, TRANSPORT_PROTOCOL, (int64_t *)&info->supportedProtocols)) {
         info->supportedProtocols = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE;
     }
