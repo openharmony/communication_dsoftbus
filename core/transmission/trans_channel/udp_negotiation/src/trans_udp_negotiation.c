@@ -89,19 +89,6 @@ static int64_t GenerateSeq(bool isServer)
     return seq;
 }
 
-static int32_t GetNetworkIdByUuid(const char *Uuid, char *peerDeviceId, const int32_t peerDeviceIdLen)
-{
-    if (Uuid == NULL) {
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = LnnGetNetworkIdByUuid(Uuid, peerDeviceId, peerDeviceIdLen);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed, ret = %d.", ret);
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel opened.");
@@ -115,9 +102,9 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
-    if (GetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId,
+    if (LnnGetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId,
         NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set network id fail.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed.");
         return SOFTBUS_ERR;
     }
     info.peerDeviceId = (char*)networkId;
