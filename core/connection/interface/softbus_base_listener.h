@@ -19,7 +19,6 @@
 #include "common_list.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
-#include "sys/select.h"
 
 #ifdef __cplusplus
 #if __cplusplus

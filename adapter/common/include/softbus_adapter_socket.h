@@ -17,9 +17,9 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <stdint.h>
-#include <sys/select.h>
 #include <unistd.h>
 #include "softbus_adapter_define.h"
+#include "softbus_adapter_timer.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -30,11 +30,18 @@ extern "C" {
 #define ADDR_IN_RESER_SIZE (8)
 
 /* sys/socket.h */
+#define SOFTBUS_PF_UNSPEC SOFTBUS_PF_UNSPEC_
+#define SOFTBUS_AF_UNSPEC SOFTBUS_AF_UNSPEC_
+
 #define SOFTBUS_PF_INET SOFTBUS_PF_INET_
 #define SOFTBUS_AF_INET SOFTBUS_AF_INET_
 
+#define SOFTBUS_PF_NETLINK SOFTBUS_PF_NETLINK_
+#define SOFTBUS_AF_NETLINK SOFTBUS_AF_NETLINK_
+
 #define SOFTBUS_SOCK_STREAM SOFTBUS_SOCK_STREAM_
 #define SOFTBUS_SOCK_DGRAM SOFTBUS_SOCK_DGRAM_
+#define SOFTBUS_SOCK_RAW SOFTBUS_SOCK_RAW_
 
 #define SOFTBUS_SOCK_CLOEXEC SOFTBUS_SOCK_CLOEXEC_
 #define SOFTBUS_SOCK_NONBLOCK SOFTBUS_SOCK_NONBLOCK_
@@ -42,8 +49,10 @@ extern "C" {
 #define SOFTBUS_SOL_SOCKET SOFTBUS_SOL_SOCKET_
 
 #define SOFTBUS_SO_REUSEADDR SOFTBUS_SO_REUSEADDR_
+#define SOFTBUS_SO_RCVBUF SOFTBUS_SO_RCVBUF_
 #define SOFTBUS_SO_KEEPALIVE SOFTBUS_SO_KEEPALIVE_
 #define SOFTBUS_SO_REUSEPORT SOFTBUS_SO_REUSEPORT_
+#define SOFTBUS_SO_RCVBUFFORCE SOFTBUS_SO_RCVBUFFORCE_
 
 #define SOFTBUS_TCP_KEEPIDLE SOFTBUS_TCP_KEEPIDLE_
 #define SOFTBUS_TCP_KEEPINTVL SOFTBUS_TCP_KEEPINTVL_
@@ -72,6 +81,7 @@ extern "C" {
 /* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE SOFTBUS_FD_SETSIZE_
 
+typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {
     unsigned short saFamily; /* address family */
@@ -111,7 +121,7 @@ void SoftBusSocketFdClr(int32_t socketFd, SoftBusFdSet *set);
 int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set);
 
 int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
-    struct timeval *timeOut);
+    SoftBusSockTimeOut *timeOut);
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 

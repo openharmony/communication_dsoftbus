@@ -61,14 +61,15 @@ bus_center_server_inc += [
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/ipc/mini_system/lnn_bus_center_ipc.c" ]
+    bus_center_server_src +=
+        [ "$dsoftbus_root_path/core/bus_center/ipc/mini/lnn_bus_center_ipc.c" ]
   } else {
     bus_center_server_src += [
-      "$dsoftbus_root_path/core/bus_center/ipc/small_system/src/bus_center_client_proxy.c",
-      "$dsoftbus_root_path/core/bus_center/ipc/small_system/src/lnn_bus_center_ipc.c",
+      "$dsoftbus_root_path/core/bus_center/ipc/small/src/bus_center_client_proxy.c",
+      "$dsoftbus_root_path/core/bus_center/ipc/small/src/lnn_bus_center_ipc.c",
     ]
     bus_center_server_inc +=
-        [ "$dsoftbus_root_path/core/bus_center/ipc/small_system/include" ]
+        [ "$dsoftbus_root_path/core/bus_center/ipc/small/include" ]
     bus_center_server_deps += [
       "//build/lite/config/component/cJSON:cjson_shared",
       "//foundation/communication/ipc_lite:liteipc_adapter",
@@ -76,13 +77,13 @@ if (defined(ohos_lite)) {
   }
 } else {
   bus_center_server_src += [
-    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/bus_center_client_proxy.cpp",
-    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/bus_center_client_proxy_standard.cpp",
-    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/src/lnn_bus_center_ipc.cpp",
+    "$dsoftbus_root_path/core/bus_center/ipc/$os_type/src/bus_center_client_proxy.cpp",
+    "$dsoftbus_root_path/core/bus_center/ipc/$os_type/src/bus_center_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/core/bus_center/ipc/$os_type/src/lnn_bus_center_ipc.cpp",
   ]
   bus_center_server_inc += [
-    "$dsoftbus_root_path/core/bus_center/ipc/standard_system/include",
-    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/$os_type/include",
+    "$dsoftbus_root_path/sdk/frame/$os_type/include",
     "//utils/system/safwk/native/include",
   ]
   bus_center_server_deps += [ "//utils/native/base:utils" ]

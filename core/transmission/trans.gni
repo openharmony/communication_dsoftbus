@@ -48,14 +48,14 @@ if (defined(ohos_lite)) {
   }
 } else {
   trans_session_inc += [
-    "$dsoftbus_root_path/core/transmission/ipc/standard/include",
-    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_root_path/core/transmission/ipc/$os_type/include",
+    "$dsoftbus_root_path/sdk/frame/$os_type/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct",
     "//third_party/cJSON",
   ]
   trans_session_src += [
-    "$dsoftbus_root_path/core/transmission/ipc/standard/src/trans_client_proxy.cpp",
-    "$dsoftbus_root_path/core/transmission/ipc/standard/src/trans_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy.cpp",
+    "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy_standard.cpp",
   ]
   trans_session_deps += [
     "//utils/native/base:utils",

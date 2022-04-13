@@ -29,10 +29,12 @@ if (dsoftbus_standard_feature_trans_udp_file == true) {
 
   native_source_path = rebase_path("$dsoftbus_root_path")
   dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
-  enhanced = exec_script(
-          "$dsoftbus_root_path/run_shell_cmd.py",
-          [ "cd $native_source_path; if [ -f $dep_file ]; then echo true; else echo false; fi" ],
-          "value")
+  enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                         [
+                           "$native_source_path",
+                           "dep_file",
+                         ],
+                         "value")
   if (enhanced) {
     trans_file_sdk_inc += [
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
