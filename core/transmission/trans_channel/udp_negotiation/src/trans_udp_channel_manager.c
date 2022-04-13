@@ -30,6 +30,11 @@
 
 static SoftBusList *g_udpChannelMgr = NULL;
 
+SoftBusList *GetUdpChannelMgrHead(void)
+{
+    return g_udpChannelMgr;
+}
+
 int32_t GetUdpChannelLock(void)
 {
     if (g_udpChannelMgr == NULL) {
@@ -413,4 +418,3 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetChannelObj not found: channelId=%d", channelId);
     return NULL;
 }
-
