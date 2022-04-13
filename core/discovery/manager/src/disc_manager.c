@@ -634,7 +634,7 @@ static char *ModuleIdToPackageName(DiscModule moduleId)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc fail");
         return NULL;
     }
-    int32_t ret = memcpy_s(packageName, PKG_NAME_SIZE_MAX, g_discModuleMap[(moduleId - 1)], PKG_NAME_SIZE_MAX);
+    int32_t ret = strcpy_s(packageName, PKG_NAME_SIZE_MAX, g_discModuleMap[(moduleId - 1)]);
     if (ret != EOK) {
         SoftBusFree(packageName);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s fail");
