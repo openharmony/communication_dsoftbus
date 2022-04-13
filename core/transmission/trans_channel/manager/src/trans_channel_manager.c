@@ -424,6 +424,7 @@ void TransChannelDeathCallback(const char *pkgName)
     TransProxyDeathCallback(pkgName);
     TransTdcDeathCallback(pkgName);
     TransLaneMgrDeathCallback(pkgName);
+    TransUdpDeathCallback(pkgName);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
