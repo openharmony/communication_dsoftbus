@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,11 +15,19 @@
 # limitations under the License.
 #
 
-import subprocess
+import os
 import sys
 
 def main():
-    return subprocess.run(' '.join(sys.argv[1:]), shell=True).returncode
-
+    if sys.argv[1] == "" or sys.argv[2] == "" :
+        print("false")
+        return 1
+    sub_module = os.path.join(sys.argv[1], sys.argv[2])
+    if os.path.exists(sub_module) == True :
+        print("true")
+        return 0
+    print("false")
+    return 0
+    
 if __name__ == '__main__':
     sys.exit(main())

@@ -44,18 +44,18 @@ if (defined(ohos_lite)) {
 } else {
   softbus_client_frame_inc += [
     "$dsoftbus_root_path/sdk/frame/common/include",
-    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_root_path/sdk/frame/$os_type/include",
     "//utils/system/safwk/native/include",
   ]
 
   softbus_client_frame_src = [
-    "$dsoftbus_root_path/core/frame/standard/init/src/if_softbus_server.cpp",
+    "$dsoftbus_root_path/core/frame/$os_type/init/src/if_softbus_server.cpp",
     "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_event_manager.c",
     "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_frame_manager.c",
-    "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",
-    "$dsoftbus_root_path/sdk/frame/standard/src/softbus_client_death_recipient.cpp",
-    "$dsoftbus_root_path/sdk/frame/standard/src/softbus_client_stub.cpp",
-    "$dsoftbus_root_path/sdk/frame/standard/src/softbus_server_proxy_frame.cpp",
-    "$dsoftbus_root_path/sdk/frame/standard/src/softbus_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/frame/$os_type/src/if_softbus_client.cpp",
+    "$dsoftbus_root_path/sdk/frame/$os_type/src/softbus_client_death_recipient.cpp",
+    "$dsoftbus_root_path/sdk/frame/$os_type/src/softbus_client_stub.cpp",
+    "$dsoftbus_root_path/sdk/frame/$os_type/src/softbus_server_proxy_frame.cpp",
+    "$dsoftbus_root_path/sdk/frame/$os_type/src/softbus_server_proxy_standard.cpp",
   ]
 }

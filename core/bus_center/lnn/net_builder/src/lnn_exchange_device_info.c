@@ -50,7 +50,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
     }
 
     if (!AddStringToJsonObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
-        !AddStringToJsonObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
+        !AddStringToJsonObject(json, LNN_DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
         !AddStringToJsonObject(json, NETWORK_ID, info->networkId) ||
         !AddStringToJsonObject(json, VERSION_TYPE, info->versionType) ||
@@ -85,7 +85,7 @@ static void UnPackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     }
 
     (void)GetJsonObjectStringItem(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
-    if (GetJsonObjectStringItem(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
+    if (GetJsonObjectStringItem(json, LNN_DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
         if (LnnConvertDeviceTypeToId(deviceType, &typeId) == SOFTBUS_OK) {
             info->deviceInfo.deviceTypeId = typeId;
         }

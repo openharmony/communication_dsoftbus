@@ -428,13 +428,13 @@ EXIT:
 
 static int32_t SelectThread(void)
 {
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = TIMEOUT;
+    SoftBusSockTimeOut tv = {0};
+    tv.sec = 0;
+    tv.usec = TIMEOUT;
     int32_t timeOut = 0;
     if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, (unsigned char *)&timeOut,
         sizeof(timeOut)) == SOFTBUS_OK) {
-        tv.tv_usec = (long)timeOut;
+        tv.usec = (long)timeOut;
     }
     SoftBusFdSet readSet;
     SoftBusFdSet writeSet;

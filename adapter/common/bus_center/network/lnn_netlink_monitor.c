@@ -27,18 +27,17 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
-#include <pthread.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "bus_center_event.h"
 #include "lnn_network_manager.h"
 #include "securec.h"
+#include "softbus_adapter_errcode.h"
+#include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \
@@ -53,25 +52,26 @@ static int32_t CreateNetlinkSocket(void)
     struct sockaddr_nl nladdr;
     int32_t sz = DEFAULT_NETLINK_RECVBUF;
 
-    sockFd = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_ROUTE);
-    if (sockFd < 0) {
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_PF_NETLINK, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_CLOEXEC,
+        NETLINK_ROUTE, &sockFd);
+    if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open netlink socket failed");
         return SOFTBUS_ERR;
     }
-    if (setsockopt(sockFd, SOL_SOCKET, SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0 &&
-        setsockopt(sockFd, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz)) < 0) {
+    if (SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0 &&
+        SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &sz, sizeof(sz)) < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set uevent socket SO_RCVBUF option failed");
-        close(sockFd);
+        SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
     (void)memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr));
-    nladdr.nl_family = AF_NETLINK;
+    nladdr.nl_family = SOFTBUS_AF_NETLINK;
     // Kernel will assign a unique nl_pid if set to zero.
     nladdr.nl_pid = 0;
     nladdr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
-    if (bind(sockFd, (struct sockaddr *)&nladdr, sizeof(nladdr)) < 0) {
+    if (SoftBusSocketBind(sockFd, (SoftBusSockAddr *)&nladdr, sizeof(nladdr)) < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind netlink socket failed");
-        close(sockFd);
+        SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
     return sockFd;
@@ -148,8 +148,8 @@ static void *NetlinkMonitorThread(void *para)
         return NULL;
     }
     while (true) {
-        len = recv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
-        if (len < 0 && errno == EINTR) {
+        len = SoftBusSocketRecv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
+        if (len < 0 && len == SOFTBUS_ADAPTER_SOCKET_EINTR) {
             continue;
         }
         if (len < 0) {
@@ -184,8 +184,8 @@ static void *NetlinkMonitorThread(void *para)
 
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
-    pthread_t tid;
-    if (pthread_create(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
+    SoftBusThread tid;
+    if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }

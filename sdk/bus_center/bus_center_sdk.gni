@@ -51,17 +51,17 @@ if (defined(ohos_lite)) {
 } else {
   bus_center_manager_sdk_inc += [
     "$dsoftbus_root_path/sdk/bus_center/ipc/include",
-    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/include",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "//utils/system/safwk/native/include",
   ]
   bus_center_manager_sdk_src += [
-    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/src/bus_center_server_proxy.cpp",
-    "$dsoftbus_root_path/sdk/bus_center/ipc/standard/src/bus_center_server_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy.cpp",
+    "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy_standard.cpp",
     "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
   ]
   bus_center_manager_sdk_deps += [ "//utils/native/base:utils" ]

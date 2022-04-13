@@ -24,15 +24,16 @@
 #endif
 
 #include <securec.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
+#include "softbus_adapter_errcode.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+
 
 #define NETLINK_BUF_LEN 1024
 
@@ -89,34 +90,34 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     int32_t status;
     int32_t fd;
 
-    fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    if (fd < 0) {
+    int32_t ret  = SoftBusSocketCreate(SOFTBUS_AF_NETLINK, SOFTBUS_SOCK_RAW, NETLINK_ROUTE, &fd);
+    if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink_socket failed");
         return SOFTBUS_ERR;
     }
 
-    status = send(fd, nlMsgHdr, nlMsgHdr->nlmsg_len, 0);
+    status = SoftBusSocketSend(fd, nlMsgHdr, nlMsgHdr->nlmsg_len, 0);
     if (status != (int32_t)(nlMsgHdr->nlmsg_len)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot talk to rtnetlink");
-        close(fd);
+        SoftBusSocketClose(fd);
         return SOFTBUS_ERR;
     }
 
     while (true) {
-        status = recv(fd, answer, maxlen, 0);
+        status = SoftBusSocketRecv(fd, answer, maxlen, 0);
         if (status < 0) {
-            if (errno == EINTR || errno == EAGAIN)
+            if (status == SOFTBUS_ADAPTER_SOCKET_EINTR || status == SOFTBUS_ADAPTER_SOCKET_EAGAIN)
                 continue;
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink receive error (%d)", errno);
-            close(fd);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink receive error (%d)", status);
+            SoftBusSocketClose(fd);
             return SOFTBUS_ERR;
         }
         if (status == 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "EOF on netlink\n");
-            close(fd);
+            SoftBusSocketClose(fd);
             return SOFTBUS_ERR;
         }
-        close(fd);
+        SoftBusSocketClose(fd);
         return ProcessNetlinkAnswer(answer, status, nlMsgHdr->nlmsg_seq);
     }
 }
@@ -150,7 +151,7 @@ bool LnnIsLinkReady(const char *iface)
         .hdr.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifinfomsg)),
         .hdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK,
         .hdr.nlmsg_type = RTM_GETLINK,
-        .info.ifi_family = PF_UNSPEC,
+        .info.ifi_family = SOFTBUS_PF_UNSPEC,
     };
     struct {
         struct nlmsghdr hdr;
