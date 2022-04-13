@@ -77,8 +77,8 @@ static int32_t GenerateSessionId(void)
 #define SESSION_ID_INIT_VALUE 1
     /* need get lock before */
     for (uint32_t id = SESSION_ID_INIT_VALUE; id <= MAX_SESSION_ID; id++) {
-        if (((g_idFlagBitmap[(id >> SHIFT_3)] >> (id & 0x7)) & ID_USED) == ID_NOT_USED) {
-            g_idFlagBitmap[(id >> SHIFT_3)] |= (ID_USED << (id & 0x7));
+        if (((g_idFlagBitmap[((id - 1) >> SHIFT_3)] >> ((id - 1) & 0x7)) & ID_USED) == ID_NOT_USED) {
+            g_idFlagBitmap[((id - 1) >> SHIFT_3)] |= (ID_USED << ((id - 1) & 0x7));
             return (int32_t)id;
         }
     }
@@ -88,7 +88,7 @@ static int32_t GenerateSessionId(void)
 static void DestroySessionId(int32_t sessionId)
 {
     uint32_t id = (uint32_t)sessionId;
-    g_idFlagBitmap[(id >> SHIFT_3)] &= (~(ID_USED << (id & 0x7)));
+    g_idFlagBitmap[((id - 1) >> SHIFT_3)] &= (~(ID_USED << ((id - 1) & 0x7)));
 }
 
 static void DestroyClientSessionServer(ClientSessionServer *server)
