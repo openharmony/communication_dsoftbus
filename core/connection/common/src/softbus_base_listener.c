@@ -282,26 +282,29 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
     SoftBusMutexUnlock(&g_listenerList[module].lock);
 
     if (fd == listenFd) {
-        SoftBusSockAddrIn addr;
-        if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
-            return SOFTBUS_ERR;
-        }
-        uint32_t addrLen = sizeof(addr);
-        int32_t cfd;
-        int32_t ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, &cfd));
-        if (ret < 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
-            return SOFTBUS_TCP_SOCKET_ERR;
-        }
-        char ip[IP_LEN] = {0};
-        SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, ip, sizeof(ip));
-        if (listener.onConnectEvent != NULL) {
-            listener.onConnectEvent(events, cfd, ip);
-        } else {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
-            SoftBusSocketClose(cfd);
+        while (true) {
+            SoftBusSockAddrIn addr;
+            if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
+                return SOFTBUS_ERR;
+            }
+            uint32_t addrLen = sizeof(addr);
+            int32_t cfd;
+            int32_t ret = TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr,
+                (int32_t *)&addrLen, &cfd));
+            if (ret < 0) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                    "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
+                break;
+            }
+            char ip[IP_LEN] = {0};
+            SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, ip, sizeof(ip));
+            if (listener.onConnectEvent != NULL) {
+                listener.onConnectEvent(events, cfd, ip);
+            } else {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
+                SoftBusSocketClose(cfd);
+            }
         }
     } else {
         if (listener.onDataEvent != NULL) {
