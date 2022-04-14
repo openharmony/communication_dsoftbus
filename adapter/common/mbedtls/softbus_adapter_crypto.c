@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "softbus_adapter_crypto.h"
 
 #include <securec.h>
@@ -22,6 +23,7 @@
 #include "mbedtls/gcm.h"
 #include "mbedtls/md.h"
 #include "mbedtls/platform.h"
+#include "softbus_adapter_file.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
 
@@ -280,4 +282,21 @@ int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned cha
 {
     (void)seqNum;
     return SoftBusDecryptData(cipherKey, input, inLen, decryptData, decryptLen);
+}
+
+uint32_t SoftBusCryptoRand(void)
+{
+    int32_t fd = SoftBusOpenFile("/dev/urandom", SOFTBUS_O_RDONLY);
+    if (fd < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "CryptoRand open file fail");
+        return 0;
+    }
+    uint32_t value = 0;
+    int32_t len = SoftBusReadFile(fd, &value, sizeof(uint32_t));
+    if (len < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "CryptoRand read file fail");
+        return 0;
+    }
+    SoftBusCloseFile(fd);
+    return value;
 }

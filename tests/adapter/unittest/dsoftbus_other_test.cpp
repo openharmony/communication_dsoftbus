@@ -184,50 +184,50 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
 }
 
 /**
- * @tc.name: SoftBusAdapter_ReadFileTest_001
+ * @tc.name: SoftBusAdapter_ReadFullFileTest_001
  * @tc.desc: Read File
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest001, TestSize.Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
 {
     const char *writeBuf="abcdef";
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 100;
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
+    ret = SoftBusReadFullFile(g_FileName, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: SoftBusAdapter_ReadFileTest_002
+ * @tc.name: SoftBusAdapter_ReadFullFileTest_002
  * @tc.desc: g_FileName is null
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest002, TestSize.Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 100;
-    int32_t ret = SoftBusReadFile(nullptr, readbuf, maxLen);
+    int32_t ret = SoftBusReadFullFile(nullptr, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
-    ret = SoftBusReadFile(g_FileName, nullptr, maxLen);
+    ret = SoftBusReadFullFile(g_FileName, nullptr, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
 /**
- * @tc.name: SoftBusAdapter_ReadFileTest_003
+ * @tc.name: SoftBusAdapter_ReadFullFileTest_003
  * @tc.desc: maxLen is ivaild param
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFileTest003, TestSize.Level0)
+HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 0;
-    int32_t ret = SoftBusReadFile(g_FileName, readbuf, maxLen);
+    int32_t ret = SoftBusReadFullFile(g_FileName, readbuf, maxLen);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
