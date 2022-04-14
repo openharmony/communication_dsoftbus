@@ -792,8 +792,8 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
         }
     }
     int32_t dirLen = i;
-    if (dirLen > dirPathLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dirLen[%d] > dirPathLen[%d]", dirLen, dirPathLen);
+    if (dirLen >= dirPathLen) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dirLen[%d] >= dirPathLen[%d]", dirLen, dirPathLen);
         return SOFTBUS_ERR;
     }
 
