@@ -21,7 +21,15 @@
 #include "softbus_errcode.h"
 #include "utils_file.h"
 
-int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
+int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen)
+{
+    (void)fd;
+    (void)readBuf;
+    (void)maxLen;
+    return -1;
+}
+
+int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
     if (fileName == NULL || readBuf == NULL || maxLen == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -79,49 +87,72 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
 
 int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
 {
+    (void)fileName;
+    (void)flags;
     return SOFTBUS_INVALID_FD;
 }
 
 int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t perms)
 {
+    (void)fileName;
+    (void)flags;
+    (void)perms;
     return SOFTBUS_INVALID_FD;
 }
 
 void SoftBusRemoveFile(const char *fileName)
 {
+    (void)fileName;
     return;
 }
 
 void SoftBusCloseFile(int32_t fd)
 {
+    (void)fd;
     return;
 }
 
 int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t offset)
 {
+    (void)fd;
+    (void)buf;
+    (void)readBytes;
+    (void)offset;
     return -1;
 }
 
 int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset)
 {
+    (void)fd;
+    (void)buf;
+    (void)writeBytes;
+    (void)offset;
     return -1;
 }
 
 int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 {
+    (void)pathName;
+    (void)mode;
     return SOFTBUS_ERR;
 }
 
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
 {
+    (void)pathName;
+    (void)mode;
     return SOFTBUS_ADAPTER_ERR;
 }
 int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 {
+    (void)fileName;
+    (void)fileSize;
     return SOFTBUS_ERR;
 }
 
 char *SoftBusRealPath(const char *path, char *absPath)
 {
+    (void)path;
+    (void)absPath;
     return NULL;
 }

@@ -67,7 +67,20 @@ static int32_t SoftBusCreateFile(const char *fileName)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
+int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen)
+{
+    if (readBuf == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus read file [buff is null]");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int64_t len = read(fd, readBuf, maxLen);
+    if (len < 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus read file fail : %s", strerror(errno));
+    }
+    return len;
+}
+
+int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen)
 {
     if (fileName == NULL || readBuf == NULL || maxLen == 0) {
         return SOFTBUS_FILE_ERR;
