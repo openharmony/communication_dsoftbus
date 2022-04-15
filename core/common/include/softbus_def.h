@@ -51,7 +51,7 @@ extern "C" {
 #define MAX_SESSION_ID 16
 #define MAX_SESSION_SERVER_NUMBER 8
 
-#define WAIT_SERVER_READY_INTERVAL 200
+#define WAIT_SERVER_READY_INTERVAL 50
 
 typedef struct {
     pthread_mutex_t lock;
