@@ -269,24 +269,26 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         return SOFTBUS_ERR;
     }
     if (fd == listenerInfo->listenFd) {
-        struct sockaddr_in addr;
-        if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
-            return SOFTBUS_ERR;
-        }
-        socklen_t addrLen = sizeof(addr);
-        int32_t cfd = TEMP_FAILURE_RETRY(accept(fd, (struct sockaddr *)&addr, &addrLen));
-        if (cfd < 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, cfd=%d, errno=%d", cfd, errno);
-            return SOFTBUS_TCP_SOCKET_ERR;
-        }
-        char ip[IP_LEN] = {0};
-        inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
-        if (listener->onConnectEvent != NULL) {
-            listener->onConnectEvent(events, cfd, ip);
-        } else {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
-            close(cfd);
+        while (true) {
+            struct sockaddr_in addr;
+            if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
+                return SOFTBUS_ERR;
+            }
+            socklen_t addrLen = sizeof(addr);
+            int32_t cfd = TEMP_FAILURE_RETRY(accept(fd, (struct sockaddr *)&addr, &addrLen));
+            if (cfd < 0) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, cfd=%d, errno=%d", cfd, errno);
+                break;
+            }
+            char ip[IP_LEN] = {0};
+            inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
+            if (listener->onConnectEvent != NULL) {
+                listener->onConnectEvent(events, cfd, ip);
+            } else {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
+                close(cfd);
+            }
         }
     } else {
         if (listener->onDataEvent != NULL) {
