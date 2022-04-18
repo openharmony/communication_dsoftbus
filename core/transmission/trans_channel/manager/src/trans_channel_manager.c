@@ -76,8 +76,7 @@ void TransChannelDeinit(void)
     TransUdpChannelDeinit();
 }
 
-static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
-    const char *groupId, int32_t flags)
+static AppInfo *GetAppInfo(const SessionParam *param)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
@@ -86,34 +85,34 @@ static AppInfo *GetAppInfo(const char *mySessionName, const char *peerSessionNam
     }
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
-    if (flags == TYPE_STREAM) {
+    if (param->attr->dataType == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
-        appInfo->streamType = RAW_STREAM;
-    } else if (flags == TYPE_FILE) {
+        appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
+    } else if (param->attr->dataType == TYPE_FILE) {
         appInfo->businessType = BUSINESS_TYPE_FILE;
     }
-    if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
+    if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), groupId) != EOK) {
+    if (strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), param->groupId) != EOK) {
         goto EXIT_ERR;
     }
-    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), mySessionName) != EOK) {
+    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), param->sessionName) != EOK) {
         goto EXIT_ERR;
     }
-    if (TransGetPkgNameBySessionName(mySessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (TransGetPkgNameBySessionName(param->sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
     appInfo->peerData.apiVersion = API_V2;
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), peerSessionName) != 0) {
+    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         goto EXIT_ERR;
     }
-    if (LnnGetRemoteStrInfo(peerDeviceId, STRING_KEY_UUID,
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
         appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
         goto EXIT_ERR;
@@ -243,9 +242,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (param->groupId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-
-    appInfo = GetAppInfo(param->sessionName, param->peerSessionName, param->peerDeviceId, param->groupId,
-        param->attr->dataType);
+    appInfo = GetAppInfo(param);
     if (appInfo == NULL) {
         goto EXIT_ERR;
     }

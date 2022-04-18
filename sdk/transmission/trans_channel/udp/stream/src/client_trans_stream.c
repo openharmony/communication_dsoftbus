@@ -97,14 +97,18 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    StreamType streamType = (StreamType)channel->streamType;
+    if (streamType != RAW_STREAM) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stream type invalid. type = %d", channel->streamType);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (channel->isServer) {
         VtpStreamOpenParam p1 = {
             "DSOFTBUS_STREAM",
             channel->myIp,
             NULL,
             -1,
-            RAW_STREAM,
+            streamType,
             channel->sessionKey,
         };
 
@@ -121,7 +125,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             channel->myIp,
             channel->peerIp,
             channel->peerPort,
-            RAW_STREAM,
+            streamType,
             channel->sessionKey,
         };
 

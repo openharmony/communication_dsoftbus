@@ -226,6 +226,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         data.ReadInt32(channel.businessType);
         channel.myIp = (char *)data.ReadCString();
+        data.ReadInt32(channel.streamType);
         if (!channel.isServer) {
             data.ReadInt32(channel.peerPort);
             channel.peerIp = (char *)data.ReadCString();

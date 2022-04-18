@@ -41,13 +41,16 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid argument!");
         return SOFTBUS_ERR;
     }
-
-    auto it = g_adaptorMap.find(channelId);
-    if (it == g_adaptorMap.end()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
-        return SOFTBUS_ERR;
+    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_adaptorMap.find(channelId);
+        if (it == g_adaptorMap.end()) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
+            return SOFTBUS_ERR;
+        }
+        adaptor = it->second;
     }
-    auto adaptor = it->second;
 
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
@@ -67,18 +70,22 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
         Communication::SoftBus::StreamData data = {
             .buffer = std::make_unique<char[]>(indata->bufLen),
             .bufLen = indata->bufLen,
-            .extBuffer = std::make_unique<char[]>(ext->bufLen),
-            .extLen = ext->bufLen,
+            .extBuffer = nullptr,
+            .extLen = 0,
         };
-
-        int ret = memcpy_s(data.buffer.get(), data.bufLen, indata->buf, indata->bufLen);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data!, %d", ret);
-            return SOFTBUS_ERR;
+        int ret;
+        if (ext != nullptr && ext->bufLen > 0) {
+            data.extBuffer = std::make_unique<char[]>(ext->bufLen);
+            data.extLen = ext->bufLen;
+            ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
+            if (ret != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy ext!, %d", ret);
+                return SOFTBUS_ERR;
+            }
         }
-        ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy ext!, %d", ret);
+        ret = memcpy_s(data.buffer.get(), data.bufLen, indata->buf, indata->bufLen);
+        if (ret != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data!, %d", ret);
             return SOFTBUS_ERR;
         }
         stream = IStream::MakeCommonStream(data, {});
