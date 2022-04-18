@@ -166,7 +166,11 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
         mySessionName, peerSessionName);
-
+    if (attr->dataType == TYPE_STREAM && attr->attr.streamAttr.streamType != RAW_STREAM) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession stream fail. streamType: %d",
+            attr->attr.streamAttr.streamType);
+        return INVALID_SESSION_ID;
+    }
     TransInfo transInfo;
     SessionParam param = {
         .sessionName = mySessionName,

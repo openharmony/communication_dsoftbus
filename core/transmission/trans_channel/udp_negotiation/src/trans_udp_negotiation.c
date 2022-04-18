@@ -102,6 +102,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.groupId = (char*)appInfo->groupId;
     info.peerDeviceId = (char*)appInfo->peerData.deviceId;
     info.peerSessionName = (char*)appInfo->peerData.sessionName;
+    info.streamType = (int32_t)appInfo->streamType;
     if (!isServerSide) {
         info.peerPort = appInfo->peerData.port;
         info.peerIp = (char*)appInfo->peerData.ip;
@@ -392,7 +393,8 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
 
 static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, const ConnectOption *opt, int64_t seq)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start exchange udp info.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start exchange udp info: channelId=%lld, streamType=%d",
+        channel->info.myData.channelId, channel->info.streamType);
     cJSON *requestMsg = cJSON_CreateObject();
     if (requestMsg == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create cjson object failed.");

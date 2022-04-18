@@ -85,6 +85,7 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     if (channel->channelType == CHANNEL_TYPE_UDP) {
         data.WriteInt32(channel->businessType);
         data.WriteCString(channel->myIp);
+        data.WriteInt32(channel->streamType);
         if (!channel->isServer) {
             data.WriteInt32(channel->peerPort);
             data.WriteCString(channel->peerIp);
