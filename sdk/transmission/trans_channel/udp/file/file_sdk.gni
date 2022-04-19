@@ -32,7 +32,7 @@ if (dsoftbus_standard_feature_trans_udp_file == true) {
   enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                          [
                            "$native_source_path",
-                           "dep_file",
+                           "$dep_file",
                          ],
                          "value")
   if (enhanced) {

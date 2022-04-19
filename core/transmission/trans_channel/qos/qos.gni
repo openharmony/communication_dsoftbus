@@ -24,7 +24,7 @@ if (dsoftbus_standard_feature_qos == true) {
   enhanced_qos = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              [
                                "$native_source_path",
-                               "dep_qos",
+                               "$dep_qos",
                              ],
                              "value")
   if (enhanced_qos) {
