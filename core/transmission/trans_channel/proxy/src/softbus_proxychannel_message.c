@@ -416,7 +416,7 @@ char *TransProxyPackIdentity(const char *identity)
     return buf;
 }
 
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, int32_t identitySize)
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize)
 {
     cJSON *root = NULL;
 
