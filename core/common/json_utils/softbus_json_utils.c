@@ -17,9 +17,9 @@
 
 #include <securec.h>
 
-bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, int targetLen)
+bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, uint32_t targetLen)
 {
-    if (json == NULL || string == NULL || target == NULL || targetLen < 0) {
+    if (json == NULL || string == NULL || target == NULL) {
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -27,7 +27,7 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
         return false;
     }
-    int length = strlen(item->valuestring);
+    uint32_t length = strlen(item->valuestring);
     if (length >= targetLen) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "the length [%d] is to long for [%s]", length, string);
         return false;
