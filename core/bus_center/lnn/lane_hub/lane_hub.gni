@@ -20,7 +20,7 @@ dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
 enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        [
                          "$native_source_path",
-                         "dep_dir",
+                         "$dep_dir",
                        ],
                        "value")
 
