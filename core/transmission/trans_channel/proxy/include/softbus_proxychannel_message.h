@@ -134,7 +134,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, int32_t identitySize);
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize);
 
 #ifdef __cplusplus
 #if __cplusplus
