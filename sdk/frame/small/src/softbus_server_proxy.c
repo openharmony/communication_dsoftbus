@@ -25,7 +25,7 @@
 #include "softbus_server_proxy.h"
 
 
-#define WAIT_SERVER_READY_INTERVAL_COUNT 50
+#define WAIT_SERVER_READY_INTERVAL_COUNT 200
 
 static IClientProxy *g_serverProxy = NULL;
 

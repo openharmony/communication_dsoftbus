@@ -182,7 +182,9 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
-    channel.fd = data.ReadFileDescriptor();
+    if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        channel.fd = data.ReadFileDescriptor();
+    }
     if (!data.ReadBool(channel.isServer)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
@@ -226,6 +228,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         data.ReadInt32(channel.businessType);
         channel.myIp = (char *)data.ReadCString();
+        data.ReadInt32(channel.streamType);
         if (!channel.isServer) {
             data.ReadInt32(channel.peerPort);
             channel.peerIp = (char *)data.ReadCString();
