@@ -19,7 +19,7 @@ dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
 enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        [
                          "$dstream_native_source_path",
-                         "dstream_dep_file",
+                         "$dstream_dep_file",
                        ],
                        "value")
 
