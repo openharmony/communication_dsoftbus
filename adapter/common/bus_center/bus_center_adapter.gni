@@ -94,7 +94,8 @@ if (defined(ohos_lite)) {
       ]
       bus_center_adapter_deps +=
           [ "${aafwk_path}/interfaces/innerkits/want:want" ]
-      bus_center_adapter_external_deps += [ "ces_standard:cesfwk_innerkits" ]
+      bus_center_adapter_external_deps +=
+          [ "common_event_service:cesfwk_innerkits" ]
     } else {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
