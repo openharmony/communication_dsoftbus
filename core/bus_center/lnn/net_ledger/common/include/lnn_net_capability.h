@@ -17,21 +17,11 @@
 #define LNN_NET_CAPABILITY_H
 
 #include <stdint.h>
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    BIT_BLE = 0,
-    BIT_BR,
-    BIT_WIFI,
-    BIT_WIFI_P2P,
-    BIT_WIFI_24G,
-    BIT_WIFI_5G,
-    BIT_ETH,
-    BIT_COUNT,
-} NetCapability;
 
 uint32_t LnnGetNetCapabilty(void);
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type);

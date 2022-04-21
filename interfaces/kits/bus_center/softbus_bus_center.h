@@ -123,7 +123,43 @@ typedef enum {
     NODE_KEY_UDID = 0,  /**< UDID in string format*/
     NODE_KEY_UUID,      /**< UUID in string format */
     NODE_KEY_BR_MAC,    /**< BR MAC in string format */
+    NODE_KEY_IP_ADDRESS, /**< IP address in string format */
+    NODE_KEY_DEV_NAME,   /**< Device name in string format */
+    NODE_KEY_NETWORK_CAPABILITY,   /**< Network capability in number format */
+    NODE_KEY_NETWORK_TYPE,        /**< Network type in number format */
 } NodeDeviceInfoKey;
+
+/**
+ * @brief Enumerates supported network capabilities.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    BIT_BLE = 0,    /**< Support BLE */
+    BIT_BR,         /**< Support BR */
+    BIT_WIFI,       /**< Support WIFI */
+    BIT_WIFI_P2P,   /**< Support WIFI P2P */
+    BIT_WIFI_24G,   /**< Support WIFI 2.4G */
+    BIT_WIFI_5G,    /**< Support WIFI 5G */
+    BIT_ETH,        /**< Support ETH */
+    BIT_COUNT,      /**< Invalid type */
+} NetCapability;
+
+/**
+ * @brief Enumerates network types for an online device.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    BIT_NETWORK_TYPE_UNKNOWN = 0,  /**< Unknown network type */
+    BIT_NETWORK_TYPE_WIFI,         /**< WIFI network type */
+    BIT_NETWORK_TYPE_BLE,          /**< BLE network type */
+    BIT_NETWORK_TYPE_BR,           /**< BR network type */
+    BIT_NETWORK_TYPE_P2P,          /**< P2P network type */
+    BIT_NETWORK_TYPE_COUNT,        /**< Invalid type */
+} NetworkType;
 
 /**
  * @brief Enumerates accuracy for time synchronize among device.

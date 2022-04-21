@@ -20,6 +20,7 @@
 #include "softbus_common.h"
 
 static char const *g_pkgName = "ohos.dsoftbus.tool";
+#define NUM_BUF_SIZE 4
 
 static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
 {
@@ -50,6 +51,43 @@ static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
     } else {
         printf("BrMac = %s\n", brMac);
     }
+    key = NODE_KEY_IP_ADDRESS;
+    unsigned char ipAddr[IP_STR_MAX_LEN] = {0};
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+        ipAddr, IP_STR_MAX_LEN) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("ipAddr = %s\n", ipAddr);
+    }
+    key = NODE_KEY_DEV_NAME;
+    unsigned char deviceName[DEVICE_NAME_BUF_LEN] = {0};
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+        deviceName, DEVICE_NAME_BUF_LEN) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("deviceName = %s\n", deviceName);
+    }
+}
+
+static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_NETWORK_CAPABILITY;
+    int32_t netCapacity = 0;
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+    (uint8_t *)&netCapacity, NUM_BUF_SIZE) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("netCapacity = %d\n", netCapacity);
+    }
+    key = NODE_KEY_NETWORK_TYPE;
+    int32_t netType = 0;
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+    (uint8_t *)&netType, NUM_BUF_SIZE) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("netType = %d\n", netType);
+    }
 }
 
 int main(void)
@@ -63,6 +101,7 @@ int main(void)
         return -1;
     }
     PrintNodeProperty(&localNodeinfo);
+    PrintNodePropertyNum(&localNodeinfo);
     printf("------Remote Device Info------\n");
     if (GetAllNodeDeviceInfo(g_pkgName, &remoteNodeInfo, &infoNum) != 0) {
         printf("GetAllNodeDeviceInfo Fail!\n");
@@ -72,6 +111,7 @@ int main(void)
     for (int i = 0; i < infoNum; i++) {
         printf("\n[No.%d]\n", i + 1);
         PrintNodeProperty(remoteNodeInfo + i);
+        PrintNodePropertyNum(remoteNodeInfo + i);
     }
     FreeNodeInfo(remoteNodeInfo);
     printf("SoftBusDumpDeviceInfo complete!\n");
