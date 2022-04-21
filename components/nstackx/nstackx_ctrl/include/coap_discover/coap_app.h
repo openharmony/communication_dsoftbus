@@ -16,7 +16,7 @@
 #ifndef COAP_APP_H
 #define COAP_APP_H
 
-#include <net.h>
+#include <coap3/coap.h>
 
 #include "nstackx_epoll.h"
 
