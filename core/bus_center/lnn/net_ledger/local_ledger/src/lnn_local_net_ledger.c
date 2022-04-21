@@ -316,6 +316,16 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetNetType(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != NUM_BUF_SIZE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->discoveryType;
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetDeviceTypeId(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -617,6 +627,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
+    {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},

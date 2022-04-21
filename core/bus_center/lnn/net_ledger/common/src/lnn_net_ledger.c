@@ -53,6 +53,60 @@ void LnnDeinitNetLedger(void)
     LnnDeinitLocalLedger();
 }
 
+static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
+{
+    if (networkId == NULL || info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
+        return SOFTBUS_ERR;
+    }
+    switch (key) {
+        case NODE_KEY_UDID:
+            return LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char *)info, infoLen);
+        case NODE_KEY_UUID:
+            return LnnGetLocalStrInfo(STRING_KEY_UUID, (char *)info, infoLen);
+        case NODE_KEY_BR_MAC:
+            return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
+        case NODE_KEY_IP_ADDRESS:
+            return LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)info, infoLen);
+        case NODE_KEY_DEV_NAME:
+            return LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, (char *)info, infoLen);
+        case NODE_KEY_NETWORK_CAPABILITY:
+            return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
+        case NODE_KEY_NETWORK_TYPE:
+            return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
+            return SOFTBUS_ERR;
+    }
+}
+
+static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
+{
+    if (networkId == NULL || info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
+        return SOFTBUS_ERR;
+    }
+    switch (key) {
+        case NODE_KEY_UDID:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, (char *)info, infoLen);
+        case NODE_KEY_UUID:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, (char *)info, infoLen);
+        case NODE_KEY_BR_MAC:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, (char *)info, infoLen);
+        case NODE_KEY_IP_ADDRESS:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, (char *)info, infoLen);
+        case NODE_KEY_DEV_NAME:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_NAME, (char *)info, infoLen);
+        case NODE_KEY_NETWORK_CAPABILITY:
+            return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
+        case NODE_KEY_NETWORK_TYPE:
+            return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
+            return SOFTBUS_ERR;
+    }
+}
+
 int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
 {
     bool isLocalNetworkId = false;
@@ -68,27 +122,9 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
         isLocalNetworkId = true;
     }
-    switch (key) {
-        case NODE_KEY_UDID:
-            if (isLocalNetworkId) {
-                return LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char *)info, infoLen);
-            } else {
-                return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, (char *)info, infoLen);
-            }
-        case NODE_KEY_UUID:
-            if (isLocalNetworkId) {
-                return LnnGetLocalStrInfo(STRING_KEY_UUID, (char *)info, infoLen);
-            } else {
-                return LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, (char *)info, infoLen);
-            }
-        case NODE_KEY_BR_MAC:
-            if (isLocalNetworkId) {
-                return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
-            } else {
-                return LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, (char *)info, infoLen);
-            }
-        default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
-            return SOFTBUS_ERR;
+    if (isLocalNetworkId) {
+        return LnnGetNodeKeyInfoLocal(networkId, key, info, infoLen);
+    } else {
+        return LnnGetNodeKeyInfoRemote(networkId, key, info, infoLen);
     }
 }
