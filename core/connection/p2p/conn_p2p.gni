@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,7 @@ p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/negotiation/include",
   "$dsoftbus_root_path/core/connection/p2p/adapter",
 
-  "//foundation/communication/wifi/interfaces/innerkits/native_c",
+  "//foundation/communication/wifi/wifi/interfaces/innerkits/native_c",
 ]
 
 if (dsoftbus_standard_feature_conn_p2p == true) {
@@ -46,7 +46,7 @@ if (dsoftbus_standard_feature_conn_p2p == true) {
     "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface.c",
     "$dsoftbus_root_path/core/connection/p2p/adapter/p2plink_adapter.c",
   ]
-  p2p_connection_deps += [ "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard:wifi_sdk" ]
+  p2p_connection_deps += [ "//foundation/communication/wifi/wifi/interfaces/innerkits/native_cpp/wifi_standard:wifi_sdk" ]
 } else {
   p2p_connection_src += [ "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface_virtual.c" ]
 }
