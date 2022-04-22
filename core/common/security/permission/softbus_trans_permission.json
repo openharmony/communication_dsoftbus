@@ -123,7 +123,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.dhardware.dcamera*",
+    "SESSION_NAME": "ohos.dhardware.dcamera.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
     "SEC_LEVEL": "public",
