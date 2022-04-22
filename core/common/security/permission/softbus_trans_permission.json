@@ -136,6 +136,19 @@
     ]
   },
   {
+    "SESSION_NAME": "ohos.dhardware.dscreen.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.dhardware.dscreen",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "security.dpms_channel",
     "DEVID": "NETWORKID",
     "APP_INFO": [
