@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -89,8 +89,8 @@ if (defined(ohos_lite)) {
       bus_center_adapter_src +=
           [ "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor.cpp" ]
       bus_center_adapter_inc += [
-        "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
-        "//foundation/communication/wifi/services/wifi_standard/wifi_framework/common/net_helper",
+        "//foundation/communication/wifi/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
+        "//foundation/communication/wifi/wifi/services/wifi_standard/wifi_framework/common/net_helper",
       ]
       bus_center_adapter_deps +=
           [ "${aafwk_path}/interfaces/innerkits/want:want" ]
