@@ -93,22 +93,22 @@ int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectO
     }
     switch (option->type) {
         case CONNECT_BR:
-            if (strncpy_s(key, size, option->info.brOption.brMac, BT_MAC_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+            if (strcpy_s(key, size, option->info.brOption.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = BT_MAC_LEN;
             break;
         case CONNECT_BLE:
-            if (strncpy_s(key, size, option->info.bleOption.bleMac, BT_MAC_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+            if (strcpy_s(key, size, option->info.bleOption.bleMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = BT_MAC_LEN;
             break;
         case CONNECT_TCP:
-            if (strncpy_s(key, size, option->info.ipOption.ip, IP_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+            if (strcpy_s(key, size, option->info.ipOption.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             *len = IP_LEN;
@@ -130,7 +130,7 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
     switch (connInfo->type) {
         case CONNECT_BR: {
             if (strcpy_s(option->info.brOption.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             break;
@@ -139,13 +139,13 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
             if (strcpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
                 memcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
                 connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             break;
         case CONNECT_TCP: {
-            if (strncpy_s(option->info.ipOption.ip, IP_LEN, connInfo->info.ipInfo.ip, IP_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
+            if (strcpy_s(option->info.ipOption.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }
             option->info.ipOption.port = connInfo->info.ipInfo.port;
