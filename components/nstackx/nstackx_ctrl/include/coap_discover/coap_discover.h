@@ -15,7 +15,7 @@
 
 #ifndef COAP_DISCOVER_H
 #define COAP_DISCOVER_H
-#include <net.h>
+#include <coap3/coap.h>
 #include "nstackx_common.h"
 
 #define COAP_MODULE_NAME_TYPE 0x01
