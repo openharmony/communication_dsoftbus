@@ -26,12 +26,11 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "coap_session_internal.h"
+#include <coap3/utlist.h>
 #include "nstackx_device.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
 #include "nstackx_util.h"
-#include "utlist.h"
 
 #define TAG "nStackXCoAP"
 
@@ -39,6 +38,18 @@
 #define DEFAULT_COAP_BUFFER_LENGTH 256
 #define COAP_CODE_RIGHT_PART_LENGTH 5
 #define COAP_CERT_CHAIN_DEPTH 2
+
+/* Must align with coap_session_internal.h */
+struct coap_endpoint_t {
+    struct coap_endpoint_t *next;
+    coap_context_t *context;        /**< endpoint's context */
+    coap_proto_t proto;             /**< protocol used on this interface */
+    uint16_t default_mtu;           /**< default mtu for this interface */
+    coap_socket_t sock;             /**< socket object for the interface, if
+                                       any */
+    coap_address_t bind_addr;       /**< local interface address */
+    coap_session_t *sessions;       /**< hash table or list of active sessions */
+};
 
 /*
  * the initial timeout will be set to a random duration between COAP_ACK_TIMEOUT and
@@ -106,17 +117,15 @@ finish:
     return len;
 }
 
-void CoapMessageHandler(struct coap_context_t *ctx,
-                        coap_session_t *session,
-                        coap_pdu_t *sent,
-                        coap_pdu_t *received,
-                        const coap_tid_t id)
+coap_response_t CoapMessageHandler(coap_session_t *session,
+                                   const coap_pdu_t *sent,
+                                   const coap_pdu_t *received,
+                                   const coap_mid_t id)
 {
     if (received == NULL) {
         LOGE(TAG, "received error");
-        return;
+        return COAP_RESPONSE_FAIL;
     }
-    (void)ctx;
     (void)session;
     (void)sent;
     (void)id;
@@ -125,23 +134,24 @@ void CoapMessageHandler(struct coap_context_t *ctx,
     coap_opt_iterator_t optIter;
 
     (void)memset_s(&optIter, sizeof(optIter), 0, sizeof(optIter));
-    if (received->type == COAP_MESSAGE_RST) {
+    if (coap_pdu_get_type(received) == COAP_MESSAGE_RST) {
         LOGD(TAG, "got RST");
-        return;
+        return COAP_RESPONSE_FAIL;
     }
 
     if (coap_check_option(received, COAP_OPTION_OBSERVE, &optIter)) {
         LOGE(TAG, "observe not support.");
-        return;
+        return COAP_RESPONSE_FAIL;
     }
     blockOpt2 = coap_check_option(received, COAP_OPTION_BLOCK2, &optIter);
     blockOpt1 = coap_check_option(received, COAP_OPTION_BLOCK1, &optIter);
     if ((blockOpt1 != NULL) || (blockOpt2 != NULL)) {
         LOGE(TAG, "block not support.");
-        return;
+        return COAP_RESPONSE_FAIL;
     }
-
-    LOGD(TAG, "%u.%02u", (received->code >> COAP_CODE_RIGHT_PART_LENGTH), received->code & 0x1F);
+    coap_pdu_code_t rcv_code = coap_pdu_get_code(received);
+    LOGD(TAG, "%u.%02u", COAP_RESPONSE_CLASS(rcv_code), rcv_code & 0x1F);
+    return COAP_RESPONSE_OK;
 }
 
 static void InitAddrinfo(struct addrinfo *hints)
@@ -299,13 +309,15 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
 
 uint8_t IsCoapCtxEndpointSocket(const coap_context_t *ctx, int fd)
 {
-    coap_endpoint_t *ep = NULL;
+    coap_endpoint_t *iterator = NULL;
+    coap_endpoint_t *listeningEndpoints = NULL;
     coap_endpoint_t *tmp = NULL;
-    if (ctx == NULL || ctx->endpoint == NULL) {
+    if (ctx == NULL) {
         return NSTACKX_FALSE;
     }
-    LL_FOREACH_SAFE(ctx->endpoint, ep, tmp) {
-        if (ep->sock.fd == fd) {
+    listeningEndpoints = coap_get_endpoint(ctx);
+    LL_FOREACH_SAFE(listeningEndpoints, iterator, tmp) {
+        if (iterator->sock.fd == fd) {
             return NSTACKX_TRUE;
         }
     }
