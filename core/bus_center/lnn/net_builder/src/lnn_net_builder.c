@@ -1106,35 +1106,31 @@ static void NetBuilderMessageHandler(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net builder process msg(%d) done, ret=%d", msg->what, ret);
 }
 
-static int32_t GetCurrentConnectType(ConnectionAddrType *type)
+static ConnectionAddrType GetCurrentConnectType(void)
 {
     char ifCurrentName[NET_IF_NAME_LEN] = {0};
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
+
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalStrInfo getCurrentConnectType failed");
-        return SOFTBUS_ERR;
+        return type;
     }
-    if (LnnGetAddrTypeByIfName(ifCurrentName, type) != SOFTBUS_OK) {
+    if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType unknown connect type");
-        return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
+    return type;
 }
 
 static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
 {
     AuthKeyGeneratedMsgPara *para = NULL;
-    ConnectionAddrType type = CONNECTION_ADDR_MAX;
+
     para = SoftBusMalloc(sizeof(AuthKeyGeneratedMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth key generated msg para fail");
         return;
     }
-    if (GetCurrentConnectType(&type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "getCurrentConnectType failed");
-        SoftBusFree(para);
-        return;
-    }
-    if (!LnnConvertOptionToAddr(&para->addr, option, type)) {
+    if (!LnnConvertOptionToAddr(&para->addr, option, GetCurrentConnectType())) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert option to addr failed");
         SoftBusFree(para);
         return;
