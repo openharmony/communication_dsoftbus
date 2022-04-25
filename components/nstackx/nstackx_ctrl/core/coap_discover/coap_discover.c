@@ -18,7 +18,6 @@
 #include <string.h>
 #include <securec.h>
 
-#include "coap.h"
 #include "coap_app.h"
 #include "coap_client.h"
 #include "nstackx_log.h"
@@ -120,13 +119,10 @@ static coap_pdu_t *CoapPackToPdu(const CoapRequest *coapRequest, const coap_uri_
     if (session == NULL) {
         return NULL;
     }
-    pdu = coap_new_pdu(session);
+    pdu = coap_new_pdu(coapRequest->type, coapRequest->code, session);
     if (pdu == NULL) {
         return NULL;
     }
-    pdu->type = coapRequest->type;
-    pdu->tid = coap_new_message_id(session);
-    pdu->code = coapRequest->code;
     if (coapRequest->tokenLength) {
         if (!coap_add_token(pdu, coapRequest->tokenLength, coapRequest->token)) {
             LOGW(TAG, "can't add token to request");
@@ -258,7 +254,7 @@ static int32_t CoapResponseService(const char *remoteUrl)
     return CoapSendRequest(COAP_MESSAGE_CON, remoteUrl, data, strlen(data) + 1, SERVER_TYPE_WLANORETH);
 }
 
-static int32_t GetServiceDiscoverInfo(uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr)
+static int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
     uint8_t *newBuf = NULL;
     if (size <= 0) {
@@ -301,10 +297,10 @@ static void IncreaseRecvDiscoverNum(void)
     }
 }
 
-static int32_t HndPostServiceDiscoverInner(coap_pdu_t *request, char **remoteUrl, DeviceInfo *deviceInfo)
+static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **remoteUrl, DeviceInfo *deviceInfo)
 {
     size_t size;
-    uint8_t *buf = NULL;
+    const uint8_t *buf = NULL;
     IncreaseRecvDiscoverNum();
     if (g_recvDiscoverMsgNum > COAP_DISVOCER_MAX_RATE) {
         return NSTACKX_EFAILED;
@@ -327,13 +323,14 @@ static int32_t HndPostServiceDiscoverInner(coap_pdu_t *request, char **remoteUrl
     return NSTACKX_EOK;
 }
 
-static void HndPostServiceDiscover(coap_context_t *ctx, struct coap_resource_t *resource, coap_session_t *session,
-    coap_pdu_t *request, coap_binary_t *token, coap_string_t *query, coap_pdu_t *response)
+static void HndPostServiceDiscover(coap_resource_t *resource,
+                                   coap_session_t *session,
+                                   const coap_pdu_t *request,
+                                   const coap_string_t *query,
+                                   coap_pdu_t *response)
 {
-    (void)ctx;
     (void)resource;
     (void)session;
-    (void)token;
     (void)query;
     if (request == NULL || response == NULL) {
         return;
@@ -365,7 +362,7 @@ static void HndPostServiceDiscover(coap_context_t *ctx, struct coap_resource_t *
         CoapResponseService(remoteUrl);
         free(remoteUrl);
     } else {
-        response->code = COAP_RESPONSE_CODE(COAP_RESPONSE_201);
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE_CREATED);
     }
 }
 
@@ -547,13 +544,14 @@ static uint16_t ParseServiceMsgFrame(const uint8_t *frame, uint16_t size, char *
     return msgLen;
 }
 
-static void HndPostServiceMsg(coap_context_t *ctx, struct coap_resource_t *resource, coap_session_t *session,
-                              coap_pdu_t *request, coap_binary_t *token, coap_string_t *query, coap_pdu_t *response)
+static void HndPostServiceMsg(coap_resource_t *resource,
+                              coap_session_t *session,
+                              const coap_pdu_t *request,
+                              const coap_string_t *query,
+                              coap_pdu_t *response)
 {
-    (void)ctx;
     (void)resource;
     (void)session;
-    (void)token;
     (void)query;
     if (request == NULL || response == NULL) {
         return;
@@ -561,7 +559,7 @@ static void HndPostServiceMsg(coap_context_t *ctx, struct coap_resource_t *resou
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
     char moduleName[NSTACKX_MAX_MODULE_NAME_LEN] = {0};
     uint8_t *msg = NULL;
-    uint8_t *buf = NULL;
+    const uint8_t *buf = NULL;
     uint16_t msgLen;
     size_t size;
 
@@ -569,7 +567,7 @@ static void HndPostServiceMsg(coap_context_t *ctx, struct coap_resource_t *resou
         return;
     }
 
-    if (!RefreshMsgIdList(request->tid)) {
+    if (!RefreshMsgIdList(coap_pdu_get_mid(request))) {
         LOGE(TAG, "repeated msg id");
         return;
     }
@@ -580,10 +578,9 @@ static void HndPostServiceMsg(coap_context_t *ctx, struct coap_resource_t *resou
         LOGD(TAG, "parse service msg frame error");
         return;
     }
-
     NotifyMsgReceived(moduleName, deviceId, msg, msgLen);
 
-    response->code = COAP_RESPONSE_CODE(COAP_RESPONSE_201);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CREATED);
     free(msg);
     return;
 }
@@ -1060,7 +1057,8 @@ void ResetCoapDiscoverTaskCount(uint8_t isBusy)
     }
     if (g_recvRecountTimer != NULL) {
         if (isBusy) {
-            LOGI(TAG, "in this busy interval: g_recvRecountTimer task count %llu", g_recvRecountTimer->task.count);
+            LOGI(TAG, "in this busy interval: g_recvRecountTimer task count %llu",
+                g_recvRecountTimer->task.count);
         }
         g_recvRecountTimer->task.count = 0;
     }

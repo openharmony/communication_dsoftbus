@@ -384,7 +384,7 @@ static void ConfigureLocalDeviceInfoInner(void *argument)
 int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
 {
     NSTACKX_LocalDeviceInfo *dupLocalDeviceInfo = NULL;
-    LOGE(TAG, "begin to NSTACKX_RegisterDevice!");
+    LOGI(TAG, "begin to NSTACKX_RegisterDevice!");
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;

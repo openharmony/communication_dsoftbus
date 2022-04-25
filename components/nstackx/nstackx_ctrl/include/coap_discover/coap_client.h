@@ -16,7 +16,7 @@
 #ifndef COAP_CLIENT_H
 #define COAP_CLIENT_H
 
-#include <net.h>
+#include <coap3/coap.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,8 +36,8 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
     const CoapServerParameter *coapServerParameter);
 
 int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst);
-void CoapMessageHandler(struct coap_context_t *ctx, coap_session_t *session,
-    coap_pdu_t *sent, coap_pdu_t *received, const coap_tid_t id);
+coap_response_t CoapMessageHandler(coap_session_t *session,
+    const coap_pdu_t *sent, const coap_pdu_t *received, const coap_mid_t id);
 
 uint8_t IsCoapCtxEndpointSocket(const coap_context_t *ctx, int fd);
 

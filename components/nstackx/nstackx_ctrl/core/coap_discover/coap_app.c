@@ -16,14 +16,12 @@
 #include "coap_app.h"
 
 #include <errno.h>
-#include <net.h>
 #include <netdb.h>
 #include <pthread.h>
 #include <securec.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "coap.h"
 #include "coap_client.h"
 #include "coap_discover.h"
 #include "nstackx_util.h"
@@ -172,7 +170,7 @@ uint32_t GetTimeout(struct coap_context_t *ctx, uint32_t *socketNum, EpollTask *
     }
 
     coap_ticks(&now);
-    timeout = coap_write(ctx, sockets,
+    timeout = coap_io_prepare_io(ctx, sockets,
         (uint32_t)(sizeof(sockets) / sizeof(sockets[0])), socketNum, now);
     if (timeout == 0 || timeout > DEFAULT_COAP_TIMEOUT) {
         timeout = DEFAULT_COAP_TIMEOUT;
@@ -254,7 +252,7 @@ void DeRegisteCoAPEpollTaskCtx(struct coap_context_t *ctx, uint32_t *socketNum, 
     *socketNum = 0;
 
     coap_ticks(&now);
-    coap_read(ctx, now);
+    coap_io_do_io(ctx, now);
 }
 
 int32_t CoapServerInit(const struct in_addr *ip)
