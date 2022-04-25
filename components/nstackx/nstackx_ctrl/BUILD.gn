@@ -13,9 +13,58 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+ctrl_sources = [
+  "//third_party/libcoap/src/address.c",
+  "//third_party/libcoap/src/async.c",
+  "//third_party/libcoap/src/block.c",
+  "//third_party/libcoap/src/coap_asn1.c",
+  "//third_party/libcoap/src/coap_cache.c",
+  "//third_party/libcoap/src/coap_debug.c",
+  "//third_party/libcoap/src/coap_event.c",
+  "//third_party/libcoap/src/coap_gnutls.c",
+  "//third_party/libcoap/src/coap_hashkey.c",
+  "//third_party/libcoap/src/coap_io.c",
+  "//third_party/libcoap/src/coap_mbedtls.c",
+  "//third_party/libcoap/src/coap_notls.c",
+  "//third_party/libcoap/src/coap_openssl.c",
+  "//third_party/libcoap/src/coap_prng.c",
+  "//third_party/libcoap/src/coap_session.c",
+  "//third_party/libcoap/src/coap_tcp.c",
+  "//third_party/libcoap/src/coap_time.c",
+  "//third_party/libcoap/src/coap_tinydtls.c",
+  "//third_party/libcoap/src/encode.c",
+  "//third_party/libcoap/src/mem.c",
+  "//third_party/libcoap/src/net.c",
+  "//third_party/libcoap/src/option.c",
+  "//third_party/libcoap/src/pdu.c",
+  "//third_party/libcoap/src/resource.c",
+  "//third_party/libcoap/src/str.c",
+  "//third_party/libcoap/src/subscribe.c",
+  "//third_party/libcoap/src/uri.c",
+]
+
+ctrl_include = [
+  "../nstackx_util/interface",
+  "interface",
+  "include",
+  "include/coap_discover",
+  "//third_party/libcoap/include",
+  "//third_party/cJSON",
+]
+
+ctrl_cflags = [
+  "-Wall",
+  "-DCOAP_SUPPORT_SOCKET_BROADCAST",
+  "-DCOAP_USER_DEFAULT_PORT=5684",
+]
+
+cflags = []
+include_dirs = []
+
 if (dsoftbus_standard_feature_ifname_prefix) {
-  cflags = [ "-DNSTACKX_ETH_INTERFACE_NAME_PREFIX=\"br\"" ]
+  cflags += [ "-DNSTACKX_ETH_INTERFACE_NAME_PREFIX=\"br\"" ]
 }
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dfinder_interface") {
@@ -32,10 +81,8 @@ if (defined(ohos_lite)) {
       "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
-    include_dirs = [
-      "include",
-      "include/coap_discover",
-    ]
+    sources += ctrl_sources
+    include_dirs += ctrl_include
     public_configs = [ ":dfinder_interface" ]
     deps = [
       "../nstackx_util:nstackx_util.open",
@@ -49,19 +96,11 @@ if (defined(ohos_lite)) {
         "LWIP_LITEOS_A_COMPAT",
       ]
     }
-    if (dsoftbus_standard_feature_ifname_prefix) {
-      cflags += [
-        "-Wall",
-        "-fPIC",
-        "-std=c99",
-      ]
-    } else {
-      cflags = [
-        "-Wall",
-        "-fPIC",
-        "-std=c99",
-      ]
-    }
+    cflags += ctrl_cflags
+    cflags += [
+      "-fPIC",
+      "-std=c99",
+    ]
     cflags_cc = cflags
     ldflags = [ "-fPIC" ]
   }
@@ -74,7 +113,11 @@ if (defined(ohos_lite)) {
   ohos_shared_library("nstackx_ctrl") {
     if (dsoftbus_standard_feature_ifname_prefix) {
       cflags_cc = cflags
+      cflags_cc += ctrl_cflags
+    } else {
+      cflags_cc = ctrl_cflags
     }
+    cflags += ctrl_cflags
     sources = [
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
@@ -85,15 +128,12 @@ if (defined(ohos_lite)) {
       "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
-    include_dirs = [
-      "//third_party/libcoap/include/coap2",
-      "//third_party/cJSON",
+    sources += ctrl_sources
+    include_dirs += [
       "//third_party/bounds_checking_function/include",
-      "include",
-      "include/coap_discover",
-      "../nstackx_util/interface",
       "../nstackx_util/platform/unix",
     ]
+    include_dirs += ctrl_include
     public_configs = [ ":dfinder_interface" ]
     deps = [
       "../nstackx_util:nstackx_util.open",
