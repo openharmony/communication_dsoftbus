@@ -27,12 +27,71 @@ extern "C" {
 #endif
 
 typedef struct {
+    /**
+     * @brief To connect the device, you can use the br/ble/tcp type to initiate a connection to the remote end.
+     * The existing connection can be reused. If there is no physical connection, the logical connection will be made.
+     * @see {@link TcpConnectDevice} or {@link ConnectDevice} or {@link BleConnectDevice}.
+     * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
+     * @param[in] requestId Request ID.
+     * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
+     * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
+     */
     int32_t (*ConnectDevice)(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    
+    /**
+     * @brief Send data to the peer. Enable br/ble/tcp to send data.
+     * @see {@link TcpPostBytes} or {@link PostBytes} or {@link BlePostBytes}.
+     * @param[in] connectionId Connection ID.
+     * @param[in] data Connection message content.
+     * @param[in] len Data length.
+     * @param[in] pid Identification ID.
+     * @param[in] flag Message send flag.
+     * @return <b>SOFTBUS_OK</b> if sending by byte is successfully.
+     */
     int32_t (*PostBytes)(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag);
+
+    /**
+     * @brief To disconnect the device, use the br/ble/tcp type of disconnect device logically to disconnect
+     * the physical connection when the logical connection reference is zero.
+     * @see {@link TcpDisconnectDevice} or {@link DisconnectDevice} or {@link BleDisconnectDevice}.
+     * @param[in] connectionId Connection ID.
+     * @return <b>SOFTBUS_OK</b> if the device disconnected is successfully.
+     */
     int32_t (*DisconnectDevice)(uint32_t connectionId);
+
+    /**
+     * @brief Disconnects all connected devices, and disconnects logical and physical connections on
+     * specified devices of type br/ble/tcp.
+     * @see {@link TcpDisconnectDeviceNow} or {@link DisconnectDeviceNow} or {@link BleDisconnectDeviceNow}.
+     * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
+     * @return <b>SOFTBUS_OK</b> If the device is successfully disconnected through the address.
+     */
     int32_t (*DisconnectDeviceNow)(const ConnectOption *option);
+
+    /**
+     * @brief Get an internal object of type br/ble/tcp based on the connection id.
+     * @see {@link TcpGetConnectionInfo} or {@link GetConnectionInfo} or {@link BleGetConnectionInfo}.
+     * @param[in] connectionId Connection ID.
+     * @param[out] info Indicates a pointer to the connection information. For details, see {@link ConnectionInfo}.
+     * @return <b>SOFTBUS_OK</b> if get the connection information is successfully.
+     */
     int32_t (*GetConnectionInfo)(uint32_t connectionId, ConnectionInfo *info);
+
+    /**
+     * @brief Start the local monitoring service and listen for br/ble/tcp peer connection events.
+     * @see {@link TcpStartLocalListening} or {@link StartLocalListening} or {@link BleStartLocalListening}.
+     * @param[in] info Indicates a pointer to local listener information.
+     * For details, see {@link LocalListenerInfo}.
+     * @return <b>SOFTBUS_OK</b> if local listeners start successfully.
+     */
     int32_t (*StartLocalListening)(const LocalListenerInfo *info);
+
+    /**
+     * @brief Stop the local monitoring service and stop monitoring br/ble/tcp peer connection events.
+     * @see {@link TcpStopLocalListening} or {@link StopLocalListening} or {@link BleStopLocalListening}.
+     * @param[in] info Indicates a pointer to local listener information. For details, see {@link LocalListenerInfo}.
+     * @return <b>SOFTBUS_OK</b> if local listeners start successfully.
+     */
     int32_t (*StopLocalListening)(const LocalListenerInfo *info);
     bool (*CheckActiveConnection)(const ConnectOption *info);
 } ConnectFuncInterface;
