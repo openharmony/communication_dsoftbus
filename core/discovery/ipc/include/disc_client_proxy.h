@@ -24,10 +24,55 @@ extern "C" {
 #endif
 #endif
 
+/**
+ * @brief Discovery device callback function.
+ * @see {@link ClientIpcOnDiscoverFailed} or {@link ClientIpcDiscoverySuccess}
+ * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] device Indicates a pointer to device information. For details, see {@link DeviceInfo}.
+ * @return <b>SOFTBUS_OK</b> Client IPC found on device.
+ */
 int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device);
+
+/**
+ * @brief The discovery failure callback notifies the local end of failure to discover other devices.
+ * This callback is only called when discovering other devices fails.
+ * @see {@link ClientIpcOnDeviceFound} or {@link ClientIpcDiscoverySuccess}
+ * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] subscribeId Indicates the service ID.
+ * @param[in] failReason Fail reason.
+ * @return <b>SOFTBUS_OK</b> Failed to find Client IPC found on device.
+ */
 int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason);
+
+/**
+ * @brief The discovery success callback notifies the local end of successfully discovering other devices.
+ * This callback is only called when other devices are successfully discovered.
+ * @see {@link ClientIpcOnDeviceFound} or {@link ClientIpcOnDiscoverFailed}
+ * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] subscribeId Indicates the service ID.
+ * @return <b>SOFTBUS_OK</b> Client IPC found on device successfully.
+ */
 int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId);
+
+/**
+ * @brief Publishing success callback, notifying the local end of publishing its own information successfully.
+ * This callback is only called when the ability to publish itself is successful.
+ * @see {@link ClientIpcOnPublishFail}
+ * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] publishId Publish ID.
+ * @return <b>SOFTBUS_OK</b> Client IPC published successfully.
+ */
 int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId);
+
+/**
+ * @brief Publishing failure callback, notifying the local end of the failure to publish its own information.
+ * This callback is only called when the ability to publish itself fails.
+ * @see {@link ClientIpcOnPublishSuccess}
+ * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] publishId Publish ID.
+ * @param[in] reason Fail reason.
+ * @return <b>SOFTBUS_OK</b> Client IPC published failed.
+ */
 int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason);
 
 #ifdef __cplusplus

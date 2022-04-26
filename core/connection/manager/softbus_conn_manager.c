@@ -64,12 +64,12 @@ static int32_t ConnTypeCheck(ConnectType type)
 {
     if (type >= CONNECT_TYPE_MAX) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "type is over max %d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_INVALID_CONN_TYPE;
     }
 
     if (g_connManager[type] == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "type is %d", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
 }
@@ -315,7 +315,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     }
 
     if (g_connManager[info->type]->ConnectDevice == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
 
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
