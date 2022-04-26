@@ -183,6 +183,12 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
     uint32_t connHeadLen;
     connHeadLen = ConnGetHeadSize();
     AuthSideFlag isServer = AUTH_SIDE_ANY;
+    char *anonymizedOut = NULL;
+    if (msg->type != PROXYCHANNEL_MSG_TYPE_NORMAL &&
+        AnonymizePacket(&anonymizedOut, payload, payloadLen) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransProxyPackMessage, payload: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
 
     if (msg->chiper == 0) {
         bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)payloadLen;

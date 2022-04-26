@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <string>
+#include <gtest/gtest.h>
+
+#include "softbus_adapter_mem.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+
+#ifndef SOFTBUS_DEBUG
+#define LOG_PRINT_MAX_LEN 256
+#else
+#define LOG_PRINT_MAX_LEN 512
+#endif
+
+using namespace std;
+using namespace testing::ext;
+
+namespace OHOS {
+const char *g_originPacket = "\"DEVICE_ID\":\"18f3b221c8661b51eaf6520c223f48afe211111113ab9c6a4f03b7c719eb60d1\"";
+const char *g_anonymizedPacket = "\"DEVICE_ID\":\"18f3b221c8661b51eaf65**********************b9c6a4f03b7c719eb60d1\"";
+const char *g_shortPacket = "\"DEVICE_ID\":\"18f3b221c8661b5111111111111111b7c719eb60d1\"";
+
+class AnonymizePacketTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+
+void AnonymizePacketTest::SetUpTestCase(void) {}
+
+void AnonymizePacketTest::TearDownTestCase(void) {}
+
+void AnonymizePacketTest::SetUp(void) {}
+
+void AnonymizePacketTest::TearDown(void) {}
+
+/**
+ * @tc.name: AnonymizePacketNormalTest001
+ * @tc.desc: Verify AnonymizePacket function, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest001, TestSize.Level0)
+{
+    char *anonymizedOut = nullptr;
+    int32_t res = AnonymizePacket(&anonymizedOut, g_originPacket, strlen(g_originPacket));
+    EXPECT_EQ(res, SOFTBUS_OK);
+    EXPECT_STREQ(g_anonymizedPacket, anonymizedOut);
+
+    SoftBusFree(anonymizedOut);
+}
+
+/**
+ * @tc.name: AnonymizePacketNormalTest002
+ * @tc.desc: Verify AnonymizePacket function, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest002, TestSize.Level0)
+{
+    char *anonymizedOut = nullptr;
+    int32_t res = AnonymizePacket(&anonymizedOut, g_shortPacket, strlen(g_shortPacket));
+    EXPECT_EQ(res, SOFTBUS_OK);
+    EXPECT_STREQ(g_shortPacket, anonymizedOut);
+
+    SoftBusFree(anonymizedOut);
+}
+
+/**
+ * @tc.name: AnonymizePacketWrongTest001
+ * @tc.desc: Verify AnonymizePacket function, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
+{
+    char *anonymizedOut = nullptr;
+    int32_t res = AnonymizePacket(&anonymizedOut, NULL, strlen(g_originPacket));
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+}
+}; // namespace OHOS
