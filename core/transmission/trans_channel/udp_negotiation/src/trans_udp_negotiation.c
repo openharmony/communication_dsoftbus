@@ -405,6 +405,11 @@ static void ProcessAbnormalUdpChannelState(const AppInfo *info, bool needClose)
 
 static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq, const cJSON *msg)
 {
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, msg->valuestring, strlen(msg->valuestring)) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpTransOnExchangeUdpInfo, msg: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
     if (isReply) {
         /* receive reply message */
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive reply udp negotiation info.");
@@ -472,6 +477,11 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
     if (msgStr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cjson unformatted failed.");
         return SOFTBUS_ERR;
+    }
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, msgStr, strlen(msgStr)) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpStartExchangeUdpInfo, msgStr: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
     }
     uint32_t size;
     uint8_t *encryptData = GetEncryptData(msgStr, authId, &size);
