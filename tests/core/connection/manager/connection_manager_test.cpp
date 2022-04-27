@@ -418,4 +418,106 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger006, TestSize.Level1)
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     printf("testConnmanger006 ConnUnSetConnectCallback end 11\r\n");
 };
+
+/*
+* @tc.name: testConnmanger007
+* @tc.desc: Test ConnSetConnectCallback moduleId out of max.
+* @tc.in: Test module, Test number, Test levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback operates normally.
+*/
+HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger007, TestSize.Level1)
+{
+    ConnectCallback connCb;
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+
+    int moduleIdMin = 0;
+    int moduleIdMax = 200;
+
+    int ret = ConnSetConnectCallback((ConnModule)moduleIdMin, &connCb);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ConnSetConnectCallback((ConnModule)moduleIdMax, &connCb);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testConnmanger008
+* @tc.desc: Test ConnConnectDevice info type out of max.
+* @tc.in: Test module, Test number, Test levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnConnectDevice operates normally.
+*/
+HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger008, TestSize.Level1)
+{
+    const char *testBleMac = "11:22:33:44:55:66";
+    ConnectResult connRet;
+    ConnectOption info;
+    info.type = CONNECT_BLE;
+    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, testBleMac, BT_MAC_LEN);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    uint32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+
+    int ret = ConnConnectDevice(nullptr, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    ret = ConnConnectDevice(&info, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+
+    info.type = (ConnectType)(CONNECT_TCP -1);
+    ret = ConnConnectDevice(&info, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+};
+
+/*
+* @tc.name: testConnmanger009
+* @tc.desc: Test ConnStartLocalListening info type out of max.
+* @tc.in: Test module, Test number, Test levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnStartLocalListening operates normally.
+*/
+HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger009, TestSize.Level1)
+{
+    LocalListenerInfo info;
+    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    int ret = ConnStartLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+};
+
+/*
+* @tc.name: testConnmanger010
+* @tc.desc: Test ConnStopLocalListening info type out of max.
+* @tc.in: Test module, Test number, Test levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnStopLocalListening operates normally.
+*/
+HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger010, TestSize.Level1)
+{
+    LocalListenerInfo info;
+    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    int ret = ConnStopLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+};
+
+/*
+* @tc.name: testConnmanger011
+* @tc.desc: Test ConnTypeIsSupport type out of max.
+* @tc.in: Test module, Test number, Test levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger011, TestSize.Level1)
+{
+    int ret = ConnTypeIsSupport(CONNECT_TYPE_MAX);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+};
 } // namespace OHOS
