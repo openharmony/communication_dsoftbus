@@ -167,7 +167,7 @@ void CreateServer(void *arg)
 }
 
 /*
-* @tc.name: testBaseListener001
+* @tc.name: testTcpManager001
 * @tc.desc: test TcpGetConnNum
 * @tc.type: FUNC
 * @tc.require:
@@ -178,7 +178,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
 };
 
 /*
-* @tc.name: testBaseListener002
+* @tc.name: testTcpManager002
 * @tc.desc: test TcpConnectDevice with invalid param
 * @tc.type: FUNC
 * @tc.require:
@@ -202,7 +202,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
 };
 
 /*
-* @tc.name: testBaseListener003
+* @tc.name: testTcpManager003
 * @tc.desc: test TcpDisconnectDevice with wrong id
 * @tc.type: FUNC
 * @tc.require:
@@ -213,7 +213,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager003, TestSize.Level1)
 };
 
 /*
-* @tc.name: testBaseListener004
+* @tc.name: testTcpManager004
 * @tc.desc: test TcpGetConnectionInfo with invalid param
 * @tc.type: FUNC
 * @tc.require:
@@ -227,7 +227,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager004, TestSize.Level1)
 };
 
 /*
-* @tc.name: testBaseListener005
+* @tc.name: testTcpManager005
 * @tc.desc: test start and stop listener multi times
 * @tc.type: FUNC
 * @tc.require:
@@ -378,7 +378,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
 }
 
 /*
-* @tc.name: testBaseListener009
+* @tc.name: testTcpManager009
 * @tc.desc: test connect and post to self
 * @tc.type: FUNC
 * @tc.require:
@@ -425,4 +425,1070 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(0, TcpGetConnNum());
 }
+
+/*
+* @tc.name: testTcpManager010
+* @tc.desc: Test TcpConnectDevice with invalid -- option.type = connnet ble , moduleId = PROXY/AUTH/AUTH_P2P.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpConnectDevice operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
+{
+    int port= 6666;
+    uint32_t requestId = 1;
+    ConnectOption option;
+    option.type = CONNECT_BLE;
+    option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
+    (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
+    int ret;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = AUTH;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = AUTH_P2P;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testTcpManager011
+* @tc.desc: Test TcpConnectDevice with invalid -- option.type = connnet ble, \
+\ moduleId = DIRECT_CHANNEL_SERVER_P2P/DIRECT_CHANNEL_CLIENT/DIRECT_CHANNEL_SERVER_WIFI.\
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpConnectDevice operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
+{
+    int port= 6666;
+    uint32_t requestId = 1;
+    ConnectOption option;
+    option.type = CONNECT_BLE;
+    option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
+    int ret;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_CLIENT;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testTcpManager012
+* @tc.desc: Test TcpConnectDevice with invalid -- option.type = connnet p2p , moduleId = PROXY/AUTH/AUTH_P2P.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpConnectDevice operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
+{
+    int port= 6666;
+    uint32_t requestId = 1;
+    ConnectOption option;
+    option.type = CONNECT_P2P;
+    option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = PROXY;
+    (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
+    int ret;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = AUTH;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = AUTH_P2P;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testTcpManager013
+* @tc.desc: test TcpConnectDevice with invalid -- option.type = connnet p2p, \
+\ moduleId = DIRECT_CHANNEL_SERVER_P2P/DIRECT_CHANNEL_CLIENT/DIRECT_CHANNEL_SERVER_WIFI.\
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpConnectDevice operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
+{
+    int port= 6666;
+    uint32_t requestId = 1;
+    ConnectOption option;
+    option.type = CONNECT_P2P;
+    option.info.ipOption.port = port;
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    (void)strcpy_s(option.info.ipOption.ip, IP_LEN, Ip);
+    int ret;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_CLIENT;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.info.ipOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    ret = TcpConnectDevice(nullptr, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TcpConnectDevice(&option, requestId, &g_result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testTcpManager014
+* @tc.desc: Test start and stop listener multi times info.type = connect_br moduleId AUTH.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager015
+* @tc.desc: Test start and stop listener multi times info.type = connect_br  moduleId AUTH_P2P.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager016
+* @tc.desc: Test start and stop listener multi times info.type = connect_br moduleId DIRECT_CHANNEL_SERVER_P2P.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager017
+* @tc.desc: Test start and stop listener multi times info.type = connect_br  moduleId DIRECT_CHANNEL_CLIENT.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_CLIENT;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager018
+* @tc.desc: Test start and stop listener multi times info.type = connect_br  moduleId DIRECT_CHANNEL_SERVER_WIFI.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager019
+* @tc.desc: Test start and stop listener multi times  info.type = connect_ble  moduleId PROXY.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = PROXY;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager020
+* @tc.desc: Test start and stop listener multi times  info.type = connect_ble  moduleId AUTH.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager021
+* @tc.desc: Test start and stop listener multi times  info.type = connect_ble  moduleId AUTH_P2P.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager022
+* @tc.desc: Test OpenTcpClientSocket with invalid param.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
+{
+    int port = 6666;
+    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
+    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    CloseTcpFd(clientfd);
+
+    clientfd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, false);
+    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    CloseTcpFd(clientfd);
+
+    clientfd = OpenTcpClientSocket(Ip, nullptr, port, false);
+    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    CloseTcpFd(clientfd);
+
+    clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", -1, false);
+    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    CloseTcpFd(clientfd);
+
+    clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CloseTcpFd(clientfd);
+};
+
+/*
+* @tc.name: testTcpManager023
+* @tc.desc: Test GetTcpSockPort invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The GetTcpSockPort operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
+{
+    int fd = -1;
+    int port = GetTcpSockPort(fd);
+    int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    int i_port = 6666;
+    fd = OpenTcpServerSocket("127.0.0.1", i_port);
+    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    port = GetTcpSockPort(fd);
+    EXPECT_EQ(port, i_port);
+    CloseTcpFd(fd);
+};
+
+/*
+* @tc.name: testTcpManager024
+* @tc.desc: Test SetIpTos invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The SetIpTos operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
+{
+    int port = 6666;
+    int fd =  OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    int tos = 1;
+    int ret = SetIpTos(fd, tos);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    fd = -1;
+    ret = SetIpTos(fd, tos);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
+    CloseTcpFd(fd);
+};
+
+
+/*
+* @tc.name: testTcpManager025
+* @tc.desc: Test ConnToggleNonBlockMode invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnToggleNonBlockMode operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
+{
+    int fd = -1;
+    bool isNonBlock = true;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ConnToggleNonBlockMode(fd, isNonBlock));
+
+    int port = 6666;
+    fd =  OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    EXPECT_EQ(SOFTBUS_OK, ConnToggleNonBlockMode(fd, isNonBlock));
+    CloseTcpFd(fd);
+};
+
+/*
+* @tc.name: testTcpManager026
+* @tc.desc: Test SendTcpData invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
+{
+    int port = 6666;
+    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
+    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ssize_t bytes = SendTcpData(clientfd, "Hello world", 11, 0);
+    EXPECT_EQ(bytes, -1);
+    TcpShutDown(clientfd);
+
+    clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bytes = SendTcpData(clientfd, "Hello world", 11, 0);
+    EXPECT_EQ(bytes, -1);
+    TcpShutDown(clientfd);
+};
+
+/*
+* @tc.name: testTcpManager027
+* @tc.desc: Test SendTcpData invalid buf len.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The OpenTcpClientSocket and SendTcpData operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
+{
+    int port = 6666;
+    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int bytes = SendTcpData(clientfd, nullptr, 10, 0);
+    EXPECT_EQ(bytes, -1);
+
+    bytes = SendTcpData(clientfd, "hello world!", 0, 0);
+    EXPECT_EQ(bytes, -1);
+
+    bytes = SendTcpData(clientfd, "hello world!", 12, 0);
+    EXPECT_EQ(bytes, -1);
+    TcpShutDown(clientfd);
+};
+
+/*
+* @tc.name: testTcpManager028
+* @tc.desc: Test RecvTcpData invalid param.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The RecvTcpData operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
+{
+    ConnPktHead head = {0};
+    head.len = strlen(g_data);
+    char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
+    if (data == nullptr) {
+        printf("Failed to assign memory to data.");
+        return;
+    }
+    int fd = -1;
+    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
+
+    int port = 6666;
+    fd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, nullptr, sizeof(ConnPktHead) + head.len, 0));
+    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, 0, 0));
+    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
+    CloseTcpFd(fd);
+};
+
+/*
+* @tc.name: testTcpManager029
+* @tc.desc: Test ConnGetSocketError invalid param.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnGetSocketError and operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
+{
+    int port = 6666;
+    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_TRUE(ConnGetSocketError(clientfd) != 0);
+    CloseTcpFd(clientfd);
+};
+
+
+/*
+* @tc.name: testTcpManager030
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager031
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_CLIENT;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager032
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BLE;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager033
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = PROXY;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager034
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager035
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = AUTH_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager036
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager037
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_CLIENT;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager038
+* @tc.desc: Test start and stop listener multi times.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The TcpStartListening and TcpStopListening operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_P2P;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager039
+* @tc.desc: Test SetIpTos return yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The SetIpTos operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    uint32_t tos = 65535;
+    int rc = SetIpTos(fd, tos);
+    EXPECT_EQ(rc, SOFTBUS_OK);
+};
+
+/*
+* @tc.name: testTcpManager040
+* @tc.desc: Test OpenTcpServerSocket Open succeed yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The OpenTcpServerSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_TRUE(OpenTcpServerSocket(info.info.ipListenerInfo.ip, info.info.ipListenerInfo.port) > 0);
+}
+
+/*
+* @tc.name: testTcpManager041
+* @tc.desc: Test OpenTcpClientSocket Open succeed yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The SetIpTos and OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
+    EXPECT_TRUE(OpenTcpClientSocket(info.info.ipListenerInfo.ip, Ip, port, true) > 0);
+};
+
+/*
+* @tc.name: testTcpManager042
+* @tc.desc: Test ConnToggleNonBlockMode param is invalid yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The SetIpTos and ConnToggleNonBlockMode operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    EXPECT_TRUE(fd > 0);
+    EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
+    EXPECT_TRUE(ConnToggleNonBlockMode(fd, true) == 0);
+};
+
+/*
+* @tc.name: testTcpManager043
+* @tc.desc: Test GetTcpSockPort param is invalid yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The GetTcpSockPort operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    EXPECT_TRUE(GetTcpSockPort(fd) > 0);
+};
+
+/*
+* @tc.name: testTcpManager044
+* @tc.desc: test SendTcpData SendData successful yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The SendTcpData operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpClientSocket("127.0.0.1", info.info.ipListenerInfo.ip, port, false);
+    const char * buf = "SendDataTest";
+    EXPECT_EQ(SendTcpData(fd, buf, 13, 0), -1);
+};
+
+/*
+* @tc.name: testTcpManager045
+* @tc.desc: Test CloseTcpFd function successful yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    CloseTcpFd(fd);
+    EXPECT_TRUE(fd >= 0);
+};
+
+/*
+* @tc.name: testTcpManager046
+* @tc.desc: Test SendTcpData param is invalid yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Nonzero
+* @tc.type: FUNC
+* @tc.require: The SendTcpData operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpClientSocket("127.0.0.1", info.info.ipListenerInfo.ip, port, false);
+    const char * buf = "SendDataTest";
+    EXPECT_EQ(SendTcpData(fd, buf, 13, 0xffff), -1);
+};
+
+/*
+* @tc.name: testTcpManager047
+* @tc.desc: Test CloseTcpFd function successful yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The TcpShutDown and OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    TcpShutDown(fd);
+    EXPECT_TRUE(fd >= 0);
+};
+
+/*
+* @tc.name: testTcpManager048
+* @tc.desc: Test ConnSetTcpKeepAlive fd param invalid.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Nonzero
+* @tc.type: FUNC
+* @tc.require: The ConnSetTcpKeepAlive operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager048, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    EXPECT_EQ(ConnSetTcpKeepAlive(-100, 65535), -1);
+};
+
+/*
+* @tc.name: testTcpManager049
+* @tc.desc: Test ConnSetTcpKeepAlive second param invalid.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnSetTcpKeepAlive operates normally.
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager049, TestSize.Level1)
+{
+    int port = 6666;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.info.ipListenerInfo.port = port;
+    info.info.ipListenerInfo.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    (void)strcpy_s(info.info.ipListenerInfo.ip, IP_LEN, Ip);
+    int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
+    EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);
+};
 } // namespace OHOS
