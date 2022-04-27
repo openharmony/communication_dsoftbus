@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/appexecfwk/standard/appexecfwk.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 adapter_bus_center_path = "$softbus_adapter_common/bus_center"
