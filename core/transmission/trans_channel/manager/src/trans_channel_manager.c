@@ -90,7 +90,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->myData.apiVersion = API_V2;
     if (param->attr->dataType == TYPE_STREAM) {
         appInfo->businessType = BUSINESS_TYPE_STREAM;
-        appInfo->streamType = RAW_STREAM;
+        appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
     } else if (param->attr->dataType == TYPE_FILE) {
         appInfo->businessType = BUSINESS_TYPE_FILE;
     }
