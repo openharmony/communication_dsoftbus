@@ -31,22 +31,31 @@ public:
     virtual ~StreamAdaptorListener() = default;
     void OnStreamReceived(std::unique_ptr<IStream> stream)
     {
-        if (adaptor_->GetListenerCallback() != nullptr &&
-            adaptor_->GetListenerCallback()->OnStreamReceived != nullptr) {
-            auto uniptr = stream->GetBuffer();
-            char *retbuf = uniptr.get();
-            int buflen = stream->GetBufferLen();
-            char *extRetBuf = stream->GetExtBuffer().get();
-            int extRetBuflen = stream->GetExtBufferLen();
-
-            int plainDataLength = buflen - adaptor_->GetEncryptOverhead();
+        if (adaptor_ == nullptr || adaptor_->GetListenerCallback() == nullptr ||
+            adaptor_->GetListenerCallback()->OnStreamReceived == nullptr) {
+            return;
+        }
+        auto uniptr = stream->GetBuffer();
+        char *retbuf = uniptr.get();
+        int32_t buflen = stream->GetBufferLen();
+        auto extUniptr = stream->GetExtBuffer();
+        char *extRetBuf = extUniptr.get();
+        int32_t extRetBuflen = stream->GetExtBufferLen();
+        StreamData retStreamData = {0};
+        int32_t streamType = adaptor_->GetStreamType();
+        std::unique_ptr<char[]> plainData = nullptr;
+        if (streamType == StreamType::COMMON_VIDEO_STREAM || streamType == StreamType::COMMON_AUDIO_STREAM) {
+            retStreamData.buf = retbuf;
+            retStreamData.bufLen = buflen;
+        } else if (streamType == StreamType::RAW_STREAM) {
+            int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                     "StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%d",
                     buflen, adaptor_->GetEncryptOverhead());
                 return;
             }
-            std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
+            plainData = std::make_unique<char[]>(plainDataLength);
             ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
                 plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
@@ -54,21 +63,20 @@ public:
                     "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
                 return;
             }
-
-            StreamData retStreamData = {
-                plainData.get(),
-                plainDataLength,
-            };
-
-            StreamData extStreamData = {
-                extRetBuf,
-                extRetBuflen,
-            };
-
-            StreamFrameInfo tmpf = {};
-            adaptor_->GetListenerCallback()->OnStreamReceived(adaptor_->GetChannelId(),
-                &retStreamData, &extStreamData, &tmpf);
+            retStreamData.buf = plainData.get();
+            retStreamData.bufLen = plainDataLength;
+        } else {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Do not support, streamType = %d", streamType);
+            return;
         }
+        StreamData extStreamData = {
+            extRetBuf,
+            extRetBuflen,
+        };
+
+        StreamFrameInfo tmpf = {0};
+        adaptor_->GetListenerCallback()->OnStreamReceived(adaptor_->GetChannelId(),
+            &retStreamData, &extStreamData, &tmpf);
     }
 
     void OnStreamStatus(int status)

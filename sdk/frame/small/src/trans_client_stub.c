@@ -54,6 +54,7 @@ int32_t ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         channel.businessType = IpcIoPopInt32(reply);
         channel.myIp = (char *)IpcIoPopString(reply, &size);
+        channel.streamType = IpcIoPopInt32(reply);
         if (channel.isServer) {
             int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
             IpcIo ret;

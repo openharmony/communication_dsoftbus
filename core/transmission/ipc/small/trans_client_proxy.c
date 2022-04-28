@@ -89,6 +89,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     if (channel->channelType == CHANNEL_TYPE_UDP) {
         IpcIoPushInt32(&io, channel->businessType);
         IpcIoPushString(&io, channel->myIp);
+        IpcIoPushInt32(&io, channel->streamType);
         if (channel->isServer) {
             return OnUdpChannelOpenedAsServer(&svc, &io);
         }

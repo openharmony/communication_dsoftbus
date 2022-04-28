@@ -67,22 +67,29 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
 
         stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
     } else if (adaptor->GetStreamType() == COMMON_VIDEO_STREAM || adaptor->GetStreamType() == COMMON_AUDIO_STREAM) {
+        if (indata->bufLen < 0 || indata->bufLen > Communication::SoftBus::MAX_STREAM_LEN ||
+            (ext != nullptr && (ext->bufLen < 0 || ext->bufLen > Communication::SoftBus::MAX_STREAM_LEN))) {
+            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+        }
         Communication::SoftBus::StreamData data = {
             .buffer = std::make_unique<char[]>(indata->bufLen),
             .bufLen = indata->bufLen,
-            .extBuffer = std::make_unique<char[]>(ext->bufLen),
-            .extLen = ext->bufLen,
+            .extBuffer = nullptr,
+            .extLen = 0,
         };
-
-        int ret = memcpy_s(data.buffer.get(), data.bufLen, indata->buf, indata->bufLen);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data!, %d", ret);
+        int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, indata->buf, indata->bufLen);
+        if (ret != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data! ret: %d", ret);
             return SOFTBUS_ERR;
         }
-        ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy ext!, %d", ret);
-            return SOFTBUS_ERR;
+        if (ext != nullptr && ext->bufLen > 0) {
+            data.extBuffer = std::make_unique<char[]>(ext->bufLen);
+            data.extLen = ext->bufLen;
+            ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
+            if (ret != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy ext! ret: %d", ret);
+                return SOFTBUS_ERR;
+            }
         }
         stream = IStream::MakeCommonStream(data, {});
     } else {
