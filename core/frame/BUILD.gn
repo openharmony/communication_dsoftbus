@@ -41,6 +41,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
       defines = AUTH_SERVER_DEFINES
+      defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
         "$dsoftbus_root_path/core/frame/common/include",
@@ -72,6 +73,7 @@ if (defined(ohos_lite)) {
   } else {
     shared_library("softbus_server_frame") {
       defines = AUTH_SERVER_DEFINES
+      defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
         "common/include",
@@ -139,6 +141,7 @@ if (defined(ohos_lite)) {
   }
   ohos_shared_library("softbus_server") {
     defines = AUTH_SERVER_DEFINES
+    defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [
       "$dsoftbus_root_path/core/frame/common/include",

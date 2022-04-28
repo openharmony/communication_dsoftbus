@@ -283,7 +283,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
             if (bytes == 0) {
                 bytes = -1;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp send fail %d %d", rc, errno);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp send fail %zd %d", rc, errno);
             break;
         }
         bytes += rc;
@@ -308,7 +308,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int flags)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd[%d] len[%d] invalid params", fd, len);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd[%d] len[%zu] invalid params", fd, len);
         return -1;
     }
 

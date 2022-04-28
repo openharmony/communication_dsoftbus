@@ -400,7 +400,7 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[requestId = %lld]", requestId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[requestId = %u]", requestId);
     return SOFTBUS_ERR;
 }
 
