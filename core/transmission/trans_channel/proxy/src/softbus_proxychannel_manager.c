@@ -296,10 +296,45 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
     return;
 }
 
+static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
+{
+    if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
+    }
+
+    if (DelPendingPacket(channelId, PENDING_TYPE_PROXY) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
+    }
+
+    uint32_t connId = info->connId;
+    TransProxyPostResetPeerMsgToLoop(info);
+    TransProxyPostDisConnectMsgToLoop(connId);
+}
+
+static void TransProxyReleaseChannelList(ListNode *proxyChannelList)
+{
+    if (proxyChannelList == NULL || IsListEmpty(proxyChannelList)) {
+        return;
+    }
+    ProxyChannelInfo *removeNode = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyChannelList, ProxyChannelInfo, node) {
+        ListDelete(&(removeNode->node));
+        if (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING ||
+            removeNode->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
+            OnProxyChannelOpenFailed(removeNode->channelId, &(removeNode->appInfo));
+        } else {
+            OnProxyChannelClosed(removeNode->channelId, &(removeNode->appInfo));
+        }
+        TransProxyCloseProxyOtherRes(removeNode->channelId, removeNode);
+    }
+}
+
 void TransProxyDelByConnId(uint32_t connId)
 {
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
+    ListNode proxyChannelList;
 
     if (g_proxyChannelList == NULL) {
         return;
@@ -310,21 +345,16 @@ void TransProxyDelByConnId(uint32_t connId)
         return;
     }
 
+    ListInit(&proxyChannelList);
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (removeNode->connId == connId) {
-            if (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING ||
-                removeNode->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
-                OnProxyChannelOpenFailed(removeNode->channelId, &(removeNode->appInfo));
-            } else {
-                OnProxyChannelClosed(removeNode->channelId, &(removeNode->appInfo));
-            }
             ListDelete(&(removeNode->node));
-            SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
+            ListAdd(&proxyChannelList, &removeNode->node);
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return;
+    TransProxyReleaseChannelList(&proxyChannelList);
 }
 
 static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *channelInfo)
@@ -882,21 +912,6 @@ int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *
     }
 
     return TransProxyOpenConnChannel(appInfo, connInfo, channelId);
-}
-
-static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
-{
-    if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
-    }
-
-    if (DelPendingPacket(channelId, PENDING_TYPE_PROXY) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
-    }
-
-    uint32_t connId = info->connId;
-    TransProxyPostResetPeerMsgToLoop(info);
-    TransProxyPostDisConnectMsgToLoop(connId);
 }
 
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
