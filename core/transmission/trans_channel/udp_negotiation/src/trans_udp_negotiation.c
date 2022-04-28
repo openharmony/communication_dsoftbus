@@ -530,7 +530,7 @@ EXIT_ERR:
 
 static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpenFailed: requestId=%u, reason=%lld",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpenFailed: requestId=%u, reason=%d",
         requestId, reason);
     UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     if (channel == NULL) {

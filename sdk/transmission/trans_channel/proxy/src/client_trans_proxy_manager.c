@@ -529,7 +529,7 @@ static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize)
     }
 
     if (*fileSize > MAX_FILE_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, filesize : %llu", *fileSize);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, filesize : %" PRIu64, *fileSize);
         return SOFTBUS_FILE_ERR;
     }
 
@@ -690,7 +690,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo sendInfo, const char *sou
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "channelId:%d, fileName:%s, fileSize:%llu, frameNum:%llu, destPath:%s",
+        "channelId:%" PRId32 ", fileName:%s, fileSize:%" PRIu64 ", frameNum:%" PRIu64 ", destPath:%s",
         sendInfo.channelId, absSrcPath, fileSize, frameNum, destFile);
     if (FileToFrame(sendInfo, frameNum, fd, destFile, fileSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "File To Frame fail");
@@ -1072,7 +1072,7 @@ static int32_t ProcessOneFrame(FileFrame fileFrame, SingleFileInfo fileInfo, int
     fileInfo.fileOffset += (uint64_t)writeLength;
 
     if (fileInfo.fileOffset > MAX_FILE_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%llu", fileInfo.fileOffset);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64, fileInfo.fileOffset);
         return SOFTBUS_ERR;
     }
     if (UpdateRecvInfo(fileInfo) != SOFTBUS_OK) {

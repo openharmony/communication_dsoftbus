@@ -123,7 +123,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         &len, (unsigned char *)sessionKey, strlen(sessionKey));
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (len != SESSION_KEY_LENGTH) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to decode sessionKey %d, len %d", ret, len);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to decode sessionKey %d, len %zu", ret, len);
         return SOFTBUS_ERR;
     }
     if (apiVersion == API_V1) {

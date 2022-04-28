@@ -17,6 +17,7 @@
 #define SOFTBUS_LOG_H
 
 #include <stdint.h>
+#include <inttypes.h>
 #include "softbus_adapter_log.h"
 
 #ifdef __cplusplus
