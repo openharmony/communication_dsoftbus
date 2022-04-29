@@ -278,8 +278,8 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
             SoftBusFree(requestInfo);
         }
     }
-
-    if (sideType == BR_SERVICE_TYPE && g_connectCallback != NULL) {
+    (void)sideType;
+    if (g_connectCallback != NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] disconn connectionId=%d", connectionId);
         g_connectCallback->OnDisconnected(connectionId, &connectionInfo);
     }
