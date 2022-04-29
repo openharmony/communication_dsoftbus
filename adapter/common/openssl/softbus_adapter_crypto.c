@@ -35,7 +35,7 @@ static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx)
         return SOFTBUS_DECRYPT_ERR;
     }
     EVP_CIPHER_CTX_set_padding(*ctx, OPENSSL_EVP_PADDING_FUNC_OPEN);
-    int32_t ret = EVP_EncryptInit_ex(*ctx, EVP_aes_256_gcm(),NULL, NULL, NULL);
+    int32_t ret = EVP_EncryptInit_ex(*ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.\n");
         EVP_CIPHER_CTX_free(*ctx);
@@ -66,7 +66,7 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
         HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.\n");
         return SOFTBUS_DECRYPT_ERR;
     }
-    ret = EVP_EncryptInit_ex(ctx, NULL,NULL, cipherkey->key, cipherkey->iv);
+    ret = EVP_EncryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.\n");
         EVP_CIPHER_CTX_free(ctx);
@@ -77,7 +77,7 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
         return SOFTBUS_ENCRYPT_ERR;
     }
     ret = EVP_EncryptUpdate(ctx, cipherText + GCM_IV_LEN,
-            (int32_t *)&cipherTextLen, plainText, plainTextSize);
+        (int32_t *)&cipherTextLen, plainText, plainTextSize);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptUpdate fail.\n");
         EVP_CIPHER_CTX_free(ctx);
@@ -118,14 +118,14 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
         HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.\n");
         return SOFTBUS_DECRYPT_ERR;
     }
-    ret = EVP_DecryptInit_ex(ctx, NULL,NULL, cipherkey->key, cipherkey->iv);
+    ret = EVP_DecryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptInit_ex fail.\n");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_DecryptUpdate(ctx, plain, (int32_t *)&plainLen,
-            cipherText + GCM_IV_LEN, cipherTextSize - OVERHEAD_LEN);
+        cipherText + GCM_IV_LEN, cipherTextSize - OVERHEAD_LEN);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.\n");
         EVP_CIPHER_CTX_free(ctx);
@@ -133,13 +133,13 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
     }
     outlen += plainLen;
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, TAG_LEN,
-        (void *)cipherText + (cipherTextSize - TAG_LEN));
+        (void *)(cipherText + (cipherTextSize - TAG_LEN)));
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.\n");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
-    ret = EVP_DecryptFinal_ex(ctx, plain + plainLen , (int32_t *)&plainLen);
+    ret = EVP_DecryptFinal_ex(ctx, plain + plainLen, (int32_t *)&plainLen);
     outlen += plainLen;
     EVP_CIPHER_CTX_free(ctx);
     return outlen;
