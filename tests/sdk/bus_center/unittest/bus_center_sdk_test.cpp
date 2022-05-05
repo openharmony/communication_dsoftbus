@@ -30,6 +30,7 @@ constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
 constexpr int32_t ERRO_CAPDATA_LEN = 514;
+constexpr int32_t NUM_BUF_SIZE = 4;
 static int32_t g_subscribeId = 0;
 static int32_t g_publishId = 0;
 
@@ -277,10 +278,13 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     NodeBasicInfo info;
     NodeBasicInfo *remoteNodeInfo = nullptr;
     int infoNum = 0;
-
     char uuid[UUID_BUF_LEN] = {0};
     char udid[UDID_BUF_LEN] = {0};
     char brMac[BT_MAC_LEN] = {0};
+    char ipAddr[IP_STR_MAX_LEN] = {0};
+    char deviceName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t netCapacity= 0;
+    int32_t netType= 0;
 
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
@@ -292,10 +296,27 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
 
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_BR_MAC,
         (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS,
+        (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_DEV_NAME,
+        (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_CAPABILITY,
+        (uint8_t *)&netCapacity, NUM_BUF_SIZE) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_TYPE,
+        (uint8_t *)&netType, NUM_BUF_SIZE) == SOFTBUS_OK);
+
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
     for (int i = 0; i < infoNum; i++) {
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC,
-        (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+            (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_IP_ADDRESS,
+            (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEV_NAME,
+            (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_CAPABILITY,
+            (uint8_t *)&netCapacity, NUM_BUF_SIZE) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_TYPE,
+            (uint8_t *)&netType, NUM_BUF_SIZE) == SOFTBUS_OK);
     }
     FreeNodeInfo(remoteNodeInfo);
 }
