@@ -210,6 +210,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]join failed, ready clean", connFsm->id);
         connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
+        return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete join LNN done", connFsm->id);
 }

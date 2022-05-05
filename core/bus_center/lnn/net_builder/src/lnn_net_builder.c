@@ -1162,13 +1162,13 @@ static void OnAuthDone(int64_t authId, int32_t retCode)
 static void OnAuthFailed(int64_t authId, int32_t reason)
 {
     OnAuthDone(authId, reason);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth failed: %lld", authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth failed: %PRld64, reason:%d.", authId, reason);
 }
 
 static void OnAuthPassed(int64_t authId)
 {
     OnAuthDone(authId, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth passed: %lld", authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth passed: %PRld64", authId);
 }
 
 static void OnRecvPeerDeviceInfo(int64_t authId, AuthSideFlag side,
