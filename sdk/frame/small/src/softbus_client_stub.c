@@ -218,7 +218,7 @@ int ClientStubInit(void)
 int ClientRegisterService(const char *pkgName)
 {
     struct CommonScvId svcId = {0};
-    if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie, &svcId.ipcCtx) != SOFTBUS_OK) {
+    if (GetClientIdentity(&svcId.handle, &svcId.token, &svcId.cookie) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client identity failed");
         return SOFTBUS_ERR;
     }
