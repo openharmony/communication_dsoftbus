@@ -27,6 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 static int64_t GetSeq(void)
 {
@@ -129,7 +130,14 @@ static void P2pLinkNegoDataRecv(int64_t authId, const ConnectOption *option, con
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink negotiation data recv enter.");
+
+    if (GetSignalingMsgSwitch() == true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "rcv msg from peer to p2p neg, datalen:%d, data:%s",
+                   info->len, InterceptSignalingMsg((unsigned char *)info->data, (unsigned char)info->len));
+    } else {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink negotiation data recv enter.");
+    }
+
     P2pLinkNeoData *param = (P2pLinkNeoData *)SoftBusCalloc(sizeof(P2pLinkNeoData) + (info->len));
     if (param == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc failed.");
@@ -185,6 +193,12 @@ int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "encrypt data failed.");
         return SOFTBUS_ERR;
     }
+
+    if (GetSignalingMsgSwitch() == true) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send msg to peer for p2p neg, datalen:%d, data:%s",
+                   size, InterceptSignalingMsg(encryptData, (unsigned char)size));
+    }
+
     AuthDataHead head = {
         .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,

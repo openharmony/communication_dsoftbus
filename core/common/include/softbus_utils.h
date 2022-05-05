@@ -71,6 +71,20 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
 int32_t Strnicmp(const char *src1, const char *src2, uint32_t len);
+void SetSignalingMsgSwitchOn(void);
+void SetSignalingMsgSwitchOff(void);
+bool GetSignalingMsgSwitch(void);
+
+/**
+ * @brief Intercept signaling messages of specified length.
+ * @param[in] data signaling message.
+ * @param[in] dataLen length of the signaling message.
+ * @return
+ * On success : Intercepted signaling message string.
+ * On failure : empty string.
+ * The returned string does not need to be freed.
+ */
+char *InterceptSignalingMsg(unsigned char *data, unsigned char dataLen);
 
 #ifdef __cplusplus
 #if __cplusplus
