@@ -176,6 +176,7 @@ static int32_t SoftbusSetThreadPolicy(SoftBusThreadAttr *threadAttr, pthread_att
         pthread_attr_setschedpolicy(attr, SCHED_OTHER);
     } else if (threadAttr->policy == SOFTBUS_SCHED_RR) {
         pthread_attr_setschedpolicy(attr, SCHED_RR);
+        pthread_attr_setinheritsched(attr, PTHREAD_EXPLICIT_SCHED);
     } else {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set policy error");
         return SOFTBUS_INVALID_PARAM;

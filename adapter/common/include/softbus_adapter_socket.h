@@ -27,7 +27,12 @@ extern "C" {
 #endif
 
 #define SA_DATA_SIZE (14)
+
+#ifdef __aarch64__
+#define ADDR_IN_RESER_SIZE (4)
+#else
 #define ADDR_IN_RESER_SIZE (8)
+#endif
 
 /* sys/socket.h */
 #define SOFTBUS_PF_UNSPEC SOFTBUS_PF_UNSPEC_
@@ -84,7 +89,7 @@ extern "C" {
 typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {
-    unsigned short saFamily; /* address family */
+    uint16_t saFamily; /* address family */
     char saData[SA_DATA_SIZE];
 } SoftBusSockAddr;
 
@@ -92,12 +97,14 @@ typedef struct {
     unsigned long sAddr;
 } SoftBusInAddr;
 
+#pragma pack (1)
 typedef struct {
-    unsigned short sinFamily; /* address family */
-    unsigned short sinPort; /* Port number */
+    uint16_t sinFamily; /* address family */
+    uint16_t sinPort; /* Port number */
     SoftBusInAddr sinAddr; /* Internet address */
     unsigned char sinZero[ADDR_IN_RESER_SIZE]; /* Same size as struct sockaddr */
 } SoftBusSockAddrIn;
+#pragma pack ()
 
 typedef struct {
     uint32_t fdsCount;
@@ -125,7 +132,7 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 
-int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, size_t len, int32_t flags);
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags,
     const SoftBusSockAddr *toAddr, int32_t toAddrLen);
 
