@@ -566,6 +566,17 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    if (len != NUM_BUF_SIZE) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((int32_t *)buf) = info->discoveryType;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetMasterWeight(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -653,6 +664,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
     {NUM_KEY_PROXY_PORT, DlGetProxyPort},
     {NUM_KEY_NET_CAP, DlGetNetCap},
+    {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
     {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
     {NUM_KEY_P2P_ROLE, DlGetP2pRole},
 };
