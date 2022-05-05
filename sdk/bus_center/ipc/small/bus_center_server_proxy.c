@@ -48,25 +48,26 @@ typedef struct {
 
 static IClientProxy *g_serverProxy = NULL;
 
-static int32_t ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
+static int32_t ClientBusCenterResultCb(Reply* info, IpcIo *reply)
 {
-    Reply *info = (Reply *)owner;
     uint32_t infoSize;
     switch (info->id) {
         case GET_ALL_ONLINE_NODE_INFO:
-            info->arg1 = IpcIoPopInt32(reply);
+            ReadInt32(reply, &(info->arg1));
             if (info->arg1 > 0) {
-                info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+                ReadUint32(reply, &infoSize);
+                info->data = (void *)ReadBuffer(reply, infoSize);
             }
             break;
         case GET_LOCAL_DEVICE_INFO:
         case GET_NODE_KEY_INFO:
-            info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+            ReadUint32(reply, &infoSize);
+            info->data = (void *)ReadBuffer(reply, infoSize);
             break;
         case ACTIVE_META_NODE:
-            info->retCode = IpcIoPopInt32(reply);
+            ReadInt32(reply, &(info->retCode));
             if (info->retCode == SOFTBUS_OK) {
-                info->data = (void *)IpcIoPopString(reply, &infoSize);
+                info->data = (void *)ReadString(reply, &infoSize);
                 if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
                     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid meta node id length: %d", infoSize);
                     return SOFTBUS_ERR;
@@ -74,14 +75,15 @@ static int32_t ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
             }
             break;
         case DEACTIVE_META_NODE:
-            info->retCode = IpcIoPopInt32(reply);
+            ReadInt32(reply, &(info->retCode));
             break;
         case GET_ALL_META_NODE:
-            info->retCode = IpcIoPopInt32(reply);
+            ReadInt32(reply, &(info->retCode));
             if (info->retCode == SOFTBUS_OK) {
-                info->arg1 = IpcIoPopInt32(reply);
+                ReadInt32(reply, &(info->arg1));
                 if (info->arg1 > 0) {
-                    info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+                    ReadUint32(reply, &infoSize);
+                    info->data = (void *)ReadBuffer(reply, infoSize);
                 }
             }
             break;
@@ -143,8 +145,7 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushUint32(&request, infoTypeLen);
+    WriteString(&request, pkgName);
     Reply reply = {0};
     reply.id = GET_ALL_ONLINE_NODE_INFO;
     /* asynchronous invocation */
@@ -190,8 +191,8 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushUint32(&request, infoTypeLen);
+    WriteString(&request, pkgName);
+    WriteUint32(&request, infoTypeLen);
     Reply reply = {0};
     reply.id = GET_LOCAL_DEVICE_INFO;
     /* asynchronous invocation */
@@ -226,10 +227,10 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, networkId);
-    IpcIoPushInt32(&request, key);
-    IpcIoPushInt32(&request, len);
+    WriteString(&request, pkgName);
+    WriteString(&request, networkId);
+    WriteInt32(&request, key);
+    WriteInt32(&request, len);
     Reply reply = {0};
     reply.id = GET_NODE_KEY_INFO;
     /* asynchronous invocation */
@@ -264,9 +265,9 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushUint32(&request, addrTypeLen);
-    IpcIoPushFlatObj(&request, addr, addrTypeLen);
+    WriteString(&request, pkgName);
+    WriteUint32(&request, addrTypeLen);
+    WriteBuffer(&request, addr, addrTypeLen);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_JOIN_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -290,8 +291,8 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, networkId);
+    WriteString(&request, pkgName);
+    WriteString(&request, networkId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_LEAVE_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -316,10 +317,10 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, targetNetworkId);
-    IpcIoPushInt32(&request, accuracy);
-    IpcIoPushInt32(&request, period);
+    WriteString(&request, pkgName);
+    WriteString(&request, targetNetworkId);
+    WriteInt32(&request, accuracy);
+    WriteInt32(&request, period);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_TIME_SYNC, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -344,8 +345,8 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, targetNetworkId);
+    WriteString(&request, pkgName);
+    WriteString(&request, targetNetworkId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_TIME_SYNC, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -369,9 +370,9 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushUint32(&request, infoLen);
-    IpcIoPushFlatObj(&request, info, infoLen);
+    WriteString(&request, pkgName);
+    WriteUint32(&request, infoLen);
+    WriteBuffer(&request, info, infoLen);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -396,8 +397,8 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushInt32(&request, publishId);
+    WriteString(&request, pkgName);
+    WriteInt32(&request, publishId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_PUBLISH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -421,9 +422,9 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushUint32(&request, infoTypeLen);
-    IpcIoPushFlatObj(&request, info, infoTypeLen);
+    WriteString(&request, pkgName);
+    WriteUint32(&request, infoTypeLen);
+    WriteBuffer(&request, info, infoTypeLen);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -448,8 +449,8 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushInt32(&request, refreshId);
+    WriteString(&request, pkgName);
+    WriteInt32(&request, refreshId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_REFRESH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -469,8 +470,11 @@ int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *i
     uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushFlatObj(&request, info, sizeof(MetaNodeConfigInfo));
+    WriteString(&request, pkgName);
+    bool ret = WriteRawData(&request, info, sizeof(MetaNodeConfigInfo));
+    if (!ret) {
+        return SOFTBUS_ERR;
+    }
     Reply reply = {0};
     reply.id = ACTIVE_META_NODE;
     /* asynchronous invocation */
@@ -502,8 +506,8 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, metaNodeId);
+    WriteString(&request, pkgName);
+    WriteString(&request, metaNodeId);
     Reply reply = {0};
     reply.id = DEACTIVE_META_NODE;
     /* asynchronous invocation */
@@ -527,8 +531,8 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushInt32(&request, *infoNum);
+    WriteString(&request, pkgName);
+    WriteInt32(&request, *infoNum);
     Reply reply = {0};
     reply.id = GET_ALL_META_NODE;
     /* asynchronous invocation */
