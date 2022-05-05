@@ -36,8 +36,9 @@ if (defined(ohos_lite)) {
   } else {
     disc_server_src +=
         [ "$dsoftbus_root_path/core/discovery/ipc/small/disc_client_proxy.c" ]
-    disc_server_deps +=
-        [ "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single" ]
+    disc_server_deps += [
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
+    ]
   }
 } else {
   disc_server_src += [
