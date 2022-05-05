@@ -24,14 +24,14 @@ extern "C" {
 #endif
 #endif
 
-int32_t ClientOnJoinLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnLeaveLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnNodeOnlineStateChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnPublishLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnRefreshLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-void ClientOnRefreshDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply);
+int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply);
+int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply);
+int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply);
+int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply);
+void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply);
+void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply);
+void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus
