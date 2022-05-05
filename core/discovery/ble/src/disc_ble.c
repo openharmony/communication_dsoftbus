@@ -404,6 +404,12 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     if (advData == NULL) {
         return;
     }
+
+    if (GetSignalingMsgSwitch() == true) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble rcv msg from peer, datalen:%d, data:%s",
+                   scanResultData->advLen, InterceptSignalingMsg(advData, scanResultData->advLen));
+    }
+
     if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSINESS) == DISTRIBUTE_BUSINESS) {
         ProcessDistributePacket(scanResultData);
     } else if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & NEARBY_BUSINESS) == NEARBY_BUSINESS) {
@@ -725,6 +731,12 @@ static int32_t StartAdvertiser(int32_t adv)
         DestroyBleConfigAdvData(&advData);
         return SOFTBUS_ERR;
     }
+
+    if (GetSignalingMsgSwitch() == true) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble send msg to peer, datalen:%d, data:%s", advData.advLength,
+                   InterceptSignalingMsg((unsigned char *)advData.advData, (unsigned char)advData.advLength));
+    }
+
     if (SoftBusStartAdv(advertiser->advId, &advParam) != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start adv adv:%d failed", adv);

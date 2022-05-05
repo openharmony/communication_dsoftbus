@@ -40,8 +40,14 @@
 #define BT_ADDR_DELIMITER ":"
 #define BT_ADDR_BASE 16
 
+#define BUF_BYTE_LEN 64
+#define BUF_HEX_LEN 128
+#define OFFSET 1
+
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
+static bool g_signalingMsgSwitch = true;
+static char g_signalingMsgBuf[BUF_HEX_LEN] = { 0 };
 
 SoftBusList *CreateSoftBusList(void)
 {
@@ -294,4 +300,38 @@ int32_t Strnicmp(const char *src1, const char *src2, uint32_t len)
         i--;
     } while (ca == cb && i > 0);
     return ca - cb;
+}
+
+void SetSignalingMsgSwitchOn(void)
+{
+    g_signalingMsgSwitch = true;
+}
+
+void SetSignalingMsgSwitchOff(void)
+{
+    g_signalingMsgSwitch = false;
+}
+
+bool GetSignalingMsgSwitch(void)
+{
+    return g_signalingMsgSwitch;
+}
+
+char *InterceptSignalingMsg(unsigned char *data, unsigned char dataLen)
+{
+    int ret = 0;
+
+    (void)memset_s(g_signalingMsgBuf, sizeof(g_signalingMsgBuf), 0, sizeof(g_signalingMsgBuf));
+    if (dataLen >= BUF_BYTE_LEN) {
+        ret = ConvertBytesToHexString(g_signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, BUF_BYTE_LEN);
+    } else {
+        ret = ConvertBytesToHexString(g_signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
+    }
+
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "intercept signaling msg faile");
+        (void)memset_s(g_signalingMsgBuf, sizeof(g_signalingMsgBuf), 0, sizeof(g_signalingMsgBuf));
+    }
+
+    return g_signalingMsgBuf;
 }
