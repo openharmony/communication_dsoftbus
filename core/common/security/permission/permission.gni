@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 if (defined(ohos_lite)) {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
-    "//foundation/communication/ipc_lite/interfaces/kits",
+    "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
     "//base/security/permission/interfaces/kits/permission_lite",
   ]
   if (ohos_kernel_type == "liteos_m") {
@@ -30,7 +30,7 @@ if (defined(ohos_lite)) {
     ]
     softbus_permission_deps = [
       "//base/security/permission/services/permission_lite/pms_client:pms_client",
-      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
 } else {

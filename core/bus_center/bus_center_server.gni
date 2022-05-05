@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
         [ "$dsoftbus_root_path/core/bus_center/ipc/small/include" ]
     bus_center_server_deps += [
       "//build/lite/config/component/cJSON:cjson_shared",
-      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
 } else {

@@ -43,7 +43,7 @@ if (defined(ohos_lite)) {
     ]
     trans_session_deps += [
       "//build/lite/config/component/cJSON:cjson_shared",
-      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
 } else {

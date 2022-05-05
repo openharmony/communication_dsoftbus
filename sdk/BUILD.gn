@@ -37,7 +37,7 @@ if (defined(ohos_lite)) {
   }
   if (ohos_kernel_type != "liteos_m") {
     common_client_deps += [
-      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
       "//foundation/distributedschedule/samgr_lite/samgr:samgr",
       "//third_party/bounds_checking_function:libsec_shared",
     ]

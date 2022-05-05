@@ -18,7 +18,7 @@
 #include <securec.h>
 #include <stdint.h>
 
-#include "liteipc_adapter.h"
+#include "ipc_skeleton.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
@@ -36,9 +36,6 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
     svc->handle = svcId.handle;
     svc->token = svcId.token;
     svc->cookie = svcId.cookie;
-#ifdef __LINUX__
-    svc->ipcContext = svcId.ipcCtx;
-#endif
     return SOFTBUS_OK;
 }
 
@@ -63,9 +60,6 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
         svc[i].handle = svcId[i].handle;
         svc[i].token = svcId[i].token;
         svc[i].cookie = svcId[i].cookie;
-#ifdef __LINUX__
-        svc[i].ipcContext = svcId[i].ipcCtx;
-#endif
     }
     SoftBusFree(svcId);
     return SOFTBUS_OK;
@@ -82,17 +76,21 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushFlatObj(&io, addr, addrTypeLen);
-    IpcIoPushInt32(&io, retCode);
+    WriteUint32(&io, addrTypeLen);
+    WriteBuffer(&io, addr, addrTypeLen);
+    WriteInt32(&io, retCode);
     if (retCode == 0) {
-        IpcIoPushString(&io, networkId);
+        WriteString(&io, networkId);
     }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_JOIN_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_JOIN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -110,14 +108,17 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&io, networkId);
-    IpcIoPushInt32(&io, retCode);
+    WriteString(&io, networkId);
+    WriteInt32(&io, retCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -135,8 +136,9 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushBool(&io, isOnline);
-    IpcIoPushFlatObj(&io, info, infoTypeLen);
+    WriteBool(&io, isOnline);
+    WriteUint32(&io, infoTypeLen);
+    WriteBuffer(&io, info, infoTypeLen);
     int num;
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
@@ -157,9 +159,11 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
         SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
     for (i = 0; i < num; i++) {
-        int32_t ans = SendRequest(NULL, svc[i], CLIENT_ON_NODE_ONLINE_STATE_CHANGED, &io, NULL,
-            LITEIPC_FLAG_ONEWAY, NULL);
+        int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_ONLINE_STATE_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback SendRequest failed.");
             SoftBusFree(svc);
@@ -180,8 +184,9 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, type);
-    IpcIoPushFlatObj(&io, info, infoTypeLen);
+    WriteInt32(&io, type);
+    WriteUint32(&io, infoTypeLen);
+    WriteBuffer(&io, info, infoTypeLen);
     int num;
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
@@ -202,9 +207,11 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
         SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
     for (i = 0; i < num; i++) {
-        int32_t ans = SendRequest(NULL, svc[i], CLIENT_ON_NODE_BASIC_INFO_CHANGED, &io, NULL,
-            LITEIPC_FLAG_ONEWAY, NULL);
+        int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_BASIC_INFO_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback SendRequest failed.");
             SoftBusFree(svc);
@@ -225,14 +232,18 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t i
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushFlatObj(&io, info, infoTypeLen);
-    IpcIoPushInt32(&io, retCode);
+    WriteUint32(&io, infoTypeLen);
+    WriteBuffer(&io, info, infoTypeLen);
+    WriteInt32(&io, retCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -250,14 +261,17 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, publishId);
-    IpcIoPushInt32(&io, reason);
+    WriteInt32(&io, publishId);
+    WriteInt32(&io, reason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -275,14 +289,17 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, refreshId);
-    IpcIoPushInt32(&io, reason);
+    WriteInt32(&io, refreshId);
+    WriteInt32(&io, reason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -300,13 +317,17 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
-    IpcIoPushFlatObj(&io, device, deviceLen);
+    WriteUint32(&io, deviceLen);
+    WriteBuffer(&io, device, deviceLen);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback SendRequest failed.");
         return SOFTBUS_ERR;
