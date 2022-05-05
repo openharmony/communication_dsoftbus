@@ -23,7 +23,6 @@ typedef struct {
     unsigned int handle;
     unsigned int token;
     unsigned int cookie;
-    void *ctx;
 } SoftBusClientContext;
 
 static SoftBusClientContext *g_clientCtx = NULL;
@@ -51,7 +50,7 @@ void ClientContextDeinit(void)
     g_clientCtx = NULL;
 }
 
-void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie, void *ctx)
+void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie)
 {
     if (g_clientCtx == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client ctx not init");
@@ -61,12 +60,11 @@ void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int coo
     g_clientCtx->handle = handle;
     g_clientCtx->token = token;
     g_clientCtx->cookie = cookie;
-    g_clientCtx->ctx = ctx;
 }
 
-int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie, void **ctx)
+int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie)
 {
-    if (handle == NULL || token == NULL || cookie == NULL || ctx == NULL) {
+    if (handle == NULL || token == NULL || cookie == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
     }
@@ -79,7 +77,6 @@ int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *c
     *handle = g_clientCtx->handle;
     *token = g_clientCtx->token;
     *cookie = g_clientCtx->cookie;
-    *ctx = g_clientCtx->ctx;
 
     return SOFTBUS_OK;
 }

@@ -15,7 +15,7 @@
 
 #include "disc_client_proxy.h"
 
-#include "liteipc_adapter.h"
+#include "ipc_skeleton.h"
 #include "serializer.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
@@ -33,9 +33,6 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
     svc->handle = svcId.handle;
     svc->token = svcId.token;
     svc->cookie = svcId.cookie;
-#ifdef __LINUX__
-    svc->ipcContext = svcId.ipcCtx;
-#endif
     return SOFTBUS_OK;
 }
 
@@ -45,13 +42,19 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
-    IpcIoPushFlatObj(&io, (const void*)device, sizeof(DeviceInfo));
+    bool ret = WriteRawData(&io, (const void*)device, sizeof(DeviceInfo));
+    if (!ret) {
+        return SOFTBUS_ERR;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ondevice found callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_DISCOVERY_DEVICE_FOUND, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ondevice found callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -65,14 +68,17 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, subscribeId);
-    IpcIoPushInt32(&io, failReason);
+    WriteInt32(&io, subscribeId);
+    WriteInt32(&io, failReason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on discovery failed callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_DISCOVERY_FAIL, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_FAIL, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on discovery failed callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -86,13 +92,16 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, subscribeId);
+    WriteInt32(&io, subscribeId);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on discovery success callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_DISCOVERY_SUCC, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_DISCOVERY_SUCC, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on discovery success callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -106,13 +115,16 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, publishId);
+    WriteInt32(&io, publishId);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on publish success callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_PUBLISH_SUCC, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_PUBLISH_SUCC, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on publish success callback SendRequest failed.");
         return SOFTBUS_ERR;
@@ -126,14 +138,17 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&io, publishId);
-    IpcIoPushInt32(&io, reason);
+    WriteInt32(&io, publishId);
+    WriteInt32(&io, reason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on publish failed callback get svc failed.");
         return SOFTBUS_ERR;
     }
-    int32_t ans = SendRequest(NULL, svc, CLIENT_PUBLISH_FAIL, &io, NULL, LITEIPC_FLAG_ONEWAY, NULL);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    int32_t ans = SendRequest(svc, CLIENT_PUBLISH_FAIL, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "on publish failed callback SendRequest failed.");
         return SOFTBUS_ERR;

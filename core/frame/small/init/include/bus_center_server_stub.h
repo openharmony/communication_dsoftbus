@@ -25,20 +25,20 @@ extern "C" {
 #endif
 #endif
 
-int32_t ServerJoinLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerLeaveLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetAllOnlineNodeInfo(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStartTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStopTimeSync(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerPublishLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStopPublishLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStopRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerActiveMetaNode(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerDeactiveMetaNode(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerGetAllMetaNodeInfo(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerGetAllOnlineNodeInfo( IpcIo *req, IpcIo *reply);
+int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply);
+int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply);
+int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
+int32_t ServerStopTimeSync( IpcIo *req, IpcIo *reply);
+int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply);
+int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply);
+int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

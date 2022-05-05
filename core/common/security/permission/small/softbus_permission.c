@@ -18,7 +18,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "liteipc_adapter.h"
 #include "permission_entry.h"
 #include "pms_interface.h"
 #include "pms_types.h"
