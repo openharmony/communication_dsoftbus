@@ -31,6 +31,8 @@ static const uint32_t CONN_HEAD_SIZE = 24;
 #define TEST_BR_MAC "24:DA:33:6A:06:EC"
 
 static unsigned int g_connId = 0;
+static unsigned int g_secondConnId = 0;
+
 #define WAIT_CONNECTION_COUNT 8
 #define WAIT_CONNECTION_SLEEP_TIME 1
 
@@ -62,6 +64,12 @@ void ConnectSuccessedCB(unsigned int requestId, unsigned int connectionId, const
 {
     printf("ConnectSuccessedCB %u\r\n", connectionId);
     g_connId = connectionId;
+    return;
+}
+
+void SecondConnectSuccessedCB(unsigned int requestId, unsigned int connectionId, const ConnectionInfo *info)
+{
+    g_secondConnId = connectionId;
     return;
 }
 
@@ -118,6 +126,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger001, TestSize.Level1)
 /*
 * @tc.name: testConnmanger002
 * @tc.desc: test invalid param
+* @tc.in: test module, test number, Test Levels.
+* @tc.out: zero
 * @tc.type: FUNC
 * @tc.require:AR000GIIE9
 */
@@ -219,7 +229,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger004, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger005
-* @tc.desc: test set unset callback and connect post disconnect
+* @tc.desc: Test set unset callback and connect post disconnect.
 * @tc.type: FUNC
 * @tc.require:AR000GIRGE
 */
@@ -258,4 +268,244 @@ HWTEST_F(ConnectionBrTest, testConnmanger005, TestSize.Level1)
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     printf("testConnmanger005 ConnUnSetConnectCallback end 11\r\n");
 };
-} // namespace OHOS
+
+/*
+* @tc.name: testConnmanger006
+* @tc.desc: Test set unset callback.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NA
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback operates normally.
+*/
+HWTEST_F(ConnectionBrTest, testConnmanger006, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnConnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+};
+
+/*
+* @tc.name: testConnmanger007
+* @tc.desc: Test set unset callback and connect post disconnect.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback and ConnDisconnectDevice
+* and ConnDisconnectDevice and ConnPostBytes and operates normally.
+*/
+HWTEST_F(ConnectionBrTest, testConnmanger007, TestSize.Level1)
+{
+    int ret;
+    int reqId;
+    ConnectCallback connCb;
+    ConnectResult connRet;
+    ConnPostData data;
+    ConnectOption info;
+    const char *str = "send msg local2\r\n";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    info.type = CONNECT_BR;
+    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (g_connId != 0) {
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
+        ASSERT_TRUE(data.buf != NULL);
+        (void)strcpy_s(data.buf + 1, strlen(str), str);
+        data.len = CONN_HEAD_SIZE + 20;
+        data.module = MODULE_TRUST_ENGINE;
+        data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        if (data.buf != nullptr) {
+            free(data.buf);
+        }
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+};
+
+/*
+* @tc.name: testConnmanger008
+* @tc.desc: Test set unset callback and connect twice has same ConnectID.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback and ConnConnectDevice operates normally.
+*/
+HWTEST_F(ConnectionBrTest, testConnmanger008, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectionInfo info;
+    ConnectResult connRet;
+    ConnectResult connRet2;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BR;
+    (void)memcpy_s(optionInfo.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+
+    connRet2.OnConnectFailed = ConnectFailedCB;
+    connRet2.OnConnectSuccessed = SecondConnectSuccessedCB;
+    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    sleep(1);
+    if ((g_connId) && (g_secondConnId)) {
+        EXPECT_EQ(g_connId, g_secondConnId);
+    }
+
+    if (g_connId) {
+        ret = ConnGetConnectionInfo(g_connId, &info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        ret = ConnDisconnectDeviceAllConn(&optionInfo);
+        g_connId = 0;
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+};
+
+/*
+* @tc.name: testConnmanger009
+* @tc.desc: Test set unset callback and connect twice post disconnect post.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback and ConnConnectDevice operates normally.
+*/
+HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectResult connRet;
+    ConnPostData data;
+    ConnectOption info;
+    const char *str = "send msg local2\r\n";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    info.type = CONNECT_BR;
+    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.info.brOption.brMac);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId1, &connRet);
+    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId2, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (g_connId != 0) {
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
+        ASSERT_TRUE(data.buf != NULL);
+        (void)strcpy_s(data.buf + 1, strlen(str), str);
+        data.len = CONN_HEAD_SIZE + 20;
+        data.module = MODULE_TRUST_ENGINE;
+        data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        ret = ConnPostBytes(g_connId, &data);
+        ASSERT_EQ(SOFTBUS_OK, ret);
+        if (data.buf != nullptr) {
+            free(data.buf);
+        }
+    }
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+};
+
+/*
+* @tc.name: testConnmanger010
+* @tc.desc: Test set unset callback and connect twice post disconnectAll post.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnSetConnectCallback and ConnConnectDevice operates normally.
+*/
+HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectResult connRet;
+    ConnPostData data;
+    ConnectOption info;
+    const char *str = "send msg local2\r\n";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    info.type = CONNECT_BR;
+    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+
+    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId1, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId2, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
+        ASSERT_TRUE(data.buf != NULL);
+        (void)strcpy_s(data.buf + 1, strlen(str), str);
+        data.len = CONN_HEAD_SIZE + 20;
+        data.module = MODULE_TRUST_ENGINE;
+        data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
+
+        ret = ConnPostBytes(g_connId, &data);
+        ASSERT_EQ(SOFTBUS_OK, ret);
+        ret = ConnDisconnectDeviceAllConn(&info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        ret = ConnPostBytes(g_connId, &data);
+        ASSERT_NE(SOFTBUS_OK, ret);
+
+        g_connId = 0;
+        if (data.buf != nullptr) {
+            free(data.buf);
+        }
+    }
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+};
+}
