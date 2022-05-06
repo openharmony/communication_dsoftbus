@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
@@ -30,9 +32,11 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/core/discovery/coap/include",
     "//utils/native/base/include",
     "unittest/common/",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
   ]
 
   deps = [
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
