@@ -33,10 +33,10 @@ ohos_unittest("disc_account_test") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
-    "//utils/native/base:utilsecurec_shared",
   ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

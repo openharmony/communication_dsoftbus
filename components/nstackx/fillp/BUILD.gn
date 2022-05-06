@@ -103,9 +103,12 @@ if (defined(ohos_lite)) {
     ]
 
     include_dirs = fillp_include
-    include_dirs += [ "//utils/native/base/include/" ]
+    include_dirs += [
+      "//utils/native/base/include/",
+      "//third_party/bounds_checking_function/include",
+    ]
     sources = fillp_source
-    deps = [ "//utils/native/base:utilsecurec_shared" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
 
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

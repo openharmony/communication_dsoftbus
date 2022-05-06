@@ -50,6 +50,7 @@ ctrl_include = [
   "include/coap_discover",
   "//third_party/libcoap/include",
   "//third_party/cJSON",
+  "//third_party/bounds_checking_function/include",
 ]
 
 ctrl_cflags = [

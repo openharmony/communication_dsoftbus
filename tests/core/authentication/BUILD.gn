@@ -38,14 +38,15 @@ ohos_unittest("AuthTest") {
     "//utils/native/base/include",
     "//third_party/cJSON",
     "unittest/common/",
+    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
-    "//utils/native/base:utilsecurec_shared",
   ]
 
   if (is_standard_system) {
