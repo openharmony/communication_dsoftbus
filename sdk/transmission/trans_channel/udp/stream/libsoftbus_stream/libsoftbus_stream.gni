@@ -27,6 +27,7 @@ libsoftbus_stream_inc = [
   "$libsoftbus_stream_sdk_path/include",
   "//third_party/cJSON",
   "//third_party/openssl/include",
+  "//third_party/bounds_checking_function/include",
 ]
 
 if (enhanced) {
@@ -60,12 +61,12 @@ if (defined(ohos_lite)) {
   if (enhanced) {
     libsoftbus_stream_deps = [
       "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
-      "//utils/native/base:utilsecurec_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
     ]
   } else {
     libsoftbus_stream_deps = [
       "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
-      "//utils/native/base:utilsecurec_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
     ]
   }
 }

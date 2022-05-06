@@ -37,6 +37,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/kits/common",
     "//utils/native/base/include",
     "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
+    "//third_party/bounds_checking_function/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -115,6 +116,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       "//utils/native/base/include",
+      "//third_party/bounds_checking_function/include",
     ]
     sources = [
       "$dsoftbus_standard_feature_product_config_path/spec_config/softbus_config_adapter.c",

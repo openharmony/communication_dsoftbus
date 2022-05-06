@@ -125,6 +125,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util/interface",
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
       "//utils/native/base/include/",
+      "//third_party/bounds_checking_function/include",
     ]
     sources = [
       "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile.c",
@@ -146,8 +147,8 @@ if (defined(ohos_lite)) {
     deps = [
       "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/mbedtls",
-      "//utils/native/base:utilsecurec_shared",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

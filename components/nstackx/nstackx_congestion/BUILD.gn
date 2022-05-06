@@ -83,6 +83,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util/interface",
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
       "//utils/native/base/include/",
+      "//third_party/bounds_checking_function/include",
       "interface",
       "platform/unix",
     ]
@@ -93,8 +94,8 @@ if (defined(ohos_lite)) {
 
     deps = [
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/mbedtls",
-      "//utils/native/base:utilsecurec_shared",
     ]
     part_name = "dsoftbus_standard"
     subsystem_name = "communication"

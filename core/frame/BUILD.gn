@@ -82,6 +82,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "//base/security/deviceauth/interfaces/innerkits",
         "//utils/native/lite/include",
+        "//third_party/bounds_checking_function/include",
       ]
       sources = dsoftbus_server_common_src
       sources += [

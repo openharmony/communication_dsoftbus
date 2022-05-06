@@ -42,6 +42,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/sdk/discovery/include",
       "//utils/native/base/include",
+      "//third_party/bounds_checking_function/include",
       "unittest/common/",
       "$dsoftbus_root_path/sdk/discovery/manager/include",
     ]
