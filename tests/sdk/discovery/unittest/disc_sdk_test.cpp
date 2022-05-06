@@ -31,6 +31,7 @@ static int g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
 static const char *g_pkgName_1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
+static const char* g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
 
 const int32_t ERRO_CAPDATA_LEN = 514;
 
@@ -240,17 +241,19 @@ HWTEST_F(Disc_Test, PublishServiceTest003, TestSize.Level0)
 
 /**
  * @tc.name: PublishServiceTest004
- * @tc.desc: Verify correct parameter with active mode and "COAP" medium
+ * @tc.desc: Test active publish, verify correct parameter with passive mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The PublishService and UnPublishService operates normally.
  */
 HWTEST_F(Disc_Test, PublishServiceTest004, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = COAP,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
@@ -283,17 +286,19 @@ HWTEST_F(Disc_Test, PublishServiceTest004, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest005
- * @tc.desc: Verify correct parameter with passive mode and "AUTO" medium
+ * @tc.desc: Test active publish, verify correct parameter with active mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The PublishService and UnPublishService operates normally.
  */
 HWTEST_F(Disc_Test, PublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
@@ -326,16 +331,18 @@ HWTEST_F(Disc_Test, PublishServiceTest005, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest006
- * @tc.desc: Verify correct parameter with passive mode and "COAP" medium
+ * @tc.desc: Test active publish, verify correct parameter with active mode and "COAP" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The PublishService and UnPublishService operates normally.
  */
 HWTEST_F(Disc_Test, PublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
+        .mode = DISCOVER_MODE_ACTIVE,
         .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
@@ -369,16 +376,18 @@ HWTEST_F(Disc_Test, PublishServiceTest006, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest007
- * @tc.desc: Verify correct parameter with active mode and "AUTO" medium
+ * @tc.desc: Test passive publish, verify correct parameter with passive mode and "AUTO" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The PublishService and UnPublishService operates normally.
  */
 HWTEST_F(Disc_Test, PublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
+        .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
@@ -408,6 +417,161 @@ HWTEST_F(Disc_Test, PublishServiceTest007, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
     EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest008
+ * @tc.desc: Test passive publish, verify correct parameter with passive mode and "COAP" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The PublishService and UnPublishService operates normally.
+ */
+HWTEST_F(Disc_Test, PublishServiceTest008, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = COAP,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, testInfo.publishId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest009
+ * @tc.desc: Verify wrong parameter.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require:The PublishService operates normally.
+ */
+HWTEST_F(Disc_Test, PublishServiceTest009, TestSize.Level1)
+{
+    int ret;
+    g_pInfo.publishId = GetPublishId();
+    ret = PublishService(g_erroPkgName1, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+}
+
+/**
+ * @tc.name: PublishServiceTest010
+ * @tc.desc: Test active publish, verify wrong parameter with active mode and "COAP" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require:The PublishService operates normally.
+ */
+HWTEST_F(Disc_Test, PublishServiceTest010, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = COAP,
+        .freq = MID,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char*)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.medium = COAP;
+
+    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.freq = LOW;
+}
+/**
+ * @tc.name: PublishServiceTest011
+ * @tc.desc: Test active publish, verify wrong parameter with active mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require:The PublishService operates normally.
+ */
+HWTEST_F(Disc_Test, PublishServiceTest011, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = BLE,
+        .freq = MID,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char*)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.medium = BLE;
+
+    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.freq = LOW;
+}
+/**
+ * @tc.name: PublishServiceTest012
+ * @tc.desc: Test active publish, verify wrong parameter with active mode and "AUTO" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require:The PublishService operates normally.
+ */
+HWTEST_F(Disc_Test, PublishServiceTest012, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = AUTO,
+        .freq = MID,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char*)"capdata2",
+        .dataLen = sizeof("capdata2")
+    };
+
+    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.medium = AUTO;
+
+    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    testInfo.freq = LOW;
 }
 
 /**
@@ -507,11 +671,107 @@ HWTEST_F(Disc_Test, StartDiscoveryTest003, TestSize.Level0)
 
 /**
  * @tc.name: StartDiscoveryTest004
- * @tc.desc: Verify correct parameter with active mode and "AUTO" medium
+ * @tc.desc: Test active discover, verify correct parameter with active mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
 HWTEST_F(Disc_Test, StartDiscoveryTest004, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StartDiscoveryTest005
+ * @tc.desc: Test active discover, verify correct parameter with active mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest005, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StartDiscoveryTest006
+ * @tc.desc: Test active discover, verify correct parameter with active mode and "AUTO" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -551,12 +811,14 @@ HWTEST_F(Disc_Test, StartDiscoveryTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: StartDiscoveryTest005
- * @tc.desc: Verify correct parameter with passive mode and "COAP" medium
+ * @tc.name: StartDiscoveryTest007
+ * @tc.desc: Test passive discover verify correct parameter with passive mode and "COAP" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(Disc_Test, StartDiscoveryTest005, TestSize.Level1)
+HWTEST_F(Disc_Test, StartDiscoveryTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -596,12 +858,61 @@ HWTEST_F(Disc_Test, StartDiscoveryTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: StartDiscoveryTest006
- * @tc.desc: Verify correct parameter with passive mode and "AUTO" medium
+ * @tc.name: StartDiscoveryTest008
+ * @tc.desc: Test passive discover verify correct parameter with passive mode and "BLE" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(Disc_Test, StartDiscoveryTest006, TestSize.Level1)
+HWTEST_F(Disc_Test, StartDiscoveryTest008, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3")
+    };
+
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = MID;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StartDiscoveryTest009
+ * @tc.desc: Test passive discover, verify correct parameter with passive mode and "AUTO" medium.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StartDiscovery and StopDiscovery operates normally.
+ */
+HWTEST_F(Disc_Test, StartDiscoveryTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -699,6 +1010,44 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UnPublishServiceTest004
+ * @tc.desc: not start publish.
+ * @tc.in: Test Moudle, Test Number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The UnPublishService operates normally.
+ */
+HWTEST_F(Disc_Test, UnPublishServiceTest004, TestSize.Level2)
+{
+    int ret;
+    int tmpId = GetPublishId();
+
+    ret = UnPublishService(g_pkgName, tmpId);
+    EXPECT_TRUE(ret != 0);
+}
+
+/**
+ * @tc.name: UnPublishServiceTest005
+ * @tc.desc: Verify UnPublishService again.
+ * @tc.in: Test Moudle, Test Number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The UnPublishService operates normally.
+ */
+HWTEST_F(Disc_Test, UnPublishServiceTest005, TestSize.Level2)
+{
+    int ret;
+    int tmpId = GetPublishId();
+
+    g_pInfo.publishId = tmpId;
+    PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+    ret = UnPublishService(g_pkgName, tmpId);
+    EXPECT_TRUE(ret == 0);
+    ret = UnPublishService(g_pkgName, tmpId);
+    EXPECT_TRUE(ret != 0);
+}
+
+/**
  * @tc.name: StopDiscoveryTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
@@ -754,5 +1103,43 @@ HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level0)
     StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: StopDiscoveryTest004
+ * @tc.desc: not start discover.
+ * @tc.in: Test Moudle, Test Number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StopDiscovery operates normally.
+ */
+HWTEST_F(Disc_Test, StopDiscoveryTest004, TestSize.Level2)
+{
+    int ret;
+    int tmpId = GetSubscribeId();
+
+    ret = StopDiscovery(g_pkgName, tmpId);
+    EXPECT_TRUE(ret != 0);
+}
+
+/**
+ * @tc.name: StopDiscoveryTest005
+ * @tc.desc: Verify StopDiscovery again.
+ * @tc.in: Test Moudle, Test Number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StopDiscovery operates normally.
+ */
+HWTEST_F(Disc_Test, StopDiscoveryTest005, TestSize.Level2)
+{
+    int ret;
+    int tmpId = GetSubscribeId();
+
+    g_sInfo.subscribeId = tmpId;
+    StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+    ret = StopDiscovery(g_pkgName, tmpId);
+    EXPECT_TRUE(ret == 0);
+    ret = StopDiscovery(g_pkgName, tmpId);
+    EXPECT_TRUE(ret != 0);
 }
 } // namespace OHOS
