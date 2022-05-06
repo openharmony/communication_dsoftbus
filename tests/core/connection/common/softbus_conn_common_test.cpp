@@ -308,6 +308,841 @@ HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
 };
 
 /*
+ * @tc.name: testBaseListener009
+ * @tc.desc: Test GetSoftbusBaseListener invalid input param SoftbusBaseListener *listener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The GetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener009, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(AUTH_P2P, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, nullptr));
+};
+
+/*
+ * @tc.name: testBaseListener010
+ * @tc.desc: Test GetSoftbusBaseListener invalid input param ListenerModule module.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The GetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener010, TestSize.Level1)
+{
+    SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    if (getListener == nullptr) {
+        return;
+    }
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), getListener));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(PROXY - 1), getListener));
+    if (getListener != nullptr) {
+        free(getListener);
+    }
+};
+
+/*
+ * @tc.name: testBaseListener011
+ * @tc.desc: Test SetSoftbusBaseListener invalid input param const SoftbusBaseListener *listener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The GetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener011, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(AUTH_P2P, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(PROXY, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(AUTH, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_WIFI, nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(UNUSE_BUTT, nullptr));
+};
+
+/*
+ * @tc.name: testBaseListener012
+ * @tc.desc: Test SetSoftbusBaseListener invalid input param ListenerModule module.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener012, TestSize.Level1)
+{
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    if (setListener == nullptr) {
+        return;
+    }
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), setListener));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(PROXY - 1), setListener));
+    if (setListener != nullptr) {
+        free(setListener);
+    }
+};
+
+/*
+ * @tc.name: testBaseListener013
+ * @tc.desc: Test setSoftbusBaseListene SOFTBUS_OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
+{
+    int i;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener014
+ * @tc.desc: Test GetSoftbusBaseListener SOFTBUS_ERR.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The GetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener014, TestSize.Level1)
+{
+    int i;
+    SoftbusBaseListener *getListener = nullptr;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        if (getListener == nullptr) {
+            return;
+        }
+        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+    }
+};
+
+/*
+ * @tc.name: testBaseListener015
+ * @tc.desc: Test SetSoftbusBaseListener SOFTBUS_OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener015, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(i), nullptr));
+    }
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        if (getListener == nullptr) {
+            free(setListener);
+            return;
+        }
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+        if (getListener != nullptr) {
+            free(getListener);
+        }
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener016
+ * @tc.desc: Test StartBaseClient invalid input param ListenerModule module.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseClient operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener016, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1)));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1)));
+};
+
+/*
+ * @tc.name: testBaseListener017
+ * @tc.desc: Test StartBaseClient, BaseListener not set, start failed.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseClient operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener017, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
+    }
+};
+
+/*
+ * @tc.name: testBaseListener018
+ * @tc.desc: Test StartBaseClient, BaseListener set, start OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener and StartBaseClient operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener018, TestSize.Level1)
+{
+    int i;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener019
+ * @tc.desc: Test StartBaseClient, BaseListener set, start OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseClient and SetSoftbusBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
+{
+    int i;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener020
+ * @tc.desc: Test StartBaseListener invalid input param ListenerModule module.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener020, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+        StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+        StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, CLIENT_MODE));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, CLIENT_MODE));
+    EXPECT_EQ(
+        SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, UNSET_MODE));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, UNSET_MODE));
+};
+
+/*
+ * @tc.name: testBaseListener021
+ * @tc.desc: Test StartBaseListener invalid input param const char *ip.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener021, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, CLIENT_MODE));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, UNSET_MODE));
+    }
+};
+
+/*
+ * @tc.name: testBaseListener022
+ * @tc.desc: Test StartBaseListener invalid input param int32_t port < 0.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener022, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+        EXPECT_EQ(
+            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, SERVER_MODE));
+        EXPECT_EQ(
+            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, CLIENT_MODE));
+        EXPECT_EQ(
+            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, UNSET_MODE));
+    }
+};
+
+/*
+ * @tc.name: testBaseListener023
+ * @tc.desc: Test StartBaseListener, BaseListener not set, start failed.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, CLIENT_MODE));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, UNSET_MODE));
+    }
+};
+
+/*
+ * @tc.name: testBaseListener024
+ * @tc.desc: Test StartBaseListener, BaseListener set, start OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener and StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
+{
+    int i;
+    int port = 6666;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        ++port;
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener025
+ * @tc.desc: Test StartBaseListener, BaseListener set, start OK.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener and StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener025, TestSize.Level1)
+{
+    int i;
+    int port = 6666;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        ++port;
+        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        if (getListener == nullptr) {
+            free(setListener);
+            return;
+        }
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener026
+ * @tc.desc: Test StopBaseListener invalid input param ListenerModule module.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StopBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener026, TestSize.Level1)
+{
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(static_cast<ListenerModule>(PROXY - 1)));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(static_cast<ListenerModule>(UNUSE_BUTT)));
+};
+
+/*
+ * @tc.name: testBaseListener027
+ * @tc.desc: Test StopBaseListener failed g_listenerList[module].info = NULL.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StopBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener027, TestSize.Level1)
+{
+    int i;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        EXPECT_EQ(SOFTBUS_ERR, StopBaseListener(static_cast<ListenerModule>(i)));
+    }
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(UNUSE_BUTT));
+};
+
+/*
+ * @tc.name: testBaseListener028
+ * @tc.desc: Test SetSoftbusBaseListener and get StartBaseListener and stop.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener and StopBaseListener and StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
+{
+    int i;
+    int port = 6666;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        if (getListener == nullptr) {
+            free(setListener);
+            return;
+        }
+        ++port;
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
+        if (getListener != nullptr) {
+            free(getListener);
+        }
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener029
+ * @tc.desc: Test SetSoftbusBaseListener and get StartBaseListener and stop and startBaseClient.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The SetSoftbusBaseListener and StartBaseClient and StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener029, TestSize.Level1)
+{
+    int i;
+    int port = 6666;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < UNUSE_BUTT; i++) {
+        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        if (getListener == nullptr) {
+            free(setListener);
+            return;
+        }
+        ++port;
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
+        if (getListener != nullptr) {
+            free(getListener);
+        }
+        EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
+        EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
+        DestroyBaseListener(static_cast<ListenerModule>(i));
+        EXPECT_EQ(SOFTBUS_ERR, StopBaseListener(static_cast<ListenerModule>(i)));
+    }
+    free(setListener);
+};
+
+/*
+ * @tc.name: testBaseListener030
+ * @tc.desc: Test AddTrigger DelTrigger invalid triggerType param.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The AddTrigger and DelTrigger operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
+{
+    int module;
+    int fd = 1;
+    int port = 6666;
+
+    for (module = PROXY; module < UNUSE_BUTT; module++) {
+        SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+        ASSERT_TRUE(listener != nullptr);
+        listener->onConnectEvent = ConnectEvent;
+        listener->onDataEvent = DataEvent;
+        EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+            AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(READ_TRIGGER - 1)));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+            AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(RW_TRIGGER + 1)));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+            DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(READ_TRIGGER - 1)));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM,
+            DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(RW_TRIGGER + 1)));
+
+        EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+        DestroyBaseListener(static_cast<ListenerModule>(module));
+        free(listener);
+    }
+};
+
+/*
+ * @tc.name: testBaseListener031
+ * @tc.desc: Test DestroyBaseListener valid input param.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The DestroyBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener032
+ * @tc.desc: Test DestroyBaseListener empty corresponding module listener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The DestroyBaseListener and StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
+{
+    int port = 6666;
+
+    SoftbusBaseListener *listener1 = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener1 != nullptr);
+    listener1->onConnectEvent = ConnectEvent;
+    listener1->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(PROXY, listener1));
+    EXPECT_EQ(PROXY + port, StartBaseListener(PROXY, "127.0.0.1", PROXY + port, SERVER_MODE));
+
+    SoftbusBaseListener *listener2 = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener2 != nullptr);
+    listener2->onConnectEvent = ConnectEvent;
+    listener2->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(AUTH, listener2));
+    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(PROXY));
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
+    DestroyBaseListener(PROXY);
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(PROXY, "127.0.0.1", PROXY + port, SERVER_MODE));
+    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
+    DestroyBaseListener(AUTH);
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+    free(listener1);
+    free(listener2);
+};
+
+/*
+ * @tc.name: testBaseListener033
+ * @tc.desc: Test DestroyBaseListener without StopBaseListener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener034
+ * @tc.desc: Test AddTrigger with empty info.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The AddTrigger operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener034, TestSize.Level1)
+{
+    int module = PROXY;
+    int triggerType = READ_TRIGGER;
+    int fd = 1;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener035
+ * @tc.desc: Test DelTrigger with empty info.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The DelTrigger operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
+{
+    int module = PROXY;
+    int triggerType = READ_TRIGGER;
+    int fd = 1;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_ERR, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener036
+ * @tc.desc: Test StartBaseListener after ResetBaseListener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener036, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener037
+ * @tc.desc: Test StopBaseListener after ResetBaseListener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StopBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener037, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener038
+ * @tc.desc: Test AddTrigger DelTrigger after ResetBaseListener.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The AddTrigger and DelTrigger operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener038, TestSize.Level1)
+{
+    int module = PROXY;
+    int triggerType = READ_TRIGGER;
+    int fd = 1;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListener(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+    EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener039
+ * @tc.desc: Test StartBaseListener after ResetBaseListenerSet.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: NonZero
+ * @tc.type: FUNC
+ * @tc.require: The StartBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener039, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListenerSet(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener040
+ * @tc.desc: Test StopBaseListener after ResetBaseListenerSet.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The StopBaseListener operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener040, TestSize.Level1)
+{
+    int module = PROXY;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListenerSet(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
+ * @tc.name: testBaseListener041
+ * @tc.desc: Test AddTrigger DelTrigger after ResetBaseListenerSet.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The AddTrigger and DelTrigger operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testBaseListener041, TestSize.Level1)
+{
+    int module = PROXY;
+    int triggerType = READ_TRIGGER;
+    int fd = 1;
+    int port = 6666;
+
+    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(listener != nullptr);
+    listener->onConnectEvent = ConnectEvent;
+    listener->onDataEvent = DataEvent;
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+
+    ResetBaseListenerSet(static_cast<ListenerModule>(module));
+    EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+    EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
+
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
+    DestroyBaseListener(static_cast<ListenerModule>(module));
+    free(listener);
+};
+
+/*
 * @tc.name: testTcpSocket001
 * @tc.desc: test OpenTcpServerSocket
 * @tc.type: FUNC
@@ -509,6 +1344,448 @@ HWTEST_F(SoftbusCommonTest, testThreadPool005, TestSize.Level1)
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool006
+ * @tc.desc: test ThreadPoolAddJob after pool == nullptr
+ * @tec.in: test module,test number,test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: ThreadPoolAddJob and ThreadPoolDestroy and ThreadPoolInit operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool006, TestSize.Level1)
+{
+    int threadNum = 1;
+    int queueMaxNum = 2;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        pool = nullptr;
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+
+    int handId = 0;
+    ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)handId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+};
+
+/*
+ * @tc.name: testThreadPool007
+ * @tc.desc: Test call ThreadPoolAddJob twice to create a thread twice.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: ThreadPoolInit and ThreadPoolAddJob and ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool007, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int handId = 0;
+    ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_EXISTED);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool008
+ * @tc.desc: Test ThreadPoolAddJob when queueCurNum add some jobs.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The testGThreadPool operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool008, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    for (int i = 0; i < queueMaxNum; i++) {
+        ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)i);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+
+    usleep(500);
+    EXPECT_EQ(pool->queueCurNum, queueMaxNum);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool009
+ * @tc.desc: Test ThreadPoolAddJob when ThreadPoolInit failed.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The testGThreadPool operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool009, TestSize.Level1)
+{
+    int threadNum = -1;
+    int queueMaxNum = -1;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    int handId = 0;
+    ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool010
+ * @tc.desc: Test ThreadPoolAddJob when add the same handle but different jobMode.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The testGThreadPool operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool010, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        int handId = 0;
+        ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)handId);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)handId);
+        EXPECT_EQ(ret, SOFTBUS_ALREADY_EXISTED);
+
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool011
+ * @tc.desc: Test ThreadPoolAddJob add the same handle when jobMode is ONCE.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolAddJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool011, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        for (int i = 0; i < queueMaxNum; i++) {
+            ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)i);
+            EXPECT_EQ(ret, SOFTBUS_OK);
+        }
+
+        int handId = 0;
+        ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)handId);
+        EXPECT_EQ(ret, SOFTBUS_ERR);
+
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool012
+ * @tc.desc: Test ThreadPoolRemoveJob when handId out of max.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolRemoveJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool012, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        for (int i = 0; i < queueMaxNum; i++) {
+            ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)i);
+            EXPECT_EQ(ret, SOFTBUS_OK);
+        }
+
+        ret = ThreadPoolRemoveJob(pool, (uintptr_t)queueMaxNum);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool013
+ * @tc.desc: Test ThreadPoolRemoveJob when no add job.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolRemoveJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool013, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int handId = 0;
+    ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool014
+ * @tc.desc: Test ThreadPoolRemoveJob remove the same handle when the added job mode is ONCE.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolRemoveJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool014, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    for (int i = 0; i < queueMaxNum; i++) {
+        ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)i);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+    usleep(1000);
+
+    int handId = 0;
+    ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool015
+ * @tc.desc: Test ThreadPoolRemoveJob when ThreadPoolInit failed.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolRemoveJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool015, TestSize.Level1)
+{
+    int threadNum = -1;
+    int queueMaxNum = -1;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    int handId = 0;
+    ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, ONCE, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool016
+ * @tc.desc: Test ThreadPoolRemoveJob remove the same hand when the added job mode is PERSISTENT.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolRemoveJob operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool016, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        for (int i = 0; i < queueMaxNum; i++) {
+            ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)i);
+            EXPECT_EQ(ret, SOFTBUS_OK);
+        }
+
+        int handId = 0;
+        ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        ret = ThreadPoolRemoveJob(pool, (uintptr_t)handId);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool017
+ * @tc.desc: Test ThreadPoolDestroy under normal process.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The testGThreadPool operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool017, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (pool != nullptr) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool018
+ * @tc.desc: Test ThreadPoolDestroy when ThreadPoolInit failed
+ * @tc.in: test module,test  number,test levels.
+ * @tc.out: Nonzero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool018, TestSize.Level1)
+{
+    int threadNum = -1;
+    int queueMaxNum = -1;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = ThreadPoolDestroy(pool);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+};
+
+/*
+ * @tc.name: testThreadPool019
+ * @tc.desc: Test ThreadPoolDestroy when not ThreadPoolAddJob.
+ * @tc.in: test module, test number,test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool019, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        ret = ThreadPoolDestroy(pool);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+};
+
+/*
+ * @tc.name: testThreadPool020
+ * @tc.desc: Test ThreadPoolDestroy when not ThreadPoolRemoveJob.
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testThreadPool020, TestSize.Level1)
+{
+    int threadNum = 2;
+    int queueMaxNum = 4;
+    g_count = 0;
+
+    ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
+    int ret = (pool != nullptr) ? SOFTBUS_OK : SOFTBUS_ERR;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    if (nullptr != pool) {
+        for (int i = 0; i < queueMaxNum; i++) {
+            ret = ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)i);
+            EXPECT_EQ(ret, SOFTBUS_OK);
+        }
         ret = ThreadPoolDestroy(pool);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
