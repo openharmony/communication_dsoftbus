@@ -22,6 +22,7 @@ if (defined(ohos_lite)) {
       "//foundation/communication/dsoftbus/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path//core/common/include",
+      "//third_party/bounds_checking_function/include",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",

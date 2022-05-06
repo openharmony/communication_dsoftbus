@@ -95,6 +95,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "//third_party/cJSON",
+      "//third_party/bounds_checking_function/include",
     ]
     include_dirs += conn_common_inc + trans_common_inc
     sources = common_utils_src
@@ -109,9 +110,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson_static",
       "//utils/native/base:utils",
-      "//utils/native/base:utilsecurec_shared",
     ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
