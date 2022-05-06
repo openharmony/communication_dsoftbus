@@ -27,6 +27,7 @@ ohos_unittest("BusCenterSdkTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "//utils/native/base/include",
+    "//third_party/bounds_checking_function/include",
     "unittest/common/",
     "$dsoftbus_root_path/adapter/common/include",
   ]

@@ -33,10 +33,10 @@ ohos_unittest("softbus_conn_ble_test") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
-    "//utils/native/base:utilsecurec_shared",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
