@@ -29,6 +29,8 @@ if (dsoftbus_standard_feature_conn_br == false) {
     "$dsoftbus_root_path/core/connection/br/src/br_connection.c",
     "$dsoftbus_root_path/core/connection/br/src/br_trans_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/br_connection_manager.c",
+    "$dsoftbus_root_path/core/connection/br/src/br_pending_packet.c",
+    "$dsoftbus_root_path/core/connection/br/src/softbus_br_queue.c",
   ]
   br_connection_inc += [
     "$dsoftbus_root_path/core/connection/br/include",

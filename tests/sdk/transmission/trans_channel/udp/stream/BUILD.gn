@@ -32,7 +32,7 @@ executable("dstream_adaptor_server_test") {
   ]
 
   deps = [
-    "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/stream/adaptor:dsoftbus_trans_dstream",
+    "${dsoftbus_root_path}/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 }
@@ -50,7 +50,7 @@ executable("dstream_adaptor_client_test") {
   ]
 
   deps = [
-    "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/stream/adaptor:dsoftbus_trans_dstream",
+    "${dsoftbus_root_path}/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 }
