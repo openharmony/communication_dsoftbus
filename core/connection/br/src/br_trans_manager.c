@@ -122,21 +122,18 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
     }
 }
 
-int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
+int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *sppDriver,
     int32_t brSendPeerLen, const char *data, uint32_t len)
 {
-    const char *tempData = data;
-    BrConnectionInfo *brConnInfo = GetConnectionRef(connId);
     if (brConnInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransSend] connId: %d, not fount failed", connId);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrTransSend");
     int32_t socketFd = brConnInfo->socketFd;
     if (socketFd == -1) {
-        ReleaseConnectionRef(brConnInfo);
         return SOFTBUS_ERR;
     }
+    const char *tempData = data;
     int32_t ret = SOFTBUS_OK;
     int32_t writeRet;
     int32_t tempLen = (int32_t)len;
@@ -163,27 +160,40 @@ int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
         tempData += sendLength;
         tempLen -= sendLength;
     }
-    ReleaseConnectionRef(brConnInfo);
     return ret;
 }
 
-static char *BrAddNumToJson(int32_t requestOrResponse, int32_t delta, int32_t count)
+static char *BrAddNumToJson(int32_t method, int32_t delta, uint64_t count)
 {
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
-    if (requestOrResponse == METHOD_NOTIFY_REQUEST) {
+    if (method == METHOD_NOTIFY_REQUEST) {
         if (!AddNumberToJsonObject(json, KEY_METHOD, METHOD_NOTIFY_REQUEST) ||
             !AddNumberToJsonObject(json, KEY_DELTA, delta) ||
-            !AddNumberToJsonObject(json, KEY_REFERENCE_NUM, count)) {
+            !AddNumberToJsonObject(json, KEY_REFERENCE_NUM, (int32_t)count)) {
+            cJSON_Delete(json);
+            return NULL;
+        }
+    } else if (method == METHOD_NOTIFY_ACK) {
+        if (!AddNumberToJsonObject(json, KEY_METHOD, METHOD_NOTIFY_ACK) ||
+            !AddNumberToJsonObject(json, KEY_WINDOWS, delta) ||
+            !AddNumber64ToJsonObject(json, KEY_ACK_SEQ_NUM, (int64_t)count)) {
+            cJSON_Delete(json);
+            return NULL;
+        }
+    } else if (method == METHOD_ACK_RESPONSE) {
+        if (!AddNumberToJsonObject(json, KEY_METHOD, METHOD_ACK_RESPONSE) ||
+            !AddNumberToJsonObject(json, KEY_WINDOWS, delta) ||
+            !AddNumber64ToJsonObject(json, KEY_ACK_SEQ_NUM, (int64_t)count)) {
             cJSON_Delete(json);
             return NULL;
         }
     } else {
         if (!AddNumberToJsonObject(json, KEY_METHOD, METHOD_NOTIFY_RESPONSE) ||
-            !AddNumberToJsonObject(json, KEY_REFERENCE_NUM, count)) {
+            !AddNumberToJsonObject(json, KEY_REFERENCE_NUM, (int32_t)count)) {
             cJSON_Delete(json);
             return NULL;
         }
@@ -193,7 +203,7 @@ static char *BrAddNumToJson(int32_t requestOrResponse, int32_t delta, int32_t co
     return data;
 }
 
-char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t count, int32_t *outLen)
+char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t count, int32_t *outLen)
 {
     char *data = BrAddNumToJson(requestOrResponse, delta, count);
     if (data == NULL) {

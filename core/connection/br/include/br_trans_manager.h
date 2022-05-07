@@ -22,11 +22,13 @@
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
+#define KEY_WINDOWS "KEY_WINDOWS"
+#define KEY_ACK_SEQ_NUM "KEY_ACK_SEQ_NUM"
 
 int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDriver, int32_t clientId, char **outBuf);
-int32_t BrTransSend(int32_t connId, const SppSocketDriver *sppDriver,
+int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *sppDriver,
     int32_t brSendPeerLen, const char *data, uint32_t len);
 
-char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, int32_t count, int32_t *outLen);
+char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t count, int32_t *outLen);
 
 #endif
