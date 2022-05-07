@@ -17,7 +17,7 @@ adapter_ble_external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
-  "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
+  "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
 ]
 adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
@@ -27,4 +27,5 @@ adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
 ]
 adapter_net_br_src = [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
-adapter_ble_deps = [ "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework:btframework" ]
+adapter_ble_deps =
+    [ "//foundation/communication/bluetooth/frameworks/inner:btframework" ]
