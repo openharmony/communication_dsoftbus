@@ -370,6 +370,11 @@ static void CoapUpdateLocalIp(LinkStatus status)
     DiscCoapUpdateLocalIp(status);
 }
 
+static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
+{
+    (void)type;
+}
+
 static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .Publish = CoapPublish,
     .StartScan = CoapStartScan,
@@ -379,7 +384,8 @@ static DiscoveryFuncInterface g_discCoapFuncInterface = {
     .Subscribe = CoapSubscribe,
     .StopAdvertise = CoapStopAdvertise,
     .Unsubscribe = CoapUnsubscribe,
-    .LinkStatusChanged = CoapUpdateLocalIp
+    .LinkStatusChanged = CoapUpdateLocalIp,
+    .UpdateLocalDeviceInfo = CoapUpdateLocalDeviceInfo
 };
 
 static DiscCoapInfo *NewDiscCoapInfo(void)

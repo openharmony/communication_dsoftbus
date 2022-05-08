@@ -53,6 +53,9 @@ typedef enum {
     NUM_KEY_DISCOVERY_TYPE,
     NUM_KEY_TRANS_PROTOCOLS,
     NUM_KEY_END,
+    BYTE_KEY_BEGIN,
+    BYTE_KEY_USERID_HASH,
+    BYTE_KEY_END,
 } InfoKey;
 
 #ifdef __cplusplus

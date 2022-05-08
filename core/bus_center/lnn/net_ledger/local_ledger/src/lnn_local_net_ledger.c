@@ -23,6 +23,7 @@
 
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
@@ -127,6 +128,34 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
     }
     if (strncpy_s(buf, len, deviceType, strlen(deviceType)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetAccount(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(buf, len, info->accountHash, SHA_256_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LlGetAccount copy error.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateAccount(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (memcpy_s(info->accountHash, SHA_256_HASH_LEN, buf, SHA_256_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LlUpdateAccount copy error.");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -631,7 +660,8 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
-    {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols}
+    {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
+    {BYTE_KEY_USERID_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount}
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -672,7 +702,8 @@ static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
+    if ((key < NUM_KEY_BEGIN || key >= NUM_KEY_END) &&
+        (key < BYTE_KEY_BEGIN || key >= BYTE_KEY_END)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -736,7 +767,8 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
 {
     uint32_t i;
     int32_t ret;
-    if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
+    if ((key < NUM_KEY_BEGIN || key >= NUM_KEY_END) &&
+        (key < BYTE_KEY_BEGIN || key >= BYTE_KEY_END)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -779,6 +811,16 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info)
+{
+    return LnnSetLocalInfo(key, (void *)info);
+}
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return LnnGetLocalInfo(key, (void *)info, len);
 }
 
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
@@ -861,6 +903,13 @@ int32_t LnnInitLocalLedgerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_ERR;
     }
+    
+    uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local user id hash error!");
+        return SOFTBUS_ERR;
+    }
+    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash);
     return SOFTBUS_OK;
 }
 

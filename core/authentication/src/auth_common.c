@@ -22,6 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 #define DEFAULT_AUTH_ABILITY_COLLECTION 0
 #define AUTH_SUPPORT_SERVER_SIDE_MASK 0x01
@@ -29,6 +30,7 @@
 #define OFFSET_BITS 24
 #define INT_MAX_VALUE 0xFFFFFEL
 #define LOW_24_BITS 0xFFFFFFL
+#define MAX_BYTE_RECORD 240
 static uint64_t g_uniqueId = 0;
 static uint32_t g_authAbility = 0;
 
@@ -137,9 +139,9 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
         }
         case CONNECT_BLE:
             if (strcpy_s(option->info.bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
-                strcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
-                connInfo->info.bleInfo.deviceIdHash) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
+                memcpy_s(option->info.bleOption.deviceIdHash, UDID_HASH_LEN,
+                connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac or deviceIdHash failed");
                 return SOFTBUS_ERR;
             }
             break;
@@ -270,4 +272,26 @@ bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *opt
             break;
     }
     return false;
+}
+
+void AuthPrintDfxMsg(int32_t module, char *data, int len)
+{
+    if (data == NULL || len <= 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "PrintDfxMsg auth data module is %d len %d", module, len);
+    if (!(module == MODULE_TRUST_ENGINE ||
+        module == MODULE_AUTH_SDK ||
+        module == MODULE_AUTH_CONNECTION ||
+        module == DATA_TYPE_DEVICE_ID ||
+        module == DATA_TYPE_AUTH ||
+        module == DATA_TYPE_SYNC)) {
+        return;
+    }
+    int32_t size = len > MAX_BYTE_RECORD ? (MAX_BYTE_RECORD - 1) : len;
+    char outBuf[MAX_BYTE_RECORD + 1] = {0};
+    if (ConvertBytesToHexString(outBuf, MAX_BYTE_RECORD, (const unsigned char *)data, size / 2) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "%s", outBuf);
+    }
 }

@@ -1413,7 +1413,7 @@ int32_t LnnInitNetBuilderDelay(void)
     char udid[UDID_BUF_LEN] = {0};
     // set master weight and master udid
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!");
         return SOFTBUS_ERR;
     }
     LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);

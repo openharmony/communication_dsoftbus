@@ -331,13 +331,16 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
         if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] == false) {
             return true;
         }
-        unsigned char hwAccountHash[MAX_ACCOUNT_HASH_LEN] = {0};
-        if (DiscBleGetShortUserIdHash(hwAccountHash) != SOFTBUS_OK) {
+        unsigned char accountHash[SHORT_USER_ID_HASH_LEN] = {0};
+        if (DiscBleGetShortUserIdHash(accountHash, SHORT_USER_ID_HASH_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash error");
             return false;
         }
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "my account = %s", hwAccountHash);
-        if (strcmp((char *)hwAccountHash, foundInfo->accountHash) == EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "my account %x %x",
+            accountHash[0], accountHash[1]);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "peer account %x %x",
+            foundInfo->accountHash[0], foundInfo->accountHash[1]);
+        if (memcmp(accountHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == EOK) {
             return true;
         }
         return false;
@@ -533,11 +536,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
     }
     (void)memset_s(info->accountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
-    if (isSameAccount) {
-        if (DiscBleGetShortUserIdHash((unsigned char *)info->accountHash) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
-        }
-    }
+    DiscBleGetShortUserIdHash((unsigned char *)info->accountHash, SHORT_USER_ID_HASH_LEN);
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] = g_bleInfoManager[infoIndex].capBitMap[pos];
     }
@@ -656,9 +655,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
             return SOFTBUS_ERR;
         }
     } else {
-        if (DiscBleGetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH]) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetShortUserIdHash failed");
-        }
+        DiscBleGetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     }
     boardcastData->data.data[POS_CAPABLITY] = info->capabilityBitmap[0] & BYTE_MASK;
     boardcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
@@ -1084,6 +1081,36 @@ static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_PASSIVE, STOP_DISCOVERY, (void *)option);
 }
 
+static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
+{
+    DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
+    int32_t ret = SOFTBUS_OK;
+    if (advertiser == NULL || advertiser->GetDeviceInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdateAdvertiserDeviceInfo get advertiser %d fail", adv);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (advertiser->isAdvertising) {
+        if (GetNeedUpdateAdvertiser(adv)) {
+            ret = UpdateAdvertiser(adv);
+        }
+    }
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "UpdateAdvertiserDeviceInfo isAdvertising %d ret %d",
+        advertiser->isAdvertising, ret);
+    return ret;
+}
+
+static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
+{
+    (void)type;
+    if (UpdateAdvertiserDeviceInfo(NON_ADV_ID) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "BleUpdateLocalDeviceInfo NON_ADV_ID fail");
+    }
+    if (UpdateAdvertiserDeviceInfo(CON_ADV_ID) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "BleUpdateLocalDeviceInfo CON_ADV_ID fail");
+    }
+}
+
 static DiscoveryFuncInterface g_discBleFuncInterface = {
     .Publish = BleStartActivePublish,
     .StartScan = BleStartPassivePublish,
@@ -1092,7 +1119,8 @@ static DiscoveryFuncInterface g_discBleFuncInterface = {
     .StartAdvertise = BleStartActiveDiscovery,
     .Subscribe = BleStartPassiveDiscovery,
     .StopAdvertise = BleStopActiveDiscovery,
-    .Unsubscribe = BleStopPassiveDiscovery
+    .Unsubscribe = BleStopPassiveDiscovery,
+    .UpdateLocalDeviceInfo = BleUpdateLocalDeviceInfo
 };
 
 static int32_t InitAdvertiser(void)

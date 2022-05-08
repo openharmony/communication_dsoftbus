@@ -107,7 +107,8 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
             return;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d", head->module);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d len %d", head->module, len);
+    AuthPrintDfxMsg(head->module, data, len);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
             if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == fd) {
@@ -151,9 +152,10 @@ static void AuthNotifyDisconn(int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ip get auth failed");
         return;
     }
+    int64_t authId = auth->authId;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth disconnect");
-    AuthNotifyTransDisconn(auth->authId);
-    AuthNotifyLnnDisconn(auth);
+    AuthNotifyTransDisconn(authId);
+    AuthNotifyLnnDisconn(authId);
 }
 
 static void AuthIpDataProcess(int32_t fd, const ConnPktHead *head)

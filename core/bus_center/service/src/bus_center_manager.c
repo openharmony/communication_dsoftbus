@@ -32,7 +32,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define DEFAULT_DELAY_LEN 0
+#define DEFAULT_DELAY_LEN 1000
 #define RETRY_MAX 10
 
 typedef int32_t (*LnnInitDelayImpl)(void);
