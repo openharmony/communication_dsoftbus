@@ -85,6 +85,7 @@ typedef struct {
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
     uint64_t supportedProtocols;
+    char accountHash[SHA_256_HASH_LEN];
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

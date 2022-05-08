@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_discovery_manager.h"
+#include "lnn_ohos_account.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -266,9 +267,8 @@ bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
     return true;
 }
 
-static void OnGroupCreated(const char *groupId)
+static void RestartCoapDiscovery(void)
 {
-    (void)groupId;
     char ifName[NET_IF_NAME_LEN] = {0};
     int32_t authPort = 0;
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
@@ -291,9 +291,38 @@ static void OnGroupCreated(const char *groupId)
     SetCallLnnStatus(true);
 }
 
+static void OnAccountChanged(void)
+{
+    uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged get local user id fail");
+        return;
+    }
+    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged get account user id fail");
+        return;
+    }
+    if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged account not change");
+        return;
+    }
+
+    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash);
+    DiscDeviceInfoChanged(TYPE_ACCOUNT);
+}
+
+static void OnGroupCreated(const char *groupId)
+{
+    (void)groupId;
+    RestartCoapDiscovery();
+    OnAccountChanged();
+}
+
 static void OnGroupDeleted(const char *groupId)
 {
     (void)groupId;
+    OnAccountChanged();
 }
 
 static VerifyCallback g_verifyCb = {

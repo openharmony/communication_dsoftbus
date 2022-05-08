@@ -12,27 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "lnn_ohos_account.h"
-#include "lnn_settingdata_event_monitor.h"
+#ifndef LNN_OHOS_ACCOUNT_H
+#define LNN_OHOS_ACCOUNT_H
 
-#include "softbus_errcode.h"
+#include <stdint.h>
 
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    (void)deviceName;
-    (void)len;
-    return SOFTBUS_ERR;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
+
+#ifdef __cplusplus
 }
-
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
-{
-    (void)handler;
-    return SOFTBUS_OK;
-}
-
-int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
-{
-    (void)accountHash;
-    (void)len;
-    return SOFTBUS_OK;
-}
+#endif
+#endif /* LNN_OHOS_ACCOUNT_H */

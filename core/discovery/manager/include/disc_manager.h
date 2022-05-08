@@ -53,6 +53,7 @@ typedef struct {
     int32_t (*Unsubscribe)(const SubscribeOption *option);
     int32_t (*StopAdvertise)(const SubscribeOption *option);
     void (*LinkStatusChanged)(LinkStatus status);
+    void (*UpdateLocalDeviceInfo)(InfoTypeChanged type);
 } DiscoveryFuncInterface;
 
 typedef struct {

@@ -65,6 +65,7 @@ static int32_t OnOneCycleEnd(const SoftBusMessage *msg);
 static int32_t OnOneCycleTimeout(const SoftBusMessage *msg);
 static int32_t OnRepeatCycle(const SoftBusMessage *msg);
 static int32_t OnTryAsMasterNode(const SoftBusMessage *msg);
+static int32_t OnDeviceInfoChanged(const SoftBusMessage *msg);
 
 static LnnHeartbeatEventHandler g_noneHbStateHandler[] = {
     {EVENT_HB_ENTER, OnHeartbeatStop},
@@ -83,6 +84,7 @@ static LnnHeartbeatEventHandler g_normalNodeStateHandler[] = {
     {EVENT_HB_ONCE_END, OnOneCycleEnd},
     {EVENT_HB_STOP, OnHeartbeatStop},
     {EVENT_HB_TIMEOUT, OnOneCycleTimeout},
+    {EVENT_HB_UPDATE_DEVICE_INFO, OnDeviceInfoChanged},
     {EVENT_HB_EXIT, NULL}
 };
 
@@ -98,6 +100,7 @@ static LnnHeartbeatEventHandler g_masterNodeStateHandler[] = {
     {EVENT_HB_ONCE_END, OnOneCycleEnd},
     {EVENT_HB_STOP, OnHeartbeatStop},
     {EVENT_HB_TIMEOUT, OnOneCycleTimeout},
+    {EVENT_HB_UPDATE_DEVICE_INFO, OnDeviceInfoChanged},
     {EVENT_HB_EXIT, OnMasterStateExit}
 };
 
@@ -691,5 +694,13 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
         }
     }
     SoftBusFree(info);
+    return g_currentState;
+}
+
+static int32_t OnDeviceInfoChanged(const SoftBusMessage *msg)
+{
+    (void)msg;
+    int32_t ret = LnnHbMgrUpdateLocalInfo();
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fsm update local device info ret %d", ret);
     return g_currentState;
 }
