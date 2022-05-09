@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 #include <sys/time.h>
+#include <cinttypes>
 
 #include "auth_common.h"
 #include "auth_connection.h"
