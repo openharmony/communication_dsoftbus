@@ -453,7 +453,11 @@ static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const Au
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthConnOpened decrypt fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthDataRecv data: %s", data);
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, data, strlen(data)) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv data: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
 
     cJSON *json = cJSON_Parse(data);
     SoftBusFree(data);

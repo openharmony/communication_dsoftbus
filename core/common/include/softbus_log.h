@@ -37,6 +37,8 @@ typedef enum {
 
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
 
+int32_t AnonymizePacket(char **output, const char *in, size_t len);
+
 #define UUID_ANONYMIZED_LENGTH 4
 #define NETWORKID_ANONYMIZED_LENGTH 4
 #define UDID_ANONYMIZED_LENGTH 4
