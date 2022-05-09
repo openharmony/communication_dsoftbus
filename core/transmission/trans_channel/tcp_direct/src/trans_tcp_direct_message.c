@@ -346,6 +346,11 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
     }
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, data, packetHead->dataLen) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransTdcPostBytes, data: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
     if (PackBytes(channelId, data, packetHead, buffer, bufferLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Pack Bytes error.");
         SoftBusFree(buffer);
@@ -668,6 +673,12 @@ static int32_t ProcessReceivedData(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process recv data: json parse failed.");
         return SOFTBUS_ERR;
     }
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, crypInfo.out, crypInfo.outLen) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TdcProcessReceivedData, data: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
+
     int32_t ret = ProcessMessage(channelId, flags, seq, packet);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv process message fail.[%d]", ret);
