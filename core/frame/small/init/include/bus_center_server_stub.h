@@ -31,7 +31,7 @@ int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
-int32_t ServerStopTimeSync( IpcIo *req, IpcIo *reply);
+int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply);
