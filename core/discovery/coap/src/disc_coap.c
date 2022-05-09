@@ -126,12 +126,13 @@ static int32_t CoapPublish(const PublishOption *option)
 
     if (DiscCoapStartDiscovery(ACTIVE_PUBLISH) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap start publish failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap start publish failed, allCap:%d",
+                   g_publishMgr->allCap[0]);
         return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
 
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap publish service.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap publish service, allCap:%d", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -165,12 +166,13 @@ static int32_t CoapUnPublish(const PublishOption *option)
     if (g_publishMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap unpublish failed.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap unpublish failed, allCap:%d",
+                       g_publishMgr->allCap[0]);
             return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
         }
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap unpublish service.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap unpublish service, allCap:%d", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -205,7 +207,7 @@ static int32_t CoapStartScan(const PublishOption *option)
         return SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap start passive publish.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap start passive publish, allCap:%d", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -236,7 +238,7 @@ static int32_t CoapStopScan(const PublishOption *option)
         return SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop passive publish.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop passive publish, allCap:%d", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -290,7 +292,8 @@ static int32_t CoapUnsubscribe(const SubscribeOption *option)
         }
     }
     (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop passive discovery.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop passive discovery, allCap:%d",
+               g_subscribeMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -318,16 +321,19 @@ static int32_t CoapStartAdvertise(const SubscribeOption *option)
     }
     if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap stop discovery failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap stop discovery failed, allCap:%d",
+                   g_subscribeMgr->allCap[0]);
         return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
     }
     if (DiscCoapStartDiscovery(ACTIVE_DISCOVERY) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap start advertise failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap start advertise failed, allCap:%d",
+                   g_subscribeMgr->allCap[0]);
         return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
     (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap start active discovery.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap start active discovery, allCap:%d",
+               g_subscribeMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -356,12 +362,13 @@ static int32_t CoapStopAdvertise(const SubscribeOption *option)
     if (g_subscribeMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap stop advertise failed.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap stop advertise failed, allCap:%d",
+                       g_subscribeMgr->allCap[0]);
             return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
         }
     }
     (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop active discovery.");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap stop active discovery, allCap:%d", g_subscribeMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
