@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 #include <sys/time.h>
+#include <inttypes.h>
 
 #include "auth_common.h"
 #include "auth_connection.h"
@@ -70,12 +71,12 @@ void OnKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVe
 {
     (void)option;
     (void)peerVersion;
-    LOG_INFO("%s: authId=%lld", __func__, authId);
+    LOG_INFO("%s: authId=%PRld64", __func__, authId);
 }
 
 void OnDeviceVerifyFail(int64_t authId, int32_t reason)
 {
-    LOG_INFO("%s: authId=%lld, reason=%d", __func__, authId, reason);
+    LOG_INFO("%s: authId=%PRld64, reason=%d", __func__, authId, reason);
 }
 
 void OnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUdid, uint8_t *data, uint32_t len)
@@ -84,12 +85,12 @@ void OnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUdi
     (void)peerUdid;
     (void)data;
     (void)len;
-    LOG_INFO("%s: authId=%lld", __func__, authId);
+    LOG_INFO("%s: authId=%PRld64", __func__, authId);
 }
 
 void OnDeviceVerifyPass(int64_t authId)
 {
-    LOG_INFO("%s: authId=%lld", __func__, authId);
+    LOG_INFO("%s: authId=%PRld64", __func__, authId);
 }
 
 void OnDeviceNotTrusted(const char *peerUdid)
@@ -100,7 +101,7 @@ void OnDeviceNotTrusted(const char *peerUdid)
 
 void OnDisconnect(int64_t authId)
 {
-    LOG_INFO("%s: authId=%lld", __func__, authId);
+    LOG_INFO("%s: authId=%PRld64", __func__, authId);
 }
 
 /*
