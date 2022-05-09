@@ -161,13 +161,13 @@ static int StartDeathProcTask(void)
     return ret;
 }
 
-static void DeathCallback()
+static void DeathCallback(void)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "\n<< ATTENTION !!! >> SERVICE (%s) DEAD !!!\n", SOFTBUS_SERVICE);
 
     if (StartDeathProcTask() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start death proc task failed");
-    } 
+    }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "client start check softbus server...");
 }
 
