@@ -31,7 +31,7 @@ static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
 #define EVP_AES_128_GCM_KEYLEN 16
 #define EVP_AES_256_GCM_KEYLEN 32
 
-static EVP_CIPHER *GetSslAlgorithmByKeyLen(const uint32_t keyLen)
+static EVP_CIPHER *GetSslAlgorithmByKeyLen(uint32_t keyLen)
 {
     switch (keyLen) {
         case EVP_AES_128_GCM_KEYLEN:
@@ -46,7 +46,7 @@ static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *ciphe
 {
     EVP_CIPHER *cipher = GetSslAlgorithmByKeyLen(cipherkey->keyLen);
     if (cipher == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "get cipher fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "get cipher fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     int32_t ret;
@@ -58,21 +58,21 @@ static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *ciphe
     if (mode == true) {
         ret = EVP_EncryptInit_ex(*ctx, cipher, NULL, NULL, NULL);
         if (ret != 1) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.\n");
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.");
             EVP_CIPHER_CTX_free(*ctx);
             return SOFTBUS_DECRYPT_ERR;
         }
     } else {
         ret = EVP_DecryptInit_ex(*ctx, cipher, NULL, NULL, NULL);
         if (ret != 1) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptInit_ex fail.\n");
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptInit_ex fail.");
             EVP_CIPHER_CTX_free(*ctx);
             return SOFTBUS_DECRYPT_ERR;
         }
     }
     ret = EVP_CIPHER_CTX_ctrl(*ctx, EVP_CTRL_GCM_SET_IVLEN, GCM_IV_LEN, NULL);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Set iv len fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Set iv len fail.");
         EVP_CIPHER_CTX_free(*ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -80,25 +80,25 @@ static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *ciphe
 }
 
 static int32_t PackIvAndTag(EVP_CIPHER_CTX *ctx, const AesGcmCipherKey *cipherkey,
-    const uint32_t dataLen, unsigned char *cipherText, const uint32_t cipherTextLen)
+    uint32_t dataLen, unsigned char *cipherText, uint32_t cipherTextLen)
 {
     if ((dataLen + OVERHEAD_LEN) > cipherTextLen) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para.");
         return SOFTBUS_ENCRYPT_ERR;
     }
-    if (memcpy_s(cipherText, cipherTextLen - dataLen, cipherkey->iv, GCM_IV_LEN) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP memcpy iv fail.\n");
+    if (memcpy_s(cipherText, cipherTextLen - dataLen, cipherkey->iv, GCM_IV_LEN) != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP memcpy iv fail.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     char tagbuf[TAG_LEN];
     int ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, TAG_LEN, (void *)tagbuf);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_CIPHER_CTX_ctrl fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_CIPHER_CTX_ctrl fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     if (memcpy_s(cipherText + dataLen + GCM_IV_LEN,
-        cipherTextLen - dataLen - GCM_IV_LEN, tagbuf, TAG_LEN) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP memcpy tag fail.\n");
+        cipherTextLen - dataLen - GCM_IV_LEN, tagbuf, TAG_LEN) != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP memcpy tag fail.");
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -109,7 +109,7 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
 {
     if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
         (cipherTextLen < plainTextSize + OVERHEAD_LEN)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
     
@@ -118,33 +118,33 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
     EVP_CIPHER_CTX *ctx = NULL;
     int32_t ret = OpensslEvpInit(&ctx, cipherkey, true);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_EncryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_EncryptUpdate(ctx, cipherText + GCM_IV_LEN,
         (int32_t *)&outbufLen, plainText, plainTextSize);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptUpdate fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptUpdate fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     outlen += outbufLen;
     ret = EVP_EncryptFinal_ex(ctx, cipherText + GCM_IV_LEN + outbufLen, (int32_t *)&outbufLen);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptFinal_ex fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptFinal_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     outlen += outbufLen;
     ret = PackIvAndTag(ctx, cipherkey, outlen, cipherText, cipherTextLen);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "pack iv and tag fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "pack iv and tag fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -157,7 +157,7 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
 {
     if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
         (plainLen < cipherTextSize - OVERHEAD_LEN)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Decrypt invalid para\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "Decrypt invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -165,33 +165,33 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
     EVP_CIPHER_CTX *ctx = NULL;
     int32_t ret = OpensslEvpInit(&ctx, cipherkey, false);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslEvpInit fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_DecryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, TAG_LEN,
         (void *)(cipherText + (cipherTextSize - TAG_LEN)));
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     ret = EVP_DecryptUpdate(ctx, plain, (int32_t *)&plainLen,
         cipherText + GCM_IV_LEN, cipherTextSize - OVERHEAD_LEN);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptUpdate fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     outlen += plainLen;
     ret = EVP_DecryptFinal_ex(ctx, plain + plainLen, (int32_t *)&plainLen);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptFinal_ex fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_DecryptFinal_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -215,7 +215,7 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
     EVP_EncodeInit(ctx);
     int32_t ret = EVP_EncodeUpdate(ctx, dst, (int32_t *)&outlen, src, slen);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_EncodeUpdate fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_EncodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -245,14 +245,14 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
     EVP_DecodeInit(ctx);
     int32_t ret = EVP_DecodeUpdate(ctx, dst, (int32_t *)&outlen, src, slen);
     if (ret == -1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeUpdate fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
     ret = EVP_DecodeFinal(ctx, dst + outlen, (int32_t *)&outlen);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeFinal fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeFinal fail.");
         EVP_ENCODE_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -269,7 +269,7 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     uint32_t olen;
     int32_t ret = EVP_Digest(str, len, hash, &olen, EVP_sha256(), NULL);
     if (ret != 1) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] Get Openssl Hash fail.\n");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] Get Openssl Hash fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -285,7 +285,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     int32_t ret;
 
     if (pthread_mutex_lock(&g_randomLock) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed.");
         return SOFTBUS_ERR;
     }
 
