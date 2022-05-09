@@ -50,7 +50,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
     size_t len;
     const char *pkgName = (const char*)ReadString(req, &len);
     uint32_t addrTypeLen;
-    ReadUint32(req,&addrTypeLen);
+    ReadUint32(req, &addrTypeLen);
     void *addr = (void*)ReadBuffer(req, addrTypeLen);
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN read addr is null.");

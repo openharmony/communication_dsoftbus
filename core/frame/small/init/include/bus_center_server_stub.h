@@ -27,7 +27,7 @@ extern "C" {
 
 int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply);
-int32_t ServerGetAllOnlineNodeInfo( IpcIo *req, IpcIo *reply);
+int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
