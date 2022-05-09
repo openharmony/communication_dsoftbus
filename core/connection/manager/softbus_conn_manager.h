@@ -103,7 +103,7 @@ typedef struct {
     int64_t seq;
     int32_t flag;
     uint32_t len;
-} ConnPktHead;
+} __attribute__((packed))ConnPktHead;
 
 #ifdef __cplusplus
 #if __cplusplus
