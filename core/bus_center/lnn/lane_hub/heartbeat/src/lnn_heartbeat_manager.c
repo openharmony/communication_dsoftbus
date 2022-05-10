@@ -20,6 +20,7 @@
 
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "disc_ble_constant.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_device_info.h"
@@ -50,6 +51,7 @@ typedef struct {
     int32_t (*init)(LnnHeartbeatImplCallback *callback);
     int32_t (*onOnceBegin)(void);
     int32_t (*onOnceEnd)(void);
+    int32_t (*onUpdateLocalDeviceInfo)(void);
     int32_t (*stop)(void);
     int32_t (*deinit)(void);
 } HeartbeatImpl;
@@ -63,6 +65,7 @@ static HeartbeatImpl g_hbImpl[HB_IMPL_TYPE_MAX] = {
         .init = LnnInitBleHeartbeat,
         .onOnceBegin = LnnOnceBleHbBegin,
         .onOnceEnd = LnnOnceBleHbEnd,
+        .onUpdateLocalDeviceInfo = LnnOnUpdateLocalDeviceInfo,
         .stop = LnnStopBleHeartbeat,
         .deinit = LnnDeinitBleHeartbeat,
     },
@@ -217,12 +220,35 @@ static NodeInfo *HbGetMatchNode(const char *devId, const ConnectionAddrType type
     return NULL;
 }
 
+static bool IsSameAccount(const char *accountHash, uint32_t len)
+{
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IsSameAccount get local userid fail");
+        return true;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsSameAccount my account %x %x",
+        localAccountHash[0], localAccountHash[1]);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsSameAccount peer account %x %x",
+        accountHash[0], accountHash[1]);
+    if (memcmp(accountHash, localAccountHash, len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsSameAccount filted by userid.");
+        return false;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsSameAccount not filted.");
+    return true;
+}
+
 static int32_t HbMgrDiscoveryDevice(const DeviceInfo *device)
 {
     ConnectionAddr *addr = (ConnectionAddr *)device->addr;
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB discovery device addr is null");
         return SOFTBUS_ERR;
+    }
+    if (!IsSameAccount(device->accountHash, SHORT_USER_ID_HASH_LEN)) {
+        return SOFTBUS_OK;
     }
     if (LnnNotifyDiscoveryDevice(addr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify device found fail");
@@ -534,4 +560,18 @@ void LnnHbMgrDeinit(void)
         }
     }
     HbDeinitUpdateList();
+}
+
+int32_t LnnHbMgrUpdateLocalInfo(void)
+{
+    for (uint32_t i = 0; i < HB_IMPL_TYPE_MAX; ++i) {
+        if (g_hbImpl[i].onUpdateLocalDeviceInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnHbMgrUpdateLocalInfo not support %d", i);
+            continue;
+        }
+
+        int32_t ret = g_hbImpl[i].onUpdateLocalDeviceInfo();
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnHbMgrUpdateLocalInfo ret %d", ret);
+    }
+    return SOFTBUS_OK;
 }

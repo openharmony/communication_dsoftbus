@@ -41,6 +41,7 @@ int32_t LnnHbMgrInit(void);
 int32_t LnnHbMgrOneCycleBegin(void);
 int32_t LnnHbMgrOneCycleEnd(void);
 int32_t LnnHbMgrStop(void);
+int32_t LnnHbMgrUpdateLocalInfo(void);
 void LnnHbMgrDeinit(void);
 
 void LnnDumpHbMgrUpdateList(void);

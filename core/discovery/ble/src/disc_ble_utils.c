@@ -189,29 +189,20 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr)
+int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len)
 {
-    if (hashStr == NULL) {
+    if (hashStr == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "hashstr is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    unsigned char account[MAX_ACCOUNT_HASH_LEN] = {0};
-    unsigned char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = DiscBleGetHwAccount((char *)account);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetHwAccount failed");
-        return ret;
+    uint8_t account[SHA_256_HASH_LEN] = {0};
+    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash get local user id failed");
+        return SOFTBUS_ERR;
     }
-    ret = SoftBusGenerateStrHash(account, strlen((const char *)account) + 1, hashResult);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
-        return ret;
-    }
-    ret = ConvertBytesToHexString((char *)hashStr, SHORT_USER_ID_HASH_LEN + 1, hashResult,
-        SHORT_USER_ID_HASH_LEN / HEXIFY_UNIT_LEN);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ConvertBytesToHexString failed");
-        return ret;
+    if (memcpy_s(hashStr, len, account, len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash memcpy_s failed");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -278,7 +269,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
     }
     if (memcpy_s(info->accountHash, SHORT_USER_ID_HASH_LEN,
         &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy hwAccountHash failed");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy accountHash failed");
         return SOFTBUS_MEM_ERR;
     }
     info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];

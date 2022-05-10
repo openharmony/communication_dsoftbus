@@ -1047,6 +1047,19 @@ void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium)
     }
 }
 
+static void DiscUpdateLocalDeviceInfo(type)
+{
+    if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {
+        g_discBleInterface->UpdateLocalDeviceInfo(type);
+    }
+}
+
+void DiscDeviceInfoChanged(InfoTypeChanged type)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscDeviceInfoChanged in %d", type);
+    DiscUpdateLocalDeviceInfo(type);
+}
+
 int32_t DiscMgrInit(void)
 {
     if (g_isInited) {
