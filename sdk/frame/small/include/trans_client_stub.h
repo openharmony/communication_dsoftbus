@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-int32_t ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnChannelOpenfailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnChannelClosed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
-int32_t ClientOnChannelMsgreceived(IpcIo *reply, const IpcContext *ctx, void *ipcMsg);
+int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply);
+int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply);
+int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply);
+int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply);
 
 #ifdef __cplusplus
 }

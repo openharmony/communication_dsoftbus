@@ -27,7 +27,6 @@ typedef struct {
     unsigned int handle; /* use for small system device */
     unsigned int token; /* use for small system device */
     unsigned int cookie; /* use for small system device */
-    void *ipcCtx; /* use for small system device */
 } SoftBusClientInfoNode;
 
 static SoftBusList *g_clientInfoList = NULL;
@@ -84,7 +83,6 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
     clientInfo->handle = svcId->handle;
     clientInfo->token = svcId->token;
     clientInfo->cookie = svcId->cookie;
-    clientInfo->ipcCtx = svcId->ipcCtx;
     ListInit(&clientInfo->node);
 
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
@@ -123,7 +121,6 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
             svcId->handle = clientInfo->handle;
             svcId->token = clientInfo->token;
             svcId->cookie = clientInfo->cookie;
-            svcId->ipcCtx = clientInfo->ipcCtx;
             (void)SoftBusMutexUnlock(&g_clientInfoList->lock);
             return SOFTBUS_OK;
         }
@@ -171,7 +168,6 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
             svcId[i].handle = clientInfo->handle;
             svcId[i].token = clientInfo->token;
             svcId[i].cookie = clientInfo->cookie;
-            svcId[i].ipcCtx = clientInfo->ipcCtx;
             i++;
         }
     }

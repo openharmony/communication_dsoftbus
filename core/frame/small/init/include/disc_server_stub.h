@@ -24,10 +24,10 @@ extern "C" {
 #endif
 #endif
 
-int32_t ServerPublishService(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerUnPublishService(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStartDiscovery(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerStopDiscovery(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerPublishService(IpcIo *req, IpcIo *reply);
+int32_t ServerUnPublishService(IpcIo *req, IpcIo *reply);
+int32_t ServerStartDiscovery(IpcIo *req, IpcIo *reply);
+int32_t ServerStopDiscovery(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

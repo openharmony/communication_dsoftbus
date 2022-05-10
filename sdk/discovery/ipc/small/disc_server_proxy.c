@@ -81,7 +81,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
+    WriteString(&request, pkgName);
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -92,10 +92,13 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     PublishSerializer publishSerializer = {
         .commonSerializer = serializer
     };
-    IpcIoPushFlatObj(&request, (void*)&publishSerializer, sizeof(PublishSerializer));
-    IpcIoPushString(&request, info->capability);
+    bool ret = WriteRawData(&request, (void*)&publishSerializer, sizeof(PublishSerializer));
+    if (!ret) {
+        return SOFTBUS_ERR;
+    }
+    WriteString(&request, info->capability);
     if (info->dataLen != 0) {
-        IpcIoPushString(&request, (const char *)(info->capabilityData));
+        WriteString(&request, (const char *)(info->capabilityData));
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_SERVICE, &request, NULL, NULL);
@@ -120,8 +123,8 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushInt32(&request, publishId);
+    WriteString(&request, pkgName);
+    WriteInt32(&request, publishId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_UNPUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -145,7 +148,7 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
+    WriteString(&request, pkgName);
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -158,10 +161,13 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
         .isSameAccount = info->isSameAccount,
         .isWakeRemote = info->isWakeRemote
     };
-    IpcIoPushFlatObj(&request, (void*)&subscribeSerializer, sizeof(SubscribeSerializer));
-    IpcIoPushString(&request, info->capability);
+    bool ret = WriteRawData(&request, (void*)&subscribeSerializer, sizeof(SubscribeSerializer));
+    if (!ret) {
+        return SOFTBUS_ERR;
+    }
+    WriteString(&request, info->capability);
     if (info->dataLen != 0) {
-        IpcIoPushString(&request, (const char *)(info->capabilityData));
+        WriteString(&request, (const char *)(info->capabilityData));
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
@@ -186,8 +192,8 @@ int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushInt32(&request, subscribeId);
+    WriteString(&request, pkgName);
+    WriteInt32(&request, subscribeId);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {

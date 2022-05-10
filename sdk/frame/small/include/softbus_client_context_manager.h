@@ -23,8 +23,8 @@ extern "C" {
 int ClientContextInit(void);
 void ClientContextDeinit(void);
 
-void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie, void *ctx);
-int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie, void **ctx);
+void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie);
+int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie);
 
 #ifdef __cplusplus
 }
