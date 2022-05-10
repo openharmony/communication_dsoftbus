@@ -59,13 +59,19 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
-        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
-      deps = [
-        "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite",
-        "//third_party/mbedtls",
-      ]
+
+      deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+      if (dsoftbus_standard_feature_encrypt == 0) {
+        sources +=
+            [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+        deps += [ "//third_party/mbedtls" ]
+      } else if (dsoftbus_standard_feature_encrypt == 1) {
+        sources +=
+            [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
+      }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
@@ -88,7 +94,6 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
-        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = [
@@ -96,7 +101,15 @@ if (defined(ohos_lite)) {
         "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
-      deps += [ "//third_party/mbedtls" ]
+      if (dsoftbus_standard_feature_encrypt == 0) {
+        sources +=
+            [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+        deps += [ "//third_party/mbedtls" ]
+      } else if (dsoftbus_standard_feature_encrypt == 1) {
+        sources +=
+            [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
+      }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   }
@@ -128,14 +141,19 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
-      "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
     ]
     public_deps = [
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/mbedtls",
       "//utils/native/base:utils",
     ]
+    if (dsoftbus_standard_feature_encrypt == 0) {
+      sources += [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+      public_deps += [ "//third_party/mbedtls" ]
+    } else if (dsoftbus_standard_feature_encrypt == 1) {
+      sources += [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+      public_deps += [ "//third_party/openssl:libcrypto_shared" ]
+    }
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
