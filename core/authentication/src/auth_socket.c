@@ -108,7 +108,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         }
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ip data module is %d len %d", head->module, len);
-    AuthPrintDfxMsg(head->module, data, len);
+    AuthPrintDfxMsg((uint32_t)head->module, data, len);
     switch (head->module) {
         case MODULE_TRUST_ENGINE: {
             if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == fd) {
