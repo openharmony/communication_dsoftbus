@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -190,6 +191,29 @@ static void LnnHeartbeatMasterNodeChangeEventHandler(const LnnEventBasicInfo *in
     }
 }
 
+static void HbOnGroupChanged(void)
+{
+    int32_t ret = LnnPostMsgToHbFsm(EVENT_HB_UPDATE_DEVICE_INFO, NULL);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HbOnGroupCreated post msg ret %d", ret);
+}
+
+static void HbOnGroupCreated(const char *groupId)
+{
+    (void)groupId;
+    HbOnGroupChanged();
+}
+
+static void HbOnGroupDeleted(const char *groupId)
+{
+    (void)groupId;
+    HbOnGroupChanged();
+}
+
+static VerifyCallback g_verifyCb = {
+    .onGroupCreated = HbOnGroupCreated,
+    .onGroupDeleted = HbOnGroupDeleted,
+};
+
 int32_t LnnStartHeartbeatDelay(void)
 {
     uint64_t delayMillis;
@@ -208,6 +232,8 @@ int32_t LnnStartHeartbeatDelay(void)
     if (LnnHbFsmStop(delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+
+    AuthRegCallback(HEARTBEAT_MONITOR, &g_verifyCb);
     return SOFTBUS_OK;
 }
 
@@ -236,6 +262,7 @@ int32_t LnnInitHeartbeat(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor regist event fail!");
         return SOFTBUS_ERR;
     }
+    AuthRegCallback(HEARTBEAT_MONITOR, &g_verifyCb);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }

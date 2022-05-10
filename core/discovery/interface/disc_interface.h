@@ -42,6 +42,11 @@ typedef enum {
     LINK_STATUS_DOWN,
 } LinkStatus;
 
+typedef enum {
+    TYPE_NAME,
+    TYPE_ACCOUNT,
+} InfoTypeChanged;
+
 /**
  * @ingroup softbus_disc_manager
  * Inner Callback.
@@ -221,6 +226,13 @@ void SetCallLnnStatus(bool flag);
  * @brief Get the networking connection status.
  */
 bool GetCallLnnStatus(void);
+
+/**
+ * @ingroup softbus_disc_manager
+ * @brief Update broadcast packets when the local device information changes.
+ * @param[in] type Information that changes
+ */
+void DiscDeviceInfoChanged(InfoTypeChanged type);
 
 #ifdef __cplusplus
 #if __cplusplus

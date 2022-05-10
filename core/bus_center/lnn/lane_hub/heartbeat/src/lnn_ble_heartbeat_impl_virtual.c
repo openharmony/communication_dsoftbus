@@ -48,3 +48,9 @@ int32_t LnnDeinitBleHeartbeat(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl deinit");
     return SOFTBUS_OK;
 }
+
+int32_t LnnOnUpdateLocalDeviceInfo(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl update local device info");
+    return SOFTBUS_NOT_IMPLEMENT;
+}

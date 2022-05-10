@@ -612,7 +612,7 @@ void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uin
             AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_PROCESS_FAILED);
         }
     } else {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown auth data module");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown auth data module %d", module);
     }
 }
 
@@ -1008,6 +1008,7 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found/create.");
         return;
     }
+    AuthPrintDfxMsg(info.type, data + sizeof(AuthDataInfo), info.dataLen);
     HandleReceiveData(auth, &info, (uint8_t *)(data + sizeof(AuthDataInfo)));
 }
 
@@ -1078,21 +1079,23 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth already removed, connectionId = %u.", connectionId);
         return;
     }
-    AuthNotifyTransDisconn(auth->authId);
+    int64_t authId = auth->authId;
+    uint16_t id = auth->id;
+    AuthNotifyTransDisconn(authId);
     if (!IsP2PLink(auth)) {
         return;
     }
-    EventRemove(auth->id);
+    EventRemove(id);
     if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-    AuthClearSessionKeyBySeq((int32_t)auth->authId);
+    AuthClearSessionKeyBySeq((int32_t)authId);
     (void)SoftBusMutexUnlock(&g_authLock);
     DeleteAuth(auth);
 }
 
-static void AuthOnGroupCreated(const char *groupInfo)
+static void OnAuthGroupChanged(const char *groupInfo, bool create)
 {
     if (groupInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain transmit invalid parameter");
@@ -1117,16 +1120,26 @@ static void AuthOnGroupCreated(const char *groupInfo)
     }
     cJSON_Delete(msg);
     if (groupType == IDENTICAL_ACCOUNT_GROUP) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth group count create, groupType = %d", groupType);
-        if (g_verifyCallback[BUSCENTER_MONITOR].onGroupCreated != NULL) {
-            g_verifyCallback[BUSCENTER_MONITOR].onGroupCreated(groupId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth group account change %d, groupType = %d",
+            create, groupType);
+        for (uint32_t monitor = LNN; monitor < VERIFY_MODULE_NUM; ++monitor) {
+            if (create && g_verifyCallback[monitor].onGroupCreated != NULL) {
+                g_verifyCallback[monitor].onGroupCreated(groupId);
+            } else if (!create && g_verifyCallback[monitor].onGroupDeleted != NULL) {
+                g_verifyCallback[monitor].onGroupDeleted(groupId);
+            }
         }
     }
 }
 
+static void AuthOnGroupCreated(const char *groupInfo)
+{
+    OnAuthGroupChanged(groupInfo, true);
+}
+
 static void AuthOnGroupDeleted(const char *groupInfo)
 {
-    (void)groupInfo;
+    OnAuthGroupChanged(groupInfo, false);
 }
 
 static void AuthOnDeviceNotTrusted(const char *peerUdid)
@@ -1361,10 +1374,11 @@ int32_t AuthCloseChannel(int64_t authId)
     return AuthHandleLeaveLNN(authId);
 }
 
-void AuthNotifyLnnDisconn(const AuthManager *auth)
+void AuthNotifyLnnDisconn(const int64_t authId)
 {
+    AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthNotifyLnnDisconn get auth manager fail");
         return;
     }
     EventRemove(auth->id);

@@ -109,6 +109,12 @@ extern "C" {
 #define MAX_ACCOUNT_HASH_LEN 96
 
 /**
+ * @brief Indicates the maximum length of the account ID hash code in HEX calculated by SHA-256.
+ *
+ */
+#define SHA_256_HASH_LEN 32
+
+/**
  * @brief Indicates the maximum length of the capability data in <b>PublishInfo</b> and <b>SubscribeInfo</b>.
  *
  */

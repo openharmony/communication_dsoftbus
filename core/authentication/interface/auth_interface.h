@@ -84,6 +84,7 @@ typedef enum {
     LNN = 0,
     BUSCENTER_MONITOR,
     VERIFY_P2P_DEVICE,
+    HEARTBEAT_MONITOR,
     VERIFY_MODULE_NUM
 } AuthVerifyModule;
 

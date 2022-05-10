@@ -27,6 +27,7 @@ int32_t LnnOnceBleHbBegin(void);
 int32_t LnnOnceBleHbEnd(void);
 int32_t LnnStopBleHeartbeat(void);
 int32_t LnnDeinitBleHeartbeat(void);
+int32_t LnnOnUpdateLocalDeviceInfo(void);
 
 #ifdef __cplusplus
 }

@@ -46,6 +46,7 @@ typedef enum {
     EVENT_HB_ONCE_END,
     EVENT_HB_STOP,
     EVENT_HB_TIMEOUT = 10,
+    EVENT_HB_UPDATE_DEVICE_INFO,
     EVENT_HB_EXIT,
     EVENT_HB_MAX,
 } LnnHeartbeatEventType;
