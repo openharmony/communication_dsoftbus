@@ -37,7 +37,7 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
 int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *option);
 int32_t ConvertOptionToAuthConnInfo(const ConnectOption *option, bool isAuthP2p, AuthConnInfo *info);
 bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *option2);
-void AuthPrintDfxMsg(int32_t module, char *data, int len);
+void AuthPrintDfxMsg(uint32_t module, char *data, int len);
 #ifdef __cplusplus
 }
 #endif
