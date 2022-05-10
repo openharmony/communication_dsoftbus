@@ -1718,9 +1718,9 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
-        .capability = "dvKit",
         .isSameAccount = true,
         .isWakeRemote = false,
+        .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = sizeof("capdata3")};
 
@@ -1831,9 +1831,9 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest006, TestSize.Level1)
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = MID,
-        .capability = "dvKit",
         .isSameAccount = true,
         .isWakeRemote = false,
+        .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata3",
         .dataLen = sizeof("capdata3")
     };
@@ -1875,9 +1875,9 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest007, TestSize.Level1)
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = MID,
-        .capability = "dvKit",
         .isSameAccount = true,
         .isWakeRemote = false,
+        .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata3",
         .dataLen = sizeof("capdata3")
     };
@@ -1919,9 +1919,9 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest008, TestSize.Level1)
         .mode = DISCOVER_MODE_PASSIVE,
         .medium = COAP,
         .freq = MID,
-        .capability = "dvKit",
         .isSameAccount = true,
         .isWakeRemote = false,
+        .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata3",
         .dataLen = sizeof("capdata3")
     };
