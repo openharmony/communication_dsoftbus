@@ -30,7 +30,9 @@
 #define OFFSET_BITS 24
 #define INT_MAX_VALUE 0xFFFFFEL
 #define LOW_24_BITS 0xFFFFFFL
-#define MAX_BYTE_RECORD 240
+#define MAX_BYTE_RECORD 230
+#define ANONYMOUS_INTEVER_LEN 60
+
 static uint64_t g_uniqueId = 0;
 static uint32_t g_authAbility = 0;
 
@@ -274,24 +276,41 @@ bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *opt
     return false;
 }
 
-void AuthPrintDfxMsg(int32_t module, char *data, int len)
+void AnoonymousDid(char *outBuf, uint32_t len)
 {
+    if (outBuf == NULL || len == 0) {
+        return;
+    }
+    uint32_t size = len > MAX_BYTE_RECORD ? MAX_BYTE_RECORD : len;
+    uint32_t internal = 1;
+    while ((internal * ANONYMOUS_INTEVER_LEN) < size) {
+        outBuf[internal * ANONYMOUS_INTEVER_LEN] = '*';
+        outBuf[internal * ANONYMOUS_INTEVER_LEN - 1] = '*';
+        outBuf[internal * ANONYMOUS_INTEVER_LEN - 2] = '*';
+        outBuf[internal * ANONYMOUS_INTEVER_LEN - 3] = '*';
+        ++internal;
+    }
+}
+
+void AuthPrintDfxMsg(uint32_t module, char *data, int len)
+{
+    if (!GetSignalingMsgSwitch()) {
+        return;
+    }
     if (data == NULL || len <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "PrintDfxMsg auth data module is %d len %d", module, len);
     if (!(module == MODULE_TRUST_ENGINE ||
-        module == MODULE_AUTH_SDK ||
         module == MODULE_AUTH_CONNECTION ||
         module == DATA_TYPE_DEVICE_ID ||
-        module == DATA_TYPE_AUTH ||
         module == DATA_TYPE_SYNC)) {
         return;
     }
     int32_t size = len > MAX_BYTE_RECORD ? (MAX_BYTE_RECORD - 1) : len;
     char outBuf[MAX_BYTE_RECORD + 1] = {0};
     if (ConvertBytesToHexString(outBuf, MAX_BYTE_RECORD, (const unsigned char *)data, size / 2) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "%s", outBuf);
+        AnoonymousDid(outBuf, strlen(outBuf));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "[signaling]:%s", outBuf);
     }
 }
