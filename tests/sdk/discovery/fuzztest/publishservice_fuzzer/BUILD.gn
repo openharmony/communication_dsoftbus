@@ -19,7 +19,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("PublishServiceFuzzTest") {
-  module_out_path = "dsoftbus_standard/publishservice_fuzzer"
+  module_out_path = "dsoftbus_standard/discovery"
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/publishservice_fuzzer"
   include_dirs = [
     "//foundation/communication/dsoftbus/core/common/inner_communication",
