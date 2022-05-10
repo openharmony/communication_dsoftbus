@@ -407,13 +407,11 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     if (advData == NULL) {
         return;
     }
-
-    if (GetSignalingMsgSwitch() == true) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble rcv msg from peer, datalen:%d, data:%s",
-                   scanResultData->advLen, InterceptSignalingMsg(advData, scanResultData->advLen));
-    }
-
     if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSINESS) == DISTRIBUTE_BUSINESS) {
+        if (GetSignalingMsgSwitch() == true) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble rcv msg from peer, datalen:%d, data:%s",
+                       scanResultData->advLen, InterceptSignalingMsg(advData, scanResultData->advLen));
+        }
         ProcessDistributePacket(scanResultData);
     } else if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & NEARBY_BUSINESS) == NEARBY_BUSINESS) {
         ProcessNearbyPacket(scanResultData);
