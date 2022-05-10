@@ -36,4 +36,6 @@ declare_args() {
 
   dsoftbus_standard_feature_build_shared_sdk = true
   dsoftbus_standard_feature_ifname_prefix = false
+
+  dsoftbus_standard_feature_encrypt = 1
 }
