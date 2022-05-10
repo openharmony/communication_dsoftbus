@@ -37,7 +37,7 @@ static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
         return SOFTBUS_ERR;
     }
 
-    *(int32_t*)owner = IpcIoPopInt32(reply);
+    ReadInt32(reply, (int *)owner);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "publish service return[%d].", *(int32_t*)owner);
     return SOFTBUS_OK;
 }
@@ -49,8 +49,8 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     uint32_t size;
-
-    void *data = IpcIoPopFlatObj(reply, &size);
+    ReadUint32(reply, &size);
+    void *data = (void *)ReadBuffer(reply, size);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pop data is null.");
         return SOFTBUS_ERR;
@@ -107,8 +107,8 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, sessionName);
+    WriteString(&request, pkgName);
+    WriteString(&request, sessionName);
 
     int32_t ret = SOFTBUS_ERR;
     /* sync */
@@ -136,8 +136,8 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, pkgName);
-    IpcIoPushString(&request, sessionName);
+    WriteString(&request, pkgName);
+    WriteString(&request, sessionName);
 
     int32_t ret = SOFTBUS_ERR;
     /* sync */
@@ -161,11 +161,14 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, param->sessionName);
-    IpcIoPushString(&request, param->peerSessionName);
-    IpcIoPushString(&request, param->peerDeviceId);
-    IpcIoPushString(&request, param->groupId);
-    IpcIoPushFlatObj(&request, (void*)param->attr, sizeof(SessionAttribute));
+    WriteString(&request, param->sessionName);
+    WriteString(&request, param->peerSessionName);
+    WriteString(&request, param->peerDeviceId);
+    WriteString(&request, param->groupId);
+    bool value = WriteRawData(&request, (void*)param->attr, sizeof(SessionAttribute));
+    if (!value) {
+        return SOFTBUS_ERR;
+    }
 
     TransSerializer transSerializer;
     transSerializer.ret = SOFTBUS_ERR;
@@ -193,8 +196,11 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushString(&request, sessionName);
-    IpcIoPushFlatObj(&request, (void*)addrInfo, sizeof(ConnectionAddr));
+    WriteString(&request, sessionName);
+    bool value = WriteRawData(&request, (void*)addrInfo, sizeof(ConnectionAddr));
+    if (!value) {
+        return SOFTBUS_ERR;
+    }
 
     int32_t ret = SOFTBUS_ERR;
     if (g_serverProxy == NULL) {
@@ -217,7 +223,7 @@ int32_t ServerIpcNotifyAuthSuccess(int channelId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&request, channelId);
+    WriteInt32(&request, channelId);
     int32_t ret = SOFTBUS_ERR;
     if (g_serverProxy == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");
@@ -238,8 +244,8 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    IpcIoPushInt32(&request, channelId);
-    IpcIoPushInt32(&request, channelType);
+    WriteInt32(&request, channelId);
+    WriteInt32(&request, channelType);
 
     int32_t ret = SOFTBUS_ERR;
     /* sync */
@@ -264,10 +270,11 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
     uint8_t *ipcData = (uint8_t *)SoftBusCalloc(ipcDataLen);
     IpcIo request = {0};
     IpcIoInit(&request, ipcData, ipcDataLen, 0);
-    IpcIoPushInt32(&request, channelId);
-    IpcIoPushInt32(&request, channelType);
-    IpcIoPushInt32(&request, msgType);
-    IpcIoPushFlatObj(&request, data, len);
+    WriteInt32(&request, channelId);
+    WriteInt32(&request, channelType);
+    WriteInt32(&request, msgType);
+    WriteUint32(&request, len);
+    WriteBuffer(&request, data, len);
 
     int32_t ret = SOFTBUS_ERR;
     /* sync */

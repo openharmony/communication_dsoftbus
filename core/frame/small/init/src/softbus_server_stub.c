@@ -17,8 +17,8 @@
 
 #include "bus_center_server_stub.h"
 #include "disc_server_stub.h"
+#include "ipc_skeleton.h"
 #include "iproxy_server.h"
-#include "liteipc_adapter.h"
 #include "lnn_bus_center_ipc.h"
 #include "samgr_lite.h"
 #include "securec.h"
@@ -87,62 +87,53 @@ static void ComponentDeathCallback(const char *pkgName)
     BusCenterServerDeathCallback(pkgName);
 }
 
-static int32_t ClientDeathCb(const IpcContext *context, void *ipcMsg, IpcIo *data, void *arg)
+static void ClientDeathCb(void *arg)
 {
     if (arg == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
-        return SOFTBUS_INVALID_PARAM;
+        return;
     }
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName((const char *)arg, &svcId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found client by package name.");
         SoftBusFree(arg);
         arg = NULL;
-        return SOFTBUS_ERR;
+        return;
     }
     SERVER_UnregisterService((const char *)arg);
     ComponentDeathCallback((const char *)arg);
     SoftBusFree(arg);
     arg = NULL;
-#ifdef __LINUX__
-    BinderRelease(svcId.ipcCtx, svcId.handle);
-#endif
     SvcIdentity sid = {0};
     sid.handle = svcId.handle;
     sid.token = svcId.token;
     sid.cookie = svcId.cookie;
-    UnregisterDeathCallback(sid, svcId.cbId);
-    return SOFTBUS_OK;
+    ReleaseSvc(sid);
 }
 
-static int32_t ServerRegisterService(const void *origin, IpcIo *req, IpcIo *reply)
+static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "register service ipc server pop.");
     size_t len = 0;
     int ret = SOFTBUS_ERR;
     struct CommonScvId svcId = {0};
 
-    const char *name = (const char*)IpcIoPopString(req, &len);
-    SvcIdentity *svc = IpcIoPopSvc(req);
-    if (name == NULL || svc == NULL || len == 0) {
+    const char *name = (const char*)ReadString(req, &len);
+    SvcIdentity svc;
+    bool value = ReadRemoteObject(req, &svc);
+    if (!value || name == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get data fail");
         goto EXIT;
     }
-    int32_t callingUid = GetCallingUid(origin);
+    int32_t callingUid = GetCallingUid();
     if (!CheckBusCenterPermission(callingUid, name)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRegisterService no permission.");
         goto EXIT;
     }
-    svcId.handle = svc->handle;
-    svcId.token = svc->token;
-    svcId.cookie = svc->cookie;
-    SvcIdentity sid = *svc;
-#ifdef __LINUX__
-    svcId.ipcCtx = svc->ipcContext;
-    BinderAcquire(svcId.ipcCtx, svcId.handle);
-    SoftBusFree(svc);
-    svc = NULL;
-#endif
+    svcId.handle = svc.handle;
+    svcId.token = svc.token;
+    svcId.cookie = svc.cookie;
+
     char *pkgName = (char *)SoftBusMalloc(len + 1);
     if (pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
@@ -154,23 +145,17 @@ static int32_t ServerRegisterService(const void *origin, IpcIo *req, IpcIo *repl
         goto EXIT;
     }
     uint32_t cbId = 0;
-    RegisterDeathCallback(NULL, sid, ClientDeathCb, pkgName, &cbId);
+    AddDeathRecipient(svc, ClientDeathCb, pkgName, &cbId);
     svcId.cbId = cbId;
     ret = SERVER_RegisterService(name, &svcId);
 EXIT:
-#ifdef __LINUX__
-    if (svc != NULL) {
-        SoftBusFree(svc);
-        svc = NULL;
-    }
-#endif
-    IpcIoPushInt32(reply, ret);
+    WriteInt32(reply, ret);
     return SOFTBUS_OK;
 }
 
 typedef struct {
     enum SoftBusFuncId id;
-    int32_t (*func)(const void *origin, IpcIo *req, IpcIo *reply);
+    int32_t (*func)(IpcIo *req, IpcIo *reply);
 } ServerInvokeCmd;
 
 ServerInvokeCmd g_serverInvokeCmdTbl[] = {
@@ -207,13 +192,13 @@ static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
     if (GetServerIsInit() == false) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
-        IpcIoPushInt32(reply, SOFTBUS_SERVER_NOT_INIT);
+        WriteInt32(reply, SOFTBUS_SERVER_NOT_INIT);
         return SOFTBUS_ERR;
     }
     int tblSize = sizeof(g_serverInvokeCmdTbl) / sizeof(ServerInvokeCmd);
     for (int i = 0; i < tblSize; i++) {
         if (funcId == g_serverInvokeCmdTbl[i].id) {
-            return g_serverInvokeCmdTbl[i].func(origin, req, reply);
+            return g_serverInvokeCmdTbl[i].func(req, reply);
         }
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not support func[%d]", funcId);

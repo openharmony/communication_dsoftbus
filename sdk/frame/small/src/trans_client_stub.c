@@ -16,106 +16,101 @@
 #include "trans_client_stub.h"
 
 #include "client_trans_channel_callback.h"
-#include "liteipc_adapter.h"
+#include "ipc_skeleton.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
-int32_t ClientOnChannelOpened(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 {
     if (reply == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t size = 0;
     ChannelInfo channel = {0};
-    const char *sessionName = (const char *)IpcIoPopString(reply, &size);
-    channel.channelId = IpcIoPopInt32(reply);
-    channel.channelType = IpcIoPopInt32(reply);
-    channel.isServer = IpcIoPopBool(reply);
-    channel.isEnabled = IpcIoPopBool(reply);
-    channel.peerUid = IpcIoPopInt32(reply);
-    channel.peerPid = IpcIoPopInt32(reply);
-    channel.groupId = (char *)IpcIoPopString(reply, &size);
-    channel.keyLen = IpcIoPopUint32(reply);
-    channel.sessionKey = (char *)IpcIoPopFlatObj(reply, &size);
-    channel.peerSessionName = (char *)IpcIoPopString(reply, &size);
-    channel.peerDeviceId = (char *)IpcIoPopString(reply, &size);
+    const char *sessionName = (const char *)ReadString(reply, &size);
+    ReadInt32(data, &(channel.channelId));
+    ReadInt32(data, &(channel.channelType));
+    ReadBool(data, &(channel.isServer));
+    ReadBool(data, &(channel.isEnabled));
+    ReadInt32(data, &(channel.peerUid));
+    ReadInt32(data, &(channel.peerPid));
+    channel.groupId = (char *)ReadString(data, &size);
+    ReadUint32(reply, &(channel.keyLen));
+    channel.sessionKey = (char *)ReadBuffer(data, channel.keyLen);
+    channel.peerSessionName = (char *)ReadString(data, &size);
+    channel.peerDeviceId = (char *)ReadString(data, &size);
     if (channel.groupId == NULL || channel.sessionKey == NULL || channel.peerSessionName == NULL ||
         channel.peerDeviceId == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pointer null error.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        channel.fd = IpcIoPopFd(reply);
+        channel.fd = ReadFileDescriptor(reply);
     }
     if (channel.channelType == CHANNEL_TYPE_UDP) {
-        channel.businessType = IpcIoPopInt32(reply);
-        channel.myIp = (char *)IpcIoPopString(reply, &size);
-        channel.streamType = IpcIoPopInt32(reply);
+        ReadInt32(reply, &(channel.businessType));
+        channel.myIp = (char *)ReadString(reply, &size);
+        ReadInt32(reply, &(channel.streamType));
         if (channel.isServer) {
             int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
-            IpcIo ret;
-            uint8_t tempData[MAX_SOFT_BUS_IPC_LEN] = {0};
-            IpcIoInit(&ret, tempData, MAX_SOFT_BUS_IPC_LEN, 0);
-            IpcIoPushInt32(&ret, udpPort);
-            SendReply(NULL, ipcMsg, &ret);
+            WriteInt32(reply, udpPort);
             return SOFTBUS_ERR;
         }
-        channel.peerPort = IpcIoPopInt32(reply);
-        channel.peerIp = (char *)IpcIoPopString(reply, &size);
+        ReadInt32(reply, &(channel.peerPort));
+        channel.peerIp = (char *)ReadString(reply, &size);
     }
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransOnChannelOpened fail, error code: %d.", ret);
     }
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnChannelOpenfailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t channelId = IpcIoPopInt32(reply);
-    int32_t channelType = IpcIoPopInt32(reply);
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
     (void)TransOnChannelOpenFailed(channelId, channelType);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnChannelClosed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t channelId = IpcIoPopInt32(reply);
-    int32_t channelType = IpcIoPopInt32(reply);
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
     (void)TransOnChannelClosed(channelId, channelType);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnChannelMsgreceived(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t channelId = IpcIoPopInt32(reply);
-    int32_t channelType = IpcIoPopInt32(reply);
-    int32_t type = IpcIoPopInt32(reply);
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t type = 0;
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
+    ReadInt32(data, &type);
     uint32_t dataLen = 0;
-    void *data = IpcIoPopFlatObj(reply, &dataLen);
-    (void)TransOnChannelMsgReceived(channelId, channelType, data, dataLen, type);
-    FreeBuffer(ctx, ipcMsg);
+    ReadUint32(data, &dataLen);
+    void *data2 = ReadBuffer(data, dataLen);
+    (void)TransOnChannelMsgReceived(channelId, channelType, data2, dataLen, type);
     return SOFTBUS_OK;
 }
