@@ -13,36 +13,6 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-ctrl_sources = [
-  "//third_party/libcoap/src/address.c",
-  "//third_party/libcoap/src/async.c",
-  "//third_party/libcoap/src/block.c",
-  "//third_party/libcoap/src/coap_asn1.c",
-  "//third_party/libcoap/src/coap_cache.c",
-  "//third_party/libcoap/src/coap_debug.c",
-  "//third_party/libcoap/src/coap_event.c",
-  "//third_party/libcoap/src/coap_gnutls.c",
-  "//third_party/libcoap/src/coap_hashkey.c",
-  "//third_party/libcoap/src/coap_io.c",
-  "//third_party/libcoap/src/coap_mbedtls.c",
-  "//third_party/libcoap/src/coap_notls.c",
-  "//third_party/libcoap/src/coap_openssl.c",
-  "//third_party/libcoap/src/coap_prng.c",
-  "//third_party/libcoap/src/coap_session.c",
-  "//third_party/libcoap/src/coap_tcp.c",
-  "//third_party/libcoap/src/coap_time.c",
-  "//third_party/libcoap/src/coap_tinydtls.c",
-  "//third_party/libcoap/src/encode.c",
-  "//third_party/libcoap/src/mem.c",
-  "//third_party/libcoap/src/net.c",
-  "//third_party/libcoap/src/option.c",
-  "//third_party/libcoap/src/pdu.c",
-  "//third_party/libcoap/src/resource.c",
-  "//third_party/libcoap/src/str.c",
-  "//third_party/libcoap/src/subscribe.c",
-  "//third_party/libcoap/src/uri.c",
-]
-
 ctrl_include = [
   "../nstackx_util/interface",
   "interface",
@@ -50,13 +20,11 @@ ctrl_include = [
   "include/coap_discover",
   "//third_party/libcoap/include",
   "//third_party/cJSON",
+  "//third_party/bounds_checking_function/include",
 ]
 
-ctrl_cflags = [
-  "-Wall",
-  "-DCOAP_SUPPORT_SOCKET_BROADCAST",
-  "-DCOAP_USER_DEFAULT_PORT=5684",
-]
+cflags = [ "-Wall" ]
+include_dirs = []
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
@@ -74,8 +42,7 @@ if (defined(ohos_lite)) {
       "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
-    sources += ctrl_sources
-    include_dirs = ctrl_include
+    include_dirs += ctrl_include
     public_configs = [ ":dfinder_interface" ]
     deps = [
       "../nstackx_util:nstackx_util.open",
@@ -89,7 +56,6 @@ if (defined(ohos_lite)) {
         "LWIP_LITEOS_A_COMPAT",
       ]
     }
-    cflags = ctrl_cflags
     cflags += [
       "-fPIC",
       "-std=c99",
@@ -104,7 +70,7 @@ if (defined(ohos_lite)) {
     include_dirs = [ "interface" ]
   }
   ohos_shared_library("nstackx_ctrl") {
-    cflags = ctrl_cflags
+    cflags_cc = cflags
     sources = [
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
@@ -115,14 +81,8 @@ if (defined(ohos_lite)) {
       "core/nstackx_device.c",
       "core/nstackx_smartgenius.c",
     ]
-    sources += ctrl_sources
-    include_dirs = [
-      "//third_party/libcoap/include",
-      "//third_party/cJSON",
+    include_dirs += [
       "//third_party/bounds_checking_function/include",
-      "include",
-      "include/coap_discover",
-      "../nstackx_util/interface",
       "../nstackx_util/platform/unix",
     ]
     include_dirs += ctrl_include
