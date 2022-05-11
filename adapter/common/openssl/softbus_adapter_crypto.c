@@ -207,20 +207,20 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
         return SOFTBUS_INVALID_PARAM;
     }
     *olen = 0;
-    size_t outlen;
+    int32_t outlen;
     EVP_ENCODE_CTX *ctx = EVP_ENCODE_CTX_new();
     if (ctx == NULL) {
         return SOFTBUS_DECRYPT_ERR;
     }
     EVP_EncodeInit(ctx);
-    int32_t ret = EVP_EncodeUpdate(ctx, dst, (int32_t *)&outlen, src, slen);
+    int32_t ret = EVP_EncodeUpdate(ctx, dst, &outlen, src, slen);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_EncodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
-    EVP_EncodeFinal(ctx, dst + outlen, (int32_t *)&outlen);
+    EVP_EncodeFinal(ctx, dst + outlen, &outlen);
     *olen += outlen;
     if ((*olen > 0) && (dst[*olen - 1] == '\n')) {
         (*olen)--;
@@ -237,20 +237,20 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
         return SOFTBUS_INVALID_PARAM;
     }
     *olen = 0;
-    size_t outlen;
+    int32_t outlen;
     EVP_ENCODE_CTX *ctx = EVP_ENCODE_CTX_new();
     if (ctx == NULL) {
         return SOFTBUS_DECRYPT_ERR;
     }
     EVP_DecodeInit(ctx);
-    int32_t ret = EVP_DecodeUpdate(ctx, dst, (int32_t *)&outlen, src, slen);
+    int32_t ret = EVP_DecodeUpdate(ctx, dst, &outlen, src, slen);
     if (ret == -1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
-    ret = EVP_DecodeFinal(ctx, dst + outlen, (int32_t *)&outlen);
+    ret = EVP_DecodeFinal(ctx, dst + outlen, &outlen);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeFinal fail.");
         EVP_ENCODE_CTX_free(ctx);
