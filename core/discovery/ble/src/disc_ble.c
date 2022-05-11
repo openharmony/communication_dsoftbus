@@ -395,6 +395,7 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
 
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
 {
+    unsigned char distinguish[] = "ble rcv";
     (void)listenerId;
     if (scanResultData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "scanResultData is NULL");
@@ -408,10 +409,7 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
         return;
     }
     if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSINESS) == DISTRIBUTE_BUSINESS) {
-        if (GetSignalingMsgSwitch() == true) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble rcv msg from peer, datalen:%d, data:%s",
-                       scanResultData->advLen, InterceptSignalingMsg(advData, scanResultData->advLen));
-        }
+        SignalingMsgPrint(distinguish, advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
         ProcessDistributePacket(scanResultData);
     } else if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & NEARBY_BUSINESS) == NEARBY_BUSINESS) {
         ProcessNearbyPacket(scanResultData);
@@ -689,6 +687,7 @@ static void BuildAdvParam(SoftBusBleAdvParams *advParam)
 
 static int32_t StartAdvertiser(int32_t adv)
 {
+    unsigned char distinguish[] = "ble send";
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     if (advertiser == NULL || advertiser->GetDeviceInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get Advertiser adv:%d failed", adv);
@@ -726,12 +725,8 @@ static int32_t StartAdvertiser(int32_t adv)
         DestroyBleConfigAdvData(&advData);
         return SOFTBUS_ERR;
     }
-
-    if (GetSignalingMsgSwitch() == true) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble send msg to peer, datalen:%d, data:%s", advData.advLength,
-                   InterceptSignalingMsg((unsigned char *)advData.advData, (unsigned char)advData.advLength));
-    }
-
+    SignalingMsgPrint(distinguish, (unsigned char *)advData.advData, (unsigned char)advData.advLength,
+                      SOFTBUS_LOG_DISC);
     if (SoftBusStartAdv(advertiser->advId, &advParam) != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&advData);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start adv adv:%d failed", adv);
