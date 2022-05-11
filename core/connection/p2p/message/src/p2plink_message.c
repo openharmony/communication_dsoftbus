@@ -126,18 +126,13 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
 
 static void P2pLinkNegoDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
+    unsigned char distinguish[] = "p2p rcv";
     if (option == NULL || info == NULL || info->module != MODULE_P2P_LINK || info->data == NULL || info->len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
-
-    if (GetSignalingMsgSwitch() == true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "rcv msg from peer to p2p neg, datalen:%d, data:%s",
-                   info->len, InterceptSignalingMsg((unsigned char *)info->data, (unsigned char)info->len));
-    } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink negotiation data recv enter.");
-    }
-
+    SignalingMsgPrint(distinguish, (unsigned char *)info->data, (unsigned char)info->len, SOFTBUS_LOG_CONN);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink negotiation data recv enter.");
     P2pLinkNeoData *param = (P2pLinkNeoData *)SoftBusCalloc(sizeof(P2pLinkNeoData) + (info->len));
     if (param == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc failed.");
@@ -188,17 +183,13 @@ static uint8_t *GetEncryptData(int64_t authId, const char *data, uint32_t size, 
 int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
 {
     uint32_t size;
+    unsigned char distinguish[] = "p2p send";
     uint8_t *encryptData = GetEncryptData(authId, data, len, &size);
     if (encryptData == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "encrypt data failed.");
         return SOFTBUS_ERR;
     }
-
-    if (GetSignalingMsgSwitch() == true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send msg to peer for p2p neg, datalen:%d, data:%s",
-                   size, InterceptSignalingMsg(encryptData, (unsigned char)size));
-    }
-
+    SignalingMsgPrint(distinguish, encryptData, (unsigned char)size, SOFTBUS_LOG_CONN);
     AuthDataHead head = {
         .dataType = DATA_TYPE_CONNECTION,
         .authId = authId,

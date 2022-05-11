@@ -76,15 +76,13 @@ void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);
 
 /**
- * @brief Intercept signaling messages of specified length.
- * @param[in] data signaling message.
- * @param[in] dataLen length of the signaling message.
- * @return
- * On success : Intercepted signaling message string.
- * On failure : empty string.
- * The returned string does not need to be freed.
+ * @brief Intercept signaling messages of specified length and print.
+ * @param[in] distinguish Distinguish the sending and receiving of ble, COAP and P2P signaling messages.
+ * @param[in] data Signaling message.
+ * @param[in] dataLen Length of the signaling message.
+ * @param[in] module softbus log module.
  */
-char *InterceptSignalingMsg(unsigned char *data, unsigned char dataLen);
+void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
 
 #ifdef __cplusplus
 #if __cplusplus
