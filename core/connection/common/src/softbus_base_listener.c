@@ -624,13 +624,6 @@ int32_t StartBaseClient(ListenerModule module)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc listenerInfo err");
             return SOFTBUS_MALLOC_ERR;
         }
-
-        if (g_listenerList[module].lockInit == false) {
-            SoftBusMutexAttr mutexAttr;
-            mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-            SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
-            g_listenerList[module].lockInit = true;
-        }
     }
     if (g_listenerList[module].info->status != LISTENER_IDLE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
@@ -670,12 +663,6 @@ int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, M
         if (g_listenerList[module].info == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc listenerInfo err");
             return SOFTBUS_MALLOC_ERR;
-        }
-        if (g_listenerList[module].lockInit == false) {
-            SoftBusMutexAttr mutexAttr;
-            mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-            SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr);
-            g_listenerList[module].lockInit = true;
         }
     }
     if (g_listenerList[module].info->status != LISTENER_IDLE) {
@@ -727,14 +714,28 @@ int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener 
         listener->onConnectEvent == NULL || listener->onDataEvent == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_listenerList[module].lockInit == false) {
+        SoftBusMutexAttr mutexAttr;
+        mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+        if (SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        g_listenerList[module].lockInit = true;
+    }
+    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set listener lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (g_listenerList[module].listener == NULL) {
         g_listenerList[module].listener = (SoftbusBaseListener *)SoftBusCalloc(sizeof(SoftbusBaseListener));
         if (g_listenerList[module].listener == NULL) {
+            (void)SoftBusMutexUnlock(&g_listenerList[module].lock);
             return SOFTBUS_MALLOC_ERR;
         }
     }
     if (memcpy_s(g_listenerList[module].listener, sizeof(SoftbusBaseListener),
         listener, sizeof(SoftbusBaseListener)) != EOK) {
+        (void)SoftBusMutexUnlock(&g_listenerList[module].lock);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
