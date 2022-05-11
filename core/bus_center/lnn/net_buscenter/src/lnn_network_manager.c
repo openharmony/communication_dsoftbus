@@ -308,7 +308,7 @@ static void OnAccountChanged(void)
         return;
     }
 
-    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash);
+    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
 }
 

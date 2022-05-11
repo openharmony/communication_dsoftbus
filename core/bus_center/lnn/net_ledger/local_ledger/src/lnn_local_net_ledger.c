@@ -813,8 +813,9 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info)
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 {
+    (void)len;
     return LnnSetLocalInfo(key, (void *)info);
 }
 
@@ -909,7 +910,7 @@ int32_t LnnInitLocalLedgerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local user id hash error!");
         return SOFTBUS_ERR;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash);
+    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN);
     return SOFTBUS_OK;
 }
 
