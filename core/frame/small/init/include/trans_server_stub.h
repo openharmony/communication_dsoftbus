@@ -23,13 +23,13 @@
 extern "C" {
 #endif
 
-int32_t ServerCreateSessionServer(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerRemoveSessionServer(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerOpenSession(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerNotifyAuthSuccess(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerOpenAuthSession(const void *origin, IpcIo *req, IpcIo *reqly);
-int32_t ServerCloseChannel(const void *origin, IpcIo *req, IpcIo *reply);
-int32_t ServerSendSessionMsg(const void *origin, IpcIo *req, IpcIo *reply);
+int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply);
+int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply);
+int32_t ServerOpenSession(IpcIo *req, IpcIo *reply);
+int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply);
+int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reqly);
+int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply);
+int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 }

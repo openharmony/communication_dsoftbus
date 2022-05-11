@@ -44,7 +44,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
     ]
     bus_center_manager_sdk_deps += [
-      "//foundation/communication/ipc_lite:liteipc_adapter",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
       "//foundation/distributedschedule/samgr_lite/samgr:samgr",
     ]
   }

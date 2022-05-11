@@ -16,83 +16,77 @@
 #include "disc_client_stub.h"
 
 #include "client_disc_manager.h"
-#include "liteipc_adapter.h"
+#include "ipc_skeleton.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t ClientOnDiscoverySuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t subscribeId = IpcIoPopInt32(reply);
+    int32_t subscribeId = 0;
+    ReadInt32(data, &subscribeId);
     DiscClientOnDiscoverySuccess(subscribeId);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnDiscoverFailed(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnDiscoverFailed(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t subscribeId = IpcIoPopInt32(reply);
-    int32_t failReason = IpcIoPopInt32(reply);
+    int32_t subscribeId = 0;
+    int32_t failReason = 0;
+    ReadInt32(data, &subscribeId);
+    ReadInt32(data, &failReason);
     DiscClientOnDiscoverFailed(subscribeId, failReason);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnDeviceFound(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnDeviceFound(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t size;
-    const DeviceInfo *deviceInfo = (const DeviceInfo*)IpcIoPopFlatObj(reply, &size);
+    const DeviceInfo *deviceInfo = (const DeviceInfo*)ReadRawData(reply, sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
     }
     DiscClientOnDeviceFound(deviceInfo);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnPublishSuccess(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnPublishSuccess(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t publishId = IpcIoPopInt32(reply);
+    int32_t publishId = 0;
+    ReadInt32(data, &publishId);
     DiscClientOnPublishSuccess(publishId);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnPublishFail(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
+int32_t ClientOnPublishFail(IpcIo *data, IpcIo *reply)
 {
-    if (reply == NULL) {
+    if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
-        FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t publishId = IpcIoPopInt32(reply);
-    int32_t failReason = IpcIoPopInt32(reply);
+    int32_t publishId = 0;
+    int32_t failReason = 0;
+    ReadInt32(data, &publishId);
+    ReadInt32(data, &failReason);
     DiscClientOnPublishFail(publishId, failReason);
-    FreeBuffer(ctx, ipcMsg);
     return SOFTBUS_OK;
 }
