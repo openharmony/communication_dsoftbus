@@ -791,7 +791,7 @@ HWTEST_F(ConnectionBleTest, testConnmanger016, TestSize.Level1)
     printf("testConnmanger016\r\n");
 
     ret = ConnTypeIsSupport(CONNECT_P2P);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
 };
 
 /*

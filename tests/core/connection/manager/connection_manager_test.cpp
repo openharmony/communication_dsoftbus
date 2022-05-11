@@ -518,6 +518,6 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger010, TestSize.Level1)
 HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger011, TestSize.Level1)
 {
     int ret = ConnTypeIsSupport(CONNECT_TYPE_MAX);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CONN_INVALID_CONN_TYPE, ret);
 };
 } // namespace OHOS
