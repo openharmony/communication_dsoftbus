@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "ipc_skeleton.h"
 #include "iproxy_client.h"
-#include "liteipc_adapter.h"
 #include "samgr_lite.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_timer.h"
@@ -31,7 +31,7 @@ static IClientProxy *g_serverProxy = NULL;
 
 static int ClientSimpleResultCb(IOwner owner, int code, IpcIo *reply)
 {
-    *(int *)owner = IpcIoPopInt32(reply);
+    ReadInt32(reply, (int *)owner);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "retvalue:%d", *(int *)owner);
     return EC_SUCCESS;
 }
@@ -77,16 +77,16 @@ int32_t RegisterService(const char *name, const struct CommonScvId *svcId)
 
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 1);
-    IpcIoPushString(&request, name);
+    WriteString(&request, name);
 
     SvcIdentity svc = {0};
     svc.handle = svcId->handle;
     svc.token = svcId->token;
     svc.cookie = svcId->cookie;
-#ifdef __LINUX__
-    svc.ipcContext = svcId->ipcCtx;
-#endif
-    IpcIoPushSvc(&request, &svc);
+    bool value = WriteRemoteObject(&request, &svc);
+    if (!value) {
+        return SOFTBUS_ERR;
+    }
 
     int ret = SOFTBUS_ERR;
     if (g_serverProxy->Invoke(g_serverProxy, MANAGE_REGISTER_SERVICE, &request, &ret,
