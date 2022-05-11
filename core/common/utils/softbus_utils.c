@@ -46,8 +46,7 @@
 
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
-static bool g_signalingMsgSwitch = true;
-static char g_signalingMsgBuf[BUF_HEX_LEN] = { 0 };
+static bool g_signalingMsgSwitch = false;
 
 SoftBusList *CreateSoftBusList(void)
 {
@@ -317,21 +316,31 @@ bool GetSignalingMsgSwitch(void)
     return g_signalingMsgSwitch;
 }
 
-char *InterceptSignalingMsg(unsigned char *data, unsigned char dataLen)
+void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
 {
     int ret = 0;
+    char signalingMsgBuf[BUF_HEX_LEN] = { 0 };
 
-    (void)memset_s(g_signalingMsgBuf, sizeof(g_signalingMsgBuf), 0, sizeof(g_signalingMsgBuf));
+    if (!GetSignalingMsgSwitch()) {
+        return;
+    }
+
     if (dataLen >= BUF_BYTE_LEN) {
-        ret = ConvertBytesToHexString(g_signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, BUF_BYTE_LEN);
+        ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, BUF_BYTE_LEN);
     } else {
-        ret = ConvertBytesToHexString(g_signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
+        ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
     }
 
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "intercept signaling msg faile");
-        (void)memset_s(g_signalingMsgBuf, sizeof(g_signalingMsgBuf), 0, sizeof(g_signalingMsgBuf));
+        return;
     }
 
-    return g_signalingMsgBuf;
+    if (module == SOFTBUS_LOG_DISC) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
+                   distinguish, dataLen, signalingMsgBuf);
+    } else if (module == SOFTBUS_LOG_CONN) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
+                   distinguish, dataLen, signalingMsgBuf);
+    }
 }
