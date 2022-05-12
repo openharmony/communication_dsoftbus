@@ -32,6 +32,7 @@
 #define LOW_24_BITS 0xFFFFFFL
 #define MAX_BYTE_RECORD 230
 #define ANONYMOUS_INTEVER_LEN 60
+#define ANONYMOUS_CHAR '*'
 
 static uint64_t g_uniqueId = 0;
 static uint32_t g_authAbility = 0;
@@ -284,10 +285,11 @@ void AnoonymousDid(char *outBuf, uint32_t len)
     uint32_t size = len > MAX_BYTE_RECORD ? MAX_BYTE_RECORD : len;
     uint32_t internal = 1;
     while ((internal * ANONYMOUS_INTEVER_LEN) < size) {
-        outBuf[internal * ANONYMOUS_INTEVER_LEN] = '*';
-        outBuf[internal * ANONYMOUS_INTEVER_LEN - 1] = '*';
-        outBuf[internal * ANONYMOUS_INTEVER_LEN - 2] = '*';
-        outBuf[internal * ANONYMOUS_INTEVER_LEN - 3] = '*';
+        uint32_t pos = internal * ANONYMOUS_INTEVER_LEN;
+        outBuf[pos] = ANONYMOUS_CHAR;
+        outBuf[--pos] = ANONYMOUS_CHAR;
+        outBuf[--pos] = ANONYMOUS_CHAR;
+        outBuf[--pos] = ANONYMOUS_CHAR;
         ++internal;
     }
 }
@@ -307,7 +309,7 @@ void AuthPrintDfxMsg(uint32_t module, char *data, int len)
         module == DATA_TYPE_SYNC)) {
         return;
     }
-    int32_t size = len > MAX_BYTE_RECORD ? (MAX_BYTE_RECORD - 1) : len;
+    int32_t size = (len > MAX_BYTE_RECORD) ? (MAX_BYTE_RECORD - 1) : len;
     char outBuf[MAX_BYTE_RECORD + 1] = {0};
     if (ConvertBytesToHexString(outBuf, MAX_BYTE_RECORD, (const unsigned char *)data, size / 2) == SOFTBUS_OK) {
         AnoonymousDid(outBuf, strlen(outBuf));
