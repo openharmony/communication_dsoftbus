@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_BR_QUEUE_H
-#define SOFTBUS_BR_QUEUE_H
+#ifndef BR_CONNECTION_QUEUE_H
+#define BR_CONNECTION_QUEUE_H
 
 #include <stdint.h>
 

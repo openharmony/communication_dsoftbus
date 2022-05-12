@@ -37,7 +37,7 @@
 #include "unistd.h"
 #include "wrapper_br_interface.h"
 
-static pthread_mutex_t g_connectionLock;
+static pthread_mutex_t g_connectionLock = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static uint16_t g_nextConnectionId = 0;
@@ -45,7 +45,6 @@ static uint16_t g_nextConnectionId = 0;
 void InitBrConnectionManager(int32_t brBuffSize)
 {
     g_brBuffSize = brBuffSize + sizeof(ConnPktHead);
-    pthread_mutex_init(&g_connectionLock, NULL);
 }
 
 uint32_t GetLocalWindowsByConnId(uint32_t connId)
@@ -217,16 +216,26 @@ BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc fail.]");
         return NULL;
     }
+    if (pthread_mutex_init(&newConnInfo->lock, NULL) != 0) {
+        SoftBusFree(newConnInfo);
+        return NULL;
+    }
+    if (pthread_cond_init(&newConnInfo->congestCond, NULL) != 0) {
+        pthread_mutex_destroy(&newConnInfo->lock);
+        SoftBusFree(newConnInfo);
+        return NULL;
+    }
     newConnInfo->recvBuf = (char *)SoftBusCalloc(g_brBuffSize);
     newConnInfo->recvSize = g_brBuffSize;
     if (newConnInfo->recvBuf == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc recvBuf fail]");
+        pthread_cond_destroy(&newConnInfo->congestCond);
+        pthread_mutex_destroy(&newConnInfo->lock);
         SoftBusFree(newConnInfo);
         return NULL;
     }
     ListInit(&newConnInfo->node);
     ListInit(&newConnInfo->requestList);
-    pthread_mutex_init(&newConnInfo->lock, NULL);
     newConnInfo->connectionId = AllocNewConnectionIdLocked();
     newConnInfo->recvPos = 0;
     newConnInfo->seq = 0;
@@ -234,7 +243,6 @@ BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
     newConnInfo->ackTimeoutCount = 0;
     newConnInfo->windows = DEFAULT_WINDOWS;
     newConnInfo->conGestState = BT_RFCOM_CONGEST_OFF;
-    pthread_cond_init(&newConnInfo->congestCond, NULL);
     newConnInfo->refCount = 1;
     newConnInfo->infoObjRefCount = 1;
     newConnInfo->state = BR_CONNECTION_STATE_CONNECTING;

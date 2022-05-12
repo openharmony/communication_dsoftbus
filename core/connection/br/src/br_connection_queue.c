@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "softbus_br_queue.h"
+#include "br_connection_queue.h"
 
 #include "common_list.h"
 #include "securec.h"
@@ -32,6 +32,7 @@
 #define HIGH_PRIORITY_DEFAULT_LIMIT 32
 #define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
 #define LOW_PRIORITY_DEFAULT_LIMIT 32
+#define WAIT_QUEUE_BUFFER_PERIOD_LEN 2
 
 typedef enum {
     HIGH_PRIORITY = 0,
@@ -104,39 +105,50 @@ static int GetPriority(int32_t flag)
     }
 }
 
-static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen)
+static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_t timeMillis)
 {
-#define TIME_OUT 1
 #define USECTONSEC 1000LL
+    if (timeMillis == 0) {
+        return SoftBusCondWait(cond, mutex, NULL);
+    }
+    SoftBusSysTime now;
+    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrSoftBusCondWait SoftBusGetTime failed");
+        return SOFTBUS_ERR;
+    }
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC;
+    SoftBusSysTime tv;
+    tv.sec = time / USECTONSEC / USECTONSEC;
+    tv.usec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
+    return SoftBusCondWait(cond, mutex, &tv);
+}
+
+static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen)
+{
 #define WAIT_RETRY_NUM 2
-#define DELAY_MILLIS 1000
+#define WAIT_QUEUE_DELAY 1000
     int32_t retry = 0;
     uint32_t queueCount = 0;
     while (true) {
         if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WaitQueueLength QueueCountGet failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait get queue count fail");
             break;
         }
-        if (queueCount < maxLen) {
+        if (queueCount < (maxLen - diffLen)) {
             break;
         }
         retry++;
         if (retry > WAIT_RETRY_NUM) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WaitQueueLength retry over");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait queue length retry over");
+            if (queueCount < maxLen) {
+                return SOFTBUS_OK;
+            }
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL!!");
             return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
         }
-        SoftBusSysTime now;
-        if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WaitQueueLength SoftBusGetTime failed");
-            return SOFTBUS_ERR;
-        }
-        int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + DELAY_MILLIS * USECTONSEC;
-        SoftBusSysTime tv;
-        tv.sec = time / USECTONSEC / USECTONSEC;
-        tv.usec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Wait g_sendWaitCond");
-        if (SoftBusCondWait(&g_sendWaitCond, &g_brQueueLock, &tv) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WaitQueueLength SoftBusCondWait failed");
+        if (BrSoftBusCondWait(&g_sendWaitCond, &g_brQueueLock, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait queue length cond wait fail");
             return SOFTBUS_ERR;
         }
     }
@@ -187,13 +199,14 @@ int32_t BrEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         BrQueue *newQueue = CreateBrQueue(queueNode->pid);
         if (newQueue == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrEnqueueNonBlock CreateBrQueue failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br enqueue create queue fail");
             goto END;
         }
         ListTailInsert(&g_brQueueList, &(newQueue->node));
         lockFreeQueue = newQueue->queue[priority];
     } else {
-        if (WaitQueueLength(lockFreeQueue, QUEUE_LIMIT[priority]) != SOFTBUS_OK) {
+        ret = WaitQueueLength(lockFreeQueue, QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN);
+        if (ret != SOFTBUS_OK) {
             goto END;
         }
     }
@@ -215,10 +228,10 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
     uint32_t queueCount;
     for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
         if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetMsg QueueCountGet failed");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetMsg get queue count fail");
             continue;
         }
-        if (queueCount >= QUEUE_LIMIT[i]) {
+        if (queueCount >= (QUEUE_LIMIT[i] - WAIT_QUEUE_BUFFER_PERIOD_LEN)) {
             (*isFull) = true;
         } else {
             (*isFull) = false;
@@ -233,6 +246,7 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
 
 int32_t BrDequeueNonBlock(void **msg)
 {
+#define DEQUEUE_DELAY 1000
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
@@ -246,11 +260,13 @@ int32_t BrDequeueNonBlock(void **msg)
     }
     if (IsListEmpty(&g_brQueueList)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait g_sendCond");
-        if (SoftBusCondWait(&g_sendCond, &g_brQueueLock, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrDequeueNonBlock SoftBusCondWait failed");
+        if (BrSoftBusCondWait(&g_sendCond, &g_brQueueLock, DEQUEUE_DELAY) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrSendCondWait failed");
+            (void)SoftBusMutexUnlock(&g_brQueueLock);
+            return SOFTBUS_ERR;
         }
         (void)SoftBusMutexUnlock(&g_brQueueLock);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TIMOUT;
     }
     BrQueue *item = LIST_ENTRY(g_brQueueList.next, BrQueue, node);
     ListDelete(&(item->node));

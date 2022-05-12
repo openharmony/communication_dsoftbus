@@ -114,6 +114,7 @@ SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
     switch (proxyType) {
         case PROXY_FLAG_BYTES:
             return CONN_MIDDLE;
+        case PROXY_FLAG_MESSAGE:
         case PROXY_FLAG_ASYNC_MESSAGE:
         case PROXY_FLAG_ACK:
             return CONN_HIGH;
@@ -377,7 +378,8 @@ static int32_t TransProxyTransAuthMsg(const ProxyChannelInfo *info, const char *
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-    int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+    int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen,
+        ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
     if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send queue full!!");
         return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
@@ -428,7 +430,8 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
             return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "slice: i:%d", i);
-        int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+        int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag),
+            info->appInfo.myData.pid);
         if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "normal proxy send queue full!!");
             return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
@@ -451,7 +454,7 @@ int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelI
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
 
-    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority);
+    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority, info->appInfo.myData.pid);
 }
 
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag)
