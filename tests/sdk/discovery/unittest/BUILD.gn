@@ -34,7 +34,10 @@ if (defined(ohos_lite)) {
   module_output_path = "dsoftbus_standard/discovery"
   ohos_unittest("DiscSdkTest") {
     module_out_path = module_output_path
-    sources = [ "disc_sdk_test.cpp" ]
+    sources = [
+      "disc_sdk_only_l2_test.cpp",
+      "disc_sdk_test.cpp",
+    ]
     include_dirs = [
       "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/core/common/include",
