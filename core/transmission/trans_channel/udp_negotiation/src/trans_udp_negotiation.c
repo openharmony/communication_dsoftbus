@@ -405,11 +405,6 @@ static void ProcessAbnormalUdpChannelState(const AppInfo *info, bool needClose)
 
 static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq, const cJSON *msg)
 {
-    char *anonymizedOut = NULL;
-    if (AnonymizePacket(&anonymizedOut, msg->valuestring, strlen(msg->valuestring)) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpTransOnExchangeUdpInfo, msg: %s", anonymizedOut);
-        SoftBusFree(anonymizedOut);
-    }
     if (isReply) {
         /* receive reply message */
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive reply udp negotiation info.");
@@ -735,6 +730,11 @@ static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthT
         SoftBusFree(decryptData);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt udp negotiation info failed.");
         return;
+    }
+    char *anonymizedOut = NULL;
+    if (AnonymizePacket(&anonymizedOut, (char *)buf.buf, buf.bufLen) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpModuleCb TransOnExchangeUdpInfo: %s", anonymizedOut);
+        SoftBusFree(anonymizedOut);
     }
     json = cJSON_Parse((char *)decryptData);
     SoftBusFree(decryptData);
