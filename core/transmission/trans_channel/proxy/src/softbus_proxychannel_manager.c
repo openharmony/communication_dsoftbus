@@ -747,7 +747,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
     }

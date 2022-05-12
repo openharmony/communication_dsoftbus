@@ -16,6 +16,7 @@
 #include <sys/prctl.h>
 
 #include "br_connection_manager.h"
+#include "br_connection_queue.h"
 #include "br_pending_packet.h"
 #include "br_trans_manager.h"
 #include "bus_center_manager.h"
@@ -24,7 +25,6 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_br_queue.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -126,9 +126,9 @@ static void PostBytesInnerListener(uint32_t connId, uint64_t seq, int32_t module
 {
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "PostInner send failed, connId:%u, seq:%lld, module:%d, result:%d", connId, seq, module, result);
+            "PostInner failed, connId:%u, seq:%" PRIu64 ", module:%d, result:%d", connId, seq, module, result);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostInner send success, connId:%u, seq:%lld, module:%d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostInner success, connId:%u, seq:%" PRIu64 ", module:%d",
             connId, seq, module);
     }
 }
@@ -617,7 +617,7 @@ static int32_t SendAck(const BrConnectionInfo *brConnInfo, uint32_t windows, uin
     }
     int32_t ret = CreateBrPendingPacket(brConnInfo->connectionId, seq);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "create pending failed id: %u, seq: %lld, ret: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "create pending failed id: %u, seq: %" PRIu64 ", ret: %d",
             brConnInfo->connectionId, seq, ret);
         return ret;
     }
@@ -625,7 +625,7 @@ static int32_t SendAck(const BrConnectionInfo *brConnInfo, uint32_t windows, uin
     if (ret != SOFTBUS_OK) {
         DelBrPendingPacket(brConnInfo->connectionId, seq);
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack connectId: %u, seq: %lld, result: %d",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack connectId: %u, seq: %" PRIu64 ", result: %d",
         brConnInfo->connectionId, seq, ret);
     return ret;
 }
@@ -639,7 +639,7 @@ static void WaitAck(BrConnectionInfo *brConnInfo, uint64_t seq)
         if (brConnInfo->windows < MAX_WINDOWS) {
             brConnInfo->windows = brConnInfo->windows + 1;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPendingPacket(%u) TRIGGERED seq:%lld, windows: %u",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPending(%u) TRIGGERED seq:%" PRIu64 ", windows: %u",
             brConnInfo->connectionId, seq, brConnInfo->windows);
         SoftBusFree(data);
         return;
@@ -651,7 +651,7 @@ static void WaitAck(BrConnectionInfo *brConnInfo, uint64_t seq)
         if (brConnInfo->ackTimeoutCount > WINDOWS_ACK_FAILED_TIMES && brConnInfo->windows < DEFAULT_WINDOWS) {
             brConnInfo->windows = DEFAULT_WINDOWS;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPendingPacket(%u) TIMOUT seq:%lld, windows: %u",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPending(%u) TIMOUT seq:%" PRIu64 ", windows: %u",
             brConnInfo->connectionId, seq, brConnInfo->windows);
         return;
     } else if (ret == SOFTBUS_OK) {
@@ -676,8 +676,11 @@ void *SendHandlerLoop(void *arg)
 #define WAIT_TIME 10
     SendBrQueueNode *sendNode = NULL;
     while (1) {
-        if (BrDequeueNonBlock((void **)(&sendNode)) != SOFTBUS_OK) {
-            SoftBusSleepMs(WAIT_TIME);
+        int32_t ret = BrDequeueNonBlock((void **)(&sendNode));
+        if (ret != SOFTBUS_OK) {
+            if (ret != SOFTBUS_TIMOUT) {
+                SoftBusSleepMs(WAIT_TIME);
+            }
             continue;
         }
         uint32_t connId = sendNode->connectionId;
@@ -705,9 +708,9 @@ void *SendHandlerLoop(void *arg)
             WaitAck(brConnInfo, brConnInfo->waitSeq);
             brConnInfo->waitSeq = 0;
         }
-        int32_t ret = BrTransSend(brConnInfo, g_sppDriver, g_brSendPeerLen, sendNode->data, sendNode->len);
+        ret = BrTransSend(brConnInfo, g_sppDriver, g_brSendPeerLen, sendNode->data, sendNode->len);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrTransSend fail. connId:%u, seq: %lld", connId, seq);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrTransSend fail. connId:%u, seq: %" PRIu64, connId, seq);
         }
         ReleaseConnectionRef(brConnInfo);
         if (sendNode->listener != NULL) {
@@ -722,16 +725,10 @@ void *SendHandlerLoop(void *arg)
 static int32_t InitDataQueue(void)
 {
     pthread_t tid;
-    pthread_attr_t threadAttr;
-    pthread_attr_init(&threadAttr);
-    pthread_attr_setstacksize(&threadAttr, BR_SEND_THREAD_STACK);
-    if (pthread_create(&tid, &threadAttr, SendHandlerLoop, NULL) != 0) {
+    if (pthread_create(&tid, NULL, SendHandlerLoop, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
-        pthread_attr_destroy(&threadAttr);
         return SOFTBUS_ERR;
     }
-
-    pthread_attr_destroy(&threadAttr);
     return InitBrPendingPacket();
 }
 
@@ -993,6 +990,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
 static int32_t OnAck(uint32_t connectionId, uint32_t localWindows, uint64_t remoteSeq)
 {
     int32_t dataLen = 0;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack seq: %" PRIu64 " respone", remoteSeq);
     char *buf = BrPackRequestOrResponse(METHOD_ACK_RESPONSE, (int32_t)localWindows, remoteSeq, &dataLen);
     if (buf != NULL) {
         return PostBytesInner(connectionId, METHOD_ACK_RESPONSE, buf, dataLen);
@@ -1032,7 +1030,7 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ACK REQUEST fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK REQUEST(%u) remote seq: %lld, windows: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK REQUEST(%u) remote seq: %" PRIu64 ", windows: %d",
             connectionId, remoteSeq, remoteWindows);
         OnAck(connectionId, GetLocalWindowsByConnId(connectionId), (uint64_t)remoteSeq);
     } else if (keyMethod == METHOD_ACK_RESPONSE) {
@@ -1043,10 +1041,10 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ACK RESPONSE fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK RESPONSE(%u) remote seq: %lld, windows: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK RESPONSE(%u) remote seq: %" PRId64 ", windows: %d",
             connectionId, remoteSeq, remoteWindows);
         if (SetBrPendingPacket(connectionId, (uint64_t)remoteSeq, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SetBrPendingPacket(%u) failed seq: %lld",
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SetBrPendingPacket(%u) failed seq: %" PRId64,
                 connectionId, remoteSeq);
         }
     }
