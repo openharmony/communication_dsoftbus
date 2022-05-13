@@ -1010,44 +1010,6 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: UnPublishServiceTest004
- * @tc.desc: not start publish.
- * @tc.in: Test Moudle, Test Number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The UnPublishService operates normally.
- */
-HWTEST_F(Disc_Test, UnPublishServiceTest004, TestSize.Level2)
-{
-    int ret;
-    int tmpId = GetPublishId();
-
-    ret = UnPublishService(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
-}
-
-/**
- * @tc.name: UnPublishServiceTest005
- * @tc.desc: Verify UnPublishService again.
- * @tc.in: Test Moudle, Test Number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The UnPublishService operates normally.
- */
-HWTEST_F(Disc_Test, UnPublishServiceTest005, TestSize.Level2)
-{
-    int ret;
-    int tmpId = GetPublishId();
-
-    g_pInfo.publishId = tmpId;
-    PublishService(g_pkgName, &g_pInfo, &g_publishCb);
-    ret = UnPublishService(g_pkgName, tmpId);
-    EXPECT_TRUE(ret == 0);
-    ret = UnPublishService(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
-}
-
-/**
  * @tc.name: StopDiscoveryTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
@@ -1103,43 +1065,5 @@ HWTEST_F(Disc_Test, StopDiscoveryTest003, TestSize.Level0)
     StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: StopDiscoveryTest004
- * @tc.desc: not start discover.
- * @tc.in: Test Moudle, Test Number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StopDiscovery operates normally.
- */
-HWTEST_F(Disc_Test, StopDiscoveryTest004, TestSize.Level2)
-{
-    int ret;
-    int tmpId = GetSubscribeId();
-
-    ret = StopDiscovery(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
-}
-
-/**
- * @tc.name: StopDiscoveryTest005
- * @tc.desc: Verify StopDiscovery again.
- * @tc.in: Test Moudle, Test Number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StopDiscovery operates normally.
- */
-HWTEST_F(Disc_Test, StopDiscoveryTest005, TestSize.Level2)
-{
-    int ret;
-    int tmpId = GetSubscribeId();
-
-    g_sInfo.subscribeId = tmpId;
-    StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
-    ret = StopDiscovery(g_pkgName, tmpId);
-    EXPECT_TRUE(ret == 0);
-    ret = StopDiscovery(g_pkgName, tmpId);
-    EXPECT_TRUE(ret != 0);
 }
 } // namespace OHOS
