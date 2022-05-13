@@ -26,6 +26,10 @@ declare_args() {
   dsoftbus_standard_get_devicename = true
 }
 
+aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
+aaservices_path = "//foundation/aafwk/standard/services"
+aakits_path = "//foundation/aafwk/standard/frameworks/kits"
+
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
@@ -50,20 +54,20 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+      "${aakits_path}/ability/native/include",
+      "${aainnerkits_path}/want/include/ohos/aafwk/content",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager/include",
+      "${aainnerkits_path}/dataobs_manager/include",
       "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 
     bus_center_core_adapter_deps = [
+      "${aainnerkits_path}/dataobs_manager:dataobs_manager",
+      "${aainnerkits_path}/uri:zuri",
+      "${aakits_path}/ability/native:abilitykit_native",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
-      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/aafwk/standard/interfaces/innerkits/dataobs_manager:dataobs_manager",
-      "//foundation/aafwk/standard/interfaces/innerkits/uri:zuri",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability:native_dataability",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb:native_rdb",
     ]
