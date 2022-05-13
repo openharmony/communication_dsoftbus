@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SESSION_H
-#define SESSION_H
+#ifndef CPP_SESSION_H
+#define CPP_SESSION_H
 
 #include <cstdint>
 #include <string>
@@ -95,4 +95,4 @@ private:
 } // namespace SoftBus
 } // namespace Communication
 
-#endif // SESSION_H
+#endif // CPP_SESSION_H
