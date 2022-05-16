@@ -1167,7 +1167,7 @@ int32_t LnnGetLaneCount(int32_t laneId)
 int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
 {
     if (laneId < 0 || laneId >= LNN_LINK_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:", laneId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:%d", laneId);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {

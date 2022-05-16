@@ -102,7 +102,7 @@ static LnnNetIfMgr *NetifMgrFactory(LnnNetIfNameType type, const char *ifName)
         return NULL;
     }
     if (g_netifBuilders[type] == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netif type %d not supportted!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netif type %d not supportted!", type);
         return NULL;
     }
     LnnNetIfMgr *netifMgr = g_netifBuilders[type](ifName);

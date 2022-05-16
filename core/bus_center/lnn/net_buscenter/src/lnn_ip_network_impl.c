@@ -342,7 +342,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, SubnetManagerEvent 
         [SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status }
     };
     subnet->status = transactMap[event][isAccepted ? EVENT_RESULT_ACCEPTED : EVENT_RESULT_REJECTED];
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet [%s, %d] state change to %d", subnet->ifName,
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet [%s, %u] state change to %d", subnet->ifName,
         subnet->protocolType, subnet->status);
 }
 

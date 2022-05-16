@@ -142,8 +142,9 @@ static void *LoopTask(void *arg)
             SoftBusFree(itemNode);
             context->msgSize--;
             if (looper->dumpable) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], get message. handle=%s,what=%d,msgSize=%u",
-                    context->name, msg->handler->name, msg->what, context->msgSize);
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
+                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",msgSize=%u", context->name,
+                    msg->handler->name, msg->what, context->msgSize);
             }
         } else {
             SoftBusSysTime tv;
@@ -159,8 +160,9 @@ static void *LoopTask(void *arg)
         context->currentMsg = msg;
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "LoopTask[%s], HandleMessage message. handle=%s,what=%d",
-                context->name, msg->handler->name, msg->what);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
+                "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name, msg->handler->name,
+                msg->what);
         }
 
         if (msg->handler->HandleMessage != NULL) {
@@ -168,7 +170,7 @@ static void *LoopTask(void *arg)
         }
         if (looper->dumpable) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-                "LoopTask[%s], after HandleMessage message. handle=%s,what=%d",
+                "LoopTask[%s], after HandleMessage message. handle=%s,what=%" PRId32,
                 context->name, msg->handler->name, msg->what);
         }
         (void)SoftBusMutexLock(&context->lock);
@@ -224,7 +226,7 @@ static void DumpLooperLocked(const SoftBusLooperContext *context)
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
-            "DumpLooper. i=%d,handler=%s,what =%d,arg1=%llu arg2=%llu, time=%lld",
+            "DumpLooper. i=%d,handler=%s,what =%" PRId32 ",arg1=%" PRIu64 " arg2=%" PRIu64 ", time=%" PRId64,
             i, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
         i++;
     }
@@ -249,7 +251,7 @@ void DumpLooper(const SoftBusLooper *looper)
 static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
     if (looper->dumpable) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=%lld us",
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
             looper->context->name, msgPost->what, msgPost->time);
     }
     if (msgPost->handler == NULL) {
