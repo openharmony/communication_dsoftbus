@@ -37,7 +37,6 @@ if (defined(ohos_lite)) {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
     "${aakits_path}/appkit/native/app/include",
-    "${aainnerkits_path}/want/include",
     "//utils/system/safwk/native/include",
   ]
   softbus_permission_src = [
