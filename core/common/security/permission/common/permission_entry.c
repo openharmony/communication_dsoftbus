@@ -74,6 +74,8 @@
 
 #define DBINDER_SERVICE_NAME "DBinderService"
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
+#define DBINDER_PACKAGE_NAME "DBinderBus"
+#define DYNAMIC_PERMISSION_MAX_SIZE 100
 
 typedef struct {
     const char *key;
@@ -81,6 +83,7 @@ typedef struct {
 } PeMap;
 
 static SoftBusList *g_permissionEntryList = NULL;
+static SoftBusList *g_dynamicPermissionList = NULL;
 static char g_permissonJson[PERMISSION_JSON_LEN];
 
 static PeMap g_peMap[] = {
@@ -362,10 +365,25 @@ static bool CheckDBinder(const char *sessionName)
         return false;
     }
     if (strcmp(DBINDER_SERVICE_NAME, sessionName) == 0) {
-        return true;
+        return false;
     }
     if (StrStartWith(sessionName, DBINDER_BUS_NAME_PREFIX)) {
         return true;
+    }
+    return false;
+}
+
+static bool HaveGrantedPermission(const char *sessionName)
+{
+    if (sessionName == NULL || g_dynamicPermissionList == NULL) {
+        return false;
+    }
+    SoftBusPermissionEntry *pe = NULL;
+    // The lock was acquired before being called
+    LIST_FOR_EACH_ENTRY(pe, &g_dynamicPermissionList->list, SoftBusPermissionEntry, node) {
+        if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
+            return true;
+        }
     }
     return false;
 }
@@ -456,37 +474,40 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     }
     int permType;
     SoftBusPermissionEntry *pe = NULL;
-    (void)SoftBusMutexLock(&g_permissionEntryList->lock);
-    LIST_FOR_EACH_ENTRY(pe, &g_permissionEntryList->list, SoftBusPermissionEntry, node) {
+    bool isDynamicPermission = CheckDBinder(sessionName);
+    SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
+
+    (void)SoftBusMutexLock(&permissionList->lock);
+    LIST_FOR_EACH_ENTRY(pe, &permissionList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
-            if (CheckDBinder(sessionName)) {
-                (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            if (isDynamicPermission) {
+                (void)SoftBusMutexUnlock(&permissionList->lock);
                 return GRANTED_APP;
             }
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
-                (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+                (void)SoftBusMutexUnlock(&permissionList->lock);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
-            (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            (void)SoftBusMutexUnlock(&permissionList->lock);
             return permType;
         }
     }
     if (pItem->permType != NORMAL_APP) {
-        (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+        (void)SoftBusMutexUnlock(&permissionList->lock);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
-            (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            (void)SoftBusMutexUnlock(&permissionList->lock);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
     }
-    (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
+    (void)SoftBusMutexUnlock(&permissionList->lock);
     return SOFTBUS_PERMISSION_DENIED;
 }
 
@@ -495,8 +516,12 @@ bool PermIsSecLevelPublic(const char *sessionName)
     if (sessionName == NULL) {
         return false;
     }
+    if (CheckDBinder(sessionName)) {
+        return true;
+    }
     SoftBusPermissionEntry *pe = NULL;
     bool ret = false;
+
     if (SoftBusMutexLock(&g_permissionEntryList->lock) != 0) {
         return false;
     }
@@ -511,4 +536,110 @@ bool PermIsSecLevelPublic(const char *sessionName)
     (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PermIsSecLevelPublic: %s is %d", sessionName, ret);
     return ret;
+}
+
+int32_t InitDynamicPermission(void)
+{
+    if (g_dynamicPermissionList == NULL) {
+        g_dynamicPermissionList = CreateSoftBusList();
+        if (g_dynamicPermissionList == NULL) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "dynamic permission init failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry, const char *sessionName,
+    int32_t callingUid, int32_t callingPid)
+{
+    if (permissionEntry == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "permission entry is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (sessionName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "sessionName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ListInit(&permissionEntry->node);
+    ListInit(&permissionEntry->appInfo);
+
+    size_t length = strlen(sessionName);
+    if (length >= SESSION_NAME_SIZE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "the length [%zd] is too long for [%s]", length, sessionName);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(permissionEntry->sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy failed");
+        return SOFTBUS_ERR;
+    }
+    permissionEntry->regexp = false;
+    permissionEntry->devId = UNKNOWN_VALUE;
+    permissionEntry->secLevel = LEVEL_PUBLIC;
+
+    SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
+    if (appInfo == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&appInfo->node);
+    if (strcpy_s(appInfo->pkgName, PKG_NAME_SIZE_MAX, DBINDER_PACKAGE_NAME) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy failed");
+        SoftBusFree(appInfo);
+        return SOFTBUS_ERR;
+    }
+    appInfo->type = GRANTED_APP;
+    appInfo->actions = ACTION_CREATE | ACTION_OPEN;
+    appInfo->uid = callingUid;
+    appInfo->pid = callingPid;
+    ListNodeInsert(&permissionEntry->appInfo, &appInfo->node);
+    return SOFTBUS_OK;
+}
+
+int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+{
+    SoftBusMutexLock(&g_dynamicPermissionList->lock);
+    if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "dynamic permission reach the upper limit");
+        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        return SOFTBUS_NO_ENOUGH_DATA;
+    }
+
+    if (HaveGrantedPermission(sessionName)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "dynamic permission already granted");
+        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        return SOFTBUS_OK;
+    }
+
+    SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
+    int32_t ret = NewDynamicPermissionEntry(permissionEntry, sessionName, callingUid, callingPid);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NewDynamicPermissionEntry failed %d", ret);
+        SoftBusFree(permissionEntry);
+        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        return ret;
+    }
+
+    ListNodeInsert(&g_dynamicPermissionList->list, &permissionEntry->node);
+    g_dynamicPermissionList->cnt++;
+    SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+
+    return SOFTBUS_OK;
+}
+
+int32_t DeleteDynamicPermission(const char *sessionName)
+{
+    SoftBusMutexLock(&g_dynamicPermissionList->lock);
+    SoftBusPermissionEntry *pe = NULL;
+    LIST_FOR_EACH_ENTRY(pe, &g_dynamicPermissionList->list, SoftBusPermissionEntry, node) {
+        if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
+            ClearAppInfo(&pe->appInfo);
+            ListDelete(&pe->node);
+            SoftBusFree(pe);
+            g_dynamicPermissionList->cnt--;
+            SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+    return SOFTBUS_NOT_FIND;
 }

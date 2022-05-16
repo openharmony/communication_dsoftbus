@@ -49,6 +49,16 @@ void CloseSessionInner(int sessionId)
     return CloseSession(sessionId);
 }
 
+int32_t GrantPermissionInner(int uid, int pid, const char *busName)
+{
+    return ClientGrantPermission(uid, pid, busName);
+}
+
+int32_t RemovePermissionInner(const char *busName)
+{
+    return ClientRemovePermission(busName);
+}
+
 int32_t SendBytesInner(int32_t sessionId, const void *data, uint32_t len)
 {
     return SendBytes(sessionId, data, len);

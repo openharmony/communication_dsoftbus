@@ -42,6 +42,8 @@ public:
 
     virtual int GrantPermission(int uid, int pid, const std::string &busName) = 0;
 
+    virtual int RemovePermission(const std::string &busName) = 0;
+
 private:
     NO_COPY_AND_ASSIGN(ISessionService);
     static std::shared_ptr<ISessionService> instance_;

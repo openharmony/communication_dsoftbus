@@ -824,7 +824,7 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
             }
         }
     }
-    
+
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found session with channelId [%d]", channelId);
     return SOFTBUS_ERR;
@@ -1041,7 +1041,7 @@ static void DestroyClientSessionByDevId(const ClientSessionServer *server,
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             continue;
         }
-        
+
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByDevId info={%d, %d, %d}",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
@@ -1143,3 +1143,32 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     return;
 }
 
+int32_t ClientGrantPermission(int uid, int pid, const char *busName)
+{
+    if (uid < 0 || pid < 0 || busName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid parameter");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientGrantPermission: sessionName=%s", busName);
+
+    int32_t ret = ServerIpcGrantPermission(uid, pid, busName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server grant permission failed, ret=%d", ret);
+    }
+    return ret;
+}
+
+int32_t ClientRemovePermission(const char *busName)
+{
+    if (busName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid parameter");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientRemovePermission: sessionName=%s", busName);
+
+    int32_t ret = ServerIpcRemovePermission(busName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server remove permission failed, ret=%d", ret);
+    }
+    return ret;
+}

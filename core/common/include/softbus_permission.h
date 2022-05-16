@@ -44,6 +44,9 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName);
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName);
 bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName);
+int32_t CheckDynamicPermission(void);
+int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName);
+int32_t RemoveTransPermission(const char *sessionName);
 
 #ifdef __cplusplus
 #if __cplusplus

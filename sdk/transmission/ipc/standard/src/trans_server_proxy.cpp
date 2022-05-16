@@ -175,3 +175,29 @@ int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType,
     }
     return g_serverProxy->QosReport(channelId, chanType, appType, quality);
 }
+
+int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    if (sessionName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionName is nullptr");
+        return SOFTBUS_ERR;
+    }
+    return g_serverProxy->GrantPermission(uid, pid, sessionName);
+}
+
+int32_t ServerIpcRemovePermission(const char *sessionName)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    if (sessionName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionName is nullptr");
+        return SOFTBUS_ERR;
+    }
+    return g_serverProxy->RemovePermission(sessionName);
+}
