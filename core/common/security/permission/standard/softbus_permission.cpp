@@ -25,6 +25,7 @@
 #include "softbus_log.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
+#include "trans_session_manager.h"
 
 #ifndef PERMISSION_JSON_FILE_PATH
 #define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"
@@ -35,11 +36,16 @@ namespace {
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
+    const char *dbinderSessionName = "DBinderService";
 }
 
 int32_t TransPermissionInit(void)
 {
-    return LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
+    int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return InitDynamicPermission();
 }
 
 void TransPermissionDeinit(void)
@@ -108,4 +114,34 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
         return true;
     }
     return false;
+}
+
+int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+{
+    return AddDynamicPermission(callingUid, callingPid, sessionName);
+}
+
+int32_t RemoveTransPermission(const char *sessionName)
+{
+    return DeleteDynamicPermission(sessionName);
+}
+
+int32_t CheckDynamicPermission(void)
+{
+    int32_t callingUid = (int32_t)OHOS::IPCSkeleton::GetCallingUid();
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    int32_t dbinderUid = 0;
+    int32_t dbinderPid = 0;
+
+    int32_t ret = TransGetUidAndPid(dbinderSessionName, &dbinderUid, &dbinderPid);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermissionInner get dbinder uid and pid failed");
+        return ret;
+    }
+    if (callingUid != dbinderUid || callingPid != dbinderPid) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermission denied: invalid uid %d or pid %d",
+            callingUid, callingPid);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
 }

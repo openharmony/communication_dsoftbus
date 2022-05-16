@@ -119,6 +119,10 @@ SoftBusServerStub::SoftBusServerStub()
         &SoftBusServerStub::StopTimeSyncInner;
     memberFuncMap_[SERVER_QOS_REPORT] =
         &SoftBusServerStub::QosReportInner;
+    memberFuncMap_[SERVER_GRANT_PERMISSION] =
+        &SoftBusServerStub::GrantPermissionInner;
+    memberFuncMap_[SERVER_REMOVE_PERMISSION] =
+        &SoftBusServerStub::RemovePermissionInner;
     memberFuncMap_[SERVER_PUBLISH_LNN] =
         &SoftBusServerStub::PublishLNNInner;
     memberFuncMap_[SERVER_STOP_PUBLISH_LNN] =
@@ -535,7 +539,7 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner read clientName failed!");
         return SOFTBUS_ERR;
     }
-    
+
     infoTypeLen = sizeof(NodeBasicInfo);
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == nullptr) {
@@ -673,6 +677,56 @@ int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &re
     int32_t retReply = QosReport(channelId, channelType, appType, quality);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GrantPermissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t uid = 0;
+    int32_t pid = 0;
+    const char *sessionName = nullptr;
+    int32_t ret = CheckDynamicPermission();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GrantPermissionInner check permission failed %d!", ret);
+        goto EXIT;
+    }
+
+    uid = data.ReadInt32();
+    pid = data.ReadInt32();
+    sessionName = data.ReadCString();
+    if (sessionName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GrantPermissionInner read sessionName failed!");
+        goto EXIT;
+    }
+    ret = GrantTransPermission(uid, pid, sessionName);
+EXIT:
+    if (!reply.WriteInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GrantPermissionInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RemovePermissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *sessionName = nullptr;
+    int32_t ret = CheckDynamicPermission();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermissionInner check permission failed %d!", ret);
+        goto EXIT;
+    }
+
+    sessionName = data.ReadCString();
+    if (sessionName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermissionInner read sessionName failed!");
+        goto EXIT;
+    }
+    ret = RemoveTransPermission(sessionName);
+EXIT:
+    if (!reply.WriteInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermissionInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
