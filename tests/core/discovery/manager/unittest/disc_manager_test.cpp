@@ -4898,6 +4898,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest001, TestSize.Level1)
 
     ret = DiscCoapUnpulbishService(pub_cap_bitmap_2, publish_mode_2);
     TEST_ASSERT_TRUE(ret != 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -4917,6 +4918,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest002, TestSize.Level1)
 
     ret = DiscCoapUnpulbishService(pub_cap_bitmap_1, pub_lish_mode_1);
     TEST_ASSERT_TRUE(ret == 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -4936,6 +4938,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest001, TestSize.Level1)
 
     ret = DiscCoapStartDiscovery(filter_cap_bitmap_2, disc_mode_2);
     TEST_ASSERT_TRUE(ret != 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -4955,6 +4958,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest002, TestSize.Level1)
 
     ret = DiscCoapStartDiscovery(filter_cap_bitmap_1, disc_mode_1);
     TEST_ASSERT_TRUE(ret == 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -4974,6 +4978,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest001, TestSize.Level1)
 
     ret = DiscCoapUnpulbishService(pub_cap_bitmap_2, publish_mode_2);
     TEST_ASSERT_TRUE(ret != 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -4993,6 +4998,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
 
     ret = DiscCoapUnpulbishService(pub_cap_bitmap_1, pub_lish_mode_1);
     TEST_ASSERT_TRUE(ret == 0);
+    DiscCoapDeinit();
 }
 
 /**
@@ -5018,6 +5024,8 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_Test001, TestSize.Level1)
     deviceList = nullptr;
     ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -2);
+    free(&deviceList);
+    NSTACKX_Deinit();
 }
 
 /**
@@ -5045,6 +5053,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_Test002, TestSize.Level1)
     NSTACKX_Deinit();
     ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -1);
+    free(&deviceList);
 }
 
 /*
@@ -5099,7 +5108,6 @@ HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn003, TestSize.Level1)
     NSTACKX_Init(&g_parameter);
     ret = NSTACKX_RegisterDeviceAn(&testInfo, 0);
     TEST_ASSERT_TRUE(ret == 0);
-    free(&testInfo);
     NSTACKX_Deinit();
 };
 
