@@ -38,27 +38,28 @@ static void DeviceFound(const DeviceInfo *device)
     ConnectionAddr addr;
 
     if (device == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound enter, type = %d\n", device->addr[0].type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound devName: %s, udid: %s",
+        device->devName, AnonymizesUDID(device->devId));
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get invalid addrtype: %d\n", device->addr[0].type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get invalid addrtype: %d", device->addr[0].type);
         return;
     }
     if (device->addr[0].info.ip.port == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get port is 0 !\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get port is 0!");
         return;
     }
     addr.type = device->addr[0].type;
     if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
         strlen(device->addr[0].info.ip.ip)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy ip failed\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy ip failed");
         return;
     }
     addr.info.ip.port = device->addr[0].info.ip.port;
     if (memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, device->accountHash, MAX_ACCOUNT_HASH_LEN) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s peer uid failed\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s peer uid failed");
         return;
     }
     if (g_callback.OnDeviceFound) {
@@ -112,7 +113,7 @@ int32_t LnnStartCoapDiscovery(void)
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)
 {
     if (callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coap discovery callback is null\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coap discovery callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     g_callback.OnDeviceFound = callback->OnDeviceFound;
