@@ -64,8 +64,9 @@ if (defined(ohos_lite)) {
 
     bus_center_core_adapter_deps = [
       "${aainnerkits_path}/dataobs_manager:dataobs_manager",
-      "${aainnerkits_path}/uri:zuri",
       "${aakits_path}/ability/native:abilitykit_native",
+      "${ability_base_path}:want",
+      "${ability_base_path}:zuri",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability:native_dataability",

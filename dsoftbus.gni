@@ -16,6 +16,7 @@ dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
+ability_base_path = "//foundation/aafwk/standard/ability_base"
 aaservices_path = "//foundation/aafwk/standard/services"
 aakits_path = "//foundation/aafwk/standard/frameworks/kits"
 

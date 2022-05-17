@@ -91,8 +91,7 @@ if (defined(ohos_lite)) {
         "//foundation/communication/wifi/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
         "//foundation/communication/wifi/wifi/services/wifi_standard/wifi_framework/common/net_helper",
       ]
-      bus_center_adapter_deps +=
-          [ "${aafwk_path}/interfaces/innerkits/want:want" ]
+      bus_center_adapter_deps += []
       bus_center_adapter_external_deps +=
           [ "common_event_service:cesfwk_innerkits" ]
     } else {
