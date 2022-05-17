@@ -41,7 +41,7 @@ static void DeviceFound(const DeviceInfo *device)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound devName: %s, udid: %s",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound devName: %s, devId: %s",
         device->devName, AnonymizesUDID(device->devId));
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "discovery get invalid addrtype: %d", device->addr[0].type);
