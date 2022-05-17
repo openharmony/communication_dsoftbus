@@ -948,12 +948,12 @@ static int32_t ProcessNodeStateChanged(const void *para)
                 "can't find connection fsm when node online state changed");
             break;
         }
+        isOnline = IsNodeOnline(connFsm->connInfo.peerNetworkId);
         if (connFsm->connInfo.peerVersion < SOFT_BUS_NEW_V1) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer not support master node elect", connFsm->id);
             rc = SOFTBUS_OK;
             break;
         }
-        isOnline = IsNodeOnline(connFsm->connInfo.peerNetworkId);
         rc = isOnline ? TryElectMasterNodeOnline(connFsm) : TryElectMasterNodeOffline(connFsm);
     } while (false);
     SoftBusFree((void *)addr);
