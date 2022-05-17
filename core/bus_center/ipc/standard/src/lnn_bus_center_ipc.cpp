@@ -67,8 +67,8 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
 }
 
 static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
-{
-    JoinLnnRequestInfo *info = new JoinLnnRequestInfo();
+{ 
+    JoinLnnRequestInfo *info = new (std::nothrow) JoinLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
@@ -95,7 +95,7 @@ static bool IsRepeatLeaveLNNRequest(const char *pkgName, const char *networkId)
 
 static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 {
-    LeaveLnnRequestInfo *info = new LeaveLnnRequestInfo();
+    LeaveLnnRequestInfo *info = new (std::nothrow) LeaveLnnRequestInfo();
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         delete info;
