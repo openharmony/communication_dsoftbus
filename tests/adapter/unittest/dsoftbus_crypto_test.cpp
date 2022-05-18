@@ -43,7 +43,7 @@ void DsoftbusCryptoTest::TearDown()
 }
 
 /*
-* @tc.name: SoftBusBase64Decode001
+* @tc.name: SoftBusBase64Encode001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
 * @tc.require: 1
@@ -58,7 +58,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusBase64Decode002
+* @tc.name: SoftBusBase64Encode002
 * @tc.desc: parameter is nullptr
 * @tc.type: FUNC
 * @tc.require: 1
@@ -79,7 +79,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusBase64Decode003
+* @tc.name: SoftBusBase64Encode003
 * @tc.desc: dlen and slen is illegal
 * @tc.type: FUNC
 * @tc.require: 1
@@ -98,8 +98,9 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#if HAVE_PRO
 /*
-* @tc.name: SoftBusBase64Encode001
+* @tc.name: SoftBusBase64Decode001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
 * @tc.require: 1
@@ -114,9 +115,10 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, TestSize.Level0)
     int32_t ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, (unsigned char *)src, slen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
-* @tc.name: SoftBusBase64Encode002
+* @tc.name: SoftBusBase64Decode002
 * @tc.desc: parameters is nullptr
 * @tc.type: FUNC
 * @tc.require: 1
@@ -140,7 +142,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, TestSize.Level0)
 }
 
 /*
-* @tc.name: SoftBusBase64Encode003
+* @tc.name: SoftBusBase64Decode003
 * @tc.desc: dlen and slen is illegal
 * @tc.type: FUNC
 * @tc.require: 1
@@ -266,6 +268,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#if HAVE_PRO
 /*
 * @tc.name: SoftBusEncryptData001
 * @tc.desc: all valid param
@@ -284,6 +287,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, TestSize.Level0)
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
 * @tc.name: SoftBusEncryptData002
@@ -328,6 +332,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#if HAVE_PRO
 /*
 * @tc.name: SoftBusEncryptDataWithSeq001
 * @tc.desc: all valid param
@@ -347,6 +352,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, TestSize.Level0)
                                             inLen, (unsigned char*)encryptData, &encryptLen, seqNum);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
 * @tc.name: SoftBusEncryptDataWithSeq002
@@ -413,6 +419,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#if HAVE_PRO
 /*
 * @tc.name: SoftBusDecryptData001
 * @tc.desc: all valid param
@@ -601,4 +608,5 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, TestSize.Level0)
                                     encryptLen, (unsigned char*)decryptData, nullptr, seqNum);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+#endif
 }
