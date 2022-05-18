@@ -78,14 +78,14 @@ static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvL
     printf("periodRecvPkts:%u\n", tvList->info.appStatistics.periodRecvPkts);
     printf("periodRecvPktLoss:%u\n", tvList->info.appStatistics.periodRecvPktLoss);
     printf("periodRecvRate:%u\n", tvList->info.appStatistics.periodRecvRate);
-    printf("periodRecvRateBps:%llu\n", tvList->info.appStatistics.periodRecvRateBps);
+    printf("periodRecvRateBps:%" PRIu64 "\n", tvList->info.appStatistics.periodRecvRateBps);
     printf("periodRtt:%u\n", tvList->info.appStatistics.periodRtt);
     printf("periodRecvPktLossHighPrecision:%u\n", tvList->info.appStatistics.periodRecvPktLossHighPrecision);
     printf("periodSendLostPkts:%u\n", tvList->info.appStatistics.periodSendLostPkts);
     printf("periodSendPkts:%u\n", tvList->info.appStatistics.periodSendPkts);
     printf("periodSendPktLossHighPrecision:%u\n", tvList->info.appStatistics.periodSendPktLossHighPrecision);
-    printf("periodSendBits:%llu\n", tvList->info.appStatistics.periodSendBits);
-    printf("periodSendRateBps:%llu\n", tvList->info.appStatistics.periodSendRateBps);
+    printf("periodSendBits:%" PRIu64 "\n", tvList->info.appStatistics.periodSendBits);
+    printf("periodSendRateBps:%" PRIu64 "\n", tvList->info.appStatistics.periodSendRateBps);
 }
 
 static ISessionListener g_hasQosCb = {

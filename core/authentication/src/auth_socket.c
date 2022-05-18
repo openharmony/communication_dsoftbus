@@ -103,7 +103,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         if (auth->authId != head->seq && auth->authId != fd &&
             (head->seq != 0 || head->module != MODULE_AUTH_CONNECTION)) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "handle verify device failed, authId = %lld, fd = %d", auth->authId, fd);
+                "handle verify device failed, authId = %" PRId64 ", fd = %d", auth->authId, fd);
             return;
         }
     }
@@ -113,7 +113,7 @@ static void AuthIpOnDataReceived(int32_t fd, const ConnPktHead *head, char *data
         case MODULE_TRUST_ENGINE: {
             if (auth->side == SERVER_SIDE_FLAG && head->flag == 0 && auth->authId == fd) {
                 auth->authId = head->seq;
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %lld", auth->authId);
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "server ip authId is %" PRId64, auth->authId);
             }
             HandleReceiveDeviceId(auth, (uint8_t *)data);
             break;
@@ -195,10 +195,10 @@ static int32_t TrySyncDeviceUuid(int32_t fd)
         return SOFTBUS_ERR;
     }
     if (auth->side != CLIENT_SIDE_FLAG || auth->status != WAIT_CONNECTION_ESTABLISHED) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %llu", auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %" PRIu64, auth->authId);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %llu", auth->authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %" PRIu64, auth->authId);
     (void)DelTrigger(AUTH, fd, WRITE_TRIGGER);
     if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
@@ -241,7 +241,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
     }
 
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %lld",
+        "auth recv eth data, head len is %d, module = %d, flag = %d, seq = %" PRId64,
         head.len, head.module, head.flag, head.seq);
     if (head.len > AUTH_MAX_DATA_LEN) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth head len is out of size");
@@ -297,7 +297,7 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth start post eth data, authId is %lld, moduleId is %d, len is %u",
+        "auth start post eth data, authId is %" PRId64 ", moduleId is %d, len is %u",
         auth->authId, head->module, len);
     ssize_t byte = SendTcpData(auth->fd, connPostData, postDataLen, 0);
     if (byte != (ssize_t)postDataLen) {

@@ -305,8 +305,8 @@ static int32_t HbMgrUpdateDevInfo(DeviceInfo *device, int32_t weight, int32_t lo
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X,"
-        "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, localMasterWeight:%d, nowTime:%llu]", device->devId,
-        device->devType, deviceType, device->addr[0].type, weight, localMasterWeight, nowTime);
+        "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, localMasterWeight:%d, nowTime:%" PRIu64 "]",
+        device->devId, device->devType, deviceType, device->addr[0].type, weight, localMasterWeight, nowTime);
     return HbProcessUpdateReq(device, nowTime);
 }
 
@@ -428,7 +428,7 @@ void LnnDumpHbMgrUpdateList(void)
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbMgrUpdateList count:%d [i:%d, udidHash:%s, "
-            "deviceType:%s, ConnectionAddrType:%02X, weight:%d, localMasterWeight:%d, lastUpdateTime:%llu]",
+            "deviceType:%s, ConnectionAddrType:%02X, weight:%d, localMasterWeight:%d, lastUpdateTime:%" PRIu64 "]",
             g_hbUpdateInfoList->cnt, dumpCount, item->device->devId, deviceType, item->device->addr[0].type,
             item->weight, item->localMasterWeight, item->lastUpdateTime);
     }
@@ -460,7 +460,7 @@ void LnnDumpHbOnlineNodeList(void)
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnDumpHbOnlineNodeList count:%d [i:%d, deviceName:%s,"
-            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%llu]", infoNum, i + 1,
+            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%" PRIu64 "]", infoNum, i + 1,
             nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId, nodeInfo->masterWeight,
             nodeInfo->discoveryType, oldTimeStamp);
     }

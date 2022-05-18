@@ -123,13 +123,13 @@ static void OnSessionClosed(int sessionId)
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
     (void)data;
-    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session bytes received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
     (void)data;
-    LOG2_INFO("session msg received, sessionid[%d], dataLen[%d]", sessionId, len);
+    LOG2_INFO("session msg received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
 static void TestSessionListenerInit(void)
@@ -144,7 +144,7 @@ static void TestSessionListenerInit(void)
 
 static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    LOG2_INFO("OnSendFileProcess sessionId = %d, bytesUpload = %llu, total = %llu\n",
+    LOG2_INFO("OnSendFileProcess sessionId = %d, bytesUpload = %" PRIu64 ", total = %" PRIu64 "\n",
         sessionId, bytesUpload, bytesTotal);
     return 0;
 }
