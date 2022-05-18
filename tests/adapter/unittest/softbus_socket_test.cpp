@@ -1273,6 +1273,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFcntlTest002, TestSize.Level0)
     EXPECT_EQ(-1, ret);
 }
 
+#if HAVE_PRO
 /*
 * @tc.name: SoftBusSocketSendTest001
 * @tc.desc: socketFd is invalid
@@ -1287,6 +1288,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
     int32_t ret = SoftBusSocketSend(socketFd, buf, TEST_BUF_SIZE, 0);
     EXPECT_EQ(-1, ret);
 }
+#endif
 
 /*
 * @tc.name: SoftBusSocketSendTest002
