@@ -57,7 +57,7 @@ uint32_t GetCipherFlagByAuthId(int64_t authId)
         return flag;
     }
     if (AuthGetConnInfo(authId, &info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get authinfo fail %lld", authId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get authinfo fail %" PRId64, authId);
         return flag;
     }
     flag = SwitchAuthLinkTypeToFlagType(info.type);

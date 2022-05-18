@@ -314,7 +314,8 @@ static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]verify request authId=%lld", connFsm->id, connInfo->authId);
+    SoftBusLog(
+        SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]verify request authId=%" PRId64, connFsm->id, connInfo->authId);
     return rc;
 }
 
@@ -327,13 +328,13 @@ static int32_t OnAuthKeyGeneratedInAuth(LnnConnectionFsm *connFsm)
     }
     if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_ACTIVE) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]active auth success, transact to syn_device_info state, authId=%llu",
+            "[id=%u]active auth success, transact to syn_device_info state, authId=%" PRIu64,
             connFsm->id, connInfo->authId);
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_DEVICE_INFO, NULL);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]passive auth success, transact to syn_device_info state, authId=%llu",
+            "[id=%u]passive auth success, transact to syn_device_info state, authId=%" PRIu64,
             connFsm->id, connInfo->authId);
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_DEVICE_INFO, NULL);
@@ -354,7 +355,7 @@ static int32_t OnAuthDoneInAuth(LnnConnectionFsm *connFsm, int32_t *retCode)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth result flag is null", connFsm->id);
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%lld, auth result=%d",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", auth result=%d",
         connFsm->id, connInfo->authId, *retCode);
     if (*retCode == SOFTBUS_OK) {
         SoftBusFree(retCode);
@@ -545,7 +546,7 @@ static int32_t OnAuthDoneInSyncInfo(LnnConnectionFsm *connFsm, int32_t *retCode)
         SoftBusFree(retCode);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%lld, auth result=%d",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", auth result=%d",
         connFsm->id, connInfo->authId, *retCode);
     if (*retCode == SOFTBUS_OK) {
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);

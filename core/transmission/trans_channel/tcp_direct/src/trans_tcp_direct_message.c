@@ -219,7 +219,8 @@ static AuthSideFlag GetAuthSideFlag(uint64_t seq, uint32_t flags)
     if (flags & FLAG_REPLY) {
         side = ((seq & AUTH_CONN_SERVER_SEQ_MASK) != 0) ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthSideFlag: flags=%d, side=%d, seq=%lld", flags, side, seq);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+        "GetAuthSideFlag: flags=%d, side=%d, seq=%" PRId64, flags, side, seq);
     return side;
 }
 
@@ -325,7 +326,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
         return SOFTBUS_MEM_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=0x%x, seq=%llu",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=0x%x, seq=%" PRIu64,
         side, packetHead->flags, packetHead->seq);
     return SOFTBUS_OK;
 }

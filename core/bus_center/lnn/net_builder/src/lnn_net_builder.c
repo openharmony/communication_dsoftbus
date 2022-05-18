@@ -615,7 +615,7 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create and start a new connection fsm as server side");
         connFsm = StartNewConnectionFsm(&msgPara->addr);
         if (connFsm == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start server new connection failed: %llu",
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start server new connection failed: %" PRIu64,
                 msgPara->authId);
             SoftBusFree((void *)msgPara);
             return SOFTBUS_ERR;
@@ -631,8 +631,8 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         }
         rc = SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth key generated process done: %llu, %d",
-        connFsm->id, msgPara->authId, rc);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "[id=%u]connection fsm auth key generated process done: %" PRIu64 ", %d", connFsm->id, msgPara->authId, rc);
     SoftBusFree((void *)msgPara);
     return rc;
 }
@@ -650,11 +650,11 @@ static int32_t ProcessAuthDone(const void *para)
     do {
         connFsm = FindConnectionFsmByAuthId(msgPara->authId);
         if (connFsm == NULL || connFsm->isDead) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld",
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64,
                 msgPara->authId);
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth done: %llu",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth done: %" PRIu64,
             connFsm->id, msgPara->authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send auth result to connection fsm[id=%u] failed",
@@ -679,7 +679,7 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
     }
     connFsm = FindConnectionFsmByAuthId(msgPara->authId);
     if (connFsm == NULL || connFsm->isDead) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64,
             msgPara->authId);
         SoftBusFree((void *)msgPara);
         return SOFTBUS_ERR;
@@ -733,10 +733,10 @@ static int32_t ProcessAuthDisconnect(const void *para)
     do {
         connFsm = FindConnectionFsmByAuthId(*authId);
         if (connFsm == NULL || connFsm->isDead) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %lld", *authId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64, *authId);
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth disconnect, authId: %lld", connFsm->id, *authId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth disconnect, authId: %" PRId64, connFsm->id, *authId);
         if (LnnSendDisconnectMsgToConnFsm(connFsm) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send disconnect to connection fsm[id=%u] failed",
                 connFsm->id);
@@ -1142,7 +1142,7 @@ static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVer
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth key generated message failed");
         SoftBusFree(para);
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth key generated: %lld", authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth key generated: %" PRId64, authId);
 }
 
 static void OnAuthDone(int64_t authId, int32_t retCode)
@@ -1242,7 +1242,7 @@ static void OnDisconnect(int64_t authId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc authId fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth channel disconnect, authId is %lld", authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth channel disconnect, authId is %" PRId64, authId);
     *para = authId;
     if (PostMessageToHandler(MSG_TYPE_DISCONNECT, (void *)para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth disconnect message failed");

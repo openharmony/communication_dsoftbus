@@ -129,7 +129,7 @@ void P2pLinkDelConnedByAuthId(int64_t authId)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (item->chanId.p2pAuthId == authId) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline by authId %lld", authId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline by authId %" PRId64, authId);
             P2pLinkDevOffLineNotify(item->peerMac);
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -161,7 +161,7 @@ static void DevOffline(const P2pLinkGroup *group)
         if (DevIsNeedDel(item->peerMac, group) == true) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline");
             if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close p2p auth chan %llu", item->chanId.p2pAuthId);
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
                 AuthCloseConn(item->chanId.p2pAuthId);
             }
             P2pLinkDevOffLineNotify(item->peerMac);
@@ -233,7 +233,7 @@ static void P2pLinkCleanConnedDev(void)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean p2p auth chan %llu", item->chanId.p2pAuthId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
             AuthCloseConn(item->chanId.p2pAuthId);
         }
         P2pLinkDevOffLineNotify(item->peerMac);

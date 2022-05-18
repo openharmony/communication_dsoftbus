@@ -27,7 +27,7 @@ static void AuthP2pOnKeyGenerated(int64_t authId, ConnectOption *option, SoftBus
 {
     (void)option;
     (void)peerVersion;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onKeyGenerated, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onKeyGenerated, authId = %" PRId64 ".", authId);
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found.");
@@ -54,14 +54,14 @@ static void AuthP2pOnKeyGenerated(int64_t authId, ConnectOption *option, SoftBus
         return;
     }
     SoftBusFree(buf);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send device info succ, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "send device info succ, authId = %" PRId64 ".", authId);
 }
 
 static void AuthP2pOnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const char *peerUuid,
     uint8_t *data, uint32_t len)
 {
     (void)peerUuid;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onRecvSyncDeviceInfo, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onRecvSyncDeviceInfo, authId = %" PRId64 ".", authId);
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found.");
@@ -85,18 +85,18 @@ static void AuthP2pOnRecvSyncDeviceInfo(int64_t authId, AuthSideFlag side, const
 
 static void AuthP2pOnDeviceVerifyPass(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyPass, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyPass, authId = %" PRId64 ".", authId);
 }
 
 static void AuthP2pOnDeviceVerifyFail(int64_t authId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyFail, authId = %lld, reason = %d.",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDeviceVerifyFail, authId = %" PRId64 ", reason = %d.",
         authId, reason);
 }
 
 static void AuthP2pOnDisconnect(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDisconnect, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth p2p onDisconnect, authId = %" PRId64 ".", authId);
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found.");

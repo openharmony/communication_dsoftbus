@@ -164,7 +164,7 @@ static char *EncryptVerifyP2pData(int64_t authId, const char *data, uint32_t *en
 
 static int32_t SendAuthData(int64_t authId, int32_t module, int32_t flag, int64_t seq, const char *data)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendAuthData: [%lld, %d, %d, %lld]",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendAuthData: [%" PRId64 ", %d, %d, %" PRId64 "]",
         authId, module, flag, seq);
     uint32_t encryptDataLen;
     char *encryptData = NULL;
@@ -193,7 +193,7 @@ static int32_t SendAuthData(int64_t authId, int32_t module, int32_t flag, int64_
 
 static int32_t VerifyP2p(int64_t authId, const char *myIp, int32_t myPort, int64_t seq)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2p: authId=%lld, ip=%s, port=%d",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2p: authId=%" PRId64 ", ip=%s, port=%d",
         authId, myIp, myPort);
     char *msg = NULL;
     int32_t ret;
@@ -213,7 +213,7 @@ static int32_t VerifyP2p(int64_t authId, const char *myIp, int32_t myPort, int64
 
 static void OnAuthConnOpened(uint32_t requestId, int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthConnOpened: requestId=%u, authId=%lld",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthConnOpened: requestId=%u, authId=%" PRId64,
         requestId, authId);
     int32_t channelId = INVALID_CHANNEL_ID;
     SessionConn *conn = NULL;
@@ -332,7 +332,8 @@ static void SendVerifyP2pFailRsp(int64_t authId, int64_t seq,
 
 static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pRequest: authId=%lld, seq=%lld", authId, seq);
+    SoftBusLog(
+        SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pRequest: authId=%" PRId64 ", seq=%" PRId64, authId, seq);
     int32_t peerPort;
     char peerIp[IP_LEN] = {0};
     int32_t myPort = 0;
@@ -373,7 +374,8 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
 
 static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply: authId=%lld, seq=%lld", authId, seq);
+    SoftBusLog(
+        SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply: authId=%" PRId64 ", seq=%" PRId64, authId, seq);
     SessionConn *conn = NULL;
     int32_t ret;
     int32_t channelId = INVALID_CHANNEL_ID;
@@ -439,7 +441,7 @@ static void OnAuthMsgProc(int64_t authId, int32_t flags, int64_t seq, const cJSO
 
 static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv: authId=%lld", authId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv: authId=%" PRId64, authId);
     if (option == NULL || info == NULL || info->data == NULL) {
         return;
     }
@@ -472,7 +474,7 @@ static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const Au
 
 static void OnAuthChannelClose(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthChannelClose: authId=%lld", authId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthChannelClose: authId=%" PRId64, authId);
     return;
 }
 
