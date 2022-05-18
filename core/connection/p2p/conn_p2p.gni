@@ -25,7 +25,7 @@ p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/negotiation/include",
   "$dsoftbus_root_path/core/connection/p2p/adapter",
 
-  "//foundation/communication/wifi/wifi/interfaces/innerkits/native_c",
+  "//foundation/communication/wifi/wifi/interfaces/kits/c",
 ]
 
 if (dsoftbus_standard_feature_conn_p2p == true) {
@@ -46,7 +46,8 @@ if (dsoftbus_standard_feature_conn_p2p == true) {
     "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface.c",
     "$dsoftbus_root_path/core/connection/p2p/adapter/p2plink_adapter.c",
   ]
-  p2p_connection_deps += [ "//foundation/communication/wifi/wifi/interfaces/innerkits/native_cpp/wifi_standard:wifi_sdk" ]
+  p2p_connection_deps +=
+      [ "//foundation/communication/wifi/wifi/frameworks/native:wifi_sdk" ]
 } else {
   p2p_connection_src += [ "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface_virtual.c" ]
 }
