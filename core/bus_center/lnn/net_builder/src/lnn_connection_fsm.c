@@ -528,8 +528,8 @@ static int32_t OnSyncDeviceInfoDone(LnnConnectionFsm *connFsm, LnnRecvDeviceInfo
         return SOFTBUS_ERR;
     }
     SoftBusFree(para);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]recv peer device info done, wait for auth done",
-        connFsm->id);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]recv device info from %s, wait for auth done",
+        connFsm->id, connInfo->nodeInfo->deviceInfo.deviceName);
     return SOFTBUS_OK;
 }
 
@@ -605,6 +605,9 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]networkId changed", connFsm->id);
         *type = CONNECTION_ADDR_MAX;
         return true;
+    }
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
+        return false;
     }
     if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer IP changed", connFsm->id);
