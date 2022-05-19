@@ -145,7 +145,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channel->info.myData.channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %lld]",
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %" PRId64 "]",
                 channel->info.myData.channelId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_ERR;
@@ -156,7 +156,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add udp channel success.[channelId = %lld].",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add udp channel success.[channelId = %" PRId64 "].",
         channel->info.myData.channelId);
     return SOFTBUS_OK;
 }
@@ -218,7 +218,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %lld]", seq);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
     return SOFTBUS_ERR;
 }
 
@@ -311,7 +311,7 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %lld]", seq);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
     return SOFTBUS_ERR;
 }
 
@@ -368,7 +368,7 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %lld]", seq);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
 }
 
 int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel)

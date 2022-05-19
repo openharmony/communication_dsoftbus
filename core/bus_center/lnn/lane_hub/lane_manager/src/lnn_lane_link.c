@@ -291,7 +291,7 @@ static void OnP2pConnectFailed(int32_t requestId, int32_t reason)
 
 static void OnConnOpened(uint32_t requestId, int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpened: requestId = %d, authId = %lld.",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpened: requestId = %d, authId = %" PRId64 ".",
         requestId, authId);
     SetAuthIdToItem(requestId, authId);
     P2pLinkConnectInfo info = {0};
@@ -402,7 +402,7 @@ static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnL
 
 static void OnConnOpenedForDisconnect(uint32_t requestId, int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpened: requestId = %d, authId = %lld.",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpened: requestId = %d, authId = %" PRId64 ".",
         requestId, authId);
     P2pLinkDisconnectInfo info = {0};
     info.authId = authId;

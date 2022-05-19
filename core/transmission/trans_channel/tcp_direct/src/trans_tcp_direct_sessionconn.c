@@ -134,7 +134,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
             return item;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%llu", req);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%" PRIu64, req);
     return NULL;
 }
 
@@ -225,7 +225,7 @@ void TransDelSessionConnById(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
             if (item->authId > 0) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close auth conn: authId=%lld", item->authId);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close auth conn: authId=%" PRId64, item->authId);
                 AuthCloseConn(item->authId);
             }
             ListDelete(&item->node);

@@ -1290,7 +1290,7 @@ static void P2pLinkNeoConnRequestProc(int64_t authId, const cJSON *data)
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, authId = %lld.", authId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv conn request, authId = %" PRId64 ".", authId);
     g_p2pLinkNegoFsm.linkInfo.authId = authId;
 
     if (P2pLinkIsDisconnectState() == true) {

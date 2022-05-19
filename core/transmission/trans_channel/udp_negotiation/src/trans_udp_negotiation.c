@@ -454,7 +454,7 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
 static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int64_t seq)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "start exchange udp info: channelId=%lld, authId=%lld, streamType=%d",
+        "start exchange udp info: channelId=%" PRId64 ", authId=%" PRId64 ", streamType=%d",
         channel->info.myData.channelId, authId, channel->info.streamType);
     cJSON *requestMsg = cJSON_CreateObject();
     if (requestMsg == NULL) {
@@ -507,7 +507,8 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
 
 static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpened: requestId=%u, authId=%lld", requestId, authId);
+    SoftBusLog(
+        SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpened: requestId=%u, authId=%" PRId64, requestId, authId);
     UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     if (channel == NULL) {
         goto EXIT_ERR;
