@@ -42,12 +42,24 @@
 #define REG_PATTERN_MAX_LEN 256
 #define REPLACE_DIVISION_BASE 3
 
+#define PLAINTEXT_LEN_SHORT 1
+#define PLAINTEXT_LEN_NORMAL 4
+#define ANONYMIZE_LEN 6
+#define SHORT_ID_LENGTH 20
+#define SESSION_NAME_DEVICE_ID_LEN 96
+#define SESSION_NAME_DEVICE_PATTERN "([0-9A-Z]{32}){1,3}"
+
 static int32_t g_logLevel;
 
 typedef struct {
     SoftBusLogModule mod;
     char name[LOG_NAME_MAX_LEN];
 } LogInfo;
+
+typedef enum {
+    ANONYMIZE_NORMAL = 1,
+    ANONYMIZE_ENHANCE
+} AnonymizeMode;
 
 static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
     {SOFTBUS_LOG_AUTH, "AUTH"},
@@ -110,14 +122,8 @@ const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
     return target + (targetLen - expectAnonymizedLength);
 }
 
-static int32_t AnonymizeRegInit(regex_t *preg)
+static int32_t AnonymizeRegInit(regex_t *preg, const char *pattern)
 {
-    char pattern[REG_PATTERN_MAX_LEN] = {0};
-    if (sprintf_s(pattern, REG_PATTERN_MAX_LEN, "%s|%s|%s|%s|%s",
-        REG_ID_PATTERN, REG_IDT_PATTERN, REG_IP_PATTERN, REG_MAC_PATTERN, REG_KEY_PATTERN) < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init anonymize reg: concatenate reg pattern fail");
-        return SOFTBUS_ERR;
-    }
     if (regcomp(preg, pattern, REG_EXTENDED) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init anonymize reg: compile reg pattern fail");
         return SOFTBUS_ERR;
@@ -130,32 +136,51 @@ static void AnonymizeRegDeinit(regex_t *preg)
     regfree(preg);
 }
 
-int32_t AnonymizePacket(char **output, const char *in, size_t len)
+static int32_t AnonymizeStringProcess(char *str, size_t len, AnonymizeMode mode)
 {
-    if (in == NULL || len > LOG_PRINT_MAX_LEN) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is null or too long, len: %d", len);
+    if (len < ANONYMIZE_LEN || mode == ANONYMIZE_ENHANCE) {
+        if (strcpy_s(str, len, "******") != EOK) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strncpy fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        uint32_t plaintextLen = len < SHORT_ID_LENGTH ? PLAINTEXT_LEN_SHORT : PLAINTEXT_LEN_NORMAL;
+        if (memset_s(str + plaintextLen, len - plaintextLen, '*', ANONYMIZE_LEN) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: memset fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+        uint32_t offset = plaintextLen + ANONYMIZE_LEN;
+        if (strncpy_s(str + offset, len - offset, str + len - plaintextLen, plaintextLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strncpy fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t AnonymizeString(char **output, const char *in, size_t inLen, const char *pattern, AnonymizeMode mode)
+{
+    if (in == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: packet is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
+    char *str = (char *)SoftBusCalloc(inLen + 1);
+    if (str == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: malloc fail.");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(str, inLen + 1, in) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcpy fail.");
+        SoftBusFree(str);
+        return SOFTBUS_MEM_ERR;
+    }
     regex_t preg;
-    if (AnonymizeRegInit(&preg) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: init reg failed.");
+    if (AnonymizeRegInit(&preg, pattern) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: init reg failed.");
+        SoftBusFree(str);
         return SOFTBUS_ERR;
     }
-
-    char *str = (char *)SoftBusCalloc(len + 1);
-    if (str == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: malloc fail.");
-        AnonymizeRegDeinit(&preg);
-        return SOFTBUS_MEM_ERR;
-    }
-    if (strcpy_s(str, len + 1, in) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: strcpy fail.");
-        SoftBusFree(str);
-        AnonymizeRegDeinit(&preg);
-        return SOFTBUS_MEM_ERR;
-    }
-
     regmatch_t pmatch[PMATCH_SIZE] = {0};
     char *outexec = str;
     do {
@@ -163,15 +188,56 @@ int32_t AnonymizePacket(char **output, const char *in, size_t len)
             break;
         }
         if (pmatch[0].rm_so != pmatch[0].rm_eo) {
-            int32_t replaceLen = (pmatch[0].rm_eo - pmatch[0].rm_so) / REPLACE_DIVISION_BASE;
-            int32_t offset = pmatch[0].rm_so + replaceLen;
-            if (memset_s(outexec + offset, len - offset, '*', replaceLen + 1) != EOK) {
-                break;
+            printf("rm_so: %d, rm_eo: %d\n", pmatch[0].rm_so, pmatch[0].rm_eo);
+            regoff_t start = pmatch[0].rm_so;
+            regoff_t end = pmatch[0].rm_eo;
+            if (AnonymizeStringProcess(outexec + start, end - start, mode) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymizeStringProcess fail");
+                return SOFTBUS_ERR;
             }
-            outexec += pmatch[0].rm_eo;
+            int32_t offset = start + (int32_t)strlen(outexec + start);
+            char tmpStr[inLen + 1];
+            strcpy_s(tmpStr, inLen + 1, outexec + end);
+            if (strcat_s(str, inLen, tmpStr) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail, ret=%d", ret);
+                return SOFTBUS_ERR;
+            }
+            outexec += offset;
         }
     } while (true);
     *output = str;
     AnonymizeRegDeinit(&preg);
     return SOFTBUS_OK;
+}
+
+int32_t AnonymizePacket(char **output, const char *in, size_t inLen)
+{
+    if (in == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char pattern[REG_PATTERN_MAX_LEN] = {0};
+    if (sprintf_s(pattern, REG_PATTERN_MAX_LEN, "%s|%s|%s|%s|%s",
+        REG_ID_PATTERN, REG_IDT_PATTERN, REG_IP_PATTERN, REG_MAC_PATTERN, REG_KEY_PATTERN) < 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: concatenate reg pattern fail");
+        return SOFTBUS_ERR;
+    }
+
+    return AnonymizeString(output, in, inLen, pattern, ANONYMIZE_NORMAL);
+}
+
+const char *AnonySessionName(char **outName, const char *inName, size_t inNameLen)
+{
+    if (inName == NULL) {
+        return "null";
+    }
+    if (inNameLen < SESSION_NAME_DEVICE_ID_LEN) {
+        return inName;
+    }
+    if (AnonymizeString(outName, inName, inNameLen, SESSION_NAME_DEVICE_PATTERN, ANONYMIZE_NORMAL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anony sessionname fail.");
+        return "";
+    }
+    return *outName;
 }
