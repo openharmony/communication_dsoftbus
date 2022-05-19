@@ -739,7 +739,7 @@ static int32_t DiscCoapTestTimeDelay(void)
     }
     uint64_t delayTime = US_PER_SECOND * (g_endTime.tv_sec - g_startTime.tv_sec) +
         (g_endTime.tv_usec - g_startTime.tv_usec);
-    printf("discovery delay time(ms) = %llu.\n", delayTime / US_PER_MS);
+    printf("discovery delay time(ms) = %" PRIu64 ".\n", delayTime / US_PER_MS);
     return DISC_TEST_OK;
 }
 

@@ -111,7 +111,7 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
     }
     AuthManager *auth = AuthGetManagerByAuthId(head->authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%llu), AuthPostData failed",
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth found(%" PRIu64 "), AuthPostData failed",
             head->authId);
         return SOFTBUS_ERR;
     }
@@ -142,7 +142,7 @@ int32_t AuthPostData(const AuthDataHead *head, const uint8_t *data, uint32_t len
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth start post data, authId is %lld, connectionId is %u, moduleId is %d, seq is %lld",
+            "auth start post data, authId is %" PRId64 ", connectionId is %u, moduleId is %d, seq is %" PRId64,
             auth->authId, info.connectionId, info.connModule, info.seq);
         if (PostDataByConn(&info, connPostData, postDataLen) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PostDataByConn failed");
@@ -388,11 +388,11 @@ bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len)
 {
     AuthDataHead head;
 
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%lld, len=%u", authId, len);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthOnTransmit authId=%" PRId64 ", len=%u", authId, len);
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     AuthManager *auth = AuthGetManagerByAuthId(authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%llu) found", authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "no match auth(%" PRIu64 ") found", authId);
         return false;
     }
     head.dataType = DATA_TYPE_AUTH;

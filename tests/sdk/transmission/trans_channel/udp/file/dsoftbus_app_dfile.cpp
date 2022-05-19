@@ -147,7 +147,7 @@ static void TestSessionListenerInit(void)
 
 static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    LOG2_INFO("OnSendFileProcess sessionId = %d, bytesUpload = %llu, total = %llu\n",
+    LOG2_INFO("OnSendFileProcess sessionId = %d, bytesUpload = %" PRIu64 ", total = %" PRIu64 "\n",
         sessionId, bytesUpload, bytesTotal);
     return 0;
 }

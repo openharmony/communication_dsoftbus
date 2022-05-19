@@ -221,7 +221,7 @@ static int32_t PostDelayMsgToHbHandler(int32_t what, uint64_t arg1, uint64_t arg
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB post delay msg, what=%d delayMillis=%llu msec",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB post delay msg, what=%d delayMillis=%" PRIu64 " msec",
         what, delayMillis);
     g_beatHandler.looper->PostMessageDelay(g_beatHandler.looper, msg, delayMillis);
     return SOFTBUS_OK;
@@ -373,7 +373,7 @@ static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
     if (LnnPostDelayMsgToHbFsm(EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %llu mecs", delayMillis);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %" PRIu64 " mecs", delayMillis);
     return STATE_HB_NORMAL_NODE_INDEX;
 }
 
@@ -680,7 +680,7 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
         }
         if ((nowTime - oldTimeStamp) > offlineMillis) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB notify node lost heartbeat, networkId:%s, "
-                "timestamp:%llu, now:%llu", AnonymizesNetworkID(info[i].networkId), oldTimeStamp, nowTime);
+                "timestamp:%" PRIu64 ", now:%" PRIu64, AnonymizesNetworkID(info[i].networkId), oldTimeStamp, nowTime);
             if (LnnRemoveHbFsmMsg(EVENT_HB_DEVICE_LOST, (uint64_t)addrType, info[i].networkId) != SOFTBUS_OK) {
                 SoftBusFree(info);
                 return SOFTBUS_ERR;

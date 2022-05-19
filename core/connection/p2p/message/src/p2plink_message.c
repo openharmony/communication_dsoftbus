@@ -58,7 +58,7 @@ static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg
 
     if (!GetJsonObjectStringItem(msg, KEY_MAC, peerMac, sizeof(peerMac))) {
         int32_t ret = AuthSetP2pMac(authId, peerMac);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set auth %lld ret %d", authId, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set auth %" PRId64 " ret %d", authId, ret);
     }
 
     switch (cmdType) {
