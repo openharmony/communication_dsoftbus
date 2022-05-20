@@ -741,7 +741,10 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
         return SOFTBUS_ERR;
     }
     int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
-    if (ret <= 0) {
+    if (ret == 0) {
+        SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_SOCKET_EAGAIN;
+    } else if (ret < 0) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
         return SOFTBUS_ERR;
