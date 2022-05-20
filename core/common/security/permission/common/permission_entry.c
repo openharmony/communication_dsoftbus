@@ -259,8 +259,10 @@ static int32_t CompareString(const char *src, const char *dest, bool regexp)
         }
         if (regexec(&regComp, dest, 0, NULL, 0) == 0) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "src:%s dest:%s", src, dest);
+            regfree(&regComp);
             return SOFTBUS_OK;
         }
+        regfree(&regComp);
     } else {
         if (strcmp(src, dest) == 0) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "src:%s dest:%s", src, dest);
