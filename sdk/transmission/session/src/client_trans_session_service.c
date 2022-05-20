@@ -85,8 +85,10 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    char *anonyOut = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer: pkgName=%s, sessionName=%s",
-        pkgName, sessionName);
+        pkgName, AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+    SoftBusFree(anonyOut);
 
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init softbus err");
@@ -125,8 +127,10 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    char *anonyOut = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer: pkgName=%s, sessionName=%s",
-        pkgName, sessionName);
+        pkgName, AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+    SoftBusFree(anonyOut);
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
@@ -170,8 +174,13 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param");
         return INVALID_SESSION_ID;
     }
+    char *anonyOutMy = NULL;
+    char *anonyOutPeer = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
-        mySessionName, peerSessionName);
+        AnonyDevId(&anonyOutMy, mySessionName, strlen(mySessionName)),
+        AnonyDevId(&anonyOutPeer, peerSessionName, strlen(peerSessionName)));
+    SoftBusFree(anonyOutMy);
+    SoftBusFree(anonyOutPeer);
 
     TransInfo transInfo;
     SessionParam param = {
@@ -306,7 +315,10 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     } else {
         addr = (ConnectionAddr *)&addrInfo[addrIndex];
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s", sessionName);
+    char *anonyOut = NULL;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s",
+        AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+    SoftBusFree(anonyOut);
 
     int32_t sessionId;
     int32_t ret = ClientAddAuthSession(sessionName, &sessionId);
@@ -392,8 +404,13 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionSync invalid param");
         return INVALID_SESSION_ID;
     }
+    char *anonyOutMy = NULL;
+    char *anonyOutPeer = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%s, peerSessionName=%s",
-        mySessionName, peerSessionName);
+        AnonyDevId(&anonyOutMy, mySessionName, strlen(mySessionName)),
+        AnonyDevId(&anonyOutPeer, peerSessionName, strlen(peerSessionName)));
+    SoftBusFree(anonyOutMy);
+    SoftBusFree(anonyOutPeer);
 
     TransInfo transInfo;
     SessionParam param = {
