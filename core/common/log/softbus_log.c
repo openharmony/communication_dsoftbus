@@ -227,7 +227,7 @@ int32_t AnonymizePacket(char **output, const char *in, size_t inLen)
     return AnonymizeString(output, in, inLen, pattern, ANONYMIZE_NORMAL);
 }
 
-const char *AnonySessionName(char **outName, const char *inName, size_t inNameLen)
+const char *AnonyDevId(char **outName, const char *inName, size_t inNameLen)
 {
     if (inName == NULL) {
         return "null";

@@ -40,7 +40,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
 
 int32_t AnonymizePacket(char **output, const char *in, size_t len);
 
-const char *AnonySessionName(char **outName, const char *inName, size_t inNameLen);
+const char *AnonyDevId(char **outName, const char *inName, size_t inNameLen);
 
 #define UUID_ANONYMIZED_LENGTH 4
 #define NETWORKID_ANONYMIZED_LENGTH 4

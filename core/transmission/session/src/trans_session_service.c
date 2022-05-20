@@ -78,8 +78,10 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    char *anonyOut = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:pkgName=%s, sessionName=%s",
-        pkgName, sessionName);
+        pkgName, AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+    SoftBusFree(anonyOut);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:uid=%d, pid=%d", uid, pid);
 
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));

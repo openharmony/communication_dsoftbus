@@ -569,8 +569,13 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
         return SOFTBUS_ERR;
     }
+    char *anonyOutMy = NULL;
+    char *anonyOutPeer = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: mySessionName=%s, peerSessionName=%s",
-        conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
+        AnonyDevId(&anonyOutMy, conn->appInfo.myData.sessionName, strlen(conn->appInfo.myData.sessionName)),
+        AnonyDevId(&anonyOutPeer, conn->appInfo.peerData.sessionName, strlen(conn->appInfo.peerData.sessionName)));
+    SoftBusFree(anonyOutMy);
+    SoftBusFree(anonyOutPeer);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: myPid=%d, peerPid=%d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
 

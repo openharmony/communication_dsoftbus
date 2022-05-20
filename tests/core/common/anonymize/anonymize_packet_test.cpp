@@ -100,14 +100,14 @@ HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
 
 /**
  * @tc.name: AnonySessionNameNormalTest001
- * @tc.desc: Verify AnonySessionName function, use the normal parameter.
+ * @tc.desc: Verify AnonyDevId function, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(AnonymizePacketTest, AnonySessionNameNormalTest001, TestSize.Level0)
 {
     char *anonymizedOut = nullptr;
-    const char *res = AnonySessionName(&anonymizedOut, g_testSessionName, strlen(g_testSessionName));
+    const char *res = AnonyDevId(&anonymizedOut, g_testSessionName, strlen(g_testSessionName));
     EXPECT_STREQ(g_testAnonySessionName, res);
 
     SoftBusFree(anonymizedOut);
