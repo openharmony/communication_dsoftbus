@@ -28,6 +28,7 @@
 #include "dfs_session.h"
 #include "inner_session.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -174,8 +175,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param");
         return INVALID_SESSION_ID;
     }
-    char *anonyOutMy = NULL;
-    char *anonyOutPeer = NULL;
+    char *anonyOutMy = NULL, *anonyOutPeer = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
         AnonyDevId(&anonyOutMy, mySessionName, strlen(mySessionName)),
         AnonyDevId(&anonyOutPeer, peerSessionName, strlen(peerSessionName)));
@@ -404,8 +404,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionSync invalid param");
         return INVALID_SESSION_ID;
     }
-    char *anonyOutMy = NULL;
-    char *anonyOutPeer = NULL;
+    char *anonyOutMy = NULL, *anonyOutPeer = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%s, peerSessionName=%s",
         AnonyDevId(&anonyOutMy, mySessionName, strlen(mySessionName)),
         AnonyDevId(&anonyOutPeer, peerSessionName, strlen(peerSessionName)));

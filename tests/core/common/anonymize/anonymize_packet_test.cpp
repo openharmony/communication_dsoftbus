@@ -33,9 +33,9 @@ namespace OHOS {
 const char *g_originPacket = "\"DEVICE_ID\":\"18f3b221c8661b51eaf6520c223f48afe211111113ab9c6a4f03b7c719eb60d1\"";
 const char *g_anonymizedPacket = "\"DEVICE_ID\":\"18f3******60d1\"";
 const char *g_shortPacket = "\"DEVICE_ID\":\"18f3b221c8661b5111111111111111b7c719eb60d1\"";
-const char *g_testSessionName = "test.ohos.abcde60272D6C226F0E08021F07AAAAAAAAAABBBBBBBB9A0111111111169A5342784D2EB\
-92274C763D83CCCCCCCCCCCCD57A4Camera_Camera123456789";
-const char *g_testAnonySessionName = "test.ohos.abcde6027******57A4Camera_Camera123456789";
+const char *g_testSessionName = "test.ohos.abc60272D6C226F0E08021F07AAAAAAAAAABBBBBBBB9A0111111111169A5342784D2EB\
+123456789ABCCCCCCCCCCCCCD57A4Cam_Cam123";
+const char *g_testAnonySessionName = "test.ohos.abc6027******57A4Cam_Cam123";
 
 class AnonymizePacketTest : public testing::Test {
 public:
@@ -111,6 +111,5 @@ HWTEST_F(AnonymizePacketTest, AnonySessionNameNormalTest001, TestSize.Level0)
     EXPECT_STREQ(g_testAnonySessionName, res);
 
     SoftBusFree(anonymizedOut);
-
 }
 }; // namespace OHOS
