@@ -161,7 +161,7 @@ static int32_t AnonymizeStringProcess(char *str, size_t len, AnonymizeMode mode)
 static int32_t AnonymizeString(char **output, const char *in, size_t inLen, const char *pattern, AnonymizeMode mode)
 {
     if (in == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: packet is null");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: in is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -188,7 +188,6 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
             break;
         }
         if (pmatch[0].rm_so != pmatch[0].rm_eo) {
-            printf("rm_so: %d, rm_eo: %d\n", pmatch[0].rm_so, pmatch[0].rm_eo);
             regoff_t start = pmatch[0].rm_so;
             regoff_t end = pmatch[0].rm_eo;
             if (AnonymizeStringProcess(outexec + start, end - start, mode) != SOFTBUS_OK) {
@@ -197,9 +196,8 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
             }
             int32_t offset = start + (int32_t)strlen(outexec + start);
             char tmpStr[inLen + 1];
-            strcpy_s(tmpStr, inLen + 1, outexec + end);
-            if (strcat_s(str, inLen, tmpStr) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail, ret=%d", ret);
+            if (strcpy_s(tmpStr, inLen + 1, outexec + end) != EOK || strcat_s(str, inLen, tmpStr) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail.");
                 return SOFTBUS_ERR;
             }
             outexec += offset;
