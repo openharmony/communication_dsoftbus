@@ -247,12 +247,12 @@ The main code directory structure of DSoftBus is as follows:
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
-DSoftBus subsystem
+[DSoftBus subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/dsoftbus.md)
 
 **communication_dsoftbus**
 
-communication_bluetooth
+[communication_bluetooth](https://gitee.com/openharmony/communication_bluetooth)
 
-communication_ipc
+[communication_ipc](https://gitee.com/openharmony/communication_ipc)
 
-communication_wifi
+[communication_wifi](https://gitee.com/openharmony/communication_wifi)
