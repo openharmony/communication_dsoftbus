@@ -223,7 +223,7 @@ static int32_t OnDataEvent(int events, int fd)
     if (events == SOFTBUS_SOCKET_IN) {
         ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Trans Srv Recv Data ret %d. ", ret);
-        if ((ret == SOFTBUS_DATA_NOT_ENOUGH) || (ret == SOFTBUS_SOCKET_EAGAIN)) {
+        if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
             SoftBusFree(conn);
             return SOFTBUS_OK;
         }
