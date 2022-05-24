@@ -32,6 +32,7 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$dsoftbus_root_path/adapter/common/include",
         "$dsoftbus_root_path/core/common/include/",
+        "$dsoftbus_root_path/interfaces/kits/common",
         "//third_party/bounds_checking_function/include",
       ]
       deps = [
@@ -56,6 +57,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include/",
+      "$dsoftbus_root_path/interfaces/kits/common",
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
