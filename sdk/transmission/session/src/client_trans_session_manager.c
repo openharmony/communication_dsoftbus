@@ -58,7 +58,7 @@ int TransClientInit(void)
 
 static int32_t GenerateSessionId(void)
 {
-    if (g_sessionIdNum > MAX_SESSION_ID) {
+    if (g_sessionIdNum >= MAX_SESSION_ID) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionid num cross the line error");
         return INVALID_SESSION_ID;
     }
