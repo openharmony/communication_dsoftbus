@@ -51,6 +51,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_utils_interface") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
     ]
@@ -89,6 +90,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
     ]
     include_dirs += conn_common_inc + trans_common_inc
