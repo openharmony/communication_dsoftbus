@@ -250,7 +250,8 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
 
 int32_t TcpOnDataEventOut(int32_t fd)
 {
-    TcpConnInfoNode tcpInfo = {0};
+    TcpConnInfoNode tcpInfo;
+    (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
 
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
         (void)DelTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, WRITE_TRIGGER);
