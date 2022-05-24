@@ -408,7 +408,9 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
     if (isReply) {
         /* receive reply message */
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive reply udp negotiation info.");
-        UdpChannelInfo channel = {0};
+        UdpChannelInfo channel;
+        (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
+
         if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel negotiation status done failed.");
             return;
@@ -430,7 +432,9 @@ static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq,
     } else {
         /* receive request message */
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive request udp negotiation info.");
-        AppInfo info = {0};
+        AppInfo info;
+        (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+
         if (ParseRequestAppInfo(authId, msg, &info) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get appinfo failed.");
             return;
@@ -691,7 +695,9 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
 int32_t TransCloseUdpChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans close udp channel.");
-    UdpChannelInfo channel = {0};
+    UdpChannelInfo channel;
+    (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
+
     if (TransSetUdpChannelOptType(channelId, TYPE_UDP_CHANNEL_CLOSE) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel close type failed.");
         return SOFTBUS_ERR;
