@@ -118,11 +118,6 @@ void LnnReleaseLane(int32_t laneId)
     if (laneId < LNN_LINK_TYPE_WLAN_5G || laneId >= LNN_LINK_TYPE_BUTT) {
         return;
     }
-    int32_t count = LnnGetLaneCount(laneId);
-    if (count == SOFTBUS_ERR || count > 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lane already used, count = %d.", count);
-        return;
-    }
 
     if (SoftBusMutexLock(&g_lanes[laneId].lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
@@ -130,6 +125,12 @@ void LnnReleaseLane(int32_t laneId)
     }
     if (laneId >= LNN_LINK_TYPE_P2P && laneId <= LNN_LINK_TYPE_P2P_MAX) {
         (void)LnnDisconnectP2p(g_lanes[laneId].networkId, g_lanes[laneId].pid);
+    }
+    int32_t count = LnnGetLaneCount(laneId);
+    if (count != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lane already used, count = %d.", count);
+        (void)SoftBusMutexUnlock(&g_lanes[laneId].lock);
+        return;
     }
     if (g_lanes[laneId].laneInfo.p2pInfo != NULL) {
         SoftBusFree(g_lanes[laneId].laneInfo.p2pInfo);
