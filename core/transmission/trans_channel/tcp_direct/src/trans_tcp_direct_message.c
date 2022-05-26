@@ -535,6 +535,16 @@ static int32_t GetUuidByChanId(int32_t channelId, char *uuid, uint32_t len, uint
     return SOFTBUS_OK;
 }
 
+static void OpenDataBusRequestOutSessionName(const char *mySessionName, const char *peerSessionName)
+{
+    char *anonyOutMy = NULL;
+    char *anonyOutPeer = NULL;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: mySessionName=%s, peerSessionName=%s",
+        AnonyDevId(&anonyOutMy, mySessionName), AnonyDevId(&anonyOutPeer, peerSessionName));
+    SoftBusFree(anonyOutMy);
+    SoftBusFree(anonyOutPeer);
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
@@ -569,12 +579,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
         return SOFTBUS_ERR;
     }
-    char *anonyOutMy = NULL, *anonyOutPeer = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: mySessionName=%s, peerSessionName=%s",
-        AnonyDevId(&anonyOutMy, conn->appInfo.myData.sessionName, strlen(conn->appInfo.myData.sessionName)),
-        AnonyDevId(&anonyOutPeer, conn->appInfo.peerData.sessionName, strlen(conn->appInfo.peerData.sessionName)));
-    SoftBusFree(anonyOutMy);
-    SoftBusFree(anonyOutPeer);
+    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: myPid=%d, peerPid=%d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
 

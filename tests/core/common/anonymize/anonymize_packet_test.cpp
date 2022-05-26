@@ -107,7 +107,7 @@ HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
 HWTEST_F(AnonymizePacketTest, AnonySessionNameNormalTest001, TestSize.Level0)
 {
     char *anonymizedOut = nullptr;
-    const char *res = AnonyDevId(&anonymizedOut, g_testSessionName, strlen(g_testSessionName));
+    const char *res = AnonyDevId(&anonymizedOut, g_testSessionName);
     EXPECT_STREQ(g_testAnonySessionName, res);
 
     SoftBusFree(anonymizedOut);

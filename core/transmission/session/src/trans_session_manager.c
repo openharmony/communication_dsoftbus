@@ -219,7 +219,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
             *uid = pos->uid;
             *pid = pos->pid;
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransGetUidAndPid: sessionName=%s, uid=%d, pid=%d",
-                AnonyDevId(&anonyOut, sessionName, strlen(sessionName)), pos->uid, pos->pid);
+                AnonyDevId(&anonyOut, sessionName), pos->uid, pos->pid);
             SoftBusFree(anonyOut);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
@@ -228,7 +228,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s",
-        AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+        AnonyDevId(&anonyOut, sessionName));
     SoftBusFree(anonyOut);
     return SOFTBUS_ERR;
 }
