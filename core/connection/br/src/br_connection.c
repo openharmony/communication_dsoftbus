@@ -36,7 +36,7 @@
 #include "time.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
-
+#define SEND_WAIT_TIMEOUT 1000
 #define DISCONN_DELAY_TIME 200
 #define BR_ACCEPET_WAIT_TIME 1000
 #define CONNECT_REF_INCRESE 1
@@ -728,6 +728,16 @@ static int32_t DisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_ERR;
 }
 
+static void GetTimeDelay(uint32_t delay, struct timespec *tv)
+{
+#define USECTONSEC 1000LL
+    SoftBusSysTime now;
+    (void)SoftBusGetTime(&now);
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + SEND_WAIT_TIMEOUT * USECTONSEC;
+    tv->tv_sec = time / USECTONSEC / USECTONSEC;
+    tv->tv_nsec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
+}
+
 void *SendHandlerLoop(void *arg)
 {
     while (1) {
@@ -736,7 +746,11 @@ void *SendHandlerLoop(void *arg)
             break;
         }
         if (IsListEmpty(&g_dataQueue.sendList)) {
-            pthread_cond_wait(&g_dataQueue.cond, &g_dataQueue.lock);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond start");
+            struct timespec tv;
+            GetTimeDelay(SEND_WAIT_TIMEOUT, &tv);
+            (void)pthread_cond_timedwait(&g_dataQueue.cond, &g_dataQueue.lock, &tv);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond end");
             (void)pthread_mutex_unlock(&g_dataQueue.lock);
             continue;
         }
