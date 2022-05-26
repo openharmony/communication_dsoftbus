@@ -429,6 +429,7 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
     }
 
     head.dataType = DATA_TYPE_SYNC;
+    head.flag = AUTH_INFO_UNCOMPRESS_FLAG;
     if (option.type == CONNECT_TCP) {
         head.module = MODULE_AUTH_CONNECTION;
     } else {
