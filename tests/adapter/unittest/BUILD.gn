@@ -24,7 +24,6 @@ if (defined(ohos_lite)) {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = [
-        "dsoftbus_crypto_test.cpp",
         "dsoftbus_other_test.cpp",
         "softbus_socket_test.cpp",
         "softbus_thread_test.cpp",
@@ -48,7 +47,6 @@ if (defined(ohos_lite)) {
   ohos_unittest("AdapterTest") {
     module_out_path = module_output_path
     sources = [
-      "dsoftbus_crypto_test.cpp",
       "dsoftbus_other_test.cpp",
       "softbus_socket_test.cpp",
       "softbus_thread_test.cpp",
