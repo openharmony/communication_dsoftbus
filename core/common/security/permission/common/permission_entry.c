@@ -365,7 +365,7 @@ static bool CheckDBinder(const char *sessionName)
         return false;
     }
     if (strcmp(DBINDER_SERVICE_NAME, sessionName) == 0) {
-        return false;
+        return true;
     }
     if (StrStartWith(sessionName, DBINDER_BUS_NAME_PREFIX)) {
         return true;

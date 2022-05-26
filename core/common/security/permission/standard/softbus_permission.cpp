@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -32,11 +33,13 @@
 #endif
 
 namespace {
+    using namespace OHOS::Security;
+
     const std::string PERMISSION_JSON_FILE = PERMISSION_JSON_FILE_PATH;
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
-    const char *dbinderSessionName = "DBinderService";
+    const std::string SAMGR_PROCESS_NAME = "samgr";
 }
 
 int32_t TransPermissionInit(void)
@@ -128,20 +131,19 @@ int32_t RemoveTransPermission(const char *sessionName)
 
 int32_t CheckDynamicPermission(void)
 {
-    int32_t callingUid = (int32_t)OHOS::IPCSkeleton::GetCallingUid();
-    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
-    int32_t dbinderUid = 0;
-    int32_t dbinderPid = 0;
+    uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
 
-    int32_t ret = TransGetUidAndPid(dbinderSessionName, &dbinderUid, &dbinderPid);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermissionInner get dbinder uid and pid failed");
-        return ret;
+    auto tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
+    if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not native call");
+        return SOFTBUS_ERR;
     }
-    if (callingUid != dbinderUid || callingPid != dbinderPid) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemovePermission denied: invalid uid %d or pid %d",
-            callingUid, callingPid);
-        return SOFTBUS_PERMISSION_DENIED;
+    AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(callingToken, nativeTokenInfo);
+    if (result == SOFTBUS_OK && nativeTokenInfo.processName == SAMGR_PROCESS_NAME) {
+        return SOFTBUS_OK;
     }
-    return SOFTBUS_OK;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+        "check dynamic permission failed, processName:%{private}s", nativeTokenInfo.processName.c_str());
+    return SOFTBUS_ERR;
 }

@@ -57,6 +57,10 @@ static sptr<IRemoteObject> GetSystemAbility()
 int32_t TransServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_serverProxy != nullptr) {
+        return SOFTBUS_OK;
+    }
+
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
@@ -179,8 +183,10 @@ int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType,
 int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        if (TransServerProxyInit() != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "grant permission g_serverProxy is nullptr!");
+            return SOFTBUS_ERR;
+        }
     }
     if (sessionName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionName is nullptr");
