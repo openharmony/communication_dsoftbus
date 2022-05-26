@@ -401,6 +401,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     fd = OpenTcpClientSocket(conn->appInfo.peerData.ip, NULL, conn->appInfo.peerData.port, true);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
+        ReleaseSessonConnLock();
         goto EXIT_ERR;
     }
     conn->appInfo.fd = fd;
