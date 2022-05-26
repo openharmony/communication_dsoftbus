@@ -826,28 +826,23 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
 {
     int port = 6666;
-    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
-    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    int clientfd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, false);
+    int ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(clientfd);
 
-    clientfd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, false);
-    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(clientfd);
-
-    clientfd = OpenTcpClientSocket(Ip, nullptr, port, false);
-    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    clientfd = OpenTcpClientSocket(nullptr, nullptr, port, false);
+    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", -1, false);
-    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     CloseTcpFd(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
-    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
     CloseTcpFd(clientfd);
 };
@@ -925,23 +920,18 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
-* @tc.require: The OpenTcpClientSocket operates normally.
+* @tc.require: The SendTcpData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
 {
     int port = 6666;
-    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
-    int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
 
+    int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
     ssize_t bytes = SendTcpData(clientfd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
     TcpShutDown(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
-    ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
     bytes = SendTcpData(clientfd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
     TcpShutDown(clientfd);
@@ -994,7 +984,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
 
     int port = 6666;
-    fd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
+    fd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, true);
     EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, nullptr, sizeof(ConnPktHead) + head.len, 0));
     EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, 0, 0));
     EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
