@@ -80,7 +80,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     }
     char *anonyOut = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:pkgName=%s, sessionName=%s",
-        pkgName, AnonyDevId(&anonyOut, sessionName, strlen(sessionName)));
+        pkgName, AnonyDevId(&anonyOut, sessionName));
     SoftBusFree(anonyOut);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCreateSessionServer:uid=%d, pid=%d", uid, pid);
 

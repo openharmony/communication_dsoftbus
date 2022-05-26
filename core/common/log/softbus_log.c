@@ -187,17 +187,19 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
         if (regexec(&preg, outexec, PMATCH_SIZE, pmatch, 0) != 0) {
             break;
         }
-        if (pmatch[0].rm_so != pmatch[0].rm_eo) {
-            regoff_t start = pmatch[0].rm_so;
-            regoff_t end = pmatch[0].rm_eo;
+        regoff_t start = pmatch[0].rm_so;
+        regoff_t end = pmatch[0].rm_eo;
+        if (start != end) {
             if (AnonymizeStringProcess(outexec + start, end - start, mode) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymizeStringProcess fail");
+                SoftBusFree(str);
                 return SOFTBUS_ERR;
             }
             int32_t offset = start + (int32_t)strlen(outexec + start);
             char tmpStr[inLen + 1];
             if (strcpy_s(tmpStr, inLen + 1, outexec + end) != EOK || strcat_s(str, inLen, tmpStr) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail.");
+                SoftBusFree(str);
                 return SOFTBUS_ERR;
             }
             outexec += offset;
@@ -225,17 +227,17 @@ int32_t AnonymizePacket(char **output, const char *in, size_t inLen)
     return AnonymizeString(output, in, inLen, pattern, ANONYMIZE_NORMAL);
 }
 
-const char *AnonyDevId(char **outName, const char *inName, size_t inNameLen)
+const char *AnonyDevId(char **outName, const char *inName)
 {
     if (inName == NULL) {
         return "null";
     }
-    if (inNameLen < SESSION_NAME_DEVICE_ID_LEN) {
+    if (strlen(inName) < SESSION_NAME_DEVICE_ID_LEN) {
         return inName;
     }
-    if (AnonymizeString(outName, inName, inNameLen, SESSION_NAME_DEVICE_PATTERN, ANONYMIZE_NORMAL) != SOFTBUS_OK) {
+    if (AnonymizeString(outName, inName, strlen(inName), SESSION_NAME_DEVICE_PATTERN, ANONYMIZE_NORMAL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anony sessionname fail.");
-        return "";
+        return "******";
     }
     return *outName;
 }

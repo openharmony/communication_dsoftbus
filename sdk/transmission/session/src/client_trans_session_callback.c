@@ -91,7 +91,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     char *anonyOut = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d, type=%d",
-        AnonyDevId(&anonyOut, sessionName, strlen(sessionName)), flag, channel->isServer, channel->routeType);
+        AnonyDevId(&anonyOut, sessionName), flag, channel->isServer, channel->routeType);
     SoftBusFree(anonyOut);
 
     ISessionListener listener = {0};
