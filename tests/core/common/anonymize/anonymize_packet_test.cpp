@@ -31,8 +31,11 @@ using namespace testing::ext;
 
 namespace OHOS {
 const char *g_originPacket = "\"DEVICE_ID\":\"18f3b221c8661b51eaf6520c223f48afe211111113ab9c6a4f03b7c719eb60d1\"";
-const char *g_anonymizedPacket = "\"DEVICE_ID\":\"18f3b221c8661b51eaf65**********************b9c6a4f03b7c719eb60d1\"";
+const char *g_anonymizedPacket = "\"DEVICE_ID\":\"18f3******60d1\"";
 const char *g_shortPacket = "\"DEVICE_ID\":\"18f3b221c8661b5111111111111111b7c719eb60d1\"";
+const char *g_testSessionName = "test.ohos.abc60272D6C226F0E08021F07AAAAAAAAAABBBBBBBB9A0111111111169A5342784D2EB\
+123456789ABCCCCCCCCCCCCCD57A4Cam_Cam123";
+const char *g_testAnonySessionName = "test.ohos.abc6027******57A4Cam_Cam123";
 
 class AnonymizePacketTest : public testing::Test {
 public:
@@ -93,5 +96,20 @@ HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
     char *anonymizedOut = nullptr;
     int32_t res = AnonymizePacket(&anonymizedOut, NULL, strlen(g_originPacket));
     EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: AnonySessionNameNormalTest001
+ * @tc.desc: Verify AnonyDevId function, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizePacketTest, AnonySessionNameNormalTest001, TestSize.Level0)
+{
+    char *anonymizedOut = nullptr;
+    const char *res = AnonyDevId(&anonymizedOut, g_testSessionName);
+    EXPECT_STREQ(g_testAnonySessionName, res);
+
+    SoftBusFree(anonymizedOut);
 }
 }; // namespace OHOS
