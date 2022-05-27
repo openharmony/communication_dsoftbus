@@ -22,6 +22,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_utils.h"
 
 #define LOG_NAME_MAX_LEN 5
 #ifndef SOFTBUS_DEBUG
@@ -212,6 +213,9 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
 
 int32_t AnonymizePacket(char **output, const char *in, size_t inLen)
 {
+    if (!GetSignalingMsgSwitch()) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
     if (in == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is null.");
         return SOFTBUS_INVALID_PARAM;
