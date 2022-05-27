@@ -37,7 +37,6 @@
 #include "unistd.h"
 #include "wrapper_br_interface.h"
 
-#define SEND_WAIT_TIMEOUT 1000 
 #define DISCONN_DELAY_TIME 200
 #define BR_ACCEPET_WAIT_TIME 1000
 #define CONNECT_REF_INCRESE 1
@@ -52,6 +51,7 @@
 #define PRIORITY_MID 8
 #define PRIORITY_LOW 1
 #define PRIORITY_DAF 1
+#define SEND_WAIT_TIMEOUT 1000
 
 #define BR_SERVER_NAME_LEN 24
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
