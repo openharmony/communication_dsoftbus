@@ -107,6 +107,10 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
 
 int32_t ClientGetSessionSide(int32_t sessionId);
 
+int32_t ClientGrantPermission(int uid, int pid, const char *busName);
+
+int32_t ClientRemovePermission(const char *busName);
+
 int TransClientInit(void);
 void TransClientDeinit(void);
 

@@ -83,3 +83,17 @@ int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType,
     (void)quality;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
+{
+    (void)uid;
+    (void)pid;
+    (void)sessionName;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ServerIpcRemovePermission(const char *sessionName)
+{
+    (void)sessionName;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
