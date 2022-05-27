@@ -155,7 +155,7 @@ static int32_t CoapSocketSend(const SocketInfo *socket, const uint8_t *buffer, s
 
     socklen_t dstAddrLen = sizeof(struct sockaddr_in);
     int32_t ret = sendto(socket->cliendFd, buffer, length, 0, (struct sockaddr *)&socket->dstAddr, dstAddrLen);
-    if (ret != length) {
+    if (ret != (int32_t)length) {
         LOGE(TAG, "sendto failed, ret = %d, errno = %d", ret, errno);
     }
     return ret;
