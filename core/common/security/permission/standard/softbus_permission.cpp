@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -25,21 +26,29 @@
 #include "softbus_log.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
+#include "trans_session_manager.h"
 
 #ifndef PERMISSION_JSON_FILE_PATH
 #define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"
 #endif
 
 namespace {
+    using namespace OHOS::Security;
+
     const std::string PERMISSION_JSON_FILE = PERMISSION_JSON_FILE_PATH;
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
+    const std::string SAMGR_PROCESS_NAME = "samgr";
 }
 
 int32_t TransPermissionInit(void)
 {
-    return LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
+    int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return InitDynamicPermission();
 }
 
 void TransPermissionDeinit(void)
@@ -108,4 +117,33 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
         return true;
     }
     return false;
+}
+
+int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+{
+    return AddDynamicPermission(callingUid, callingPid, sessionName);
+}
+
+int32_t RemoveTransPermission(const char *sessionName)
+{
+    return DeleteDynamicPermission(sessionName);
+}
+
+int32_t CheckDynamicPermission(void)
+{
+    uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
+
+    auto tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
+    if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not native call");
+        return SOFTBUS_ERR;
+    }
+    AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(callingToken, nativeTokenInfo);
+    if (result == SOFTBUS_OK && nativeTokenInfo.processName == SAMGR_PROCESS_NAME) {
+        return SOFTBUS_OK;
+    }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+        "check dynamic permission failed, processName:%{private}s", nativeTokenInfo.processName.c_str());
+    return SOFTBUS_ERR;
 }

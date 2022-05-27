@@ -19,6 +19,22 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)
+{
+    (void)uid;
+    (void)pid;
+    (void)sessionName;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GrantPermission ipc default impl");
+    return SOFTBUS_ERR;
+}
+
+int32_t ISoftBusServer::RemovePermission(const char *sessionName)
+{
+    (void)sessionName;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RemovePermission ipc default impl");
+    return SOFTBUS_ERR;
+}
+
 int32_t ISoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
 {
     (void)pkgName;
