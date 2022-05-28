@@ -149,7 +149,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
             return SOFTBUS_ERR;
         }
         msg->chiperSide = isServer;
-        if (TransProxyGetAuthConnectOption(msg->connId, &option) != 0) {
+        if (TransProxyGetAuthConnectOption(msg->connId, &option) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse msg GetConnectOption fail connId[%d]", msg->connId);
             return SOFTBUS_ERR;
         }
@@ -163,7 +163,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
         }
         deBuf.bufLen = (uint32_t)len - PROXY_CHANNEL_HEAD_LEN;
         if (AuthDecrypt(&option, (AuthSideFlag)isServer, (uint8_t *)(data + PROXY_CHANNEL_HEAD_LEN),
-            (uint32_t)len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != 0) {
+            (uint32_t)len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != SOFTBUS_OK) {
             SoftBusFree(deBuf.buf);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg decrypt fail isServer");
             return SOFTBUS_ERR;
@@ -267,6 +267,11 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         !AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64->sessionKeyBase64)) {
         return SOFTBUS_ERR;
     }
+    if (!AddNumberToJsonObject(root, JSON_KEY_ENCRYPT, appInfo->encrypt) ||
+        !AddNumberToJsonObject(root, JSON_KEY_ALGORITHM, appInfo->algorithm) ||
+        !AddNumberToJsonObject(root, JSON_KEY_CRC, appInfo->crc)) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -349,7 +354,10 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     if (appInfo->appType == APP_TYPE_NORMAL) {
         if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
             !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
-            !AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
+            !AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName) ||
+            !AddNumberToJsonObject(root, JSON_KEY_ENCRYPT, appInfo->encrypt) ||
+            !AddNumberToJsonObject(root, JSON_KEY_ALGORITHM, appInfo->algorithm) ||
+            !AddNumberToJsonObject(root, JSON_KEY_CRC, appInfo->crc)) {
             cJSON_Delete(root);
             return NULL;
         }
@@ -382,7 +390,15 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
-
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake ack old version");
+        appInfo->encrypt = APP_INFO_SUPPORT;
+        appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+        appInfo->crc = APP_INFO_NO_SUPPORT;
+    }
+    
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
                                  sizeof(appInfo->peerData.pkgName))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "no item to get pkg name");
@@ -400,6 +416,14 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
         !GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, sessionKeyLen)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg APP_TYPE_NORMAL");
         return SOFTBUS_ERR;
+    }
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake old version");
+        appInfo->encrypt = APP_INFO_SUPPORT;
+        appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+        appInfo->crc = APP_INFO_NO_SUPPORT;
     }
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),

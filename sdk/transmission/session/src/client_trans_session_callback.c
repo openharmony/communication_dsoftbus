@@ -43,6 +43,9 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->isEnable = true;
     session->info.flag = (int32_t)flag;
     session->routeType = channel->routeType;
+    session->fileEncrypt = channel->encrypt;
+    session->algorithm = channel->algorithm;
+    session->crc = channel->crc;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -168,7 +171,8 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReceivedFileData(int32_t sessionId, const char *data, uint32_t len, SessionPktType type)
+static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len,
+    SessionPktType type)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
     if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME)
@@ -177,23 +181,9 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, const char *data, uint
         return SOFTBUS_ERR;
     }
 
-    FileListener fileListener;
-    memset_s(&fileListener, sizeof(fileListener), 0, sizeof(fileListener));
-    if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
+    if (ProcessFileFrameData(sessionId, channelId, data, len, type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
         return SOFTBUS_ERR;
-    }
-
-    if (type == TRANS_SESSION_FILE_ALLFILE_SENT) {
-        if (ProcessFileListData(sessionId, fileListener, data, len) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process filelist data failed");
-            return SOFTBUS_ERR;
-        }
-    } else {
-        if (ProcessFileFrameData(sessionId, fileListener, data, len, type) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process fileframe data failed");
-            return SOFTBUS_ERR;
-        }
     }
     return SOFTBUS_OK;
 }
@@ -225,8 +215,12 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
         case TRANS_SESSION_FILE_LAST_FRAME:
         case TRANS_SESSION_FILE_ONLYONE_FRAME:
         case TRANS_SESSION_FILE_ALLFILE_SENT:
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
             if (channelType == CHANNEL_TYPE_PROXY) {
-                return ProcessReceivedFileData(sessionId, data, len, type);
+                return ProcessReceivedFileData(sessionId, channelId, data, len, type);
             }
             break;
         default:
