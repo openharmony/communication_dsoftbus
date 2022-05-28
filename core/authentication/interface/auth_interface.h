@@ -29,6 +29,10 @@ extern "C" {
 #define AUTH_ERROR_CODE (-1)
 #define AUTH_INVALID_ID (-1)
 
+/* Whether to support compressed device information when sync, 1 means support, 0 means not support */
+#define AUTH_INFO_COMPRESS_FLAG 1
+#define AUTH_INFO_UNCOMPRESS_FLAG 0
+
 typedef enum {
     /* nearby type v1 */
     SOFT_BUS_OLD_V1 = 1,
