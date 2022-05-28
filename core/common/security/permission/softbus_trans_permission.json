@@ -1,30 +1,5 @@
 [
   {
-    "SESSION_NAME": "DBinderService",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "UID": "1000",
-        "PKG_NAME": "DBinderService",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "DBinder.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "TYPE": "granted_app",
-        "PKG_NAME": "DBinderBus",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "DistributedFileService.*",
     "REGEXP": "true",
     "DEVID": "UUID",

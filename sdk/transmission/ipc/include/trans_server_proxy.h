@@ -34,6 +34,8 @@ int32_t ServerIpcNotifyAuthSuccess(int channelId);
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType);
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
+int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName);
+int32_t ServerIpcRemovePermission(const char *sessionName);
 
 #ifdef __cplusplus
 }

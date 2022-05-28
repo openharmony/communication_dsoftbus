@@ -44,6 +44,8 @@ public:
 
     int GrantPermission(int uid, int pid, const std::string &busName) override;
 
+    int RemovePermission(const std::string &busName) override;
+
     int OpenSessionCallback(int sessionId);
 
     void CloseSessionCallback(int sessionId);

@@ -51,6 +51,8 @@ public:
         int32_t period) override;
     int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int quality) override;
+    int32_t GrantPermission(int uid, int pid, const char *sessionName) override;
+    int32_t RemovePermission(const char *sessionName) override;
 
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
