@@ -349,6 +349,7 @@ static void OnGroupCreated(const char *groupId)
 {
     (void)groupId;
     char ifName[NET_IF_NAME_LEN] = {0};
+    int32_t authPort = 0;
     if (SoftBusMutexLock(&g_lnnIpNetworkInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return;
@@ -360,6 +361,11 @@ static void OnGroupCreated(const char *groupId)
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip invaild now, stop group create");
+        (void)SoftBusMutexUnlock(&g_lnnIpNetworkInfo.lock);
+        return;
+    }
+    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local auth port failed.");
         (void)SoftBusMutexUnlock(&g_lnnIpNetworkInfo.lock);
         return;
     }
