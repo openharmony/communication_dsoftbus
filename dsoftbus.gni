@@ -11,14 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-aafwk_inner_api_path = "//foundation/aafwk/standard/interfaces/innerkits"
-aafwk_kits_path = "//foundation/aafwk/standard/frameworks/kits"
-aafwk_services_path = "//foundation/aafwk/standard/services"
+aafwk_inner_api_path =
+    "//foundation/ability/ability_runtime/interfaces/innerkits"
+aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
+aafwk_services_path = "//foundation/ability/ability_runtime/services"
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
-ability_base_path = "//foundation/aafwk/standard/ability_base"
+ability_base_path = "//foundation/ability/ability_runtime/ability_base"
 
 declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
