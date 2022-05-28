@@ -747,11 +747,9 @@ void *SendHandlerLoop(void *arg)
             break;
         }
         if (IsListEmpty(&g_dataQueue.sendList)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond start");
             struct timespec tv;
             GetTimeDelay(SEND_WAIT_TIMEOUT, &tv);
             (void)pthread_cond_timedwait(&g_dataQueue.cond, &g_dataQueue.lock, &tv);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond end");
             (void)pthread_mutex_unlock(&g_dataQueue.lock);
             continue;
         }
