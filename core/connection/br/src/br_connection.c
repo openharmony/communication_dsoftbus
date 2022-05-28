@@ -676,23 +676,11 @@ void *SendHandlerLoop(void *arg)
 #define WAIT_TIME 10
     SendBrQueueNode *sendNode = NULL;
     while (1) {
-<<<<<<< HEAD
-        if (pthread_mutex_lock(&g_dataQueue.lock) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[SendHandlerLoop] mutex failed");
-            break;
-        }
-        if (IsListEmpty(&g_dataQueue.sendList)) {
-            struct timespec tv;
-            GetTimeDelay(SEND_WAIT_TIMEOUT, &tv);
-            (void)pthread_cond_timedwait(&g_dataQueue.cond, &g_dataQueue.lock, &tv);
-            (void)pthread_mutex_unlock(&g_dataQueue.lock);
-=======
         int32_t ret = BrDequeueNonBlock((void **)(&sendNode));
         if (ret != SOFTBUS_OK) {
             if (ret != SOFTBUS_TIMOUT) {
                 SoftBusSleepMs(WAIT_TIME);
             }
->>>>>>> 5d6229f04db2e4691a4d8db610eb0d275b583766
             continue;
         }
         uint32_t connId = sendNode->connectionId;
