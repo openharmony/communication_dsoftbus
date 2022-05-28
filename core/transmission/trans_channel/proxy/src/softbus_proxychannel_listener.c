@@ -54,6 +54,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
+    info.encrypt = appInfo->encrypt;
+    info.algorithm = appInfo->algorithm;
+    info.crc = appInfo->crc;
 
     int32_t ret;
     if (appInfo->appType != APP_TYPE_AUTH) {

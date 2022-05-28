@@ -260,7 +260,9 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         }
     }
     data.ReadInt32(channel.routeType);
-
+    data.ReadInt32(channel.encrypt);
+    data.ReadInt32(channel.algorithm);
+    data.ReadInt32(channel.crc);
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {

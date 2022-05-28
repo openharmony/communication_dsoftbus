@@ -24,70 +24,6 @@
 extern "C" {
 #endif
 
-#ifdef __linux__
-#define MAX_FILE_NUM 1
-#else
-#define MAX_FILE_NUM 1
-#endif
-#define MAX_RECV_FILE_NUM 50
-#define MAX_FILE_PATH_NAME_LEN 512
-
-#define FRAME_DATA_SEQ_OFFSET (4)
-#define PROXY_MAX_PACKET_SIZE (1024 - 48)
-#define MAX_FILE_SIZE (0x500000) /* 5M */
-
-#define PATH_SEPARATOR '/'
-#define DEFAULT_NEW_PATH_AUTHORITY (0750)
-
-#define INVALID_NODE_INDEX (-1)
-#define INVALID_FD (-1)
-
-typedef struct {
-    int32_t channelId;
-    int32_t sessionId;
-    FileListener fileListener;
-} SendListenerInfo;
-
-typedef struct {
-    uint32_t seqCount;
-    SoftBusMutex lock;
-    uint32_t seqLockInitFlag;
-} SendFileInfo;
-
-typedef struct {
-    uint8_t *buffer;
-    uint32_t bufferSize;
-} FileListBuffer;
-
-typedef struct {
-    int32_t frameType;
-    uint32_t frameLength;
-    uint8_t *data;
-} FileFrame;
-
-typedef enum {
-    NODE_IDLE,
-    NODE_BUSY,
-    NODE_ERR,
-} RecvFileNodeStatus;
-
-typedef struct {
-    int32_t index;
-    uint32_t seq;
-    int32_t fileFd;
-    int32_t fileStatus; /* 0: idle 1:busy */
-    uint64_t fileOffset;
-    int32_t timeOut;
-    char filePath[MAX_FILE_PATH_NAME_LEN];
-} SingleFileInfo;
-
-typedef struct {
-    SoftBusMutex lock;
-    int32_t sessionId;
-    FileListener fileListener;
-    SingleFileInfo recvFileInfo[MAX_RECV_FILE_NUM];
-} RecvFileInfo;
-
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb);
 
 void ClientTransProxyDeinit(void);
@@ -110,10 +46,7 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
 int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
     uint32_t fileCnt);
 
-int32_t ProcessFileFrameData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len,
-    int32_t type);
-
-int32_t ProcessFileListData(int32_t sessionId, FileListener fileListener, const char *data, uint32_t len);
+int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type);
 
 #ifdef __cplusplus
 }

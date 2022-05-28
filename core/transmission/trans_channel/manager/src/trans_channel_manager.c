@@ -112,6 +112,9 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     }
 
     appInfo->peerData.apiVersion = API_V2;
+    appInfo->encrypt = APP_INFO_SUPPORT;
+    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    appInfo->crc = APP_INFO_SUPPORT;
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         goto EXIT_ERR;
     }
