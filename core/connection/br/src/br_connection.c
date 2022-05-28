@@ -51,7 +51,6 @@
 #define PRIORITY_MID 8
 #define PRIORITY_LOW 1
 #define PRIORITY_DAF 1
-#define SEND_WAIT_TIMEOUT 1000
 
 #define BR_SERVER_NAME_LEN 24
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
@@ -729,16 +728,6 @@ static int32_t DisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_ERR;
 }
 
-static void GetTimeDelay(uint32_t delay, struct timespec *tv)
-{
-#define USECTONSEC 1000LL
-    SoftBusSysTime now;
-    (void)SoftBusGetTime(&now);
-    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + SEND_WAIT_TIMEOUT * USECTONSEC;
-    tv->tv_sec = time / USECTONSEC / USECTONSEC;
-    tv->tv_nsec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
-}
-
 void *SendHandlerLoop(void *arg)
 {
     while (1) {
@@ -747,11 +736,7 @@ void *SendHandlerLoop(void *arg)
             break;
         }
         if (IsListEmpty(&g_dataQueue.sendList)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond start");
-            struct timespec tv;
-            GetTimeDelay(SEND_WAIT_TIMEOUT, &tv);
-            (void)pthread_cond_timedwait(&g_dataQueue.cond, &g_dataQueue.lock, &tv);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br wait send cond end");
+            pthread_cond_wait(&g_dataQueue.cond, &g_dataQueue.lock);
             (void)pthread_mutex_unlock(&g_dataQueue.lock);
             continue;
         }
