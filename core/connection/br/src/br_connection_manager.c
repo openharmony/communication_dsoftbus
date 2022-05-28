@@ -37,7 +37,7 @@
 #include "unistd.h"
 #include "wrapper_br_interface.h"
 
-static pthread_mutex_t g_connectionLock;
+static pthread_mutex_t g_connectionLock = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static uint16_t g_nextConnectionId = 0;
@@ -45,7 +45,26 @@ static uint16_t g_nextConnectionId = 0;
 void InitBrConnectionManager(int32_t brBuffSize)
 {
     g_brBuffSize = brBuffSize + sizeof(ConnPktHead);
-    pthread_mutex_init(&g_connectionLock, NULL);
+}
+
+uint32_t GetLocalWindowsByConnId(uint32_t connId)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetLocalWindowsByConnId mutex failed");
+        return 0;
+    }
+    ListNode *item = NULL;
+    BrConnectionInfo *itemNode = NULL;
+    LIST_FOR_EACH(item, &g_connection_list) {
+        itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
+        if (itemNode->connectionId == connId) {
+            uint32_t windows = itemNode->windows;
+            (void)pthread_mutex_unlock(&g_connectionLock);
+            return windows;
+        }
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    return 0;
 }
 
 int32_t GetBrConnectionCount(void)
@@ -197,20 +216,33 @@ BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc fail.]");
         return NULL;
     }
+    if (pthread_mutex_init(&newConnInfo->lock, NULL) != 0) {
+        SoftBusFree(newConnInfo);
+        return NULL;
+    }
+    if (pthread_cond_init(&newConnInfo->congestCond, NULL) != 0) {
+        pthread_mutex_destroy(&newConnInfo->lock);
+        SoftBusFree(newConnInfo);
+        return NULL;
+    }
     newConnInfo->recvBuf = (char *)SoftBusCalloc(g_brBuffSize);
     newConnInfo->recvSize = g_brBuffSize;
     if (newConnInfo->recvBuf == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc recvBuf fail]");
+        pthread_cond_destroy(&newConnInfo->congestCond);
+        pthread_mutex_destroy(&newConnInfo->lock);
         SoftBusFree(newConnInfo);
         return NULL;
     }
     ListInit(&newConnInfo->node);
     ListInit(&newConnInfo->requestList);
-    pthread_mutex_init(&newConnInfo->lock, NULL);
     newConnInfo->connectionId = AllocNewConnectionIdLocked();
     newConnInfo->recvPos = 0;
+    newConnInfo->seq = 0;
+    newConnInfo->waitSeq = 0;
+    newConnInfo->ackTimeoutCount = 0;
+    newConnInfo->windows = DEFAULT_WINDOWS;
     newConnInfo->conGestState = BT_RFCOM_CONGEST_OFF;
-    pthread_cond_init(&newConnInfo->congestCond, NULL);
     newConnInfo->refCount = 1;
     newConnInfo->infoObjRefCount = 1;
     newConnInfo->state = BR_CONNECTION_STATE_CONNECTING;
@@ -466,7 +498,7 @@ static bool IsTargetSideType(ConnSideType targetType, int32_t connType)
     return true;
 }
 
-int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCountId)
+int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outConnId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -477,8 +509,8 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCoun
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (IsTargetSideType(option->info.brOption.sideType, itemNode->sideType) &&
             Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
-            if (outCountId != NULL) {
-                *outCountId = itemNode->connectionId;
+            if (outConnId != NULL) {
+                *outConnId = itemNode->connectionId;
             }
             (void)pthread_mutex_unlock(&g_connectionLock);
             return itemNode->state;
@@ -513,7 +545,7 @@ bool IsBrDeviceReady(uint32_t connId)
 int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClosingByConnOption mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -525,11 +557,13 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
             *socketFd = itemNode->socketFd;
             *sideType = itemNode->sideType;
             itemNode->state = BR_CONNECTION_STATE_CLOSING;
-            break;
+            (void)pthread_mutex_unlock(&g_connectionLock);
+            return SOFTBUS_OK;
         }
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    return SOFTBUS_OK;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClosingByConnOption not find mac addr");
+    return SOFTBUS_NOT_FIND;
 }
 
 bool BrCheckActiveConnection(const ConnectOption *option)

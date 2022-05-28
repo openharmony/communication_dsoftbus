@@ -360,7 +360,7 @@ int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, int32_t priority)
+int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, int32_t priority, int32_t pid)
 {
     ConnPostData data = {0};
     static uint64_t seq = 1;
@@ -369,10 +369,11 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, in
     data.module = MODULE_PROXY_CHANNEL;
     data.seq = seq++;
     data.flag = priority;
+    data.pid = pid;
     data.len = (uint32_t)len;
     data.buf = buf;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "send buf connid %d len %u seq %" PRIu64 " pri %d", connectionId, len, data.seq, priority);
+        "send buf connid %d len %u seq %" PRIu64 " pri %d pid %d", connectionId, len, data.seq, priority, pid);
     ret = ConnPostBytes(connectionId, &data);
     if (ret < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send buf fail %d", ret);
@@ -611,7 +612,6 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
     }
-
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         chan->reqId = (int32_t)conn->requestId;
         chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
