@@ -194,14 +194,14 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
             if (AnonymizeStringProcess(outexec + start, end - start, mode) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymizeStringProcess fail");
                 SoftBusFree(str);
+                AnonymizeRegDeinit(&preg);
                 return SOFTBUS_ERR;
             }
             int32_t offset = start + (int32_t)strlen(outexec + start);
             char tmpStr[inLen + 1];
             if (strcpy_s(tmpStr, inLen + 1, outexec + end) != EOK || strcat_s(str, inLen, tmpStr) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail.");
-                SoftBusFree(str);
-                return SOFTBUS_ERR;
+                break;
             }
             outexec += offset;
         }
