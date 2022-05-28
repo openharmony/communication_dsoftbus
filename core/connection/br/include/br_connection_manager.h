@@ -32,8 +32,14 @@ typedef struct {
 
 #define METHOD_NOTIFY_REQUEST 1
 #define METHOD_NOTIFY_RESPONSE 2
+#define METHOD_NOTIFY_ACK 4
+#define METHOD_ACK_RESPONSE 5
 
 #define MAGIC_NUMBER 0xBABEFACE
+
+#define MIN_WINDOWS 10
+#define MAX_WINDOWS 80
+#define DEFAULT_WINDOWS 20
 
 typedef enum {
     ADD_CONN_BR_INVALID,
@@ -71,9 +77,15 @@ typedef struct BrConnectionInfo {
     ListNode requestList;
     pthread_mutex_t lock;
     pthread_cond_t congestCond;
+    uint64_t seq;
+    uint64_t waitSeq;
+    uint32_t windows;
+    uint32_t ackTimeoutCount;
 } BrConnectionInfo;
 
 void InitBrConnectionManager(int32_t brBuffSize);
+
+uint32_t GetLocalWindowsByConnId(uint32_t connId);
 
 int32_t GetBrConnectionCount(void);
 
@@ -110,7 +122,7 @@ int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *notifyList,
 
 bool HasDiffMacDeviceExit(const ConnectOption *option);
 
-int32_t GetBrConnStateByConnOption(const ConnectOption *option, int32_t *outCountId);
+int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCountId);
 
 bool IsBrDeviceReady(uint32_t connId);
 

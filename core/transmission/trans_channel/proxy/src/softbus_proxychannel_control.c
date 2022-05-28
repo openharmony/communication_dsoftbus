@@ -43,7 +43,7 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint3
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
 
-    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority);
+    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority, info->appInfo.myData.pid);
 }
 
 int32_t TransProxyHandshake(ProxyChannelInfo *info)
@@ -80,7 +80,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
             return SOFTBUS_ERR;
         }
     }
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshake buf fail");
         return SOFTBUS_ERR;
     }
@@ -116,7 +116,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH, chan->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshakeack buf fail");
         return SOFTBUS_ERR;
     }
@@ -151,7 +151,7 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
         return;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive buf fail");
         return;
     }
@@ -185,7 +185,7 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive ack buf fail");
         return SOFTBUS_ERR;
     }
@@ -221,7 +221,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_LOW) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_LOW, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reset buf fail");
         return SOFTBUS_ERR;
     }
