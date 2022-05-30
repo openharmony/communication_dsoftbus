@@ -623,6 +623,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     g_dynamicPermissionList->cnt++;
     SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
 
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s dynamic permission granted", sessionName);
     return SOFTBUS_OK;
 }
 
@@ -637,6 +638,7 @@ int32_t DeleteDynamicPermission(const char *sessionName)
             SoftBusFree(pe);
             g_dynamicPermissionList->cnt--;
             SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s dynamic permission deleted", sessionName);
             return SOFTBUS_OK;
         }
     }
