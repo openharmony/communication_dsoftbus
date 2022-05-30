@@ -206,6 +206,8 @@ static void CloseUnusedChannel(void *para)
             continue;
         }
         (void)TransCloseNetWorkingChannel(item->clientChannelId);
+        item->clientChannelId = INVALID_CHANNEL_ID;
+        item->isClientOpened = false;
         if (item->serverChannelId == INVALID_CHANNEL_ID) {
             ListDelete(&item->node);
             SoftBusFree(item);
