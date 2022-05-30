@@ -643,7 +643,8 @@ int32_t P2pLinkConfigGcIp(const char *ip)
     }
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "config ip, interface = %s.", groupInfo->interface);
-    IpAddrInfo addrInfo = {0};
+    IpAddrInfo addrInfo;
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
     if (ConvertIpStringToIntArray(addrInfo.ip, ip) != SOFTBUS_OK ||
         ConvertIpStringToIntArray(addrInfo.gateway, ip) != SOFTBUS_OK ||
         ConvertIpStringToIntArray(addrInfo.netmask, DEFAULT_NET_MASK) != SOFTBUS_OK) {
