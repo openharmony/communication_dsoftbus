@@ -21,6 +21,7 @@
 #include "lnn_lane_info.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_capability.h"
+#include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -200,7 +201,8 @@ static int32_t GetLaneOfP2p(const char *netWorkId, int32_t pid, LnnLaneProperty 
 {
     int32_t laneId;
     int32_t local, remote;
-    LnnLaneP2pInfo p2pInfo = {0};
+    LnnLaneP2pInfo p2pInfo;
+    (void)memset_s(&p2pInfo, sizeof(p2pInfo), 0, sizeof(p2pInfo));
 
     (void)prop;
     if (!GetNumInfo(netWorkId, &local, &remote)) {

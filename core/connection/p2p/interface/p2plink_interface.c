@@ -322,13 +322,14 @@ static void LoopP2pLinkQueryDevOnline(P2pLoopMsg msgType, void *arg)
 
 int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
 {
-    QueryP2pDevIsOnline queryInfo = {0};
+    QueryP2pDevIsOnline queryInfo;
     int32_t ret;
 
     if (peerMac == NULL) {
         return SOFTBUS_ERR;
     }
 
+    (void)memset_s(&queryInfo, sizeof(queryInfo), 0, sizeof(queryInfo));
     if (P2pLinkGetRole() == ROLE_NONE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "isonline role is none");
         return SOFTBUS_ERR;
