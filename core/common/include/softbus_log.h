@@ -38,7 +38,7 @@ typedef enum {
 
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
 
-int32_t AnonymizePacket(char **output, const char *in, size_t inLen);
+void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet, size_t packetLen);
 
 const char *AnonyDevId(char **outName, const char *inName);
 

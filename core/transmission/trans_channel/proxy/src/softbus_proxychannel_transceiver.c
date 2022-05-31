@@ -712,11 +712,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse proxy msg err");
         return;
     }
-    char *anonymizedOut = NULL;
-    if (msg.msgHead.type != PROXYCHANNEL_MSG_TYPE_NORMAL &&
-        AnonymizePacket(&anonymizedOut, msg.data, msg.dateLen) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransProxyonMessageReceived, msg->data: %s", anonymizedOut);
-        SoftBusFree(anonymizedOut);
+    if (msg.msgHead.type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
+        AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "TransProxyonMessageReceived, msg->data: ", msg.data, msg.dateLen);
     }
     TransProxyonMessageReceived(&msg);
     if (msg.msgHead.chiper & ENCRYPTED) {
