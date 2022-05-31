@@ -213,19 +213,23 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
+    char *anonyOut = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransGetUidAndPid: sessionName=%s, uid=%d, pid=%d",
-                sessionName, pos->uid, pos->pid);
+                AnonyDevId(&anonyOut, sessionName), pos->uid, pos->pid);
+            SoftBusFree(anonyOut);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s", sessionName);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s",
+        AnonyDevId(&anonyOut, sessionName));
+    SoftBusFree(anonyOut);
     return SOFTBUS_ERR;
 }
 

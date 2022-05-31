@@ -71,6 +71,9 @@ int32_t IsValidPkgName(int32_t uid, const char *pkgName);
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions);
 bool PermIsSecLevelPublic(const char *sessionName);
+int32_t InitDynamicPermission(void);
+int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName);
+int32_t DeleteDynamicPermission(const char *sessionName);
 
 #ifdef __cplusplus
 #if __cplusplus
