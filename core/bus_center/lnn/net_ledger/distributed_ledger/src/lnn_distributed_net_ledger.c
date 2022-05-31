@@ -764,7 +764,7 @@ static void MergeLnnRelation(const NodeInfo *oldInfo, NodeInfo *info)
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
-    const char *deviceId = NULL;
+    const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
     bool isOffline = true;
@@ -781,13 +781,13 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
             info->authSeqNum);
     }
 
-    deviceId = LnnGetDeviceUdid(info);
+    udid = LnnGetDeviceUdid(info);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return REPORT_NONE;
     }
-    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, deviceId);
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "addOnlineNode find online node");
         isOffline = false;
@@ -805,7 +805,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         MergeLnnRelation(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
-    LnnMapSet(&map->udidMap, deviceId, info, sizeof(NodeInfo));
+    LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isOffline) {
         return REPORT_ONLINE;

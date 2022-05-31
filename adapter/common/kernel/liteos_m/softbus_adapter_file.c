@@ -72,7 +72,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     int32_t fd;
     fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteDeviceId UtilsFileOpen fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "UtilsFileOpen fail");
         return SOFTBUS_FILE_ERR;
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
