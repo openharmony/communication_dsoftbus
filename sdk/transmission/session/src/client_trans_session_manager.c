@@ -1042,7 +1042,7 @@ static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
             continue;
         }
 
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionBynetworkId info={%d, %d, %d}",
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByNetworkId info={%d, %d, %d}",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
@@ -1075,7 +1075,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionBynetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
+        DestroyClientSessionByNetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     (void)ClientDestroySession(&destroyList);
@@ -1136,7 +1136,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionBynetworkId(serverNode, networkId, routeType, &destroyList);
+        DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     (void)ClientDestroySession(&destroyList);
