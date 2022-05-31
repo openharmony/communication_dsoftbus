@@ -185,7 +185,7 @@ static int32_t GenHexStringHash(const unsigned char *str, uint32_t len, char *ha
     return SOFTBUS_OK;
 }
 
-static NodeInfo *HbGetMatchNode(const char *devId, const ConnectionAddrType type)
+static NodeInfo *HbGetMatchNode(const char *udid, const ConnectionAddrType type)
 {
     int32_t infoNum, i;
     NodeBasicInfo *info = NULL;
@@ -210,7 +210,7 @@ static NodeInfo *HbGetMatchNode(const char *devId, const ConnectionAddrType type
             SHORT_UDID_HASH_HEX_LEN, udidHash) != SOFTBUS_OK) {
             continue;
         }
-        if (strncmp(udidHash, devId, SHORT_UDID_HASH_HEX_LEN) == 0) {
+        if (strncmp(udidHash, udid, SHORT_UDID_HASH_HEX_LEN) == 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node online udidHash:%s", udidHash);
             SoftBusFree(info);
             return nodeInfo;
