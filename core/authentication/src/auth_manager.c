@@ -103,7 +103,7 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *para)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    uint16_t id = (uint16_t)para;
+    uint16_t id = *((uint16_t *)para);
     if (msg->what == AUTH_TIMEOUT && (uint16_t)(msg->arg1) == id) {
         return SOFTBUS_OK;
     }
@@ -113,7 +113,7 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *para)
 static void EventRemove(uint16_t id)
 {
     g_authHandler.looper->RemoveMessageCustom(g_authHandler.looper, &g_authHandler,
-        CustomFunc, (void *)(uintptr_t)id);
+        CustomFunc, (void *)(&id));
 }
 
 static int32_t PostDisconnectDeviceEvent(uint32_t connectionId)
