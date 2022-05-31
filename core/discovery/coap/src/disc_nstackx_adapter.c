@@ -302,22 +302,22 @@ static char *GetDeviceId(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get udid failed.");
         return NULL;
     }
-    cJSON *udid = cJSON_CreateObject();
-    if (udid == NULL) {
+    cJSON *deviceId = cJSON_CreateObject();
+    if (deviceId == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "crate json object failed.");
         return NULL;
     }
-    if (!AddStringToJsonObject(udid, DEVICE_UDID, udid)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add udid to udid json object failed.");
+    if (!AddStringToJsonObject(deviceId, DEVICE_UDID, udid)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add udid to device id json object failed.");
         goto GET_DEVICE_ID_END;
     }
-    formatString = cJSON_PrintUnformatted(udid);
+    formatString = cJSON_PrintUnformatted(deviceId);
     if (formatString == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "format udid json object failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "format device id json object failed.");
     }
 
 GET_DEVICE_ID_END:
-    cJSON_Delete(udid);
+    cJSON_Delete(deviceId);
     return formatString;
 }
 
