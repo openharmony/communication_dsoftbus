@@ -1028,7 +1028,7 @@ int32_t ClientGetSessionSide(int32_t sessionId)
     return side;
 }
 
-static void DestroyClientSessionBynetworkId(const ClientSessionServer *server,
+static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     const char *networkId, int32_t routeType, ListNode *destroyList)
 {
     SessionInfo *sessionNode = NULL;
