@@ -17,14 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "softbus_adapter_mem.h"
-#include "softbus_errcode.h"
 #include "softbus_log.h"
-
-#ifndef SOFTBUS_DEBUG
-#define LOG_PRINT_MAX_LEN 256
-#else
-#define LOG_PRINT_MAX_LEN 512
-#endif
 
 using namespace std;
 using namespace testing::ext;
@@ -61,12 +54,7 @@ void AnonymizePacketTest::TearDown(void) {}
  */
 HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest001, TestSize.Level0)
 {
-    char *anonymizedOut = nullptr;
-    int32_t res = AnonymizePacket(&anonymizedOut, g_originPacket, strlen(g_originPacket));
-    EXPECT_EQ(res, SOFTBUS_OK);
-    EXPECT_STREQ(g_anonymizedPacket, anonymizedOut);
-
-    SoftBusFree(anonymizedOut);
+    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketNormalTest001: ", g_originPacket, strlen(g_originPacket));
 }
 
 /**
@@ -77,12 +65,7 @@ HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest001, TestSize.Level0)
  */
 HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest002, TestSize.Level0)
 {
-    char *anonymizedOut = nullptr;
-    int32_t res = AnonymizePacket(&anonymizedOut, g_shortPacket, strlen(g_shortPacket));
-    EXPECT_EQ(res, SOFTBUS_OK);
-    EXPECT_STREQ(g_shortPacket, anonymizedOut);
-
-    SoftBusFree(anonymizedOut);
+    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketNormalTest002: ", g_shortPacket, strlen(g_shortPacket));
 }
 
 /**
@@ -93,9 +76,7 @@ HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest002, TestSize.Level0)
  */
 HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
 {
-    char *anonymizedOut = nullptr;
-    int32_t res = AnonymizePacket(&anonymizedOut, NULL, strlen(g_originPacket));
-    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketWrongTest001: ", NULL, strlen(g_originPacket));
 }
 
 /**
