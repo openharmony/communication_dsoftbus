@@ -198,4 +198,36 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest006, TestSize.Level0)
         testPid--;
     }
 }
+
+/**
+ * @tc.name: DynamicPermissionTest007
+ * @tc.desc: Repeated call AddDynamicPermission and DeleteDynamicPermission.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest007, TestSize.Level0)
+{
+    int testPid = 17258;
+    int ret = 0;
+    int testNum = 100;
+    std::string sessionName = "DBinder" + std::to_string(g_permUid) + std::string("_") + std::to_string(testPid);
+
+    for (int i = 0; i < testNum; i++) {
+        ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
+        ASSERT_NE(ret, SOFTBUS_OK);
+        ret = AddDynamicPermission(g_permUid, testPid, sessionName.c_str());
+        ASSERT_EQ(ret, SOFTBUS_OK);
+
+        ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
+        ASSERT_EQ(ret, SOFTBUS_OK) << "sessionName: " << sessionName.c_str();
+        ret = CheckTransSecLevel(sessionName.c_str(), sessionName.c_str());
+        ASSERT_EQ(ret, SOFTBUS_OK);
+
+        ret = DeleteDynamicPermission(sessionName.c_str());
+        ASSERT_EQ(ret, SOFTBUS_OK);
+
+        ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
+        ASSERT_NE(ret, SOFTBUS_OK);
+    }
+}
 } // namespace OHOS
