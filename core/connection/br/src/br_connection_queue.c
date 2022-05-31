@@ -123,7 +123,7 @@ static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_
     return SoftBusCondWait(cond, mutex, &tv);
 }
 
-static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen)
+static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, int32_t pid)
 {
 #define WAIT_RETRY_NUM 2
 #define WAIT_QUEUE_DELAY 1000
@@ -134,6 +134,7 @@ static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxL
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait get queue count fail");
             break;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br pid = %d, queue count = %d", pid, queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
         }
@@ -176,17 +177,20 @@ int32_t BrEnqueueNonBlock(const void *msg)
     }
     SendBrQueueNode *queueNode = (SendBrQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
-    if (queueNode->pid == 0 && queueNode->isInner) {
-        return QueueMultiProducerEnqueue(g_innerQueue->queue[priority], msg);
-    }
-
     if (SoftBusMutexLock(&g_brQueueLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
-    bool isListEmpty = false;
-    if (IsListEmpty(&g_brQueueList)) {
-        isListEmpty = true;
+    bool isListEmpty = true;
+    if (queueNode->pid == 0 && queueNode->isInner) {
+        ret = WaitQueueLength(g_innerQueue->queue[priority], QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN, 0);
+        if (ret == SOFTBUS_OK) {
+            ret = QueueMultiProducerEnqueue(g_innerQueue->queue[priority], msg);
+        }
+        goto END;
+    }
+    if (!IsListEmpty(&g_brQueueList)) {
+        isListEmpty = false;
     }
     LockFreeQueue *lockFreeQueue = NULL;
     BrQueue *item = NULL;
@@ -205,7 +209,7 @@ int32_t BrEnqueueNonBlock(const void *msg)
         ListTailInsert(&g_brQueueList, &(newQueue->node));
         lockFreeQueue = newQueue->queue[priority];
     } else {
-        ret = WaitQueueLength(lockFreeQueue, QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN);
+        ret = WaitQueueLength(lockFreeQueue, QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN, queueNode->pid);
         if (ret != SOFTBUS_OK) {
             goto END;
         }
@@ -217,7 +221,6 @@ int32_t BrEnqueueNonBlock(const void *msg)
 END:
     if (isListEmpty) {
         (void)SoftBusCondBroadcast(&g_sendCond);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Broadcast g_sendCond");
     }
     (void)SoftBusMutexUnlock(&g_brQueueLock);
     return ret;
@@ -250,13 +253,16 @@ int32_t BrDequeueNonBlock(void **msg)
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
-    bool isFull = false;
-    if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
-        return SOFTBUS_OK;
-    }
-
     if (SoftBusMutexLock(&g_brQueueLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
+    }
+    bool isFull = false;
+    if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
+        if (isFull) {
+            (void)SoftBusCondBroadcast(&g_sendWaitCond);
+        }
+        (void)SoftBusMutexUnlock(&g_brQueueLock);
+        return SOFTBUS_OK;
     }
     if (IsListEmpty(&g_brQueueList)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait g_sendCond");

@@ -16,6 +16,7 @@
 #include "trans_server_proxy_standard.h"
 
 #include "ipc_skeleton.h"
+#include "ipc_types.h"
 
 #include "message_parcel.h"
 #include "softbus_errcode.h"
@@ -32,7 +33,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
     }
-    
+
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
@@ -405,6 +406,76 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
         return SOFTBUS_ERR;
     }
     return serverRet;
+}
+
+int32_t TransServerProxy::GrantPermission(int uid, int pid, const char *sessionName)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(uid)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write uid failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(pid)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write pid failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(sessionName)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write sessionName failed!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_GRANT_PERMISSION, data, reply, option);
+    if (ret != ERR_NONE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission send request failed, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return ret;
+}
+
+int32_t TransServerProxy::RemovePermission(const char *sessionName)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(sessionName)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission write sessionName failed!");
+        return SOFTBUS_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_REMOVE_PERMISSION, data, reply, option);
+    if (ret != ERR_NONE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission send request failed, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return ret;
 }
 
 int32_t TransServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)

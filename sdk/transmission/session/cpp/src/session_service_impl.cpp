@@ -129,7 +129,16 @@ int SessionServiceImpl::GrantPermission(int uid, int pid, const std::string &bus
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:GrantPermission, invalid parameter");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
+    return GrantPermissionInner(uid, pid, busName.c_str());
+}
+
+int SessionServiceImpl::RemovePermission(const std::string &busName)
+{
+    if (busName.empty()) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:RemovePermission, invalid parameter");
+        return SOFTBUS_ERR;
+    }
+    return RemovePermissionInner(busName.c_str());
 }
 
 int SessionServiceImpl::CreatNewSession(int sessionId)

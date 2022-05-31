@@ -27,6 +27,8 @@ int RemoveSessionServerInner(const char *pkgName, const char *sessionName);
 int OpenSessionInner(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
     const char *groupId, int flag);
 void CloseSessionInner(int sessionId);
+int32_t GrantPermissionInner(int uid, int pid, const char *busName);
+int32_t RemovePermissionInner(const char *busName);
 int32_t SendBytesInner(int32_t sessionId, const void *data, uint32_t len);
 int32_t GetPeerUidInner(int32_t sessionId, int *data);
 int32_t GetPeerPidInner(int32_t sessionId, int *data);
