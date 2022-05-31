@@ -302,8 +302,8 @@ static char *GetDeviceId(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get udid failed.");
         return NULL;
     }
-    cJSON *deviceId = cJSON_CreateObject();
-    if (deviceId == NULL) {
+    cJSON *udid = cJSON_CreateObject();
+    if (udid == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "crate json object failed.");
         return NULL;
     }
