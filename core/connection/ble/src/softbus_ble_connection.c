@@ -934,15 +934,15 @@ static cJSON *GetLocalInfoJson(int32_t roleType)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
         return NULL;
     }
-    char devId[UDID_BUF_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, UDID_BUF_LEN) != SOFTBUS_OK) {
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         cJSON_Delete(json);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo Get local dev Id failed.");
         return NULL;
     }
-    if (!AddStringToJsonObject(json, "devid", devId)) {
+    if (!AddStringToJsonObject(json, "devid", udid)) {
         cJSON_Delete(json);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo Cannot add devid to jsonobj");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo Cannot add udid to jsonobj");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, "type", roleType)) {
@@ -1012,13 +1012,13 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
         return SOFTBUS_ERR;
     }
     cJSON_Delete(data);
-    char deviceIdHash[UDID_HASH_LEN];
+    char udidHash[UDID_HASH_LEN];
     if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId),
-        (unsigned char *)deviceIdHash) != SOFTBUS_OK) {
+        (unsigned char *)udidHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse GenerateStrHash failed");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(connInfo->info.info.bleInfo.deviceIdHash, UDID_HASH_LEN, deviceIdHash, UDID_HASH_LEN) != EOK) {
+    if (memcpy_s(connInfo->info.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse memcpy_s failed");
         return SOFTBUS_ERR;
     }

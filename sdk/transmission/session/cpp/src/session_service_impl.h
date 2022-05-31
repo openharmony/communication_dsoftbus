@@ -38,7 +38,7 @@ public:
     int RemoveSessionServer(const std::string &pkgName, const std::string &sessionName) override;
 
     std::shared_ptr<Session> OpenSession(const std::string &mySessionName, const std::string &peerSessionName,
-        const std::string &peerDeviceId, const std::string &groupId, int flags) override;
+        const std::string &peerNetworkId, const std::string &groupId, int flags) override;
 
     int CloseSession(std::shared_ptr<Session> session) override;
 

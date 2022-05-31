@@ -149,11 +149,11 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 }
 
 static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSessionName,
-    const char *peerDeviceId, const char *groupId, const SessionAttribute *attr)
+    const char *peerNetworkId, const char *groupId, const SessionAttribute *attr)
 {
     if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerDeviceId, DEVICE_ID_SIZE_MAX) ||
+        !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) ||
         (attr == NULL) ||
         (attr->dataType >= TYPE_BUTT)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -167,10 +167,10 @@ static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSess
     return SOFTBUS_OK;
 }
 
-int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerDeviceId, groupId, attr);
+    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param");
         return INVALID_SESSION_ID;
@@ -186,7 +186,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
-        .peerDeviceId = peerDeviceId,
+        .peerDeviceId = peerNetworkId,
         .groupId = groupId,
         .attr = attr,
     };
@@ -406,10 +406,10 @@ static void OpenSessionSyncOutSessionName(const char *mySessionName, const char 
     SoftBusFree(anonyOutPeer);
 }
 
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerDeviceId, groupId, attr);
+    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionSync invalid param");
         return INVALID_SESSION_ID;
@@ -420,7 +420,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
-        .peerDeviceId = peerDeviceId,
+        .peerDeviceId = peerNetworkId,
         .groupId = groupId,
         .attr = attr,
     };
@@ -511,13 +511,13 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
     return ClientGetSessionDataById(sessionId, sessionName, len, KEY_PEER_SESSION_NAME);
 }
 
-int GetPeerDeviceId(int sessionId, char *devId, unsigned int len)
+int GetPeerDeviceId(int sessionId, char *networkId, unsigned int len)
 {
-    if (!IsValidSessionId(sessionId) || (devId == NULL) || (len > SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidSessionId(sessionId) || (networkId  == NULL) || (len > SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return ClientGetSessionDataById(sessionId, devId, len, KEY_PEER_DEVICE_ID);
+    return ClientGetSessionDataById(sessionId, networkId, len, KEY_PEER_DEVICE_ID);
 }
 
 int GetSessionSide(int sessionId)
