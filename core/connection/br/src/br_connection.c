@@ -561,7 +561,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     node->flag = flag;
     node->len = (uint32_t)len;
     node->data = data;
-    node->isInner = false;
+    node->isInner = ((pid == 0) ? true : false);
     node->listener = NULL;
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
