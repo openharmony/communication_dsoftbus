@@ -215,6 +215,10 @@ static void NewBrBleDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
     if (strcmp(ipAddr, DEFAULT_IP) == 0) {
         LnnSetWiFiIp(newInfo, LnnGetWiFiIp(oldInfo));
     }
+
+    newInfo->connectInfo.authPort = oldInfo->connectInfo.authPort;
+    newInfo->connectInfo.proxyPort = oldInfo->connectInfo.proxyPort;
+    newInfo->connectInfo.sessionPort = oldInfo->connectInfo.sessionPort;
 }
 
 static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *basic)
