@@ -118,17 +118,17 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 
 static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
 {
-    cJSON *deviceId = cJSON_Parse(nstackxDevice->deviceId);
-    if (deviceId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device id failed.");
+    cJSON *udid = cJSON_Parse(nstackxDevice->deviceId);
+    if (udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse udid failed.");
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectStringItem(deviceId, DEVICE_UDID, device->devId, sizeof(device->devId))) {
-        cJSON_Delete(deviceId);
+    if (!GetJsonObjectStringItem(udid, DEVICE_UDID, device->devId, sizeof(device->devId))) {
+        cJSON_Delete(udid);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse udid from remote failed.");
         return SOFTBUS_ERR;
     }
-    cJSON_Delete(deviceId);
+    cJSON_Delete(udid);
     return SOFTBUS_OK;
 }
 
@@ -307,17 +307,17 @@ static char *GetDeviceId(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "crate json object failed.");
         return NULL;
     }
-    if (!AddStringToJsonObject(deviceId, DEVICE_UDID, udid)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add udid to device id json object failed.");
+    if (!AddStringToJsonObject(udid, DEVICE_UDID, udid)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "add udid to udid json object failed.");
         goto GET_DEVICE_ID_END;
     }
-    formatString = cJSON_PrintUnformatted(deviceId);
+    formatString = cJSON_PrintUnformatted(udid);
     if (formatString == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "format device id json object failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "format udid json object failed.");
     }
 
 GET_DEVICE_ID_END:
-    cJSON_Delete(deviceId);
+    cJSON_Delete(udid);
     return formatString;
 }
 

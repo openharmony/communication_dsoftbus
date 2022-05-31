@@ -218,7 +218,7 @@ The main code directory structure of DSoftBus is as follows:
 
     ```
     // Open a session.
-    int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId, const char *groupId, const SessionAttribute* attr);
+    int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId, const char *groupId, const SessionAttribute* attr);
     ```
 
 3.  Send data to the peer device based on the session ID.

@@ -24,7 +24,7 @@ extern "C" {
 
 int CreateSessionServerInner(const char *pkgName, const char *sessionName);
 int RemoveSessionServerInner(const char *pkgName, const char *sessionName);
-int OpenSessionInner(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSessionInner(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, int flag);
 void CloseSessionInner(int sessionId);
 int32_t GrantPermissionInner(int uid, int pid, const char *busName);

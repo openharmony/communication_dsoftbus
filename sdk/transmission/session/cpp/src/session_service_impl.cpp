@@ -79,14 +79,14 @@ int SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, const st
 }
 
 std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySessionName,
-    const std::string &peerSessionName, const std::string &peerDeviceId, const std::string &groupId, int flags)
+    const std::string &peerSessionName, const std::string &peerNetworkId, const std::string &groupId, int flags)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSession");
-    if (mySessionName.empty() || peerSessionName.empty() || peerDeviceId.empty()) {
+    if (mySessionName.empty() || peerSessionName.empty() || peerNetworkId.empty()) {
         return nullptr;
     }
     int sessionId = OpenSessionInner(mySessionName.c_str(), peerSessionName.c_str(),
-        peerDeviceId.c_str(), groupId.c_str(), flags);
+        peerNetworkId.c_str(), groupId.c_str(), flags);
     if (sessionId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
         return nullptr;
@@ -162,8 +162,8 @@ int SessionServiceImpl::CreatNewSession(int sessionId)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    std::string peerDevId(str);
-    session->SetPeerDeviceId(peerDevId);
+    std::string peerNetworkId(str);
+    session->SetPeerDeviceId(peerNetworkId);
     session->SetIsServer(true);
     std::lock_guard<std::mutex> autoLock(sessionMutex_);
     sessionMap_.insert(std::pair<int, std::shared_ptr<Session>>(sessionId, session));
@@ -193,12 +193,12 @@ int SessionServiceImpl::OpenSessionCallback(int sessionId)
     std::string peerSessionName(str);
     session->SetPeerSessionName(peerSessionName);
 
-    char deviceId[DEVICE_ID_SIZE_MAX];
-    if (GetPeerDeviceIdInner(sessionId, deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
+    char networkId[DEVICE_ID_SIZE_MAX];
+    if (GetPeerDeviceIdInner(sessionId, networkId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    std::string peerDeviceId(deviceId);
-    session->SetPeerDeviceId(peerDeviceId);
+    std::string peerNetworkId(networkId);
+    session->SetPeerDeviceId(peerNetworkId);
     session->SetIsServer(isServer);
 
     std::lock_guard<std::mutex> autoLock(sessionMutex_);

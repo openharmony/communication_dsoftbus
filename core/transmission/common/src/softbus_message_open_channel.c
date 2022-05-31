@@ -187,13 +187,13 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
 
-    char deviceId[DEVICE_ID_SIZE_MAX] = {0};
-    if (!GetJsonObjectStringItem(msg, DEVICE_ID, deviceId, DEVICE_ID_SIZE_MAX)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get deviceId");
+    char uuid[DEVICE_ID_SIZE_MAX] = {0};
+    if (!GetJsonObjectStringItem(msg, DEVICE_ID, uuid, DEVICE_ID_SIZE_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get uuid");
         return SOFTBUS_ERR;
     }
-    if (strcmp(deviceId, appInfo->peerData.deviceId) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid deviceId");
+    if (strcmp(uuid, appInfo->peerData.deviceId) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid uuid");
         return SOFTBUS_ERR;
     }
 
