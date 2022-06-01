@@ -36,6 +36,7 @@ ohos_fuzztest("OpenAuthSessionFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "openauthsession_fuzzer.cpp" ]
 
