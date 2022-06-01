@@ -15,7 +15,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 udp_channel_path =
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation"
-if (dsoftbus_standard_feature_trans_udp == true) {
+if (dsoftbus_feature_trans_udp == true) {
   trans_udp_channel_src = [
     "$udp_channel_path/src/trans_udp_channel_manager.c",
     "$udp_channel_path/src/trans_udp_negotiation.c",

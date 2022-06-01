@@ -24,7 +24,7 @@ declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
   softbus_adapter_config =
       "//foundation/communication/dsoftbus/adapter/default_config"
-  dsoftbus_standard_feature_product_config_path =
+  dsoftbus_feature_product_config_path =
       "//foundation/communication/dsoftbus/adapter/default_config"
 }
 
@@ -51,5 +51,5 @@ if (defined(ohos_lite)) {
   }
   import("//build/ohos.gni")
   import(
-      "$dsoftbus_standard_feature_product_config_path/feature_config/standard/config.gni")
+      "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
 }
