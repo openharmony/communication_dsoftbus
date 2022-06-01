@@ -175,6 +175,7 @@ static void GroupStateChanged(const P2pLinkGroup *group)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy fail");
         SoftBusFree(arg);
+        return;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv group change");
     ret = P2pLoopProc(LoopGroupStateChanged, (void *)arg, P2PLOOP_BROADCAST_GROUPSTATE_CHANGED);
