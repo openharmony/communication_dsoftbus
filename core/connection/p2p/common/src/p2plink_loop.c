@@ -96,6 +96,7 @@ int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
     cbinfo->cbPara = para;
     SoftBusMessage *msg  = P2pCreateLoopMsg(msgType, (char *)cbinfo);
     if (msg == NULL) {
+        SoftBusFree(cbinfo);
         return SOFTBUS_ERR;
     }
     g_p2pcHandler.looper->PostMessage(g_p2pcHandler.looper, msg);
@@ -112,6 +113,7 @@ int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delay
     cbinfo->cbPara = para;
     SoftBusMessage *msg  = P2pCreateLoopMsg(msgType, (char *)cbinfo);
     if (msg == 0) {
+        SoftBusFree(cbinfo);
         return SOFTBUS_ERR;
     }
     g_p2pcHandler.looper->PostMessageDelay(g_p2pcHandler.looper, msg, delayMillis);
