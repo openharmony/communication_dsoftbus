@@ -164,6 +164,9 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->peerId = info->peerId;
             item->status = PROXY_CHANNEL_STATUS_COMPLETED;
             item->timeout = 0;
+            item->appInfo.encrypt = info->appInfo.encrypt;
+            item->appInfo.algorithm = info->appInfo.algorithm;
+            item->appInfo.crc = info->appInfo.crc;
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
             (void)memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
@@ -621,7 +624,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     info->myId = msg->msgHead.myId;
     info->peerId = msg->msgHead.peerId;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "recv Handshake ack myid %d peerid %d identity %s", info->myId, info->peerId, info->identity);
+        "recv Handshake ack myid %d peerid %d identity %s crc %d",
+        info->myId, info->peerId, info->identity, info->appInfo.crc);
     if (TransProxyUpdateAckInfo(info) != SOFTBUS_OK) {
         SoftBusFree(info);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UpdateAckInfo fail");

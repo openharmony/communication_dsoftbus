@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <inttypes.h>
+#include <cinttypes>
 #include <iostream>
 #include <semaphore.h>
 #include <string>
@@ -45,6 +45,11 @@
 using namespace testing::ext;
 using namespace std;
 namespace OHOS {
+
+const std::string FILE_TEST_PKG_NAME = "com.huawei.plrdtest.dsoftbus";
+const std::string FILE_TEST_PKG_NAME_DEMO = "com.huawei.plrdtest.dsoftbus1";
+const std::string FILE_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendFile_10";
+const std::string FILE_SESSION_NAME_DEMO = "com.huawei.plrdtest.dsoftbus.JtSendFile_demo";
 
 const int SEND_DATA_SIZE_1K = 1024;
 const int SEND_DATA_SIZE_4K = 4 * 1024;
@@ -74,8 +79,9 @@ const int WSLEEP_MSEC_TYPE = 2;
 const int WSLEEP_MSEC_UNIT = 1000;
 const int WSLEEP_SEND_BYTES_TIME = 10;
 const int WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME = 500;
+const uint32_t TEST_SEND_FILE_COUNT = 2;
 
-typedef struct {
+struct TransTestInfo {
     string mySessionName;
     string peerSessionName;
     int32_t testCnt;
@@ -84,7 +90,7 @@ typedef struct {
     const char **sfileList;
     const char **dfileList;
     int32_t sfileCnt;
-} TransTestInfo;
+};
 
 unordered_set<string> networkIdSet_;
 unordered_set<int32_t> sessionSet_;
@@ -240,8 +246,7 @@ public:
     static void TestSendFile(int32_t sendCnt, const char *sfileList[], const char *dfileList[],
         int32_t cnt, bool ex = false);
 
-    static void TransTestCase001(TransTestInfo &transInfo);
-    static void TransTest(TransTestInfo &transInfo, int32_t testDataType, bool ex = false);
+    static void TransTest(struct TransTestInfo &transInfo, int32_t testDataType, bool ex = false);
     static void *TestSendFileThread(void *arg);
 };
 
@@ -339,8 +344,8 @@ void AuthSessionTest::CloseAllSession(void)
 {
     for (auto session : sessionSet_) {
         CloseSession(session);
-        sessionSet_.erase(session);
     }
+    sessionSet_.clear();
     Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
 }
 
@@ -411,15 +416,17 @@ void AuthSessionTest::TestSendFile(int32_t sendCnt, const char *sfileList[], con
                 ASSERT_NE(ret, SOFTBUS_OK);
             } else {
                 EXPECT_EQ(ret, SOFTBUS_OK);
+                Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
             }
-            Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
         }
     }
-    Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
-    Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
+    if (!ex) {
+        Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
+        Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
+    }
 }
 
-void AuthSessionTest::TransTest(TransTestInfo &transInfo, int32_t testDataType, bool ex)
+void AuthSessionTest::TransTest(struct TransTestInfo &transInfo, int32_t testDataType, bool ex)
 {
     cout << "testCnt = " << transInfo.sendNum << endl;
     OpenAllSession(transInfo.dataType, transInfo.mySessionName, transInfo.peerSessionName);
@@ -446,75 +453,11 @@ void AuthSessionTest::TransTest(TransTestInfo &transInfo, int32_t testDataType, 
         CloseAllSession();
         return;
     }
-    Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
+    if (!ex) {
+        Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
+    }
     CloseAllSession();
 }
-
-void AuthSessionTest::TransTestCase001(TransTestInfo &transInfo)
-{
-    cout << "testCnt = " << transInfo.testCnt << endl;
-    char *data = (char *)malloc(SEND_DATA_SIZE_1M);
-    ASSERT_NE(data, nullptr);
-    (void)memset_s(data, SEND_DATA_SIZE_1M, 0, SEND_DATA_SIZE_1M);
-    int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1M, g_testData, strlen(g_testData));
-    EXPECT_EQ(ret, EOK);
-    int32_t ret2;
-    OpenAllSession(transInfo.dataType, transInfo.mySessionName, transInfo.peerSessionName);
-    for (int32_t i = 0; i < transInfo.testCnt; i++) {
-        for (auto session : sessionSet_) {
-            cout << "send bytes, session id = " << session << endl;
-            for (int32_t j = 0; j < transInfo.sendNum; j++) {
-                ret = SendBytes(session, data, SEND_DATA_SIZE_4K);
-                ret2 = SendMessage(session, data, SEND_DATA_SIZE_1K);
-                EXPECT_EQ(ret, 0);
-                if (ret2 != SOFTBUS_OK && ret2 != SOFTBUS_TIMOUT) {
-                    EXPECT_EQ(ret2, 0);
-                }
-            }
-        }
-    }
-    free(data);
-    data = nullptr;
-    Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
-    CloseAllSession();
-}
-
-/*
-* @tc.name: testSendBytesMessage001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthSessionTest, testSendBytesMessage001, TestSize.Level1)
-{
-    int32_t ret;
-    if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
-        TestServerSide();
-        return;
-    }
-    std::string pkgName;
-    TransTestInfo transInfo = {
-        .testCnt = 1,
-        .sendNum = testEntryArgs_->transNums_, // 1000,
-        .dataType = TYPE_FILE,
-    };
-    if (testEntryArgs_->testSide_ == ACTIVE_OPENSESSION_WAY) {
-        pkgName = FILE_TEST_PKG_NAME;
-        transInfo.mySessionName = FILE_SESSION_NAME;
-        transInfo.peerSessionName = FILE_SESSION_NAME;
-    } else if (testEntryArgs_->testSide_ == ACTIVE_ANOTHER_OPENSESSION_WAY) {
-        pkgName = FILE_TEST_PKG_NAME_DEMO;
-        transInfo.mySessionName = FILE_SESSION_NAME_DEMO;
-        transInfo.peerSessionName = FILE_SESSION_NAME_DEMO;
-    } else {
-        return;
-    }
-    ret = CreateSessionServer(pkgName.c_str(), transInfo.mySessionName.c_str(), &g_listener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransTestCase001(transInfo);
-    ret = RemoveSessionServer(pkgName.c_str(), transInfo.mySessionName.c_str());
-    EXPECT_EQ(ret, SOFTBUS_OK);
-};
 
 /*
 * @tc.name: testSendFile001
@@ -534,7 +477,7 @@ HWTEST_F(AuthSessionTest, testSendFile001, TestSize.Level1)
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K;
     dfileList[1] = DFILE_NAME_5M;
-    TransTestInfo transInfo = {
+    struct TransTestInfo transInfo = {
         .testCnt = 1,
         .sendNum = 1,
         .dataType = TYPE_FILE,
@@ -568,13 +511,13 @@ void *AuthSessionTest::TestSendFileThread(void *arg)
 {
     Wsleep(WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME, WSLEEP_MSEC_TYPE);
     cout << "TestSendFileThread start" << endl;
-    const char *sfileList[10] = {nullptr};
-    const char *dfileList[10] = {nullptr};
+    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
+    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K_2;
     dfileList[1] = DFILE_NAME_5M_2;
-    TestSendFile(1, sfileList, dfileList, 2);
+    TestSendFile(1, sfileList, dfileList, TEST_SEND_FILE_COUNT);
     cout << "TestSendFileThread end" << endl;
     return nullptr;
 }
@@ -609,8 +552,8 @@ HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = SetFileSendListener(pkgName.c_str(), mySessionName.c_str(), &g_fileSendListener);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    const char *sfileList[10] = {nullptr};
-    const char *dfileList[10] = {nullptr};
+    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
+    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K;
@@ -620,7 +563,7 @@ HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
     int32_t createPthreadRet = pthread_create(&tid, nullptr, AuthSessionTest::TestSendFileThread, nullptr);
     EXPECT_EQ(createPthreadRet, 0);
     cout << "TestSendFile start" << endl;
-    TestSendFile(1, sfileList, dfileList, 2);
+    TestSendFile(1, sfileList, dfileList, TEST_SEND_FILE_COUNT);
     cout << "TestSendFile end" << endl;
     if (createPthreadRet == 0 && pthread_join(tid, nullptr) != 0) {
         cout << "join thread error" << endl;
@@ -646,7 +589,7 @@ HWTEST_F(AuthSessionTest, testSendFileEx001, TestSize.Level1)
     const char *dfileList[1] = {nullptr};
     sfileList[0] = SFILE_NAME_ERR;
     dfileList[0] = SFILE_NAME_ERR;
-    TransTestInfo transInfo = {
+    struct TransTestInfo transInfo = {
         .testCnt = 1,
         .sendNum = 1,
         .dataType = TYPE_FILE,

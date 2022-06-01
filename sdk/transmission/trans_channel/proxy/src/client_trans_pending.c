@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -165,10 +166,12 @@ static int32_t TransPendWaitTime(const PendingPacket *pending, TransPendData *da
             return SOFTBUS_OK;
         }
         SoftBusSysTime now;
-        ComputeWaitPendTime(waitMillis, &outtime);
-        if (now.sec > outtime.sec || (now.sec == outtime.sec && now.usec > outtime.usec)) {
+        ComputeWaitPendTime(waitMillis, &now);
+        if (now.sec > outtime.sec || (now.sec == outtime.sec && now.usec >= outtime.usec)) {
             break;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "now(%" PRId64 ", %" PRId64 ") out(%" PRId64 ", %" PRId64 ")",
+            now.sec, now.usec, outtime.sec, outtime.usec);
     }
     return SOFTBUS_TIMOUT;
 }

@@ -28,6 +28,10 @@
 #define BIT_INT_NUM 32
 #define BIT_BYTE_NUM 8
 
+#define FRAME_NUM_0 0
+#define FRAME_NUM_1 1
+#define FRAME_NUM_2 2
+
 typedef struct {
     uint8_t *buffer;
     uint32_t bufferSize;

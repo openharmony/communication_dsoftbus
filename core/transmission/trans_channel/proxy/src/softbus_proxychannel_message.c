@@ -394,9 +394,9 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake ack old version");
-        appInfo->encrypt = APP_INFO_SUPPORT;
+        appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
         appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-        appInfo->crc = APP_INFO_NO_SUPPORT;
+        appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     }
     
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
@@ -421,9 +421,9 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake old version");
-        appInfo->encrypt = APP_INFO_SUPPORT;
+        appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
         appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-        appInfo->crc = APP_INFO_NO_SUPPORT;
+        appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     }
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
