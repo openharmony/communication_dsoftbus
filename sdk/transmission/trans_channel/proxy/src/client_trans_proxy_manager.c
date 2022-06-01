@@ -565,9 +565,9 @@ static int32_t FileToFrame(SendListenerInfo sendInfo, uint64_t frameNum, int32_t
     uint64_t fileOffset = 0;
     uint64_t remainedSendSize = fileSize;
     uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
+    fileFrame.data = buffer;
     for (uint64_t index = 0; index < frameNum; index++) {
         fileFrame.frameType = FrameIndexToType(index, frameNum);
-        fileFrame.data = buffer;
         if (memcpy_s(fileFrame.data, FRAME_DATA_SEQ_OFFSET, (char *)&sendInfo.channelId,
             FRAME_DATA_SEQ_OFFSET) != EOK) {
             goto EXIT_ERR;
