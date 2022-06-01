@@ -46,7 +46,7 @@ extern "C" {
 #undef LOG_DOMAIN
 #undef LOG_TAG
 #define LOG_DOMAIN 0xD0015C0
-#define LOG_TAG "dsoftbus_standard"
+#define LOG_TAG "dsoftbus"
 
 #define LOG_DBG(fmt, ...) HILOG_DEBUG(LOG_CORE, fmt"\n", ##__VA_ARGS__);
 #define LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, fmt"\n", ##__VA_ARGS__);

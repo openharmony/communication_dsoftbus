@@ -1,7 +1,7 @@
 {
-    "name": "@openharmony/dsoftbus_standard",
+    "name": "@openharmony/dsoftbus",
     "version": "3.1.0",
-    "description": "dsoftbus_standard",
+    "description": "dsoftbus",
     "publishAs": "code-segment",
     "scripts": {
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/communication/dsoftbus && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
@@ -10,7 +10,7 @@
     "repository": "",
     "license": "Apache License 2.0",
     "component": {
-      "name": "dsoftbus_standard",
+      "name": "dsoftbus",
       "subsystem": "communication",
       "adapted_system_type": [
         "mini",
@@ -19,17 +19,17 @@
       ],
       "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
-        "dsoftbus_standard_feature_conn_p2p",
-        "dsoftbus_standard_feature_disc_ble",
-        "dsoftbus_standard_feature_conn_br",
-        "dsoftbus_standard_feature_conn_ble",
-        "dsoftbus_standard_feature_lnn_net",
-        "dsoftbus_standard_feature_trans_udp_stream",
-        "dsoftbus_standard_feature_trans_udp_file",
-        "dsoftbus_standard_get_devicename",
-        "dsoftbus_standard_feature_product_config_path",
-        "dsoftbus_standard_feature_ifname_prefix",
-        "dsoftbus_standard_feature_lnn_wifiservice_dependence"
+        "dsoftbus_feature_conn_p2p",
+        "dsoftbus_feature_disc_ble",
+        "dsoftbus_feature_conn_br",
+        "dsoftbus_feature_conn_ble",
+        "dsoftbus_feature_lnn_net",
+        "dsoftbus_feature_trans_udp_stream",
+        "dsoftbus_feature_trans_udp_file",
+        "dsoftbus_get_devicename",
+        "dsoftbus_feature_product_config_path",
+        "dsoftbus_feature_ifname_prefix",
+        "dsoftbus_feature_lnn_wifiservice_dependence"
       ],
       "rom": "967KB",
       "ram": "28MB",

@@ -32,7 +32,7 @@ bus_center_hub_inc = [
 ]
 bus_center_hub_deps = []
 
-if (dsoftbus_standard_feature_lnn_net) {
+if (dsoftbus_feature_lnn_net) {
   bus_center_hub_src = [
     "$core_lane_hub_path/common/src/lnn_lane_hub.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_info.c",
@@ -40,7 +40,7 @@ if (dsoftbus_standard_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_lane_manager.c",
     "$core_lane_hub_path/lane_manager/src/lnn_smart_communication.c",
   ]
-  if (dsoftbus_standard_feature_lnn_time_sync) {
+  if (dsoftbus_feature_lnn_time_sync) {
     bus_center_hub_src +=
         [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager.c" ]
     if (!enhanced) {
@@ -51,7 +51,7 @@ if (dsoftbus_standard_feature_lnn_net) {
     bus_center_hub_src +=
         [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
   }
-  if (dsoftbus_standard_feature_lnn_heartbeat) {
+  if (dsoftbus_feature_lnn_heartbeat) {
     bus_center_hub_inc +=
         [ "$dsoftbus_core_path/connection/p2p/common/include/p2plink_type.h" ]
     bus_center_hub_src += [
@@ -76,11 +76,11 @@ if (dsoftbus_standard_feature_lnn_net) {
   ]
 }
 
-if (dsoftbus_standard_feature_lnn_net &&
-    dsoftbus_standard_feature_lnn_time_sync && enhanced) {
+if (dsoftbus_feature_lnn_net &&
+    dsoftbus_feature_lnn_time_sync && enhanced) {
   bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
 }
-if (dsoftbus_standard_feature_lnn_net &&
-    dsoftbus_standard_feature_lnn_heartbeat && enhanced) {
+if (dsoftbus_feature_lnn_net &&
+    dsoftbus_feature_lnn_heartbeat && enhanced) {
   bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_heartbeat_impl" ]
 }

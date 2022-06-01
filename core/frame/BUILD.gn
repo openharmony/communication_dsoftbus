@@ -131,14 +131,14 @@ if (defined(ohos_lite)) {
           "$dsoftbus_root_path/core/frame/$os_type/init/src/softbus_server.cfg"
     }
 
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
     subsystem_name = "communication"
   }
   ohos_prebuilt_etc("softbus_permission_json") {
     source = "$dsoftbus_root_path/core/common/security/permission/softbus_trans_permission.json"
     install_enable = true
     relative_install_dir = "communication/softbus"
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
   }
   ohos_shared_library("softbus_server") {
     defines = AUTH_SERVER_DEFINES
@@ -150,7 +150,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/frame/$os_type/init/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
-      "$dsoftbus_standard_feature_product_config_path/spec_config",
+      "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
     ]
     sources = dsoftbus_server_common_src
@@ -184,7 +184,7 @@ if (defined(ohos_lite)) {
       ]
     }
 
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
     subsystem_name = "communication"
   }
 }
