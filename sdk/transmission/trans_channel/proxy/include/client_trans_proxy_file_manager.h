@@ -25,7 +25,6 @@
 #else
 #define MAX_SEND_FILE_NUM 1
 #endif
-#define MAX_RECV_FILE_NUM 3
 #define MAX_FILE_SIZE (0x500000) /* 5M */
 
 #define PATH_SEPARATOR '/'
@@ -47,6 +46,20 @@
 #define IS_SEND_RESULT 1
 #define IS_RECV_RESULT 0
 
+#define FILE_SEND_ACK_RESULT_SUCCESS 0xFFFFFFFF
+#define FILE_SEND_ACK_INTERVAL 32
+#define WAIT_START_ACK_TIME 2000
+#define WAIT_ACK_TIME 400
+#define WAIT_ACK_LAST_TIME 2000
+#define WAIT_FRAME_ACK_TIMEOUT_COUNT 16
+
+typedef enum {
+    TRANS_FILE_RECV_IDLE_STATE = 0,
+    TRANS_FILE_RECV_START_STATE,
+    TRANS_FILE_RECV_PROCESS_STATE,
+    TRANS_FILE_RECV_ERR_STATE,
+} FileRecvState;
+
 typedef enum {
     NODE_IDLE,
     NODE_BUSY,
@@ -58,6 +71,7 @@ typedef struct {
     int32_t frameType;
     uint32_t frameLength;
     uint32_t seq;
+    uint16_t crc;
     uint8_t *data;
     uint8_t *fileData;
 } FileFrame;
@@ -66,6 +80,13 @@ typedef struct {
     SoftBusMutex lock;
     uint32_t lockInitFlag;
 } TransFileInfoLock;
+
+typedef struct {
+    ListNode node;
+    int32_t channelId;
+    uint32_t count;
+    SoftBusMutex sendLock;
+} ProxyFileMutexLock;
 
 int32_t ClinetTransProxyFileManagerInit(void);
 void ClinetTransProxyFileManagerDeinit(void);

@@ -200,6 +200,7 @@ void TransDeleteFileListener(const char *sessionName)
     FileListener *fileNode = NULL;
     LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
         if (strcmp(fileNode->mySessionName, sessionName) == 0) {
+            ListDelete(&fileNode->node);
             SoftBusFree(fileNode);
             break;
         }
