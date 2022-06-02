@@ -32,6 +32,7 @@ ohos_fuzztest("ActiveMetaNodeFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "activemetanode_fuzzer.cpp" ]
 

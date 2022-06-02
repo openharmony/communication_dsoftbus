@@ -36,6 +36,7 @@ ohos_fuzztest("CloseSessionFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "closesession_fuzzer.cpp" ]
 

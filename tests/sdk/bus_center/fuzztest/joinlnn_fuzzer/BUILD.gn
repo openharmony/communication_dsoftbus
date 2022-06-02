@@ -32,6 +32,7 @@ ohos_fuzztest("JoinLNNFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "joinlnn_fuzzer.cpp" ]
 
