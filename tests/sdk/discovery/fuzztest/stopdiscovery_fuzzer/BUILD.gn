@@ -35,6 +35,7 @@ ohos_fuzztest("StopDiscoveryFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "stopdiscovery_fuzzer.cpp" ]
 

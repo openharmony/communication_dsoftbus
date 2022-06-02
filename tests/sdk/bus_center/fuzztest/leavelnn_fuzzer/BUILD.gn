@@ -32,6 +32,7 @@ ohos_fuzztest("LeaveLNNFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "leavelnn_fuzzer.cpp" ]
 

@@ -36,6 +36,7 @@ ohos_fuzztest("RemoveSessionServerFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "removesessionserver_fuzzer.cpp" ]
 
