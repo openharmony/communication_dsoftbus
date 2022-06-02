@@ -729,7 +729,7 @@ static int32_t InitDataQueue(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
         return SOFTBUS_ERR;
     }
-    return InitBrPendingPacket();
+    return SOFTBUS_OK;
 }
 
 void *ConnBrAccept(void *arg)
@@ -1164,10 +1164,14 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         return NULL;
     }
     InitBrConnectionManager(g_brBuffSize);
-    if (InitDataQueue() != SOFTBUS_OK) {
+    if (InitBrPendingPacket() != SOFTBUS_OK) {
         return NULL;
     }
     if (BrInnerQueueInit() != SOFTBUS_OK) {
+        DestroyBrPendingPacket();
+        return NULL;
+    }
+    if (InitDataQueue() != SOFTBUS_OK) {
         DestroyBrPendingPacket();
         return NULL;
     }
