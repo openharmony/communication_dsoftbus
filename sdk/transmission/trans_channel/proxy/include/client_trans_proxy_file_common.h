@@ -32,10 +32,17 @@
 #define FRAME_NUM_1 1
 #define FRAME_NUM_2 2
 
+#define PATH_SEPARATOR '/'
+
 typedef struct {
     uint8_t *buffer;
     uint32_t bufferSize;
 } FileListBuffer;
+
+bool IsPathValid(char *filePath);
+int32_t GetAndCheckRealPath(const char *filePath, char *absPath);
+bool CheckDestFilePathValid(const char *destFile);
+int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber);
 
 bool IntToByte(uint32_t value, char *buffer, uint32_t len);
 bool ByteToInt(char *buffer, uint32_t len, uint32_t *outValue);

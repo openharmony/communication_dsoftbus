@@ -27,7 +27,6 @@
 #endif
 #define MAX_FILE_SIZE (0x500000) /* 5M */
 
-#define PATH_SEPARATOR '/'
 #define DEFAULT_NEW_PATH_AUTHORITY (0750)
 
 #define INVALID_NODE_INDEX (-1)
@@ -49,9 +48,9 @@
 #define FILE_SEND_ACK_RESULT_SUCCESS 0xFFFFFFFF
 #define FILE_SEND_ACK_INTERVAL 32
 #define WAIT_START_ACK_TIME 2000
-#define WAIT_ACK_TIME 400
-#define WAIT_ACK_LAST_TIME 2000
-#define WAIT_FRAME_ACK_TIMEOUT_COUNT 16
+#define WAIT_ACK_TIME 200
+#define WAIT_ACK_LAST_TIME 5000
+#define WAIT_FRAME_ACK_TIMEOUT_COUNT 24
 
 typedef enum {
     TRANS_FILE_RECV_IDLE_STATE = 0,
@@ -87,6 +86,11 @@ typedef struct {
     uint32_t count;
     SoftBusMutex sendLock;
 } ProxyFileMutexLock;
+
+typedef struct {
+    uint32_t startSeq;
+    uint32_t seqResult;
+} AckResponseData;
 
 int32_t ClinetTransProxyFileManagerInit(void);
 void ClinetTransProxyFileManagerDeinit(void);

@@ -22,12 +22,84 @@
 #include "client_trans_proxy_file_common.h"
 
 #include "securec.h"
+#include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+
+bool IsPathValid(char *filePath)
+{
+    if (filePath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is null");
+        return false;
+    }
+    if ((strlen(filePath) == 0) || (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size[%d] is wrong", (int32_t)strlen(filePath));
+        return false;
+    }
+
+    if (filePath[strlen(filePath) - 1] == PATH_SEPARATOR) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is end with '/' ");
+        return false;
+    }
+    return true;
+}
+
+int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
+{
+    if ((filePath == NULL) || (absPath == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "input invalid");
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusRealPath(filePath, absPath) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus realpath failed");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t pathLength = strlen(absPath);
+    if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pathLength[%d] is too large", pathLength);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+bool CheckDestFilePathValid(const char *destFile)
+{
+    if (destFile == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile is null");
+        return false;
+    }
+    int32_t len = strlen(destFile);
+    if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN) || (destFile[0] == PATH_SEPARATOR)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile first char is '/'");
+        return false;
+    }
+
+    if (strstr(destFile, "..") != NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path is not canonical form");
+        return false;
+    }
+    return true;
+}
+
+int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber)
+{
+    if (index == FRAME_NUM_0) {
+        return TRANS_SESSION_FILE_FIRST_FRAME;
+    }
+    if ((index == FRAME_NUM_1) && (frameNumber == FRAME_NUM_2)) {
+        return TRANS_SESSION_FILE_ONLYONE_FRAME;
+    }
+    if (index == (frameNumber - 1)) {
+        return TRANS_SESSION_FILE_LAST_FRAME;
+    }
+    return TRANS_SESSION_FILE_ONGOINE_FRAME;
+}
 
 bool IntToByte(uint32_t value, char *buffer, uint32_t len)
 {
@@ -219,11 +291,12 @@ int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
     fl.l_whence = SEEK_SET;
     fl.l_start = 0;
     fl.l_len = 0;
-    if (fcntl(fd, isBlock ? F_SETLKW : F_SETLK, &fl) < 0 && !isBlock) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "lock file is blocked, file busy");
+    int32_t ret = fcntl(fd, isBlock ? F_SETLKW : F_SETLK, &fl);
+    if (ret != 0 && !isBlock) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "lock file is blocked, file busy errno: %d", errno);
         return SOFTBUS_FILE_BUSY;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "file locked! errno: %d", errno);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "file locked! ret: %d, errno: %d", ret, errno);
     return SOFTBUS_OK;
 }
 
