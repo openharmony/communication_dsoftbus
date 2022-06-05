@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include <limits.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "client_trans_proxy_file_manager.h"
 
@@ -239,7 +240,6 @@ int32_t ClinetTransProxyFileManagerInit(void)
     }
     return SOFTBUS_OK;
 }
-
 void ClinetTransProxyFileManagerDeinit(void)
 {
     (void)RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, NULL);
@@ -273,7 +273,7 @@ static int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, ui
 }
 static int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint32_t *value)
 {
-    if (frame == NULL || startSeq == NULL || value == NULL) {
+    if (frame == NULL || startSeq == NULL || value == NULL || frame->data == NULL) {
         return SOFTBUS_ERR;
     }
     if (frame->frameLength < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
@@ -288,8 +288,8 @@ static int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     frame->fileData = frame->data + FRAME_HEAD_LEN;
-    (*startSeq) = (*(uint64_t *)(frame->fileData));
-    (*value) = (*(uint64_t *)(frame->fileData + FRAME_DATA_SEQ_OFFSET));
+    (*startSeq) = (*(uint32_t *)(frame->fileData));
+    (*value) = (*(uint32_t *)(frame->fileData + FRAME_DATA_SEQ_OFFSET));
     return SOFTBUS_OK;
 }
 
@@ -323,21 +323,6 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
     }
     return len;
 }
-
-static int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber)
-{
-    if (index == FRAME_NUM_0) {
-        return TRANS_SESSION_FILE_FIRST_FRAME;
-    }
-    if ((index == FRAME_NUM_1) && (frameNumber == FRAME_NUM_2)) {
-        return TRANS_SESSION_FILE_ONLYONE_FRAME;
-    }
-    if (index == (frameNumber - 1)) {
-        return TRANS_SESSION_FILE_LAST_FRAME;
-    }
-    return TRANS_SESSION_FILE_ONGOINE_FRAME;
-}
-
 static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint64_t readLength, uint64_t fileOffset,
     const SendListenerInfo *info)
 {
@@ -365,7 +350,6 @@ static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint6
     }
     return len;
 }
-
 static int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame, uint32_t *fileDataLen)
 {
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
@@ -399,7 +383,6 @@ static int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame
         }
         *fileDataLen = fileFrame->frameLength;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -439,18 +422,12 @@ static int32_t RetransFileFrameBySeq(const SendListenerInfo *info, int32_t seq)
 
 static int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *data, uint32_t len)
 {
-    if (data == NULL || len < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv ack response len: %u fail", len);
-        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    if (data == NULL || len != sizeof(AckResponseData)) {
+        return SOFTBUS_OK;
     }
-    uint32_t magic = *(uint32_t *)data;
-    uint64_t dataLen = *(uint64_t *)(data + FRAME_MAGIC_OFFSET);
-    if (magic != FILE_MAGIC_NUMBER || dataLen != (FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv ack response fail head: %u %" PRIu64, magic, dataLen);
-        return SOFTBUS_INVALID_DATA_HEAD;
-    }
-    uint32_t startSeq = *(uint32_t *)(data + FRAME_HEAD_LEN);
-    uint32_t seqResult = *(uint32_t *)(data + FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET);
+    AckResponseData *resData = (AckResponseData *)data;
+    uint32_t startSeq = resData->startSeq;
+    uint32_t seqResult = resData->seqResult;
     if (seqResult != FILE_SEND_ACK_RESULT_SUCCESS) {
         uint32_t failSeq;
         for (int32_t i = 0; i < FILE_SEND_ACK_INTERVAL; i++) {
@@ -466,70 +443,12 @@ static int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *d
     return SOFTBUS_OK;
 }
 
-static int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
-{
-    if ((filePath == NULL) || (absPath == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "input invalid");
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusRealPath(filePath, absPath) == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus realpath failed");
-        return SOFTBUS_ERR;
-    }
-
-    int32_t pathLength = strlen(absPath);
-    if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pathLength[%d] is too large", pathLength);
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static bool IsPathValid(char *filePath)
-{
-    if (filePath == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is null");
-        return false;
-    }
-    if ((strlen(filePath) == 0) || (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size[%d] is wrong", (int32_t)strlen(filePath));
-        return false;
-    }
-
-    if (filePath[strlen(filePath) - 1] == PATH_SEPARATOR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is end with '/' ");
-        return false;
-    }
-    return true;
-}
-
-static bool CheckDestFilePathValid(const char *destFile)
-{
-    if (destFile == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile is null");
-        return false;
-    }
-    int32_t len = strlen(destFile);
-    if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN) || (destFile[0] == PATH_SEPARATOR)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile first char is '/'");
-        return false;
-    }
-
-    if (strstr(destFile, "..") != NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path is not canonical form");
-        return false;
-    }
-    return true;
-}
-
 static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
 {
     if ((filePath == NULL) || (recvRootDir == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath or rootDir is null");
         return NULL;
     }
-
     int32_t rootDirLength = strlen(recvRootDir);
     int32_t filePathLength = strlen(filePath);
     bool isNeedAddSep = true;
@@ -537,7 +456,6 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
         ((rootDirLength > 0) && (recvRootDir[rootDirLength - 1] == PATH_SEPARATOR))) {
         isNeedAddSep = false;
     }
-
     int32_t destFullPathLength = (isNeedAddSep) ? (rootDirLength + sizeof('/') + filePathLength) :
         (rootDirLength + filePathLength);
     char *recvFullPath = (char *)SoftBusCalloc(destFullPathLength + 1);
@@ -545,7 +463,6 @@ static char *GetFullRecvPath(const char *filePath, const char *recvRootDir)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recvFullPath is null");
         return NULL;
     }
-
     int32_t ret;
     if (isNeedAddSep) {
         ret = sprintf_s(recvFullPath, destFullPathLength + 1, "%s%c%s", recvRootDir, PATH_SEPARATOR, filePath);
@@ -582,7 +499,6 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dirLen[%d] >= dirPathLen[%d]", dirLen, dirPathLen);
         return SOFTBUS_ERR;
     }
-
     if (strncpy_s(dirPath, dirPathLen, fullPath, dirLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s dir path error, dirLen[%d]", dirLen);
         return SOFTBUS_ERR;
@@ -607,7 +523,6 @@ static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNam
             break;
         }
     }
-
     if (strcpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s filename error, fileNameLen[%d]", fileNameLen);
         return SOFTBUS_ERR;
@@ -969,7 +884,10 @@ static int32_t SendOneFrameRear(SendListenerInfo *info, int32_t frameType)
         if ((uint32_t)info->waitSeq == 0) {
             return SOFTBUS_OK;
         }
-        uint32_t time = (frameType == TRANS_SESSION_FILE_LAST_FRAME ? WAIT_ACK_LAST_TIME : WAIT_ACK_TIME);
+        uint32_t time = WAIT_ACK_TIME;
+        if (frameType == TRANS_SESSION_FILE_LAST_FRAME || info->waitTimeoutCount >= WAIT_FRAME_ACK_TIMEOUT_COUNT) {
+            time = WAIT_ACK_LAST_TIME;
+        }
         ret = GetPendingPacketData(info->sessionId, (uint64_t)info->waitSeq, time, false, &pendData);
         if (ret == SOFTBUS_ALREADY_TRIGGERED || ret == SOFTBUS_OK) {
             ret = AckResponseDataHandle(info, pendData.data, pendData.len);
@@ -1385,7 +1303,7 @@ static int32_t PutToRecvFileList(FileRecipientInfo *recipient, const SingleFileI
     }
 
     int32_t fd = SoftBusOpenFileWithPerms(file->filePath,
-        SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE | SOFTBUS_O_TRUNC, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
+        SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open destFile fail");
         return SOFTBUS_FILE_ERR;
@@ -1395,6 +1313,7 @@ static int32_t PutToRecvFileList(FileRecipientInfo *recipient, const SingleFileI
         SoftBusCloseFile(fd);
         return SOFTBUS_FILE_ERR;
     }
+    (void)ftruncate(fd, 0);
     recipient->recvFileInfo.fileStatus = NODE_BUSY;
     recipient->recvFileInfo.fileOffset = 0;
     recipient->recvFileInfo.timeOut = 0;
@@ -1926,37 +1845,46 @@ static int32_t ProcessFileAckRequest(int32_t sessionId, const FileFrame *frame)
 
 static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel recv file ack response. session id: %d len: %u",
-        sessionId, frame->frameLength);
     if (frame->data == NULL || frame->frameLength == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
+    AckResponseData *data = (AckResponseData *)SoftBusCalloc(sizeof(AckResponseData));
+    if (data == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    TransPendData pendData = {
+        .data = (char *)data,
+        .len = sizeof(AckResponseData),
+    };
+    if (UnpackAckReqAndResData((FileFrame *)frame, &data->startSeq, &data->seqResult) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv unpack ack response fail");
+        SoftBusFree(data);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv file ack response. session id: %d start seq: %u, value: %u",
+        sessionId, data->startSeq, data->seqResult);
     if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response SoftBusMutexLock failed");
+        SoftBusFree(data);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     SendListenerInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_sendListenerInfoList, SendListenerInfo, node) {
         if (item->sessionId == sessionId) {
-            TransPendData pendData;
-            pendData.data = (char *)SoftBusCalloc(frame->frameLength);
-            if (pendData.data == NULL) {
-                (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
-                return SOFTBUS_MALLOC_ERR;
-            }
-            (void)memcpy_s(pendData.data, frame->frameLength, frame->data, frame->frameLength);
-            pendData.len = frame->frameLength;
             if (SetPendingPacketData((uint32_t)sessionId, (uint64_t)(item->waitSeq), &pendData) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response SetPendingPacketData fail");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response set pend packet fail");
                 (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
+                SoftBusFree(data);
                 return SOFTBUS_ERR;
             }
             (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response not find. session id: %d", sessionId);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv ack response not find. session id %d start seq %u",
+        sessionId, data->startSeq);
+    SoftBusFree(data);
     return SOFTBUS_NOT_FIND;
 }
 
