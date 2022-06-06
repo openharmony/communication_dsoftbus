@@ -238,7 +238,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
             }
             break;
         case BUSINESS_TYPE_FILE:
-            ret = TransOnFileChannelOpened(channel, udpPort);
+            ret = TransOnFileChannelOpened(sessionName, channel, udpPort);
             if (ret < SOFTBUS_OK) {
                 (void)TransDeleteUdpChannel(newChannel->channelId);
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on file channel open failed.");
