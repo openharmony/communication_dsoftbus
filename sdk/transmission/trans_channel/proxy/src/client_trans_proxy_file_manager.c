@@ -1286,6 +1286,29 @@ EXIT_ERR:
     return ret;
 }
 
+static bool CheckRecvFileExist(const char *absFullPath)
+{
+    if (absFullPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "absFullPath is null");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock file timer failed");
+        return false;
+    }
+    FileRecipientInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_recvRecipientInfoList, FileRecipientInfo, node) {
+        if (info->recvState == TRANS_FILE_RECV_IDLE_STATE || info->recvFileInfo.fileStatus != NODE_BUSY) {
+            continue;
+        }
+        if (strcmp(info->recvFileInfo.filePath, absFullPath) == 0) {
+            (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
+            return true;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
+    return false;
+}
 static int32_t PutToRecvFileList(FileRecipientInfo *recipient, const SingleFileInfo *file)
 {
 #define RETRY_WRITE_LOCK_TIMES 2
@@ -1297,11 +1320,14 @@ static int32_t PutToRecvFileList(FileRecipientInfo *recipient, const SingleFileI
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session receiving file");
         return SOFTBUS_ERR;
     }
+    if (CheckRecvFileExist(file->filePath)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is already exist and busy");
+        return SOFTBUS_FILE_ERR;
+    }
     if (memcpy_s(&recipient->recvFileInfo, sizeof(SingleFileInfo), file, sizeof(SingleFileInfo)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy file info fail");
         return SOFTBUS_MEM_ERR;
     }
-
     int32_t fd = SoftBusOpenFileWithPerms(file->filePath,
         SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE, SOFTBUS_S_IRUSR | SOFTBUS_S_IWUSR);
     if (fd < 0) {
