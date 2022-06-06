@@ -63,8 +63,10 @@ const char *SFILE_NAME_5M1 = "/data/file5M1.tar";
 
 const char *DFILE_NAME_1K = "file1K.tar";
 const char *DFILE_NAME_1K_2 = "file1K_2.tar";
+const char *DFILE_NAME_1K_3 = "file1K_3.tar";
 const char *DFILE_NAME_5M = "file5M.tar";
 const char *DFILE_NAME_5M_2 = "file5M_2.tar";
+const char *DFILE_NAME_5M_3 = "file5M_3.tar";
 const char *DFILE_NAME_5M1 = "file5M1.tar";
 const char *RECV_ROOT_PATH = "/data/recv/";
 
@@ -515,8 +517,8 @@ void *AuthSessionTest::TestSendFileThread(void *arg)
     const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
-    dfileList[0] = DFILE_NAME_1K_2;
-    dfileList[1] = DFILE_NAME_5M_2;
+    dfileList[0] = DFILE_NAME_1K_3;
+    dfileList[1] = DFILE_NAME_5M_3;
     TestSendFile(1, sfileList, dfileList, TEST_SEND_FILE_COUNT);
     cout << "TestSendFileThread end" << endl;
     return nullptr;
@@ -556,8 +558,8 @@ HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
     const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
-    dfileList[0] = DFILE_NAME_1K;
-    dfileList[1] = DFILE_NAME_5M;
+    dfileList[0] = DFILE_NAME_1K_2;
+    dfileList[1] = DFILE_NAME_5M_2;
     OpenAllSession(TYPE_FILE, mySessionName, peerSessionName);
     pthread_t tid;
     int32_t createPthreadRet = pthread_create(&tid, nullptr, AuthSessionTest::TestSendFileThread, nullptr);
