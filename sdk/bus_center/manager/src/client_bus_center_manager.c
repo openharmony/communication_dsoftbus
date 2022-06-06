@@ -425,7 +425,6 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join lnn cb list in join");
     }
-    rc = SOFTBUS_ERR;
     do {
         if (FindJoinLNNCbItem(target, cb) != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");

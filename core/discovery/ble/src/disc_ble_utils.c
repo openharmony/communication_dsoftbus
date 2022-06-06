@@ -274,13 +274,12 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data,
     }
     info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
     int32_t curLen = POS_TLV + ADV_HEAD_LEN;
-    unsigned char devType;
     int32_t len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_ID_HASH, curLen, (unsigned char *)info->devId);
     PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_TYPE, curLen, &devType);
+    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_TYPE, curLen, (unsigned char *)info->devType);
     PACKET_CHECK_LENGTH(len);
-    info->devType = (DeviceType)devType;
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_BR_MAC, curLen, (unsigned char *)info->addr[0].info.ble.bleMac);
+    PACKET_CHECK_LENGTH(len);
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_CUST, curLen, (unsigned char *)info->custData);
     PACKET_CHECK_LENGTH(len);
     len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_NAME, curLen, (unsigned char *)info->devName);
