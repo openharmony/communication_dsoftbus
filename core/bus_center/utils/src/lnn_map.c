@@ -136,6 +136,9 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t hash = MapHash(key);
+    if (map->nodeSize > 0 && map->nodes == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (map->nodeSize > 0 && map->nodes != NULL) {
         uint32_t idx = MapHashIdx(map, hash);
         node = map->nodes[idx];

@@ -904,6 +904,9 @@ static void BleDisconnectCallback(BleHalConnInfo halConnInfo)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectCallback mutex failed");
         return;
     }
+    if (IsListEmpty(&g_connection_list)) {
+        return;
+    }
     LIST_FOR_EACH(bleItem, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(bleItem, BleConnectionInfo, node);
         if (itemNode->halConnId == halConnInfo.halConnId && itemNode->info.isServer == halConnInfo.isServer) {
