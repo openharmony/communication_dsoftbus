@@ -53,7 +53,7 @@ static bool CheckPkgNameInfo(const char *pkgName)
             return false;
         }
     }
-    if (totalNum > SOFTBUS_PKGNAME_MAX_NUM) {
+    if (totalNum >= SOFTBUS_PKGNAME_MAX_NUM) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "number of pkgName exceeds maximum");
         return false;
     }

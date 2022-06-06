@@ -82,6 +82,10 @@ typedef enum {
     TRANS_SESSION_FILE_LAST_FRAME,
     TRANS_SESSION_FILE_ONLYONE_FRAME,
     TRANS_SESSION_FILE_ALLFILE_SENT,
+    TRANS_SESSION_FILE_CRC_CHECK_FRAME,
+    TRANS_SESSION_FILE_RESULT_FRAME,
+    TRANS_SESSION_FILE_ACK_REQUEST_SENT,
+    TRANS_SESSION_FILE_ACK_RESPONSE_SENT,
 } SessionPktType;
 
 typedef enum {
@@ -118,6 +122,9 @@ typedef struct {
     int32_t peerPort;
     int32_t routeType;
     int32_t streamType;
+    int32_t encrypt;
+    int32_t algorithm;
+    int32_t crc;
 } ChannelInfo;
 
 #ifdef __cplusplus
