@@ -101,9 +101,7 @@ static LIST_HEAD(g_recvRecipientInfoList);
 
 static int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
-    int32_t ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, type);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "send msg(%d): type=%d, ret=%d", channelId, type, ret);
-    return ret;
+    return ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, type);
 }
 
 static int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uint32_t side)
@@ -123,11 +121,9 @@ static int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t resu
     int32_t ret = ProxyChannelSendFileStream(channelId, data, len, TRANS_SESSION_FILE_RESULT_FRAME);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send trans result fail %d", ret);
-        SoftBusFree(data);
-        return ret;
     }
     SoftBusFree(data);
-    return SOFTBUS_OK;
+    return ret;
 }
 static int32_t UnpackFileTransResultFrame(const uint8_t *data, uint32_t len, uint32_t *seq,
     int32_t *result, uint32_t *side)
@@ -226,7 +222,7 @@ int32_t ClinetTransProxyFileManagerInit(void)
     }
     if (g_recvFileInfoLock.lockInitFlag == false) {
         if (SoftBusMutexInit(&g_recvFileInfoLock.lock, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile mutex init fail!");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recvfile mutex init fail!");
             return SOFTBUS_ERR;
         }
         g_recvFileInfoLock.lockInitFlag = true;
@@ -236,7 +232,7 @@ int32_t ClinetTransProxyFileManagerInit(void)
         return SOFTBUS_ERR;
     }
     if (RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, ProxyFileTransTimerProc) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "register sendfile timer fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register sendfile timer fail");
     }
     return SOFTBUS_OK;
 }
@@ -244,11 +240,11 @@ void ClinetTransProxyFileManagerDeinit(void)
 {
     (void)RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, NULL);
     if (SoftBusMutexDestroy(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destroy send file lock fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroy send file lock fail");
     }
     g_sendFileInfoLock.lockInitFlag = false;
     if (SoftBusMutexDestroy(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "destroy recv file lock fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroy recv file lock fail");
     }
     g_recvFileInfoLock.lockInitFlag = false;
 }
@@ -274,7 +270,7 @@ static int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, ui
 static int32_t UnpackAckReqAndResData(FileFrame *frame, uint32_t *startSeq, uint32_t *value)
 {
     if (frame == NULL || startSeq == NULL || value == NULL || frame->data == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (frame->frameLength < FRAME_HEAD_LEN + FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack ack data len %d fail", frame->frameLength);
@@ -392,7 +388,7 @@ static int32_t RetransFileFrameBySeq(const SendListenerInfo *info, int32_t seq)
         return SOFTBUS_OK;
     }
     if (seq <= 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     FileFrame fileFrame = {0};
     fileFrame.data = (uint8_t *)SoftBusCalloc(PROXY_MAX_PACKET_SIZE);
@@ -481,7 +477,7 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
 {
     if ((fullPath == NULL) || (strlen(fullPath) < 1) || (fullPath[strlen(fullPath) - 1] == PATH_SEPARATOR)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t i = 0;
     int32_t dirFullLen = (int32_t)strlen(fullPath);
@@ -497,11 +493,11 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
     int32_t dirLen = i;
     if (dirLen >= dirPathLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dirLen[%d] >= dirPathLen[%d]", dirLen, dirPathLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(dirPath, dirPathLen, fullPath, dirLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s dir path error, dirLen[%d]", dirLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -510,7 +506,7 @@ static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNam
 {
     if ((fullPath == NULL) || (strlen(fullPath) < 1) || (fullPath[strlen(fullPath) - 1] == PATH_SEPARATOR)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t i;
     int32_t dirFullLen = (int32_t)strlen(fullPath);
@@ -525,7 +521,7 @@ static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNam
     }
     if (strcpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s filename error, fileNameLen[%d]", fileNameLen);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -539,7 +535,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
     if (GetDirPath(fullPath, dirPath, MAX_FILE_PATH_NAME_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dir path failed");
         SoftBusFree(dirPath);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     char *absFullDir = (char *)SoftBusCalloc(PATH_MAX + 1);
     if (absFullDir == NULL) {
@@ -567,7 +563,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fileName[%s][%d]", fileName, fileNameLength);
     if (sprintf_s(recvAbsPath, pathSize, "%s/%s", absFullDir, fileName) < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy filename error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sprintf_s filename error");
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recvAbsPath[%s]", recvAbsPath);
@@ -584,14 +580,14 @@ static int32_t CreateDirAndGetAbsPath(const char *filePath, char *recvAbsPath, i
 {
     if ((filePath == NULL) || (recvAbsPath == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t len = (uint32_t)strlen(filePath);
     int32_t ret;
     char *tempPath = (char *)SoftBusCalloc(len + 1);
     if (tempPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc tempPath failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     for (uint32_t i = 0; i < len; i++) {
         tempPath[i] = filePath[i];
@@ -609,9 +605,10 @@ static int32_t CreateDirAndGetAbsPath(const char *filePath, char *recvAbsPath, i
     }
 
     SoftBusFree(tempPath);
-    if (GetAbsFullPath(filePath, recvAbsPath, pathSize) != SOFTBUS_OK) {
+    ret = GetAbsFullPath(filePath, recvAbsPath, pathSize);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest dir is invalid");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -683,7 +680,7 @@ static void DelSessionFileLock(int32_t channelId)
 static int32_t AddSendListenerInfo(SendListenerInfo *info)
 {
     if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy add send info SoftBusMutexLock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy add send info lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     SendListenerInfo *item = NULL;
@@ -1554,7 +1551,6 @@ EXIT_ERR:
 
 static int32_t WriteEmptyFrame(SingleFileInfo *fileInfo, int32_t count)
 {
-    // 写空帧：文件留空白
     if (count > 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "write %d empty frame", count);
         char *emptyBuff = (char *)SoftBusCalloc(fileInfo->oneFrameLen);
@@ -1579,7 +1575,6 @@ static int32_t WriteEmptyFrame(SingleFileInfo *fileInfo, int32_t count)
 static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, SingleFileInfo *fileInfo)
 {
     uint32_t seq = frame->seq;
-    // 到下一个32帧，startSeq还未更新，说明没有接收到ack请求，直接返回失败
     if (seq >= fileInfo->startSeq + FILE_SEND_ACK_INTERVAL) {
         return SOFTBUS_ERR;
     }
@@ -1591,7 +1586,6 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
         if (WriteEmptyFrame(fileInfo, seqDiff) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        // 当前帧为最后一帧或者大于上一次32帧+timeout count, 去校验上一次32帧的接收结果，如果有不成功，代表丢帧
         if ((seq >= fileInfo->preStartSeq + FILE_SEND_ACK_INTERVAL + WAIT_FRAME_ACK_TIMEOUT_COUNT - 1) ||
             (frame->frameType == TRANS_SESSION_FILE_LAST_FRAME && seq > FILE_SEND_ACK_INTERVAL)) {
             if ((fileInfo->preSeqResult & FILE_SEND_ACK_RESULT_SUCCESS) != FILE_SEND_ACK_RESULT_SUCCESS) {
@@ -1603,7 +1597,6 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
         fileOffset = fileInfo->fileOffset;
         fileInfo->seqResult |= 0x01 << bit;
     } else {
-        // 计算当前重发送的帧，前面写了多少数据，计算偏移
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv retrans file frame");
         fileOffset = (seq - 1) * fileInfo->oneFrameLen;
         fileInfo->preSeqResult |= 0x01 << bit;
@@ -1755,7 +1748,7 @@ EXIT_ERR:
 static int32_t ProcessFileRecvResult(int32_t sessionId, uint32_t seq, int32_t result)
 {
     if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "process recv result lock fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process recv result lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     SendListenerInfo *item = NULL;
@@ -1883,7 +1876,7 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
         .len = sizeof(AckResponseData),
     };
     if (UnpackAckReqAndResData((FileFrame *)frame, &data->startSeq, &data->seqResult) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv unpack ack response fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy recv unpack ack response fail");
         SoftBusFree(data);
         return SOFTBUS_ERR;
     }
@@ -1891,14 +1884,14 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
         sessionId, data->startSeq, data->seqResult);
     if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
         SoftBusFree(data);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response lock fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy recv ack response lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     SendListenerInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_sendListenerInfoList, SendListenerInfo, node) {
         if (item->sessionId == sessionId) {
             if (SetPendingPacketData((uint32_t)sessionId, (uint64_t)(item->waitSeq), &pendData) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "proxy recv ack response set pend packet fail");
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy recv ack response set pend packet fail");
                 (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
                 SoftBusFree(data);
                 return SOFTBUS_ERR;
@@ -1908,7 +1901,7 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
         }
     }
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv ack response not find. session id %d start seq %u",
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv ack response not find. session id %d start seq %u",
         sessionId, data->startSeq);
     SoftBusFree(data);
     return SOFTBUS_NOT_FIND;

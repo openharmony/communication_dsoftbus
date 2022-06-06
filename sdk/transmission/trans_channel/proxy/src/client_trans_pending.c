@@ -65,14 +65,14 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
     pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateBrPendingPacket SoftBusCalloc failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateBrPendingPacket SoftBusCalloc fail");
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -118,7 +118,7 @@ void DeletePendingPacket(uint32_t id, uint64_t seq)
 void ClearPendingPacketById(uint32_t id)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrPendingPacket SoftBusMutexLock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClearPendingPacketById lock fail");
         return;
     }
     PendingPacket *item = NULL;
@@ -170,8 +170,6 @@ static int32_t TransPendWaitTime(const PendingPacket *pending, TransPendData *da
         if (now.sec > outtime.sec || (now.sec == outtime.sec && now.usec >= outtime.usec)) {
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "now(%" PRId64 ", %" PRId64 ") out(%" PRId64 ", %" PRId64 ")",
-            now.sec, now.usec, outtime.sec, outtime.usec);
     }
     return SOFTBUS_TIMOUT;
 }
@@ -216,13 +214,13 @@ EXIT:
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrPendingPacket SoftBusMutexLock failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetBrPendingPacket lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
         if (item->seq == seq && item->id == id) {
-            SoftBusMutexLock(&item->lock);
+            (void)SoftBusMutexLock(&item->lock);
             item->finded = true;
             if (data != NULL) {
                 item->data.data = data->data;
