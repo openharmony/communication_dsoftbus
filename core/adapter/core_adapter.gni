@@ -26,7 +26,7 @@ declare_args() {
   dsoftbus_standard_get_devicename = true
 }
 
-aainnerkits_path = "//foundation/ability/ability_runtime/interfaces/innerkits"
+aainnerkits_path = "//foundation/ability/ability_runtime/interfaces/inner_api"
 aaservices_path = "//foundation/ability/ability_runtime/services"
 aakits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 

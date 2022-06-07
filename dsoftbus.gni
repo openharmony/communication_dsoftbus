@@ -12,7 +12,7 @@
 # limitations under the License.
 
 aafwk_inner_api_path =
-    "//foundation/ability/ability_runtime/interfaces/innerkits"
+    "//foundation/ability/ability_runtime/interfaces/inner_api"
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 aafwk_services_path = "//foundation/ability/ability_runtime/services"
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
