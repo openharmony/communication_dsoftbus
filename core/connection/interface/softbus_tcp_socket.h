@@ -28,8 +28,8 @@ extern "C" {
 #endif
 #endif
 
-#ifndef TEMP_FAILURE_RETRY
-#define TEMP_FAILURE_RETRY(expression) \
+#ifndef SOFTBUS_TEMP_FAILURE_RETRY
+#define SOFTBUS_TEMP_FAILURE_RETRY(expression) \
 ( \
     __extension__ \
     ( \
