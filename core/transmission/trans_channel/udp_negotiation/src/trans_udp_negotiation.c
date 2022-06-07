@@ -197,9 +197,6 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process udp channel open state[as server].");
     appInfo->myData.channelId = GenerateUdpChannelId();
-    if (appInfo->myData.channelId == INVALID_ID) {
-        return SOFTBUS_ERR;
-    }
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
     if (udpPort <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp listen port failed[port = %d].", udpPort);
