@@ -66,7 +66,7 @@ static int OpenTcpServer(const char *ip, int port)
 
     (void)SetReuseAddr(fd, 1);
     (void)SetReusePort(fd, 1);
-    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
+    rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Bind error");
         TcpShutDown(fd);

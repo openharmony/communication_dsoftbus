@@ -92,7 +92,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 SoftBusFdSet writeSet;
                 SoftBusSocketFdZero(&writeSet);
                 SoftBusSocketFdSet(fd, &writeSet);
-                rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
+                rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
                 if (rc < 0) {
                     break;
                 }
@@ -105,7 +105,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 SoftBusFdSet readSet;
                 SoftBusSocketFdZero(&readSet);
                 SoftBusSocketFdSet(fd, &readSet);
-                rc = TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
+                rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
                 if (rc < 0) {
                     break;
                 }
@@ -135,7 +135,7 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
         return SOFTBUS_ERR;
     }
     addr.sinPort = SoftBusHtoNs(port);
-    rc = TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
+    rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "bind fd=%d,rc=%d", fd, rc);
         return SOFTBUS_ERR;
@@ -213,7 +213,7 @@ int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, 
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, peerIp, &addr.sinAddr);
     addr.sinPort = SoftBusHtoNs((uint16_t)port);
-    int rc = TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
+    int rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)
         && (rc != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
@@ -277,7 +277,7 @@ ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
     }
     ssize_t bytes = 0;
     while (1) {
-        ssize_t rc = TEMP_FAILURE_RETRY(SoftBusSocketSend(fd, &buf[bytes], len - bytes, 0));
+        ssize_t rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSend(fd, &buf[bytes], len - bytes, 0));
         if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
             continue;
         } else if (rc <= 0) {
@@ -321,7 +321,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         }
     }
 
-    ssize_t rc = TEMP_FAILURE_RETRY(SoftBusSocketRecv(fd, buf, len, flags));
+    ssize_t rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketRecv(fd, buf, len, flags));
     if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "tcp recv data socket EAGAIN");
         rc = 0;
