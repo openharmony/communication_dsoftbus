@@ -69,11 +69,36 @@ void PendingDeinit(int type)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "PendigPackManagerDeinit init ok");
 }
 
-static inline bool TimeBefore(SoftBusSysTime *inputTime)
+static inline bool TimeBefore(const SoftBusSysTime *inputTime)
 {
     SoftBusSysTime now;
     SoftBusGetTime(&now);
-    return (now.sec < inputTime.sec || (now.sec == inputTime.sec && now.usec < inputTime.usec);
+    return (now.sec < inputTime->sec || (now.sec == inputTime->sec && now.usec < inputTime->usec));
+}
+
+static PendingPktInfo *CreatePendingItem(int32_t channelId, int32_t seqNum)
+{
+    PendingPktInfo *item = (PendingPktInfo *)SoftBusCalloc(sizeof(PendingPktInfo));
+    if (item == NULL) {
+        return NULL;
+    }
+
+    SoftBusMutexInit(&item->lock, NULL);
+    SoftBusCondInit(&item->cond);
+    item->channelId = channelId;
+    item->seq = seqNum;
+    item->status = PACKAGE_STATUS_PENDING;
+    return item;
+}
+
+static void ReleasePendingItem(PendingPktInfo *item)
+{
+    if (item == NULL) {
+        return;
+    }
+    (void)SoftBusMutexDestroy(&item->lock);
+    (void)SoftBusCondDestroy(&item->cond);
+    SoftBusFree(item);
 }
 
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
@@ -90,25 +115,20 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     }
 
     SoftBusMutexLock(&pendingList->lock);
-    LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
+    LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node)
+    {
         if (item->seq == seqNum && item->channelId == channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
             SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_ERR;
         }
     }
-    item = (PendingPktInfo *)SoftBusCalloc(sizeof(PendingPktInfo));
+
+    item = CreatePendingItem(channelId, seqNum);
     if (item == NULL) {
         SoftBusMutexUnlock(&pendingList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
-
-    SoftBusMutexInit(&item->lock, NULL);
-    SoftBusCondInit(&item->cond);
-    item->channelId = channelId;
-    item->seq = seqNum;
-    item->status = PACKAGE_STATUS_PENDING;
-
     ListAdd(&pendingList->list, &item->node);
     pendingList->cnt++;
     SoftBusMutexUnlock(&pendingList->lock);
@@ -131,12 +151,9 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
     SoftBusMutexLock(&pendingList->lock);
     ListDelete(&item->node);
-    SoftBusMutexDestroy(&item->lock);
-    SoftBusCondDestroy(&item->cond);
-    SoftBusFree(item);
     pendingList->cnt--;
     SoftBusMutexUnlock(&pendingList->lock);
-
+    ReleasePendingItem(item);
     return ret;
 }
 
