@@ -25,7 +25,21 @@
 #include "softbus_utils.h"
 
 #define TIME_OUT 2
-#define USECTONSEC 1000
+
+typedef struct {
+    ListNode node;
+    SoftBusCond cond;
+    SoftBusMutex lock;
+    int32_t channelId;
+    int32_t seq;
+    uint8_t status;
+} PendingPktInfo;
+
+enum PackageStatus {
+    PACKAGE_STATUS_PENDING = 0,
+    PACKAGE_STATUS_FINISHED,
+    PACKAGE_STATUS_CANCELED
+};
 
 static SoftBusList *g_pendingList[PENDING_TYPE_BUTT] = {NULL, NULL};
 
@@ -53,6 +67,13 @@ void PendingDeinit(int type)
         g_pendingList[type] = NULL;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "PendigPackManagerDeinit init ok");
+}
+
+static inline bool TimeBefore(SoftBusSysTime *inputTime)
+{
+    SoftBusSysTime now;
+    SoftBusGetTime(&now);
+    return (now.sec < inputTime.sec || (now.sec == inputTime.sec && now.usec < inputTime.usec);
 }
 
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
@@ -86,7 +107,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     SoftBusCondInit(&item->cond);
     item->channelId = channelId;
     item->seq = seqNum;
-    item->finded = false;
+    item->status = PACKAGE_STATUS_PENDING;
 
     ListAdd(&pendingList->list, &item->node);
     pendingList->cnt++;
@@ -96,12 +117,14 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     SoftBusSysTime now;
     SoftBusGetTime(&now);
     outtime.sec = now.sec + TIME_OUT;
-    outtime.usec = now.usec * USECTONSEC;
+    outtime.usec = now.usec;
     SoftBusMutexLock(&item->lock);
-    SoftBusCondWait(&item->cond, &item->lock, &outtime);
+    while (item->status == PACKAGE_STATUS_PENDING && TimeBefore(&outtime)) {
+        SoftBusCondWait(&item->cond, &item->lock, &outtime);
+    }
 
     int32_t ret = SOFTBUS_OK;
-    if (item->finded != true) {
+    if (item->status != PACKAGE_STATUS_FINISHED) {
         ret = SOFTBUS_TIMOUT;
     }
     SoftBusMutexUnlock(&item->lock);
@@ -134,7 +157,7 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
-            item->finded = true;
+            item->status = PACKAGE_STATUS_FINISHED;
             SoftBusCondSignal(&item->cond);
             SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
@@ -159,6 +182,7 @@ int32_t DelPendingPacket(int32_t channelId, int type)
     SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->channelId == channelId) {
+            item->status = PACKAGE_STATUS_CANCELED;
             SoftBusCondSignal(&item->cond);
             SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_OK;
