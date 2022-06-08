@@ -149,7 +149,7 @@ static void *LoopTask(void *arg)
         } else {
             SoftBusSysTime tv;
             tv.sec = time / TIME_THOUSANDS_MULTIPLIER / TIME_THOUSANDS_MULTIPLIER;
-            tv.usec = time % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER) * TIME_THOUSANDS_MULTIPLIER;
+            tv.usec = time % (TIME_THOUSANDS_MULTIPLIER * TIME_THOUSANDS_MULTIPLIER);
             SoftBusCondWait(&context->cond, &context->lock, &tv);
         }
 

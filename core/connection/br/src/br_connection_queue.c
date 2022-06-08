@@ -119,7 +119,7 @@ static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_
     int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC;
     SoftBusSysTime tv;
     tv.sec = time / USECTONSEC / USECTONSEC;
-    tv.usec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
+    tv.usec = time % (USECTONSEC * USECTONSEC);
     return SoftBusCondWait(cond, mutex, &tv);
 }
 
