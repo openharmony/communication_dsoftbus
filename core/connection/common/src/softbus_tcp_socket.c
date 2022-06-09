@@ -326,7 +326,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "tcp recv data socket EAGAIN");
         rc = 0;
     } else if (rc <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data fail errno[%d]", errno);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp recv data fail errno[%d], rc[%d]", errno, rc);
         rc = -1;
     }
     return rc;
