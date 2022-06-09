@@ -5011,20 +5011,20 @@ HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
  */
 HWTEST_F(Disc_ManagerTest, NSTACKX_Test001, TestSize.Level1)
 {
-    NSTACKX_DeviceInfo *deviceList = (NSTACKX_DeviceInfo *)malloc(sizeof(NSTACKX_DeviceInfo));
+    NSTACKX_DeviceInfo deviceList;
     uint32_t deviceCountPtr = 0;
     int32_t ret;
     NSTACKX_Parameter g_parameter;
 
+    (void)memset_s(&deviceList, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
     NSTACKX_Init(&g_parameter);
-    ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
+    ret = NSTACKX_GetDeviceList(&deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -2);
 
     deviceCountPtr = NSTACKX_MAX_DEVICE_NUM;
-    deviceList = nullptr;
-    ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
+    (void)memset_s(&deviceList, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
+    ret = NSTACKX_GetDeviceList(&deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -2);
-    free(&deviceList);
     NSTACKX_Deinit();
 }
 
@@ -5038,22 +5038,22 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_Test001, TestSize.Level1)
  */
 HWTEST_F(Disc_ManagerTest, NSTACKX_Test002, TestSize.Level1)
 {
-    NSTACKX_DeviceInfo *deviceList = (NSTACKX_DeviceInfo *)malloc(sizeof(NSTACKX_DeviceInfo));
+    NSTACKX_DeviceInfo deviceList;
     uint32_t deviceCountPtr = NSTACKX_MAX_DEVICE_NUM;
     int32_t ret;
     NSTACKX_Parameter g_parameter;
 
-    ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
+    (void)memset_s(&deviceList, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
+    ret = NSTACKX_GetDeviceList(&deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -1);
 
     NSTACKX_Init(&g_parameter);
-    ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
+    ret = NSTACKX_GetDeviceList(&deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == 0);
 
     NSTACKX_Deinit();
-    ret = NSTACKX_GetDeviceList(deviceList, &deviceCountPtr);
+    ret = NSTACKX_GetDeviceList(&deviceList, &deviceCountPtr);
     TEST_ASSERT_TRUE(ret == -1);
-    free(&deviceList);
 }
 
 /*
@@ -5153,19 +5153,19 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability005, TestSize.Level1)
  * @tc.name: testBaseListener006
  * @tc.desc: Test NSTACKX_RegisterCapability yes or no.
  * @tc.in: test module, test number, Test Levels.
- * @tc.out: Zero
+ * @tc.out: Nonzero
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
 HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability006, TestSize.Level1)
 {
     int32_t ret;
-    uint32_t mapNum = 2;
+    uint32_t mapNum = 3;
     NSTACKX_Parameter g_parameter;
 
     NSTACKX_Init(&g_parameter);
     ret = NSTACKX_RegisterCapability(mapNum, 0);
-    TEST_ASSERT_TRUE(ret == 0);
+    TEST_ASSERT_TRUE(ret != 0);
     NSTACKX_Deinit();
 };
 }
