@@ -227,7 +227,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     if (msg == NULL || para == NULL) {
         return 1;
     }
-    msgType = (int32_t)para;
+    msgType = (int32_t)(uintptr_t)para;
     if (msg->what == FSM_CTRL_MSG_DATA && (int32_t)msg->arg1 == msgType) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove fsm data message: %d", msgType);
         FreeFsmHandleMsgObj((FsmCtrlMsgObj *)msg->obj);
