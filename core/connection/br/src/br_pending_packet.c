@@ -144,7 +144,7 @@ int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void 
         (void)SoftBusGetTime(&now);
         int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC;
         outtime.sec = time / USECTONSEC / USECTONSEC;
-        outtime.usec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
+        outtime.usec = time % (USECTONSEC * USECTONSEC);
         (void)SoftBusCondWait(&pending->cond, &pending->lock, &outtime);
         if (pending->finded) {
             *data = pending->data;
