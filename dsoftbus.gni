@@ -19,7 +19,7 @@ hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
-ability_base_path = "//foundation/ability/ability_runtime/ability_base"
+ability_base_path = "//foundation/ability/ability_base"
 
 declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
