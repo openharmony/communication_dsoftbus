@@ -514,6 +514,7 @@ static AuthManager *InitClientAuthManager(AuthVerifyModule moduleId, const Conne
 
     auth->requestId = requestId;
     auth->option = *option;
+    auth->fd = INVALID_FD;
     if (memcpy_s(auth->peerUid, MAX_ACCOUNT_HASH_LEN, peerUid, MAX_ACCOUNT_HASH_LEN) != 0) {
         (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s faield");
