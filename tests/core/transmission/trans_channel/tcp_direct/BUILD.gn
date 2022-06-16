@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/transmission"
+module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransTcpDirectCoreTest") {
   module_out_path = module_output_path

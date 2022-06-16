@@ -23,7 +23,7 @@ br_adapter_inc = [
 ]
 
 declare_args() {
-  dsoftbus_standard_get_devicename = true
+  dsoftbus_get_devicename = true
 }
 
 aainnerkits_path = "//foundation/ability/ability_runtime/interfaces/inner_api"
@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
 
   bus_center_core_adapter_deps = []
 } else {
-  if (dsoftbus_standard_get_devicename == false) {
+  if (dsoftbus_get_devicename == false) {
     bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
     bus_center_core_adapter_inc =

@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (dsoftbus_standard_feature_lnn_net) {
+if (dsoftbus_feature_lnn_net) {
   bus_center_monitor_src =
       [ "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_event_monitor.c" ]
 } else {
