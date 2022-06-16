@@ -154,7 +154,7 @@ static DiscBleListener g_bleListener = {
     .stateListenerId = -1,
     .scanListenerId = -1
 };
-static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {0, 3, 5, 3, 6, 5, 6, 7};
+static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {0, 3, 5, 3, 7, 5, 6, 7};
 
 static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *obj);
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac);
