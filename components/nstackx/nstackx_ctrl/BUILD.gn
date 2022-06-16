@@ -26,7 +26,7 @@ ctrl_include = [
 cflags = [ "-Wall" ]
 include_dirs = []
 
-if (dsoftbus_standard_feature_ifname_prefix) {
+if (dsoftbus_feature_ifname_prefix) {
   cflags += [ "-DNSTACKX_ETH_INTERFACE_NAME_PREFIX=\"br\"" ]
 }
 
@@ -98,6 +98,6 @@ if (defined(ohos_lite)) {
       "//third_party/libcoap:libcoap",
     ]
     subsystem_name = "communication"
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
   }
 }

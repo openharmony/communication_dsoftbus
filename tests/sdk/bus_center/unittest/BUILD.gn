@@ -14,12 +14,12 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/bus_center"
+module_output_path = "dsoftbus/bus_center"
 
 ohos_unittest("BusCenterSdkTest") {
   module_out_path = module_output_path
   sources = [ "bus_center_sdk_test.cpp" ]
-  if (dsoftbus_standard_feature_lnn_meta_node) {
+  if (dsoftbus_feature_lnn_meta_node) {
     sources += [ "bus_center_meta_node_sdk_test.cpp" ]
   }
   include_dirs = [

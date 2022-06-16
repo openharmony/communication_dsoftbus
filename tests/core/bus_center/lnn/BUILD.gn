@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/LNN"
+module_output_path = "dsoftbus/LNN"
 
 ohos_unittest("LNNTest") {
   module_out_path = module_output_path

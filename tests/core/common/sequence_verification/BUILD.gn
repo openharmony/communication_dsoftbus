@@ -33,7 +33,7 @@ if (defined(ohos_lite)) {
   import("//build/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-  module_output_path = "dsoftbus_standard/common"
+  module_output_path = "dsoftbus/common"
   ohos_unittest("seq_verification_test") {
     module_out_path = module_output_path
     sources = [ "unittest/sequence_verification_test.cpp" ]
