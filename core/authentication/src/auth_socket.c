@@ -195,7 +195,8 @@ static int32_t TrySyncDeviceUuid(int32_t fd)
         return SOFTBUS_ERR;
     }
     if (auth->side != CLIENT_SIDE_FLAG || auth->status != WAIT_CONNECTION_ESTABLISHED) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %" PRIu64, auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected write event for auth: %" PRIu64 ", fd:%d.",
+            auth->authId, fd);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "connect successful for authId: %" PRIu64, auth->authId);
@@ -295,8 +296,8 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth start post eth data, authId is %" PRId64 ", moduleId is %d, len is %u",
-        auth->authId, head->module, len);
+        "auth start post eth data, authId is %" PRId64 ", fd is %d, moduleId is %d, len is %u",
+        auth->authId, auth->fd, head->module, len);
     ssize_t byte = SendTcpData(auth->fd, connPostData, postDataLen, 0);
     if (byte != (ssize_t)postDataLen) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SendTcpData failed");

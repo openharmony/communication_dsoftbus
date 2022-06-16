@@ -184,7 +184,7 @@ int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, 
         return -1;
     }
 
-    int fd;
+    int fd = -1;
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
