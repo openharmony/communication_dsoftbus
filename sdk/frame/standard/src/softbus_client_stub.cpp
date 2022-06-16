@@ -437,9 +437,8 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
         }
     }
     int32_t retReply = OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
-    if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner write reply failed!");
-        return SOFTBUS_ERR;
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner notify join result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -457,9 +456,8 @@ int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessagePar
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnLeaveLNNResult(networkId, retCode);
-    if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner write reply failed!");
-        return SOFTBUS_ERR;
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner notify leave result failed!");
     }
     return SOFTBUS_OK;
 }
