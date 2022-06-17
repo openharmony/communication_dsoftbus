@@ -54,7 +54,7 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "${aafwk_kits_path}/ability/native/include",
+      "${aafwk_path}/interfaces/kits/native/ability/native",
       "${aafwk_inner_api_path}/want/include/ohos/aafwk/content",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
@@ -64,7 +64,7 @@ if (defined(ohos_lite)) {
 
     bus_center_core_adapter_deps = [
       "${aafwk_inner_api_path}/dataobs_manager:dataobs_manager",
-      "${aafwk_kits_path}/ability/native:abilitykit_native",
+      "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
       "${ability_base_path}:want",
       "${ability_base_path}:zuri",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
