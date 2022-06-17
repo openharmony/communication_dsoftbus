@@ -50,7 +50,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
         "$softbus_adapter_config/spec_config",
-        "//base/security/deviceauth/interfaces/innerkits",
+        "//base/security/device_auth/interfaces/innerkits",
       ]
       sources = dsoftbus_server_common_src
       sources += [
@@ -82,7 +82,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/include",
         "$softbus_adapter_config/spec_config",
         "$dsoftbus_root_path/interfaces/kits/transport",
-        "//base/security/deviceauth/interfaces/innerkits",
+        "//base/security/device_auth/interfaces/innerkits",
         "//utils/native/lite/include",
         "//third_party/bounds_checking_function/include",
       ]
@@ -176,7 +176,7 @@ if (defined(ohos_lite)) {
       external_deps = bus_center_server_external_deps
       external_deps += [
         "access_token:libaccesstoken_sdk",
-        "deviceauth_standard:deviceauth_sdk",
+        "device_auth:deviceauth_sdk",
         "hiviewdfx_hilog_native:libhilog",
         "ipc:ipc_core",
         "safwk:system_ability_fwk",

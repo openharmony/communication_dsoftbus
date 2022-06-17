@@ -21,7 +21,7 @@ ohos_unittest("AuthTest") {
   sources = [ "unittest/auth_test.cpp" ]
 
   include_dirs = [
-    "//base/security/deviceauth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/innerkits",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
