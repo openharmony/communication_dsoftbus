@@ -51,6 +51,8 @@ int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber);
 char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount);
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo);
 
+const char* TransGetFileName(const char* path);
+
 uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen);
 
 int32_t FileLock(int32_t fd, int32_t type, bool isBlock);
