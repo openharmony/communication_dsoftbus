@@ -56,7 +56,7 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//base/security/deviceauth/services:deviceauth_sdk",
+    "//base/security/device_auth/services:deviceauth_sdk",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
