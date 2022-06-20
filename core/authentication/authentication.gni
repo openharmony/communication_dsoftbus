@@ -47,17 +47,17 @@ auth_server_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
+    auth_server_inc += [ "//base/security/device_auth/interfaces/innerkits" ]
     if (dsoftbus_feature_lnn_net) {
-      auth_server_deps += [ "//base/security/deviceauth/services:deviceauth" ]
+      auth_server_deps += [ "//base/security/device_auth/services:deviceauth" ]
     }
   } else {
     auth_server_inc += [ "//third_party/cJSON" ]
     if (dsoftbus_feature_lnn_net) {
       auth_server_deps +=
-          [ "//base/security/deviceauth/services:deviceauth_sdk" ]
+          [ "//base/security/device_auth/services:deviceauth_sdk" ]
     }
   }
 } else {
-  auth_server_inc += [ "//base/security/deviceauth/interfaces/innerkits" ]
+  auth_server_inc += [ "//base/security/device_auth/interfaces/innerkits" ]
 }
