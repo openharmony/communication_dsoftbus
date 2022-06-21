@@ -1087,8 +1087,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     int64_t authId = auth->authId;
     uint16_t id = auth->id;
+    ConnectType type = auth->option.type;
     AuthNotifyTransDisconn(authId);
-    if (!IsP2PLink(auth)) {
+    if (!IsP2PLink(auth) && type != CONNECT_BR) {
         return;
     }
     EventRemove(id);
@@ -1098,6 +1099,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     AuthClearSessionKeyBySeq((int32_t)authId);
     (void)SoftBusMutexUnlock(&g_authLock);
+    if (type == CONNECT_BR) {
+        AuthNotifyLnnDisconn(authId);
+    }
     DeleteAuth(auth);
 }
 
