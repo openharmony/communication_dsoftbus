@@ -13,7 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-if (dsoftbus_standard_feature_conn_tcp == true) {
+if (dsoftbus_feature_conn_tcp == true) {
   tcp_connection_src = [
     "$dsoftbus_root_path/core/connection/tcp/src/softbus_tcp_connect_manager.c",
   ]

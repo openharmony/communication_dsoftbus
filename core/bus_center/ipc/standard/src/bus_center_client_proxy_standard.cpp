@@ -106,17 +106,12 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_JOIN_RESULT, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult send request failed");
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusLeaveLNN read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
@@ -144,17 +139,12 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_LEAVE_RESULT, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult send request failed");
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)

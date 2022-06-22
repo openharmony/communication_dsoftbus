@@ -18,7 +18,7 @@ trans_qos_inc =
     [ "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface" ]
 trans_qos_deps = []
 
-if (dsoftbus_standard_feature_qos == true) {
+if (dsoftbus_feature_qos == true) {
   native_source_path = rebase_path("$dsoftbus_root_path")
   dep_qos = "dsoftbus_enhance/core/transmission/trans_channel/qos/BUILD.gn"
   enhanced_qos = exec_script("$dsoftbus_root_path/check_sub_module.py",

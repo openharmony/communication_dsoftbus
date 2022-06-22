@@ -146,7 +146,7 @@ static void ComputeWaitPendTime(uint32_t waitMillis, SoftBusSysTime *outtime)
     (void)SoftBusGetTime(&now);
     int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC;
     outtime->sec = time / USECTONSEC / USECTONSEC;
-    outtime->usec = time % (USECTONSEC * USECTONSEC) * USECTONSEC;
+    outtime->usec = time % (USECTONSEC * USECTONSEC);
 }
 
 static int32_t TransPendWaitTime(const PendingPacket *pending, TransPendData *data, uint32_t waitMillis)

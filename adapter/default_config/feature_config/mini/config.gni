@@ -12,30 +12,30 @@
 # limitations under the License.
 
 declare_args() {
-  dsoftbus_standard_feature_disc_ble = false
-  dsoftbus_standard_feature_disc_coap = true
+  dsoftbus_feature_disc_ble = false
+  dsoftbus_feature_disc_coap = true
 
-  dsoftbus_standard_feature_conn_tcp = true
-  dsoftbus_standard_feature_conn_br = false
-  dsoftbus_standard_feature_conn_ble = false
-  dsoftbus_standard_feature_conn_p2p = false
+  dsoftbus_feature_conn_tcp = true
+  dsoftbus_feature_conn_br = false
+  dsoftbus_feature_conn_ble = false
+  dsoftbus_feature_conn_p2p = false
 
-  dsoftbus_standard_feature_trans_udp = false
-  dsoftbus_standard_feature_trans_udp_stream = false
-  dsoftbus_standard_feature_trans_udp_file = false
+  dsoftbus_feature_trans_udp = false
+  dsoftbus_feature_trans_udp_stream = false
+  dsoftbus_feature_trans_udp_file = false
 
-  dsoftbus_standard_feature_ip_auth = true
-  dsoftbus_standard_feature_auth_account = false
+  dsoftbus_feature_ip_auth = true
+  dsoftbus_feature_auth_account = false
 
-  dsoftbus_standard_feature_lnn_net = true
-  dsoftbus_standard_feature_lnn_time_sync = false
-  dsoftbus_standard_feature_lnn_heartbeat = false
-  dsoftbus_standard_feature_lnn_meta_node = false
-  dsoftbus_standard_feature_qos = false
-  dsoftbus_standard_feature_lnn_wifiservice_dependence = false
+  dsoftbus_feature_lnn_net = true
+  dsoftbus_feature_lnn_time_sync = false
+  dsoftbus_feature_lnn_heartbeat = false
+  dsoftbus_feature_lnn_meta_node = false
+  dsoftbus_feature_qos = false
+  dsoftbus_feature_lnn_wifiservice_dependence = false
 
-  dsoftbus_standard_feature_build_shared_sdk = false
-  dsoftbus_standard_feature_ifname_prefix = false
+  dsoftbus_feature_build_shared_sdk = false
+  dsoftbus_feature_ifname_prefix = false
 
-  dsoftbus_standard_feature_encrypt = 0
+  dsoftbus_feature_encrypt = 0
 }

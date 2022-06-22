@@ -14,16 +14,16 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/connection"
+module_output_path = "dsoftbus/connection"
 
 ohos_unittest("softbus_conn_manager_test") {
   module_out_path = module_output_path
 
-  if (dsoftbus_standard_feature_conn_br == true) {
+  if (dsoftbus_feature_conn_br == true) {
     defines = [ "connection_enable_br_test" ]
   }
 
-  if (dsoftbus_standard_feature_conn_ble == true) {
+  if (dsoftbus_feature_conn_ble == true) {
     defines += [ "connection_enable_ble_test" ]
   }
 
