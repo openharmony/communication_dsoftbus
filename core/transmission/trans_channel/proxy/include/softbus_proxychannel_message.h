@@ -126,11 +126,17 @@ typedef struct {
     SliceProcessor processor[PROCESSOR_MAX];
 } ChannelSliceProcessor;
 
+typedef struct {
+    uint8_t *inData;
+    uint32_t inLen;
+    uint8_t *outData;
+    uint32_t outLen;
+} ProxyDataInfo;
+
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
-    const char *payload, int32_t payloadLen, char **data, int32_t *dataLen);
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);
