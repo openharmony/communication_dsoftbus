@@ -34,6 +34,10 @@
 
 #define PATH_SEPARATOR '/'
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     uint8_t *buffer;
     uint32_t bufferSize;
@@ -44,9 +48,6 @@ int32_t GetAndCheckRealPath(const char *filePath, char *absPath);
 bool CheckDestFilePathValid(const char *destFile);
 int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber);
 
-bool IntToByte(uint32_t value, char *buffer, uint32_t len);
-bool ByteToInt(char *buffer, uint32_t len, uint32_t *outValue);
-
 char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount);
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo);
 
@@ -55,5 +56,9 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen);
 int32_t FileLock(int32_t fd, int32_t type, bool isBlock);
 int32_t TryFileLock(int32_t fd, int32_t type, int32_t retryTimes);
 int32_t FileUnLock(int32_t fd);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
