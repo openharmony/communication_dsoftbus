@@ -54,11 +54,8 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "${aafwk_path}/interfaces/kits/native/ability/native",
-      "${aafwk_inner_api_path}/want/include/ohos/aafwk/content",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
-      "${aafwk_inner_api_path}/dataobs_manager/include",
       "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 

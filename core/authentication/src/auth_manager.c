@@ -514,6 +514,7 @@ static AuthManager *InitClientAuthManager(AuthVerifyModule moduleId, const Conne
 
     auth->requestId = requestId;
     auth->option = *option;
+    auth->fd = -1;
     if (memcpy_s(auth->peerUid, MAX_ACCOUNT_HASH_LEN, peerUid, MAX_ACCOUNT_HASH_LEN) != 0) {
         (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s faield");
@@ -1086,8 +1087,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     int64_t authId = auth->authId;
     uint16_t id = auth->id;
+    ConnectType type = auth->option.type;
     AuthNotifyTransDisconn(authId);
-    if (!IsP2PLink(auth)) {
+    if (!IsP2PLink(auth) && type != CONNECT_BR) {
         return;
     }
     EventRemove(id);
@@ -1097,6 +1099,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     AuthClearSessionKeyBySeq((int32_t)authId);
     (void)SoftBusMutexUnlock(&g_authLock);
+    if (type == CONNECT_BR) {
+        AuthNotifyLnnDisconn(authId);
+    }
     DeleteAuth(auth);
 }
 
