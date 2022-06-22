@@ -15,7 +15,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 bus_center_disc_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c" ]
 
-if (dsoftbus_standard_feature_lnn_net) {
+if (dsoftbus_feature_lnn_net) {
   bus_center_disc_mgr_src += [
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_discovery_impl.c",

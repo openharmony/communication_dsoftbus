@@ -31,7 +31,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
-  module_output_path = "dsoftbus_standard/discovery"
+  module_output_path = "dsoftbus/discovery"
   ohos_unittest("DiscSdkTest") {
     module_out_path = module_output_path
     sources = [

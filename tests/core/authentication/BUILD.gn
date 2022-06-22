@@ -14,14 +14,14 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/auth"
+module_output_path = "dsoftbus/auth"
 
 ohos_unittest("AuthTest") {
   module_out_path = module_output_path
   sources = [ "unittest/auth_test.cpp" ]
 
   include_dirs = [
-    "//base/security/deviceauth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/innerkits",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",

@@ -110,7 +110,7 @@ int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply)
     ReadInt32(data, &type);
     uint32_t dataLen = 0;
     ReadUint32(data, &dataLen);
-    void *data2 = ReadBuffer(data, dataLen);
+    const uint8_t *data2 = ReadBuffer(data, dataLen);
     (void)TransOnChannelMsgReceived(channelId, channelType, data2, dataLen, type);
     return SOFTBUS_OK;
 }

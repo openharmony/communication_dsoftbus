@@ -268,16 +268,15 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     }
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<JoinLnnRequestInfo *>::iterator iter, iter2;
+    std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end();) {
         if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr)) {
             ++iter;
             continue;
         }
         ClientOnJoinLNNResult((*iter)->pkgName, addr, addrTypeLen, networkId, retCode);
-        iter2 = iter;
+        delete *iter;
         iter = g_joinLNNRequestInfo.erase(iter);
-        delete *iter2;
     }
     return SOFTBUS_OK;
 }
@@ -288,16 +287,15 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<LeaveLnnRequestInfo *>::iterator iter, iter2;
+    std::vector<LeaveLnnRequestInfo *>::iterator iter;
     for (iter = g_leaveLNNRequestInfo.begin(); iter != g_leaveLNNRequestInfo.end();) {
         if (strncmp(networkId, (*iter)->networkId, strlen(networkId))) {
             ++iter;
             continue;
         }
         ClientOnLeaveLNNResult((*iter)->pkgName, networkId, retCode);
-        iter2 = iter;
+        delete *iter;
         iter = g_leaveLNNRequestInfo.erase(iter);
-        delete *iter2;
     }
     return SOFTBUS_OK;
 }
@@ -320,30 +318,28 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32
 static void RemoveJoinRequestInfoByPkgName(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<JoinLnnRequestInfo *>::iterator iter, iter2;
+    std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end();) {
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName))) {
             ++iter;
             continue;
         }
-        iter2 = iter;
+        delete *iter;
         iter = g_joinLNNRequestInfo.erase(iter);
-        delete *iter2;
     }
 }
 
 static void RemoveLeaveRequestInfoByPkgName(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<LeaveLnnRequestInfo *>::iterator iter, iter2;
+    std::vector<LeaveLnnRequestInfo *>::iterator iter;
     for (iter = g_leaveLNNRequestInfo.begin(); iter != g_leaveLNNRequestInfo.end();) {
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName))) {
             ++iter;
             continue;
         }
-        iter2 = iter;
+        delete *iter;
         iter = g_leaveLNNRequestInfo.erase(iter);
-        delete *iter2;
     }
 }
 

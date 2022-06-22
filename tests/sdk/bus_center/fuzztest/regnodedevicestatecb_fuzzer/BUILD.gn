@@ -14,7 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
-module_output_path = "dsoftbus_standard/bus_center"
+module_output_path = "dsoftbus/bus_center"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("RegNodeDeviceStateCbFuzzTest") {

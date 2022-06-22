@@ -49,7 +49,7 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
 
-  module_output_path = "dsoftbus_standard/transmission"
+  module_output_path = "dsoftbus/transmission"
   ohos_unittest("TransSdkTest") {
     module_out_path = module_output_path
     sources = trans_sdk_test_common_src

@@ -22,14 +22,14 @@ adapter_wifi_deps = []
 if (defined(ohos_lite) ||
     (defined(global_parts_info) &&
      !defined(global_parts_info.communication_wifi_standard))) {
-  if (dsoftbus_standard_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_net) {
     adapter_wifi_src += [
       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
     ]
   }
 } else {
-  if (dsoftbus_standard_feature_lnn_net) {
-    if (dsoftbus_standard_feature_lnn_wifiservice_dependence) {
+  if (dsoftbus_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_wifiservice_dependence) {
       adapter_wifi_src +=
           [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
       adapter_wifi_inc += [

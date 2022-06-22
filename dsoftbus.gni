@@ -19,13 +19,13 @@ hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
 dsoftbus_core_path = "//foundation/communication/dsoftbus/core"
-ability_base_path = "//foundation/ability/ability_runtime/ability_base"
+ability_base_path = "//foundation/ability/ability_base"
 
 declare_args() {
   softbus_adapter_common = "//foundation/communication/dsoftbus/adapter/common"
   softbus_adapter_config =
       "//foundation/communication/dsoftbus/adapter/default_config"
-  dsoftbus_standard_feature_product_config_path =
+  dsoftbus_feature_product_config_path =
       "//foundation/communication/dsoftbus/adapter/default_config"
 }
 
@@ -52,5 +52,5 @@ if (defined(ohos_lite)) {
   }
   import("//build/ohos.gni")
   import(
-      "$dsoftbus_standard_feature_product_config_path/feature_config/standard/config.gni")
+      "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
 }

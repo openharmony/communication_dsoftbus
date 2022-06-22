@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/transmission"
+module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransTcpDirectCoreTest") {
   module_out_path = module_output_path
@@ -65,7 +65,7 @@ ohos_unittest("TransTcpDirectCoreTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//base/security/deviceauth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/innerkits",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 

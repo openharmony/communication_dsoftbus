@@ -26,7 +26,7 @@ ohos_executable("SoftBusDumpDeviceInfo") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/sdk:softbus_client",
   ]
-  part_name = "dsoftbus_standard"
+  part_name = "dsoftbus"
   subsystem_name = "communication"
 }
 
