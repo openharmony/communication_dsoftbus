@@ -17,7 +17,6 @@
 
 #include <securec.h>
 
-#include "ability.h"
 #include "abs_shared_result_set.h"
 #include "data_ability_helper.h"
 #include "data_ability_predicates.h"
