@@ -30,6 +30,18 @@
 #include "softbus_adapter_log.h"
 #include "softbus_def.h"
 
+static void ShiftByte(uint8_t *in, int8_t inSize)
+{
+    int8_t left = 0;
+    int8_t right = inSize - 1;
+    while (left < right) {
+        in[left] ^= in[right];
+        in[right] ^= in[left];
+        in[left] ^= in[right];
+        ++left;
+        --right;
+    }
+}
 
 static int32_t GetErrorCode(void)
 {
@@ -478,4 +490,65 @@ uint16_t SoftBusNtoHs(uint16_t netshort)
 uint32_t SoftBusInetAddr(const char *cp)
 {
     return inet_addr(cp);
+}
+
+static bool IsLittleEndian(void)
+{
+    uint32_t data = 0x1;
+    if (data == ntohl(data)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+static void ProcByteOrder(uint8_t *value, int8_t size)
+{
+    if (IsLittleEndian()) {
+        return;
+    }
+    ShiftByte(value, size);
+    return;
+}
+
+uint16_t SoftBusHtoLs(uint16_t value)
+{
+    uint16_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint32_t SoftBusHtoLl(uint32_t value)
+{
+    uint32_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint64_t SoftBusHtoLll(uint64_t value)
+{
+    uint64_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint16_t SoftBusLtoHs(uint16_t value)
+{
+    uint16_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint32_t SoftBusLtoHl(uint32_t value)
+{
+    uint32_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint64_t SoftBusLtoHll(uint64_t value)
+{
+    uint64_t res = value;
+    ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
 }

@@ -152,6 +152,15 @@ uint16_t SoftBusHtoNs(uint16_t hostshort);
 uint32_t SoftBusNtoHl(uint32_t netlong);
 uint16_t SoftBusNtoHs(uint16_t netshort);
 
+/* host to little-endian */
+uint16_t SoftBusHtoLs(uint16_t value);
+uint32_t SoftBusHtoLl(uint32_t value);
+uint64_t SoftBusHtoLll(uint64_t value);
+/* little-endian to host */
+uint16_t SoftBusLtoHs(uint16_t value);
+uint32_t SoftBusLtoHl(uint32_t value);
+uint64_t SoftBusLtoHll(uint64_t value);
+
 uint32_t SoftBusInetAddr(const char *cp);
 
 int32_t SoftBusSocketGetError(int32_t socketFd);

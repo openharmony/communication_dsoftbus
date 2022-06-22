@@ -29,6 +29,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -75,6 +76,15 @@ void __attribute__ ((weak)) AuthCloseTcpFd(int32_t fd)
 int32_t __attribute__ ((weak)) OpenAuthServer(void)
 {
     return SOFTBUS_ERR;
+}
+
+static void UnpackAuthDataInfo(AuthDataInfo *data)
+{
+    data->type = SoftBusLtoHl(data->type);
+    data->module = (int32_t)SoftBusLtoHl((uint32_t)data->module);
+    data->seq = (int64_t)SoftBusLtoHll((uint64_t)data->seq);
+    data->flag = (int32_t)SoftBusLtoHl((uint32_t)data->flag);
+    data->dataLen = SoftBusLtoHl(data->dataLen);
 }
 
 static int32_t EventInLooper(uint16_t id)
@@ -903,6 +913,7 @@ static int32_t AnalysisData(char *data, uint32_t len, AuthDataInfo *info)
     info->flag = *(int32_t *)data;
     data += sizeof(int32_t);
     info->dataLen = *(uint32_t *)data;
+    UnpackAuthDataInfo(info);
     if ((info->dataLen + sizeof(AuthDataInfo)) > len) {
         return SOFTBUS_ERR;
     }

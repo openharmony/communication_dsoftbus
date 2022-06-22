@@ -24,6 +24,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -282,6 +283,7 @@ int32_t TcpOnDataEventIn(int32_t fd)
     ConnPktHead head;
     uint32_t headSize = sizeof(ConnPktHead);
     ssize_t bytes = RecvTcpData(fd, (char *)&head, headSize, g_tcpTimeOut);
+    UnpackConnPktHead(&head);
     if (bytes <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "TcpOnDataEvent Disconnect fd:%d", fd);
         DelTcpConnInfo(connectionId);

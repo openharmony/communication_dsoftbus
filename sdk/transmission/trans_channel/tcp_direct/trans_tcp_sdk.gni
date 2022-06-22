@@ -28,5 +28,6 @@ if (defined(ohos_lite)) {
   trans_direct_channel_sdk_inc += [
     "$dsoftbus_root_path/core/common/security/sequence_verification/include",
     "$dsoftbus_root_path/core/common/wifi_common/tcp_socket/include",
+    "$dsoftbus_root_path/adapter/common/include",
   ]
 }
