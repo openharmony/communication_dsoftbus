@@ -18,6 +18,7 @@ trans_sdk_test_common_src = [
   "tcp_direct/unittest/trans_tcp_direct_test.cpp",
   "udp/stream/trans_sdk_stream_test.cpp",
 ]
+
 trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/interfaces/inner_kits/transport",
@@ -49,12 +50,27 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")
 
+  trans_sdk_proxy_test_src = [
+    "proxy/client_trans_proxy_file_common_test.cpp"
+  ]
+
+  trans_sdk_proxy_test_inc = [
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include"
+  ]
+
+  trans_sdk_proxy_test_deps = [
+    "$dsoftbus_root_path/sdk:softbus_client"
+  ]
+
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("TransSdkTest") {
     module_out_path = module_output_path
     sources = trans_sdk_test_common_src
+    sources += trans_sdk_proxy_test_src
     include_dirs = trans_sdk_test_common_inc
+    include_dirs += trans_sdk_proxy_test_inc
     deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
