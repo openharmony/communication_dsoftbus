@@ -26,6 +26,7 @@
 #include "softbus_property.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_transmission_interface.h"
@@ -38,13 +39,6 @@
 #define USECTONSEC 1000
 #define PACK_HEAD_LEN (sizeof(PacketHead))
 #define DATA_HEAD_SIZE (4 * 1024)  // donot knoe bytes 1024 or message (4 * 1024)
-
-typedef struct {
-    unsigned char *inData;
-    uint32_t inLen;
-    unsigned char *outData;
-    uint32_t outLen;
-} ProxyDataInfo;
 
 typedef struct {
     int32_t priority;
@@ -377,7 +371,7 @@ static int32_t TransProxyTransAuthMsg(const ProxyChannelInfo *info, const char *
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-    int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+    int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen, ProxyTypeToConnPri(flag));
     if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send queue full!!");
         return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
@@ -428,7 +422,7 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
             return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "slice: i:%d", i);
-        int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag));
+        int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen, ProxyTypeToConnPri(flag));
         if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "normal proxy send queue full!!");
             return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
@@ -443,15 +437,17 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
 int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelInfo *info, const char *payLoad,
     int payLoadLen, int priority)
 {
-    char *buf = NULL;
-    int bufLen = 0;
-
-    if (TransProxyPackMessage(msghead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    ProxyDataInfo dataInfo = {
+        .inData = (uint8_t *)payLoad,
+        .inLen = (uint32_t)payLoadLen,
+        .outData = NULL,
+        .outLen = 0,
+    };
+    if (TransProxyPackMessage(msghead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-
-    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority);
+    return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, priority);
 }
 
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag)
