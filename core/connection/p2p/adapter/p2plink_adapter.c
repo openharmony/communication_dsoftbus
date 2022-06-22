@@ -593,7 +593,7 @@ int32_t P2pLinkRequestGcIp(const char *mac, char *ip, int32_t len)
     }
 
     char ipString[P2P_IP_LEN] = {0};
-    ret = sprintf_s(ipString, sizeof(ipString), "%d.%d.%d.%d",
+    ret = sprintf_s(ipString, sizeof(ipString), "%u.%u.%u.%u",
         ipAddr[IP_INDEX_ZERO], ipAddr[IP_INDEX_ONE], ipAddr[IP_INDEX_TWO], ipAddr[IP_INDEX_TREE]);
     if (ret == -1) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sprintf_s request ip failed, ret = %d.", ret);
