@@ -26,6 +26,7 @@
 #include "softbus_property.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_transmission_interface.h"
@@ -38,13 +39,6 @@
 #define USECTONSEC 1000
 #define PACK_HEAD_LEN (sizeof(PacketHead))
 #define DATA_HEAD_SIZE (4 * 1024)  // donot knoe bytes 1024 or message (4 * 1024)
-
-typedef struct {
-    unsigned char *inData;
-    uint32_t inLen;
-    unsigned char *outData;
-    uint32_t outLen;
-} ProxyDataInfo;
 
 typedef struct {
     int32_t priority;
@@ -104,6 +98,14 @@ ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
             return PROXY_FILE_ONLYONE_FRAME;
         case TRANS_SESSION_FILE_ALLFILE_SENT:
             return PROXY_FILE_ALLFILE_SENT;
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+            return PROXY_FILE_CRC_CHECK_FRAME;
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+            return PROXY_FILE_RESULT_FRAME;
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+            return PROXY_FILE_ACK_REQUEST_SENT;
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+            return PROXY_FILE_ACK_RESPONSE_SENT;
         default:
             return PROXY_FLAG_BYTES;
     }
@@ -378,7 +380,7 @@ static int32_t TransProxyTransAuthMsg(const ProxyChannelInfo *info, const char *
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-    int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen,
+    int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen,
         ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
     if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send queue full!!");
@@ -430,8 +432,8 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
             return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "slice: i:%d", i);
-        int32_t ret = TransProxyTransSendMsg(info->connId, buf, bufLen, ProxyTypeToConnPri(flag),
-            info->appInfo.myData.pid);
+        int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen,
+            ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
         if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "normal proxy send queue full!!");
             return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
@@ -446,15 +448,18 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
 int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelInfo *info, const char *payLoad,
     int payLoadLen, int priority)
 {
-    char *buf = NULL;
-    int bufLen = 0;
-
-    if (TransProxyPackMessage(msghead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    ProxyDataInfo dataInfo = {
+        .inData = (uint8_t *)payLoad,
+        .inLen = (uint32_t)payLoadLen,
+        .outData = NULL,
+        .outLen = 0,
+    };
+    if (TransProxyPackMessage(msghead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-
-    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority, info->appInfo.myData.pid);
+    return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+        priority, info->appInfo.myData.pid);
 }
 
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag)
@@ -519,6 +524,14 @@ static SessionPktType PacketTypeToSessionType(ProxyPacketType pktType)
             return TRANS_SESSION_FILE_ONLYONE_FRAME;
         case PROXY_FILE_ALLFILE_SENT:
             return TRANS_SESSION_FILE_ALLFILE_SENT;
+        case PROXY_FILE_CRC_CHECK_FRAME:
+            return TRANS_SESSION_FILE_CRC_CHECK_FRAME;
+        case PROXY_FILE_RESULT_FRAME:
+            return TRANS_SESSION_FILE_RESULT_FRAME;
+        case PROXY_FILE_ACK_REQUEST_SENT:
+            return TRANS_SESSION_FILE_ACK_REQUEST_SENT;
+        case PROXY_FILE_ACK_RESPONSE_SENT:
+            return TRANS_SESSION_FILE_ACK_RESPONSE_SENT;
         default:
             return TRANS_SESSION_BYTES;
     }
@@ -543,6 +556,10 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
         case PROXY_FILE_LAST_FRAME:
         case PROXY_FILE_ONLYONE_FRAME:
         case PROXY_FILE_ALLFILE_SENT:
+        case PROXY_FILE_CRC_CHECK_FRAME:
+        case PROXY_FILE_RESULT_FRAME:
+        case PROXY_FILE_ACK_REQUEST_SENT:
+        case PROXY_FILE_ACK_RESPONSE_SENT:
             return NotifyClientMsgReceived(pkgName, channelId, data, len, PacketTypeToSessionType(flags));
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid flags(%d)", flags);

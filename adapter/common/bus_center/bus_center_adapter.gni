@@ -20,7 +20,7 @@ bus_center_adapter_inc = [ "$softbus_adapter_common/bus_center/include" ]
 bus_center_adapter_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    if (dsoftbus_standard_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -32,7 +32,7 @@ if (defined(ohos_lite)) {
       ]
     }
   } else if (ohos_kernel_type == "linux") {
-    if (dsoftbus_standard_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
         "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -45,12 +45,12 @@ if (defined(ohos_lite)) {
     }
   } else if (ohos_kernel_type == "liteos_a") {
     bus_center_adapter_inc += [
-      "//drivers/adapter/uhdf/posix/include",
-      "//drivers/framework/include/utils",
-      "//drivers/framework/include/core",
-      "//drivers/framework/ability/sbuf/include",
+      "//drivers/hdf_core/adapter/uhdf/posix/include",
+      "//drivers/hdf_core/framework/include/utils",
+      "//drivers/hdf_core/framework/include/core",
+      "//drivers/hdf_core/framework/ability/sbuf/include",
     ]
-    if (dsoftbus_standard_feature_lnn_net) {
+    if (dsoftbus_feature_lnn_net) {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/driver/lnn_hdf_driver_monitor.c",
         "$adapter_bus_center_path/driver/lnn_hdf_driver_request.c",
@@ -61,20 +61,20 @@ if (defined(ohos_lite)) {
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",
       ]
       bus_center_adapter_inc += [
-        "//drivers/framework/core/shared/include",
-        "//drivers/framework/include",
+        "//drivers/hdf_core/framework/core/shared/include",
+        "//drivers/hdf_core/framework/include",
       ]
       bus_center_adapter_deps += [
-        "//drivers/adapter/uhdf/manager:hdf_core",
-        "//drivers/adapter/uhdf/platform:hdf_platform",
-        "//drivers/adapter/uhdf/posix:hdf_posix_osal",
+        "//drivers/hdf_core/adapter/uhdf/manager:hdf_core",
+        "//drivers/hdf_core/adapter/uhdf/platform:hdf_platform",
+        "//drivers/hdf_core/adapter/uhdf/posix:hdf_posix_osal",
       ]
     }
   }
 } else {
   bus_center_adapter_inc += [ "//utils/native/base/include" ]
   bus_center_adapter_external_deps = []
-  if (dsoftbus_standard_feature_lnn_net) {
+  if (dsoftbus_feature_lnn_net) {
     bus_center_adapter_src += [
       "$adapter_bus_center_path/driver/lnn_driver_monitor_virtual.c",
       "$adapter_bus_center_path/driver/lnn_driver_request_virtual.c",
@@ -84,7 +84,7 @@ if (defined(ohos_lite)) {
       "$adapter_bus_center_path/platform/lnn_product_monitor_virtual.c",
     ]
 
-    if (dsoftbus_standard_feature_lnn_wifiservice_dependence) {
+    if (dsoftbus_feature_lnn_wifiservice_dependence) {
       bus_center_adapter_src +=
           [ "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor.cpp" ]
       bus_center_adapter_inc += [

@@ -112,6 +112,9 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     }
 
     appInfo->peerData.apiVersion = API_V2;
+    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         goto EXIT_ERR;
     }
@@ -183,8 +186,7 @@ static int32_t TransGetLaneInfo(const SessionParam *param, int32_t pid,
 
 static int32_t SetP2pConnInfo(const LnnLaneP2pInfo *laneP2pInfo, ConnectOption *connOpt)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetP2pConnInfo localIp=%s, peerIp=%s",
-        laneP2pInfo->localIp, laneP2pInfo->peerIp);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetP2pConnInfo localIp, peerIp");
 
     connOpt->type = CONNECT_P2P;
     if (strcpy_s(connOpt->info.ipOption.ip, IP_LEN, laneP2pInfo->peerIp) != EOK) {

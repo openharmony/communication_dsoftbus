@@ -23,6 +23,12 @@
 extern "C" {
 #endif // __cplusplus
 
+#define APP_INFO_FILE_FEATURES_SUPPORT 1
+#define APP_INFO_FILE_FEATURES_NO_SUPPORT 0
+
+#define APP_INFO_ALGORITHM_AES_GCM_256 0
+#define APP_INFO_ALGORITHM_CHACHA 1
+
 typedef enum {
     API_UNKNOWN = 0,
     API_V1 = 1,
@@ -80,6 +86,9 @@ typedef struct {
     AppType appType;
     AppInfoData myData;
     AppInfoData peerData;
+    int32_t encrypt;
+    int32_t algorithm;
+    int32_t crc;
 } AppInfo;
 
 #ifdef __cplusplus

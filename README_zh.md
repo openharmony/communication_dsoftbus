@@ -218,7 +218,7 @@
 
     ```
     // 创建会话
-    int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId, const char *groupId, const SessionAttribute* attr);
+    int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId, const char *groupId, const SessionAttribute* attr);
     ```
 
 3.  通过sessionId向对端设备发送数据。

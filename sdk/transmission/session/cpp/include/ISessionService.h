@@ -36,7 +36,7 @@ public:
     virtual int RemoveSessionServer(const std::string &pkgName, const std::string &sessionName) = 0;
 
     virtual std::shared_ptr<Session> OpenSession(const std::string &mySessionName, const std::string &peerSessionName,
-        const std::string &peerDeviceId, const std::string &groupId, int flags) = 0;
+        const std::string &peerNetworkId, const std::string &groupId, int flags) = 0;
 
     virtual int CloseSession(std::shared_ptr<Session> session) = 0;
 

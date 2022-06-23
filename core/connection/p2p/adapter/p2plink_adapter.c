@@ -599,7 +599,7 @@ int32_t P2pLinkRequestGcIp(const char *mac, char *ip, int32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sprintf_s request ip failed, ret = %d.", ret);
         return SOFTBUS_MEM_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "request ip success, ip = %s.", ipString);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkRequestGcIp success");
     if (strcpy_s(ip, len, (char *)ipString) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_MEM_ERR;
@@ -643,7 +643,8 @@ int32_t P2pLinkConfigGcIp(const char *ip)
     }
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "config ip, interface = %s.", groupInfo->interface);
-    IpAddrInfo addrInfo = {0};
+    IpAddrInfo addrInfo;
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
     if (ConvertIpStringToIntArray(addrInfo.ip, ip) != SOFTBUS_OK ||
         ConvertIpStringToIntArray(addrInfo.gateway, ip) != SOFTBUS_OK ||
         ConvertIpStringToIntArray(addrInfo.netmask, DEFAULT_NET_MASK) != SOFTBUS_OK) {

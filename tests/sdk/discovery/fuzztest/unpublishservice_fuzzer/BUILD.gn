@@ -19,7 +19,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("UnPublishServiceFuzzTest") {
-  module_out_path = "dsoftbus_standard/discovery"
+  module_out_path = "dsoftbus/discovery"
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/unpublishservice_fuzzer"
   include_dirs = [
     "//foundation/communication/dsoftbus/core/common/inner_communication",
@@ -35,6 +35,7 @@ ohos_fuzztest("UnPublishServiceFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
   sources = [ "unpublishservice_fuzzer.cpp" ]
 

@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr);
 
 #ifdef __cplusplus

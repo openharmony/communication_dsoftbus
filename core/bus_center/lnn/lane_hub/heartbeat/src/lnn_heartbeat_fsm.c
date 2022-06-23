@@ -397,7 +397,7 @@ static int32_t OnMasterStateEnter(const SoftBusMessage *msg)
     if (LnnRemoveHbFsmMsg(EVENT_HB_REPEAT_CYCLE, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (LnnPostDelayMsgToHbFsm(EVENT_HB_REPEAT_CYCLE, NULL, HB_ENABLE_DELAY_LEN) != SOFTBUS_OK) {
+    if (LnnPostMsgToHbFsm(EVENT_HB_REPEAT_CYCLE, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     return STATE_HB_MASTER_NODE_INDEX;
@@ -700,7 +700,7 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
 static int32_t OnDeviceInfoChanged(const SoftBusMessage *msg)
 {
     (void)msg;
-    int32_t ret = LnnHbMgrUpdateLocalInfo();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fsm update local device info ret %d", ret);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB fsm update local device info");
+    (void)LnnPostMsgToHbFsm(EVENT_HB_ONCE_BEGIN, NULL);
     return g_currentState;
 }

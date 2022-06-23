@@ -17,7 +17,7 @@ import(
     "$dsoftbus_sdk_path/transmission/trans_channel/udp/stream/stream_sdk.gni")
 
 dsoftbus_udp_sdk_path = "$dsoftbus_sdk_path/transmission/trans_channel/udp"
-if (dsoftbus_standard_feature_trans_udp == true) {
+if (dsoftbus_feature_trans_udp == true) {
   trans_udp_channel_sdk_src =
       [ "$dsoftbus_udp_sdk_path/common/src/client_trans_udp_manager.c" ]
 } else {
@@ -29,7 +29,7 @@ trans_udp_channel_sdk_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    if (dsoftbus_standard_feature_trans_udp != true) {
+    if (dsoftbus_feature_trans_udp != true) {
       trans_udp_channel_sdk_src +=
           [ "$dsoftbus_udp_sdk_path/file/src/client_trans_file_virtual.c" ]
       trans_udp_channel_sdk_inc += [ "$dsoftbus_udp_sdk_path/file/include" ]

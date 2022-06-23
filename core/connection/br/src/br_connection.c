@@ -561,7 +561,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     node->flag = flag;
     node->len = (uint32_t)len;
     node->data = data;
-    node->isInner = false;
+    node->isInner = ((pid == 0) ? true : false);
     node->listener = NULL;
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
@@ -729,7 +729,7 @@ static int32_t InitDataQueue(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
         return SOFTBUS_ERR;
     }
-    return InitBrPendingPacket();
+    return SOFTBUS_OK;
 }
 
 void *ConnBrAccept(void *arg)
@@ -1164,10 +1164,14 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         return NULL;
     }
     InitBrConnectionManager(g_brBuffSize);
-    if (InitDataQueue() != SOFTBUS_OK) {
+    if (InitBrPendingPacket() != SOFTBUS_OK) {
         return NULL;
     }
     if (BrInnerQueueInit() != SOFTBUS_OK) {
+        DestroyBrPendingPacket();
+        return NULL;
+    }
+    if (InitDataQueue() != SOFTBUS_OK) {
         DestroyBrPendingPacket();
         return NULL;
     }

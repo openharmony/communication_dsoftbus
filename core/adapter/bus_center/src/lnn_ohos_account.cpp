@@ -23,7 +23,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-static const char *DEFAULT_USER_ID = "0";
+static const std::string DEFAULT_USER_ID = "0";
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
@@ -47,7 +47,9 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
         return SOFTBUS_ERR;
     }
 
-    if (accountInfo.second.uid_.empty() || accountInfo.second.uid_ == DEFAULT_USER_ID) {
+    if (accountInfo.second.uid_.empty() ||
+        accountInfo.second.uid_ == DEFAULT_USER_ID ||
+        accountInfo.second.uid_ == OHOS::AccountSA::DEFAULT_OHOS_ACCOUNT_UID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetOhosAccountInfo get default user id");
         return SOFTBUS_OK;
     }

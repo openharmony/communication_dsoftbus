@@ -124,12 +124,12 @@ int32_t DiscBleGetHwAccount(char *hwAccount)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetDeviceUdid(char *devId, uint32_t len)
+int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 {
-    if (devId == NULL) {
+    if (udid == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, len) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local dev Id failed.");
         return SOFTBUS_ERR;
     }
@@ -168,14 +168,14 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "hashstr is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    char devId[DISC_MAX_DEVICE_ID_LEN] = {0};
+    char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
-    int32_t ret = DiscBleGetDeviceUdid(devId, sizeof(devId));
+    int32_t ret = DiscBleGetDeviceUdid(udid, sizeof(udid));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceId failed");
         return ret;
     }
-    ret = SoftBusGenerateStrHash((const unsigned char *)devId, strlen(devId) + 1, (unsigned char *)hashResult);
+    ret = SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid) + 1, (unsigned char *)hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash failed");
         return ret;

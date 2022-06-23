@@ -335,14 +335,14 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
  *
  * @param mySessionName local session name.
  * @param peerSessionName remote session name.
- * @param peerDeviceId remote device id.
+ * @param peerNetworkId remote device id.
  * @param groupId group id.
  * @param attr session attribute {@link SessionAttribute}.
  * @return return sessionId if the session is opened successfully, returns an error code otherwise.
  * @since 1.0
  * @version 1.0
  */
-int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute* attr);
 
 /**
@@ -409,13 +409,13 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len);
  * @brief Obtains the peer device ID based on a session ID.
  *
  * @param sessionId Indicates the session ID.
- * @param devId Indicates the pointer to the buffer for storing the device ID.
+ * @param networkId Indicates the pointer to the buffer for storing the device ID.
  * @param len Indicates the length of the buffer.
  * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
  * @since 1.0
  * @version 1.0
  */
-int GetPeerDeviceId(int sessionId, char *devId, unsigned int len);
+int GetPeerDeviceId(int sessionId, char *networkId, unsigned int len);
 
 int GetSessionSide(int sessionId);
 
