@@ -387,7 +387,6 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
             return SOFTBUS_OK;
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session is opening, i=%d", i);
         usleep(SESSION_CHECK_PERIOD);
         i++;
     }
