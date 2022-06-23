@@ -15,6 +15,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <string.h>
@@ -29,6 +30,14 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+
+#pragma pack(push, 1)
+struct FileListItem {
+    uint32_t index;
+    uint32_t fileNameLength;
+    char fileName[0];
+};
+#pragma pack(pop)
 
 bool IsPathValid(char *filePath)
 {
@@ -101,34 +110,6 @@ int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber)
     return TRANS_SESSION_FILE_ONGOINE_FRAME;
 }
 
-bool IntToByte(uint32_t value, char *buffer, uint32_t len)
-{
-    if ((buffer == NULL) || (len < sizeof(uint32_t))) {
-        return false;
-    }
-
-    for (uint32_t i = 0; i < BYTE_INT_NUM; i++) {
-        uint32_t offset = BIT_INT_NUM - (i + 1) * BIT_BYTE_NUM;
-        buffer[i] = (char)((value >> offset) & 0xFF);
-    }
-    return true;
-}
-
-bool ByteToInt(char *buffer, uint32_t len, uint32_t *outValue)
-{
-    if ((outValue == NULL) || (buffer == NULL) || (len < sizeof(uint32_t))) {
-        return false;
-    }
-    uint32_t value = 0;
-    for (int32_t i = 0; i < BYTE_INT_NUM; i++) {
-        value <<= BIT_BYTE_NUM;
-        value |= buffer[i] & 0xFF;
-    }
-
-    *outValue = value;
-    return true;
-}
-
 // crc校验表
 static const unsigned char g_auchCRCHi[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1,
@@ -175,9 +156,10 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
 {
     unsigned char uchCRCHi = 0xFF;
     unsigned char uchCRCLo = 0xFF;
-    unsigned char uIndex;
-    while (usDataLen--) {
-        uIndex = uchCRCLo ^ (*puchMsg++);
+    uint16_t dataLen = usDataLen;
+    const uint8_t *data = puchMsg;
+    while (dataLen--) {
+        unsigned char uIndex = uchCRCLo ^ (*data++);
         uchCRCLo = uchCRCHi ^ g_auchCRCHi[uIndex];
         uchCRCHi = g_auchCRCLo[uIndex];
     }
@@ -186,88 +168,84 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
 
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo)
 {
+    if (destFile == NULL || outbufferInfo == NULL || fileCnt == 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:bad input", __func__);
+        return SOFTBUS_ERR;
+    }
+    int32_t errCode = SOFTBUS_OK;
     uint32_t totalLength = 0;
     uint32_t offset = 0;
-    uint32_t index;
-    for (index = 0; index < fileCnt; index++) {
-        totalLength += strlen(destFile[index]);
+    for (uint32_t i = 0; i < fileCnt; i++) {
+        size_t fileNameLength = strlen(destFile[i]);
+        if (fileNameLength == 0 || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "bad file name at index %" PRIu32, i);
+            return SOFTBUS_INVALID_PARAM;
+        } else {
+            totalLength += fileNameLength;
+        }
     }
 
-    uint32_t fileNameSize = 0;
-    uint32_t indexSize  = sizeof(index);
-    uint32_t bufferSize = totalLength + (indexSize + sizeof(fileNameSize)) * fileCnt;
+    size_t bufferSize = totalLength + (sizeof(struct FileListItem) * fileCnt);
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(bufferSize);
     if (buffer == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc filelist failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
-    char byteBuff[sizeof(int32_t)] = {0};
-    for (index = 0; index < fileCnt; index++) {
-        if (IntToByte(index, byteBuff, indexSize) == false) {
-            goto EXIT;
+    for (uint32_t index = 0; index < fileCnt; index++) {
+        uint32_t fileNameSize = strlen(destFile[index]);
+        struct FileListItem *fileItem = (struct FileListItem *)(buffer + offset);
+        fileItem->index = htonl(index);
+        fileItem->fileNameLength = htonl(fileNameSize);
+        offset += sizeof(struct FileListItem);
+
+        // note: no \0 here
+        if (memcpy_s(fileItem->fileName, bufferSize - offset, destFile[index], fileNameSize) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy file name failed!", __func__);
+            errCode = SOFTBUS_ERR;
+            break;
         }
-        if (memcpy_s(buffer + offset, bufferSize - offset, byteBuff, indexSize) != EOK) {
-            goto EXIT;
-        }
-        offset += indexSize;
-        fileNameSize = strlen(destFile[index]);
-        if (IntToByte(fileNameSize, byteBuff, indexSize) == false) {
-            goto EXIT;
-        }
-        if (memcpy_s(buffer + offset, bufferSize - offset, byteBuff, sizeof(fileNameSize)) != EOK) {
-            goto EXIT;
-        }
-        offset += sizeof(fileNameSize);
-        if (memcpy_s(buffer + offset, bufferSize - offset, destFile[index], fileNameSize) != EOK) {
-            goto EXIT;
-        }
+
         offset += fileNameSize;
+    }
+
+    if (errCode != SOFTBUS_OK) {
+        SoftBusFree(buffer);
+        return errCode;
     }
 
     outbufferInfo->buffer = buffer;
     outbufferInfo->bufferSize = offset;
     return SOFTBUS_OK;
-EXIT:
-    SoftBusFree(buffer);
-    return SOFTBUS_ERR;
 }
 
 char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
 {
-    if ((buffer == NULL) || (fileCount == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList input invalid");
+    if ((buffer == NULL) || (fileCount == NULL) || bufferSize < sizeof(struct FileListItem)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: input invalid", __func__);
         return NULL;
     }
     char *firstFile = (char *)SoftBusCalloc(MAX_FILE_PATH_NAME_LEN + 1);
     if (firstFile == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList calloc fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: calloc fail", __func__);
         return NULL;
     }
     uint32_t offset = 0;
     int32_t count = 0;
-    uint32_t fileNameLength = 0;
-    uint32_t byteLen = sizeof(uint32_t);
-    char byteBuff[sizeof(int32_t)] = {0};
-    while (offset < bufferSize) {
-        offset += sizeof(uint32_t);
-        if (memcpy_s(byteBuff, sizeof(byteBuff), buffer + offset, byteLen) != EOK) {
-            SoftBusFree(firstFile);
-            return NULL;
-        }
-        if (ByteToInt(byteBuff, byteLen, &fileNameLength) == false) {
-            SoftBusFree(firstFile);
-            return NULL;
-        }
-        offset += byteLen;
+    while (offset < bufferSize - sizeof(struct FileListItem)) {
+        const struct FileListItem *fileListItem = (const struct FileListItem *)(buffer + offset);
+        offset += sizeof(struct FileListItem);
+        
+        uint32_t fileNameLength = ntohl(fileListItem->fileNameLength);
         if (fileNameLength > bufferSize - offset || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BufferToFileList invalid fileLength");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: invalid fileLength", __func__);
             SoftBusFree(firstFile);
             return NULL;
         }
         /* only output first file path */
         if (count == 0) {
-            if (memcpy_s(firstFile, MAX_FILE_PATH_NAME_LEN, buffer + offset, fileNameLength) != EOK) {
+            // note: no \0 in buffer
+            if (memcpy_s(firstFile, MAX_FILE_PATH_NAME_LEN, fileListItem->fileName, fileNameLength) != EOK) {
                 SoftBusFree(firstFile);
                 return NULL;
             }
