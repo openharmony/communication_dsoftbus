@@ -193,8 +193,8 @@ static int32_t SendAuthData(int64_t authId, int32_t module, int32_t flag, int64_
 
 static int32_t VerifyP2p(int64_t authId, const char *myIp, int32_t myPort, int64_t seq)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2p: authId=%" PRId64 ", ip=%s, port=%d",
-        authId, myIp, myPort);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2p: authId=%" PRId64 ", ip, port=%d",
+        authId, myPort);
     char *msg = NULL;
     int32_t ret;
 
@@ -397,8 +397,8 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         ReleaseSessonConnLock();
         goto EXIT_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip=%s, port=%d",
-        conn->appInfo.peerData.ip, conn->appInfo.peerData.port);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip, port=%d",
+        conn->appInfo.peerData.port);
 
     fd = OpenTcpClientSocket(conn->appInfo.peerData.ip, NULL, conn->appInfo.peerData.port, true);
     if (fd <= 0) {
@@ -456,11 +456,7 @@ static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const Au
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthConnOpened decrypt fail");
         return;
     }
-    char *anonymizedOut = NULL;
-    if (AnonymizePacket(&anonymizedOut, data, strlen(data)) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv data: %s", anonymizedOut);
-        SoftBusFree(anonymizedOut);
-    }
+    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "OnAuthDataRecv data: ", data, strlen(data));
 
     cJSON *json = cJSON_Parse(data);
     SoftBusFree(data);

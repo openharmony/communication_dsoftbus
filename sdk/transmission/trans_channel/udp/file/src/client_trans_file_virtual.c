@@ -57,8 +57,9 @@ void RegisterFileCb(const UdpChannelMgrCb *fileCb)
     (void)fileCb;
 }
 
-int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
+int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
+    (void)sessionName;
     (void)channel;
     (void)filePort;
     return SOFTBUS_FUNC_NOT_SUPPORT;

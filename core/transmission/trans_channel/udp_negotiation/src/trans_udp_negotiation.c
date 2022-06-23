@@ -477,11 +477,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cjson unformatted failed.");
         return SOFTBUS_ERR;
     }
-    char *anonymizedOut = NULL;
-    if (AnonymizePacket(&anonymizedOut, msgStr, strlen(msgStr)) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpStartExchangeUdpInfo, msgStr: %s", anonymizedOut);
-        SoftBusFree(anonymizedOut);
-    }
+    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpStartExchangeUdpInfo, msgStr: ", msgStr, strlen(msgStr));
     uint32_t size;
     uint8_t *encryptData = GetEncryptData(msgStr, authId, &size);
     cJSON_free(msgStr);
@@ -738,11 +734,7 @@ static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthT
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt udp negotiation info failed.");
         return;
     }
-    char *anonymizedOut = NULL;
-    if (AnonymizePacket(&anonymizedOut, (char *)buf.buf, buf.bufLen) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpModuleCb TransOnExchangeUdpInfo: %s", anonymizedOut);
-        SoftBusFree(anonymizedOut);
-    }
+    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpModuleCb TransOnExchangeUdpInfo: ", (char *)buf.buf, buf.bufLen);
     json = cJSON_Parse((char *)decryptData);
     SoftBusFree(decryptData);
     decryptData = NULL;

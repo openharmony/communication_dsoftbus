@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus_standard/connection"
+module_output_path = "dsoftbus/connection"
 
 ohos_unittest("softbus_tcp_manager_test") {
   module_out_path = module_output_path

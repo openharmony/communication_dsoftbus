@@ -121,7 +121,7 @@ if (defined(ohos_lite)) {
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
     subsystem_name = "communication"
   }
 }

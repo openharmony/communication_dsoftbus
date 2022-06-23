@@ -71,7 +71,7 @@ static void ClearSyncInfoMsg(SyncChannelInfo *info, ListNode *list)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, list, SyncInfoMsg, node) {
         ListDelete(&item->node);
         if (item->complete != NULL) {
-            item->complete((LnnSyncInfoType)item->data, info->networkId,
+            item->complete((LnnSyncInfoType)(*(uint32_t *)item->data), info->networkId,
                 &item->data[MSG_HEAD_LEN], item->dataLen - MSG_HEAD_LEN);
         }
         SoftBusFree(item);
@@ -173,7 +173,7 @@ static void SendSyncInfoMsg(SyncChannelInfo *info, SyncInfoMsg *msg)
     SoftBusGetTime(&info->accessTime);
     ListDelete(&msg->node);
     if (msg->complete != NULL) {
-        msg->complete((LnnSyncInfoType)msg->data, info->networkId,
+        msg->complete((LnnSyncInfoType)(*(uint32_t *)msg->data), info->networkId,
             &msg->data[MSG_HEAD_LEN], msg->dataLen - MSG_HEAD_LEN);
     }
     SoftBusFree(msg);
@@ -206,6 +206,8 @@ static void CloseUnusedChannel(void *para)
             continue;
         }
         (void)TransCloseNetWorkingChannel(item->clientChannelId);
+        item->clientChannelId = INVALID_CHANNEL_ID;
+        item->isClientOpened = false;
         if (item->serverChannelId == INVALID_CHANNEL_ID) {
             ListDelete(&item->node);
             SoftBusFree(item);

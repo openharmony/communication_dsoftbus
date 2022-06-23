@@ -21,12 +21,11 @@ bus_center_utils_src = [
   "$core_bus_center_utils_path/src/lnn_map.c",
   "$dsoftbus_root_path/core/bus_center/utils/src/lnn_ipc_utils.c",
 ]
-if (dsoftbus_standard_feature_lnn_net) {
+if (dsoftbus_feature_lnn_net) {
   bus_center_utils_src +=
       [ "$core_bus_center_utils_path/src/lnn_state_machine.c" ]
 }
-if (dsoftbus_standard_feature_lnn_net ||
-    dsoftbus_standard_feature_lnn_meta_node) {
+if (dsoftbus_feature_lnn_net || dsoftbus_feature_lnn_meta_node) {
   bus_center_utils_src += [
     "$core_bus_center_utils_path/src/lnn_file_utils.c",
     "$core_bus_center_utils_path/src/lnn_network_id.c",

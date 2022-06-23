@@ -41,7 +41,7 @@
 #define REG_MAC_PATTERN "([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}"
 #define REG_KEY_PATTERN "[0-9A-Za-z+-//]{43}="
 #define REG_PATTERN_MAX_LEN 256
-#define REPLACE_DIVISION_BASE 3
+#define INLEN_MULTIPLE_FACTOR 2
 
 #define PLAINTEXT_LEN_SHORT 1
 #define PLAINTEXT_LEN_NORMAL 4
@@ -194,14 +194,14 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
             if (AnonymizeStringProcess(outexec + start, end - start, mode) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymizeStringProcess fail");
                 SoftBusFree(str);
+                AnonymizeRegDeinit(&preg);
                 return SOFTBUS_ERR;
             }
             int32_t offset = start + (int32_t)strlen(outexec + start);
             char tmpStr[inLen + 1];
             if (strcpy_s(tmpStr, inLen + 1, outexec + end) != EOK || strcat_s(str, inLen, tmpStr) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize string: strcat fail.");
-                SoftBusFree(str);
-                return SOFTBUS_ERR;
+                break;
             }
             outexec += offset;
         }
@@ -211,24 +211,32 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
     return SOFTBUS_OK;
 }
 
-int32_t AnonymizePacket(char **output, const char *in, size_t inLen)
+void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet, size_t packetLen)
 {
     if (!GetSignalingMsgSwitch()) {
-        return SOFTBUS_FUNC_NOT_SUPPORT;
+        return;
     }
-    if (in == NULL) {
+    if (packet == NULL || packetLen == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is null.");
-        return SOFTBUS_INVALID_PARAM;
+        return;
+    }
+    if (packetLen > LOG_PRINT_MAX_LEN * INLEN_MULTIPLE_FACTOR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is too long.");
+        return;
     }
 
     char pattern[REG_PATTERN_MAX_LEN] = {0};
     if (sprintf_s(pattern, REG_PATTERN_MAX_LEN, "%s|%s|%s|%s|%s",
         REG_ID_PATTERN, REG_IDT_PATTERN, REG_IP_PATTERN, REG_MAC_PATTERN, REG_KEY_PATTERN) < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: concatenate reg pattern fail");
-        return SOFTBUS_ERR;
+        return;
     }
-
-    return AnonymizeString(output, in, inLen, pattern, ANONYMIZE_NORMAL);
+    char *anonymizedOut = NULL;
+    int32_t ret = AnonymizeString(&anonymizedOut, packet, packetLen, pattern, ANONYMIZE_NORMAL);
+    if (ret == SOFTBUS_OK) {
+        SoftBusLog(module, SOFTBUS_LOG_INFO, "%s%s", msg, anonymizedOut);
+        SoftBusFree(anonymizedOut);
+    }
 }
 
 const char *AnonyDevId(char **outName, const char *inName)

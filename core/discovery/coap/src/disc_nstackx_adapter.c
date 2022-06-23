@@ -118,17 +118,17 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 
 static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
 {
-    cJSON *deviceId = cJSON_Parse(nstackxDevice->deviceId);
-    if (deviceId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse device id failed.");
+    cJSON *udid = cJSON_Parse(nstackxDevice->deviceId);
+    if (udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse udid failed.");
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectStringItem(deviceId, DEVICE_UDID, device->devId, sizeof(device->devId))) {
-        cJSON_Delete(deviceId);
+    if (!GetJsonObjectStringItem(udid, DEVICE_UDID, device->devId, sizeof(device->devId))) {
+        cJSON_Delete(udid);
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse udid from remote failed.");
         return SOFTBUS_ERR;
     }
-    cJSON_Delete(deviceId);
+    cJSON_Delete(udid);
     return SOFTBUS_OK;
 }
 

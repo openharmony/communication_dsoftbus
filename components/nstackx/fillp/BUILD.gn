@@ -110,7 +110,7 @@ if (defined(ohos_lite)) {
     sources = fillp_source
     deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
 
-    part_name = "dsoftbus_standard"
+    part_name = "dsoftbus"
     subsystem_name = "communication"
   }
 }

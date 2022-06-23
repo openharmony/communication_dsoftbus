@@ -52,7 +52,7 @@ void P2pLinkSetMyIp(const char *ip)
     if (ret != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my ip %s", g_myIp);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my ip.");
 }
 
 void P2pLinkSetMyMac(const char *mac)

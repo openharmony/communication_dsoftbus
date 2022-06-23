@@ -48,7 +48,7 @@ bool CheckCapBitMapEqual(const uint32_t *srcBitMap, const uint32_t *dstBitMap, u
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 
-int32_t DiscBleGetDeviceUdid(char *devId, uint32_t len);
+int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len);
 int32_t DiscBleGetDeviceName(char *deviceName);
 int32_t DiscBleGetHwAccount(char *hwAccount);
 uint8_t DiscBleGetDeviceType(void);

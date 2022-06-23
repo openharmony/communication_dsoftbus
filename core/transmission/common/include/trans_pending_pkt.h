@@ -33,15 +33,6 @@ enum {
     PENDING_TYPE_BUTT,
 };
 
-typedef struct {
-    ListNode node;
-    SoftBusCond cond;
-    SoftBusMutex lock;
-    int32_t channelId;
-    int32_t seq;
-    bool finded;
-} PendingPktInfo;
-
 int32_t PendingInit(int type);
 void PendingDeinit(int type);
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type);

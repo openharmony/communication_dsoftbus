@@ -37,11 +37,11 @@ int RemoveSessionServerInner(const char *pkgName, const char *sessionName)
     return RemoveSessionServer(pkgName, sessionName);
 }
 
-int OpenSessionInner(const char *mySessionName, const char *peerSessionName, const char *peerDeviceId,
+int OpenSessionInner(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, int flag)
 {
     SessionAttribute attr = {flag};
-    return OpenSessionSync(mySessionName, peerSessionName, peerDeviceId, groupId, &attr);
+    return OpenSessionSync(mySessionName, peerSessionName, peerNetworkId, groupId, &attr);
 }
 
 void CloseSessionInner(int sessionId)

@@ -103,7 +103,7 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *para)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    uint16_t id = (uint16_t)para;
+    uint16_t id = *((uint16_t *)para);
     if (msg->what == AUTH_TIMEOUT && (uint16_t)(msg->arg1) == id) {
         return SOFTBUS_OK;
     }
@@ -113,7 +113,7 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *para)
 static void EventRemove(uint16_t id)
 {
     g_authHandler.looper->RemoveMessageCustom(g_authHandler.looper, &g_authHandler,
-        CustomFunc, (void *)(uintptr_t)id);
+        CustomFunc, (void *)(&id));
 }
 
 static int32_t PostDisconnectDeviceEvent(uint32_t connectionId)
@@ -514,6 +514,7 @@ static AuthManager *InitClientAuthManager(AuthVerifyModule moduleId, const Conne
 
     auth->requestId = requestId;
     auth->option = *option;
+    auth->fd = -1;
     if (memcpy_s(auth->peerUid, MAX_ACCOUNT_HASH_LEN, peerUid, MAX_ACCOUNT_HASH_LEN) != 0) {
         (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s faield");
@@ -996,7 +997,7 @@ void AuthOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq,
     if (AnalysisData(data, (uint32_t)len, &info) != SOFTBUS_OK) {
         return;
     }
-    AuthManager *auth = AuthGetManagerByChannel(connectionId);
+    AuthManager *auth = AuthGetManagerByConnectionId(connectionId);
     if (auth == NULL) {
         if (info.type == DATA_TYPE_DEVICE_ID && AuthGetSideByRemoteSeq(seq) == SERVER_SIDE_FLAG &&
             AuthIsSupportServerSide()) {
@@ -1086,8 +1087,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     int64_t authId = auth->authId;
     uint16_t id = auth->id;
+    ConnectType type = auth->option.type;
     AuthNotifyTransDisconn(authId);
-    if (!IsP2PLink(auth)) {
+    if (!IsP2PLink(auth) && type != CONNECT_BR) {
         return;
     }
     EventRemove(id);
@@ -1097,6 +1099,9 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     }
     AuthClearSessionKeyBySeq((int32_t)authId);
     (void)SoftBusMutexUnlock(&g_authLock);
+    if (type == CONNECT_BR) {
+        AuthNotifyLnnDisconn(authId);
+    }
     DeleteAuth(auth);
 }
 
@@ -1413,25 +1418,21 @@ void AuthNotifyTransDisconn(int64_t authId)
 
 int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
 {
-    AuthManager *auth = NULL;
-    ListNode *item = NULL;
-    ListNode *tmp = NULL;
+    AuthManager *item = NULL;
     if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-    LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
-        auth = LIST_ENTRY(item, AuthManager, node);
-        if (CompareConnectOption(&auth->option, option)) {
-            *authId = auth->authId;
+    LIST_FOR_EACH_ENTRY(item, &g_authClientHead, AuthManager, node) {
+        if (item->status == AUTH_PASSED && CompareConnectOption(&item->option, option)) {
+            *authId = item->authId;
             (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
     }
-    LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
-        auth = LIST_ENTRY(item, AuthManager, node);
-        if (CompareConnectOption(&auth->option, option)) {
-            *authId = auth->authId;
+    LIST_FOR_EACH_ENTRY(item, &g_authServerHead, AuthManager, node) {
+        if (item->status == AUTH_PASSED && CompareConnectOption(&item->option, option)) {
+            *authId = item->authId;
             (void)SoftBusMutexUnlock(&g_authLock);
             return SOFTBUS_OK;
         }
@@ -1452,7 +1453,7 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     }
     LIST_FOR_EACH_SAFE(item, tmp, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
-        if (CompareConnectOption(&auth->option, option)) {
+        if (auth->status == AUTH_PASSED && CompareConnectOption(&auth->option, option)) {
             if (strlen(auth->peerUuid) == 0) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "client list no peerUuid");
                 break;
@@ -1468,7 +1469,7 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     }
     LIST_FOR_EACH_SAFE(item, tmp, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
-        if (CompareConnectOption(&auth->option, option)) {
+        if (auth->status == AUTH_PASSED && CompareConnectOption(&auth->option, option)) {
             if (strlen(auth->peerUuid) == 0) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "server list no peerUuid");
                 break;
@@ -2055,7 +2056,7 @@ int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOp
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authClientHead, AuthManager, node) {
-        if (IsP2PLink(item) || item->option.type != type) {
+        if (IsP2PLink(item) || item->option.type != type || item->status != AUTH_PASSED) {
             continue;
         }
         if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
@@ -2065,7 +2066,7 @@ int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOp
         }
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authServerHead, AuthManager, node) {
-        if (IsP2PLink(item) || item->option.type != type) {
+        if (IsP2PLink(item) || item->option.type != type || item->status != AUTH_PASSED) {
             continue;
         }
         if (strncmp(item->peerUuid, uuid, strlen(uuid)) == 0) {
@@ -2076,5 +2077,30 @@ int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOp
     }
     (void)SoftBusMutexUnlock(&g_authLock);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "active auth not found, type = %d.", type);
+    return SOFTBUS_ERR;
+}
+
+int32_t AuthGetActiveBleConnectOption(const char *uuid, bool isServerSide, ConnectOption *option)
+{
+    if (uuid == NULL || uuid[0] == '\0' || option == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *item = NULL;
+    ListNode *targetList = isServerSide ? &g_authServerHead : &g_authClientHead;
+    if (SoftBusMutexLock(&g_authLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(item, targetList, AuthManager, node) {
+        if (item->status == AUTH_PASSED && item->option.type == CONNECT_BLE &&
+            strcmp(item->peerUuid, uuid) == 0) {
+            (void)memcpy_s(option, sizeof(ConnectOption), &item->option, sizeof(ConnectOption));
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authLock);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "active ble auth not exist.");
     return SOFTBUS_ERR;
 }

@@ -54,6 +54,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
+    info.encrypt = appInfo->encrypt;
+    info.algorithm = appInfo->algorithm;
+    info.crc = appInfo->crc;
 
     int32_t ret;
     if (appInfo->appType != APP_TYPE_AUTH) {
@@ -182,7 +185,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
                              sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local devid fail %d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local uuid fail %d", ret);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != 0) {
@@ -242,14 +245,14 @@ static LnnLaneProperty TransGetLnnLaneProperty(SessionType type)
     }
 }
 
-static int32_t TransGetLaneInfo(SessionType flags, const char *peerDeviceId, int32_t pid,
+static int32_t TransGetLaneInfo(SessionType flags, const char *peerNetworkId, int32_t pid,
     LnnLanesObject **lanesObject, const LnnLaneInfo **laneInfo)
 {
     LnnLaneProperty laneProperty = TransGetLnnLaneProperty(flags);
     if (laneProperty == LNN_LANE_PROPERTY_BUTT) {
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
     }
-    LnnLanesObject *object = LnnRequestLanesObject(peerDeviceId, pid, laneProperty, NULL, 1);
+    LnnLanesObject *object = LnnRequestLanesObject(peerNetworkId, pid, laneProperty, NULL, 1);
     if (object == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lne obj err");
         return SOFTBUS_TRANS_GET_LANE_INFO_ERR;

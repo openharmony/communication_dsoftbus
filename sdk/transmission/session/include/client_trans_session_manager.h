@@ -47,6 +47,9 @@ typedef struct {
     int32_t peerPid;
     bool isEncrypt;
     int32_t routeType;
+    int32_t fileEncrypt;
+    int32_t algorithm;
+    int32_t crc;
 } SessionInfo;
 
 typedef struct {
@@ -110,6 +113,8 @@ int32_t ClientGetSessionSide(int32_t sessionId);
 int32_t ClientGrantPermission(int uid, int pid, const char *busName);
 
 int32_t ClientRemovePermission(const char *busName);
+
+int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc);
 
 int TransClientInit(void);
 void TransClientDeinit(void);

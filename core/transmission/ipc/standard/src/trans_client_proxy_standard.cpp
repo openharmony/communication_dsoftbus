@@ -98,6 +98,9 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         }
     }
     data.WriteInt32(channel->routeType);
+    data.WriteInt32(channel->encrypt);
+    data.WriteInt32(channel->algorithm);
+    data.WriteInt32(channel->crc);
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {
@@ -256,17 +259,12 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived send request failed");
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,

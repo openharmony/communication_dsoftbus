@@ -23,12 +23,12 @@ br_adapter_inc = [
 ]
 
 declare_args() {
-  dsoftbus_standard_get_devicename = true
+  dsoftbus_get_devicename = true
 }
 
-aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
-aaservices_path = "//foundation/aafwk/standard/services"
-aakits_path = "//foundation/aafwk/standard/frameworks/kits"
+aainnerkits_path = "//foundation/ability/ability_runtime/interfaces/inner_api"
+aaservices_path = "//foundation/ability/ability_runtime/services"
+aakits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
 
   bus_center_core_adapter_deps = []
 } else {
-  if (dsoftbus_standard_get_devicename == false) {
+  if (dsoftbus_get_devicename == false) {
     bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
     bus_center_core_adapter_inc =
@@ -54,11 +54,8 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "${aafwk_kits_path}/ability/native/include",
-      "${aafwk_inner_api_path}/want/include/ohos/aafwk/content",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
-      "${aafwk_inner_api_path}/dataobs_manager/include",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 
@@ -69,8 +66,8 @@ if (defined(ohos_lite)) {
       "${ability_base_path}:zuri",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability:native_dataability",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb:native_rdb",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
     ]
   }
 }

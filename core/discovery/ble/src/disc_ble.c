@@ -377,8 +377,10 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
 {
     uint32_t advLen = scanResultData->advLen;
     unsigned char *advData = scanResultData->advData;
-    DeviceInfo foundInfo = {0};
+    DeviceInfo foundInfo;
+    (void)memset_s(&foundInfo, sizeof(foundInfo), 0, sizeof(foundInfo));
     foundInfo.addrNum = 1;
+    foundInfo.addr[0].type = CONNECTION_ADDR_BLE;
     if (memcpy_s(foundInfo.addr[0].info.ble.bleMac, BT_ADDR_LEN, scanResultData->addr.addr, BT_ADDR_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return;

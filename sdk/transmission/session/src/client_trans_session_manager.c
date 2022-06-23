@@ -902,6 +902,9 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isServer = channel->isServer;
                 sessionNode->isEnable = true;
                 sessionNode->routeType = channel->routeType;
+                sessionNode->fileEncrypt = channel->encrypt;
+                sessionNode->algorithm = channel->algorithm;
+                sessionNode->crc = channel->crc;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
@@ -1028,21 +1031,21 @@ int32_t ClientGetSessionSide(int32_t sessionId)
     return side;
 }
 
-static void DestroyClientSessionByDevId(const ClientSessionServer *server,
-    const char *devId, int32_t routeType, ListNode *destroyList)
+static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
+    const char *networkId, int32_t routeType, ListNode *destroyList)
 {
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-        if (strcmp(sessionNode->info.peerDeviceId, devId) != 0) {
+        if (strcmp(sessionNode->info.peerDeviceId, networkId) != 0) {
             continue;
         }
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             continue;
         }
 
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByDevId info={%d, %d, %d}",
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSessionByNetworkId info={%d, %d, %d}",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
@@ -1075,7 +1078,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionByDevId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
+        DestroyClientSessionByNetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     (void)ClientDestroySession(&destroyList);
@@ -1136,7 +1139,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyClientSessionByDevId(serverNode, networkId, routeType, &destroyList);
+        DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     (void)ClientDestroySession(&destroyList);
@@ -1171,4 +1174,36 @@ int32_t ClientRemovePermission(const char *busName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server remove permission failed, ret=%d", ret);
     }
     return ret;
+}
+
+int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int32_t *algorithm, int32_t *crc)
+{
+    if (sessionId < 0 || fileEncrypt == NULL || algorithm == NULL || crc == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found");
+        return SOFTBUS_NOT_FIND;
+    }
+    *fileEncrypt = sessionNode->fileEncrypt;
+    *algorithm = sessionNode->algorithm;
+    *crc = sessionNode->crc;
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_OK;
 }

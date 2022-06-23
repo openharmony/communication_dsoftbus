@@ -97,7 +97,7 @@ ohos_shared_library("mbedtls_shared") {
   output_name = "mbedtls"
   public_configs = [ ":mbedtls_config" ]
 
-  part_name = "dsoftbus_standard"
+  part_name = "dsoftbus"
   subsystem_name = "communication"
 }
 

@@ -145,20 +145,20 @@ static int32_t TestRegisterDeviceInfo(const char *ip)
     }
 
     (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
-    char *devIdStr = GetDeviceId();
-    if (devIdStr == NULL) {
+    char *udidStr = GetDeviceId();
+    if (udidStr == NULL) {
         printf("get device id string failed.\n");
         free(localDevInfo);
         return SOFTBUS_ERR;
     }
 
-    if (strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), devIdStr) != EOK) {
-        cJSON_free(devIdStr);
+    if (strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), udidStr) != EOK) {
+        cJSON_free(udidStr);
         printf("strcpy_s device id failed.\n");
         free(localDevInfo);
         return SOFTBUS_ERR;
     }
-    cJSON_free(devIdStr);
+    cJSON_free(udidStr);
     if (strcpy_s(localDevInfo->name, sizeof(localDevInfo->name), DEVICE_NAME) != EOK ||
         strcpy_s(localDevInfo->networkIpAddr, sizeof(localDevInfo->networkIpAddr), ip) != EOK ||
         strcpy_s(localDevInfo->networkName, sizeof(localDevInfo->networkName), NET_WORK_NAME) != EOK ||
