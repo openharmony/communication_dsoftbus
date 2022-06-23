@@ -16,8 +16,8 @@
 #include <arpa/inet.h>
 #include <iostream>
 
-#include "securec.h"
 #include <gtest/gtest.h>
+#include "securec.h"
 
 #include "client_trans_proxy_file_common.h"
 #include "softbus_adapter_mem.h"
@@ -92,7 +92,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput3, TestSize
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize.Level0)
 {
     const char *fileSet[] = {
-        "/dev/path/to", "",
+        "/dev/path/to",
         "/path/max/length/more/than/512/"
         "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
         "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
@@ -110,5 +110,4 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize
     FileListBuffer bufferInfo = {0};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, FileListToBuffer(fileSet, sizeof(fileSet) / sizeof(const char *), &bufferInfo));
 }
-
 } // namespace OHOS

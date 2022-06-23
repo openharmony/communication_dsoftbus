@@ -156,9 +156,10 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
 {
     unsigned char uchCRCHi = 0xFF;
     unsigned char uchCRCLo = 0xFF;
-    unsigned char uIndex;
-    while (usDataLen--) {
-        uIndex = uchCRCLo ^ (*puchMsg++);
+    uint16_t dataLen = usDataLen;
+    const uint8_t *data = puchMsg;
+    while (dataLen--) {
+        unsigned char uIndex = uchCRCLo ^ (*data++);
         uchCRCLo = uchCRCHi ^ g_auchCRCHi[uIndex];
         uchCRCHi = g_auchCRCLo[uIndex];
     }
@@ -176,8 +177,8 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
     uint32_t offset = 0;
     for (uint32_t i = 0; i < fileCnt; i++) {
         size_t fileNameLength = strlen(destFile[i]);
-        if(fileNameLength > MAX_FILE_PATH_NAME_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file name too long at index %" PRIu32, i);
+        if (fileNameLength == 0 || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "bad file name at index %" PRIu32, i);
             return SOFTBUS_INVALID_PARAM;
         } else {
             totalLength += fileNameLength;
