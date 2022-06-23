@@ -220,7 +220,7 @@ typedef enum {
     /** HiLink */
     COAP1 = 4,
     MEDIUM_BUTT
-} ExchanageMedium;
+} ExchangeMedium;
 
 /**
  * @brief Enumerates frequencies for publishing services.
@@ -297,8 +297,8 @@ typedef struct {
     int publishId;
     /** Discovery mode for service publishing. For details, see {@link Discovermode}. */
     DiscoverMode mode;
-    /** Service publishing medium. For details, see {@link ExchanageMedium}. */
-    ExchanageMedium medium;
+    /** Service publishing medium. For details, see {@link ExchangeMedium}. */
+    ExchangeMedium medium;
     /** Service publishing frequency. For details, see {@link ExchangeFre}. */
     ExchangeFreq freq;
     /** Service publishing capabilities. For details, see {@link g_capabilityMap}. */
@@ -318,8 +318,8 @@ typedef struct {
     int subscribeId;
     /** Discovery mode for service subscription. For details, see {@link Discovermode}. */
     DiscoverMode mode;
-    /** Service subscription medium. For details, see {@link ExchanageMedium}. */
-    ExchanageMedium medium;
+    /** Service subscription medium. For details, see {@link ExchangeMedium}. */
+    ExchangeMedium medium;
     /** Service subscription frequency. For details, see {@link ExchangeFre}. */
     ExchangeFreq freq;
     /** only find the device with the same account */

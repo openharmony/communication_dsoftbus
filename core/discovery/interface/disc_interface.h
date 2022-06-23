@@ -212,9 +212,9 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
  * @brief Modify the connection state.
  * @param[in] status Used to indicate a certain connection state discovered. For details, see {@link LinkStatus}.
  * @param[in] medium A medium for sending information that can be used in a connection route.
- * For details, see {@link ExchanageMedium}.
+ * For details, see {@link ExchangeMedium}.
  */
-void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium);
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium);
 
 /**
  * @brief Set the networking status and modify the networking connection status.

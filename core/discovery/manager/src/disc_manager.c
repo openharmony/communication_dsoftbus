@@ -76,7 +76,7 @@ typedef struct {
     ListNode node;
     int32_t id;
     DiscoverMode mode;
-    ExchanageMedium medium;
+    ExchangeMedium medium;
     InnerOption option;
     ListNode capNode;
     DiscItem *item;
@@ -1032,7 +1032,7 @@ int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
     return SOFTBUS_OK;
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchanageMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
 {
     switch (medium) {
         case COAP:

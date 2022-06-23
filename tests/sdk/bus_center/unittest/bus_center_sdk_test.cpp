@@ -369,7 +369,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
-    g_pInfo.medium = (ExchanageMedium)(COAP + 1);
+    g_pInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     g_pInfo.medium = COAP;
@@ -444,7 +444,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
-    g_sInfo.medium = (ExchanageMedium)(COAP + 1);
+    g_sInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
     g_sInfo.medium = COAP;
