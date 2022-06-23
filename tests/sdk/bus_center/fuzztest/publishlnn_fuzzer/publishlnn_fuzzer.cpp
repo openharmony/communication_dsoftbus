@@ -48,7 +48,7 @@ namespace OHOS {
     {
         g_pInfo.publishId = size;
         g_pInfo.mode = (size % MAX_SIZE_DISCOVER_MODE) ? DISCOVER_MODE_ACTIVE : DISCOVER_MODE_PASSIVE;
-        g_pInfo.medium = (ExchanageMedium)(size % MAX_SIZE_EXCHANGE_MEDIUM);
+        g_pInfo.medium = (ExchangeMedium)(size % MAX_SIZE_EXCHANGE_MEDIUM);
         g_pInfo.freq = (ExchangeFreq)(size % MAX_SIZE_EXCHANGE_FREQ);
         g_pInfo.capability = g_capabilityMap[(DataBitMap)(size % MAX_SIZE_CAPABILITYMAP)].capability;
         g_pInfo.capabilityData = (unsigned char *)data;

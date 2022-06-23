@@ -175,7 +175,7 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level0)
     ret = PublishService(g_pkgName, &testInfo, NULL);
     EXPECT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -411,7 +411,7 @@ HWTEST_F(Disc_Test, PublishServiceTest008, TestSize.Level1)
         .dataLen = sizeof("capdata2")
     };
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -442,7 +442,7 @@ HWTEST_F(Disc_Test, PublishServiceTest009, TestSize.Level1)
         .dataLen = sizeof("capdata2")
     };
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.medium = BLE;
@@ -473,7 +473,7 @@ HWTEST_F(Disc_Test, PublishServiceTest010, TestSize.Level1)
         .dataLen = sizeof("capdata2")
     };
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.medium = AUTO;
@@ -514,7 +514,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
     ret = StartDiscovery(g_pkgName, &testInfo, NULL);
     EXPECT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret != 0);
     testInfo.medium = COAP;
