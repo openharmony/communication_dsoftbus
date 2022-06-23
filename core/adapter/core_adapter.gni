@@ -26,9 +26,9 @@ declare_args() {
   dsoftbus_get_devicename = true
 }
 
-aainnerkits_path = "//foundation/ability/ability_runtime/interfaces/inner_api"
-aaservices_path = "//foundation/ability/ability_runtime/services"
-aakits_path = "//foundation/ability/ability_runtime/frameworks/kits"
+ability_runtime_innerkits_path = "//foundation/ability/ability_runtime/interfaces/inner_api"
+ability_runtime_services_path = "//foundation/ability/ability_runtime/services"
+ability_runtime_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
@@ -60,8 +60,8 @@ if (defined(ohos_lite)) {
     ]
 
     bus_center_core_adapter_deps = [
-      "${aafwk_inner_api_path}/dataobs_manager:dataobs_manager",
-      "${aafwk_kits_path}/ability/native:abilitykit_native",
+      "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+      "${ability_runtime_kits_path}/ability/native:abilitykit_native",
       "${ability_base_path}:want",
       "${ability_base_path}:zuri",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
