@@ -313,6 +313,16 @@ int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, Connect
  */
 int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option);
 
+/**
+ * @brief Get ble ConnectOption info by uuid.
+ *
+ * @param uuid device uuid string.
+ * @param isServerSide client or server.
+ * @param option connect option info {@link ConnectOption}.
+ * @return return SOFTBUS_OK if get successfully, otherwise return an error code.
+ */
+int32_t AuthGetActiveBleConnectOption(const char *uuid, bool isServerSide, ConnectOption *option);
+
 #ifdef __cplusplus
 }
 #endif
