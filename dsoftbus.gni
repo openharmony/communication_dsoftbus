@@ -15,6 +15,7 @@ aafwk_inner_api_path =
     "//foundation/ability/ability_runtime/interfaces/inner_api"
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 aafwk_services_path = "//foundation/ability/ability_runtime/services"
+aafwk_path = "//foundation/ability/ability_runtime"
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "//foundation/communication/dsoftbus/sdk"
