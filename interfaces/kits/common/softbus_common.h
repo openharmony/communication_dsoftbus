@@ -53,6 +53,15 @@ extern "C" {
 #endif
 
 /**
+ * @brief Permission of softbus component
+ *
+ * @since 3.0
+ * @version 3.0
+*/
+#define OHOS_PERMISSION_DISTRIBUTED_DATASYNC "ohos.permission.DISTRIBUTED_DATASYNC
+#define OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER "ohos.permission.DISTRIBUTED_SOFTBUS_CENTER"
+
+/**
  * @brief Indicates the length of the Bluetooth device MAC address in string format,
  * including the terminating null character <b>\0</b>.
  *
