@@ -236,6 +236,11 @@ static inline bool CapsRecvFeedback(const struct DFileSession *session)
     return session->capsCheck & NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
 }
 
+static inline bool CapsChaCha(const struct DFileSession *session)
+{
+    return (session->fileManager->keyLen == CHACHA20_KEY_LENGTH) && (session->capability & NSTACKX_CAPS_CHACHA);
+}
+
 #ifdef __cplusplus
 }
 #endif

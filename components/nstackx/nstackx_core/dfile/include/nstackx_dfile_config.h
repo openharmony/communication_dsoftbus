@@ -20,7 +20,7 @@
 
 #include "nstackx_config.h"
 #include "nstackx_util.h"
-
+#include "nstackx_dfile_frame.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -181,6 +181,8 @@ int32_t GetDFileConfig(DFileConfig *dFileConfig, uint16_t mtu, uint16_t connType
 int32_t ConfigDFileTrans(uint16_t connType, DFileTransConfig *transConfig);
 void SetTidToBindInfo(const struct DFileSession *session, uint32_t pos);
 void SetTcpKeepAlive(SocketDesc fd);
+void DFileGetCipherCaps(struct DFileSession *session, SettingFrame *settingFramePara);
+void DFileChooseCipherType(SettingFrame *hostSettingFrame, struct DFileSession *session);
 
 #ifdef __cplusplus
 }

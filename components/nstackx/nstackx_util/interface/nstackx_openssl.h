@@ -29,6 +29,11 @@
 extern "C" {
 #endif
 
+typedef enum {
+    CIPHER_AES_GCM = 0,
+    CIPHER_CHACHA,
+} DFileCipherType;
+
 #define AES_128_KEY_LENGTH 16
 #define AES_192_KEY_LENGTH 24
 #define AES_256_KEY_LENGTH 32
@@ -36,6 +41,8 @@ extern "C" {
 #define GCM_MAX_AAD_LENGTH 64
 #define GCM_TAG_LENGTH 16
 #define GCM_ADDED_LEN (GCM_IV_LENGTH + GCM_TAG_LENGTH)
+#define CHACHA20_KEY_LENGTH 32
+#define CHACHA20_POLY1305_NAME "chacha20-poly1305"
 
 #ifndef SSL_AND_CRYPTO_INCLUDED
 typedef void EVP_CIPHER_CTX;
@@ -53,6 +60,7 @@ typedef struct {
     uint8_t aad[GCM_MAX_AAD_LENGTH];
     uint32_t aadLen;
     EVP_CIPHER_CTX *ctx;
+    int cipherType;
 } CryptPara;
 
 typedef struct {
@@ -70,6 +78,7 @@ NSTACKX_EXPORT uint32_t AesGcmDecrypt(uint8_t *inBuff, uint32_t inLen, CryptPara
     uint8_t *outBuff, uint32_t outLen);
 NSTACKX_EXPORT int32_t GetRandBytes(uint8_t *buf, uint32_t len);
 NSTACKX_EXPORT uint8_t IsCryptoIncluded(void);
+NSTACKX_EXPORT uint8_t QueryCipherSupportByName(char *name);
 
 #ifdef __cplusplus
 }

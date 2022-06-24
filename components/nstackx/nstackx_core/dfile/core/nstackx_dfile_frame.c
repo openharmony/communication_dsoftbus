@@ -301,6 +301,8 @@ void EncodeSettingFrame(uint8_t *buffer, size_t length, size_t *frameLength, con
     settingFrame->capability = htonl(settingFramePara->capability);
     settingFrame->dataFrameSize = htonl(settingFramePara->dataFrameSize);
     settingFrame->capsCheck = htonl(settingFramePara->capsCheck);
+    settingFrame->cipherCapability = htonl(settingFramePara->cipherCapability);
+    settingFrame->deviceBits = htons(settingFramePara->deviceBits);
 }
 
 /* Caller should make sure that "length" can cover the minimum header length */
@@ -554,6 +556,13 @@ static uint8_t IsSettingFrameLengthValid(const SettingFrame *hostSettingFrame, u
         return NSTACKX_TRUE;
     }
 
+    if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+        sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+        sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize) +
+        sizeof(hostSettingFrame->capsCheck)) {
+        return NSTACKX_TRUE;
+    }
+
     /*
      * From dfile with the same version with local dfile.
      */
@@ -574,11 +583,7 @@ static uint8_t IsSettingFrameMtuAndTypeValid(const SettingFrame *netSettingFrame
     return NSTACKX_TRUE;
 }
 
-/*
- * Note: netSettingFrame is a malloced buffer with length reading from network, so it is not reliable and its length
- * may be shorter than sizeof(SettingFrame).
- */
-int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSettingFrame)
+static int32_t DFileCheckSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSettingFrame)
 {
     if (netSettingFrame->header.sessionId != 0 || netSettingFrame->header.transId != 0) {
         LOGE(TAG, "error transId for Setting Frame");
@@ -593,6 +598,19 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
         LOGE(TAG, "illegal setting frame mtu or type");
         return NSTACKX_EFAILED;
     }
+    return NSTACKX_EOK;
+}
+
+/*
+ * Note: netSettingFrame is a malloced buffer with length reading from network, so it is not reliable and its length
+ * may be shorter than sizeof(SettingFrame).
+ */
+int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSettingFrame)
+{
+    if (DFileCheckSettingFrame(netSettingFrame, hostSettingFrame) != NSTACKX_EOK) {
+        return NSTACKX_EFAILED;
+    }
+    uint16_t payloadLength = ntohs(netSettingFrame->header.length);
     hostSettingFrame->header.sessionId = netSettingFrame->header.sessionId;
     hostSettingFrame->mtu = ntohs(netSettingFrame->mtu);
     hostSettingFrame->connType = ntohs(netSettingFrame->connType);
@@ -625,10 +643,19 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
             sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize))) {
             hostSettingFrame->capsCheck = ntohl(netSettingFrame->capsCheck);
         }
+        if (payloadLength > (sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
+            sizeof(hostSettingFrame->dFileVersion) + sizeof(hostSettingFrame->abmCapability) +
+            sizeof(hostSettingFrame->capability) + sizeof(hostSettingFrame->dataFrameSize) +
+            sizeof(hostSettingFrame->capsCheck))) {
+            hostSettingFrame->cipherCapability = ntohl(netSettingFrame->cipherCapability);
+            hostSettingFrame->deviceBits = ntohs(netSettingFrame->deviceBits);
+        }
     }
-    LOGI(TAG, "local dfile version is %u, remote dfile version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x",
-         NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability,
-         hostSettingFrame->dataFrameSize, hostSettingFrame->capsCheck);
+    LOGI(TAG, "local version is %u, remote version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x "
+        "cipherCaps 0x%x deviceBits %u",
+        NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability,
+        hostSettingFrame->dataFrameSize, hostSettingFrame->capsCheck,
+        hostSettingFrame->cipherCapability, hostSettingFrame->deviceBits);
     return NSTACKX_EOK;
 }
 
