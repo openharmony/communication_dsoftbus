@@ -25,7 +25,7 @@
 #include "softbus_log.h"
 #include "string.h"
 
-#define IS_BR_ENCRYPT true
+#define IS_BR_ENCRYPT false
 
 static void Init(const struct tagSppSocketDriver *sppDriver)
 {
