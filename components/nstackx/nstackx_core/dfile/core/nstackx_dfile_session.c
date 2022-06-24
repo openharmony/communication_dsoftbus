@@ -451,6 +451,10 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
     settingFramePara.capability = peerInfo->session->capability & NSTACKX_CAPS_LINK_SEQUENCE;
     settingFramePara.dataFrameSize = 0;
     settingFramePara.capsCheck = NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK;
+    if (peerInfo->session->fileManager->keyLen) {
+        DFileGetCipherCaps(peerInfo->session, &settingFramePara);
+        settingFramePara.deviceBits = DFileGetDeviceBits();
+    }
     EncodeSettingFrame(buf, NSTACKX_DEFAULT_FRAME_SIZE, &frameLen, &settingFramePara);
     int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
     if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
@@ -568,6 +572,7 @@ static void DFileSessionHandleClientSetting(DFileSession *session, DFileFrame *d
         LOGI(TAG, "server replies using normal ACK");
         session->capability &= ~NSTACKX_CAPS_LINK_SEQUENCE;
     }
+    DFileChooseCipherType(&hostSettingFrame, session);
 }
 
 static uint16_t DFileGetMTU(SocketProtocol protocol)
@@ -695,6 +700,7 @@ L_END:
         SetDFileSessionConfig(session, &dFileConfig, hostSettingFrame.connType, peerInfo);
     }
     HandleLinkSeqCap(session, &hostSettingFrame);
+    DFileChooseCipherType(&hostSettingFrame, session);
 }
 
 static void DFileSessionHandleSetting(DFileSession *session, DFileFrame *dFileFrame,
@@ -1997,7 +2003,7 @@ int32_t CreateFileManager(DFileSession *session, const uint8_t *key, uint32_t ke
         return NSTACKX_EINVAL;
     }
     if (keyLen > 0) {
-        if (keyLen != AES_128_KEY_LENGTH || key == NULL) {
+        if ((keyLen != AES_128_KEY_LENGTH && keyLen != CHACHA20_KEY_LENGTH) || key == NULL) {
             LOGE(TAG, "error key or key len");
             return NSTACKX_EFAILED;
         }

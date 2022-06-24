@@ -165,6 +165,8 @@ typedef struct {
     uint32_t capability;
     uint32_t dataFrameSize;
     uint32_t capsCheck;
+    uint32_t cipherCapability;
+    uint16_t deviceBits;
 } SettingFrame;
 
 typedef struct {

@@ -41,3 +41,12 @@ int32_t GetConnectionType(const uint32_t sourceIp, const uint32_t destinationIp,
     }
     return GetConnectionTypeByDev(sourceIp, connectType);
 }
+
+uint8_t DFileGetDeviceBits(void)
+{
+    if (TYPE_BITS_NUM(char *) == DEVICE_32_BITS) {
+        return DEVICE_32_BITS;
+    }
+
+    return DEVICE_64_BITS;
+}
