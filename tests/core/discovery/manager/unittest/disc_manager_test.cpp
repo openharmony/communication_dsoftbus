@@ -323,7 +323,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest002, TestSize.Level1)
     ret = DiscPublish((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -716,7 +716,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest012, TestSize.Level1)
     ret = DiscPublish((DiscModule)TEST_ERRO_MOUDULE2, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -758,7 +758,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest013, TestSize.Level1)
     ret = DiscPublish((DiscModule)TEST_ERRO_MOUDULE2, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -800,7 +800,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest014, TestSize.Level1)
     ret = DiscPublish((DiscModule)TEST_ERRO_MOUDULE2, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublish(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -898,7 +898,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest002, TestSize.Level1)
     ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1015,7 +1015,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest006, TestSize.Level1)
     ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE2, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1057,7 +1057,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest007, TestSize.Level1)
     ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1099,7 +1099,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest008, TestSize.Level1)
     ret = DiscStartScan((DiscModule)TEST_ERRO_MOUDULE2, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartScan(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1156,7 +1156,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
     ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1248,7 +1248,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
     ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1290,7 +1290,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
     ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1332,7 +1332,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest007, TestSize.Level1)
     ret = DiscStartAdvertise((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartAdvertise(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1729,7 +1729,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
     ret = DiscSubscribe((DiscModule)TEST_ERRO_MOUDULE, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscSubscribe(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1843,7 +1843,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest006, TestSize.Level1)
     ret = DiscSubscribe((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscSubscribe(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -1887,7 +1887,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest007, TestSize.Level1)
     ret = DiscSubscribe((DiscModule)TEST_ERRO_MOUDULE1, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscSubscribe(MODULE_LNN, &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -2757,7 +2757,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest002, TestSize.Level1)
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -2858,7 +2858,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest005, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -2894,7 +2894,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest006, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -2930,7 +2930,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest007, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscPublishService("pkgname1", &testInfo);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -3263,7 +3263,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest002, TestSize.Level1)
     ret = DiscStartDiscovery("pkgname1", &testInfo, NULL);
     TEST_ASSERT_TRUE(ret != 0);
 
-    testInfo.medium = (ExchanageMedium)(COAP + 1);
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -3366,7 +3366,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest005, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -3404,7 +3404,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest006, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;
@@ -3442,7 +3442,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest007, TestSize.Level1)
 
     DiscMgrInit();
 
-    testInfo.medium = (ExchanageMedium)(AUTO - 1);
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = DiscStartDiscovery("pkgname1", &testInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret != 0);
     testInfo.medium = COAP;

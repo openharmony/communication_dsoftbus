@@ -275,8 +275,8 @@ static int32_t ConvertPublishInfoToVoid(const PublishInfo *pubInfo, void **info,
     buf += sizeof(int32_t);
     *(DiscoverMode *)buf = pubInfo->mode;
     buf += sizeof(DiscoverMode);
-    *(ExchanageMedium *)buf = pubInfo->medium;
-    buf += sizeof(ExchanageMedium);
+    *(ExchangeMedium *)buf = pubInfo->medium;
+    buf += sizeof(ExchangeMedium);
     *(ExchangeFreq *)buf = pubInfo->freq;
     buf += sizeof(ExchangeFreq);
     if (memcpy_s(buf, strlen(pubInfo->capability), pubInfo->capability, strlen(pubInfo->capability)) != EOK) {
@@ -313,8 +313,8 @@ static int32_t ConvertSubscribeInfoToVoid(const SubscribeInfo *subInfo, void **i
     buf += sizeof(int32_t);
     *(DiscoverMode *)buf = subInfo->mode;
     buf += sizeof(DiscoverMode);
-    *(ExchanageMedium *)buf = subInfo->medium;
-    buf += sizeof(ExchanageMedium);
+    *(ExchangeMedium *)buf = subInfo->medium;
+    buf += sizeof(ExchangeMedium);
     *(ExchangeFreq *)buf = subInfo->freq;
     buf += sizeof(ExchangeFreq);
     *(bool *)buf = subInfo->isSameAccount;

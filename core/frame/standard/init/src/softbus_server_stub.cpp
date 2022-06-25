@@ -171,7 +171,7 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
     const char *pkgName = data.ReadCString();
     subInfo.subscribeId = data.ReadInt32();
     subInfo.mode = (DiscoverMode)data.ReadInt32();
-    subInfo.medium = (ExchanageMedium)data.ReadInt32();
+    subInfo.medium = (ExchangeMedium)data.ReadInt32();
     subInfo.freq = (ExchangeFreq)data.ReadInt32();
     subInfo.isSameAccount = data.ReadBool();
     subInfo.isWakeRemote = data.ReadBool();
@@ -209,7 +209,7 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
     const char *pkgName = data.ReadCString();
     pubInfo.publishId = data.ReadInt32();
     pubInfo.mode = (DiscoverMode)data.ReadInt32();
-    pubInfo.medium = (ExchanageMedium)data.ReadInt32();
+    pubInfo.medium = (ExchangeMedium)data.ReadInt32();
     pubInfo.freq = (ExchangeFreq)data.ReadInt32();
     pubInfo.capability = data.ReadCString();
     pubInfo.dataLen = data.ReadUint32();
