@@ -56,7 +56,7 @@ namespace OHOS {
     {
         g_sInfo.subscribeId = size;
         g_sInfo.mode = (size % MAX_SIZE_DISCOVER_MODE) ? DISCOVER_MODE_ACTIVE : DISCOVER_MODE_PASSIVE;
-        g_sInfo.medium = (ExchanageMedium)(size % MAX_SIZE_EXCHANGE_MEDIUM);
+        g_sInfo.medium = (ExchangeMedium)(size % MAX_SIZE_EXCHANGE_MEDIUM);
         g_sInfo.freq = (ExchangeFreq)(size % MAX_SIZE_EXCHANGE_FREQ);
         g_sInfo.isSameAccount = (size % MAX_SIZE_DISCOVER_MODE) ? true : false;
         g_sInfo.isWakeRemote = (size % MAX_SIZE_DISCOVER_MODE) ? true : false;

@@ -30,7 +30,7 @@ typedef struct {
         int subscribeId;
     } id;
     DiscoverMode mode;
-    ExchanageMedium medium;
+    ExchangeMedium medium;
     ExchangeFreq freq;
     unsigned int dataLen;
 } DiscSerializer;

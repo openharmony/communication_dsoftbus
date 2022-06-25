@@ -24,8 +24,8 @@ void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
     info1 += sizeof(int32_t);
     pubInfo->mode = *(DiscoverMode *)info1;
     info1 += sizeof(DiscoverMode);
-    pubInfo->medium = *(ExchanageMedium *)info1;
-    info1 += sizeof(ExchanageMedium);
+    pubInfo->medium = *(ExchangeMedium *)info1;
+    info1 += sizeof(ExchangeMedium);
     pubInfo->freq = *(ExchangeFreq *)info1;
     info1 += sizeof(ExchangeFreq);
     pubInfo->capability = (const char *)info1;
@@ -45,8 +45,8 @@ void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
     info1 += sizeof(int32_t);
     subInfo->mode = *(DiscoverMode *)info1;
     info1 += sizeof(DiscoverMode);
-    subInfo->medium = *(ExchanageMedium *)info1;
-    info1 += sizeof(ExchanageMedium);
+    subInfo->medium = *(ExchangeMedium *)info1;
+    info1 += sizeof(ExchangeMedium);
     subInfo->freq = *(ExchangeFreq *)info1;
     info1 += sizeof(ExchangeFreq);
     subInfo->isSameAccount = *(bool *)info1;
