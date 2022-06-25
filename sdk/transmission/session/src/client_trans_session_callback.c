@@ -131,11 +131,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
         channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session callback failed");
-        return ret;
-    }
+    (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
 
     if (listener.OnSessionOpened != NULL) {
         (void)listener.OnSessionOpened(sessionId, SOFTBUS_ERR);
@@ -152,11 +148,8 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
         channelId, channelType);
     int32_t sessionId;
     ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session callback failed");
-        return ret;
-    }
+    int32_t ret;
+    (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
 
     if (listener.OnSessionClosed != NULL) {
         listener.OnSessionClosed(sessionId);
