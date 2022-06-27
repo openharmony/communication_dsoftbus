@@ -154,7 +154,16 @@ static DiscBleListener g_bleListener = {
     .stateListenerId = -1,
     .scanListenerId = -1
 };
-static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {0, 3, 5, 3, 6, 5, 6, 7};
+static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
+    HICALL_CAPABILITY_BITMAP,
+    CASTPLUS_CAPABILITY_BITMAP,
+    DVKIT_CAPABILITY_BITMAP,
+    CASTPLUS_CAPABILITY_BITMAP,
+    OSD_CAPABILITY_BITMAP,
+    DVKIT_CAPABILITY_BITMAP,
+    DDMP_CAPABILITY_BITMAP,
+    OSD_CAPABILITY_BITMAP
+};
 
 static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *obj);
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac);
@@ -171,11 +180,11 @@ static int32_t StopScaner(void);
 static int ConvertCapBitMap(int oldCap)
 {
     switch (oldCap) {
-        case 0x80: // osdCapability
+        case OSD_CAPABILITY_BITMAP: // osdCapability
             return 0x10;
-        case 0x8:  // castPlus
+        case CASTPLUS_CAPABILITY_BITMAP:  // castPlus
             return 0x2;
-        case 0x20: // dvkit
+        case DVKIT_CAPABILITY_BITMAP: // dvkit
             return 0x4;
         default:
             return oldCap;
