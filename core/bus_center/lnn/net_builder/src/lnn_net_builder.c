@@ -202,29 +202,6 @@ static LnnConnectionFsm *FindConnectionFsmByNetworkId(const char *networkId)
     return NULL;
 }
 
-static LnnConnectionFsm *FindConnectionFsmByUdid(const char *targetUdid)
-{
-    LnnConnectionFsm *item = NULL;
-    const char *udid = NULL;
-    NodeInfo *info = NULL;
-
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (item->connInfo.nodeInfo == NULL) {
-            continue;
-        }
-        udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
-        if (udid != NULL && strcmp(targetUdid, udid) == 0) {
-            return item;
-        }
-    }
-    // maybe target device is already online, so find it node info from ledger
-    info = LnnGetNodeInfoById(targetUdid, CATEGORY_UDID);
-    if (info != NULL) {
-        return FindConnectionFsmByNetworkId(info->networkId);
-    }
-    return NULL;
-}
-
 static LnnConnectionFsm *FindConnectionFsmByConnFsmId(uint16_t connFsmId)
 {
     LnnConnectionFsm *item = NULL;
@@ -706,14 +683,25 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
     }
 
     do {
-        connFsm = FindConnectionFsmByUdid(peerUdid);
-        if (connFsm == NULL || connFsm->isDead) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ignore not trusted peer udid");
+        NodeInfo *info = LnnGetNodeInfoById(peerUdid, CATEGORY_UDID);
+        if (info != NULL) {
+            LnnRequestLeaveSpecific(info->networkId, CONNECTION_ADDR_MAX);
             break;
         }
-        rc = LnnSendNotTrustedToConnFsm(connFsm);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]send not trusted msg to connection fsm result: %d",
-            connFsm->id, rc);
+        
+        LnnConnectionFsm *item = NULL;
+        const char *udid = NULL;
+        LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+            if (item->connInfo.nodeInfo == NULL) {
+                continue;
+            }
+            udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
+            if (udid != NULL && strcmp(peerUdid, udid) == 0) {
+                rc = LnnSendNotTrustedToConnFsm(item);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                    "[id=%u]send not trusted msg to connection fsm result: %d", connFsm->id, rc);
+            }
+        }
     } while (false);
     SoftBusFree((void *)peerUdid);
     return rc;
@@ -1058,7 +1046,8 @@ static int32_t ProcessLeaveSpecific(const void *para)
     int32_t rc;
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         if (strcmp(item->connInfo.peerNetworkId, msgPara->networkId) != 0 ||
-            item->connInfo.addr.type != msgPara->addrType) {
+            (item->connInfo.addr.type != msgPara->addrType &&
+            msgPara->addrType != CONNECTION_ADDR_MAX)) {
             continue;
         }
         rc = LnnSendLeaveRequestToConnFsm(item);

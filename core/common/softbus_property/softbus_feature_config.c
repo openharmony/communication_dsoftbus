@@ -262,7 +262,8 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 {
-    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (len > g_configItems[type].len) || (type != g_configItems[type].type)) {
+    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
+        (len > g_configItems[type].len) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len) != EOK) {
@@ -273,7 +274,8 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 
 int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
-    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (len != g_configItems[type].len) || (type != g_configItems[type].type)) {
+    if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
+        (len != g_configItems[type].len) || (type != g_configItems[type].type)) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {

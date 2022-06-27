@@ -360,7 +360,7 @@ int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, int32_t priority, int32_t pid)
+int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid)
 {
     ConnPostData data = {0};
     static uint64_t seq = 1;
@@ -370,8 +370,8 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, char *buf, int32_t len, in
     data.seq = seq++;
     data.flag = priority;
     data.pid = pid;
-    data.len = (uint32_t)len;
-    data.buf = buf;
+    data.len = len;
+    data.buf = (char *)buf;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "send buf connid %d len %u seq %" PRIu64 " pri %d pid %d", connectionId, len, data.seq, priority, pid);
     ret = ConnPostBytes(connectionId, &data);

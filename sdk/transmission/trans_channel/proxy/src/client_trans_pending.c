@@ -166,7 +166,7 @@ static int32_t TransPendWaitTime(const PendingPacket *pending, TransPendData *da
             return SOFTBUS_OK;
         }
         SoftBusSysTime now;
-        ComputeWaitPendTime(waitMillis, &now);
+        ComputeWaitPendTime(0, &now);
         if (now.sec > outtime.sec || (now.sec == outtime.sec && now.usec >= outtime.usec)) {
             break;
         }

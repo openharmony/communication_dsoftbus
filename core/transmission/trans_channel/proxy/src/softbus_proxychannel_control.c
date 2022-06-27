@@ -28,8 +28,7 @@
 
 int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen, int32_t priority)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
@@ -38,20 +37,21 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint3
     }
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
-    if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = payLoadLen;
+    if (TransProxyPackMessage(&msgHead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-
-    return TransProxyTransSendMsg(info->connId, buf, bufLen, priority, info->appInfo.myData.pid);
+    return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+        priority, info->appInfo.myData.pid);
 }
 
 int32_t TransProxyHandshake(ProxyChannelInfo *info)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
     char *payLoad = NULL;
-    int32_t payLoadLen;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
@@ -66,13 +66,15 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake fail");
         return SOFTBUS_ERR;
     }
-    payLoadLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = strlen(payLoad) + 1;
+    if (TransProxyPackMessage(&msgHead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
+    dataInfo.inData = NULL;
 
     if ((msgHead.chiper & AUTH_SERVER_SIDE)) {
         if (TransProxySetChiperSide(info->channelId, SERVER_SIDE_FLAG) != SOFTBUS_OK) {
@@ -80,7 +82,8 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
             return SOFTBUS_ERR;
         }
     }
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshake buf fail");
         return SOFTBUS_ERR;
     }
@@ -89,10 +92,8 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
 
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
     char *payLoad = NULL;
-    int32_t payLoadLen;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d",
@@ -101,130 +102,128 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     if (chan->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
+    msgHead.myId = chan->myId;
+    msgHead.peerId = chan->peerId;
+
     payLoad = TransProxyPackHandshakeAckMsg(chan);
     if (payLoad == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack fail");
         return SOFTBUS_ERR;
     }
-    payLoadLen = strlen(payLoad) + 1;
-    msgHead.myId = chan->myId;
-    msgHead.peerId = chan->peerId;
-
-    if (TransProxyPackMessage(&msgHead, connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = strlen(payLoad) + 1;
+    if (TransProxyPackMessage(&msgHead, connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH, chan->appInfo.myData.pid) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, chan->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshakeack buf fail");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
     char *payLoad = NULL;
-    int32_t payLoadLen;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    payLoad = TransProxyPackIdentity(info->identity);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive fail");
-    if (payLoad == NULL) {
-        return;
-    }
-    payLoadLen = strlen(payLoad) + 1;
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
 
-    if (TransProxyPackMessage(&msgHead, connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    payLoad = TransProxyPackIdentity(info->identity);
+    if (payLoad == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive fail");
+        return;
+    }
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = strlen(payLoad) + 1;
+    if (TransProxyPackMessage(&msgHead, connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive head fail");
         cJSON_free(payLoad);
         return;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive buf fail");
         return;
     }
-    return;
 }
 
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
     char *payLoad = NULL;
-    int32_t payLoadLen;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = info->myId;
+    msgHead.peerId = info->peerId;
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+    }
+
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive ack fail");
         return SOFTBUS_ERR;
     }
-    payLoadLen = strlen(payLoad) + 1;
-    msgHead.myId = info->myId;
-    msgHead.peerId = info->peerId;
-    if (info->appInfo.appType != APP_TYPE_AUTH) {
-        msgHead.chiper = (msgHead.chiper | ENCRYPTED);
-    }
-
-    if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = strlen(payLoad) + 1;
+    if (TransProxyPackMessage(&msgHead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send keepalive ack buf fail");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
 int32_t TransProxyResetPeer(ProxyChannelInfo *info)
 {
-    char *buf = NULL;
-    int32_t bufLen = 0;
     char *payLoad = NULL;
-    int32_t payLoadLen;
+    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send reset msg myId %d peerid %d", info->myId, info->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    payLoad = TransProxyPackIdentity(info->identity);
-    if (payLoad == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset fail");
-        return SOFTBUS_ERR;
-    }
-    payLoadLen = strlen(payLoad) + 1;
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
 
-    if (TransProxyPackMessage(&msgHead, info->connId, payLoad, payLoadLen, &buf, &bufLen) != SOFTBUS_OK) {
+    payLoad = TransProxyPackIdentity(info->identity);
+    if (payLoad == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset fail");
+        return SOFTBUS_ERR;
+    }
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = strlen(payLoad) + 1;
+    if (TransProxyPackMessage(&msgHead, info->connId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack reset head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, buf, bufLen, CONN_LOW, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    if (TransProxyTransSendMsg(info->connId, dataInfo.outData,  dataInfo.outLen,
+        CONN_LOW, info->appInfo.myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reset buf fail");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
