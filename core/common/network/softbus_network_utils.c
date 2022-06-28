@@ -33,7 +33,7 @@ int SoftBusChannelToFrequency(int channel)
 {
     if (channel >= CHANNEL_2G_FIRST && channel <= CHANNEL_2G_LAST) {
         return (channel - CHANNEL_2G_FIRST) * FREQUENCY_STEP + FREQUENCY_2G_FIRST;
-    } else if (channel >= CHANNEL_5G_LAST && channel <= CHANNEL_5G_LAST) {
+    } else if (channel >= CHANNEL_5G_FIRST && channel <= CHANNEL_5G_LAST) {
         return (channel - CHANNEL_5G_FIRST) * FREQUENCY_STEP + FREQUENCY_5G_FIRST;
     } else {
         return FREQUENCY_INVALID;
