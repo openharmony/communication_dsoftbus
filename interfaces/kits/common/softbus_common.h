@@ -144,6 +144,8 @@ extern "C" {
  */
 #define DISC_MAX_DEVICE_ID_LEN 96
 
+#define NUM_BUF_SIZE 4
+
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
  *
