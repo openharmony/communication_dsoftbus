@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "wifi_device.h"
+#include "wifi_hid2d.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
@@ -266,3 +267,16 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
+{
+    if (channelList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para channelList is NULL.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = Hid2dGetChannelListFor5G(channelList, num);
+    if (ret != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get channel 5G list failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
