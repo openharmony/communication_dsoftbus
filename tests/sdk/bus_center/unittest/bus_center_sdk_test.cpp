@@ -30,7 +30,6 @@ constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
 constexpr int32_t ERRO_CAPDATA_LEN = 514;
-constexpr int32_t NUM_BUF_SIZE = 4;
 static int32_t g_subscribeId = 0;
 static int32_t g_publishId = 0;
 
