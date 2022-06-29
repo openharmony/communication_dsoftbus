@@ -81,6 +81,7 @@
           "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
           "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/integration_test:integration_test",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/publishservice_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/startdiscovery_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/stopdiscovery_fuzzer:fuzztest",
