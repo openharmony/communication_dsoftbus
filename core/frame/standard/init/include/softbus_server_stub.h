@@ -20,6 +20,7 @@
 #include "if_softbus_server.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
+#include "bus_center_manager.h"
 
 namespace OHOS {
 class SoftBusServerStub : public IRemoteStub<ISoftBusServer> {
@@ -29,6 +30,7 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
+    int32_t GetNodeKeyInfoLen(int32_t key);
     int32_t StartDiscoveryInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopDiscoveryInner(MessageParcel &data, MessageParcel &reply);
     int32_t PublishServiceInner(MessageParcel &data, MessageParcel &reply);
