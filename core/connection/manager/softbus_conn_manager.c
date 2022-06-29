@@ -24,6 +24,7 @@
 #include "softbus_ble_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -353,7 +354,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
     head->module = data->module;
     head->len = data->len - sizeof(ConnPktHead);
     head->seq = data->seq;
-
+    PackConnPktHead(head);
     return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len), data->pid, data->flag);
 }
 

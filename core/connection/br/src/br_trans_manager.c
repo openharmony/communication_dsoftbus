@@ -19,6 +19,7 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
@@ -33,6 +34,7 @@ static int32_t ReceivedHeadCheck(BrConnectionInfo *conn)
         return SOFTBUS_ERR;
     }
     ConnPktHead *head = (ConnPktHead *)(conn->recvBuf);
+    UnpackConnPktHead(head);
     if ((uint32_t)(head->magic) != MAGIC_NUMBER) {
         conn->recvPos = 0;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReceivedHeadCheck] magic error 0x%x", head->magic);
@@ -224,7 +226,7 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t
     head.seq = 1;
     head.flag = 0;
     head.len = strlen(data) + 1;
-
+    PackConnPktHead(&head);
     if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);

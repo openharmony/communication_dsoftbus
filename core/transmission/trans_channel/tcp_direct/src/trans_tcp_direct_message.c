@@ -25,6 +25,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
@@ -53,6 +54,24 @@ typedef struct {
 
 
 static SoftBusList *g_tcpSrvDataList = NULL;
+
+static void PackTdcPacketHead(TdcPacketHead *data)
+{
+    data->magicNumber = SoftBusHtoLl(data->magicNumber);
+    data->module = SoftBusHtoLl(data->module);
+    data->seq = SoftBusHtoLll(data->seq);
+    data->flags = SoftBusHtoLl(data->flags);
+    data->dataLen = SoftBusHtoLl(data->dataLen);
+}
+
+static void UnpackTdcPacketHead(TdcPacketHead *data)
+{
+    data->magicNumber = SoftBusLtoHl(data->magicNumber);
+    data->module = SoftBusLtoHl(data->module);
+    data->seq = SoftBusLtoHll(data->seq);
+    data->flags = SoftBusLtoHl(data->flags);
+    data->dataLen = SoftBusLtoHl(data->dataLen);
+}
 
 int32_t TransSrvDataListInit(void)
 {
@@ -322,12 +341,14 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
     if (GetMsgTypeByCipherFlags(packetHead->flags) == FLAG_REQUEST && side == SERVER_SIDE_FLAG) {
         packetHead->seq = packetHead->seq | AUTH_CONN_SERVER_SIDE;
     }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "side=%d, flag=0x%x, seq=%" PRIu64,
+        side, packetHead->flags, packetHead->seq);
+
+    PackTdcPacketHead(packetHead);
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "side=%d, flag=0x%x, seq=%" PRIu64,
-        side, packetHead->flags, packetHead->seq);
     return SOFTBUS_OK;
 }
 
@@ -708,6 +729,7 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
     }
 
     TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
+    UnpackTdcPacketHead(pktHead);
     if (pktHead->magicNumber != MAGIC_NUMBER) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv recv invalid packet head");

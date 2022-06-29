@@ -32,6 +32,7 @@
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
+#include "softbus_datahead_transform.h"
 
 #define MSG_SLICE_HEAD_LEN (sizeof(SliceHead) + sizeof(ProxyMessageHead))
 #define PROXY_ACK_SIZE 4
@@ -56,6 +57,38 @@ typedef struct  {
 
 static SoftBusList *g_channelSliceProcessorList = NULL;
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag);
+
+void PackSliceHead(SliceHead *data)
+{
+    data->priority = (int32_t)SoftBusHtoLl((uint32_t)data->priority);
+    data->sliceNum = (int32_t)SoftBusHtoLl((uint32_t)data->sliceNum);
+    data->sliceSeq = (int32_t)SoftBusHtoLl((uint32_t)data->sliceSeq);
+    data->reserved = (int32_t)SoftBusHtoLl((uint32_t)data->reserved);
+}
+
+void UnPackSliceHead(SliceHead *data)
+{
+    data->priority = (int32_t)SoftBusLtoHl((uint32_t)data->priority);
+    data->sliceNum = (int32_t)SoftBusLtoHl((uint32_t)data->sliceNum);
+    data->sliceSeq = (int32_t)SoftBusLtoHl((uint32_t)data->sliceSeq);
+    data->reserved = (int32_t)SoftBusLtoHl((uint32_t)data->reserved);
+}
+
+void PackPacketHead(PacketHead *data)
+{
+    data->magicNumber = (int32_t)SoftBusHtoLl((uint32_t)data->magicNumber);
+    data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
+    data->flags = (int32_t)SoftBusHtoLl((uint32_t)data->flags);
+    data->dataLen = (int32_t)SoftBusHtoLl((uint32_t)data->dataLen);
+}
+
+void UnPackPacketHead(PacketHead *data)
+{
+    data->magicNumber = (int32_t)SoftBusLtoHl((uint32_t)data->magicNumber);
+    data->seq = (int32_t)SoftBusLtoHl((uint32_t)data->seq);
+    data->flags = (int32_t)SoftBusLtoHl((uint32_t)data->flags);
+    data->dataLen = (int32_t)SoftBusLtoHl((uint32_t)data->dataLen);
+}
 
 int32_t NotifyClientMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len,
     SessionPktType type)
@@ -221,6 +254,7 @@ static int32_t TransProxyPackBytes(int32_t channelId, ProxyDataInfo *dataInfo, P
     pktHead->seq = seq;
     pktHead->flags = flag;
     pktHead->dataLen = (int32_t)enDataInfo.outLen;
+    PackPacketHead(pktHead);
     *outseq = seq;
     dataInfo->outData = outBuf;
     dataInfo->outLen = outBufLen;
@@ -328,7 +362,8 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
     uint32_t bufLen;
     uint32_t connHeadLen;
     uint32_t dstLen;
-
+    ProxyMessageHead proxyMessageHead;
+    SliceHead sliceHeadTemp;
     connHeadLen = ConnGetHeadSize();
     bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)datalen;
     if (sliceHead != NULL) {
@@ -338,14 +373,21 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const Slice
     if (buf == NULL) {
         return NULL;
     }
-
-    if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+    if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
+        return NULL;
+    }
+    PackProxyMessageHead(&proxyMessageHead);
+    if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
         SoftBusFree(buf);
         return NULL;
     }
     if (sliceHead != NULL) {
         dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
-        if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, sliceHead, sizeof(SliceHead)) != EOK) {
+        if (memcpy_s(&sliceHeadTemp, sizeof(SliceHead), sliceHead, sizeof(SliceHead)) != EOK) {
+            return NULL;
+        }
+        PackSliceHead(&sliceHeadTemp);
+        if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, &sliceHeadTemp, sizeof(SliceHead)) != EOK) {
             SoftBusFree(buf);
             return NULL;
         }
@@ -642,6 +684,7 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
 static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
 {
     PacketHead *head = (PacketHead*)data;
+    UnPackPacketHead(head);
     if ((uint32_t)head->magicNumber != MAGIC_NUMBER) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid magicNumber %x", head->magicNumber);
         return SOFTBUS_ERR;
@@ -855,8 +898,8 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t channelId, const c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data null or len %d error", len);
         return SOFTBUS_ERR;
     }
-
     headSlice = (SliceHead *)data;
+    UnPackSliceHead(headSlice);
     if (TransProxyCheckSliceHead(headSlice)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid slihead");
         return SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD;

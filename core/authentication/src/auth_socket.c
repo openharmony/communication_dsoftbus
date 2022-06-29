@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
@@ -231,6 +232,7 @@ static int32_t AuthOnDataEvent(int32_t events, int32_t fd)
 
     ConnPktHead head = {0};
     len = RecvTcpData(fd, (void *)&head, headSize, 0);
+    UnpackConnPktHead(&head);
     if (len < (int32_t)headSize) {
         if (len < 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth RecvTcpData failed, DelTrigger");
@@ -284,6 +286,7 @@ int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const ui
         return SOFTBUS_ERR;
     }
     connPostData = buf;
+    PackConnPktHead(&ethHead);
     if (memcpy_s(buf, sizeof(ConnPktHead), &ethHead, sizeof(ConnPktHead)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         SoftBusFree(connPostData);

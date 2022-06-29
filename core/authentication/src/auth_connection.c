@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_adapter_socket.h"
 
 int32_t __attribute__ ((weak)) AuthSocketSendData(AuthManager *auth,
     const AuthDataHead *head, const uint8_t *data, uint32_t len)
@@ -42,6 +43,15 @@ typedef struct {
     uint32_t connectionId;
     int32_t connModule;
 } PostDataInfo;
+
+static void PackAuthDataInfo(AuthDataInfo *data)
+{
+    data->type = SoftBusHtoLl(data->type);
+    data->module = (int32_t)SoftBusHtoLl((uint32_t)data->module);
+    data->seq = (int64_t)SoftBusHtoLll((uint64_t)data->seq);
+    data->flag = (int32_t)SoftBusHtoLl((uint32_t)data->flag);
+    data->dataLen = SoftBusHtoLl(data->dataLen);
+}
 
 static int32_t PostDataByConn(const PostDataInfo *info, char *buf, uint32_t postDataLen)
 {
@@ -72,16 +82,24 @@ static int32_t SetBufData(char *buf, const AuthManager *auth, const AuthDataHead
     const uint8_t *data, uint32_t len)
 {
     buf += ConnGetHeadSize();
+    AuthDataInfo autoDataInfoHead = {
+        .type = head->dataType,
+        .module = head->module,
+        .seq = head->seq,
+        .flag = head->flag,
+        .dataLen = len,
+    };
+    PackAuthDataInfo(&autoDataInfoHead);
     if (!IsWiFiLink(auth)) {
-        *(int32_t *)buf = head->dataType;
+        *(int32_t *)buf = autoDataInfoHead.type;
         buf += sizeof(int32_t);
-        *(int32_t *)buf = head->module;
+        *(int32_t *)buf = autoDataInfoHead.module;
         buf += sizeof(int32_t);
-        *(int64_t *)buf = head->seq;
+        *(int64_t *)buf = autoDataInfoHead.seq;
         buf += sizeof(int64_t);
-        *(int32_t *)buf = head->flag;
+        *(int32_t *)buf = autoDataInfoHead.flag;
         buf += sizeof(int32_t);
-        *(int32_t *)buf = len;
+        *(int32_t *)buf = autoDataInfoHead.dataLen;
         buf += sizeof(int32_t);
     }
     if (memcpy_s(buf, len, data, len) != EOK) {

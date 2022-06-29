@@ -51,6 +51,22 @@ typedef struct {
 static uint32_t g_dataBufferMaxLen = 0;
 static SoftBusList *g_tcpDataList = NULL;
 
+static void PackTcpDataPacketHead(TcpDataPacketHead *data)
+{
+    data->magicNumber = SoftBusHtoLl(data->magicNumber);
+    data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
+    data->flags = SoftBusHtoLl(data->flags);
+    data->dataLen = SoftBusHtoLl(data->dataLen);
+}
+
+static void UnpackTcpDataPacketHead(TcpDataPacketHead *data)
+{
+    data->magicNumber = SoftBusLtoHl(data->magicNumber);
+    data->seq = (int32_t)SoftBusLtoHl((uint32_t)data->seq);
+    data->flags = SoftBusLtoHl(data->flags);
+    data->dataLen = SoftBusLtoHl(data->dataLen);
+}
+
 static int32_t TransTdcDecrypt(const char *sessionKey, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
 {
     AesGcmCipherKey cipherKey = {0};
@@ -119,6 +135,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
         .flags = flags,
         .dataLen = dataLen,
     };
+    PackTcpDataPacketHead(&pktHead);
     if (memcpy_s(buf, DC_DATA_HEAD_SIZE, &pktHead, sizeof(TcpDataPacketHead)) != EOK) {
         SoftBusFree(buf);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s error");
@@ -415,6 +432,7 @@ static int32_t TransTdcProcAllData(int32_t channelId)
         }
 
         TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
+        UnpackTcpDataPacketHead(pktHead);
         if (pktHead->magicNumber != MAGIC_NUMBER) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid data packet head");
             SoftBusMutexUnlock(&g_tcpDataList->lock);
