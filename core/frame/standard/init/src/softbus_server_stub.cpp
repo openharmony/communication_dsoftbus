@@ -564,6 +564,11 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
+{
+    return LnnGetNodeKeyInfoLen(key);
+}
+
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
@@ -581,22 +586,35 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read key failed!");
         return SOFTBUS_ERR;
     }
+    int32_t infoLen = GetNodeKeyInfoLen(key);
+    if (infoLen == SOFTBUS_ERR) {
+        return SOFTBUS_ERR;
+    }
     int32_t len;
     if (!data.ReadInt32(len)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len failed!");
         return SOFTBUS_ERR;
     }
-    void *buf = SoftBusMalloc(len);
+    if (len < infoLen) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len is invalid param!");
+        return SOFTBUS_ERR;
+    }
+    void *buf = SoftBusCalloc(infoLen);
     if (buf == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner malloc buffer failed!");
         return SOFTBUS_ERR;
     }
-    if (GetNodeKeyInfo(clientName, networkId, key, (unsigned char *)buf, len) != SOFTBUS_OK) {
+    if (GetNodeKeyInfo(clientName, networkId, key, (unsigned char *)buf, infoLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner get key info failed!");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
-    if (!reply.WriteRawData(buf, len)) {
+    if (!reply.WriteInt32(infoLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner write info length failed!");
+        SoftBusFree(buf);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.WriteRawData(buf, infoLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner write key info failed!");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
