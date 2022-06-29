@@ -19,9 +19,8 @@ adapter_wifi_src = []
 adapter_wifi_inc = [ "$softbus_adapter_wifi_path/include" ]
 adapter_wifi_deps = []
 
-if (defined(ohos_lite) ||
-    (defined(global_parts_info) &&
-     !defined(global_parts_info.communication_wifi_standard))) {
+if (defined(ohos_lite) || (defined(global_parts_info) &&
+                           !defined(global_parts_info.communication_wifi))) {
   if (dsoftbus_feature_lnn_net) {
     adapter_wifi_src += [
       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
@@ -29,18 +28,13 @@ if (defined(ohos_lite) ||
   }
 } else {
   if (dsoftbus_feature_lnn_net) {
-    if (dsoftbus_feature_lnn_wifiservice_dependence) {
-      adapter_wifi_src +=
-          [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
-      adapter_wifi_inc += [
-        "//foundation/communication/wifi/interfaces/innerkits/native_c",
-        "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
-      ]
-      adapter_wifi_deps += [ "//foundation/communication/wifi/interfaces/innerkits/native_cpp/wifi_standard:wifi_sdk" ]
-    } else {
-      adapter_wifi_src += [
-        "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
-      ]
-    }
+    adapter_wifi_src +=
+        [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
+    adapter_wifi_inc += [
+      "//foundation/communication/wifi/wifi/interfaces/kits/c",
+      "//foundation/communication/wifi/wifi/frameworks/native/include",
+    ]
+    adapter_wifi_deps +=
+        [ "//foundation/communication/wifi/wifi/frameworks/native:wifi_sdk" ]
   }
 }
