@@ -27,6 +27,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
+#include "softbus_datahead_transform.h"
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
@@ -48,6 +49,8 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     msg->msgHead.myId = *(int16_t *)ptr;
     msg->data = data + sizeof(ProxyMessageHead);
     msg->dateLen = len - sizeof(ProxyMessageHead);
+    UnpackProxyMessageHead(&msg->msgHead);
+
     return SOFTBUS_OK;
 }
 
@@ -192,6 +195,7 @@ static int32_t GetEncryptSeqByConnId(uint32_t connId, ConnectType *type, int32_t
 static uint8_t *PackPlaintextMessage(ProxyMessageHead *msg, const uint8_t *payload, uint32_t payloadLen,
     uint32_t *outLen)
 {
+    ProxyMessageHead proxyMessageHead;
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
@@ -199,7 +203,11 @@ static uint8_t *PackPlaintextMessage(ProxyMessageHead *msg, const uint8_t *paylo
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc proxy buf fail");
         return NULL;
     }
-    if (memcpy_s(buf + connHeadLen, size - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+    if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
+        return NULL;
+    }
+    PackProxyMessageHead(&proxyMessageHead);
+    if (memcpy_s(buf + connHeadLen, size - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
         SoftBusFree(buf);
         return NULL;
     }
@@ -220,7 +228,7 @@ static uint8_t *PackEncrypedMessage(ProxyMessageHead *msg, uint32_t connId,
     int32_t encSeq = 0;
     uint32_t connHeadLen = ConnGetHeadSize();
     AuthSideFlag authSide = AUTH_SIDE_ANY;
-
+    ProxyMessageHead proxyMessageHead;
     if (GetEncryptSeqByConnId(connId, &connType, &encSeq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetEncryptSeqByConnId fail connId[%u]", connId);
         return NULL;
@@ -246,7 +254,11 @@ static uint8_t *PackEncrypedMessage(ProxyMessageHead *msg, uint32_t connId,
     if (connType == CONNECT_BLE) {
         msg->chiper = msg->chiper | USE_BLE_CIPHER;
     }
-    if (memcpy_s(buf + connHeadLen, size - connHeadLen, msg, sizeof(ProxyMessageHead)) != EOK) {
+    if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
+        return NULL;
+    }
+    PackProxyMessageHead(&proxyMessageHead);
+    if (memcpy_s(buf + connHeadLen, size - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
         SoftBusFree(buf);
         return NULL;
     }

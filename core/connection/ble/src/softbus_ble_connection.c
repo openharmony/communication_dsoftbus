@@ -35,6 +35,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -516,6 +517,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     head.seq = 1;
     head.flag = 0;
     head.len = strlen(data) + 1;
+    PackConnPktHead(&head);
     if (memcpy_s(buf, dataLen, (void *)&head, headSize)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);
@@ -1057,6 +1059,7 @@ static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32
     }
     if (isBleConn) {
         ConnPktHead *head = (ConnPktHead *)value;
+        UnpackConnPktHead(head);
         if (head->module == MODULE_CONNECTION) {
             cJSON *data = NULL;
             data = cJSON_Parse(value + sizeof(ConnPktHead));
