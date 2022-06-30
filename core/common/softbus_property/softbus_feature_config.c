@@ -194,7 +194,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_config.maxLnnConnCnt)
     },
     {
-        SOFTBUS_INT_LNN_SUPPORT_CAPBILITY,
+        SOFTBUS_INT_LNN_SUPPORT_CAPABILITY,
         (unsigned char*)&(g_config.maxLnnSupportCap),
         sizeof(g_config.maxLnnSupportCap)
     },
@@ -219,7 +219,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_tranConfig.isSupportTcpProxy)
     },
     {
-        SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL,
+        SOFTBUS_INT_SUPPORT_SELECT_INTERVAL,
         (unsigned char*)&(g_tranConfig.selectInterval),
         sizeof(g_tranConfig.selectInterval)
     },
@@ -234,7 +234,7 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_config.lnnNetIfName)
     },
     {
-        SOFTBUS_INT_LNN_MAX_CONCURENT_NUM,
+        SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
         (unsigned char*)&(g_config.lnnMaxConcurentNum),
         sizeof(g_config.lnnMaxConcurentNum)
     },
