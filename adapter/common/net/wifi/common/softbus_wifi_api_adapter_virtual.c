@@ -43,11 +43,14 @@ int32_t SoftBusStartWifiScan(void)
 
 int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 {
+    (void)cb;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
 {
+    (void)result;
+    (void)size;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
