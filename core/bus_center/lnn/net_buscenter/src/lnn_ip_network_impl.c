@@ -476,6 +476,7 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 
 static VisitNextChoice NotifyWlanAddressChanged(const LnnNetIfMgr *netifManager, void *data)
 {
+    (void)data;
     if (netifManager->type == LNN_NETIF_TYPE_WLAN) {
         LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_IP);
     }
@@ -493,6 +494,7 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
 
 int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
 {
+    (void)self;
     int32_t ret = SOFTBUS_OK;
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed\n");
@@ -512,6 +514,7 @@ int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
 
 int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr)
 {
+    (void)self;
     if (netifMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!\n", __func__);
         return SOFTBUS_ERR;

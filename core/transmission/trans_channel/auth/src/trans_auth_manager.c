@@ -159,6 +159,7 @@ static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t channelId)
 
 static int32_t NotifyOnDataReceived(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
+    (void)option;
     AuthChannelInfo channel;
     if (GetChannelInfoByAuthId(authId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
