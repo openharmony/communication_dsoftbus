@@ -56,7 +56,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int64_t authId);
 
-static int32_t GenerateAuthChannelId()
+static int32_t GenerateAuthChannelId(void)
 {
     g_channelId++;
     return g_channelId;
