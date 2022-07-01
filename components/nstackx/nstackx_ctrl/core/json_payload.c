@@ -14,12 +14,15 @@
  */
 
 #include "json_payload.h"
+#include <securec.h>
 
 #include "cJSON.h"
-#include "nstackx_device.h"
+#ifndef DFINDER_USE_MINI_NSTACKX
+#include "coap_client.h"
+#endif /* END OF DFINDER_USE_MINI_NSTACKX */
+#include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
-#include "nstackx_log.h"
-#include "securec.h"
+#include "nstackx_device.h"
 
 #define TAG "nStackXCoAP"
 
@@ -34,7 +37,9 @@
 #define JSON_REQUEST_MODE "mode"
 #define JSON_DEVICE_HASH "deviceHash"
 #define JSON_SERVICE_DATA "serviceData"
-#define NSTACKX_MAX_URI_BUFFER_LENGTH 64
+#define JSON_BUSINESS_TYPE "bType"
+#define JSON_BUSINESS_DATA "bData"
+#define JSON_EXTEND_SERVICE_DATA "extendServiceData"
 
 static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
 {
@@ -79,13 +84,43 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
     item = cJSON_CreateString(deviceInfo->serviceData);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_SERVICE_DATA, item)) {
         cJSON_Delete(item);
-        LOGE(TAG, "cJSON_CreateString for serviceData failed");
+        DFINDER_LOGE(TAG, "cJSON_CreateString for serviceData failed");
+        return NSTACKX_EFAILED;
+    }
+
+#ifndef DFINDER_USE_MINI_NSTACKX
+    item = cJSON_CreateString(deviceInfo->extendServiceData);
+    if (item == NULL || !cJSON_AddItemToObject(data, JSON_EXTEND_SERVICE_DATA, item)) {
+        cJSON_Delete(item);
+        DFINDER_LOGE(TAG, "cJSON_CreateString for extendServiceData failed");
+        return NSTACKX_EFAILED;
+    }
+#endif /* END OF DFINDER_USE_MINI_NSTACKX */
+
+    return NSTACKX_EOK;
+}
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+static int32_t AddApJsonDataWithIdx(cJSON *data, uint8_t idx)
+{
+    cJSON *item = NULL;
+    char ipString[INET_ADDRSTRLEN] = {0};
+
+    if (GetLocalIpStringWithIdx(ipString, sizeof(ipString), idx) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "get local ip string failed with idx-%hhu", idx);
+        return NSTACKX_EFAILED;
+    }
+
+    item = cJSON_CreateString(ipString);
+    if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_WLAN_IP, item)) {
+        DFINDER_LOGE(TAG, "cjson create ip string failed");
+        cJSON_Delete(item);
         return NSTACKX_EFAILED;
     }
 
     return NSTACKX_EOK;
 }
-
+#else
 static int32_t AddWifiApJsonData(cJSON *data)
 {
     cJSON *item = NULL;
@@ -103,6 +138,7 @@ static int32_t AddWifiApJsonData(cJSON *data)
 
     return NSTACKX_EOK;
 }
+#endif
 
 static int32_t AddCapabilityBitmap(cJSON *data, const DeviceInfo *deviceInfo)
 {
@@ -137,13 +173,37 @@ L_END_JSON:
     return NSTACKX_EFAILED;
 }
 
+static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast)
+{
+    cJSON *item = NULL;
+
+    item = cJSON_CreateNumber(deviceInfo->businessType);
+    if (item == NULL || !cJSON_AddItemToObject(data, JSON_BUSINESS_TYPE, item)) {
+        cJSON_Delete(item);
+        DFINDER_LOGE(TAG, "cJSON_CreateString for businessType failed");
+        return NSTACKX_EFAILED;
+    }
+    if (isBroadcast) {
+        item = cJSON_CreateString(deviceInfo->businessData.businessDataBroadcast);
+    } else {
+        item = cJSON_CreateString(deviceInfo->businessData.businessDataUnicast);
+    }
+    if (item == NULL || !cJSON_AddItemToObject(data, JSON_BUSINESS_DATA, item)) {
+        cJSON_Delete(item);
+        DFINDER_LOGE(TAG, "cJSON_CreateString for businessData failed");
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
+}
+
 static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
 {
     cJSON *item = NULL;
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_ID);
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        LOGE(TAG, "Cannot find device ID or invalid device ID");
+        DFINDER_LOGE(TAG, "Cannot find device ID or invalid device ID");
         return NSTACKX_EINVAL;
     }
     if (strcpy_s(dev->deviceId, sizeof(dev->deviceId), item->valuestring) != EOK) {
@@ -152,7 +212,7 @@ static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_NAME);
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        LOGE(TAG, "Cannot find device name or invalid device name");
+        DFINDER_LOGE(TAG, "Cannot find device name or invalid device name");
         return NSTACKX_EINVAL;
     }
     if (strcpy_s(dev->deviceName, sizeof(dev->deviceName), item->valuestring) != EOK) {
@@ -161,14 +221,14 @@ static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_TYPE);
     if (!cJSON_IsNumber(item) || (item->valuedouble < 0) || (item->valuedouble > 0xFF)) {
-        LOGE(TAG, "Cannot find device type or invalid device type");
+        DFINDER_LOGE(TAG, "Cannot find device type or invalid device type");
         return NSTACKX_EINVAL;
     }
     dev->deviceType = (uint8_t)item->valuedouble;
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_HICOM_VERSION);
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        LOGW(TAG, "Can't find hicom version");
+        DFINDER_LOGW(TAG, "Can't find hicom version");
         return NSTACKX_EOK;
     }
     if (strcpy_s(dev->version, sizeof(dev->version), item->valuestring) != EOK) {
@@ -185,7 +245,7 @@ static void ParseWifiApJsonData(const cJSON *data, DeviceInfo *dev)
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_WLAN_IP);
     if (cJSON_IsString(item)) {
         if (inet_pton(AF_INET, item->valuestring, &(dev->netChannelInfo.wifiApInfo.ip)) != 1) {
-            LOGW(TAG, "Invalid ip address");
+            DFINDER_LOGW(TAG, "Invalid ip address");
         } else {
             dev->netChannelInfo.wifiApInfo.state = NET_CHANNEL_STATE_CONNETED;
         }
@@ -197,14 +257,14 @@ static void ParseModeJsonData(const cJSON *data, DeviceInfo *dev)
     cJSON *item = NULL;
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_REQUEST_MODE);
     if (item == NULL) {
-        LOGE(TAG, "Cannot get mode json");
+        DFINDER_LOGE(TAG, "Cannot get mode json");
         return;
     }
     if (!cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        LOGE(TAG, "Cannot find mode or invalid mode");
+        DFINDER_LOGE(TAG, "Cannot find mode or invalid mode");
     } else {
         if (dev == NULL) {
-            LOGE(TAG, "device info is null");
+            DFINDER_LOGE(TAG, "device info is null");
             return;
         }
         dev->mode = (uint8_t)item->valuedouble;
@@ -216,15 +276,19 @@ static void ParseDeviceHashData(const cJSON *data, DeviceInfo *dev)
     cJSON *item = NULL;
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_HASH);
     if (item == NULL) {
-        LOGD(TAG, "Cannot get hash json");
+        DFINDER_LOGD(TAG, "Cannot get hash json");
+        return;
+    }
+    if (item->valuestring == NULL) {
+        DFINDER_LOGD(TAG, "Cannot get valuestring");
         return;
     }
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
-        LOGD(TAG, "Cannot find device hash or invalid hash");
+        DFINDER_LOGD(TAG, "Cannot find device hash or invalid hash");
         return;
     }
     if (strcpy_s(dev->deviceHash, sizeof(dev->deviceHash), item->valuestring) != EOK) {
-        LOGE(TAG, "parse device hash data error");
+        DFINDER_LOGE(TAG, "parse device hash data error");
         return;
     }
 }
@@ -234,18 +298,46 @@ static void ParseServiceDataJsonData(const cJSON *data, DeviceInfo *dev)
     cJSON *item = NULL;
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_SERVICE_DATA);
     if (item == NULL) {
-        LOGE(TAG, "Cannot get service data");
+        DFINDER_LOGE(TAG, "Cannot get service data");
         return;
     }
     if (!cJSON_IsString(item)) {
-        LOGE(TAG, "Cannot find serviceData");
+        DFINDER_LOGE(TAG, "Cannot find serviceData");
+        return;
+    }
+    if (item->valuestring == NULL) {
+        DFINDER_LOGE(TAG, "item->valuestring is null");
         return;
     }
     if (strcpy_s(dev->serviceData, sizeof(dev->serviceData), item->valuestring)) {
-        LOGE(TAG, "parse device serviceData error");
+        DFINDER_LOGE(TAG, "parse device serviceData error");
         return;
     }
 }
+
+#ifndef DFINDER_USE_MINI_NSTACKX
+static void ParseExtendServiceDataJsonData(const cJSON *data, DeviceInfo *dev)
+{
+    cJSON *item = NULL;
+    item = cJSON_GetObjectItemCaseSensitive(data, JSON_EXTEND_SERVICE_DATA);
+    if (item == NULL) {
+        DFINDER_LOGE(TAG, "Cannot get service data");
+        return;
+    }
+    if (!cJSON_IsString(item)) {
+        DFINDER_LOGE(TAG, "Cannot find extendServiceData");
+        return;
+    }
+    if (item->valuestring == NULL) {
+        DFINDER_LOGE(TAG, "item->valuestring is null");
+        return;
+    }
+    if (strcpy_s(dev->extendServiceData, sizeof(dev->extendServiceData), item->valuestring)) {
+        DFINDER_LOGE(TAG, "parse device extendServiceData error");
+        return;
+    }
+}
+#endif /* END OF DFINDER_USE_MINI_NSTACKX */
 
 static void ParseCapabilityBitmap(const cJSON *data, DeviceInfo *deviceInfo)
 {
@@ -272,6 +364,50 @@ static void ParseCapabilityBitmap(const cJSON *data, DeviceInfo *deviceInfo)
     deviceInfo->capabilityBitmapNum = capabilityBitmapNum;
 }
 
+static void ParseBusinessType(const cJSON *data, DeviceInfo *dev)
+{
+    cJSON *item = NULL;
+    item = cJSON_GetObjectItemCaseSensitive(data, JSON_BUSINESS_TYPE);
+    if (item == NULL) {
+        dev->businessType = NSTACKX_BUSINESS_TYPE_NULL;
+        DFINDER_LOGW(TAG, "Cannot get businessType json");
+        return;
+    }
+    if (!cJSON_IsNumber(item) || (item->valuedouble < 0)) {
+        dev->businessType = NSTACKX_BUSINESS_TYPE_NULL;
+        DFINDER_LOGE(TAG, "Cannot find businessType or invalid Type");
+    } else {
+        dev->businessType = (uint8_t)item->valuedouble;
+    }
+}
+
+static void ParseBusinessDataJsonData(const cJSON *data, DeviceInfo *dev, uint8_t isBroadcast)
+{
+    cJSON *item = NULL;
+    item = cJSON_GetObjectItemCaseSensitive(data, JSON_BUSINESS_DATA);
+    if (item == NULL) {
+        DFINDER_LOGE(TAG, "Cannot get businessData json");
+        return;
+    }
+    if (!cJSON_IsString(item)) {
+        DFINDER_LOGE(TAG, "Cannot find businessData");
+        return;
+    }
+    if (isBroadcast == NSTACKX_TRUE) {
+        if (strcpy_s(dev->businessData.businessDataBroadcast,
+            sizeof(dev->businessData.businessDataBroadcast), item->valuestring)) {
+            DFINDER_LOGE(TAG, "parse device businessData error");
+            return;
+        }
+    } else {
+        if (strcpy_s(dev->businessData.businessDataUnicast,
+            sizeof(dev->businessData.businessDataUnicast), item->valuestring)) {
+            DFINDER_LOGE(TAG, "parse device businessData error");
+            return;
+        }
+    }
+}
+
 /*
  * Service Discover JSON format
  * {
@@ -284,7 +420,11 @@ static void ParseCapabilityBitmap(const cJSON *data, DeviceInfo *deviceInfo)
  *   "coapUri":[coap uri for discover, string]   <-- optional. When present, means it's broadcast request.
  * }
  */
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx)
+#else
 char *PrepareServiceDiscover(uint8_t isBroadcast)
+#endif /* #ifdef DFINDER_SUPPORT_MULTI_NIF */
 {
     char coapUriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
     char host[NSTACKX_MAX_IP_STRING_LEN] = {0};
@@ -300,28 +440,41 @@ char *PrepareServiceDiscover(uint8_t isBroadcast)
 
     /* Prepare local device info */
     if ((AddDeviceJsonData(data, deviceInfo) != NSTACKX_EOK) ||
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+        (AddApJsonDataWithIdx(data, idx) != NSTACKX_EOK) ||
+#else
         (AddWifiApJsonData(data) != NSTACKX_EOK) ||
-        (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK)) {
+#endif
+        (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
+        (AddBusinessJsonData(data, deviceInfo, isBroadcast) != NSTACKX_EOK)) {
+        DFINDER_LOGE(TAG, "Add json data failed");
         goto L_END_JSON;
     }
 
     if (isBroadcast) {
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+        if (GetLocalIpStringWithIdx(host, sizeof(host), idx) != NSTACKX_EOK) {
+#else
         if (GetLocalIpString(host, sizeof(host)) != NSTACKX_EOK) {
+#endif
+            DFINDER_LOGE(TAG, "GetLocalIpStringWithIdx failed");
             goto L_END_JSON;
         }
         if (sprintf_s(coapUriBuffer, sizeof(coapUriBuffer), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
+            DFINDER_LOGE(TAG, "deal coap url failed");
             goto L_END_JSON;
         }
         localCoapString = cJSON_CreateString(coapUriBuffer);
         if (localCoapString == NULL || !cJSON_AddItemToObject(data, JSON_COAP_URI, localCoapString)) {
             cJSON_Delete(localCoapString);
+            DFINDER_LOGE(TAG, "local coap string failed");
             goto L_END_JSON;
         }
     }
 
     formatString = cJSON_PrintUnformatted(data);
     if (formatString == NULL) {
-        LOGE(TAG, "cJSON_PrintUnformatted failed");
+        DFINDER_LOGE(TAG, "cJSON_PrintUnformatted failed");
     }
 
 L_END_JSON:
@@ -334,6 +487,7 @@ int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **
     char *remoteUrl = NULL;
     cJSON *data = NULL;
     cJSON *item = NULL;
+    uint8_t isBroadcast = NSTACKX_FALSE;
 
     if (buf == NULL || deviceInfo == NULL || remoteUrlPtr == NULL) {
         return NSTACKX_EINVAL;
@@ -354,15 +508,26 @@ int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **
     ParseModeJsonData(data, deviceInfo);
     ParseDeviceHashData(data, deviceInfo);
     ParseServiceDataJsonData(data, deviceInfo);
+#ifndef DFINDER_USE_MINI_NSTACKX
+    ParseExtendServiceDataJsonData(data, deviceInfo);
+#endif /* END OF DFINDER_USE_MINI_NSTACKX */
+    ParseBusinessType(data, deviceInfo);
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_COAP_URI);
     if (item != NULL) {
+        isBroadcast = NSTACKX_TRUE;
         if (cJSON_IsString(item)) {
+            DFINDER_LOGD(TAG, "new device join");
             remoteUrl = strdup(item->valuestring);
-            LOGD(TAG, "new device join");
+            if (remoteUrl == NULL) {
+                DFINDER_LOGE(TAG, "remoteUrl strdup fail");
+                cJSON_Delete(data);
+                return NSTACKX_ENOMEM;
+            }
         }
     }
-
+    ParseBusinessDataJsonData(data, deviceInfo, isBroadcast);
+    deviceInfo->businessData.isBroadcast = isBroadcast;
     *remoteUrlPtr = remoteUrl;
     cJSON_Delete(data);
     return NSTACKX_EOK;

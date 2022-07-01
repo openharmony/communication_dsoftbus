@@ -13,59 +13,111 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-ctrl_include = [
-  "../nstackx_util/interface",
-  "interface",
-  "include",
-  "include/coap_discover",
-  "//third_party/libcoap/include",
-  "//third_party/cJSON",
-  "//third_party/bounds_checking_function/include",
+cflags = [
+  "-Wall",
+  "-DENABLE_USER_LOG",
+  "-DDFINDER_SAVE_DEVICE_LIST",
+  "-DNSTACKX_EXTEND_BUSINESSDATA",
 ]
-
-cflags = [ "-Wall" ]
 include_dirs = []
 
-if (dsoftbus_feature_ifname_prefix) {
-  cflags += [ "-DNSTACKX_ETH_INTERFACE_NAME_PREFIX=\"br\"" ]
+if (dsoftbus_standard_feature_dfinder_support_multi_nif) {
+  cflags += [ "-DDFINDER_SUPPORT_MULTI_NIF" ]
 }
 
 if (defined(ohos_lite)) {
-  import("//build/lite/config/component/lite_component.gni")
-  config("dfinder_interface") {
-    include_dirs = [ "interface" ]
-  }
-  shared_library("nstackx_ctrl") {
-    sources = [
-      "core/coap_discover/coap_app.c",
-      "core/coap_discover/coap_client.c",
-      "core/coap_discover/coap_discover.c",
-      "core/coap_discover/json_payload.c",
-      "core/nstackx_common.c",
-      "core/nstackx_database.c",
-      "core/nstackx_device.c",
-      "core/nstackx_smartgenius.c",
-    ]
-    include_dirs += ctrl_include
-    public_configs = [ ":dfinder_interface" ]
-    deps = [
-      "../nstackx_util:nstackx_util.open",
-      "//build/lite/config/component/cJSON:cjson_shared",
-      "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/libcoap:libcoap",
-    ]
-    if (ohos_kernel_type == "liteos_a") {
+  if (ohos_kernel_type == "liteos_m") {
+    import("//build/lite/config/component/lite_component.gni")
+    config("dfinder_interface") {
+      include_dirs = [ "interface" ]
+    }
+    static_library("nstackx_ctrl") {
+      sources = [
+        "core/json_payload.c",
+        "core/mini_discover/coap_adapter.c",
+        "core/mini_discover/coap_app.c",
+        "core/mini_discover/coap_discover.c",
+        "core/nstackx_common.c",
+        "core/nstackx_database.c",
+        "core/nstackx_device.c",
+        "core/nstackx_dfinder_log.c",
+      ]
+      include_dirs = [
+        "include",
+        "include/mini_discover",
+        "//third_party/cJSON",
+        "../nstackx_util/interface",
+        "../nstackx_util/platform/liteos",
+      ]
       defines = [
         "NSTACKX_WITH_LITEOS",
         "LWIP_LITEOS_A_COMPAT",
+        "_GNU_SOURCE",
+        "DFINDER_USE_MINI_NSTACKX",
+        "DFINDER_SAVE_DEVICE_LIST",
+        "NSTACKX_WITH_LITEOS_M",
+      ]
+      public_configs = [ ":dfinder_interface" ]
+      deps = [ "../nstackx_util:nstackx_util.open" ]
+      cflags += [
+        "-Wall",
+        "-std=c99",
+      ]
+      cflags_cc = cflags
+    }
+  } else {
+    import("//build/lite/config/component/lite_component.gni")
+    config("dfinder_interface") {
+      include_dirs = [ "interface" ]
+    }
+    shared_library("nstackx_ctrl") {
+      sources = [
+        "core/coap_discover/coap_app.c",
+        "core/coap_discover/coap_client.c",
+        "core/coap_discover/coap_discover.c",
+        "core/json_payload.c",
+        "core/nstackx_common.c",
+        "core/nstackx_database.c",
+        "core/nstackx_device.c",
+        "core/nstackx_dfinder_log.c",
+        "core/nstackx_smartgenius.c",
+      ]
+      ctrl_include = [
+        "../nstackx_util/interface",
+        "interface",
+        "include",
+        "include/coap_discover",
+        "//third_party/libcoap/include",
+        "//third_party/cJSON",
+      ]
+      include_dirs += ctrl_include
+      public_configs = [ ":dfinder_interface" ]
+      deps = [
+        "../nstackx_util:nstackx_util.open",
+        "//build/lite/config/component/cJSON:cjson_shared",
+        "//third_party/bounds_checking_function:libsec_shared",
+        "//third_party/libcoap:libcoap",
+      ]
+      if (ohos_kernel_type == "liteos_a") {
+        defines = [
+          "NSTACKX_WITH_LITEOS",
+          "LWIP_LITEOS_A_COMPAT",
+          "DFINDER_SAVE_DEVICE_LIST",
+        ]
+      } else if (ohos_kernel_type == "linux") {
+        defines = [ "DFINDER_SAVE_DEVICE_LIST" ]
+      }
+      cflags += [
+        "-fPIC",
+        "-std=c99",
+      ]
+      cflags_cc = cflags
+      ldflags = [
+        "-Wl,-z,relro,-z,now",
+        "-s",
+        "-fPIC",
       ]
     }
-    cflags += [
-      "-fPIC",
-      "-std=c99",
-    ]
-    cflags_cc = cflags
-    ldflags = [ "-fPIC" ]
   }
 } else {
   import("//build/ohos.gni")
@@ -79,15 +131,24 @@ if (defined(ohos_lite)) {
       "core/coap_discover/coap_app.c",
       "core/coap_discover/coap_client.c",
       "core/coap_discover/coap_discover.c",
-      "core/coap_discover/json_payload.c",
+      "core/json_payload.c",
       "core/nstackx_common.c",
       "core/nstackx_database.c",
       "core/nstackx_device.c",
+      "core/nstackx_dfinder_log.c",
       "core/nstackx_smartgenius.c",
     ]
     include_dirs += [
       "//third_party/bounds_checking_function/include",
       "../nstackx_util/platform/unix",
+    ]
+    ctrl_include = [
+      "../nstackx_util/interface",
+      "interface",
+      "include",
+      "include/coap_discover",
+      "//third_party/libcoap/include",
+      "//third_party/cJSON",
     ]
     include_dirs += ctrl_include
     public_configs = [ ":dfinder_interface" ]

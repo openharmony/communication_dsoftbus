@@ -201,8 +201,12 @@ int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
     struct ifreq buf[INTERFACE_MAX];
     struct ifconf ifc;
     struct ifreq *ifBinding = NULL;
+
+#ifndef DFINDER_SUPPORT_MULTI_NIF
     uint32_t ethNameLen = (uint32_t)strlen(ETH_DEV_NAME_PRE);
     uint32_t wlanNameLen = (uint32_t)strlen(WLAN_DEV_NAME_PRE);
+#endif
+
     int32_t fd = GetInterfaceList(&ifc, buf, sizeof(buf));
     if (fd < 0) {
         return NSTACKX_EFAILED;
@@ -210,10 +214,11 @@ int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
     int32_t ifreqLen = (int32_t)sizeof(struct ifreq);
     int32_t interfaceNum = (int32_t)(ifc.ifc_len / ifreqLen);
     for (int32_t i = 0; i < interfaceNum && i < INTERFACE_MAX; i++) {
-        LOGI(TAG, "device name: %s", buf[i].ifr_name);
+#ifndef DFINDER_SUPPORT_MULTI_NIF
         if (strlen(buf[i].ifr_name) < ethNameLen && strlen(buf[i].ifr_name) < wlanNameLen) {
             continue;
         }
+#endif
         /* get IP of this interface */
         int32_t state = GetInterfaceIP(fd, &buf[i]);
         if (state == NSTACKX_EFAILED) {
@@ -228,6 +233,7 @@ int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
                 break;
             }
         } else {
+#ifndef DFINDER_SUPPORT_MULTI_NIF
             /* strategy: ethernet have higher priority */
             if (memcmp(buf[i].ifr_name, ETH_DEV_NAME_PRE, ethNameLen) == 0) {
                 ifBinding = &buf[i];
@@ -235,6 +241,7 @@ int32_t BindToDevice(SocketDesc sockfd, const struct sockaddr_in *localAddr)
             } else if (memcmp(buf[i].ifr_name, WLAN_DEV_NAME_PRE, wlanNameLen) == 0) {
                 ifBinding = &buf[i];
             }
+#endif
         }
     }
     CloseSocketInner(fd);
