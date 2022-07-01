@@ -149,7 +149,7 @@
     typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     
     // 发起组网请求
-    int32_t JoinLNN(ConnectionAddr *target, OnJoinLNNResult cb);
+    int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
     ```
 
 2.  等待组网结果，JoinLNN\(\)返回成功表示软总线接受了组网请求，组网结果通过回调函数通知业务；组网回调函数中addr参数内容和JoinLNN\(\)的入参互相匹配；retCode如果为0，表示组网成功，此时networkId为有效值，后续传输、退网等接口均需使用该参数；retCode如果不为0，表示组网失败，此时networkId为无效值。
