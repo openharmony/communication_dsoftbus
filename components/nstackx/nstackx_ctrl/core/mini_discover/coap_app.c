@@ -25,10 +25,11 @@
 #include "coap_adapter.h"
 #include "coap_discover.h"
 #include "json_payload.h"
+#include "lwip/sockets.h"
 #include "nstackx_device.h"
 #include "nstackx_epoll.h"
 #include "nstackx_error.h"
-#include "nstackx_log.h"
+#include "nstackx_dfinder_log.h"
 #include "sys_util.h"
 
 #define TAG "nStackXCoAP"
@@ -62,15 +63,15 @@ static bool IsLoopBackPacket(struct sockaddr_in *remoteAddr)
     struct in_addr localAddr = {0};
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
-        LOGE(TAG, "get local ip string failed");
+        DFINDER_LOGE(TAG, "get local ip string failed");
         return false;
     }
     if (inet_pton(AF_INET, ipString, &localAddr) != 1) {
-        LOGE(TAG, "inet_pton failed, errno = %d", errno);
+        DFINDER_LOGE(TAG, "inet_pton failed, errno = %d", errno);
         return false;
     }
     if (remoteAddr->sin_addr.s_addr == localAddr.s_addr) {
-        LOGE(TAG, "drop loopback packet");
+        DFINDER_LOGE(TAG, "drop loopback packet");
         return true;
     }
     return false;
@@ -87,7 +88,7 @@ static void HandleReadEvent(int32_t fd)
     ssize_t nRead = recvfrom(fd, recvBuffer, COAP_MAX_PDU_SIZE, 0, (struct sockaddr *)&remoteAddr, &len);
     if ((nRead == 0) || (nRead < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)) {
         free(recvBuffer);
-        LOGE(TAG, "receive from remote packet failed");
+        DFINDER_LOGE(TAG, "receive from remote packet failed");
         return;
     }
 
@@ -109,19 +110,19 @@ static int32_t CoapCreateUdpClient(const struct sockaddr_in *sockAddr, uint8_t i
     (void)sockAddr;
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        LOGE(TAG, "create socket failed, errno = %d", fd);
+        DFINDER_LOGE(TAG, "create socket failed, errno = %d", fd);
         return NSTACKX_EFAILED;
     }
 
     int32_t optVal = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)) != 0) {
-        LOGE(TAG, "set sock opt failed, errno = %d", errno);
+        DFINDER_LOGE(TAG, "set sock opt failed, errno = %d", errno);
         goto CLOSE_FD;
     }
 
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
-        LOGE(TAG, "get local ip string failed");
+        DFINDER_LOGE(TAG, "get local ip string failed");
         goto CLOSE_FD;
     }
 
@@ -132,18 +133,18 @@ static int32_t CoapCreateUdpClient(const struct sockaddr_in *sockAddr, uint8_t i
     localAddr.sin_port = htons(COAP_SRV_DEFAULT_PORT);
 
     if (bind(fd, (struct sockaddr *)&localAddr, sizeof(struct sockaddr_in)) == -1) {
-        LOGE(TAG, "bind local addr failed, errno = %d", errno);
+        DFINDER_LOGE(TAG, "bind local addr failed, errno = %d", errno);
         goto CLOSE_FD;
     }
 
     if (isBroadCast && setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &optVal, sizeof(optVal)) != 0) {
-        LOGE(TAG, "set sock opt broadcast failed, errno = %d", errno);
+        DFINDER_LOGE(TAG, "set sock opt broadcast failed, errno = %d", errno);
         goto CLOSE_FD;
     }
 
     return fd;
 CLOSE_FD:
-    close(fd);
+    lwip_close(fd);
     return NSTACKX_EFAILED;
 }
 
@@ -155,8 +156,8 @@ static int32_t CoapSocketSend(const SocketInfo *socket, const uint8_t *buffer, s
 
     socklen_t dstAddrLen = sizeof(struct sockaddr_in);
     int32_t ret = sendto(socket->cliendFd, buffer, length, 0, (struct sockaddr *)&socket->dstAddr, dstAddrLen);
-    if (ret != (int32_t)length) {
-        LOGE(TAG, "sendto failed, ret = %d, errno = %d", ret, errno);
+    if (ret != length) {
+        DFINDER_LOGE(TAG, "sendto failed, ret = %d, errno = %d", ret, errno);
     }
     return ret;
 }
@@ -181,18 +182,18 @@ static int32_t CoapSendMsg(const CoapRequest *coapRequest, uint8_t isBroadcast)
     socket.cliendFd = fd;
     socket.dstAddr = sockAddr;
     if (CoapSocketSend(&socket, (uint8_t *)coapRequest->data, coapRequest->dataLength) == -1) {
-        LOGE(TAG, "Coap socket send response message failed");
-        close(fd);
+        DFINDER_LOGE(TAG, "Coap socket send response message failed");
+        lwip_close(fd);
         return NSTACKX_EFAILED;
     }
-    close(fd);
+    lwip_close(fd);
     return NSTACKX_EOK;
 }
 
 int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool isAckMsg)
 {
     if (param == NULL) {
-        LOGE(TAG, "coap build param is null");
+        DFINDER_LOGE(TAG, "coap build param is null");
         return NSTACKX_EFAILED;
     }
 
@@ -201,8 +202,9 @@ int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool i
     CoapRequest coapRequest = {0};
     coapRequest.remoteIp = param->remoteIp;
     CoapReadWriteBuffer sndPktBuff = {0};
-    sndPktBuff.readWriteBuf = calloc(1, COAP_MAX_PDU_SIZE);
+    sndPktBuff.readWriteBuf = (char *)calloc(COAP_MAX_PDU_SIZE, sizeof(char));
     if (sndPktBuff.readWriteBuf == NULL) {
+        DFINDER_LOGE(TAG, "mem calloc failed, size = %u", COAP_MAX_PDU_SIZE * sizeof(char));
         return NSTACKX_EFAILED;
     }
     sndPktBuff.size = COAP_MAX_PDU_SIZE;
@@ -211,7 +213,7 @@ int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool i
         payload = PrepareServiceDiscover(isBroadcast);
         if (payload == NULL) {
             free(sndPktBuff.readWriteBuf);
-            LOGE(TAG, "prepare payload data failed");
+            DFINDER_LOGE(TAG, "prepare payload data failed");
             return NSTACKX_EFAILED;
         }
     }
@@ -224,7 +226,7 @@ int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool i
     if (ret != DISCOVERY_ERR_SUCCESS) {
         free(sndPktBuff.readWriteBuf);
         sndPktBuff.readWriteBuf = NULL;
-        LOGE(TAG, "build coap packet failed, ret = %d", ret);
+        DFINDER_LOGE(TAG, "build coap packet failed, ret = %d", ret);
         return ret;
     }
     coapRequest.data = sndPktBuff.readWriteBuf;
@@ -245,7 +247,7 @@ static void DeRegisteCoAPEpollTaskCtx(void)
 static void DeRegisterCoAPEpollTask(void)
 {
     if (g_ctxSocketErrFlag) {
-        LOGI(TAG, "error of g_ctx's socket occurred and destroy g_ctx");
+        DFINDER_LOGI(TAG, "error of g_ctx's socket occurred and destroy g_ctx");
         g_ctxSocketErrFlag = NSTACKX_FALSE;
         NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
     } else {
@@ -277,17 +279,17 @@ static void CoAPEpollErrorHandle(void *data)
     }
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     g_ctxSocketErrFlag = NSTACKX_TRUE;
-    LOGE(TAG, "coap socket error occurred and close it");
+    DFINDER_LOGE(TAG, "coap socket error occurred and close it");
     DeRegisterCoAPEpollTask();
     CloseDesc(task->taskfd);
     task->taskfd = -1;
 }
 
-static uint32_t RegisterCoAPEpollTask(EpollDesc epollfd)
+static int32_t RegisterCoAPEpollTask(EpollDesc epollfd)
 {
     if (g_coapListenFd == -1) {
-        LOGI(TAG, "g_coapListenFd hasn't initialized.");
-        return NSTACKX_FALSE;
+        DFINDER_LOGI(TAG, "g_coapListenFd hasn't initialized.");
+        return NSTACKX_EFAILED;
     }
 
     uint32_t events = EPOLLIN | EPOLLERR;
@@ -297,8 +299,8 @@ static uint32_t RegisterCoAPEpollTask(EpollDesc epollfd)
     g_task.writeHandle = NULL;
     g_task.errorHandle = CoAPEpollErrorHandle;
     if (g_task.taskfd < 0) {
-        LOGE(TAG, "g_coapListenFd isn't correct.");
-        return NSTACKX_FALSE;
+        DFINDER_LOGE(TAG, "g_coapListenFd isn't correct.");
+        return NSTACKX_EFAILED;
     }
     RegisterEpollTask(&g_task, events);
     return NSTACKX_EOK;
@@ -315,8 +317,8 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
 
     int32_t optVal = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)) != 0) {
-        LOGE(TAG, "set sock opt failed, errno = %d", errno);
-        close(fd);
+        DFINDER_LOGE(TAG, "set sock opt failed, errno = %d", errno);
+        lwip_close(fd);
         return NSTACKX_FALSE;
     }
 
@@ -326,12 +328,12 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
     localAddr.sin_addr.s_addr = inet_addr(ipAddr);
 
     if (bind(fd, (struct sockaddr *)&localAddr, len) == -1) {
-        close(fd);
+        lwip_close(fd);
         return NSTACKX_FALSE;
     }
 
     if (getsockname(fd, (struct sockaddr *)&localAddr, &len) == -1) {
-        close(fd);
+        lwip_close(fd);
         return NSTACKX_FALSE;
     }
     return fd;
@@ -343,7 +345,7 @@ static int32_t CoapGetContext(const char *node, int32_t port, uint8_t needBind, 
     (void)needBind;
     int32_t coapListenFd = CoapCreateUdpServer(node, port);
     if (coapListenFd <= 0) {
-        LOGE(TAG, "create coap listen fd failed");
+        DFINDER_LOGE(TAG, "create coap listen fd failed");
         return NSTACKX_FALSE;
     }
 
@@ -352,35 +354,35 @@ static int32_t CoapGetContext(const char *node, int32_t port, uint8_t needBind, 
 
 int32_t CoapServerInit(const struct in_addr *ip)
 {
-    LOGD(TAG, "CoapServerInit is called");
+    DFINDER_LOGD(TAG, "CoapServerInit is called");
     EpollDesc epollFd;
     int32_t ret;
 
     if (!IsWifiApConnected()) {
-        LOGD(TAG, "wifi not connected");
+        DFINDER_LOGD(TAG, "wifi not connected");
         return NSTACKX_EOK;
     }
 
     if (g_coapListenFd != -1) {
-        LOGI(TAG, "coap server has initialized.");
+        DFINDER_LOGI(TAG, "coap server has initialized.");
         return NSTACKX_EOK;
     }
 
     g_coapListenFd = CoapGetContext(COAP_SRV_DEFAULT_ADDR, COAP_SRV_DEFAULT_PORT, NSTACKX_TRUE, ip);
     if (g_coapListenFd == -1) {
-        LOGE(TAG, "coap init get listen fd failed");
+        DFINDER_LOGE(TAG, "coap init get listen fd failed");
         return NSTACKX_EFAILED;
     }
 
     epollFd = GetMainLoopEpollFd();
     if (!IsEpollDescValid(epollFd)) {
-        LOGE(TAG, "epoll is invalid!");
+        DFINDER_LOGE(TAG, "epoll is invalid!");
         return NSTACKX_EFAILED;
     }
 
     ret = RegisterCoAPEpollTask(epollFd);
     if (ret != NSTACKX_EOK) {
-        LOGE(TAG, "register coap epoll task failed!");
+        DFINDER_LOGE(TAG, "register coap epoll task failed!");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
@@ -388,7 +390,7 @@ int32_t CoapServerInit(const struct in_addr *ip)
 
 void CoapServerDestroy(void)
 {
-    LOGD(TAG, "CoapServerDestroy is called");
+    DFINDER_LOGD(TAG, "CoapServerDestroy is called");
 
     if (g_coapListenFd == -1) {
         return;
@@ -401,7 +403,7 @@ void CoapServerDestroy(void)
 void ResetCoapSocketTaskCount(uint8_t isBusy)
 {
     if (isBusy) {
-        LOGI(TAG, "in this busy interval, socket task count: wifi %llu,"
+        DFINDER_LOGI(TAG, "in this busy interval, socket task count: wifi %llu,"
             "read %llu, write %llu, error %llu", g_task.count,
             g_socketEventNum[SOCKET_READ_EVENT],
             g_socketEventNum[SOCKET_WRITE_EVENT], g_socketEventNum[SOCKET_ERROR_EVENT]);

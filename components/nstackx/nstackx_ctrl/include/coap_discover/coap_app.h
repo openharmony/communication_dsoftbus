@@ -26,8 +26,26 @@ extern "C" {
 
 #define COAP_SRV_DEFAULT_PORT "5684"
 #define COAP_SRV_DEFAULT_ADDR "0.0.0.0"
+
+#define MAX_COAP_SOCKET_NUM 64
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+typedef struct {
+    coap_context_t *ctx;
+    EpollTask taskList[MAX_COAP_SOCKET_NUM];
+    uint32_t socketNum;
+    uint8_t ctxSocketErrFlag;
+} CoapCtxType;
+#endif
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+int32_t CoapServerInitWithIdx(const struct in_addr *ip, uint32_t idx, const char *networkName);
+void CoapServerDestroyWithIdx(uint32_t ctxIdx);
+#else
 int32_t CoapServerInit(const struct in_addr *ip);
 void CoapServerDestroy(void);
+#endif
+
 int32_t CoapP2pServerInit(const struct in_addr *ip);
 void CoapP2pServerDestroy(void);
 int32_t CoapUsbServerInit(const struct in_addr *ip);
@@ -37,6 +55,11 @@ uint32_t GetTimeout(struct coap_context_t *ctx, uint32_t *socketNum, EpollTask *
 void DeRegisterCoAPEpollTask(void);
 void DeRegisteCoAPEpollTaskCtx(struct coap_context_t *ctx, uint32_t *socketNum, EpollTask *taskList);
 void ResetCoapSocketTaskCount(uint8_t isBusy);
+#ifdef _WIN32
+int32_t CoapThreadInit(void);
+void CoapThreadDestory(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

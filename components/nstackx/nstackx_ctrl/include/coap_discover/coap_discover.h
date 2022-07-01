@@ -27,13 +27,13 @@
 #define SERVER_TYPE_USB 2
 
 #define INVALID_TYPE 255
-
+#pragma pack(1)
 typedef struct {
     uint8_t type;
     uint16_t len; /* must be a positive integer */
     uint8_t value[0];
-} __attribute__((packed)) CoapMsgUnit;
-
+} CoapMsgUnit;
+#pragma pack()
 struct coap_session_t;
 struct DeviceInfo;
 typedef struct {
@@ -43,16 +43,36 @@ typedef struct {
     uint8_t *data;
     uint32_t len;
     uint8_t type;
+    int32_t err;
+    sem_t wait;
 } MsgCtx;
+
+typedef enum {
+    COAP_BROADCAST_TYPE_DEFAULT = 0,
+    COAP_BROADCAST_TYPE_USER = 1
+} CoapBroadcastType;
 
 void CoapServiceDiscoverInner(uint8_t userRequest);
 void CoapServiceDiscoverInnerAn(uint8_t userRequest);
+void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest);
 void CoapServiceDiscoverStopInner(void);
 uint8_t CoapDiscoverRequestOngoing(void);
-void CoapInitResources(coap_context_t *ctx, uint8_t isNeedInitCtx);
+
+#ifndef DFINDER_SUPPORT_MULTI_NIF
+void CoapInitResources(coap_context_t *ctx, uint8_t serverType);
+#endif
+
 int32_t CoapDiscoverInit(EpollDesc epollfd);
 void CoapDiscoverDeinit(void);
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+void CoapInitResourcesWithIdx(coap_context_t *ctx, uint32_t idx, const char *networkName);
+void CoapDestroyCtxWithIdx(uint32_t ctxIdx);
+coap_context_t *GetContextWithIdx(uint8_t serverType, uint32_t idx);
+#else
 void CoapDestroyCtx(uint8_t serverType);
+#endif
+
 int32_t CoapSendServiceMsg(MsgCtx *msgCtx, struct DeviceInfo *deviceInfo);
 int32_t CoapSendServiceMsgWithDefiniteTargetIp(MsgCtx *msgCtx, struct DeviceInfo *deviceInfo);
 coap_context_t *GetContext(uint8_t serverType);
@@ -61,4 +81,7 @@ void CoapUnsubscribeModuleInner(uint8_t isUnsubscribe);
 void CoapInitSubscribeModuleInner(void);
 void ResetCoapDiscoverTaskCount(uint8_t isBusy);
 uint8_t GetActualType(const uint8_t type, const char *dstIp);
+void SetCoapDiscoverType(CoapBroadcastType type);
+void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration);
+void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
 #endif /* #ifndef COAP_DISCOVER_H */

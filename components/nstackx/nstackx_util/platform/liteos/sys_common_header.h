@@ -45,6 +45,7 @@
 })
 
 #define NSTACKX_EXPORT extern
+#define NSTACKX_EXPORT_VARIABLE
 
 typedef int32_t SocketDesc;
 

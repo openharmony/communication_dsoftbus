@@ -13,20 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef COAP_DISCOVER_H
-#define COAP_DISCOVER_H
+#include "nstackx_dfinder_log.h"
+#include <stdint.h>
+#include <securec.h>
+#include "nstackx_error.h"
 
-#include "coap_def.h"
-#include "nstackx_common.h"
+#define TAG "nStackXDFinder"
 
+#ifdef ENABLE_USER_LOG
+static uint32_t g_dfinderLogLevel = DFINDER_LOG_LEVEL_INFO;
 
-void CoapServiceDiscoverInner(uint8_t userRequest);
-void CoapServiceDiscoverInnerAn(uint8_t userRequest);
-void CoapServiceDiscoverStopInner(void);
-uint8_t CoapDiscoverRequestOngoing(void);
-int32_t CoapDiscoverInit(EpollDesc epollfd);
-void CoapDiscoverDeinit(void);
-void ResetCoapDiscoverTaskCount(uint8_t isBusy);
-void HndPostServiceDiscover(const CoapPacket *pkt);
+uint32_t GetDFinderLogLevel(void)
+{
+    return g_dfinderLogLevel;
+}
 
-#endif /* #ifndef COAP_DISCOVER_H */
+void SetDFinderLogLevel(uint32_t logLevel)
+{
+    if (logLevel >= DFINDER_LOG_LEVEL_END) {
+        LOGE(TAG, "invalid loglevel:%u", logLevel);
+        return;
+    }
+    g_dfinderLogLevel = logLevel;
+}
+#endif

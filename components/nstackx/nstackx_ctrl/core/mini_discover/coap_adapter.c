@@ -14,6 +14,7 @@
  */
 
 #include "coap_adapter.h"
+#include "nstackx_dfinder_log.h"
 #include "securec.h"
 
 #define COAP_MAX_ENDPOINTS_NUM 64
@@ -33,6 +34,8 @@
 #define MSGID_HIGHT_BYTE 2
 #define RAND_DIVISOR 0
 
+#define TAG "nStackXCoAP"
+
 typedef struct {
     CoapPacket *pkt;
     CoapPacketParam *param;
@@ -47,6 +50,7 @@ static int32_t CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos
     if (*value == COAP_EXTEND_DELTA_VALUE_UINT8) {
         (*headerLen)++;
         if (bufLen < *headerLen) {
+            DFINDER_LOGE(TAG, "opt invalid cause short for header");
             return DISCOVERY_ERR_OPT_INVALID_SHORT_FOR_HEADER;
         }
 
@@ -58,12 +62,14 @@ static int32_t CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos
     if (*value == COAP_EXTEND_DELTA_VALUE_UINT16) {
         *headerLen = (uint8_t)(*headerLen + COAP_OPTION_EXTENSION_LEN);
         if (bufLen < *headerLen) {
+            DFINDER_LOGE(TAG, "opt invalid cause short for header");
             return DISCOVERY_ERR_OPT_INVALID_SHORT_FOR_HEADER;
         }
 
         uint16_t optionDeltaValue = (uint16_t)((*dataPos)[1] << COAP_SHIFT_BIT8) |
             (*dataPos)[COAP_OPTION_EXTENSION_LEN];
         if (optionDeltaValue > (0xFFFF - COAP_LOW_DELTA_NUM - COAP_MID_DELTA_NUM)) {
+            DFINDER_LOGE(TAG, "CoapParseOptionExtension bad req");
             return DISCOVERY_ERR_BAD_REQ;
         }
 
@@ -73,6 +79,7 @@ static int32_t CoapParseOptionExtension(uint16_t *value, const uint8_t **dataPos
     }
 
     if (*value == COAP_EXTEND_DELTA_VALUE_INVALID) {
+        DFINDER_LOGE(TAG, "CoapParseOptionExtension opt invalid delta");
         return DISCOVERY_ERR_OPT_INVALID_DELTA;
     }
 
@@ -88,6 +95,7 @@ static int32_t CoapParseOption(CoapOption *option, uint16_t *runningDelta, const
     int32_t ret;
 
     if (bufLen < 1)  {
+        DFINDER_LOGE(TAG, "CoapParseOption buf too short");
         return DISCOVERY_ERR_OPT_INVALID_SHORT_FOR_HEADER;
     }
     dataPos = *buf;
@@ -105,6 +113,7 @@ static int32_t CoapParseOption(CoapOption *option, uint16_t *runningDelta, const
     }
 
     if ((dataPos + 1 + len) > (*buf + bufLen)) {
+        DFINDER_LOGE(TAG, "CoapParseOption dataPos too big");
         return DISCOVERY_ERR_OPT_INVALID_BIG;
     }
 
@@ -125,6 +134,7 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
     const uint8_t *end = buf + buflen;
 
     if (dataPos > end) {
+        DFINDER_LOGE(TAG, "CoapParseOptionsAndPayload overruns pkt");
         return DISCOVERY_ERR_OPT_OVERRUNS_PKT;
     }
 
@@ -137,6 +147,7 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
     }
 
     if ((dataPos < end) && (*dataPos != 0xFF) && (optionIndex >= COAP_MAX_OPTION)) {
+        DFINDER_LOGE(TAG, "CoapParseOptionsAndPayload server error");
         return DISCOVERY_ERR_SERVER_ERR;
     }
     pkt->optionsNum = optionIndex;
@@ -147,6 +158,7 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
     }
 
     if (dataPos + 1 >= end) {
+        DFINDER_LOGE(TAG, "CoapParseOptionsAndPayload invalid pkt");
         return DISCOVERY_ERR_INVALID_PKT;
     }
 
@@ -158,6 +170,7 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
 static int32_t CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     if (bufLen < HEADER_LEN) {
+        DFINDER_LOGE(TAG, "CoapParseHeader header invalid short");
         return DISCOVERY_ERR_HEADER_INVALID_SHORT;
     }
 
@@ -174,14 +187,17 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     int32_t ret;
     if (pkt == NULL || buf == NULL) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode pkt or buf invalid");
         return -1;
     }
 
     if (bufLen == 0) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode buflen invalid");
         return -1;
     }
 
     if (pkt->protocol != COAP_UDP) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal not coap_udp");
         return -1;
     }
 
@@ -191,14 +207,17 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
     }
 
     if (pkt->header.ver != COAP_VERSION) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal header version invalid");
         return DISCOVERY_ERR_VER_INVALID;
     }
 
     if (pkt->header.tokenLen > MAX_TOK_LEN) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal header tokenlen invalid");
         return DISCOVERY_ERR_INVALID_TOKEN_LEN;
     }
 
     if ((bufLen > HEADER_LEN) && (pkt->header.code == 0)) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode empty msg");
         return DISCOVERY_ERR_INVALID_EMPTY_MSG;
     }
 
@@ -206,6 +225,7 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
         pkt->token.buffer = NULL;
         pkt->token.len = 0;
     } else if ((uint32_t)(pkt->header.tokenLen + HEADER_LEN) > bufLen) {
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode token too short");
         return DISCOVERY_ERR_TOKEN_INVALID_SHORT;
     } else {
         pkt->token.buffer = &buf[BUF_OFFSET_BYTE4];
@@ -224,19 +244,23 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
 {
     if (buf->len != 0) {
+        DFINDER_LOGE(TAG, "CoapCreateHeader invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if ((pktParam->protocol != COAP_UDP) && (pktParam->protocol != COAP_TCP)) {
+        DFINDER_LOGE(TAG, "CoapCreateHeader protocol not udp or tcp");
         return DISCOVERY_ERR_TRANSPORT_NOT_UDP_OR_TCP;
     }
     pkt->protocol = pktParam->protocol;
 
     if (pktParam->type > COAP_TYPE_RESET) {
+        DFINDER_LOGE(TAG, "CoapCreateHeader unknown msg type");
         return DISCOVERY_ERR_UNKNOWN_MSG_TYPE;
     }
 
     if (buf->size < HEADER_LEN) {
+        DFINDER_LOGE(TAG, "CoapCreateHeader exceed max pdu");
         return DISCOVERY_ERR_PKT_EXCEED_MAX_PDU;
     }
 
@@ -253,6 +277,7 @@ static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam
         buf->readWriteBuf[BUF_OFFSET_BYTE2] = (char)((pkt->header.varSection.msgId & 0xFF00) >> COAP_SHIFT_BIT8);
         buf->readWriteBuf[BUF_OFFSET_BYTE3] = (char)(pkt->header.varSection.msgId & 0x00FF);
     } else {
+        DFINDER_LOGE(TAG, "CoapCreateHeader not supported");
         return DISCOVERY_ERR_NOT_SUPPORTED;
     }
     pkt->len = buf->len = HEADER_LEN;
@@ -262,14 +287,17 @@ static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam
 static int32_t CoapAddData(CoapPacket *pkt, const CoapBuffer *payload, CoapReadWriteBuffer *buf)
 {
     if ((payload->len == 0) && (payload->buffer == NULL)) {
+        DFINDER_LOGE(TAG, "CoapAddData invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if (buf->len < HEADER_LEN) {
+        DFINDER_LOGE(TAG, "CoapAddData buf invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if ((payload->len > 0xFFFF) || (buf->len + payload->len + 1) > buf->size) {
+        DFINDER_LOGE(TAG, "CoapAddData exceed max pdu");
         return DISCOVERY_ERR_PKT_EXCEED_MAX_PDU;
     }
 
@@ -280,6 +308,7 @@ static int32_t CoapAddData(CoapPacket *pkt, const CoapBuffer *payload, CoapReadW
         (buf->len)++;
         pkt->payload.buffer = (const uint8_t *)&buf->readWriteBuf[buf->len];
         if (memcpy_s(&buf->readWriteBuf[buf->len], buf->size - buf->len, payload->buffer, payload->len) != EOK) {
+            DFINDER_LOGE(TAG, "CoapAddData memcpy fail");
             return DISCOVERY_ERR_INVALID_ARGUMENT;
         }
     }
@@ -335,14 +364,17 @@ static int32_t CoapCheckOption(const CoapPacket *pkt, const CoapOption *option, 
     uint16_t runningDelta = 0;
 
     if (buf->len < HEADER_LEN) {
+        DFINDER_LOGE(TAG, "CoapCheckOption buf invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if ((option->optionBuf == NULL) && (option->len != 0)) {
+        DFINDER_LOGE(TAG, "CoapCheckOption invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if ((option->len > 0xFFFF) || (pkt->optionsNum >= COAP_MAX_OPTION)) {
+        DFINDER_LOGE(TAG, "CoapCheckOption bad req");
         return DISCOVERY_ERR_BAD_REQ;
     }
 
@@ -352,6 +384,7 @@ static int32_t CoapCheckOption(const CoapPacket *pkt, const CoapOption *option, 
 
     optionLen = CoapGetOptionLength(option, runningDelta);
     if ((buf->len + optionLen) > buf->size) {
+        DFINDER_LOGE(TAG, "CoapCheckOption exceed max pdu");
         return DISCOVERY_ERR_PKT_EXCEED_MAX_PDU;
     }
 
@@ -366,6 +399,7 @@ static int32_t CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapRead
     uint16_t prevOptionNum;
 
     if (CoapCheckOption(pkt, option, buf) != DISCOVERY_ERR_SUCCESS) {
+        DFINDER_LOGE(TAG, "CoapAddOption invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
@@ -396,6 +430,7 @@ static int32_t CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapRead
 
     if (option->len != 0) {
         if (memcpy_s(&buf->readWriteBuf[buf->len], buf->size - buf->len, option->optionBuf, option->len) != EOK) {
+            DFINDER_LOGE(TAG, "CoapAddOption memcpy fail");
             return DISCOVERY_ERR_OPT_INVALID_BIG;
         }
     }
@@ -414,18 +449,22 @@ static int32_t CoapAddOption(CoapPacket *pkt, const CoapOption *option, CoapRead
 static int32_t CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWriteBuffer *buf)
 {
     if ((token->len != 0) && (token->buffer == NULL)) {
+        DFINDER_LOGE(TAG, "CoapAddToken token invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if (buf->len != HEADER_LEN) {
+        DFINDER_LOGE(TAG, "CoapAddToken buf invalid argument");
         return DISCOVERY_ERR_INVALID_ARGUMENT;
     }
 
     if (token->len > MAX_TOK_LEN)  {
+        DFINDER_LOGE(TAG, "CoapAddToken token too long");
         return DISCOVERY_ERR_INVALID_TOKEN_LEN;
     }
 
     if ((buf->len + token->len) > buf->size) {
+        DFINDER_LOGE(TAG, "CoapAddToken exceed max pdu");
         return DISCOVERY_ERR_PKT_EXCEED_MAX_PDU;
     }
 
@@ -440,7 +479,8 @@ static int32_t CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWr
                                                   | token->len);
         }
 
-        if (memcpy_s(&buf->readWriteBuf[buf->len], pkt->header.tokenLen, token->buffer, token->len) != EOK) {
+        if (memcpy_s(&buf->readWriteBuf[buf->len], buf->size - buf->len, token->buffer, pkt->header.tokenLen) != EOK) {
+            DFINDER_LOGE(TAG, "CoapAddToken memcpy fail");
             return DISCOVERY_ERR_INVALID_ARGUMENT;
         }
     }
@@ -465,6 +505,7 @@ static int32_t CoapCreateBody(CoapPacket *pkt, const CoapPacketParam *param, con
 
     if (param->options != 0) {
         if (param->optionsNum > COAP_MAX_OPTION) {
+            DFINDER_LOGE(TAG, "CoapCreateBody server error");
             return DISCOVERY_ERR_SERVER_ERR;
         }
 
@@ -492,6 +533,7 @@ int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const C
     int32_t ret;
 
     if (pkt == NULL || param == NULL || buf == NULL || buf->readWriteBuf == NULL) {
+        DFINDER_LOGE(TAG, "CoapSoftBusEncode invalid");
         return DISCOVERY_ERR_INVALID_EMPTY_MSG;
     }
 
@@ -501,6 +543,7 @@ int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const C
     }
 
     if ((param->code == 0) && ((param->options != NULL) || (payload != NULL))) {
+        DFINDER_LOGE(TAG, "CoapSoftBusEncode empty msg");
         return DISCOVERY_ERR_INVALID_EMPTY_MSG;
     }
 
@@ -528,7 +571,7 @@ uint16_t CoapSoftBusMsgId(void)
 static int32_t CoapSoftBusBuildMessage(const CoapResponseInfo *resqInfo, CoapReadWriteBuffer *sndPktBuff)
 {
     if (resqInfo == NULL || resqInfo->pkt == NULL || resqInfo->param == NULL || sndPktBuff->readWriteBuf == NULL ||
-        sndPktBuff->size == 0 || resqInfo->payloadLen >= sndPktBuff->size) {
+        resqInfo->payloadLen >= sndPktBuff->size) {
         return DISCOVERY_ERR_BAD_REQ;
     }
 
@@ -577,10 +620,12 @@ static void BuildCoapPktParam(const CoapBuildParam *buildParam, CoapPacketParam 
 int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff, bool isAck)
 {
     if (param == NULL || sndPktBuff == NULL || sndPktBuff->readWriteBuf == NULL) {
+        DFINDER_LOGE(TAG, "BuildCoapPkt invalid");
         return DISCOVERY_ERR_BAD_REQ;
     }
 
     if (!isAck && (pktPayload == NULL)) {
+        DFINDER_LOGE(TAG, "BuildCoapPkt bad req");
         return DISCOVERY_ERR_BAD_REQ;
     }
 
@@ -607,6 +652,7 @@ int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapRe
     }
 
     if (sndPktBuff->len >= sndPktBuff->size) {
+        DFINDER_LOGE(TAG, "BuildCoapPkt snd pkt buff too long");
         return DISCOVERY_ERR_BAD_REQ;
     }
 

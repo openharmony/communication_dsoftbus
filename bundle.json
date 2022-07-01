@@ -29,7 +29,8 @@
         "dsoftbus_get_devicename",
         "dsoftbus_feature_product_config_path",
         "dsoftbus_feature_ifname_prefix",
-        "dsoftbus_feature_lnn_wifiservice_dependence"
+        "dsoftbus_feature_lnn_wifiservice_dependence",
+        "dsoftbus_standard_feature_dfinder_support_multi_nif"
       ],
       "rom": "967KB",
       "ram": "28MB",
