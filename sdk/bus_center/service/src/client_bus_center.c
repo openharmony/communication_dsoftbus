@@ -83,13 +83,14 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->businessDataLen >= MAX_BUSINESSDATA_LEN) || (strlen(info->businessData) != info->businessDataLen)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "business data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -118,13 +119,14 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->businessDataLen >= MAX_BUSINESSDATA_LEN) || (strlen(info->businessData) != info->businessDataLen)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "business data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 

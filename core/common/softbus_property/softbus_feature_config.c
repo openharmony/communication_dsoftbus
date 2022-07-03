@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
 #include "softbus_feature_config.h"
@@ -51,6 +52,10 @@
 #define LNN_UDID_INIT_DELAY_LEN 1000
 #define LNN_NET_IF_NAME "0:eth0,1:wlan0"
 #define LNN_MAX_CONCURENT_NUM 2
+#define DEFAULT_DISC_FREQ_LOW ((5 << 16) | 12)
+#define DEFAULT_DISC_FREQ_MID ((5 << 16) | 24)
+#define DEFAULT_DISC_FREQ_HIGH ((5 << 16) | 36)
+#define DEFAULT_DISC_FREQ_SUPER_HIGH ((10 << 16) | 48)
 
 #ifdef __LITEOS_M__
 #define DEFAULT_SELECT_INTERVAL 100000
@@ -136,6 +141,19 @@ typedef struct {
 } TransConfigItem;
 
 static TransConfigItem g_tranConfig = {0};
+
+typedef struct {
+    uint32_t discFreq[FREQ_BUTT];
+} DiscConfigItem;
+
+static DiscConfigItem g_discConfig = {
+    .discFreq = {
+        DEFAULT_DISC_FREQ_LOW,
+        DEFAULT_DISC_FREQ_MID,
+        DEFAULT_DISC_FREQ_HIGH,
+        DEFAULT_DISC_FREQ_SUPER_HIGH,
+    },
+};
 
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
@@ -257,6 +275,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_BOOL_SUPPORT_TOPO,
         (unsigned char*)&(g_config.isSupportTopo),
         sizeof(g_config.isSupportTopo)
+    },
+    {
+        SOFTBUS_INT_DISC_FREQ,
+        (unsigned char*)(g_discConfig.discFreq),
+        sizeof(g_discConfig.discFreq)
     },
 };
 
