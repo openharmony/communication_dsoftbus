@@ -215,9 +215,9 @@ typedef enum  {
  */
 enum {
     /* Passive */
-    DISCOVERY_TYPE_PASSIVE = 1;
+    DISCOVERY_TYPE_PASSIVE = 1,
     /* ACTIVE */
-    DISCOVERY_TYPE_ACTIVE = 2;
+    DISCOVERY_TYPE_ACTIVE = 2
 };
 
 /**
@@ -326,7 +326,7 @@ typedef struct {
     /** Maximum length of the capability data for service publishing (512 bytes) */
     unsigned int dataLen;
     /** The business data for service publishing */
-    const char * businessData;
+    const char *businessData;
     /** Maximum length of the business data for service publishing (299 bytes) */
     unsigned int businessDataLen;
 } PublishInfo;
@@ -355,7 +355,7 @@ typedef struct {
     /** Maximum length of the capability data for service subscription (512 bytes) */
     unsigned int dataLen;
     /** The business data for service subscription */
-    const char * businessData;
+    const char *businessData;
     /** Maximum length of the business data for service subscription (299 bytes) */
     unsigned int businessDataLen;
 } SubscribeInfo;
