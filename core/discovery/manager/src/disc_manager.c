@@ -283,13 +283,14 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->businessDataLen >= MAX_BUSINESSDATA_LEN) || (strlen(info->businessData) != info->businessDataLen)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "business data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -318,13 +319,14 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if ((info->businessDataLen >= MAX_BUSINESSDATA_LEN) || (strlen(info->businessData) != info->businessDataLen)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "business data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -395,6 +397,7 @@ static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
     infoNode->mode = info->mode;
     infoNode->option.publishOption.freq = info->freq;
     infoNode->option.publishOption.dataLen = info->dataLen;
+    infoNode->option.publishOption.businessDataLen = info->businessDataLen;
     infoNode->option.publishOption.capabilityData =
         (unsigned char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN * sizeof(unsigned char));
     if (infoNode->option.publishOption.capabilityData == NULL) {
@@ -415,6 +418,23 @@ static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
         return NULL;
     }
     BitmapSet(&(infoNode->option.publishOption.capabilityBitmap[0]), (uint32_t)ret);
+    if (info->businessData == NULL) {
+        infoNode->option.publishOption.businessData == NULL;
+    } else {
+        infoNode->option.publishOption.businessData = (char *)SoftBusCalloc(MAX_BUSINESSDATA_LEN * sizeof(char));
+        if (infoNode->option.publishOption.businessData == NULL) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc businessData failed");
+            ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
+            return NULL;
+        }
+        if (memcpy_s(infoNode->option.publishOption.businessData, info->businessDataLen, info->businessData,
+            info->businessDataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s businessData failed");
+            SoftBusFree(infoNode->option.publishOption.businessData);
+            ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
+            return NULL;
+        }
+    }
     return infoNode;
 }
 
@@ -434,6 +454,7 @@ static DiscInfo *CreateNewSubscribeInfoNode(const SubscribeInfo *info)
     infoNode->mode = info->mode;
     infoNode->option.subscribeOption.freq = info->freq;
     infoNode->option.subscribeOption.dataLen = info->dataLen;
+    infoNode->option.subscribeOption.businessDataLen = info->businessDataLen;
     infoNode->option.subscribeOption.isSameAccount = info->isSameAccount;
     infoNode->option.subscribeOption.isWakeRemote = info->isWakeRemote;
     infoNode->option.subscribeOption.capabilityData =
@@ -456,6 +477,23 @@ static DiscInfo *CreateNewSubscribeInfoNode(const SubscribeInfo *info)
         return NULL;
     }
     BitmapSet(&(infoNode->option.subscribeOption.capabilityBitmap[0]), (uint32_t)ret);
+    if (info->businessData == NULL) {
+        infoNode->option.subscribeOption.businessData == NULL;
+    } else {
+        infoNode->option.subscribeOption.businessData = (char *)SoftBusCalloc(MAX_BUSINESSDATA_LEN * sizeof(char));
+        if (infoNode->option.subscribeOption.businessData == NULL) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc businessData failed");
+            ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
+            return NULL;
+        }
+        if (memcpy_s(infoNode->option.subscribeOption.businessData, info->businessDataLen, info->businessData,
+            info->businessDataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s businessData failed");
+            SoftBusFree(infoNode->option.subscribeOption.businessData);
+            ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
+            return NULL;
+        }
+    }
     return infoNode;
 }
 

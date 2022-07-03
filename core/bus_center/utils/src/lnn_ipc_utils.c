@@ -32,10 +32,15 @@ void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
     info1 += strlen(pubInfo->capability) + 1;
     pubInfo->dataLen = *(int32_t *)info1;
     info1 += sizeof(int32_t);
-    if (pubInfo->dataLen == 0) {
-        return;
+    if (pubInfo->dataLen > 0) {
+        pubInfo->capabilityData = (unsigned char *)info1;
+        info1 += pubInfo->dataLen + 1;
     }
-    pubInfo->capabilityData = (unsigned char *)info1;
+    pubInfo->businessDataLen = *(uint32_t *)info1;
+    info1 += sizeof(uint32_t);
+    if (pubInfo->businessDataLen > 0) {
+        pubInfo->businessData = (char *)info1;
+    }
 }
 
 void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
@@ -57,8 +62,13 @@ void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
     info1 += strlen(subInfo->capability) + 1;
     subInfo->dataLen = *(int32_t *)info1;
     info1 += sizeof(int32_t);
-    if (subInfo->dataLen == 0) {
-        return;
+    if (subInfo->dataLen > 0) {
+        subInfo->capabilityData = (unsigned char *)info1;
+        info1 += subInfo->dataLen + 1;
     }
-    subInfo->capabilityData = (unsigned char *)info1;
+    subInfo->businessDataLen = *(uint32_t *)info1;
+    info1 += sizeof(uint32_t);
+    if (subInfo->businessDataLen > 0) {
+        subInfo->businessData = (char *)info1;
+    }
 }

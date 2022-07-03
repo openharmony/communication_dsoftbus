@@ -21,18 +21,22 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
 #define JSON_WLAN_IP "wifiIpAddr"
 #define JSON_HW_ACCOUNT "hwAccountHashVal"
 #define JSON_SERVICE_DATA "serviceData"
+#define JSON_BUSINESS_DATA "bData"
 #define SERVICE_DATA_PORT "port"
 #define DEVICE_UDID "UDID"
 #define AUTH_PORT_LEN 6
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR "0.0.0.0"
 #define DEFAULT_DEVICE_TYPE 0xAF
+#define DISC_GET_FREQ_COUNT(x) ((x) & 0xFFFF)
+#define DISC_GET_FREQ_DURATION(x) (((x) << 16) * 1000)
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
@@ -101,6 +105,15 @@ static void ParseServiceData(const cJSON *data, DeviceInfo *device)
     device->addr[0].info.ip.port = (uint16_t)authPort;
 }
 
+static void ParseBusinessData(const cJSON *data, DeviceInfo *device)
+{
+    if (!GetJsonObjectStringItem(data, JSON_BUSINESS_DATA, device->businessData, sizeof(device->businessData))) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "parse businessData data failed.");
+        return
+    }
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "parse businessData=%s", device->businessData);
+}
+
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
 {
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
@@ -112,6 +125,7 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     ParseWifiIpAddr(reserveInfo, device);
     ParseHwAccountHash(reserveInfo, device);
     ParseServiceData(reserveInfo, device);
+    ParseBusinessData(reserveInfo, device);
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
 }
@@ -132,18 +146,32 @@ static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceIn
     return SOFTBUS_OK;
 }
 
+static uint8_t GetDiscType(uint8_t mode, uint8_t discoveryType)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "device found from nstackx: mode=%d, discoveryType=%d",
+        mode, discoveryType);
+    if (discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
+        return DISCOVERY_TYPE_ACTIVE;
+    }
+    if (mode == PUBLISH_MODE_PROACTIVE) {
+        return DISCOVERY_TYPE_ACTIVE;
+    }
+    return DISCOVERY_TYPE_PASSIVE;
+}
+
 static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
 {
     if (strcpy_s(discDevInfo->devName, sizeof(discDevInfo->devName), nstackxDevInfo->deviceName) != EOK ||
         memcpy_s(discDevInfo->capabilityBitmap, sizeof(discDevInfo->capabilityBitmap),
                  nstackxDevInfo->capabilityBitmap, sizeof(nstackxDevInfo->capabilityBitmap)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s or memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s devName or memcpy_s capabilityBitmap failed.");
         return SOFTBUS_ERR;
     }
 
     discDevInfo->addrNum = 1;
     discDevInfo->devType = nstackxDevInfo->deviceType;
     discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
+    discDevInfo->discoveryType = GetDiscType(nstackxDevInfo->mode, nstackxDevInfo->discoveryType);
 
     if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
         discDevInfo->addr[0].type = CONNECTION_ADDR_WLAN;
@@ -170,6 +198,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "invalid param.");
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Disc device found, count=%u", deviceCount);
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     if (discDeviceInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "malloc device info failed.");
@@ -180,7 +209,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
 
         if (((nstackxDeviceInfo->update) & 0x1) == 0) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "duplicate  device is not reported.");
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "duplicate device is not reported.");
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -261,26 +290,58 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapStartDiscovery(DiscCoapMode mode)
+static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
-    if (mode < ACTIVE_PUBLISH || mode > ACTIVE_DISCOVERY) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid param.");
+    uint32_t arrayFreq[FREQ_BUTT] = {0};
+    if (SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq) != SOFTBUS_OK)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc get freq failed");
+        return SOFTBUS_ERR;
+    }
+    *discFreq = arrayFreq[freq];
+    return SOFTBUS_OK;
+}
+
+static int32_t SetDiscoverySettiongs(NSTACKX_DiscoverySettiongs *discSet, const DiscCoapOption *option)
+{
+    if (option->mode == ACTIVE_PUBLISH) {
+        discSet->discoveryMode = PUBLISH_MODE_PROACTIVE;
+    } else {
+        discSet->discoveryMode = DISCOVER_MODE;
+    }
+    uint32_t discFreq;
+    if (GetDiscFreq(option->freq, &discFreq) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get discovery freq config failed");
+        return SOFTBUS_ERR;
+    }
+    discSet->businessData = option->businessData;
+    discSet->length = option->businessDataLen;
+    discSet->advertiseCount = DISC_GET_FREQ_COUNT(discFreq);
+    discSet->advertiseDuration = DISC_GET_FREQ_DURATION(discFreq);
+    return SOFTBUS_OK;
+}
+
+int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
+{
+    if (option == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid param: option");
         return SOFTBUS_INVALID_PARAM;
     }
-    switch (mode) {
-        case ACTIVE_PUBLISH:
-            if (NSTACKX_StartDeviceFindAn(PUBLISH_MODE_PROACTIVE) != SOFTBUS_OK) {
-                return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
-            }
-            break;
-        case ACTIVE_DISCOVERY:
-            if (NSTACKX_StartDeviceFind() != SOFTBUS_OK) {
-                return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
-            }
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unsupport coap mode.");
-            return SOFTBUS_ERR;
+    if (option->mode < ACTIVE_PUBLISH || option->mode > ACTIVE_DISCOVERY) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid param: option->mode");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NSTACKX_DiscoverySettiongs discSet;
+    if (SetDiscoverySettiongs(&discSet, option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set discovery settings failed");
+        return SOFTBUS_ERR;
+    }
+    if (NSTACKX_StartDeviceDiscovery(&discSet) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "start device discovery failed");
+        if (option->mode == ACTIVE_PUBLISH) {
+            return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
+        } else {
+            return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
+        }
     }
     return SOFTBUS_OK;
 }

@@ -93,6 +93,21 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     return SOFTBUS_OK;
 }
 
+static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option)
+{
+    if (option->isPublish) {
+        discCoapOption->mode = ACTIVE_PUBLISH;
+        discCoapOption->freq = option->option.publishOption.freq;
+        discCoapOption->businessData = option->option.publishOption.businessData;
+        discCoapOption->businessDataLen = option->option.publishOption.businessDataLen;
+    } else {
+        discCoapOption->mode = ACTIVE_DISCOVERY;
+        discCoapOption->freq = option->option.SubscribeOption.freq;
+        discCoapOption->businessData = option->option.subscribeOption.businessData;
+        discCoapOption->businessDataLen = option->option.subscribeOption.businessDataLen;
+    }
+}
+
 static int32_t CoapPublish(const PublishOption *option)
 {
     if (option == NULL || g_publishMgr == NULL) {
@@ -123,8 +138,13 @@ static int32_t CoapPublish(const PublishOption *option)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register service data to dfinder failed.");
         return SOFTBUS_ERR;
     }
-
-    if (DiscCoapStartDiscovery(ACTIVE_PUBLISH) != SOFTBUS_OK) {
+    DiscCoapOption discCoapOption;
+    DiscOption discOption = {
+        .isPublish = true,
+        .option.publishOption = *option,
+    };
+    SetDiscCoapOption(&discCoapOption, &discOption);
+    if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "[signaling]:coap start publish failed, allCap:%d",
                    g_publishMgr->allCap[0]);
@@ -329,7 +349,13 @@ static int32_t CoapStartAdvertise(const SubscribeOption *option)
                    g_subscribeMgr->allCap[0]);
         return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
     }
-    if (DiscCoapStartDiscovery(ACTIVE_DISCOVERY) != SOFTBUS_OK) {
+    DiscCoapOption discCoapOption;
+    DiscOption discOption = {
+        .isPublish = false,
+        .option.subscribeOption = *option,
+    };
+    SetDiscCoapOption(&discCoapOption, &discOption);
+    if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "[signaling]:coap start advertise failed, allCap:%d",
                    g_subscribeMgr->allCap[0]);
