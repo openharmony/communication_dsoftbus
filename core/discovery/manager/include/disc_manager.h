@@ -32,6 +32,7 @@ typedef struct {
     uint32_t capabilityBitmap[CAPABILITY_NUM];
     unsigned char *capabilityData;
     uint32_t dataLen;
+    bool ranging;
 } PublishOption;
 
 typedef struct {
