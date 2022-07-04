@@ -23,8 +23,6 @@
 
 #define TAG "nStackXEpoll"
 
-#define BYTE_BITS_NUM 8
-#define TYPE_BITS_NUM(_type) (sizeof(_type) * BYTE_BITS_NUM)
 #ifndef LWIP_LITEOS_A_COMPAT
 #define IS_INVALID_SOCKET_DESC(fd) \
     (((fd) < LWIP_SOCKET_OFFSET) || ((fd) >= (LWIP_CONFIG_NUM_SOCKETS + LWIP_SOCKET_OFFSET)))

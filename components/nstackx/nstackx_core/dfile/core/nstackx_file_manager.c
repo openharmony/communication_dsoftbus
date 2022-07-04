@@ -1040,6 +1040,13 @@ int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLe
 {
     uint32_t aadLen;
 
+    if (CapsChaCha(fileList->context)) {
+        fileList->cryptPara.cipherType = CIPHER_CHACHA;
+    } else {
+        fileList->cryptPara.cipherType = CIPHER_AES_GCM;
+        keyLen = AES_128_KEY_LENGTH;
+    }
+
     if (memcpy_s(fileList->cryptPara.key, sizeof(fileList->cryptPara.key), key, keyLen) != EOK) {
         LOGE(TAG, "memcpy key failed");
         return NSTACKX_EFAILED;
@@ -1047,7 +1054,10 @@ int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLe
     fileList->cryptPara.keylen = keyLen;
 
     aadLen = sizeof(fileList->cryptPara.aad);
-    (void)memset_s(fileList->cryptPara.aad, aadLen, GCM_AAD_CHAR, aadLen);
+    if (memset_s(fileList->cryptPara.aad, aadLen, GCM_AAD_CHAR, aadLen) != EOK) {
+        LOGE(TAG, "memset aad failed");
+        return NSTACKX_EFAILED;
+    }
     fileList->cryptPara.aadLen = aadLen;
 #ifndef MBEDTLS_INCLUDED
     fileList->cryptPara.ctx = CreateCryptCtx();
@@ -1056,6 +1066,7 @@ int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLe
         return NSTACKX_EFAILED;
     }
 #endif
+    LOGI(TAG, "set encrypt/decrypt type is %d", fileList->cryptPara.cipherType);
     return NSTACKX_EOK;
 }
 
@@ -1392,7 +1403,7 @@ static int32_t FileManagerInit(FileManager *fileManager, FileManagerMsgPara *msg
     }
 
     if (keyLen > 0) {
-        if (keyLen != AES_128_KEY_LENGTH || key == NULL ||
+        if ((keyLen != AES_128_KEY_LENGTH && keyLen != CHACHA20_KEY_LENGTH) || key == NULL ||
             memcpy_s(fileManager->key, sizeof(fileManager->key), key, keyLen) != EOK) {
             LOGE(TAG, "can't get valid key info.");
             return NSTACKX_EFAILED;
