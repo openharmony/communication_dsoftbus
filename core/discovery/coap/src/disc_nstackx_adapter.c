@@ -218,6 +218,8 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             continue;
         }
 
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Disc device found, devName=%s, localNetIfName=%s",
+            discDeviceInfo->devName, nstackxDeviceInfo->networkName);
         if ((g_discCoapInnerCb != NULL) && (g_discCoapInnerCb->OnDeviceFound != NULL)) {
             g_discCoapInnerCb->OnDeviceFound(discDeviceInfo);
         }
@@ -313,6 +315,7 @@ static int32_t SetDiscoverySettiongs(NSTACKX_DiscoverySettiongs *discSet, const 
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get discovery freq config failed");
         return SOFTBUS_ERR;
     }
+    discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     discSet->businessData = option->businessData;
     discSet->length = option->businessDataLen;
     discSet->advertiseCount = DISC_GET_FREQ_COUNT(discFreq);
@@ -406,17 +409,19 @@ static int32_t SetLocalDeviceInfo(void)
         return SOFTBUS_ERR;
     }
     g_localDeviceInfo->deviceType = (uint8_t)deviceType;
+    g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name,
                            sizeof(g_localDeviceInfo->name)) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->networkIpAddr,
-                           sizeof(g_localDeviceInfo->networkIpAddr)) != SOFTBUS_OK ||
+        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
+                           sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, g_localDeviceInfo->version,
                            sizeof(g_localDeviceInfo->version)) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->networkName,
-                           sizeof(g_localDeviceInfo->networkName)) != SOFTBUS_OK) {
+        LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
+                           sizeof(g_localDeviceInfo->localIfInfo[0].networkName)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device info from lnn failed.");
         return SOFTBUS_ERR;
     }
+    g_localDeviceInfo->ifNums = 1;
 
     return SOFTBUS_OK;
 }
