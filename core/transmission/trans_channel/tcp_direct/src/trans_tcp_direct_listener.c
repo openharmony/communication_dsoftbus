@@ -103,6 +103,7 @@ static int32_t StartVerifySession(SessionConn *conn)
 
 static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, int32_t chanId, const char *ip)
 {
+    (void)events;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail in create session conn node.");
