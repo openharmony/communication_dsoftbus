@@ -133,7 +133,7 @@ static void NetBuilderConfigInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max connection count fail, use default value");
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
-    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURENT_NUM,
+    if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
         (unsigned char*)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max conncurent count fail, use default value");
         g_netBuilder.maxConcurrentCount = 0;
