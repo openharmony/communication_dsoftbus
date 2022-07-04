@@ -90,15 +90,15 @@ void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format
         return;
     }
 
-    ret = sprintf_s(szStr, sizeof(szStr), "[%s]", g_logInfo[module].name);
+    ret = sprintf_s(szStr, sizeof(szStr), "[%s]", moduleName);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Nstackx log error");
         return;
     }
     ulPos = strlen(szStr);
     (void)memset_s(&arg, sizeof(va_list), 0, sizeof(va_list));
-    va_start(arg, fmt);
-    ret = vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, fmt, arg);
+    va_start(arg, format);
+    ret = vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, format, arg);
     va_end(arg);
     if (ret < 0) {
         HILOG_WARN(SOFTBUS_HILOG_ID, "Nstackx log len error");
