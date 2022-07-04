@@ -198,3 +198,25 @@ void SetTcpKeepAlive(SocketDesc fd)
     }
 #endif
 }
+
+void DFileGetCipherCaps(DFileSession *session, SettingFrame *settingFramePara)
+{
+    if (CapsChaCha(session) && DFileGetDeviceBits() == DEVICE_32_BITS &&
+        QueryCipherSupportByName(CHACHA20_POLY1305_NAME)) {
+        settingFramePara->cipherCapability |= NSTACKX_CIPHER_CHACHA;
+    } else {
+        session->capability &= ~NSTACKX_CAPS_CHACHA;
+        LOGI(TAG, "local cipher no support %s.", CHACHA20_POLY1305_NAME);
+    }
+}
+
+void DFileChooseCipherType(SettingFrame *hostSettingFrame, DFileSession *session)
+{
+    if ((hostSettingFrame->cipherCapability & NSTACKX_CIPHER_CHACHA) && (DFileGetDeviceBits() == DEVICE_32_BITS) &&
+        (session->fileManager->keyLen == CHACHA20_KEY_LENGTH)) {
+        session->capability |= NSTACKX_CAPS_CHACHA;
+    } else {
+        session->capability &= ~NSTACKX_CAPS_CHACHA;
+    }
+    LOGI(TAG, "opposite replies %s use chacha cipher", CapsChaCha(session) ? "" : "no");
+}

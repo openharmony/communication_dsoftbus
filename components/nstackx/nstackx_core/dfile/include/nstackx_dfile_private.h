@@ -34,6 +34,9 @@ enum {
 #define NSTACKX_INTERNAL_CAPS_MEMLOG                 NBITS(INTERNAL_CAPS_MEMLOG)
 #define NSTACKX_INTERNAL_CAPS_RECV_FEEDBACK          NBITS(INTERNAL_CAPS_RECV_FEEDBACK)
 
+#define NSTACKX_CIPHER_AES_GCM                       NBITS(CIPHER_AES_GCM)
+#define NSTACKX_CIPHER_CHACHA                        NBITS(CIPHER_CHACHA)
+
 #ifdef __cplusplus
 }
 #endif
