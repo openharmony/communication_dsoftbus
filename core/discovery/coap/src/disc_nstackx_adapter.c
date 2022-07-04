@@ -35,8 +35,9 @@
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR "0.0.0.0"
 #define DEFAULT_DEVICE_TYPE 0xAF
-#define DISC_GET_FREQ_COUNT(x) ((x) & 0xFFFF)
-#define DISC_GET_FREQ_DURATION(x) (((x) << 16) * 1000)
+#define DISC_FREQ_COUNT_MASK 0xFFFF
+#define DISC_FREQ_DURATION_BIT 16
+#define DISC_USECOND 1000
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
@@ -295,7 +296,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
     uint32_t arrayFreq[FREQ_BUTT] = {0};
-    if (SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq) != SOFTBUS_OK)) {
+    if (SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc get freq failed");
         return SOFTBUS_ERR;
     }
@@ -318,8 +319,8 @@ static int32_t SetDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const Di
     discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     discSet->businessData = option->businessData;
     discSet->length = option->businessDataLen;
-    discSet->advertiseCount = DISC_GET_FREQ_COUNT(discFreq);
-    discSet->advertiseDuration = DISC_GET_FREQ_DURATION(discFreq);
+    discSet->advertiseCount = discFreq & DISC_FREQ_COUNT_MASK;
+    discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
     return SOFTBUS_OK;
 }
 

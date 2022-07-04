@@ -391,6 +391,25 @@ static DiscItem *CreateNewItem(SoftBusList *serviceList, const char *packageName
     return itemNode;
 }
 
+static bool AddBusinessData(const char *srcData, uint32_t dataLen, char **destData)
+{
+    if (srcData == NULL) {
+        *destData = NULL;
+        return true;
+    }
+    *destData = (char *)SoftBusCalloc(MAX_BUSINESSDATA_LEN * sizeof(char));
+    if (*destData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc businessData failed");
+        return false;
+    }
+    if (memcpy_s(*destData, dataLen, srcData, dataLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s businessData failed");
+        SoftBusFree(*destData);
+        return false;
+    }
+    return true;
+}
+
 static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
 {
     int32_t ret;
@@ -428,22 +447,10 @@ static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
         return NULL;
     }
     BitmapSet(&(infoNode->option.publishOption.capabilityBitmap[0]), (uint32_t)ret);
-    if (info->businessData == NULL) {
-        infoNode->option.publishOption.businessData == NULL;
-    } else {
-        infoNode->option.publishOption.businessData = (char *)SoftBusCalloc(MAX_BUSINESSDATA_LEN * sizeof(char));
-        if (infoNode->option.publishOption.businessData == NULL) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc businessData failed");
-            ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
-            return NULL;
-        }
-        if (memcpy_s(infoNode->option.publishOption.businessData, info->businessDataLen, info->businessData,
-            info->businessDataLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s businessData failed");
-            SoftBusFree(infoNode->option.publishOption.businessData);
-            ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
-            return NULL;
-        }
+    if (AddBusinessData(info->businessData, info->businessDataLen,
+        &(infoNode->option.publishOption.businessData)) != true) {
+        ReleaseInfoNodeMem(infoNode, PUBLISH_SERVICE);
+        return NULL;
     }
     return infoNode;
 }
@@ -487,22 +494,10 @@ static DiscInfo *CreateNewSubscribeInfoNode(const SubscribeInfo *info)
         return NULL;
     }
     BitmapSet(&(infoNode->option.subscribeOption.capabilityBitmap[0]), (uint32_t)ret);
-    if (info->businessData == NULL) {
-        infoNode->option.subscribeOption.businessData == NULL;
-    } else {
-        infoNode->option.subscribeOption.businessData = (char *)SoftBusCalloc(MAX_BUSINESSDATA_LEN * sizeof(char));
-        if (infoNode->option.subscribeOption.businessData == NULL) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc businessData failed");
-            ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
-            return NULL;
-        }
-        if (memcpy_s(infoNode->option.subscribeOption.businessData, info->businessDataLen, info->businessData,
-            info->businessDataLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s businessData failed");
-            SoftBusFree(infoNode->option.subscribeOption.businessData);
-            ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
-            return NULL;
-        }
+    if (AddBusinessData(info->businessData, info->businessDataLen,
+        &(infoNode->option.subscribeOption.businessData)) != true) {
+        ReleaseInfoNodeMem(infoNode, SUBSCRIBE_SERVICE);
+        return NULL;
     }
     return infoNode;
 }
