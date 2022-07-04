@@ -22,7 +22,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define DEFAULT_KEY_LENGTH 16
+#define DEFAULT_KEY_LENGTH 32
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
