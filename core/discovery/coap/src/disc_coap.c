@@ -102,7 +102,7 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
         discCoapOption->businessDataLen = option->option.publishOption.businessDataLen;
     } else {
         discCoapOption->mode = ACTIVE_DISCOVERY;
-        discCoapOption->freq = option->option.SubscribeOption.freq;
+        discCoapOption->freq = option->option.subscribeOption.freq;
         discCoapOption->businessData = option->option.subscribeOption.businessData;
         discCoapOption->businessDataLen = option->option.subscribeOption.businessDataLen;
     }
