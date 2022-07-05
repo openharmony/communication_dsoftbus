@@ -369,9 +369,9 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIo request = {0};
-    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
     WriteUint32(&request, infoLen);
     WriteBuffer(&request, info, infoLen);
@@ -421,9 +421,9 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN g_serverProxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIo request = {0};
-    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
     WriteUint32(&request, infoTypeLen);
     WriteBuffer(&request, info, infoTypeLen);

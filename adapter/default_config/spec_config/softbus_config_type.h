@@ -49,6 +49,7 @@ typedef enum {
     SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH, /* L1: 1K, L2: 4K */
     SOFTBUS_INT_AUTO_NETWORKING_SWITCH, /* support auto networking: true, not support: false */
     SOFTBUS_BOOL_SUPPORT_TOPO, /* support: true, not support: false */
+    SOFTBUS_INT_DISC_FREQ, /* the default val is 5s 12 times */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 
