@@ -329,6 +329,8 @@ typedef struct {
     const char *businessData;
     /** Maximum length of the business data for service publishing (299 bytes) */
     unsigned int businessDataLen;
+    /** Whether the device should be ranged  by discoverers.*/
+    bool ranging;
 } PublishInfo;
 
 /**
@@ -414,6 +416,8 @@ typedef struct {
     uint8_t discoveryType;
     /** Business data. Its length is specified by {@link MAX_BUSINESSDATA_LEN}. */
     char businessData[MAX_BUSINESSDATA_LEN];
+    /** The distance of dicovered device, in centimeters(cm)*/
+    int32_t range;
 } DeviceInfo;
 #ifdef __cplusplus
 }

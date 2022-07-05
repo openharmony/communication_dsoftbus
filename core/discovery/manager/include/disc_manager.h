@@ -34,6 +34,7 @@ typedef struct {
     uint32_t dataLen;
     char *businessData;
     unsigned int businessDataLen;
+    bool ranging;
 } PublishOption;
 
 typedef struct {

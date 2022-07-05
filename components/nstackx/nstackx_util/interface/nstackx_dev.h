@@ -34,6 +34,11 @@ typedef enum {
     CONNECT_TYPE_MAX,
 } ConnectType;
 
+typedef enum {
+    DEVICE_32_BITS = 32,
+    DEVICE_64_BITS = 64,
+} DeviceType;
+
 #define P2P_DEV_NAME_PRE "p2p"
 #define WLAN_DEV_NAME_PRE "wlan"
 #ifndef ETH_DEV_NAME_PRE
@@ -57,5 +62,6 @@ NSTACKX_EXPORT int32_t GetConnectionType(const uint32_t sourceIp, const uint32_t
 NSTACKX_EXPORT int32_t BindToTargetDev(SocketDesc sockfd, const char *targetInterfaceName);
 NSTACKX_EXPORT int32_t GetInterfaceNameByIP(uint32_t sourceIp, char *interfaceName, size_t nameLen);
 NSTACKX_EXPORT void BindToDevInTheSameLan(SocketDesc sockfd, const struct sockaddr_in *sockAddr);
+NSTACKX_EXPORT uint8_t DFileGetDeviceBits(void);
 
 #endif // NSTACKX_DEV_H

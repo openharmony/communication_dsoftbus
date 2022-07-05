@@ -36,4 +36,7 @@
 #define PIPE_IN 1
 #define PIPE_FD_NUM 2
 
+#define BYTE_BITS_NUM 8
+#define TYPE_BITS_NUM(_type) (sizeof(_type) * BYTE_BITS_NUM)
+
 #endif // NSTACKX_COMMON_HEADER_H

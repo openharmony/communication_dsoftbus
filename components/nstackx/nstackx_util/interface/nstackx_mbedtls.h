@@ -22,10 +22,16 @@
 #include "mbedtls/gcm.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
-
+#include "mbedtls/chachapoly.h"
+#include "mbedtls/version.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+    CIPHER_AES_GCM = 0,
+    CIPHER_CHACHA,
+} DFileCipherType;
 
 #define AES_128_KEY_LENGTH 16
 #define AES_192_KEY_LENGTH 24
@@ -35,6 +41,8 @@ extern "C" {
 #define GCM_TAG_LENGTH 16
 #define GCM_ADDED_LEN (GCM_IV_LENGTH + GCM_TAG_LENGTH)
 #define KEY_BITS_UNIT 8
+#define CHACHA20_KEY_LENGTH 32
+#define CHACHA20_POLY1305_NAME "MBEDTLS_POLY1305_C"
 
 typedef struct {
     uint8_t key[AES_256_KEY_LENGTH];
@@ -43,6 +51,7 @@ typedef struct {
     uint32_t ivLen;
     uint8_t aad[GCM_MAX_AAD_LENGTH];
     uint32_t aadLen;
+    int cipherType;
 } CryptPara;
 
 NSTACKX_EXPORT uint32_t AesGcmEncrypt(const uint8_t *inBuff, uint32_t inLen, CryptPara *cryptPara,
@@ -51,6 +60,7 @@ NSTACKX_EXPORT uint32_t AesGcmDecrypt(uint8_t *inBuff, uint32_t inLen, CryptPara
     uint8_t *outBuff, uint32_t outLen);
 NSTACKX_EXPORT int32_t GetRandBytes(uint8_t *buf, uint32_t len);
 NSTACKX_EXPORT uint8_t IsCryptoIncluded(void);
+NSTACKX_EXPORT uint8_t QueryCipherSupportByName(char *name);
 #endif
 
 #ifdef __cplusplus

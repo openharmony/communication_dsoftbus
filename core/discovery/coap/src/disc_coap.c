@@ -114,6 +114,10 @@ static int32_t CoapPublish(const PublishOption *option)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (option->ranging == true) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap publish not support ranging, is it misuse? just ignore");
+    }
+    
     if (SoftBusMutexLock(&(g_publishMgr->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "pthread mutex lock failed.");
         return SOFTBUS_LOCK_ERR;
@@ -202,6 +206,10 @@ static int32_t CoapStartScan(const PublishOption *option)
 {
     if (option == NULL || g_publishMgr == NULL) {
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (option->ranging == true) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap publish not support ranging, is it misuse? just ignore");
     }
 
     if (SoftBusMutexLock(&(g_publishMgr->lock)) != 0) {

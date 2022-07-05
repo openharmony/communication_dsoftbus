@@ -48,7 +48,9 @@ extern "C" {
 #define INVALID_TID (pthread_t)(-1)
 
 #ifdef LWIP_LITEOS_A_COMPAT
+#ifndef atomic_t
 typedef uint64_t atomic_t;
+#endif
 
 #define NSTACKX_ATOM_FETCH(ptr) (*ptr)
 #define NSTACKX_ATOM_SET(ptr, i) ((*ptr) = (i))
