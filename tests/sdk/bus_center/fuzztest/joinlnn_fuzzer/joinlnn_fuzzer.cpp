@@ -18,6 +18,7 @@
 #include <cstring>
 #include <securec.h>
 #include "softbus_bus_center.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
@@ -42,9 +43,13 @@ namespace OHOS {
     }
 
 
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool JoinLnnFuzzerTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size <= 0) {
+            return true;
+        }
+
+        if (strnlen((const char *)data, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
             return true;
         }
 
@@ -58,6 +63,6 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    OHOS::JoinLnnFuzzerTest(data, size);
     return 0;
 }
