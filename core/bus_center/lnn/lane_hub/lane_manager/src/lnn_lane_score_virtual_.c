@@ -30,7 +30,7 @@ void LnnDeinitScore(void)
     return;
 }
 
-int32_t LnnGetChannelScore(int32_t channelId)
+int32_t LnnGetCurrChannelScore(int32_t channelId)
 {
     (void)channelId;
     return VIRTUAL_DEFAULT_SCORE;

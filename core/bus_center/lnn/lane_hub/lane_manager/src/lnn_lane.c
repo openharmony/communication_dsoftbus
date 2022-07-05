@@ -95,11 +95,11 @@ static uint32_t AllocLaneId(LaneType type)
     return INVALID_LANE_ID;
 }
 
-static void DestoryLaneId(uint32_t laneId)
+static void DestroyLaneId(uint32_t laneId)
 {
     uint32_t randomId = laneId & LANE_RANDOM_ID_MASK;
     if ((randomId == INVALID_LANE_ID) || (randomId > MAX_LANE_ID_NUM)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[DestoryLaneId]invalid laneId");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[DestroyLaneId]invalid laneId");
         return;
     }
     if (Lock() != SOFTBUS_OK) {
@@ -275,7 +275,7 @@ uint32_t LnnRequestLane(const LaneRequestOption *request, const ILaneListener *l
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "alloc lane fail, result:%d", result);
-        DestoryLaneId(laneId);
+        DestroyLaneId(laneId);
         return INVALID_LANE_ID;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "request lane success, lane:%u", laneId);
@@ -297,7 +297,7 @@ int32_t LnnFreeLane(uint32_t laneId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "freeLane fail, result:%d", result);
         return SOFTBUS_ERR;
     }
-    DestoryLaneId(laneId);
+    DestroyLaneId(laneId);
     return SOFTBUS_OK;
 }
 

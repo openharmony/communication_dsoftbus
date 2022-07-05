@@ -24,7 +24,7 @@ extern "C" {
 
 int32_t LnnInitScore(void);
 void LnnDeinitScore(void);
-int32_t LnnGetChannelScore(int32_t channelId);
+int32_t LnnGetCurrChannelScore(int32_t channelId);
 int32_t LnnStartScoring(int32_t interval);
 int32_t LnnStopScoring(void);
 
