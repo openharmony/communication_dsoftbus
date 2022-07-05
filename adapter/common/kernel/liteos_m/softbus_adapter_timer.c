@@ -37,7 +37,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
-    if (timerId != NULL) {
+    if (timerId == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
         return SOFTBUS_ERR;
     }
@@ -52,7 +52,7 @@ int SoftBusStartTimer(void *timerId, unsigned int ms)
 
 int SoftBusDeleteTimer(void *timerId)
 {
-    if (timerId != NULL) {
+    if (timerId == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
         return SOFTBUS_ERR;
     }
