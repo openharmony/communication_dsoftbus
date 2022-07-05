@@ -39,7 +39,7 @@ int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (timerId != NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
-        return SOFTBUS_ERR; 
+        return SOFTBUS_ERR;
     }
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "start timer failed");
@@ -54,7 +54,7 @@ int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId != NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
-	return SOFTBUS_ERR;
+        return SOFTBUS_ERR;
     }
     if (osTimerDelete(timerId) != osOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "delete timer failed");
