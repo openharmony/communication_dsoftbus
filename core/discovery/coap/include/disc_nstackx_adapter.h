@@ -31,6 +31,21 @@ typedef enum {
     ACTIVE_DISCOVERY,
 } DiscCoapMode;
 
+typedef struct {
+    bool isPublish;
+    union {
+        PublishOption publishOption;
+        SubscribeOption subscribeOption;
+    } option;
+} DiscOption;
+
+typedef struct {
+    int32_t freq;
+    DiscCoapMode mode;
+    char *businessData;
+    unsigned int businessDataLen;
+} DiscCoapOption;
+
 int32_t DiscNstackxInit(void);
 void DiscNstackxDeinit(void);
 
@@ -38,7 +53,7 @@ int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb);
 int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen);
-int32_t DiscCoapStartDiscovery(DiscCoapMode);
+int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
 void DiscCoapUpdateLocalIp(LinkStatus status);
 

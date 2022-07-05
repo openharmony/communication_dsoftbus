@@ -149,7 +149,7 @@ static void DeleteLaneLinkNode(uint32_t laneId)
 
 static int32_t TriggerLink(uint32_t laneId, TransOption *request, LaneLinkType *recommendLinkList, uint32_t listNum)
 {
-    LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(szieof(LaneLinkNodeInfo));
+    LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(sizeof(LaneLinkNodeInfo));
     if (linkNode == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -280,7 +280,7 @@ static void Free(uint32_t laneId)
     TransReqInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
         if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->nide);
+            ListDelete(&infoNode->node);
             g_requestList->cnt--;
             Unlock();
             DestroyLink(laneId, infoNode->info.networkId);

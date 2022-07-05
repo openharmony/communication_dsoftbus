@@ -109,7 +109,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
     }
 
     if (linkAttr->GetLinkScore(networkId, expectedBw) <= UNACCEPT_SCORE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "curr socre is unaccept, linkType:%d", linkType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "curr score is unaccept, linkType:%d", linkType);
         return false;
     }
     return true;
@@ -140,7 +140,7 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get defaultLinkList fail");
         return;
     }
-    *resNum;
+    *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
         if (!IsValidLane(networkId, optionalLink[i], request->expectedBw)) {
             continue;
