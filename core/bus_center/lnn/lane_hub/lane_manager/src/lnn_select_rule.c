@@ -35,14 +35,14 @@
 
 static int32_t GetWlanLinkedFrequency(void)
 {
-    WifiLinkedInfo wlanInfo;
-    int32_t ret = GetLinkedInfo(&wlanInfo);
-    if (ret != WIFI_SUCCESS) {
+    LnnWlanLinkedInfo info;
+    int32_t ret = LnnGetWlanLinkedInfo(&info);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get linked info fail, reason:%d", ret);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wlan linked frequency:%d", wlanInfo.frequency);
-    return wlanInfo.frequency;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wlan linked frequency:%d", info.frequency);
+    return info.frequency;
 }
 
 static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
@@ -62,13 +62,6 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 
 static bool IsEnableWlan2P4G(const char *networkId)
 {
-    int32_t frequency = GetWlanLinkedFrequency();
-    if (frequency < 0) {
-        return false;
-    }
-    if (!SoftBusIs2GBand(frequency)) {
-        return false;
-    }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
@@ -83,20 +76,13 @@ static bool IsEnableWlan2P4G(const char *networkId)
 
 static bool IsEnableWlan5G(const char *networkId)
 {
-    int32_t frequency = GetWlanLinkedFrequency();
-    if (frequency < 0) {
-        return false;
-    }
-    if (!SoftBusIs5GBand(frequency)) {
-        return false;
-    }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
         return false;
     }
-    if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH))) &&
-        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
+    if (((local & (1<< BIT_WIFI_24G)) || (local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH))) &&
+        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
     return false;
@@ -166,7 +152,7 @@ static int32_t GetLinkedChannelScore(void)
 {
     int32_t frequency = GetWlanLinkedFrequency();
     if (frequency < 0) {
-        return UNACCEPT_SCORE;
+        return LNN_LINK_DEFAULT_SCORE;
     }
     int32_t channel = SoftBusFrequencyToChannel(frequency);
     if (channel < 0) {

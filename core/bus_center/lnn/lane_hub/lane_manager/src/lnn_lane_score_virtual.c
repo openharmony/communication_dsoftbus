@@ -30,6 +30,12 @@ void LnnDeinitScore(void)
     return;
 }
 
+int32_t LnnGetWlanLinkedInfo(LnnWlanLinkedInfo *info)
+{
+    (void)info;
+    return SOFTBUS_ERR;
+}
+
 int32_t LnnGetCurrChannelScore(int32_t channelId)
 {
     (void)channelId;
