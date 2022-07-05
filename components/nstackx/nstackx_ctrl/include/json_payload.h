@@ -13,23 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef NSTACK_COMMON_H
-#define NSTACK_COMMON_H
+#ifndef JSON_PAYLOAD_H
+#define JSON_PAYLOAD_H
+
+#include <stdint.h>
 #include "nstackx.h"
-#include "nstackx_list.h"
-#include "nstackx_epoll.h"
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
-void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
-void NotifyDFinderMsgRecver(DFinderMsgType msgType);
-EpollDesc GetMainLoopEpollFd(void);
-List *GetMainLoopEvendChain(void);
 
 #ifdef __cplusplus
-};
+extern "C" {
 #endif
 
-#endif /* #ifndef NSTACK_COMMON_H */
+#define NSTACKX_MAX_URI_BUFFER_LENGTH 64
+#ifdef DFINDER_USE_MINI_NSTACKX
+#define COAP_DEVICE_DISCOVER_URI "device_discover"
+#endif
+
+struct DeviceInfo;
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx);
+#else
+char *PrepareServiceDiscover(uint8_t isBroadcast);
+#endif
+int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* #ifndef JSON_PAYLOAD_H */

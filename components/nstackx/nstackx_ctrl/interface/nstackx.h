@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #define NSTACKX_MAX_DEVICE_NAME_LEN 64
@@ -29,21 +29,54 @@ extern "C"{
 #define NSTACKX_MAX_MAC_STRING_LEN 18
 #define NSTACKX_MAX_IP_STRING_LEN 16
 #define NSTACKX_MAX_CAPABILITY_NUM 2
-#define NSTACKX_MAX_DEVICE_NUM 20
 #define NSTACKX_MAX_INTERFACE_NAME_LEN 16
 #define NSTACKX_MAX_HICOM_VERSION 16
 #define NSTACKX_MAX_SERVICE_DATA_LEN 64
+#define NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN 128
+#ifndef NSTACKX_EXTEND_BUSINESSDATA
+#define NSTACKX_MAX_BUSINESS_DATA_LEN 1
+#else
+#define NSTACKX_MAX_BUSINESS_DATA_LEN 300
+#endif
 
-#define NSTACKX_MAX_RESERVED_INFO_LEN 219 // expand from 131 to 219 (+88) bytes to hold service data
+#ifdef DFINDER_SAVE_DEVICE_LIST
+#define NSTACKX_MIN_DEVICE_NUM 1
+#define NSTACKX_DEFAULT_DEVICE_NUM 20
+#define NSTACKX_MAX_DEVICE_NUM 400
+#else
+#define NSTACKX_MAX_DEVICE_NUM 1
+#endif
+
+// expand from 131 to 219 (+88) bytes to hold service data
+// expand from 219 to 400 (+128 +53) bytes to hold extend service data
+// expand from 400 to (420 + NSTACKX_MAX_BUSINESS_DATA_LEN) bytes to hold business data and type
+#define NSTACKX_MAX_RESERVED_INFO_LEN (420 + NSTACKX_MAX_BUSINESS_DATA_LEN)
+
 #define DEVICE_HASH_LEN 21
-#define DEFAULT_MODE 0
-#define DISCOVER_MODE 1
-#define PUBLISH_MODE_UPLINE 2
-#define PUBLISH_MODE_OFFLINE 3
-#define PUBLISH_MODE_PROACTIVE 10
+enum {
+    DEFAULT_MODE = 0,
+    DISCOVER_MODE = 1,
+    PUBLISH_MODE_UPLINE = 2,
+    PUBLISH_MODE_OFFLINE = 3,
+    PUBLISH_MODE_PROACTIVE = 10
+}; // discovery mode
 #define PUBLISH_DEVICE_NUM 1
 #define INNER_DISCOVERY 1
 #define PUBLISH_NUM 1
+#define COUNT_INIT 0
+
+enum {
+    NSTACKX_DISCOVERY_TYPE_PASSIVE = 1,
+    NSTACKX_DISCOVERY_TYPE_ACTIVE = 2
+};
+
+#ifndef DFINDER_EXPORT
+#ifdef _WIN32
+#define DFINDER_EXPORT __declspec(dllexport)
+#else
+#define DFINDER_EXPORT
+#endif
+#endif
 
 /* Remote device information */
 typedef struct NSTACKX_DeviceInfo {
@@ -53,11 +86,27 @@ typedef struct NSTACKX_DeviceInfo {
     uint32_t capabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM];
     uint8_t deviceType;
     uint8_t mode;
+#ifdef DFINDER_SAVE_DEVICE_LIST
     uint8_t update : 1;
     uint8_t reserved : 7;
+    char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
+#endif
+    uint8_t discoveryType;
+    uint8_t businessType;
     char version[NSTACKX_MAX_HICOM_VERSION];
     char reservedInfo[NSTACKX_MAX_RESERVED_INFO_LEN];
 } NSTACKX_DeviceInfo;
+
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+#define NSTACKX_MAX_LISTENED_NIF_NUM 2
+#else
+#define NSTACKX_MAX_LISTENED_NIF_NUM 1
+#endif
+typedef struct {
+    char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
+    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
+} NSTACKX_InterfaceInfo;
+
 
 /* Local device information */
 typedef struct {
@@ -65,18 +114,48 @@ typedef struct {
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN];
     char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
     char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
+
+    /* Configuration for network interface */
+    NSTACKX_InterfaceInfo localIfInfo[NSTACKX_MAX_LISTENED_NIF_NUM];
+    uint8_t ifNums;
+
+    /* Obsoleted. Use localIfInfo instead. */
     char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
+    /* Obsoleted. Use localIfInfo instead. */
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     uint8_t is5GHzBandSupported;
     uint8_t deviceType;
     char version[NSTACKX_MAX_HICOM_VERSION];
+    uint8_t businessType;
 } NSTACKX_LocalDeviceInfo;
 
+typedef enum {
+    NSTACKX_BUSINESS_TYPE_NULL = 0,
+    NSTACKX_BUSINESS_TYPE_HICOM = 1,
+    NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,
+    NSTACKX_BUSINESS_TYPE_NEARBY = 3
+} NSTACKX_BusinessType;
+
+#define NSTACKX_MIN_ADVERTISE_COUNT 1
+#define NSTACKX_MAX_ADVERTISE_COUNT 100
+/* The unit of duration is ms. */
+#define NSTACKX_MIN_ADVERTISE_DURATION 5000
+#define NSTACKX_MAX_ADVERTISE_DURATION 50000
+
+typedef struct {
+    uint8_t businessType;
+    uint8_t discoveryMode;
+    uint32_t advertiseCount;
+    uint32_t advertiseDuration;
+    char *businessData;
+    uint32_t length;
+} NSTACKX_DiscoverySettings;
+
 /* Register local device information */
-int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo);
+DFINDER_EXPORT int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo);
 
 /* Register local device information with deviceHash */
-int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash);
+DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash);
 
 /* Device list change callback type */
 typedef void (*NSTACKX_OnDeviceListChanged)(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
@@ -100,77 +179,95 @@ typedef struct {
     NSTACKX_OnDeviceListChanged onDeviceFound;
     NSTACKX_OnMsgReceived onMsgReceived;
     NSTACKX_OnDFinderMsgReceived onDFinderMsgReceived;
+    uint32_t maxDeviceNum; // the size of the device list configured by the caller
 } NSTACKX_Parameter;
+
+/* DFinder log level */
+enum {
+    DFINDER_LOG_LEVEL_OFF     = 0,
+    DFINDER_LOG_LEVEL_FATAL   = 1,
+    DFINDER_LOG_LEVEL_ERROR   = 2,
+    DFINDER_LOG_LEVEL_WARNING = 3,
+    DFINDER_LOG_LEVEL_INFO    = 4,
+    DFINDER_LOG_LEVEL_DEBUG   = 5,
+    DFINDER_LOG_LEVEL_END,
+};
 
 /*
  * NSTACKX Initialization
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter);
+DFINDER_EXPORT int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter);
 
 /* NSTACKX Destruction */
-void NSTACKX_Deinit(void);
+DFINDER_EXPORT void NSTACKX_Deinit(void);
 
 /*
  * Start device discovery
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_StartDeviceFind(void);
+DFINDER_EXPORT int32_t NSTACKX_StartDeviceFind(void);
 
 /*
  * Start device discovery by mode
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_StartDeviceFindAn(uint8_t mode);
+DFINDER_EXPORT int32_t NSTACKX_StartDeviceFindAn(uint8_t mode);
 
 /*
  * Stop device discovery
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_StopDeviceFind(void);
+DFINDER_EXPORT int32_t NSTACKX_StopDeviceFind(void);
 
 /*
  * subscribe module
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_SubscribeModule(void);
+DFINDER_EXPORT int32_t NSTACKX_SubscribeModule(void);
 
 /*
  * unsubscribe module
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_UnsubscribeModule(void);
+DFINDER_EXPORT int32_t NSTACKX_UnsubscribeModule(void);
 
 /*
  * Register the capability of local device.
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
+DFINDER_EXPORT int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 
 /*
  * Set the capability to filter remote devices.
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
+DFINDER_EXPORT int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 
 /*
  * Register the serviceData of local device.
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_RegisterServiceData(const char* serviceData);
+DFINDER_EXPORT int32_t NSTACKX_RegisterServiceData(const char *serviceData);
+
+/*
+ * Register the extendServiceData of local device.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData);
 
 /*
  * Send Msg to remote peer
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint8_t *data,
-                        uint32_t len);
+DFINDER_EXPORT int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint8_t *data,
+                                       uint32_t len);
 
 /*
  * Send Msg to remote peer
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, const uint8_t *data,
+DFINDER_EXPORT int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, const uint8_t *data,
     uint32_t len, const char *ipaddr, uint8_t sendType);
 
 /*
@@ -181,13 +278,49 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
  *                         When returns, it indicates numbers of valid device in deviceList.
  * return 0 on success, negative value on failure
  */
-int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr);
+DFINDER_EXPORT int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr);
 
 /*
  * NSTACKX Initialization, only used for restart.
  * return 0 on success, negative value on failure
  */
-void NSTACKX_StartDeviceFindRestart(void);
+DFINDER_EXPORT int32_t NSTACKX_InitRestart(const NSTACKX_Parameter *parameter);
+
+/*
+ * NSTACKX Initialization, only used for restart.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT void NSTACKX_StartDeviceFindRestart(void);
+
+/*
+ * Start device discovery with settings. If advertiseCount and advertiseDuration both 0, discovery with default
+ * advertise settings.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoverySettings);
+
+typedef struct {
+    uint8_t businessType;
+    char localNetworkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
+    char remoteIp[NSTACKX_MAX_IP_STRING_LEN];
+    char *businessData;
+    uint32_t length;
+} NSTACKX_ResponseSettings;
+
+/*
+ * Send discovery response to remote in unicast.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
+
+#ifdef ENABLE_USER_LOG
+typedef void (*DFinderLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);
+
+/*
+ * Set the DFinder log implementation
+ */
+DFINDER_EXPORT int32_t NSTACKX_DFinderRegisterLog(DFinderLogCallback userLogCallback);
+#endif
 
 #ifdef __cplusplus
 }

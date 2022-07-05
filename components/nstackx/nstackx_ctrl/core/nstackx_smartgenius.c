@@ -21,6 +21,7 @@
 #ifdef SUPPORT_SMARTGENIUS
 #include <sys/socket.h>
 #include <unistd.h>
+#include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <arpa/inet.h>
 #endif /* SUPPORT_SMARTGENIUS */
@@ -71,16 +72,18 @@ static void IfAddrMsgHandle(struct nlmsghdr *msgHdr)
         return;
     }
 
-    /* Use macro RTA_DATA() to get network insterface name from attribute "IFA_LABEL". */
-    if (!FilterNetworkInterface((char *)RTA_DATA(tb[IFA_LABEL]))) {
-        return;
-    }
-
     if (ifAddr->ifa_family != AF_INET) {
         return;
     }
 
     if (strcpy_s(interfaceInfo.name, sizeof(interfaceInfo.name), (char *)RTA_DATA(tb[IFA_LABEL])) != EOK) {
+        return;
+    }
+
+    UpdateAllNetworkInterfaceNameIfNeed(&interfaceInfo);
+
+    /* Use macro RTA_DATA() to get network insterface name from attribute "IFA_LABEL". */
+    if (!FilterNetworkInterface((char *)RTA_DATA(tb[IFA_LABEL]))) {
         return;
     }
 
@@ -190,7 +193,6 @@ int32_t SmartGeniusInit(EpollDesc epollfd)
     g_netlinkTask.readHandle = SmartGeniusCallback;
     g_netlinkTask.writeHandle = NULL;
     g_netlinkTask.errorHandle = NULL;
-    g_netlinkTask.endHandle = NULL;
     g_netlinkTask.count = 0;
     if (RegisterEpollTask(&g_netlinkTask, EPOLLIN) != NSTACKX_EOK) {
         close(fd);
