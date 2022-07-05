@@ -37,6 +37,7 @@ typedef enum {
 } SoftBusLogModule;
 
 void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...);
+void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...);
 
 void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet, size_t packetLen);
 

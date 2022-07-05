@@ -27,7 +27,7 @@
 #include "softbus_log.h"
 
 #define DEFAULT_NODE_STATE_CB_CNT 10
-#define MAX_IPC_LEN 512
+#define MAX_IPC_LEN 1024
 
 static int32_t g_maxNodeStateCbCount;
 
@@ -287,13 +287,23 @@ static int32_t ConvertPublishInfoToVoid(const PublishInfo *pubInfo, void **info,
     buf += strlen(pubInfo->capability) + 1;
     *(int32_t *)buf = pubInfo->dataLen;
     buf += sizeof(int32_t);
-    if (pubInfo->dataLen != 0) {
+    if (pubInfo->dataLen > 0) {
         if (memcpy_s(buf, pubInfo->dataLen, (char *)pubInfo->capabilityData, pubInfo->dataLen) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->capabilityData fail");
             SoftBusFree(*info);
             return SOFTBUS_ERR;
         }
         buf += pubInfo->dataLen + 1;
+    }
+    *(uint32_t *)buf = pubInfo->businessDataLen;
+    buf += sizeof(uint32_t);
+    if (pubInfo->businessDataLen > 0) {
+        if (memcpy_s(buf, pubInfo->businessDataLen, (char *)pubInfo->businessData, pubInfo->businessDataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->businessData fail");
+            SoftBusFree(*info);
+            return SOFTBUS_ERR;
+        }
+        buf += pubInfo->businessDataLen + 1;
     }
     *(bool *)buf = pubInfo->ranging;
     buf += sizeof(bool);
@@ -331,15 +341,26 @@ static int32_t ConvertSubscribeInfoToVoid(const SubscribeInfo *subInfo, void **i
     *(int32_t *)buf = subInfo->dataLen;
     buf += sizeof(int32_t);
     *infoLen = (void *)buf - *info;
-    if (subInfo->dataLen == 0) {
-        return SOFTBUS_OK;
+    if (subInfo->dataLen > 0) {
+        if (memcpy_s(buf, subInfo->dataLen, (char *)subInfo->capabilityData, subInfo->dataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->capabilityData fail");
+            SoftBusFree(*info);
+            return SOFTBUS_ERR;
+        }
+        *infoLen += subInfo->dataLen + 1;
+        buf += subInfo->dataLen + 1;
     }
-    if (memcpy_s(buf, subInfo->dataLen, (char *)subInfo->capabilityData, subInfo->dataLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->capabilityData fail");
-        SoftBusFree(*info);
-        return SOFTBUS_ERR;
+    *(uint32_t *)buf = subInfo->businessDataLen;
+    *infoLen += sizeof(uint32_t);
+    buf += sizeof(uint32_t);
+    if (subInfo->businessDataLen > 0) {
+        if (memcpy_s(buf, subInfo->businessDataLen, (char *)subInfo->businessData, subInfo->businessDataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->businessData fail");
+            SoftBusFree(*info);
+            return SOFTBUS_ERR;
+        }
+        *infoLen += subInfo->businessDataLen + 1;
     }
-    *infoLen += subInfo->dataLen + 1;
     return SOFTBUS_OK;
 }
 

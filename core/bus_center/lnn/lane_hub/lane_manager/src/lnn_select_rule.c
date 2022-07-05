@@ -35,7 +35,7 @@
 
 static int32_t GetWlanLinkedFrequency(void)
 {
-    WifiLinkInfo wlanInfo;
+    WifiLinkedInfo wlanInfo;
     int32_t ret = GetLinkedInfo(&wlanInfo);
     if (ret != WIFI_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get linked info fail, reason:%d", ret);
@@ -172,7 +172,7 @@ static int32_t GetLinkedChannelScore(void)
     if (channel < 0) {
         return UNACCEPT_SCORE;
     }
-    int32_t score = LnnGetChannelScore(channel);
+    int32_t score = LnnGetCurrChannelScore(channel);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current channel:%d, score:%d", channel, score);
     if (score <= 0) {
         score = LNN_LINK_DEFAULT_SCORE;
