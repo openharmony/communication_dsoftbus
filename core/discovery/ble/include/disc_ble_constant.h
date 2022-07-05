@@ -75,7 +75,7 @@
 #define RANGE_POWER_TYPE_LEN 1
 #define TL_LEN 1
 
-#define MAX_BROADCAST_DATA 31
+#define MAX_BROADCAST_DATA_LEN 31
 #define SCAN_RSP_HEADER_LEN 4
 
 #endif
