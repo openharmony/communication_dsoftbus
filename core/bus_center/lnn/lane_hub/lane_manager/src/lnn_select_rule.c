@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
 #include "softbus_adapter_mem.h"
@@ -161,12 +162,6 @@ static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-static int32_t GetCurrentChannelScore(int32_t channelId)
-{
-    (void)channelId;
-    return LNN_LINK_DEFAULT_SCORE;
-}
-
 static int32_t GetLinkedChannelScore(void)
 {
     int32_t frequency = GetWlanLinkedFrequency();
@@ -177,8 +172,11 @@ static int32_t GetLinkedChannelScore(void)
     if (channel < 0) {
         return UNACCEPT_SCORE;
     }
-    int32_t score = GetCurrentChannelScore(channel);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current channel:%d", channel, score);
+    int32_t score = LnnGetChannelScore(channel);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current channel:%d, score:%d", channel, score);
+    if (score <= 0) {
+        score = LNN_LINK_DEFAULT_SCORE;
+    }
     return score;
 }
 
