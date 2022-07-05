@@ -55,7 +55,7 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
 static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P;
-    if (memcpy_s(connInfo->connInfo.p2p, sizeof(P2pConnInfo),
+    if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
         return SOFTBUS_ERR;
     }
@@ -68,7 +68,7 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
 static int32_t Wlan2P4GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_WLAN_2P4G;
-    if (memcpy_s(connInfo->connInfo.wlan, sizeof(WlanConnInfo),
+    if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
         return SOFTBUS_ERR;
     }
@@ -81,7 +81,7 @@ static int32_t Wlan2P4GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *conn
 static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_WLAN_5G;
-    if (memcpy_s(connInfo->connInfo.wlan, sizeof(WlanConnInfo),
+    if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
         return SOFTBUS_ERR;
     }
@@ -121,8 +121,9 @@ int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueS
     }
     if (LnnMapSet(map, (const char *)keyStr, value, valueSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save data fail");
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
 }
 
 void *LnnReadData(const Map *map, uint32_t key)
