@@ -160,6 +160,8 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse reserve information failed.");
         return SOFTBUS_ERR;
     }
+    // coap not support range now, just assign -1 as unknown
+    discDevInfo->range = -1;
 
     return SOFTBUS_OK;
 }

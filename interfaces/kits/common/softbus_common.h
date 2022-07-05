@@ -309,6 +309,8 @@ typedef struct {
     unsigned char *capabilityData;
     /** Maximum length of the capability data for service publishing (512 bytes) */
     unsigned int dataLen;
+    /** Whether the device should be ranged  by discoverers.*/
+    bool ranging;
 } PublishInfo;
 
 /**
@@ -386,6 +388,8 @@ typedef struct {
     unsigned int capabilityBitmap[DISC_MAX_CAPABILITY_NUM];
     /** Custom data. Its length is specified by {@link DISC_MAX_CUST_DATA_LEN}. */
     char custData[DISC_MAX_CUST_DATA_LEN];
+    /** The distance of dicovered device, in centimeters(cm)*/
+    int32_t range;
 } DeviceInfo;
 #ifdef __cplusplus
 }
