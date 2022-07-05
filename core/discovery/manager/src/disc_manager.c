@@ -290,7 +290,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->businessData == NULL) {
+    if (info->businessData == NULL || info->businessDataLen == 0) {
         return SOFTBUS_OK;
     }
 
@@ -331,7 +331,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->businessData == NULL) {
+    if (info->businessData == NULL || info->businessDataLen == 0) {
         return SOFTBUS_OK;
     }
 
@@ -393,7 +393,7 @@ static DiscItem *CreateNewItem(SoftBusList *serviceList, const char *packageName
 
 static bool AddBusinessData(const char *srcData, uint32_t dataLen, char **destData)
 {
-    if (srcData == NULL) {
+    if (srcData == NULL || dataLen == 0) {
         *destData = NULL;
         return true;
     }
