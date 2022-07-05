@@ -295,10 +295,10 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
         return SOFTBUS_MEM_ERR;
     }
 
-    if (dataLen <= MAX_BROADCAST_DATA + SCAN_RSP_HEADER_LEN) {
+    if (dataLen <= MAX_BROADCAST_DATA_LEN + SCAN_RSP_HEADER_LEN) {
         return ParseRecvTlvs(device, data, dataLen);
     }
-    
+
     // it needs to skip scan resp AD Structure header when TLV overflow to scan rsp
     int indScanRspDataLen = dataLen - SCAN_RSP_HEADER_LEN;
     unsigned char *copyData = SoftBusCalloc(indScanRspDataLen);
@@ -307,16 +307,16 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
         return SOFTBUS_MEM_ERR;
     }
 
-    if (memcpy_s(copyData, MAX_BROADCAST_DATA, data, MAX_BROADCAST_DATA) != EOK) {
+    if (memcpy_s(copyData, MAX_BROADCAST_DATA_LEN, data, MAX_BROADCAST_DATA_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s adv failed, can not skip scan resp flag.");
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
 
-    const unsigned char *destScanbRspTlv = copyData + MAX_BROADCAST_DATA;
-    int destScanRspTlvLen = indScanRspDataLen - MAX_BROADCAST_DATA;
-    const unsigned char *srcScanRspTlv = data + MAX_BROADCAST_DATA + SCAN_RSP_HEADER_LEN;
-    int srcScanRspTlvLen = dataLen-MAX_BROADCAST_DATA-SCAN_RSP_HEADER_LEN;
+    const unsigned char *destScanbRspTlv = copyData + MAX_BROADCAST_DATA_LEN;
+    int destScanRspTlvLen = indScanRspDataLen - MAX_BROADCAST_DATA_LEN;
+    const unsigned char *srcScanRspTlv = data + MAX_BROADCAST_DATA_LEN + SCAN_RSP_HEADER_LEN;
+    int srcScanRspTlvLen = dataLen-MAX_BROADCAST_DATA_LEN-SCAN_RSP_HEADER_LEN;
     if (memcpy_s(destScanbRspTlv, destScanRspTlvLen, srcScanRspTlv,  srcScanRspTlvLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s scan rsp failed, can not skip scan resp flag.");
         SoftBusFree(copyData);
