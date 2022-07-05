@@ -69,6 +69,13 @@ int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t buf
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthGetServerSideByOption(const ConnectOption *option, bool *isServerSide)
+{
+    (void)option;
+    (void)isServerSide;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t AuthTransDataRegCallback(AuthTransModule moduleId, AuthTransCallback *cb)
 {
     (void)moduleId;
