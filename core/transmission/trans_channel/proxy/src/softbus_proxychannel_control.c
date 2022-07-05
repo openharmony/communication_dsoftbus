@@ -33,6 +33,7 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint3
 
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = info->chiper;
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
     msgHead.myId = info->myId;
@@ -47,6 +48,53 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint3
     return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, priority);
 }
 
+static int32_t GetChiperParamByConnId(uint32_t connId, uint8_t *chiper)
+{
+    ConnectType authType;
+    ConnectOption option = {0};
+    char uuid[UUID_BUF_LEN] = {0};
+    bool isServerSide = false;
+
+    if (TransProxyGetConnectOption(connId, &option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connect option fail connId[%d]", connId);
+        return SOFTBUS_ERR;
+    }
+    switch (option.type) {
+        case CONNECT_TCP:
+            authType = CONNECT_TCP;
+            break;
+        case CONNECT_BR:
+            if (GetRemoteUuidByBtMac(option.info.brOption.brMac, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid by btmac fail");
+                return SOFTBUS_ERR;
+            }
+            if (AuthGetActiveConnectOption(uuid, CONNECT_BLE, &option) == SOFTBUS_OK) {
+                authType = CONNECT_BLE;
+                break;
+            }
+            if (AuthGetActiveConnectOption(uuid, CONNECT_BR, &option) == SOFTBUS_OK) {
+                authType = CONNECT_BR;
+                break;
+            }
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthGetActiveConnectOption fail");
+            return SOFTBUS_ERR;
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PROXY not support connType: %d", option.type);
+            return SOFTBUS_ERR;
+    }
+    if (AuthGetServerSideByOption(&option, &isServerSide) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthGetServerSideByOption fail");
+        return SOFTBUS_ERR;
+    }
+    if (isServerSide) {
+        *chiper |= AUTH_SERVER_SIDE;
+    }
+    if (authType == CONNECT_BLE) {
+        *chiper |= USE_BLE_CIPHER;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyHandshake(ProxyChannelInfo *info)
 {
     char *payLoad = NULL;
@@ -56,6 +104,11 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (info->appInfo.appType != APP_TYPE_AUTH) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
+        if (GetChiperParamByConnId(info->connId, &msgHead.chiper) != SOFTBUS_OK ||
+            TransProxySetChiper(info->channelId, msgHead.chiper) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get chiper fail");
+            return SOFTBUS_ERR;
+        }
     }
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
@@ -75,12 +128,6 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     cJSON_free(payLoad);
     dataInfo.inData = NULL;
 
-    if ((msgHead.chiper & AUTH_SERVER_SIDE)) {
-        if (TransProxySetChiperSide(info->channelId, SERVER_SIDE_FLAG) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set chiper side fail");
-            return SOFTBUS_ERR;
-        }
-    }
     if (TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send handshake buf fail");
         return SOFTBUS_ERR;
@@ -98,6 +145,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
         chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (chan->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = chan->chiper;
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
     msgHead.myId = chan->myId;
@@ -133,6 +181,7 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = info->chiper;
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
 
@@ -165,6 +214,7 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = info->chiper;
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
 
@@ -199,6 +249,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.chiper = info->chiper;
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     }
 
