@@ -15,6 +15,11 @@
 
 #include "nstackx_log.h"
 
+#include <errno.h>
+#include "securec.h"
+#include "nstackx_util.h"
+#include "nstackx_error.h"
+#define TAG "nStackXLog"
 static uint32_t g_logLevel = NSTACKX_LOG_LEVEL_INFO;
 
 #ifdef BUILD_FOR_WINDOWS
@@ -49,7 +54,29 @@ void SetLogImpl(LogImplInternal fn)
     if (fn == NULL) {
         return;
     }
-#ifdef BUILD_FOR_WINDOWS
-    g_logImpl = fn;
-#endif
 }
+#ifdef ENABLE_USER_LOG
+#ifdef BUILD_FOR_WINDOWS
+#ifndef NEED_EXPORT_VARIABLE
+#define NEED_EXPORT_VARIABLE
+#endif
+#endif
+
+NstakcxLogCallback g_nstackxLogCallBack = PrintfImpl;
+
+int32_t SetLogCallback(NstakcxLogCallback logCb)
+{
+    if (logCb == NULL) {
+        LOGE(TAG, "log callback is null");
+        return NSTACKX_EINVAL;
+    }
+    if (logCb == g_nstackxLogCallBack) {
+        LOGW(TAG, "log callback is the same");
+        return NSTACKX_EOK;
+    }
+    LOGI(TAG, "log callback changed");
+    g_nstackxLogCallBack = logCb;
+    return NSTACKX_EOK;
+}
+
+#endif

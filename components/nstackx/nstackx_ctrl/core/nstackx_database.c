@@ -26,16 +26,6 @@
 
 #define NSTACKX_USEDMAP_ROW_SIZE 32U /* Row size suit for uint32_t */
 
-typedef struct {
-    uint8_t *blk;
-    uint32_t *usedMap;
-    uint32_t mapSize;
-    uint32_t useCount;
-    uint32_t maxCount;
-    size_t recSize;
-    RecCompareCallback cb;
-} DatabaseInfo;
-
 static inline int64_t GetRecordIndex(const DatabaseInfo *db, const void *rec)
 {
     if (db->recSize == 0) {

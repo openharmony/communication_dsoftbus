@@ -34,9 +34,9 @@ typedef struct {
     enum CoapProtocolTypeEnum protocol;
     enum CoapMsgTypeEnum type;
     uint8_t code;
+    uint8_t optionsNum;
     uint16_t msgId;
     CoapOption *options;
-    uint8_t optionsNum;
 } CoapPacketParam;
 
 typedef struct {

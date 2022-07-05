@@ -18,7 +18,7 @@ static_library("nstackx_test") {
   sources = [ "nstackx_test.c" ]
   include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
   deps = [
-    "$dsoftbus_root_path/components/nstackx_mini/nstackx_ctrl:nstackx_ctrl",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "//build/lite/config/component/cJSON:cjson_static",
   ]
   cflags = [

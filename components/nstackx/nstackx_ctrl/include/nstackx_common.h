@@ -19,15 +19,30 @@
 #include "nstackx_list.h"
 #include "nstackx_epoll.h"
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
+
+#ifdef DFINDER_SAVE_DEVICE_LIST
+typedef struct {
+    NSTACKX_DeviceInfo *deviceList;
+    uint32_t *deviceCountPtr;
+    sem_t wait;
+} GetDeviceListMessage;
+#endif
+
+typedef struct DeviceInfo DeviceInfo;
 
 void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
 void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
+#ifndef DFINDER_USE_MINI_NSTACKX
 void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len);
+#endif /* END OF DFINDER_USE_MINI_NSTACKX */
 void NotifyDFinderMsgRecver(DFinderMsgType msgType);
 EpollDesc GetMainLoopEpollFd(void);
 List *GetMainLoopEvendChain(void);
+uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount);
+int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType);
+int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr);
 
 #ifdef __cplusplus
 };
