@@ -213,7 +213,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
     int32_t ret;
 
@@ -227,7 +227,7 @@ int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
         return SOFTBUS_ERR;
     }
     *size = WIFI_SCAN_HOTSPOT_LIMIT;
-    ret = GetScanInfoList((WifiScanInfo *)*result, size);
+    ret = GetScanInfoList((WifiScanInfo *)*result, (unsigned int *)size);
     if (ret != WIFI_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus get wifi scan list failed.");
         return SOFTBUS_ERR;
