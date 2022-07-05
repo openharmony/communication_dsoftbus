@@ -107,7 +107,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
-    if (laneModel == NULL) {
+    if (laneModel != NULL) {
         AddLaneIdNode(laneId, laneModel);
         Unlock();
         return SOFTBUS_OK;
@@ -144,7 +144,7 @@ int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
     param.transType = profile->content;
     param.priority = profile->priority;
     uint32_t profileId = GenerateLaneProfileId(&param);
-    profileId->serialNum = profileId;
+    profile->serialNum = profileId;
     if (AddLaneModel(laneId, profileId, profile) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
