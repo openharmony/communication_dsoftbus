@@ -57,6 +57,7 @@
 #define TLV_TYPE_DEVICE_NAME 0x03
 #define TLV_TYPE_CUST 0x04
 #define TLV_TYPE_BR_MAC 0x05
+#define TLV_TYPE_RANGE_POWER 0x06
 
 #define POS_VERSION 0
 #define POS_BUSINESS 1
@@ -71,6 +72,10 @@
 #define BT_MAX_STR_LEN 18
 #define BT_MAC_BYTES_LEN 6
 #define DEVICE_TYPE_LEN 1
+#define RANGE_POWER_TYPE_LEN 1
 #define TL_LEN 1
+
+#define MAX_BROADCAST_DATA_LEN 31
+#define SCAN_RSP_HEADER_LEN 4
 
 #endif

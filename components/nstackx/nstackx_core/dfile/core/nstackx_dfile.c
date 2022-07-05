@@ -43,7 +43,7 @@ static pthread_mutex_t g_dFileSessionChainMutex = PTHREAD_MUTEX_INITIALIZER;
 static List g_dFileSessionChain = {&(g_dFileSessionChain), &(g_dFileSessionChain)};
 static uint16_t g_dFileSessionId = 0;
 /* currently enabled capabilities */
-static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY;
+static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY | NSTACKX_CAPS_CHACHA;
 /* wlan catagory from APP */
 static uint32_t g_wlanCatagory = NSTACKX_WLAN_CAT_TCP;
 
@@ -1556,6 +1556,7 @@ int32_t NSTACKX_DFileSetCapabilities(uint32_t capabilities, uint32_t value)
     /* EaglEye test */
     Coverity_Tainted_Set((void *)&capabilities);
     Coverity_Tainted_Set((void *)&value);
+
     /* unused para */
     (void)(capabilities);
     (void)(value);

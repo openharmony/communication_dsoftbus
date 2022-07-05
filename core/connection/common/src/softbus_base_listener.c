@@ -435,7 +435,7 @@ static int32_t SelectThread(void)
     tv.sec = 0;
     tv.usec = TIMEOUT;
     int32_t timeOut = 0;
-    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, (unsigned char *)&timeOut,
+    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SELECT_INTERVAL, (unsigned char *)&timeOut,
         sizeof(timeOut)) == SOFTBUS_OK) {
         tv.usec = (long)timeOut;
     }

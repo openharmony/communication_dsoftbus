@@ -52,18 +52,22 @@ static int32_t InitEncryptCtx(CryptPara *cryptPara)
 {
     int32_t length;
     const EVP_CIPHER *cipher = NULL;
-    switch (cryptPara->keylen) {
-        case AES_128_KEY_LENGTH:
-            cipher = EVP_aes_128_gcm();
-            break;
-        case AES_192_KEY_LENGTH:
-            cipher = EVP_aes_192_gcm();
-            break;
-        case AES_256_KEY_LENGTH:
-            cipher = EVP_aes_256_gcm();
-            break;
-        default:
-            return NSTACKX_EFAILED;
+    if (cryptPara->cipherType == CIPHER_CHACHA) {
+        cipher = EVP_get_cipherbyname(CHACHA20_POLY1305_NAME);
+    } else if (cryptPara->cipherType == CIPHER_AES_GCM) {
+        switch (cryptPara->keylen) {
+            case AES_128_KEY_LENGTH:
+                cipher = EVP_aes_128_gcm();
+                break;
+            case AES_192_KEY_LENGTH:
+                cipher = EVP_aes_192_gcm();
+                break;
+            case AES_256_KEY_LENGTH:
+                cipher = EVP_aes_256_gcm();
+                break;
+            default:
+                return NSTACKX_EFAILED;
+        }
     }
 
     if (cryptPara->aadLen == 0 || cryptPara->ctx == NULL) {
@@ -144,18 +148,22 @@ static int32_t InitDecryptCtx(CryptPara *cryptPara)
 {
     int32_t length;
     const EVP_CIPHER *cipher = NULL;
-    switch (cryptPara->keylen) {
-        case AES_128_KEY_LENGTH:
-            cipher = EVP_aes_128_gcm();
-            break;
-        case AES_192_KEY_LENGTH:
-            cipher = EVP_aes_192_gcm();
-            break;
-        case AES_256_KEY_LENGTH:
-            cipher = EVP_aes_256_gcm();
-            break;
-        default:
-            return NSTACKX_EFAILED;
+    if (cryptPara->cipherType == CIPHER_CHACHA) {
+        cipher = EVP_get_cipherbyname(CHACHA20_POLY1305_NAME);
+    } else if (cryptPara->cipherType == CIPHER_AES_GCM) {
+        switch (cryptPara->keylen) {
+            case AES_128_KEY_LENGTH:
+                cipher = EVP_aes_128_gcm();
+                break;
+            case AES_192_KEY_LENGTH:
+                cipher = EVP_aes_192_gcm();
+                break;
+            case AES_256_KEY_LENGTH:
+                cipher = EVP_aes_256_gcm();
+                break;
+            default:
+                return NSTACKX_EFAILED;
+        }
     }
     if (cryptPara->ivLen != GCM_IV_LENGTH || cryptPara->aadLen == 0 || cryptPara->ctx == NULL) {
         return NSTACKX_EFAILED;
@@ -216,6 +224,16 @@ uint8_t IsCryptoIncluded(void)
     return NSTACKX_TRUE;
 }
 
+uint8_t QueryCipherSupportByName(char *name)
+{
+    if (EVP_get_cipherbyname(name) != NULL) {
+        return NSTACKX_TRUE;
+    }
+
+    LOGI(TAG, "devices no support %s", name);
+    return NSTACKX_FALSE;
+}
+
 #else
 int32_t GetRandBytes(uint8_t *buf, uint32_t len)
 {
@@ -262,6 +280,12 @@ uint32_t AesGcmDecrypt(uint8_t *inBuf, uint32_t inLen, CryptPara *cryptPara, uin
 
 uint8_t IsCryptoIncluded(void)
 {
+    return NSTACKX_FALSE;
+}
+
+uint8_t QueryCipherSupportByName(char *name)
+{
+    LOGI(TAG, "devices no support %s", name);
     return NSTACKX_FALSE;
 }
 

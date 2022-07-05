@@ -36,15 +36,15 @@ typedef enum {
     SOFTBUS_INT_CONN_TCP_TIME_OUT, /* the default val is 100 */
     SOFTBUS_INT_MAX_NODE_STATE_CB_CNT, /* the default val is 10 */
     SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, /* the default val is 10 */
-    SOFTBUS_INT_LNN_SUPPORT_CAPBILITY, /* the default val is 30 */
+    SOFTBUS_INT_LNN_SUPPORT_CAPABILITY, /* the default val is 30 */
     SOFTBUS_INT_AUTH_ABILITY_COLLECTION, /* the default val is 0 */
     SOFTBUS_INT_ADAPTER_LOG_LEVEL, /* the default val is 0 */
     SOFTBUS_STR_STORAGE_DIRECTORY, /* the max length is MAX_STORAGE_PATH_LEN */
     SOFTBUS_INT_SUPPORT_TCP_PROXY, /* the l0 devices val is 0 , others is 1 */
-    SOFTBUS_INT_SUPPORT_SECLECT_INTERVAL, /* the l0 devices val is 100000us , others is 10000us */
+    SOFTBUS_INT_SUPPORT_SELECT_INTERVAL, /* the l0 devices val is 100000us , others is 10000us */
     SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN, /* the default val is 0 */
     SOFTBUS_STR_LNN_NET_IF_NAME, /* the default val is 0:eth0,1:wlan0 */
-    SOFTBUS_INT_LNN_MAX_CONCURENT_NUM, /* the default val is 0 */
+    SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM, /* the default val is 0 */
     SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, /* L1: 4K, L2: 64K */
     SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH, /* L1: 1K, L2: 4K */
     SOFTBUS_INT_AUTO_NETWORKING_SWITCH, /* support auto networking: true, not support: false */

@@ -40,7 +40,10 @@ void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
     info1 += sizeof(uint32_t);
     if (pubInfo->businessDataLen > 0) {
         pubInfo->businessData = (char *)info1;
+        info1 += pubInfo->businessDataLen + 1;
     }
+    pubInfo->ranging = *(bool *)info1;
+    info1 += sizeof(bool);
 }
 
 void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
