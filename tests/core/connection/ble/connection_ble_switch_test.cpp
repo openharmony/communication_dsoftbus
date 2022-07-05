@@ -430,7 +430,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 {
-    int reqId = 1, reqsId = 1;
+    int req1 = 1, req2 = 1;
     int ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
@@ -448,10 +448,10 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
     printf("bleMac: %s\n", optionInfo.info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    reqsId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    ASSERT_LT(reqId, reqsId);
-    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    req1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    req2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ASSERT_LT(req1, req2);
+    ret = ConnConnectDevice(&optionInfo, req1, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId) {
         ret = ConnGetConnectionInfo(g_connId, &info);
