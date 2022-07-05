@@ -42,6 +42,11 @@ typedef struct {
     unsigned short dataLen;
 } BoardcastData;
 
+typedef struct {
+    DeviceInfo *info;
+    int8_t power;
+} DeviceWrapper;
+
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap);
 bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos);
 bool CheckCapBitMapEqual(const uint32_t *srcBitMap, const uint32_t *dstBitMap, uint32_t capBitMapNum);
@@ -55,8 +60,8 @@ uint8_t DiscBleGetDeviceType(void);
 int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
-int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const unsigned char *data, uint32_t dataLen);
-int32_t GetDeviceInfoFromDisAdvData(DeviceInfo *info, const unsigned char *data, uint32_t dataLen);
+int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const void *data, uint32_t dataLen);
+int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *info, const unsigned char *data, uint32_t dataLen);
 
 #ifdef __cplusplus
 #if __cplusplus

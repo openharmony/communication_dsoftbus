@@ -394,6 +394,7 @@ static DiscInfo *CreateNewPublishInfoNode(const PublishInfo *info)
     infoNode->medium = info->medium;
     infoNode->mode = info->mode;
     infoNode->option.publishOption.freq = info->freq;
+    infoNode->option.publishOption.ranging = info->ranging;
     infoNode->option.publishOption.dataLen = info->dataLen;
     infoNode->option.publishOption.capabilityData =
         (unsigned char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN * sizeof(unsigned char));

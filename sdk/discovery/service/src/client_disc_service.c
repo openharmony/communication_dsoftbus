@@ -54,7 +54,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    
     return SOFTBUS_OK;
 }
 

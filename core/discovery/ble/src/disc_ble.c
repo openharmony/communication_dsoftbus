@@ -34,6 +34,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_range.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -96,6 +97,7 @@ typedef struct {
     bool isSameAccount[CAPABILITY_MAX_BITNUM];
     bool isWakeRemote[CAPABILITY_MAX_BITNUM];
     int32_t freq[CAPABILITY_MAX_BITNUM];
+    int32_t rangingRefCnt;
 } DiscBleInfo;
 
 typedef struct {
@@ -175,6 +177,7 @@ static int32_t UpdateAdvertiser(int32_t adv);
 static int32_t ReplyPassiveNonBroadcast(void);
 static void ClearRecvMessage(void);
 static int32_t StopScaner(void);
+static void AssembleNonOptionalTlv(DeviceInfo *info, BoardcastData *boardcastData);
 
 /* This function is used to compatibled with mobile phone, will remove later */
 static int ConvertCapBitMap(int oldCap)
@@ -309,7 +312,11 @@ static void ProcessNearbyPacket(const SoftBusBleScanResult *scanResultData)
 
 static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, DeviceInfo *foundInfo)
 {
-    if (GetDeviceInfoFromDisAdvData(foundInfo, advData, advLen) != SOFTBUS_OK) {
+    DeviceWrapper device = {
+        .info = foundInfo,
+        .power = SOFTBUS_ILLEGAL_BLE_POWER
+    };
+    if (GetDeviceInfoFromDisAdvData(&device, advData, advLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceInfoFromDisAdvData failed");
         return;
     }
@@ -357,9 +364,13 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
     return false;
 }
 
-static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, DeviceInfo *foundInfo)
+static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, char rssi, DeviceInfo *foundInfo)
 {
-    if (GetDeviceInfoFromDisAdvData(foundInfo, advData, advLen) != SOFTBUS_OK) {
+    DeviceWrapper device = {
+        .info=foundInfo,
+        .power = SOFTBUS_ILLEGAL_BLE_POWER
+    };
+    if (GetDeviceInfoFromDisAdvData(&device, advData, advLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetDeviceInfoFromDisAdvData failed");
         return;
     }
@@ -371,6 +382,28 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, D
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
+
+    int32_t range = -1;
+    if (device.power != SOFTBUS_ILLEGAL_BLE_POWER) {
+        SoftBusRangeParam param = {
+            .rssi = *(signed char *)(&rssi),
+            .power = device.power,
+            .addr = {0}
+        };
+        if (memcpy_s(param.addr, BT_ADDR_LEN, foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ProcessDisNonPacket memcpy_s failed");
+            (void)SoftBusMutexUnlock(&g_bleInfoLock);
+            return;
+        }
+        int ret = SoftBusBleRange(&param, &range);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ProcessDisNonPacket range device failed, ret=%d", ret);
+            range = -1;
+            // range failed should report device continuely
+        }
+    }
+    foundInfo->range = range;
+    
     unsigned int tempCap = 0;
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
@@ -400,7 +433,7 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
     if ((advData[POS_BUSINESS_EXTENSION + ADV_HEAD_LEN] & BIT_CON) != 0) {
         ProcessDisConPacket(advData, advLen, &foundInfo);
     } else {
-        ProcessDisNonPacket(advData, advLen, &foundInfo);
+        ProcessDisNonPacket(advData, advLen, scanResultData->rssi, &foundInfo);
     }
 }
 
@@ -574,6 +607,11 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         info->capabilityBitmap[pos] =
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
     }
+    
+    int32_t activeCnt = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].rangingRefCnt;
+    int32_t passiveCnt = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].rangingRefCnt;
+    info->range = activeCnt + passiveCnt;
+
     if (CheckBitMapEmpty(CAPABILITY_NUM, info->capabilityBitmap)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "All capbit is zero");
         return SOFTBUS_ERR;
@@ -637,6 +675,22 @@ static void DestroyBleConfigAdvData(SoftBusBleAdvData *advData)
     SoftBusFree(advData->scanRspData);
 }
 
+static void AssembleNonOptionalTlv(DeviceInfo *info, BoardcastData *boardcastData)
+{
+    if (g_recvMessageInfo.numNeedBrMac > 0) {
+        SoftBusBtAddr addr;
+        if (SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
+            (void)AssembleTLV(boardcastData, TLV_TYPE_BR_MAC, (const void *)&addr.addr, BT_ADDR_LEN);
+        }
+    }
+    if (info->range > 0) {
+        int8_t power = 0;
+        if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
+            (void)AssembleTLV(boardcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
+        }
+    }
+}
+
 static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *boardcastData)
 {
     if (info == NULL || advId >= NUM_ADVERTISER || boardcastData == NULL) {
@@ -672,14 +726,11 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId Hash failed");
     }
     uint8_t devType = info->devType;
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, (const unsigned char *)deviceIdHash,
+    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
         SHORT_DEVICE_ID_HASH_LENGTH);
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, &devType, DEVICE_TYPE_LEN);
-    if (advId == NON_ADV_ID && g_recvMessageInfo.numNeedBrMac > 0) {
-        SoftBusBtAddr addr;
-        if (SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
-            (void)AssembleTLV(boardcastData, TLV_TYPE_BR_MAC, (const unsigned char *)&addr.addr, BT_ADDR_LEN);
-        }
+    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)&devType, DEVICE_TYPE_LEN);
+    if (advId == NON_ADV_ID) {
+        AssembleNonOptionalTlv(info, boardcastData);
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "boardcastData->dataLen:%d", boardcastData->dataLen);
     return SOFTBUS_OK;
@@ -974,13 +1025,16 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if (option == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    uint32_t rangingCnt;
     DiscBleOption regOption;
     if (publishFlags == BLE_PUBLISH) {
         regOption.publishOption = (PublishOption *)option;
         regOption.subscribeOption = NULL;
+        rangingCnt = regOption.publishOption->ranging == true ? 1 : 0;
     } else {
         regOption.publishOption = NULL;
         regOption.subscribeOption = (SubscribeOption *)option;
+        rangingCnt = 0;
     }
     unsigned char index = publishFlags | activeFlags;
     if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
@@ -993,12 +1047,14 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
+        g_bleInfoManager[index].rangingRefCnt += rangingCnt;
     } else {
         if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
+        g_bleInfoManager[index].rangingRefCnt -= rangingCnt;
     }
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;

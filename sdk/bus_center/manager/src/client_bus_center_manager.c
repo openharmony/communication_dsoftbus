@@ -287,16 +287,17 @@ static int32_t ConvertPublishInfoToVoid(const PublishInfo *pubInfo, void **info,
     buf += strlen(pubInfo->capability) + 1;
     *(int32_t *)buf = pubInfo->dataLen;
     buf += sizeof(int32_t);
+    if (pubInfo->dataLen != 0) {
+        if (memcpy_s(buf, pubInfo->dataLen, (char *)pubInfo->capabilityData, pubInfo->dataLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->capabilityData fail");
+            SoftBusFree(*info);
+            return SOFTBUS_ERR;
+        }
+        buf += pubInfo->dataLen + 1;
+    }
+    *(bool *)buf = pubInfo->ranging;
+    buf += sizeof(bool);
     *infoLen = (void *)buf - *info;
-    if (pubInfo->dataLen == 0) {
-        return SOFTBUS_OK;
-    }
-    if (memcpy_s(buf, pubInfo->dataLen, (char *)pubInfo->capabilityData, pubInfo->dataLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->capabilityData fail");
-        SoftBusFree(*info);
-        return SOFTBUS_ERR;
-    }
-    *infoLen += pubInfo->dataLen + 1;
     return SOFTBUS_OK;
 }
 
