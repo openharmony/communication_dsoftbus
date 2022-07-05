@@ -383,6 +383,7 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
         return;
     }
 
+    int32_t range = -1;
     if (device.power != SOFTBUS_ILLEGAL_BLE_POWER) {
         SoftBusRangeParam param = {
             .rssi = *(signed char *)(&rssi),
@@ -394,15 +395,14 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
             (void)SoftBusMutexUnlock(&g_bleInfoLock);
             return;
         }
-        int32_t range;
         int ret = SoftBusBleRange(&param, &range);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ProcessDisNonPacket range device failed, ret=%d", ret);
             range = -1;
             // range failed should report device continuely
         }
-        foundInfo->range = range;
     }
+    foundInfo->range = range;
     
     unsigned int tempCap = 0;
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
