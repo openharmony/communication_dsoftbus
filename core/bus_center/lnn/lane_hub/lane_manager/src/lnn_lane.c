@@ -24,6 +24,7 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link_proc.h"
 #include "lnn_lane_model.h"
+#include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
@@ -39,6 +40,8 @@
 #define LANE_ID_BITMAP_COUNT ((MAX_LANE_ID_NUM + ID_CALC_MASK) >> ID_SHIFT_STEP)
 #define LANE_ID_TYPE_SHIFT 28
 #define LANE_RANDOM_ID_MASK 0xFFFFFFF
+
+#define LANE_SCORING_INTERVAL 300 /* 5min */
 
 typedef struct {
     ListNode node;
@@ -316,6 +319,13 @@ int32_t InitLane(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneLink fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitScore() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneScoring fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnStartScoring(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start laneScoring fail");
+    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -335,6 +345,7 @@ void DeinitLane(void)
 {
     DeinitLaneModel();
     DeinitLaneLink();
+    LnnDeinitScore();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->Deinit();
     }
