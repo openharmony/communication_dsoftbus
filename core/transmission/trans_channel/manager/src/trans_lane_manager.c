@@ -30,7 +30,8 @@ typedef struct {
     int32_t channelId;
     int32_t channelType;
     char pkgName[PKG_NAME_SIZE_MAX];
-    LnnLanesObject *lanesObj;
+    uint32_t laneId;
+    LaneConnInfo laneConnInfo;
 } TransLaneInfo;
 
 static SoftBusList *g_channelLaneList = NULL;
@@ -62,8 +63,8 @@ void TransLaneMgrDeinit(void)
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *nextLaneItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
+        LnnFreeLane(laneItem->laneId);
         ListDelete(&(laneItem->node));
-        LnnReleaseLanesObject(laneItem->lanesObj);
         SoftBusFree(laneItem);
     }
     (void)SoftBusMutexUnlock(&g_channelLaneList->lock);
@@ -71,7 +72,8 @@ void TransLaneMgrDeinit(void)
     g_channelLaneList = NULL;
 }
 
-int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObject *lanesObj, const char *pkgName)
+int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo, uint32_t laneId,
+    const char *pkgName)
 {
     if (g_channelLaneList == NULL) {
         return SOFTBUS_ERR;
@@ -83,7 +85,12 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LnnLanesObje
     }
     newLane->channelId = channelId;
     newLane->channelType = channelType;
-    newLane->lanesObj = lanesObj;
+    newLane->laneId = laneId;
+    if (memcpy_s(&(newLane->laneConnInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
+        SoftBusFree(newLane);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy failed.");
+        return SOFTBUS_ERR;
+    }
     if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), pkgName) != EOK) {
         SoftBusFree(newLane);
         return SOFTBUS_ERR;
@@ -127,10 +134,10 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
+            LnnFreeLane(laneItem->laneId);
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            LnnReleaseLanesObject(laneItem->lanesObj);
             SoftBusFree(laneItem);
             return SOFTBUS_OK;
         }
@@ -155,40 +162,16 @@ void TransLaneMgrDeathCallback(const char *pkgName)
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (strcmp(laneItem->pkgName, pkgName) == 0) {
+            LnnFreeLane(laneItem->laneId);
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
                 pkgName, laneItem->channelId, laneItem->channelType);
-            LnnReleaseLanesObject(laneItem->lanesObj);
             SoftBusFree(laneItem);
             return;
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return;
-}
-
-LnnLanesObject *TransLaneMgrGetLane(int32_t channelId, int32_t channelType)
-{
-    if (g_channelLaneList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
-        return NULL;
-    }
-    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
-        return NULL;
-    }
-
-    TransLaneInfo *laneItem = NULL;
-    LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
-            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            return laneItem->lanesObj;
-        }
-    }
-    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]",
-        channelId, channelType);
-    return NULL;
 }

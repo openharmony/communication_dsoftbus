@@ -55,7 +55,7 @@ static void GetBytesDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
     linkList[(*listNum)++] = LANE_BR;
 }
 
-static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType **optLink, uint32_t *linkNum)
+static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink, uint32_t *linkNum)
 {
     LaneLinkType defaultLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(defaultLink, sizeof(defaultLink), -1, sizeof(defaultLink));
@@ -118,7 +118,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
-    LaneLinkType *preferredList = request->list.linkType;
+    LaneLinkType *preferredList = (LaneLinkType *)&(request->list.linkType[0]);
     uint32_t listNum = request->list.linkTypeNum;
     *resNum = 0;
     for (uint32_t i = 0; i < listNum; i++) {

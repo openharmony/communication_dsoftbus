@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -25,6 +26,7 @@
 #include "softbus_proxychannel_network.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_utils.h"
+#include "trans_lane_pending_ctl.h"
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t channelId)
 {
@@ -206,90 +208,34 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     return SOFTBUS_OK;
 }
 
-static int32_t TransParseConnectOption(const ConnectionAddr *connAddr, ConnectOption *connOpt)
-{
-    ConnectionAddrType type = connAddr->type;
-    if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
-        connOpt->type = CONNECT_TCP;
-        connOpt->info.ipOption.port = (int32_t)connAddr->info.ip.port;
-        if (strcpy_s(connOpt->info.ipOption.ip, sizeof(connOpt->info.ipOption.ip), connAddr->info.ip.ip) != EOK) {
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
-    } else if (type == CONNECTION_ADDR_BR) {
-        connOpt->type = CONNECT_BR;
-        if (strcpy_s(connOpt->info.brOption.brMac, sizeof(connOpt->info.brOption.brMac),
-            connAddr->info.br.brMac) != EOK) {
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
-    } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get conn opt err: type=%d", type);
-        return SOFTBUS_ERR;
-    }
-}
-
-static LnnLaneProperty TransGetLnnLaneProperty(SessionType type)
-{
-    switch (type) {
-        case TYPE_MESSAGE:
-            return LNN_MESSAGE_LANE;
-        case TYPE_BYTES:
-            return LNN_BYTES_LANE;
-        case TYPE_FILE:
-            return LNN_FILE_LANE;
-        case TYPE_STREAM:
-            return LNN_STREAM_LANE;
-        default:
-            return LNN_LANE_PROPERTY_BUTT;
-    }
-}
-
-static int32_t TransGetLaneInfo(SessionType flags, const char *peerNetworkId, int32_t pid,
-    LnnLanesObject **lanesObject, const LnnLaneInfo **laneInfo)
-{
-    LnnLaneProperty laneProperty = TransGetLnnLaneProperty(flags);
-    if (laneProperty == LNN_LANE_PROPERTY_BUTT) {
-        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
-    }
-    LnnLanesObject *object = LnnRequestLanesObject(peerNetworkId, pid, laneProperty, NULL, 1);
-    if (object == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lne obj err");
-        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
-    }
-    int32_t laneIndex = 0;
-    int32_t laneId = LnnGetLaneId(object, laneIndex);
-    const LnnLaneInfo *info = LnnGetLaneInfo(laneId);
-    if (info == NULL) {
-        LnnReleaseLanesObject(object);
-        return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
-    }
-
-    *lanesObject = object;
-    *laneInfo = info;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get lane info ok: flags=%d", flags);
-    return SOFTBUS_OK;
-}
-
-
 static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *connOpt)
 {
-    LnnLanesObject *object = NULL;
-    const LnnLaneInfo *info = NULL;
+    uint32_t laneId = 0;
+    LaneConnInfo connInfo;
+    LaneRequestOption option;
 #define DEFAULT_PID 0
-    if (TransGetLaneInfo(TYPE_MESSAGE, peerNetworkId, DEFAULT_PID, &object, &info) != SOFTBUS_OK) {
+    option.type = LANE_TYPE_TRANS;
+    option.requestInfo.trans.pid = DEFAULT_PID;
+    option.requestInfo.trans.transType = LANE_T_MSG;
+    option.requestInfo.trans.expectedBw = 0;
+    if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
+        peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy networkId failed.");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransGetLaneInfoByOption(&option, &connInfo, &laneId) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "net Channel lane info: udp=%d, proxy=%d, type=%d",
-        info->isSupportUdp, info->isProxy, info->conOption.type);
-    if (TransParseConnectOption(&info->conOption, connOpt) != SOFTBUS_OK) {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "net channel lane info id:[%u] type=%d", laneId, connInfo.type);
+    if (TransGetConnectOptByConnInfo(&connInfo, connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    LnnReleaseLanesObject(object);
+    LnnFreeLane(laneId);
     return SOFTBUS_OK;
- EXIT_ERR:
-    if (object != NULL) {
-        LnnReleaseLanesObject(object);
+EXIT_ERR:
+    if (laneId != 0) {
+        LnnFreeLane(laneId);
     }
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
