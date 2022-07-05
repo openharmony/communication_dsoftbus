@@ -150,7 +150,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger002, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger003
-* @tc.desc: test set unset callback and connect post disconnect
+* @tc.desc: test set unset callback and connect post disconnect and multiple disconnects.
 * @tc.type: FUNC
 * @tc.require:AR000GIRGE
 */
@@ -194,6 +194,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger003, TestSize.Level1)
         }
         ret = ConnDisconnectDevice(g_connId);
         EXPECT_EQ(SOFTBUS_OK, ret);
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
     }
 
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
@@ -229,7 +231,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger004, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger005
-* @tc.desc: Test set unset callback and connect post disconnect.
+* @tc.desc: The test set unsets the return value of callback and disconnection after connection.
 * @tc.type: FUNC
 * @tc.require:AR000GIRGE
 */

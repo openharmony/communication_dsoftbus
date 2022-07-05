@@ -149,7 +149,7 @@ static IPublishCallback g_publishCb = {
 
 /**
  * @tc.name: PublishServiceTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Test for wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -203,7 +203,7 @@ HWTEST_F(Disc_Test, PublishServiceTest001, TestSize.Level0)
 
 /**
  * @tc.name: PublishServiceTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: Test GetPublishId and PublishService to see if they are running properly.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -486,7 +486,7 @@ HWTEST_F(Disc_Test, PublishServiceTest010, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Verify statrtdiscovery wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,7 +542,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
 
 /**
  * @tc.name: StartDiscoveryTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: Verify the StartDiscovery error parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -566,7 +566,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level0)
 
 /**
  * @tc.name: StartDiscoveryTest003
- * @tc.desc: Verify same parameter again
+ * @tc.desc: Verify startdiscovery same parameter again
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -722,7 +722,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest006, TestSize.Level1)
 
 /**
  * @tc.name: UnPublishServiceTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Verify unpublishservice wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -741,7 +741,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest001, TestSize.Level0)
 
 /**
  * @tc.name: UnPublishServiceTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: Verify publishservice and unpublishservice normal case.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -763,7 +763,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest002, TestSize.Level0)
 
 /**
  * @tc.name: UnPublishServiceTest003
- * @tc.desc: Verify same parameter again
+ * @tc.desc: Verify publishservice and unpublishservice same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -780,7 +780,7 @@ HWTEST_F(Disc_Test, UnPublishServiceTest003, TestSize.Level0)
 
 /**
  * @tc.name: StopDiscoveryTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Verify stopdiscovery wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -799,7 +799,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest001, TestSize.Level0)
 
 /**
  * @tc.name: StopDiscoveryTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: test under normal conditions.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -821,7 +821,7 @@ HWTEST_F(Disc_Test, StopDiscoveryTest002, TestSize.Level0)
 
 /**
  * @tc.name: StopDiscoveryTest003
- * @tc.desc: Verify same parameter again
+ * @tc.desc: Verify StartDiscovery and StopDiscovery same parameter again.
  * @tc.type: FUNC
  * @tc.require:
  */
