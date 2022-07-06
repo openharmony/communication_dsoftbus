@@ -496,7 +496,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener017, TestSize.Level1)
 
 /*
  * @tc.name: testBaseListener018
- * @tc.desc: Test StartBaseClient, BaseListener set, start OK.
+ * @tc.desc: Test StartBaseClient, set BaseListener, start successfully.
  * @tc.in: Test module, Test number, Test Levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -627,7 +627,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
 
 /*
  * @tc.name: testBaseListener024
- * @tc.desc: Test StartBaseListener, BaseListener set, start OK.
+ * @tc.desc: Test StartBaseListener, set BaseListener, run successfully.
  * @tc.in: Test module, Test number, Test Levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -903,7 +903,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
 {
     int module = PROXY;
     int port = 6666;
-
     SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
@@ -1737,7 +1736,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool018, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testThreadPool019, TestSize.Level1)
 {
-    int threadNum = 2;
+    int threadNum = 1;
     int queueMaxNum = 4;
 
     ThreadPool *pool = ThreadPoolInit(threadNum, queueMaxNum);
@@ -1777,4 +1776,4 @@ HWTEST_F(SoftbusCommonTest, testThreadPool020, TestSize.Level1)
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 };
-} // namespace OHOS
+}
