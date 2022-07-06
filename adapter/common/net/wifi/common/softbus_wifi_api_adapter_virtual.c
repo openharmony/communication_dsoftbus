@@ -47,7 +47,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
     (void)result;
     (void)size;
