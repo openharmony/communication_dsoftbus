@@ -29,7 +29,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     size_t size = 0;
     ChannelInfo channel = {0};
-    const char *sessionName = (const char *)ReadString(reply, &size);
+    const char *sessionName = (const char *)ReadString(data, &size);
     ReadInt32(data, &(channel.channelId));
     ReadInt32(data, &(channel.channelType));
     ReadBool(data, &(channel.isServer));
@@ -37,7 +37,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     ReadInt32(data, &(channel.peerUid));
     ReadInt32(data, &(channel.peerPid));
     channel.groupId = (char *)ReadString(data, &size);
-    ReadUint32(reply, &(channel.keyLen));
+    ReadUint32(data, &(channel.keyLen));
     channel.sessionKey = (char *)ReadBuffer(data, channel.keyLen);
     channel.peerSessionName = (char *)ReadString(data, &size);
     channel.peerDeviceId = (char *)ReadString(data, &size);
@@ -47,19 +47,19 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        channel.fd = ReadFileDescriptor(reply);
+        channel.fd = ReadFileDescriptor(data);
     }
     if (channel.channelType == CHANNEL_TYPE_UDP) {
-        ReadInt32(reply, &(channel.businessType));
-        channel.myIp = (char *)ReadString(reply, &size);
-        ReadInt32(reply, &(channel.streamType));
+        ReadInt32(data, &(channel.businessType));
+        channel.myIp = (char *)ReadString(data, &size);
+        ReadInt32(data, &(channel.streamType));
         if (channel.isServer) {
             int32_t udpPort = TransOnChannelOpened(sessionName, &channel);
             WriteInt32(reply, udpPort);
             return SOFTBUS_ERR;
         }
-        ReadInt32(reply, &(channel.peerPort));
-        channel.peerIp = (char *)ReadString(reply, &size);
+        ReadInt32(data, &(channel.peerPort));
+        channel.peerIp = (char *)ReadString(data, &size);
     }
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {

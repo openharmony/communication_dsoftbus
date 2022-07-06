@@ -49,8 +49,12 @@ typedef struct {
 
 static IClientProxy *g_serverProxy = NULL;
 
-static int32_t ClientBusCenterResultCb(Reply* info, IpcIo *reply)
+static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
 {
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientBusCenterResultCb ret: %d", ret);
+        return SOFTBUS_ERR;
+    }
     uint32_t infoSize;
     switch (info->id) {
         case GET_ALL_ONLINE_NODE_INFO:
@@ -148,6 +152,7 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteString(&request, pkgName);
+    WriteUint32(&request, infoTypeLen);
     Reply reply = {0};
     reply.id = GET_ALL_ONLINE_NODE_INFO;
     /* asynchronous invocation */
