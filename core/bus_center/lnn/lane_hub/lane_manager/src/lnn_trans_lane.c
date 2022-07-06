@@ -220,7 +220,7 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
     if ((request == NULL) || (request->type != LANE_TYPE_TRANS)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    TransOption *transRequest = &request->requestInfo.trans;
+    TransOption *transRequest = (TransOption *)&request->requestInfo.trans;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = transRequest->transType;
@@ -272,10 +272,10 @@ static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
     g_laneIdCallback->OnLaneIdDisabled(laneId);
 }
 
-static void Free(uint32_t laneId)
+static int32_t Free(uint32_t laneId)
 {
     if (Lock() != SOFTBUS_OK) {
-        return;
+        return SOFTBUS_ERR;
     }
     TransReqInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
@@ -286,10 +286,11 @@ static void Free(uint32_t laneId)
             DestroyLink(laneId, infoNode->info.networkId);
             UnbindLaneId(laneId, infoNode);
             SoftBusFree(infoNode);
-            return;
+            return SOFTBUS_OK;
         }
     }
     Unlock();
+    return SOFTBUS_OK;
 }
 
 static int32_t GetLaneReqInfo(uint32_t laneId, TransReqInfo *reqInfo)
@@ -554,7 +555,7 @@ static void Init(const ILaneIdStateListener *listener)
     }
     ListInit(&g_requestList->list);
     ListInit(&g_multiLinkList);
-    g_laneIdCallback = listener;
+    g_laneIdCallback = (ILaneIdStateListener *)listener;
 }
 
 static void Deinit(void)

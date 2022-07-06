@@ -21,6 +21,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_def.h"
+#include "lnn_lane_score.h"
 #include "lnn_map.h"
 #include "lnn_net_capability.h"
 #include "p2plink_interface.h"
@@ -326,8 +327,8 @@ static void SetConnectDeviceResult(int32_t requestId, const char *myIp, const ch
     RequestIdNode *requestItem = NULL;
     RequestIdNode *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(requestItem, nextNode, &headItem->requestIdList, RequestIdNode, node) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "SetConnectDeviceResult,
-            requestId is %d", requestItem->requestId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "SetConnectDeviceResult, requestId is %d",
+            requestItem->requestId);
         requestItem->callback.OnLaneLinkSuccess(requestItem->requestId, &linkNode->laneLinkInfo);
     }
     (void)SoftBusMutexUnlock(&g_linkRequestList->lock);
@@ -586,25 +587,21 @@ static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const L
 
 static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *isConnected)
 {
-    WifiLinkedInfo wlanInfo;
-    int32_t ret = GetLinkedInfo(&wlanInfo);
-    if (ret != WIFI_SUCCESS) {
+    LnnWlanLinkedInfo info;
+    int32_t ret = LnnGetWlanLinkedInfo(&info);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan is disconnect");
         return SOFTBUS_ERR;
     }
-    if (wlanInfo.connState == WIFI_CONNECTED) {
-        *isConnected = true;
-    } else {
-        *isConnected = false;
-    }
+    *isConnected = info.isConnected;
 
-    if (wlanInfo.band == 1) {
+    if (info.band == 1) {
         *is5GBand = false;
     } else {
         *is5GBand = true;
     }
 
-    *channel = SoftBusFrequencyToChannel(wlanInfo.frequency);
+    *channel = SoftBusFrequencyToChannel(info.frequency);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wlan current channel is %d", *channel);
     return SOFTBUS_OK;
 }
@@ -656,11 +653,10 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     bool is5GBand = false;
     bool isConnected = false;
     if (GetWlanLinkedAttribute(&channel, &is5GBand, &isConnected) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wlan linked info fail");
     }
     if (!isConnected) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan is disconnected");
-        return SOFTBUS_ERR;
     }
     FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port);
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
@@ -753,7 +749,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "the callback is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane link is failed");
         return SOFTBUS_ERR;
@@ -796,7 +792,8 @@ void DestroyLink(uint32_t reqId, const char *networkId)
         return;
     }
     uint32_t count = linkNode->cnt--;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DestroyLink, count is %d, linkNode type is %d", count, linkNode->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DestroyLink, count is %d, linkNode type is %d",
+        count, linkNode->type);
     if (count == 0 && linkNode->type == LANE_P2P) {
         if (OpenAuthConnToDisconnectP2p(headItem->headerId, networkId, headItem->pid) != SOFTBUS_OK) {
             DisconnectP2pWithoutAuthConn(networkId, headItem->pid);
