@@ -17,16 +17,24 @@
 #define LNN_LANE_SCORE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct {
+    int32_t frequency;
+    int32_t band;
+    bool isConnected;
+} LnnWlanLinkedInfo;
 
 int32_t LnnInitScore(void);
 void LnnDeinitScore(void);
 int32_t LnnGetCurrChannelScore(int32_t channelId);
 int32_t LnnStartScoring(int32_t interval);
 int32_t LnnStopScoring(void);
+int32_t LnnGetWlanLinkedInfo(LnnWlanLinkedInfo *info);
 
 #ifdef __cplusplus
 }
