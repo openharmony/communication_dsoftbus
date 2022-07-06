@@ -422,15 +422,15 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger007
-* @tc.desc: Test set unset callback and connect post disconnectAll.
+* @tc.desc: Test whether the result of obtaining the request id multiple times is the same.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
-* @tc.require: The ConnSetConnectCallback and ConnDisconnectDeviceAllConn and ConnGetConnectionInfo operates normally.
+* @tc.require: The ConnGetNewRequestId operates normally.
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 {
-    int reqId = 1;
+    int req1 = 1, req2 = 1;
     int ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
@@ -448,8 +448,10 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
     printf("bleMac: %s\n", optionInfo.info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
-    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    req1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    req2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ASSERT_LT(req1, req2);
+    ret = ConnConnectDevice(&optionInfo, req1, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId) {
         ret = ConnGetConnectionInfo(g_connId, &info);
@@ -466,7 +468,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger008
-* @tc.desc: Test set unset callback and connect post disconnect post.
+* @tc.desc: Test connect post disconnect post and multiple tests connsetconnectcallback and conndisconnectdevice.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -488,6 +490,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     connCb.OnDataReceived = DataReceivedCB;
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     info.type = CONNECT_BLE;
     (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     printf("brMac: %s\n", info.info.bleOption.bleMac);
@@ -511,6 +515,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 
         ret = ConnDisconnectDevice(g_connId);
         EXPECT_EQ(SOFTBUS_OK, ret);
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
 
         ret = ConnPostBytes(g_connId, &data);
         ASSERT_NE(SOFTBUS_OK, ret);
@@ -524,11 +530,11 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger009
-* @tc.desc: Test set unset callback and connect twice has same ConnectID.
+* @tc.desc: Test Set ConnSetConnectCallback and connect twice has same ConnectID multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
-* @tc.require: The ConnSetConnectCallback and ConnConnectDevice operates normally.
+* @tc.require: The ConnConnectDevice operates normally.
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
 {
@@ -544,7 +550,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
     connCb.OnDataReceived = DataReceivedCB;
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     optionInfo.type = CONNECT_BLE;
     (void)memcpy_s(optionInfo.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
@@ -574,7 +581,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger010
-* @tc.desc: Test set unset callback and connect twice post disconnect post.
+* @tc.desc: Test set unset callback and connect many times post disconnect post.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -614,10 +621,17 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
         data.seq = 1;
         ret = ConnPostBytes(g_connId, &data);
         EXPECT_EQ(SOFTBUS_OK, ret);
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
 
         ret = ConnDisconnectDevice(g_connId);
         EXPECT_EQ(SOFTBUS_OK, ret);
 
+        ret = ConnPostBytes(g_connId, &data);
+        ASSERT_EQ(SOFTBUS_OK, ret);
+        if (data.buf != nullptr) {
+            free(data.buf);
+        }
         ret = ConnPostBytes(g_connId, &data);
         ASSERT_EQ(SOFTBUS_OK, ret);
         if (data.buf != nullptr) {
@@ -630,7 +644,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
 
 /*
 * @tc.name: testConnmanger011
-* @tc.desc: Test set unset callback and connect twice post disconnectAll post.
+* @tc.desc: Test set unset callback and twice ConnConnectDevice and connect twice post disconnectAll post.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -658,7 +672,11 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger011, TestSize.Level1)
     int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId1, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnConnectDevice(&info, reqId1, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&info, reqId2, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

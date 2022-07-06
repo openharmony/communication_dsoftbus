@@ -228,7 +228,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager004, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager005
-* @tc.desc: test start and stop listener multi times
+* @tc.desc: Test the BR and TCP start and stop listeners multiple times.
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -1012,7 +1012,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager030
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test the BLE and TCP start and stop listeners multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -1039,7 +1039,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager031
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test BLE and TCP start and stop listeners under DIRECT_CHANNEL_CLIENT multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -1066,7 +1066,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager032
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test BLE and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_WIFI multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -1093,7 +1093,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager033
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under PROXY multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
@@ -1121,7 +1121,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager034
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under AUTH multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
@@ -1148,7 +1148,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager035
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under AUTH_P2P multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -1176,7 +1176,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager036
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_P2P multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
@@ -1203,7 +1203,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager037
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_CLIENT multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
@@ -1230,7 +1230,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager038
-* @tc.desc: Test start and stop listener multi times.
+* @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_WIFI multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
@@ -1287,7 +1287,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
 {
-    int port = 6666;
+    int port = 6667;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.info.ipListenerInfo.port = port;
@@ -1382,7 +1382,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager045
-* @tc.desc: Test CloseTcpFd function successful yes or no.
+* @tc.desc: Test whether the CloseTcpFd function runs successfully.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -1481,4 +1481,4 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager049, TestSize.Level1)
     int fd = OpenTcpServerSocket(info.info.ipListenerInfo.ip, port);
     EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);
 };
-} // namespace OHOS
+}
