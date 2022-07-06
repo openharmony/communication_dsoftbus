@@ -168,6 +168,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
 int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParcel &reply)
 {
     SubscribeInfo subInfo;
+    (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     const char *pkgName = data.ReadCString();
     subInfo.subscribeId = data.ReadInt32();
     subInfo.mode = (DiscoverMode)data.ReadInt32();
@@ -206,6 +207,7 @@ int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel
 int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     PublishInfo pubInfo;
+    (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     const char *pkgName = data.ReadCString();
     pubInfo.publishId = data.ReadInt32();
     pubInfo.mode = (DiscoverMode)data.ReadInt32();
