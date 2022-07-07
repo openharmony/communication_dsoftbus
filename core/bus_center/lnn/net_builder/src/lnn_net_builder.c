@@ -43,6 +43,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
+#define LNN_CONN_CAPABILITY_MSG_LEN 8
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 #define JSON_KEY_MASTER_UDID "MasterUdid"
 #define JSON_KEY_MASTER_WEIGHT "MasterWeight"
@@ -1354,6 +1355,21 @@ static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId,
     }
 }
 
+static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv conn capability msg, type:%d, len:%u", type, len);
+    if (type != LNN_INFO_TYPE_CAPABILITY || len != LNN_CONN_CAPABILITY_MSG_LEN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid conn capability msg.");
+        return;
+    }
+    uint64_t connCap = *((uint64_t *)msg);
+    if (LnnSetDistributedConnCapability(networkId, connCap)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update conn capability succ.");
+}
+
 int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
@@ -1372,6 +1388,10 @@ int32_t LnnInitNetBuilder(void)
     NetBuilderConfigInit();
     if (RegisterAuthCallback() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveConnCapabilityMsg) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register conn capability msg fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg) != SOFTBUS_OK) {

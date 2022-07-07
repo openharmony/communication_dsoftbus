@@ -67,6 +67,7 @@ int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *tim
 int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
+int32_t LnnSetDistributedConnCapability(const char *networkId, uint64_t connCapability);
 
 #ifdef __cplusplus
 }
