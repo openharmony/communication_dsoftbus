@@ -39,7 +39,7 @@ int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get local ip failed");
         return SOFTBUS_ERR;
     }
-    int fd = OpenTcpClientSocket(option->info.ipOption.ip, localIp, option->info.ipOption.port, isNonBlock);
+    int fd = OpenTcpClientSocket(option->socketOption.addr, localIp, option->socketOption.port, isNonBlock);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenTcpClientSocket failed");
         return SOFTBUS_ERR;
@@ -353,12 +353,23 @@ int32_t OpenAuthServer(void)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth SetSoftbusBaseListener failed");
         return AUTH_ERROR_CODE;
     }
-    char localIp[IP_MAX_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_MAX_LEN) != SOFTBUS_OK) {
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .moduleId = AUTH,
+            .port = 0,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, info.socketOption.addr, sizeof(info.socketOption.addr)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth LnnGetLocalStrInfo failed");
         return AUTH_ERROR_CODE;
     }
-    localPort = StartBaseListener(AUTH, localIp, 0, SERVER_MODE);
+
+    localPort = StartBaseListener(AUTH, &info);
     if (localPort <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth StartBaseListener failed!");
         return AUTH_ERROR_CODE;

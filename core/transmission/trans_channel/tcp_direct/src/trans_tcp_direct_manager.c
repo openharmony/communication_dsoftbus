@@ -167,8 +167,8 @@ void TransTdcDeathCallback(const char *pkgName)
 
 static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 {
-    appInfo->peerData.port = connInfo->info.ipOption.port;
-    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connInfo->info.ipOption.ip) != EOK) {
+    appInfo->peerData.port = connInfo->socketOption.port;
+    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connInfo->socketOption.addr) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo cpy fail");
         return SOFTBUS_MEM_ERR;
     }

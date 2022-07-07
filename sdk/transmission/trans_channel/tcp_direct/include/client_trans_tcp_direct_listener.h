@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t TransTdcCreateListener(int32_t fd);
 void TransTdcReleaseFd(int32_t fd);
+int32_t TransTdcStopRead(int32_t fd);
 
 #ifdef __cplusplus
 }

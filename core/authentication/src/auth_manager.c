@@ -309,21 +309,21 @@ static bool CheckConnectionInfo(const ConnectOption *option, const ConnectionInf
     switch (option->type) {
         case CONNECT_TCP: {
             if (info->type == CONNECT_TCP &&
-                strcmp(option->info.ipOption.ip, info->info.ipInfo.ip) == 0) {
+                strcmp(option->socketOption.addr, info->socketInfo.addr) == 0) {
                 return true;
             }
             break;
         }
         case CONNECT_BR: {
             if (info->type == CONNECT_BR &&
-                strcmp(option->info.brOption.brMac, info->info.brInfo.brMac) == 0) {
+                strcmp(option->brOption.brMac, info->brInfo.brMac) == 0) {
                 return true;
             }
             break;
         }
         case CONNECT_BLE: {
             if (info->type == CONNECT_BLE &&
-                strcmp(option->info.bleOption.bleMac, info->info.bleInfo.bleMac) == 0) {
+                strcmp(option->bleOption.bleMac, info->bleInfo.bleMac) == 0) {
                 return true;
             }
             break;
@@ -1344,13 +1344,13 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_TCP;
-    if (strncpy_s(option.info.ipOption.ip, IP_LEN, ip, strlen(ip))) {
+    if (strncpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), ip, strlen(ip))) {
         (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
         SoftBusFree(auth);
         return SOFTBUS_ERR;
     }
-    option.info.ipOption.port = port;
+    option.socketOption.port = port;
     auth->option = option;
     ListNodeInsert(&g_authServerHead, &auth->node);
     (void)SoftBusMutexUnlock(&g_authLock);
@@ -1626,8 +1626,8 @@ static int32_t AuthOpenWifiConn(const AuthConnInfo *info, uint32_t requestId, co
         if (!IsWiFiLink(item)) {
             continue;
         }
-        if (strncmp(item->option.info.ipOption.ip, info->info.ipInfo.ip, strlen(info->info.ipInfo.ip)) == 0 &&
-            item->option.info.ipOption.port == info->info.ipInfo.port) {
+        if (strncmp(item->option.socketOption.addr, info->info.ipInfo.ip, strlen(info->info.ipInfo.ip)) == 0 &&
+            item->option.socketOption.port == info->info.ipInfo.port) {
             authId = item->authId;
             (void)SoftBusMutexUnlock(&g_authLock);
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "open wifi conn succ, authId = %" PRId64 ".", item->authId);
@@ -1639,8 +1639,8 @@ static int32_t AuthOpenWifiConn(const AuthConnInfo *info, uint32_t requestId, co
         if (!IsWiFiLink(item)) {
             continue;
         }
-        if (strncmp(item->option.info.ipOption.ip, info->info.ipInfo.ip, strlen(info->info.ipInfo.ip)) == 0 &&
-            item->option.info.ipOption.port == info->info.ipInfo.port) {
+        if (strncmp(item->option.socketOption.addr, info->info.ipInfo.ip, strlen(info->info.ipInfo.ip)) == 0 &&
+            item->option.socketOption.port == info->info.ipInfo.port) {
             authId = item->authId;
             (void)SoftBusMutexUnlock(&g_authLock);
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "open wifi conn succ, authId = %" PRId64 ".", item->authId);
@@ -1763,7 +1763,7 @@ static bool IsNeedVerifyAgain(ConnectOption *option, uint32_t requestId,
         }
         (void)SoftBusMutexUnlock(&g_authLock);
         if (auth->option.type == CONNECT_BR) {
-            option->info.brOption.sideType = info.isServer ? CONN_SIDE_SERVER : CONN_SIDE_CLIENT;
+            option->brOption.sideType = info.isServer ? CONN_SIDE_SERVER : CONN_SIDE_CLIENT;
         }
         if (TryCreateConnection(option, requestId, callback) == SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth br/ble connection exist, no neeed verify again.");
@@ -1820,13 +1820,14 @@ int32_t AuthStartListening(const AuthListennerInfo *info)
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
-            if (strcpy_s(local.info.ipListenerInfo.ip, sizeof(local.info.ipListenerInfo.ip),
+            if (strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr),
                 info->info.ipInfo.ip) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s ip failed");
                 return SOFTBUS_MEM_ERR;
             }
-            local.info.ipListenerInfo.port = info->info.ipInfo.port;
-            local.info.ipListenerInfo.moduleId = AUTH_P2P;
+            local.socketOption.port = info->info.ipInfo.port;
+            local.socketOption.moduleId = AUTH_P2P;
+            local.socketOption.protocol = LNN_PROTOCOL_IP;
             return ConnStartLocalListening(&local);
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport auth link type, type = %d.", info->type);
@@ -1844,7 +1845,8 @@ int32_t AuthStopListening(const AuthListennerInfo *info)
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
-            local.info.ipListenerInfo.moduleId = AUTH_P2P;
+            local.socketOption.moduleId = AUTH_P2P;
+            local.socketOption.protocol = LNN_PROTOCOL_IP;
             return ConnStopLocalListening(&local);
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport auth link type, type = %d.", info->type);

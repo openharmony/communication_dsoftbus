@@ -51,7 +51,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    int32_t fd = OpenConnTcp(connInfo->info.ipOption.ip, connInfo->info.ipOption.port);
+    int32_t fd = OpenConnTcp(connInfo->socketOption.addr, connInfo->socketOption.port);
     if (fd < 0) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel connect fail");

@@ -278,5 +278,5 @@ int32_t TransDisableSessionListener(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid handle.");
         return SOFTBUS_ERR;
     }
-    return DelTrigger(DIRECT_CHANNEL_CLIENT, channel.detail.fd, READ_TRIGGER);
+    return TransTdcStopRead(channel.detail.fd);
 }

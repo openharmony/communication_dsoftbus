@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <pthread.h>
+#include <securec.h>
 
 #include "common_list.h"
 #include "softbus_base_listener.h"
@@ -76,12 +77,12 @@ void SoftbusCommonTest::TearDown(void)
     g_count = 0;
 }
 
-int32_t ConnectEvent(int32_t events, int32_t cfd, const char *ip)
+int32_t ConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr)
 {
     return 0;
 }
 
-int32_t DataEvent(int32_t events, int32_t fd)
+int32_t DataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     return 0;
 }
@@ -110,32 +111,33 @@ HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
 {
     int i;
     int port = 6666;
-    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+    for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(i), nullptr));
     }
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            free(setListener);
-            return;
-        }
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        SoftbusBaseListener getListener = {0};
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {
+                .addr = "127.0.0.1",
+                .port = port,
+                .moduleId = static_cast<ListenerModule>(i),
+                .protocol = LNN_PROTOCOL_IP
+            }
+        };
         ++port;
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
-        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
-        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
-        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), &info));
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener.onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener.onDataEvent);
         ASSERT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
-        if (getListener != nullptr) {
-            free(getListener);
-        }
     }
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(UNUSE_BUTT, setListener));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(LISTENER_MODULE_DYNAMIC_START, setListener));
     free(setListener);
 };
 
@@ -155,13 +157,28 @@ HWTEST_F(SoftbusCommonTest, testBaseListener003, TestSize.Level1)
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(module, listener));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(module, nullptr, port, SERVER_MODE));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(module, "127.0.0.1", -1, SERVER_MODE));
-    EXPECT_EQ(port, StartBaseListener(module, "127.0.0.1", port, SERVER_MODE));
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(module, "127.0.0.1", port, SERVER_MODE));
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = port,
+            .moduleId = module,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(module, &info));
+
+    ASSERT_EQ(strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), "127.0.0.1"), EOK);
+    info.socketOption.port = -1;
+
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(module, &info));
+    info.socketOption.port = port;
+    EXPECT_EQ(port, StartBaseListener(module, &info));
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(module, &info));
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
-    DestroyBaseListener(module);
     free(listener);
 };
 
@@ -199,7 +216,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
     int ret;
     int module;
     int port = 6666;
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
         if (listener == nullptr) {
             for (int i = 0; i < module; i++) {
@@ -209,16 +226,21 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
             }
             continue;
         }
+
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {.addr = "127.0.0.1", .port = port, .moduleId = static_cast<ListenerModule>(module), .protocol = LNN_PROTOCOL_IP}
+        };
+
         listener->onConnectEvent = ConnectEvent;
         listener->onDataEvent = DataEvent;
         ret = SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener);
         EXPECT_EQ(SOFTBUS_OK, ret);
-        ret = StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1",
-            port + static_cast<ListenerModule>(module), SERVER_MODE);
+        ret = StartBaseListener(static_cast<ListenerModule>(module), &info);
         EXPECT_EQ(port + module, ret);
         free(listener);
     }
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         ret = StopBaseListener(static_cast<ListenerModule>(module));
         EXPECT_EQ(SOFTBUS_OK, ret);
         DestroyBaseListener(static_cast<ListenerModule>(module));
@@ -240,7 +262,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener006, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, AddTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, DelTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
     }
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_INVALID_PARAM, AddTrigger(static_cast<ListenerModule>(module), INVALID_FD,
                 static_cast<TriggerType>(triggerType)));
@@ -261,7 +283,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener007, TestSize.Level1)
     int module;
     int triggerType;
     int fd = 1;
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
@@ -284,13 +306,18 @@ HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
     int fd = 1;
     int port = 6666;
 
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         SoftbusBaseListener* listener = (SoftbusBaseListener*)malloc(sizeof(SoftbusBaseListener));
         ASSERT_TRUE(listener != nullptr);
         listener->onConnectEvent = ConnectEvent;
         listener->onDataEvent = DataEvent;
+
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {.addr = "127.0.0.1", .port = port, .moduleId = static_cast<ListenerModule>(module), .protocol = LNN_PROTOCOL_IP}
+        };
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), &info));
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
@@ -332,15 +359,9 @@ HWTEST_F(SoftbusCommonTest, testBaseListener009, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener010, TestSize.Level1)
 {
-    SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    if (getListener == nullptr) {
-        return;
-    }
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), getListener));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(PROXY - 1), getListener));
-    if (getListener != nullptr) {
-        free(getListener);
-    }
+    SoftbusBaseListener getListener;
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), &getListener));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(static_cast<ListenerModule>(PROXY - 1), &getListener));
 };
 
 /*
@@ -400,7 +421,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         DestroyBaseListener(static_cast<ListenerModule>(i));
     }
@@ -418,13 +439,9 @@ HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener014, TestSize.Level1)
 {
     int i;
-    SoftbusBaseListener *getListener = nullptr;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            return;
-        }
-        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+    SoftbusBaseListener getListener = {0};
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
     }
 };
 
@@ -439,27 +456,20 @@ HWTEST_F(SoftbusCommonTest, testBaseListener014, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener015, TestSize.Level1)
 {
     int i;
-    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+    for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(static_cast<ListenerModule>(i), nullptr));
     }
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            free(setListener);
-            return;
-        }
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        SoftbusBaseListener getListener = {0};
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
-        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
-        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener.onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener.onDataEvent);
         DestroyBaseListener(static_cast<ListenerModule>(i));
-        if (getListener != nullptr) {
-            free(getListener);
-        }
     }
     free(setListener);
 };
@@ -489,7 +499,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener016, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener017, TestSize.Level1)
 {
     int i;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
     }
 };
@@ -509,7 +519,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener018, TestSize.Level1)
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
@@ -533,7 +543,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
@@ -554,18 +564,17 @@ HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener020, TestSize.Level1)
 {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
     EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, SERVER_MODE));
+        StartBaseListener(static_cast<ListenerModule>(PROXY - 1), &info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, SERVER_MODE));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, CLIENT_MODE));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, CLIENT_MODE));
-    EXPECT_EQ(
-        SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(PROXY - 1), "127.0.0.1", 666, UNSET_MODE));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), "127.0.0.1", 666, UNSET_MODE));
+        StartBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), &info));
 };
 
 /*
@@ -578,11 +587,17 @@ HWTEST_F(SoftbusCommonTest, testBaseListener020, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener021, TestSize.Level1)
 {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "",
+                         .port = 666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
     int i;
-    for (i = PROXY; i <= UNUSE_BUTT; i++) {
-        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, SERVER_MODE));
-        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, CLIENT_MODE));
-        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), nullptr, 666, UNSET_MODE));
+    for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), &info));
     }
 };
 
@@ -596,14 +611,18 @@ HWTEST_F(SoftbusCommonTest, testBaseListener021, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener022, TestSize.Level1)
 {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = -1,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
     int i;
-    for (i = PROXY; i <= UNUSE_BUTT; i++) {
+    for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
         EXPECT_EQ(
-            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, SERVER_MODE));
-        EXPECT_EQ(
-            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, CLIENT_MODE));
-        EXPECT_EQ(
-            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", -1, UNSET_MODE));
+            SOFTBUS_INVALID_PARAM, StartBaseListener(static_cast<ListenerModule>(i), &info));
     }
 };
 
@@ -617,11 +636,17 @@ HWTEST_F(SoftbusCommonTest, testBaseListener022, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
 {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = -1,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
     int i;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, SERVER_MODE));
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, CLIENT_MODE));
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", 666, UNSET_MODE));
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), &info));
     }
 };
 
@@ -635,16 +660,23 @@ HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
 {
-    int i;
-    int port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+    for (int i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        info.socketOption.port++;
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        ++port;
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(info.socketOption.port, StartBaseListener(static_cast<ListenerModule>(i), &info));
         DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
@@ -660,24 +692,28 @@ HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener025, TestSize.Level1)
 {
-    int i;
-    int port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        ++port;
-        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            free(setListener);
-            return;
-        }
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+
+    for (int i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.port++;
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        SoftbusBaseListener getListener = {0};
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(info.socketOption.port, StartBaseListener(static_cast<ListenerModule>(i), &info));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), &info));
         DestroyBaseListener(static_cast<ListenerModule>(i));
-        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
+        EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
     }
     free(setListener);
 };
@@ -707,7 +743,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener026, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener027, TestSize.Level1)
 {
     int i;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_ERR, StopBaseListener(static_cast<ListenerModule>(i)));
     }
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(UNUSE_BUTT));
@@ -723,27 +759,29 @@ HWTEST_F(SoftbusCommonTest, testBaseListener027, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
 {
-    int i;
-    int port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            free(setListener);
-            return;
-        }
-        ++port;
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+
+    for (int i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        info.socketOption.port++;
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
+        SoftbusBaseListener getListener = {0};
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
-        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
-        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
-        if (getListener != nullptr) {
-            free(getListener);
-        }
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener.onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener.onDataEvent);
+
+        EXPECT_EQ(info.socketOption.port, StartBaseListener(static_cast<ListenerModule>(i), &info));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
         DestroyBaseListener(static_cast<ListenerModule>(i));
     }
@@ -761,27 +799,30 @@ HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
 HWTEST_F(SoftbusCommonTest, testBaseListener029, TestSize.Level1)
 {
     int i;
-    int port = 6666;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
     setListener->onConnectEvent = ConnectEvent;
     setListener->onDataEvent = DataEvent;
-    for (i = PROXY; i < UNUSE_BUTT; i++) {
-        SoftbusBaseListener *getListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-        if (getListener == nullptr) {
-            free(setListener);
-            return;
-        }
-        ++port;
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        SoftbusBaseListener getListener = {0};
+        info.socketOption.port++;
+        info.socketOption.moduleId = static_cast<ListenerModule>(i);
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), getListener));
-        EXPECT_EQ(setListener->onConnectEvent, getListener->onConnectEvent);
-        EXPECT_EQ(setListener->onDataEvent, getListener->onDataEvent);
-        if (getListener != nullptr) {
-            free(getListener);
-        }
+        EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
+        EXPECT_EQ(setListener->onConnectEvent, getListener.onConnectEvent);
+        EXPECT_EQ(setListener->onDataEvent, getListener.onDataEvent);
+
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
-        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(i), &info));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
         DestroyBaseListener(static_cast<ListenerModule>(i));
@@ -802,15 +843,25 @@ HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
 {
     int module;
     int fd = 1;
-    int port = 6666;
 
-    for (module = PROXY; module < UNUSE_BUTT; module++) {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+
+    for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
+        info.socketOption.port++;
+        info.socketOption.moduleId = static_cast<ListenerModule>(module);
+
         SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
         ASSERT_TRUE(listener != nullptr);
         listener->onConnectEvent = ConnectEvent;
         listener->onDataEvent = DataEvent;
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-        EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+        EXPECT_EQ(info.socketOption.port, StartBaseListener(static_cast<ListenerModule>(module), &info));
 
         EXPECT_EQ(SOFTBUS_INVALID_PARAM,
             AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(READ_TRIGGER - 1)));
@@ -837,18 +888,24 @@ HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
 {
-    int module = PROXY;
-    int port = 6666;
+    ListenerModule module = PROXY;
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = 6666,
+                         .moduleId = module,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
     SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(module, listener));
+    EXPECT_EQ(info.socketOption.port, StartBaseListener(module, &info));
 
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
+    DestroyBaseListener(module);
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(module, &info));
     free(listener);
 };
 
@@ -862,31 +919,47 @@ HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
 {
-    int port = 6666;
+    const int port = 6666;
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = port,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
 
     SoftbusBaseListener *listener1 = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener1 != nullptr);
     listener1->onConnectEvent = ConnectEvent;
     listener1->onDataEvent = DataEvent;
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(PROXY, listener1));
-    EXPECT_EQ(PROXY + port, StartBaseListener(PROXY, "127.0.0.1", PROXY + port, SERVER_MODE));
+    EXPECT_EQ(port, StartBaseListener(PROXY, &info));
 
     SoftbusBaseListener *listener2 = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener2 != nullptr);
     listener2->onConnectEvent = ConnectEvent;
     listener2->onDataEvent = DataEvent;
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(AUTH, listener2));
-    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+
+    info.socketOption.moduleId = AUTH;
+    info.socketOption.port = AUTH + port;
+    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, &info));
 
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(PROXY));
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
     DestroyBaseListener(PROXY);
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(PROXY, "127.0.0.1", PROXY + port, SERVER_MODE));
-    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+
+    info.socketOption.moduleId = PROXY;
+    info.socketOption.port = PROXY + port;
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(PROXY, &info));
+
+    info.socketOption.moduleId = AUTH;
+    info.socketOption.port = AUTH + port;
+    EXPECT_EQ(AUTH + port, StartBaseListener(AUTH, &info));
 
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
     DestroyBaseListener(AUTH);
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(AUTH, "127.0.0.1", AUTH + port, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(AUTH, &info));
     free(listener1);
     free(listener2);
 };
@@ -901,17 +974,26 @@ HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
 {
-    int module = PROXY;
-    int port = 6666;
+    ListenerModule module = PROXY;
+    const int port = 6666;
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = port,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
+
     SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(module, listener));
+    EXPECT_EQ(port, StartBaseListener(module, &info));
 
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    DestroyBaseListener(module);
+    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(module, &info));
     free(listener);
 };
 
@@ -925,17 +1007,25 @@ HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
  */
 HWTEST_F(SoftbusCommonTest, testBaseListener034, TestSize.Level1)
 {
-    int module = PROXY;
+    ListenerModule module = PROXY;
     int triggerType = READ_TRIGGER;
     int fd = 1;
-    int port = 6666;
+    const int port = 6666;
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = port,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
 
     SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), &info));
 
     DestroyBaseListener(static_cast<ListenerModule>(module));
     EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
@@ -955,189 +1045,25 @@ HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
     int module = PROXY;
     int triggerType = READ_TRIGGER;
     int fd = 1;
-    int port = 6666;
+    const int port = 6666;
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {.addr = "127.0.0.1",
+                         .port = port,
+                         .moduleId = PROXY,
+                         .protocol = LNN_PROTOCOL_IP}
+    };
 
     SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(listener != nullptr);
     listener->onConnectEvent = ConnectEvent;
     listener->onDataEvent = DataEvent;
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
+    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), &info));
 
     DestroyBaseListener(static_cast<ListenerModule>(module));
     EXPECT_EQ(SOFTBUS_ERR, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener036
- * @tc.desc: Test StartBaseListener after ResetBaseListener.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StartBaseListener operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener036, TestSize.Level1)
-{
-    int module = PROXY;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListener(static_cast<ListenerModule>(module));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener037
- * @tc.desc: Test StopBaseListener after ResetBaseListener.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The StopBaseListener operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener037, TestSize.Level1)
-{
-    int module = PROXY;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListener(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener038
- * @tc.desc: Test AddTrigger DelTrigger after ResetBaseListener.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The AddTrigger and DelTrigger operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener038, TestSize.Level1)
-{
-    int module = PROXY;
-    int triggerType = READ_TRIGGER;
-    int fd = 1;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListener(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
-    EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
-
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener039
- * @tc.desc: Test StartBaseListener after ResetBaseListenerSet.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The StartBaseListener operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener039, TestSize.Level1)
-{
-    int module = PROXY;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListenerSet(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener040
- * @tc.desc: Test StopBaseListener after ResetBaseListenerSet.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The StopBaseListener operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener040, TestSize.Level1)
-{
-    int module = PROXY;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListenerSet(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-
-    DestroyBaseListener(static_cast<ListenerModule>(module));
-    free(listener);
-};
-
-/*
- * @tc.name: testBaseListener041
- * @tc.desc: Test AddTrigger DelTrigger after ResetBaseListenerSet.
- * @tc.in: Test module, Test number, Test Levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The AddTrigger and DelTrigger operates normally.
- */
-HWTEST_F(SoftbusCommonTest, testBaseListener041, TestSize.Level1)
-{
-    int module = PROXY;
-    int triggerType = READ_TRIGGER;
-    int fd = 1;
-    int port = 6666;
-
-    SoftbusBaseListener *listener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
-    ASSERT_TRUE(listener != nullptr);
-    listener->onConnectEvent = ConnectEvent;
-    listener->onDataEvent = DataEvent;
-    EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
-    EXPECT_EQ(port, StartBaseListener(static_cast<ListenerModule>(module), "127.0.0.1", port, SERVER_MODE));
-
-    ResetBaseListenerSet(static_cast<ListenerModule>(module));
-    EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
-    EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
-
-    EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-    DestroyBaseListener(static_cast<ListenerModule>(module));
     free(listener);
 };
 

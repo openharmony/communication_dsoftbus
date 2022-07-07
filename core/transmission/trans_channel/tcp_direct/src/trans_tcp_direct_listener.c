@@ -32,8 +32,6 @@
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 
-static SoftbusBaseListener g_sessionListener;
-
 uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 {
     switch (type) {
@@ -204,8 +202,9 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     TransSrvDelDataBufNode(channelId);
 }
 
-static int32_t OnDataEvent(int events, int fd)
+static int32_t OnDataEvent(ListenerModule module, int events, int fd)
 {
+    (void)module;
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnDataEvent malloc fail.");
@@ -255,7 +254,7 @@ static int32_t OnDataEvent(int events, int fd)
     SoftBusFree(conn);
     return ret;
 }
-
+#if 0
 static int32_t OnConnectEventWifi(int32_t events, int32_t cfd, const char *ip)
 {
     return OnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, events, cfd, ip);
@@ -275,40 +274,33 @@ static int32_t OnDataEventP2P(int32_t events, int32_t fd)
 {
     return OnDataEvent(events, fd);
 }
+#endif
 
-int32_t TransTdcStartSessionListener(const char *ip, const int port)
+int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
-    if (ip == NULL || port < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Invalid para.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    g_sessionListener.onConnectEvent = OnConnectEventWifi;
-    g_sessionListener.onDataEvent = OnDataEventWifi;
+    static SoftbusBaseListener g_sessionListener = {
+        .onConnectEvent = OnConnectEvent,
+        .onDataEvent = OnDataEvent
+    };
 
-    int32_t ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_WIFI, &g_sessionListener);
+    int32_t ret = SetSoftbusBaseListener(module, &g_sessionListener);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Set BaseListener Failed.", __func__);
         return ret;
     }
-    int serverPort = StartBaseListener(DIRECT_CHANNEL_SERVER_WIFI, ip, port, SERVER_MODE);
+    int serverPort = StartBaseListener(module, info);
     return serverPort;
 }
 
-int32_t TransTdcStopSessionListener(void)
+int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc();
-    int32_t ret = StopBaseListener(DIRECT_CHANNEL_SERVER_WIFI);
-    DestroyBaseListener(DIRECT_CHANNEL_SERVER_WIFI);
+    int32_t ret = StopBaseListener(module);
+    DestroyBaseListener(module);
     return ret;
-}
-
-int32_t GetTdcBaseListener(SoftbusBaseListener *listener)
-{
-    if (listener == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    listener->onConnectEvent = OnConnectEventP2P;
-    listener->onDataEvent = OnDataEventP2P;
-    return SOFTBUS_OK;
 }

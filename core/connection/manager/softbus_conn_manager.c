@@ -21,10 +21,11 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_base_listener.h"
 #include "softbus_ble_connection.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_datahead_transform.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -445,6 +446,12 @@ int32_t ConnServerInit(void)
         return SOFTBUS_ERR;
     }
 
+    int32_t ret = InitBaseListener();
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
+        return ret;
+    }
+
     g_connManagerCb.OnConnected = ConnManagerConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
     g_connManagerCb.OnDataReceived = ConnManagerRecvData;
@@ -500,6 +507,8 @@ void ConnServerDeinit(void)
         DestroySoftBusList(g_listenerList);
         g_listenerList = NULL;
     }
+
+    DeinitBaseListener();
 
     g_isInited = false;
 }

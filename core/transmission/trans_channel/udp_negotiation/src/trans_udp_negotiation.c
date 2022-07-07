@@ -608,8 +608,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 
 static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *appInfo, int32_t *channelId)
 {
-    appInfo->peerData.port = connOpt->info.ipOption.port;
-    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connOpt->info.ipOption.ip) != EOK) {
+    appInfo->peerData.port = connOpt->socketOption.port;
+    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connOpt->socketOption.addr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
 

@@ -336,21 +336,21 @@ int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info)
     info->type = connInfo.type;
     switch (info->type) {
         case CONNECT_BR: {
-            (void)memcpy_s(info->info.brOption.brMac, sizeof(info->info.brOption.brMac),
-                connInfo.info.brInfo.brMac, sizeof(connInfo.info.brInfo.brMac));
+            (void)memcpy_s(info->brOption.brMac, sizeof(info->brOption.brMac),
+                connInfo.brInfo.brMac, sizeof(connInfo.brInfo.brMac));
             break;
         }
         case CONNECT_BLE: {
-            (void)memcpy_s(info->info.bleOption.bleMac, sizeof(info->info.bleOption.bleMac),
-                connInfo.info.bleInfo.bleMac, sizeof(connInfo.info.bleInfo.bleMac));
-            (void)memcpy_s(info->info.bleOption.deviceIdHash, sizeof(info->info.bleOption.deviceIdHash),
-                connInfo.info.bleInfo.deviceIdHash, sizeof(connInfo.info.bleInfo.deviceIdHash));
+            (void)memcpy_s(info->bleOption.bleMac, sizeof(info->bleOption.bleMac),
+                connInfo.bleInfo.bleMac, sizeof(connInfo.bleInfo.bleMac));
+            (void)memcpy_s(info->bleOption.deviceIdHash, sizeof(info->bleOption.deviceIdHash),
+                connInfo.bleInfo.deviceIdHash, sizeof(connInfo.bleInfo.deviceIdHash));
             break;
         }
         case CONNECT_TCP: {
-            (void)memcpy_s(info->info.ipOption.ip, sizeof(info->info.ipOption.ip),
-                connInfo.info.ipInfo.ip, sizeof(connInfo.info.ipInfo.ip));
-            info->info.ipOption.port = connInfo.info.ipInfo.port;
+            (void)memcpy_s(info->socketOption.addr, sizeof(info->socketOption.addr),
+                connInfo.socketInfo.addr, sizeof(connInfo.socketInfo.addr));
+            info->socketOption.port = connInfo.socketInfo.port;
             break;
         }
         default: {
@@ -413,7 +413,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpItem, &g_proxyConnectionList->list, ProxyConnInfo, node) {
-        if (strcmp(item->connInfo.info.brOption.brMac, chan->connInfo.info.brOption.brMac) == 0) {
+        if (strcmp(item->connInfo.brOption.brMac, chan->connInfo.brOption.brMac) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             if (item->state == PROXY_CHANNEL_STATUS_PYH_CONNECTED) {
@@ -504,20 +504,20 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
         }
         switch (connInfo->type) {
             case CONNECT_TCP: {
-                if (strcmp(connInfo->info.ipOption.ip, item->connInfo.info.ipOption.ip) == 0 &&
-                    connInfo->info.ipOption.port == item->connInfo.info.ipOption.port) {
+                if (strcmp(connInfo->socketOption.addr, item->connInfo.socketOption.addr) == 0 &&
+                    connInfo->socketOption.port == item->connInfo.socketOption.port) {
                     find = true;
                 }
                 break;
             }
             case CONNECT_BR: {
-                if (strcmp(connInfo->info.brOption.brMac, item->connInfo.info.brOption.brMac) == 0) {
+                if (strcmp(connInfo->brOption.brMac, item->connInfo.brOption.brMac) == 0) {
                     find = true;
                 }
                 break;
             }
             case CONNECT_BLE:
-                if (strcmp(connInfo->info.bleOption.bleMac, item->connInfo.info.bleOption.bleMac) == 0) {
+                if (strcmp(connInfo->bleOption.bleMac, item->connInfo.bleOption.bleMac) == 0) {
                     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy error");
                     find = true;
                 }
@@ -682,7 +682,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     }
     result.OnConnectFailed = TransOnConnectFailed;
     result.OnConnectSuccessed = TransOnConnectSuccessed;
-    connChan->connInfo.info.ipOption.moduleId = PROXY;
+    connChan->connInfo.socketOption.moduleId = PROXY;
     ret = ConnConnectDevice(&(connChan->connInfo), reqId, &result);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");

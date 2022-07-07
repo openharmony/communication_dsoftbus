@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,25 +55,46 @@ typedef enum {
     CONNECT_TYPE_MAX
 } ConnectType;
 
+#define CONN_INVALID_LISTENER_MODULE_ID 0xffff
+#define CONN_DYNAMIC_LISTENER_MODULE_COUNT 5
+
+typedef enum {
+    PROXY = 0,
+    AUTH,
+    AUTH_P2P,
+    DIRECT_CHANNEL_SERVER_P2P,
+    DIRECT_CHANNEL_CLIENT,
+    DIRECT_CHANNEL_SERVER_WIFI,
+
+    LISTENER_MODULE_DYNAMIC_START,
+    LISTENER_MODULE_DYNAMIC_END = LISTENER_MODULE_DYNAMIC_START + CONN_DYNAMIC_LISTENER_MODULE_COUNT,
+    UNUSE_BUTT,
+} ListenerModule;
+
+struct BrInfo {
+    char brMac[BT_MAC_LEN];
+};
+struct BleInfo {
+    char bleMac[BT_MAC_LEN];
+    char deviceIdHash[UDID_HASH_LEN];
+};
+struct SocketInfo {
+    char addr[MAX_SOCKET_ADDR_LEN];
+    ProtocolType protocol;
+    int32_t port;
+    int32_t fd;
+    int32_t moduleId; /* For details, see {@link ListenerModule}. */
+};
+
 typedef struct {
     int32_t isAvailable;
     int32_t isServer;
     ConnectType type;
     union {
-        struct BrInfo {
-            char brMac[BT_MAC_LEN];
-        } brInfo;
-        struct BleInfo {
-            char bleMac[BT_MAC_LEN];
-            char deviceIdHash[UDID_HASH_LEN];
-        } bleInfo;
-        struct IpInfo {
-            char ip[IP_LEN];
-            int32_t port;
-            int32_t fd;
-            int32_t moduleId; /* For details, see {@link ListenerModule}. */
-        } ipInfo;
-    } info;
+        struct BrInfo brInfo;
+        struct BleInfo bleInfo;
+        struct SocketInfo socketInfo;
+    };
 } ConnectionInfo;
 
 typedef struct {
@@ -108,34 +130,43 @@ typedef struct {
     void (*OnConnectFailed)(uint32_t requestId, int32_t reason);
 } ConnectResult;
 
-typedef struct {
-    ConnectType type;
-    union {
-        struct BrOption {
-            char brMac[BT_MAC_LEN];
-            ConnSideType sideType;
-        } brOption;
-        struct BleOption {
-            char bleMac[BT_MAC_LEN];
-            char deviceIdHash[UDID_HASH_LEN];
-        } bleOption;
-        struct IpOption {
-            char ip[IP_LEN];
-            int32_t port;
-            int32_t moduleId; /* For details, see {@link ListenerModule}. */
-        } ipOption;
-    } info;
-} ConnectOption;
+struct BrOption {
+    char brMac[BT_MAC_LEN];
+    ConnSideType sideType;
+};
+
+struct BleOption {
+    char bleMac[BT_MAC_LEN];
+    char deviceIdHash[UDID_HASH_LEN];
+};
+
+struct SocketOption {
+    char addr[MAX_SOCKET_ADDR_LEN];
+    int32_t port;
+    int32_t moduleId; /* For details, see {@link ListenerModule}. */
+};
 
 typedef struct {
     ConnectType type;
     union {
-        struct IpListenerInfo {
-            char ip[IP_LEN];
-            int32_t port;
-            int32_t moduleId; /* For details, see {@link ListenerModule}. */
-        } ipListenerInfo;
-    } info;
+        struct BrOption brOption;
+        struct BleOption bleOption;
+        struct SocketOption socketOption;
+    };
+} ConnectOption;
+
+struct ListenerSocketOption {
+    char addr[MAX_SOCKET_ADDR_LEN];
+    int32_t port;
+    ProtocolType protocol;
+    ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
+};
+
+typedef struct {
+    ConnectType type;
+    union {
+        struct ListenerSocketOption socketOption;
+    };
 } LocalListenerInfo;
 
 /**

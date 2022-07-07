@@ -219,14 +219,14 @@ static int32_t GetAuthConnectOption(int32_t channelId, uint32_t cipherFlag, Conn
         SoftBusFree(conn);
         return SOFTBUS_OK;
     }
-    if (strcpy_s(option->info.ipOption.ip, IP_LEN, conn->appInfo.peerData.ip) != 0) {
+    if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), conn->appInfo.peerData.ip) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
 
     option->type = CONNECT_TCP;
-    option->info.ipOption.port = conn->appInfo.peerData.port;
+    option->socketOption.port = conn->appInfo.peerData.port;
     SoftBusFree(conn);
     return SOFTBUS_OK;
 }
