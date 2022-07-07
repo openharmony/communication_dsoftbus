@@ -556,9 +556,10 @@ int64_t AuthVerifyDevice(AuthVerifyModule moduleId, const ConnectionAddr *addr)
             return SOFTBUS_ERR;
         }
     } else if (option.type == CONNECT_BR || option.type == CONNECT_BLE) {
+        int64_t authId = auth->authId;
         if (ConnConnectDevice(&option, auth->requestId, &g_connResult) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnConnectDevice failed");
-            DeleteAuth(auth);
+            (void)AuthHandleLeaveLNN(authId);
             return SOFTBUS_ERR;
         }
     } else {
@@ -1645,9 +1646,10 @@ static int32_t TryCreateConnection(const ConnectOption *option, uint32_t request
         .OnConnectSuccessed = OnConnectSuccessed,
         .OnConnectFailed = OnConnectFailed,
     };
+    int64_t authId = conn->authId;
     if (ConnConnectDevice(option, conn->requestId, &result) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "conn connect device failed.");
-        DeleteAuth(conn);
+        (void)AuthHandleLeaveLNN(authId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1731,10 +1733,10 @@ static int32_t AuthOpenCommonConn(const AuthConnInfo *info, uint32_t requestId, 
         return SOFTBUS_ERR;
     }
     auth->connCb = *callback;
-
+    int64_t authId = auth->authId;
     if (ConnConnectDevice(&option, auth->requestId, &g_connResult) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "conn connect device failed.");
-        DeleteAuth(auth);
+        (void)AuthHandleLeaveLNN(authId);
         return SOFTBUS_ERR;
     }
 
