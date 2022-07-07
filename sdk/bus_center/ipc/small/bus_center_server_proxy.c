@@ -52,7 +52,7 @@ static IClientProxy *g_serverProxy = NULL;
 static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
 {
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientBusCenterResultCb ret: %d", ret);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientBusCenterResultCb failed. ret: %d", ret);
         return SOFTBUS_ERR;
     }
     uint32_t infoSize;
