@@ -149,10 +149,10 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if (transType == LANE_T_BYTE) {
-        return CHANNEL_TYPE_TCP_DIRECT;
+    } else if (transType == LANE_T_MSG) {
+        return CHANNEL_TYPE_PROXY;
     }
-    return CHANNEL_TYPE_PROXY;
+    return CHANNEL_TYPE_TCP_DIRECT;
 }
 
 static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt,

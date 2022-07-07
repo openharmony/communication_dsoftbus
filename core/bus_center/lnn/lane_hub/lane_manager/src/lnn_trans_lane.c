@@ -283,7 +283,7 @@ static int32_t Free(uint32_t laneId)
             ListDelete(&infoNode->node);
             g_requestList->cnt--;
             Unlock();
-            DestroyLink(laneId, infoNode->info.networkId);
+            DestroyLink(laneId, infoNode->type, infoNode->info.pid, infoNode->info.networkId);
             UnbindLaneId(laneId, infoNode);
             SoftBusFree(infoNode);
             return SOFTBUS_OK;
