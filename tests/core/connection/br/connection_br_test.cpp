@@ -171,8 +171,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger003, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BR;
-    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.info.brOption.brMac);
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.brOption.brMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -251,8 +251,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     optionInfo.type = CONNECT_BR;
-    (void)memcpy_s(optionInfo.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", optionInfo.info.brOption.brMac);
+    (void)memcpy_s(optionInfo.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", optionInfo.brOption.brMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -317,7 +317,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger007, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BR;
-    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -369,7 +369,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger008, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     optionInfo.type = CONNECT_BR;
-    (void)memcpy_s(optionInfo.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    (void)memcpy_s(optionInfo.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -418,8 +418,8 @@ HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BR;
-    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.info.brOption.brMac);
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.brOption.brMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -475,7 +475,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BR;
-    (void)memcpy_s(info.info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
 

@@ -458,7 +458,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger008, TestSize.Level1)
     ConnectResult connRet;
     ConnectOption info;
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, testBleMac, BT_MAC_LEN);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, testBleMac, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     uint32_t reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);

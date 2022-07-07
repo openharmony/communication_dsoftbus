@@ -33,9 +33,11 @@ typedef struct {
     SoftBusMutex lock;
     bool lockInit;
 } SoftBusTcpListenerLock;
+
 static SoftBusTcpListenerLock g_lock = {
     .lockInit = false,
 };
+
 
 static void TdcLockInit(void)
 {
@@ -48,16 +50,18 @@ static void TdcLockInit(void)
     }
     return;
 }
-static int32_t OnConnectEvent(int events, int cfd, const char *ip)
+static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
 {
+    (void)module;
     (void)events;
     (void)cfd;
-    (void)ip;
+    (void)clientAddr;
     return SOFTBUS_OK;
 }
 
-static int32_t OnDataEvent(int events, int32_t fd)
+static int32_t OnDataEvent(ListenerModule module, int events, int32_t fd)
 {
+    (void)module;
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "can not match fd.[%d]", fd);
@@ -118,4 +122,11 @@ void TransTdcReleaseFd(int32_t fd)
     }
     DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
     TcpShutDown(fd);
+}
+
+int32_t TransTdcStopRead(int32_t fd) {
+    if (fd < 0) {
+        return SOFTBUS_OK;
+    }
+    return DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
 }

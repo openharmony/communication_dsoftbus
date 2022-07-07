@@ -17,6 +17,7 @@
 #define SOFTBUS_BASE_LISTENER_H
 
 #include "common_list.h"
+#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
 
@@ -39,29 +40,23 @@ typedef enum {
     SERVER_MODE,
 } ModeType;
 
-typedef enum {
-    PROXY = 0,
-    AUTH,
-    AUTH_P2P,
-    DIRECT_CHANNEL_SERVER_P2P,
-    DIRECT_CHANNEL_CLIENT,
-    DIRECT_CHANNEL_SERVER_WIFI,
-    UNUSE_BUTT,
-} ListenerModule;
-
 typedef struct {
-    int32_t (*onConnectEvent)(int32_t events, int32_t cfd, const char *ip);
-    int32_t (*onDataEvent)(int32_t events, int32_t fd);
+    int32_t (*onConnectEvent)(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr);
+    int32_t (*onDataEvent)(ListenerModule module, int32_t events, int32_t fd);
 } SoftbusBaseListener;
+
+int32_t InitBaseListener(void);
+void DeinitBaseListener(void);
+
+uint32_t CreateListenerModule(void);
+void DestroyBaseListener(ListenerModule module);
 
 int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *listener);
 int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener *listener);
+
 int32_t StartBaseClient(ListenerModule module);
-int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, ModeType modeType);
+int32_t StartBaseListener(ListenerModule module, const LocalListenerInfo *info);
 int32_t StopBaseListener(ListenerModule module);
-void ResetBaseListener(ListenerModule module);
-void ResetBaseListenerSet(ListenerModule module);
-void DestroyBaseListener(ListenerModule module);
 
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType);
 int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType);

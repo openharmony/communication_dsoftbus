@@ -36,18 +36,23 @@ static char g_p2pSessionIp[IP_LEN] = {0};
 
 static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 {
-    SoftbusBaseListener listener = {0};
-    int32_t ret;
     int32_t listenerPort;
 
-    GetTdcBaseListener(&listener);
-    ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, &listener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener set listener fail");
-        return ret;
+    LocalListenerInfo info = {
+        .type = CONNECT_P2P,
+        .socketOption = {
+            .addr = "",
+            .port = *port,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_P2P
+        }
+    };
+    if(strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip)!= EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy addr failed!", __func__);
+        return SOFTBUS_ERR;
     }
 
-    listenerPort = StartBaseListener(DIRECT_CHANNEL_SERVER_P2P, ip, *port, SERVER_MODE);
+    listenerPort = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
     if (listenerPort < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener start listener fail");
         return SOFTBUS_ERR;
