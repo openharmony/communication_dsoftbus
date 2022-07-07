@@ -137,7 +137,7 @@ typedef struct {
 
 QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo);
 uint32_t ApplyLaneId(LaneType type);
-uint32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
+int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
 int32_t LnnFreeLane(uint32_t laneId);
 
 #ifdef __cplusplus
