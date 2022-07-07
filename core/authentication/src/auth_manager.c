@@ -1441,6 +1441,32 @@ int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId)
     return SOFTBUS_ERR;
 }
 
+int32_t AuthGetServerSideByOption(const ConnectOption *option, bool *isServerSide)
+{
+    AuthManager *item = NULL;
+    if (SoftBusMutexLock(&g_authLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_authClientHead, AuthManager, node) {
+        if (item->status == AUTH_PASSED && CompareConnectOption(&item->option, option)) {
+            *isServerSide = (item->side == SERVER_SIDE_FLAG);
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_authServerHead, AuthManager, node) {
+        if (item->status == AUTH_PASSED && CompareConnectOption(&item->option, option)) {
+            *isServerSide = (item->side == SERVER_SIDE_FLAG);
+            (void)SoftBusMutexUnlock(&g_authLock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authLock);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get server side by option failed");
+    return SOFTBUS_ERR;
+}
+
 int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t bufLen)
 {
     AuthManager *auth = NULL;
