@@ -257,29 +257,31 @@ static bool RequestInfoCheck(const LaneRequestOption *request, const ILaneListen
 }
 
 /* return laneId if the operation is successful, return 0 otherwise. */
-uint32_t LnnRequestLane(const LaneRequestOption *request, const ILaneListener *listener)
+uint32_t ApplyLaneId(LaneType type)
+{
+    return AllocLaneId(type);
+}
+
+uint32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane requestInfo invalid");
-        return INVALID_LANE_ID;
+        return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane type[%d] is not supported", request->type);
-        return INVALID_LANE_ID;
+        return SOFTBUS_ERR;
     }
     int32_t result;
-    uint32_t laneId = AllocLaneId(request->type);
-    if (laneId == INVALID_LANE_ID) {
-        return INVALID_LANE_ID;
-    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lane type %d.", request->type);
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "alloc lane fail, result:%d", result);
         DestroyLaneId(laneId);
-        return INVALID_LANE_ID;
+        return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "request lane success, lane:%u", laneId);
-    return laneId;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnFreeLane(uint32_t laneId)
