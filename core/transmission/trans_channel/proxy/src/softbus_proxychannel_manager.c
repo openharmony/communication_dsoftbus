@@ -527,7 +527,7 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
     return seq;
 }
 
-int32_t TransProxySetChiperSide(int32_t channelId, int32_t side)
+int32_t TransProxySetChiper(int32_t channelId, uint8_t chiper)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -542,7 +542,7 @@ int32_t TransProxySetChiperSide(int32_t channelId, int32_t side)
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            item->chiperSide = side;
+            item->chiper = chiper;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
@@ -551,7 +551,7 @@ int32_t TransProxySetChiperSide(int32_t channelId, int32_t side)
     return SOFTBUS_ERR;
 }
 
-int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side)
+int32_t TransProxyGetChiper(int32_t channelId, uint8_t *chiper)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -566,7 +566,7 @@ int32_t TransProxyGetChiperSide(int32_t channelId, int32_t *side)
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            *side = item->chiperSide;
+            *chiper = item->chiper;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
@@ -693,7 +693,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     chan->myId = newChanId;
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
-    chan->chiperSide = msg->chiperSide;
+    chan->chiper = msg->chiper;
     chan->type = info.type;
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");

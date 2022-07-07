@@ -65,7 +65,7 @@ typedef struct {
     int32_t dateLen;
     char *data;
     uint32_t connId;
-    int32_t chiperSide;
+    uint8_t chiper;
 } ProxyMessage;
 
 #define VERSION 1
@@ -109,7 +109,7 @@ typedef struct {
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
-    int32_t chiperSide;
+    uint8_t chiper;
 } ProxyChannelInfo;
 
 typedef struct {
@@ -136,6 +136,7 @@ typedef struct {
     uint32_t outLen;
 } ProxyDataInfo;
 
+int32_t GetRemoteUuidByBtMac(const char *peerMac, char *uuid, int32_t len);
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
