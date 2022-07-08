@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        32,
     };
 
     VtpStreamOpenParam p2 = {
@@ -70,7 +71,8 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port2,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        32,
     };
 
     ret = StartVtpStreamChannelClient(CHANNELID, &p1, &g_callback);
