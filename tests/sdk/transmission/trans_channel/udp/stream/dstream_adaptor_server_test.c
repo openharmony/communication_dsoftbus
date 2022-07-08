@@ -57,7 +57,7 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
@@ -67,7 +67,7 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
