@@ -57,7 +57,8 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        32,
     };
 
     VtpStreamOpenParam p2 = {
@@ -66,7 +67,8 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        32,
     };
 
     ret = StartVtpStreamChannelServer(CHANNELID, &p1, &g_callback);
