@@ -159,6 +159,7 @@ int32_t AuthHandleLeaveLNN(int64_t authId);
 
 int32_t AuthGetUuidByOption(const ConnectOption *option, char *buf, uint32_t bufLen);
 int32_t AuthGetIdByOption(const ConnectOption *option, int64_t *authId);
+int32_t AuthGetServerSideByOption(const ConnectOption *option, bool *isServerSide);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);
