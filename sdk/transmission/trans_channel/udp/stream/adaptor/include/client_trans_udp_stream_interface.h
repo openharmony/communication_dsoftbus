@@ -54,7 +54,8 @@ typedef struct {
     char *peerIp;
     int32_t peerPort;
     StreamType type;
-    char *sessionKey;
+    uint8_t *sessionKey;
+    uint32_t keyLen;
 } VtpStreamOpenParam;
 
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param,
