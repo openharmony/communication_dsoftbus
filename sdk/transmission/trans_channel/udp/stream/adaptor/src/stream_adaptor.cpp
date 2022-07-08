@@ -43,9 +43,9 @@ int StreamAdaptor::GetStreamType()
     return streamType_;
 }
 
-const char *StreamAdaptor::GetSessionKey()
+const std::pair<uint8_t*, uint32_t> StreamAdaptor::GetSessionKey()
 {
-    return sessionKey_.c_str();
+    return sessionKey_;
 }
 
 int64_t StreamAdaptor::GetChannelId()
@@ -81,7 +81,15 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     streamManager_ =  Communication::SoftBus::IStreamManager::GetInstance(nullptr, adaptorListener);
     streamManager_->PrepareEnvironment(param->pkgName);
     serverSide_ = isServerSide;
-    sessionKey_ = std::string(param->sessionKey, SESSION_KEY_LENGTH);
+    if (sessionKey_.first == nullptr) {
+        sessionKey_.first = new uint8_t[param->keyLen];
+    }
+    if (memcpy_s(sessionKey_.first, param->keyLen, param->sessionKey, param->keyLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return;
+    }
+
+    sessionKey_.second = param->keyLen;
     callback_ = callback;
     streamType_ = param->type;
     channelId_ = channelId;
@@ -92,14 +100,14 @@ void StreamAdaptor::ReleaseAdaptor()
     streamManager_->DestroyStreamDataChannel();
     streamManager_->DestroyEnvironment(pkgName_);
     channelId_ = -1;
-
-    size_t len = sessionKey_.length();
-    if (len != 0) {
-        sessionKey_.replace(0, len, len, '\0');
+    if (sessionKey_.first != nullptr) {
+        delete []sessionKey_.first;
     }
+    sessionKey_.first = nullptr;
 }
 
-ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen, const char* sessionKey)
+ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen,
+    std::pair<uint8_t*, uint32_t> sessionKey)
 {
     AesGcmCipherKey cipherKey = {0};
 
@@ -109,7 +117,7 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, SESSION_KEY_LENGTH) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
@@ -124,7 +132,8 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
     return outLen;
 }
 
-ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen, const char *sessionKey)
+ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen,
+    std::pair<uint8_t*, uint32_t> sessionKey)
 {
     AesGcmCipherKey cipherKey = {0};
 
@@ -134,7 +143,7 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, SESSION_KEY_LENGTH) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
