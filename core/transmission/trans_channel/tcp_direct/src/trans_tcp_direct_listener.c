@@ -293,7 +293,7 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Set BaseListener Failed.", __func__);
         return ret;
     }
-    int serverPort = StartBaseListener(module, info);
+    int serverPort = StartBaseListener(info);
     return serverPort;
 }
 

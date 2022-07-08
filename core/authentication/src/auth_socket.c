@@ -369,7 +369,7 @@ int32_t OpenAuthServer(void)
         return AUTH_ERROR_CODE;
     }
 
-    localPort = StartBaseListener(AUTH, &info);
+    localPort = StartBaseListener(&info);
     if (localPort <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth StartBaseListener failed!");
         return AUTH_ERROR_CODE;

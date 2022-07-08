@@ -751,11 +751,12 @@ int32_t StartBaseClient(ListenerModule module)
     return ret;
 }
 
-int32_t StartBaseListener(ListenerModule module, const LocalListenerInfo *info)
+int32_t StartBaseListener(const LocalListenerInfo *info)
 {
-    if (info == NULL || info->socketOption.port < 0) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
+    ListenerModule module = info->socketOption.moduleId;
     SoftbusListenerNode *node = RequestListenerNode(module);
     if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);

@@ -594,7 +594,7 @@ int32_t TcpStartListening(const LocalListenerInfo *info)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Set BaseListener Failed.");
         return rc;
     }
-    return StartBaseListener(info->socketOption.moduleId, info);
+    return StartBaseListener(info);
 }
 
 int32_t TcpStopListening(const LocalListenerInfo *info)

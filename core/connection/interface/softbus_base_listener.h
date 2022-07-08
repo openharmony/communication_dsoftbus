@@ -55,7 +55,7 @@ int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *liste
 int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener *listener);
 
 int32_t StartBaseClient(ListenerModule module);
-int32_t StartBaseListener(ListenerModule module, const LocalListenerInfo *info);
+int32_t StartBaseListener(const LocalListenerInfo *info);
 int32_t StopBaseListener(ListenerModule module);
 
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType);
