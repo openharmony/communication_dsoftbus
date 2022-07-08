@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port2,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabcdefgh",
+        "abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
