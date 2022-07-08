@@ -54,7 +54,7 @@ public:
     std::shared_ptr<VtpStreamSocket> GetSelf();
 
     bool CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
-    bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType, 
+    bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
         std::pair<uint8_t*, uint32_t> sessionKey) override;
 
     bool CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
