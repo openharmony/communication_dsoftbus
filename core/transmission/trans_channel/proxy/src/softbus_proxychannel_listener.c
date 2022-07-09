@@ -213,6 +213,7 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
     uint32_t laneId = 0;
     LaneConnInfo connInfo;
     LaneRequestOption option;
+    (void)memset_s(&option, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
 #define DEFAULT_PID 0
     option.type = LANE_TYPE_TRANS;
     option.requestInfo.trans.pid = DEFAULT_PID;

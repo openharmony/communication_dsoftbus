@@ -172,7 +172,7 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LaneLinkType resList[LANE_LINK_TYPE_BUTT];
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
-    if (request->list.linkTypeNum > 0) {
+    if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
         SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
         SelectByDefaultLink(networkId, request, resList, &resNum);
