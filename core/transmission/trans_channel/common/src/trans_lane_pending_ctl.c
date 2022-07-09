@@ -439,6 +439,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
     }
 
     LaneRequestOption requestOption;
+    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
     if (GetRequestOptionBySessionParam(param, &requestOption) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
