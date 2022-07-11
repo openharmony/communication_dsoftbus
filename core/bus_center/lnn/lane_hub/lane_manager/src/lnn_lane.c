@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "common_list.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
@@ -27,6 +28,7 @@
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
 #include "lnn_trans_lane.h"
+#include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
@@ -42,6 +44,7 @@
 #define LANE_RANDOM_ID_MASK 0xFFFFFFF
 
 #define LANE_SCORING_INTERVAL 300 /* 5min */
+#define CHANNEL_RATING_DELAY (5 * 60 * 1000)
 
 typedef struct {
     ListNode node;
@@ -311,6 +314,28 @@ QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
     return QUERY_RESULT_OK;
 }
 
+static void LaneInitChannelRatingDelay(void *para)
+{
+    (void)para;
+    if (LnnInitScore() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneScoring fail");
+        return;
+    }
+    if (LnnStartScoring(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start laneScoring fail");
+    }
+}
+
+static int32_t LaneDelayInit(void)
+{
+    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LaneInitChannelRatingDelay,
+        NULL, CHANNEL_RATING_DELAY);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneDelayInit post channelRating msg fail");
+    }
+    return ret;
+}
+
 int32_t InitLane(void)
 {
     if (InitLaneModel() != SOFTBUS_OK) {
@@ -321,12 +346,9 @@ int32_t InitLane(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneLink fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitScore() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneScoring fail");
+    if (LaneDelayInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]laneDelayInit fail");
         return SOFTBUS_ERR;
-    }
-    if (LnnStartScoring(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start laneScoring fail");
     }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
