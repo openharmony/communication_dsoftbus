@@ -14,8 +14,10 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "client_trans_udp_stream_interface.h"
+#include "securec.h"
 #include "session.h"
 
 #define CHANNELID 1
@@ -51,8 +53,16 @@ int main(int argc, char *argv[])
         printf("[client]:Please input server sorcket to connect\n");
         return 0;
     }
-    int port = atoi(argv[FIRST_ARGV]);
-    int port2 = atoi(argv[SECOND_ARGV]);
+    int port = 0;
+    if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0)
+    {
+        return 0;
+    }
+    int port2 = 0;
+    if (sscanf_s(argv[SECOND_ARGV], "%d",&port2) <= 0)
+    {
+        return 0;
+    }
     int ret;
 
     VtpStreamOpenParam p1 = {
@@ -61,7 +71,7 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabc",
+        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
@@ -71,7 +81,7 @@ int main(int argc, char *argv[])
         "127.0.0.1",
         port2,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabc",
+        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 

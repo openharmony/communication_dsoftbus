@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
@@ -57,7 +58,7 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabc",
+        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
@@ -67,7 +68,7 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdef\0ghabcdefghabcdefghfgdabc",
+        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
         32,
     };
 
