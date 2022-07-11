@@ -144,6 +144,7 @@ struct SocketOption {
     char addr[MAX_SOCKET_ADDR_LEN];
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
+    ProtocolType protocol;
 };
 
 typedef struct {

@@ -26,7 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_p2p.h"
@@ -49,7 +49,7 @@ static void OnSesssionOpenFailProc(const SessionConn *node)
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
         DelTrigger(node->listenMod, fd, RW_TRIGGER);
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
     }
 }
 

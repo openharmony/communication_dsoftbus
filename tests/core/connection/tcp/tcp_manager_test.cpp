@@ -264,6 +264,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
 
     uint32_t requestId = 1;
@@ -271,6 +272,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
     option.type = CONNECT_TCP;
     option.socketOption.port = port;
     option.socketOption.moduleId = PROXY;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
     EXPECT_EQ(port, TcpStartListening(&info));
@@ -298,12 +300,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = clientPort;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
 
     uint32_t requestId = 1;
     ConnectOption option = {};
     option.type = CONNECT_TCP;
     option.socketOption.port = serverPort;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     option.socketOption.moduleId = PROXY;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
@@ -347,6 +351,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
 
     uint32_t requestId = 1;
@@ -354,6 +359,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
     option.type = CONNECT_TCP;
     option.socketOption.port = port;
     option.socketOption.moduleId = PROXY;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
     int32_t maxConnNum;
@@ -389,12 +395,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
 
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_TCP;
     option.socketOption.port = port;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     option.socketOption.moduleId = PROXY;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
@@ -442,6 +450,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
     option.type = CONNECT_BLE;
     option.socketOption.port = port;
     option.socketOption.moduleId = PROXY;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
     int ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
@@ -485,6 +494,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
     option.type = CONNECT_BLE;
     option.socketOption.port = port;
     option.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
     int ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
@@ -527,6 +537,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
     option.type = CONNECT_P2P;
     option.socketOption.port = port;
     option.socketOption.moduleId = PROXY;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
     int ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
@@ -570,6 +581,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
     option.type = CONNECT_P2P;
     option.socketOption.port = port;
     option.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
     int ret;
     ret = TcpConnectDevice(nullptr, requestId, &g_result);
@@ -611,6 +623,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -638,6 +651,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -666,6 +680,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -693,6 +708,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_CLIENT;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -720,6 +736,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
     info.type = CONNECT_BR;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -747,6 +764,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = PROXY;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -775,6 +793,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -802,6 +821,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -829,22 +849,22 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
     int clientfd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, false);
     int ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(clientfd);
+    ConnCloseSocket(clientfd);
 
     clientfd = OpenTcpClientSocket(nullptr, nullptr, port, false);
     ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(clientfd);
+    ConnCloseSocket(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", -1, false);
     ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(clientfd);
+    ConnCloseSocket(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
     ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
-    CloseTcpFd(clientfd);
+    ConnCloseSocket(clientfd);
 };
 
 /*
@@ -868,7 +888,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
     port = GetTcpSockPort(fd);
     EXPECT_EQ(port, i_port);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 };
 
 /*
@@ -890,7 +910,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
     fd = -1;
     ret = SetIpTos(fd, tos);
     EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 };
 
 
@@ -911,39 +931,39 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
     int port = 6666;
     fd =  OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
     EXPECT_EQ(SOFTBUS_OK, ConnToggleNonBlockMode(fd, isNonBlock));
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 };
 
 /*
 * @tc.name: testTcpManager026
-* @tc.desc: Test SendTcpData invalid fd.
+* @tc.desc: Test ConnSendSocketData invalid fd.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
-* @tc.require: The SendTcpData operates normally.
+* @tc.require: The ConnSendSocketData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
 {
     int port = 6666;
 
     int clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, false);
-    ssize_t bytes = SendTcpData(clientfd, "Hello world", 11, 0);
+    ssize_t bytes = ConnSendSocketData(clientfd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
-    TcpShutDown(clientfd);
+    ConnShutdownSocket(clientfd);
 
     clientfd = OpenTcpClientSocket(Ip, "127.0.0.1", port, true);
-    bytes = SendTcpData(clientfd, "Hello world", 11, 0);
+    bytes = ConnSendSocketData(clientfd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
-    TcpShutDown(clientfd);
+    ConnShutdownSocket(clientfd);
 };
 
 /*
 * @tc.name: testTcpManager027
-* @tc.desc: Test SendTcpData invalid buf len.
+* @tc.desc: Test ConnSendSocketData invalid buf len.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
-* @tc.require: The OpenTcpClientSocket and SendTcpData operates normally.
+* @tc.require: The OpenTcpClientSocket and ConnSendSocketData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
 {
@@ -952,24 +972,24 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
     int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int bytes = SendTcpData(clientfd, nullptr, 10, 0);
+    int bytes = ConnSendSocketData(clientfd, nullptr, 10, 0);
     EXPECT_EQ(bytes, -1);
 
-    bytes = SendTcpData(clientfd, "hello world!", 0, 0);
+    bytes = ConnSendSocketData(clientfd, "hello world!", 0, 0);
     EXPECT_EQ(bytes, -1);
 
-    bytes = SendTcpData(clientfd, "hello world!", 12, 0);
+    bytes = ConnSendSocketData(clientfd, "hello world!", 12, 0);
     EXPECT_EQ(bytes, -1);
-    TcpShutDown(clientfd);
+    ConnShutdownSocket(clientfd);
 };
 
 /*
 * @tc.name: testTcpManager028
-* @tc.desc: Test RecvTcpData invalid param.
+* @tc.desc: Test ConnRecvSocketData invalid param.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
-* @tc.require: The RecvTcpData operates normally.
+* @tc.require: The ConnRecvSocketData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
 {
@@ -981,14 +1001,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
         return;
     }
     int fd = -1;
-    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
+    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, sizeof(ConnPktHead) + head.len, 0));
 
     int port = 6666;
     fd = OpenTcpClientSocket(nullptr, "127.0.0.1", port, true);
-    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, nullptr, sizeof(ConnPktHead) + head.len, 0));
-    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, 0, 0));
-    EXPECT_EQ(SOFTBUS_ERR, RecvTcpData(fd, data, sizeof(ConnPktHead) + head.len, 0));
-    CloseTcpFd(fd);
+    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, nullptr, sizeof(ConnPktHead) + head.len, 0));
+    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, 0, 0));
+    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, sizeof(ConnPktHead) + head.len, 0));
+    ConnCloseSocket(fd);
 };
 
 /*
@@ -1006,7 +1026,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
     int ret = (clientfd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(ConnGetSocketError(clientfd) != 0);
-    CloseTcpFd(clientfd);
+    ConnCloseSocket(clientfd);
 };
 
 
@@ -1025,6 +1045,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1052,6 +1073,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_CLIENT;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1079,6 +1101,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1106,6 +1129,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = PROXY;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1134,6 +1158,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1161,6 +1186,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = AUTH_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1189,6 +1215,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1216,6 +1243,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_CLIENT;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1243,6 +1271,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
@@ -1270,6 +1299,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
     uint32_t tos = 65535;
@@ -1292,6 +1322,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_TRUE(OpenTcpServerSocket(info.socketOption.addr, info.socketOption.port) > 0);
 }
@@ -1311,6 +1342,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
     EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
@@ -1332,6 +1364,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
     EXPECT_TRUE(fd > 0);
@@ -1354,6 +1387,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
     EXPECT_TRUE(GetTcpSockPort(fd) > 0);
@@ -1361,11 +1395,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager044
-* @tc.desc: test SendTcpData SendData successful yes or no.
+* @tc.desc: test ConnSendSocketData SendData successful yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
-* @tc.require: The SendTcpData operates normally.
+* @tc.require: The ConnSendSocketData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
 {
@@ -1374,10 +1408,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpClientSocket("127.0.0.1", info.socketOption.addr, port, false);
     const char * buf = "SendDataTest";
-    EXPECT_EQ(SendTcpData(fd, buf, 13, 0), -1);
+    EXPECT_EQ(ConnSendSocketData(fd, buf, 13, 0), -1);
 };
 
 /*
@@ -1395,19 +1430,20 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
     EXPECT_TRUE(fd >= 0);
 };
 
 /*
 * @tc.name: testTcpManager046
-* @tc.desc: Test SendTcpData param is invalid yes or no.
+* @tc.desc: Test ConnSendSocketData param is invalid yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Nonzero
 * @tc.type: FUNC
-* @tc.require: The SendTcpData operates normally.
+* @tc.require: The ConnSendSocketData operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
 {
@@ -1416,19 +1452,20 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpClientSocket("127.0.0.1", info.socketOption.addr, port, false);
     const char * buf = "SendDataTest";
-    EXPECT_EQ(SendTcpData(fd, buf, 13, 0xffff), -1);
+    EXPECT_EQ(ConnSendSocketData(fd, buf, 13, 0xffff), -1);
 };
 
 /*
 * @tc.name: testTcpManager047
-* @tc.desc: Test CloseTcpFd function successful yes or no.
+* @tc.desc: Test ConnCloseSocket function successful yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
-* @tc.require: The TcpShutDown and OpenTcpClientSocket operates normally.
+* @tc.require: The ConnShutdownSocket and OpenTcpClientSocket operates normally.
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
 {
@@ -1437,9 +1474,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
-    TcpShutDown(fd);
+    ConnShutdownSocket(fd);
     EXPECT_TRUE(fd >= 0);
 };
 
@@ -1458,6 +1496,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager048, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(ConnSetTcpKeepAlive(-100, 65535), -1);
 };
@@ -1477,6 +1516,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager049, TestSize.Level1)
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = OpenTcpServerSocket(info.socketOption.addr, port);
     EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);

@@ -154,6 +154,7 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
                 return SOFTBUS_ERR;
             }
             option->socketOption.port = connInfo->socketInfo.port;
+            option->socketOption.protocol = connInfo->socketInfo.protocol;
             break;
         }
         default: {
@@ -177,6 +178,7 @@ int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *opt
                 return SOFTBUS_MEM_ERR;
             }
             option->socketOption.port = info->info.ipInfo.port;
+            option->socketOption.protocol = LNN_PROTOCOL_IP;
             break;
         case AUTH_LINK_TYPE_BR:
             option->type = CONNECT_BR;
@@ -201,6 +203,7 @@ int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *opt
                 return SOFTBUS_MEM_ERR;
             }
             option->socketOption.port = info->info.ipInfo.port;
+            option->socketOption.protocol = LNN_PROTOCOL_IP;
             option->socketOption.moduleId = AUTH_P2P;
             break;
         default:
@@ -254,7 +257,7 @@ bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *opt
     }
     switch (option1->type) {
         case CONNECT_TCP:
-            if (option2->type == CONNECT_TCP &&
+            if (option2->type == CONNECT_TCP && option2->socketOption.protocol == option1->socketOption.protocol &&
                 strcmp(option1->socketOption.addr, option2->socketOption.addr) == 0) {
                 return true;
             }

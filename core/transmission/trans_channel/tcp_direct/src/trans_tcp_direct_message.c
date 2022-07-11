@@ -29,7 +29,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
@@ -224,9 +224,9 @@ static int32_t GetAuthConnectOption(int32_t channelId, uint32_t cipherFlag, Conn
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     option->type = CONNECT_TCP;
     option->socketOption.port = conn->appInfo.peerData.port;
+    option->socketOption.protocol = LNN_PROTOCOL_IP;
     SoftBusFree(conn);
     return SOFTBUS_OK;
 }
@@ -389,7 +389,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     }
     int fd = conn->appInfo.fd;
     SoftBusFree(conn);
-    if (SendTcpData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
+    if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
         SoftBusFree(buffer);
         return SOFTBUS_ERR;
     }
@@ -763,7 +763,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "srv can not find data buf node.");
         return SOFTBUS_ERR;
     }
-    int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
+    int32_t ret = ConnRecvSocketData(node->fd, node->w, node->size - (node->w - node->data), 0);
     if (ret < 0) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");

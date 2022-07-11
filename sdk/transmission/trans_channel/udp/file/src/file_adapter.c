@@ -22,7 +22,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 
 
 static int SetReuseAddr(int fd, int on)
@@ -69,7 +69,7 @@ static int OpenTcpServer(const char *ip, int port)
     rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc != SOFTBUS_ADAPTER_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Bind error");
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
     return fd;
@@ -87,10 +87,16 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start tcp server for getting port");
         return SOFTBUS_ERR;
     }
-    int port = GetTcpSockPort(fd);
+    const SocketInterface * ip = GetSocketInterface(LNN_PROTOCOL_IP);
+    if(ip == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "no ip supportted");
+        ConnShutdownSocket(fd);
+        return SOFTBUS_NOT_FIND;
+    }
+    int port = ip->GetSockPort(fd);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to get port from tcp socket");
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
     *filePort = port;
@@ -102,7 +108,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);
-    TcpShutDown(fd);
+    ConnShutdownSocket(fd);
     if (sessionId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start dfile server.");
         return SOFTBUS_ERR;

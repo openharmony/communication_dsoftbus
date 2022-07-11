@@ -308,7 +308,7 @@ static bool CheckConnectionInfo(const ConnectOption *option, const ConnectionInf
 {
     switch (option->type) {
         case CONNECT_TCP: {
-            if (info->type == CONNECT_TCP &&
+            if (info->type == CONNECT_TCP && option->socketOption.protocol == info->socketInfo.protocol &&
                 strcmp(option->socketOption.addr, info->socketInfo.addr) == 0) {
                 return true;
             }
@@ -1351,6 +1351,7 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
         return SOFTBUS_ERR;
     }
     option.socketOption.port = port;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
     auth->option = option;
     ListNodeInsert(&g_authServerHead, &auth->node);
     (void)SoftBusMutexUnlock(&g_authLock);

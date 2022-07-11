@@ -71,6 +71,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
             return false;
         }
         option->socketOption.port = addr->info.ip.port;
+        option->socketOption.protocol = LNN_PROTOCOL_IP;
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", addr->type);
@@ -102,6 +103,10 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
         return true;
     }
     if (option->type == CONNECT_TCP) {
+        if(option->socketOption.protocol != LNN_PROTOCOL_IP) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "only ip is supportted");
+            return false;
+        }
         addr->type = hintType;
         if (strncpy_s(addr->info.ip.ip, IP_LEN, option->socketOption.addr,
             strlen(option->socketOption.addr)) != EOK) {

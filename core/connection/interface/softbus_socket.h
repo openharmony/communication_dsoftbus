@@ -58,15 +58,19 @@ typedef struct SocketInterface {
     int (*AcceptClient)(int fd, ConnectOption *clientAddr, int *cfd);
 } SocketInterface;
 
+int32_t ConnInitSockets(void);
+void ConnDeinitSockets(void);
+
 const SocketInterface* GetSocketInterface(ProtocolType protocolType);
 
-int32_t RegistSocketType(const SocketInterface* interface);
-void UnregistSocketType(const SocketInterface* interface);
+int32_t RegistSocketProtocol(const SocketInterface* interface);
 
-ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout);
-ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout);
-void CloseTcpFd(int32_t fd);
-void TcpShutDown(int32_t fd);
+int32_t OpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
+
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout);
+ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
+void ConnCloseSocket(int32_t fd);
+void ConnShutdownSocket(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
 
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);

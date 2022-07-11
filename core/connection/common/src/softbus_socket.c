@@ -15,14 +15,16 @@
 
 #include "softbus_socket.h"
 
-#include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <securec.h>
+#include <unistd.h>
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_tcp_socket.h"
 
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE 0x200000  // 2M
@@ -30,41 +32,89 @@
 #define USER_TIMEOUT_MS 500000  // 500000us
 
 static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = {0};
+static SoftBusMutex g_socketsMutex;
 
-int32_t RegistSocketType(const SocketInterface *interface)
+int32_t RegistSocketProtocol(const SocketInterface *interface)
 {
     if (interface == NULL || interface->GetSockPort == NULL || interface->OpenClientSocket == NULL ||
         interface->OpenServerSocket == NULL || interface->AcceptClient == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Bad socket interface!");
         return SOFTBUS_ERR;
     }
+    int ret = SoftBusMutexLock(&g_socketsMutex);
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
+        return ret;
+    }
+
+    ret = SOFTBUS_ERR;
     for (uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
         if (g_socketInterfaces[i] == NULL) {
             g_socketInterfaces[i] = interface;
-            return SOFTBUS_OK;
+            ret = SOFTBUS_OK;
+            break;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "socket type list is full!");
-    return SOFTBUS_ERR;
-}
-
-void UnregistSocketType(const SocketInterface* interface) {
-    for(uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
-        if(g_socketInterfaces[i] == interface) {
-            g_socketInterfaces[i] = NULL;
-            return;
-        }
+    (void) SoftBusMutexUnlock(&g_socketsMutex);
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "socket type list is full!");
     }
+    return ret;
 }
 
 const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
+    int ret = SoftBusMutexLock(&g_socketsMutex);
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
+        return NULL;
+    }
+    const SocketInterface *result = NULL;
     for (uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
         if (g_socketInterfaces[i] != NULL && g_socketInterfaces[i]->type == protocolType) {
-            return g_socketInterfaces[i];
+            result = g_socketInterfaces[i];
+            break;
         }
     }
-    return NULL;
+    (void) SoftBusMutexUnlock(&g_socketsMutex);
+    return result;
+}
+
+int32_t ConnInitSockets(void) {
+    int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: init mutex failed!ret=%" PRId32, __func__, ret);
+        return ret;
+    }
+
+    (void)memset_s(g_socketInterfaces, sizeof(g_socketInterfaces), 0, sizeof(g_socketInterfaces));
+
+    ret = RegistSocketProtocol(GetTcpProtocol());
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: regist tcp failed!!ret=%" PRId32, __func__, ret);
+        (void)SoftBusMutexDestroy(&g_socketsMutex);
+        return ret;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: tcp registed!", __func__);
+    return ret;
+}
+
+void ConnDeinitSockets(void)
+{
+    (void)memset_s(g_socketInterfaces, sizeof(g_socketInterfaces), 0, sizeof(g_socketInterfaces));
+    (void)SoftBusMutexDestroy(&g_socketsMutex);
+}
+
+int32_t OpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock) {
+    if(option == NULL || bindAddr == NULL) {
+        return SOFTBUS_ERR;
+    }
+    const SocketInterface* socketInterface = GetSocketInterface(option->socketOption.protocol);
+    if(socketInterface == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!protocol=%d", option->socketOption.protocol);
+        return SOFTBUS_ERR;
+    }
+    return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);
 }
 
 static int WaitEvent(int fd, short events, int timeout)
@@ -132,7 +182,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     return fcntl(fd, F_SETFL, flags);
 }
 
-ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d invalid params", fd);
@@ -205,12 +255,12 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
     return rc;
 }
 
-ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout)
+ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
 {
     return OnRecvData(fd, buf, len, timeout, 0);
 }
 
-void CloseTcpFd(int32_t fd)
+void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close fd=%d", fd);
@@ -218,7 +268,7 @@ void CloseTcpFd(int32_t fd)
     }
 }
 
-void TcpShutDown(int32_t fd)
+void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);
