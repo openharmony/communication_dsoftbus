@@ -25,7 +25,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "softbus_type_def.h"
 #include "trans_pending_pkt.h"
 
@@ -121,7 +121,7 @@ void TransTdcReleaseFd(int32_t fd)
         return;
     }
     DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
-    TcpShutDown(fd);
+    ConnShutdownSocket(fd);
 }
 
 int32_t TransTdcStopRead(int32_t fd) {

@@ -131,11 +131,16 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
 {
     int ret = 0;
     AppInfo appInfo;
-    ConnectOption connInfo;
+    ConnectOption connInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .port = 6000,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = MODULE_MESSAGE_SERVICE
+        }
+    };
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    (void)memset_s(&connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    connInfo.type = CONNECT_TCP;
-    connInfo.socketOption.port = 6000;
     if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), "192.168.8.1") != EOK) {
         return;
     }

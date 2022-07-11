@@ -25,7 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_json.h"
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_message.h"
@@ -405,7 +405,24 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip, port=%d",
         conn->appInfo.peerData.port);
 
-    fd = OpenTcpClientSocket(conn->appInfo.peerData.ip, NULL, conn->appInfo.peerData.port, true);
+    ConnectOption options = {
+        .type = CONNECT_P2P,
+        .socketOption = {
+            .addr = {0},
+            .port = conn->appInfo.peerData.port,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_CLIENT
+        }
+    };
+
+    ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), conn->appInfo.peerData.ip);
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s: strcpy_s failed!ret = %" PRId32, __func__, ret);
+        ReleaseSessonConnLock();
+        goto EXIT_ERR;
+    }
+
+    fd = OpenClientSocket(&options, BIND_ADDR_ALL, true);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
         ReleaseSessonConnLock();

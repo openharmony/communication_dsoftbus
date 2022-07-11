@@ -28,7 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 
@@ -151,13 +151,13 @@ static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, 
     return SOFTBUS_OK;
 }
 
-static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const char *ip)
+static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Exception occurred");
         return SOFTBUS_ERR;
     }
-    if (cfd < 0 || ip == NULL) {
+    if (cfd < 0 || clientAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param, cfd = %d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -166,15 +166,15 @@ static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const 
     int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create srv data buf node failed.");
-        TcpShutDown(cfd);
+        ConnShutdownSocket(cfd);
         return ret;
     }
 
-    ret = CreateSessionConnNode(module, events, cfd, channelId, ip);
+    ret = CreateSessionConnNode(module, events, cfd, channelId, clientAddr->socketOption.addr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
-        TcpShutDown(cfd);
+        ConnShutdownSocket(cfd);
         return ret;
     }
     return SOFTBUS_OK;
@@ -183,7 +183,7 @@ static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const 
 static void CloseTcpDirectFd(int fd)
 {
 #ifndef __LITEOS_M__
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 #else
     (void)fd;
 #endif
@@ -193,7 +193,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 {
     if (ret != SOFTBUS_OK) {
         DelTrigger(module, fd, READ_TRIGGER);
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
         NotifyChannelOpenFailed(channelId);
     } else {
         CloseTcpDirectFd(fd);
@@ -216,7 +216,7 @@ static int32_t OnDataEvent(ListenerModule module, int events, int fd)
         DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
         DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
         SoftBusFree(conn);
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_ERR;
@@ -239,7 +239,7 @@ static int32_t OnDataEvent(ListenerModule module, int events, int fd)
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
             DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-            TcpShutDown(fd);
+            ConnShutdownSocket(fd);
             NotifyChannelOpenFailed(conn->channelId);
             TransDelSessionConnById(conn->channelId);
             TransSrvDelDataBufNode(conn->channelId);
@@ -247,34 +247,13 @@ static int32_t OnDataEvent(ListenerModule module, int events, int fd)
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exception occurred.");
         DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
-        TcpShutDown(fd);
+        ConnShutdownSocket(fd);
         TransDelSessionConnById(conn->channelId);
         TransSrvDelDataBufNode(conn->channelId);
     }
     SoftBusFree(conn);
     return ret;
 }
-#if 0
-static int32_t OnConnectEventWifi(int32_t events, int32_t cfd, const char *ip)
-{
-    return OnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, events, cfd, ip);
-}
-
-static int32_t OnDataEventWifi(int32_t events, int32_t fd)
-{
-    return OnDataEvent(events, fd);
-}
-
-static int32_t OnConnectEventP2P(int32_t events, int32_t cfd, const char *ip)
-{
-    return OnConnectEvent(DIRECT_CHANNEL_SERVER_P2P, events, cfd, ip);
-}
-
-static int32_t OnDataEventP2P(int32_t events, int32_t fd)
-{
-    return OnDataEvent(events, fd);
-}
-#endif
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
@@ -301,6 +280,5 @@ int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc();
     int32_t ret = StopBaseListener(module);
-    DestroyBaseListener(module);
     return ret;
 }

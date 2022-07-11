@@ -22,7 +22,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
 
@@ -201,7 +201,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, StartBaseClient(module));
     EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(module));
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
-    DestroyBaseListener(module);
     free(listener);
 };
 
@@ -222,7 +221,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
             for (int i = 0; i < module; i++) {
                 ret = StopBaseListener(static_cast<ListenerModule>(i));
                 EXPECT_EQ(SOFTBUS_OK, ret);
-                DestroyBaseListener(static_cast<ListenerModule>(i));
             }
             continue;
         }
@@ -243,7 +241,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         ret = StopBaseListener(static_cast<ListenerModule>(module));
         EXPECT_EQ(SOFTBUS_OK, ret);
-        DestroyBaseListener(static_cast<ListenerModule>(module));
     }
 };
 
@@ -329,7 +326,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
                 fd, static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-        DestroyBaseListener(static_cast<ListenerModule>(module));
         free(listener);
     }
 };
@@ -423,7 +419,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
     setListener->onDataEvent = DataEvent;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -469,7 +464,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener015, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
         EXPECT_EQ(setListener->onConnectEvent, getListener.onConnectEvent);
         EXPECT_EQ(setListener->onDataEvent, getListener.onDataEvent);
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -523,7 +517,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener018, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -549,7 +542,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, StartBaseClient(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(SOFTBUS_ERR, StartBaseClient(static_cast<ListenerModule>(i)));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -676,7 +668,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
         info.socketOption.port++;
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(info.socketOption.port, StartBaseListener(&info));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -711,7 +702,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener025, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(i), setListener));
         EXPECT_EQ(info.socketOption.port, StartBaseListener(&info));
         EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
         EXPECT_EQ(SOFTBUS_ERR, GetSoftbusBaseListener(static_cast<ListenerModule>(i), &getListener));
     }
     free(setListener);
@@ -782,7 +772,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
 
         EXPECT_EQ(info.socketOption.port, StartBaseListener(&info));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
     }
     free(setListener);
 };
@@ -824,7 +813,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener029, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
-        DestroyBaseListener(static_cast<ListenerModule>(i));
         EXPECT_EQ(SOFTBUS_ERR, StopBaseListener(static_cast<ListenerModule>(i)));
     }
     free(setListener);
@@ -872,7 +860,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
             DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(RW_TRIGGER + 1)));
 
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
-        DestroyBaseListener(static_cast<ListenerModule>(module));
         free(listener);
     }
 };
@@ -903,7 +890,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
     EXPECT_EQ(info.socketOption.port, StartBaseListener(&info));
 
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
-    DestroyBaseListener(module);
+
     EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info));
     free(listener);
 };
@@ -946,7 +933,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(PROXY));
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
-    DestroyBaseListener(PROXY);
 
     info.socketOption.moduleId = PROXY;
     info.socketOption.port = PROXY + port;
@@ -957,7 +943,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
     EXPECT_EQ(AUTH + port, StartBaseListener(&info));
 
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(AUTH));
-    DestroyBaseListener(AUTH);
     EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info));
     free(listener1);
     free(listener2);
@@ -991,7 +976,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(module, listener));
     EXPECT_EQ(port, StartBaseListener(&info));
 
-    DestroyBaseListener(module);
     EXPECT_EQ(SOFTBUS_ERR, StartBaseListener(&info));
     free(listener);
 };
@@ -1026,7 +1010,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener034, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
     EXPECT_EQ(port, StartBaseListener(&info));
 
-    DestroyBaseListener(static_cast<ListenerModule>(module));
     EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
     free(listener);
 };
@@ -1061,7 +1044,6 @@ HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
     EXPECT_EQ(port, StartBaseListener(&info));
 
-    DestroyBaseListener(static_cast<ListenerModule>(module));
     EXPECT_EQ(SOFTBUS_ERR, DelTrigger(static_cast<ListenerModule>(module), fd, static_cast<TriggerType>(triggerType)));
     free(listener);
 };
@@ -1079,16 +1061,16 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int port = GetTcpSockPort(fd);
     EXPECT_EQ(port, g_port);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 
     fd = OpenTcpServerSocket(nullptr, g_port);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
     fd = OpenTcpServerSocket("127.0.0.1", -1);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 };
 
 /*
@@ -1102,15 +1084,15 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
     int fd = OpenTcpClientSocket(nullptr, "127.0.0.1", g_port, false);
     int ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
     fd = OpenTcpClientSocket(nullptr, nullptr, g_port, false);
     ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
     fd = OpenTcpClientSocket("127.0.0.1", "127.0.0.1", -1, false);
     ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    CloseTcpFd(fd);
+    ConnCloseSocket(fd);
 };
 
 /*
@@ -1129,7 +1111,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
 
 /*
 * @tc.name: testTcpSocket004
-* @tc.desc: test SendTcpData invalid fd
+* @tc.desc: test ConnSendSocketData invalid fd
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -1138,9 +1120,9 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket004, TestSize.Level1)
     int clientFd = OpenTcpClientSocket(nullptr, "127.5.0.1", g_port, false);
     int ret = (clientFd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ssize_t bytes = SendTcpData(clientFd, "Hello world", 11, 0);
+    ssize_t bytes = ConnSendSocketData(clientFd, "Hello world", 11, 0);
     EXPECT_EQ(bytes, -1);
-    TcpShutDown(clientFd);
+    ConnShutdownSocket(clientFd);
 };
 
 /*

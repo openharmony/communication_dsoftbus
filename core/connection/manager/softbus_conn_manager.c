@@ -29,6 +29,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
 
@@ -446,7 +447,13 @@ int32_t ConnServerInit(void)
         return SOFTBUS_ERR;
     }
 
-    int32_t ret = InitBaseListener();
+    int32_t ret = ConnInitSockets();
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
+        return ret;
+    }
+
+    ret = InitBaseListener();
     if(ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;

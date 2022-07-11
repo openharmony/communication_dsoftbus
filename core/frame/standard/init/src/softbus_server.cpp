@@ -136,6 +136,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
+            connOpt.socketOption.protocol = LNN_PROTOCOL_IP;
             break;
         case CONNECT_BLE:
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {

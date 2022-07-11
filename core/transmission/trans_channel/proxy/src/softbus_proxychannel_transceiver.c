@@ -351,6 +351,7 @@ int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info)
             (void)memcpy_s(info->socketOption.addr, sizeof(info->socketOption.addr),
                 connInfo.socketInfo.addr, sizeof(connInfo.socketInfo.addr));
             info->socketOption.port = connInfo.socketInfo.port;
+            info->socketOption.protocol = connInfo.socketInfo.protocol;
             break;
         }
         default: {
@@ -504,7 +505,8 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
         }
         switch (connInfo->type) {
             case CONNECT_TCP: {
-                if (strcmp(connInfo->socketOption.addr, item->connInfo.socketOption.addr) == 0 &&
+                if (connInfo->socketOption.protocol == item->connInfo.socketOption.protocol &&
+                    strcmp(connInfo->socketOption.addr, item->connInfo.socketOption.addr) == 0 &&
                     connInfo->socketOption.port == item->connInfo.socketOption.port) {
                     find = true;
                 }

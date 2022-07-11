@@ -22,6 +22,7 @@
 #include <sys/uio.h>
 
 #include "softbus_adapter_errcode.h"
+#include "softbus_protocol_def.h"
 #include "softbus_socket.h"
 
 #ifdef __cplusplus
@@ -30,9 +31,7 @@ extern "C" {
 #endif
 #endif
 
-int32_t OpenTcpServerSocket(const char *ip, int32_t port);
-int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, bool isNonBlock);
-int32_t GetTcpSockPort(int32_t fd);
+const SocketInterface *GetTcpProtocol(void);
 
 int32_t SetIpTos(int fd, uint32_t tos);
 
