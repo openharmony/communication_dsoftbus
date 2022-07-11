@@ -55,7 +55,11 @@ int32_t GetRandBytes(uint8_t *buf, uint32_t len)
         return NSTACKX_EFAILED;
     }
     if (MbedtlsGetRandomSeed() != NSTACKX_EOK) {
-        ret = NSTACKX_EFAILED;
+        LOGE(TAG, "MbedtlsGetRandomSeed error");
+        if (pthread_mutex_unlock(&g_randomLock) != 0) {
+            LOGE(TAG, "unlock failed");
+        }
+        return NSTACKX_EFAILED;
     }
 
     ret = mbedtls_ctr_drbg_random(&g_mbedtlsCtrDrbg, buf, len);
