@@ -460,20 +460,21 @@ static int32_t SetP2pConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set p2p conn info.");
     connOpt->type = CONNECT_P2P;
-    if (strcpy_s(connOpt->info.ipOption.ip, IP_LEN, p2pInfo->peerIp) != EOK) {
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), p2pInfo->peerIp) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set p2p localIp err");
         return SOFTBUS_MEM_ERR;
     }
-
-    connOpt->info.ipOption.port = -1;
+    connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
+    connOpt->socketOption.port = -1;
     return SOFTBUS_OK;
 }
 
 static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_TCP;
-    connOpt->info.ipOption.port = (int32_t)connInfo->port;
-    if (strcpy_s(connOpt->info.ipOption.ip, sizeof(connOpt->info.ipOption.ip),
+    connOpt->socketOption.port = (int32_t)connInfo->port;
+    connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr),
             connInfo->ip) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set wlan localIp err");
         return SOFTBUS_ERR;
