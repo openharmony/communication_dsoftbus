@@ -21,14 +21,16 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_base_listener.h"
 #include "softbus_client_event_manager.h"
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_socket.h"
 #include "softbus_utils.h"
 
 static bool g_isInited = false;
@@ -140,12 +142,34 @@ static void FreeClientPkgName(void)
     (void)pthread_mutex_unlock(&g_pkgNameLock);
 }
 
+static void ConnClientDeinit(void) {
+    (void)DeinitBaseListener();
+    (void)ConnDeinitSockets();
+}
+
 static void ClientModuleDeinit(void)
 {
     EventClientDeinit();
     BusCenterClientDeinit();
     TransClientDeinit();
+    ConnClientDeinit();
     DiscClientDeinit();
+}
+
+static int32_t ConnClientInit() {
+    int32_t ret = ConnInitSockets();
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
+        return ret;
+    }
+
+    ret = InitBaseListener();
+    if(ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
+        return ret;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init conn client success");
+    return ret;
 }
 
 static int32_t ClientModuleInit(void)
@@ -166,8 +190,13 @@ static int32_t ClientModuleInit(void)
         goto ERR_EXIT;
     }
 
-    if (TransClientInit() == SOFTBUS_ERR) {
+    if(ConnClientInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init connect manager failed");
+        goto ERR_EXIT;
+    }
+
+    if (TransClientInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init trans manager failed");
         goto ERR_EXIT;
     }
 

@@ -40,9 +40,9 @@ int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
         return SOFTBUS_ERR;
     }
 
-    int fd = OpenClientSocket(option, localIp, isNonBlock);
+    int fd = ConnOpenClientSocket(option, localIp, isNonBlock);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth OpenClientSocket failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnOpenClientSocket failed");
         return SOFTBUS_ERR;
     }
     if (AddTrigger(AUTH, fd, isNonBlock ? WRITE_TRIGGER : READ_TRIGGER) != SOFTBUS_OK) {
@@ -240,7 +240,7 @@ static int32_t AuthOnDataEvent(ListenerModule module, int32_t events, int32_t fd
     UnpackConnPktHead(&head);
     if (len < (int32_t)headSize) {
         if (len < 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnRecvSocketData failed, DelTrigger");
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnRecvSocketData failed, DelTrigger. recv len=%zd", len);
             (void)DelTrigger(AUTH, fd, READ_TRIGGER);
             AuthNotifyDisconn(fd);
         }

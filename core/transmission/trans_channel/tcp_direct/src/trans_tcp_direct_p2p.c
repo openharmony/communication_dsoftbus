@@ -422,7 +422,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         goto EXIT_ERR;
     }
 
-    fd = OpenClientSocket(&options, BIND_ADDR_ALL, true);
+    fd = ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
         ReleaseSessonConnLock();

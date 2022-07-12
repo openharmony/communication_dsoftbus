@@ -105,7 +105,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnstreamChannelOpened enter.");
     if (channel == NULL || streamPort == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     StreamType streamType = (StreamType)channel->streamType;

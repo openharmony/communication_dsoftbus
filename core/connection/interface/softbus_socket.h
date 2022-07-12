@@ -65,7 +65,7 @@ const SocketInterface* GetSocketInterface(ProtocolType protocolType);
 
 int32_t RegistSocketProtocol(const SocketInterface* interface);
 
-int32_t OpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
 
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout);
 ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
