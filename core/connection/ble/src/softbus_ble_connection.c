@@ -858,6 +858,9 @@ static void BleServerConnectCallback(int32_t halConnId, const char *bleStrMac, c
 
 static void ReleaseBleConnectionInfo(BleConnectionInfo *info)
 {
+    if (info == NULL) {
+        return;
+    }
     ListNode *item = NULL;
     ListNode *nextItem = NULL;
     ListDelete(&info->node);

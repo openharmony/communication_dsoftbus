@@ -246,7 +246,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 int32_t TcpOnDataEventOut(int32_t fd)
