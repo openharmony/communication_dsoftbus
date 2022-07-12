@@ -1331,8 +1331,8 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
         return SOFTBUS_ERR;
     }
 
-    cipherKey.keyLen = sessionKey_.second;
-    if (memcpy_s(cipherKey.key, sessionKey_.second, sessionKey_.first, sessionKey_.second) != EOK) {
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
@@ -1355,8 +1355,8 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
         return SOFTBUS_ERR;
     }
 
-    cipherKey.keyLen = sessionKey_.second; // 256 bit encryption
-    if (memcpy_s(cipherKey.key, sessionKey_.second, sessionKey_.first, sessionKey_.second) != EOK) {
+    cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }

@@ -56,8 +56,8 @@ public:
                 return;
             }
             plainData = std::make_unique<char[]>(plainDataLength);
-            ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(), plainDataLength,
-                adaptor_->GetSessionKey());
+            ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
+                plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                     "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
