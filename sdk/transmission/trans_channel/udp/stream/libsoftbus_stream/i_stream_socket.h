@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 #include <queue>
+#include <securec.h>
 #include <utility>
 
 #include "i_stream.h"
@@ -50,7 +51,14 @@ public:
         streamType_ = INVALID;
         isBlocked_ = false;
     }
-    virtual ~IStreamSocket() = default;
+    virtual ~IStreamSocket()
+    {
+        if (sessionKey_.first != nullptr) {
+            (void)memset_s(sessionKey_.first, sessionKey_.second, 0, sessionKey_.second);
+            delete [] sessionKey_.first;
+        }
+        sessionKey_.first = nullptr;
+    }
 
     virtual bool CreateClient(IpAndPort &local, int streamType,
         std::pair<uint8_t*, uint32_t> sessionKey) = 0; // socket + bind

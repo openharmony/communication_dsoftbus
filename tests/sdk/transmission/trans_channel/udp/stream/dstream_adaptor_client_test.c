@@ -66,7 +66,7 @@ int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, 
     p1->peerIp = "127.0.0.1";
     p1->peerPort = port;
     p1->type = RAW_STREAM;
-    p1->sessionKey = (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc";
+    p1->sessionKey = (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc";
     p1->keyLen = SESSION_KEY_LENGTH;
 
     p2->pkgName = PKGNAME;

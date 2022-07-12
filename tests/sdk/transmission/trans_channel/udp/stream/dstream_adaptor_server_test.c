@@ -60,7 +60,7 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
+        (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc",
         SESSION_KEY_LENGTH,
     };
 
