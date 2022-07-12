@@ -44,7 +44,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerJoinLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
@@ -252,7 +252,7 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerPublishLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
@@ -281,7 +281,7 @@ int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopPublishLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
@@ -305,7 +305,7 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerRefreshLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;
@@ -334,7 +334,7 @@ int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopRefreshLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;

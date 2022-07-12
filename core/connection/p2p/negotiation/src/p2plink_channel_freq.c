@@ -47,7 +47,7 @@ int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *chann
     }
 
     if (channelString == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -73,7 +73,7 @@ void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list
 {
     // srcStr will be cut.
     if (srcStr == NULL || delimit == NULL || list == NULL || outNum == NULL || num == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
 
@@ -249,7 +249,7 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
 int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
 {
     if (gc == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 

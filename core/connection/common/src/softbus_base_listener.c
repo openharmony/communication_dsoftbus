@@ -22,13 +22,13 @@
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
-
 
 #define MAX_LISTEN_EVENTS 1024
 #define TIMEOUT           10000
@@ -52,8 +52,8 @@ enum BaseListenerStatus {
 
 typedef struct {
     ListNode node;
+    LocalListenerInfo listenerInfo;
     int32_t listenFd;
-    char addr[MAX_SOCKET_ADDR_LEN];
     int32_t listenPort;
     int32_t fdCount;
     ModeType modeType;
@@ -411,12 +411,6 @@ static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *
         }
         node->info.fdCount = 1;
         node->info.listenPort = node->socketIf->GetSockPort(node->info.listenFd);
-        if (strcpy_s(node->info.addr, sizeof(node->info.addr), info->socketOption.addr) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Copy addr failed");
-            ReleaseListenerSockets(node);
-            ret = SOFTBUS_MEM_ERR;
-            break;
-        }
         if (node->info.listenPort < 0) {
             SoftBusLog(
                 SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetSockPort failed, listenPort_=%d", node->info.listenPort);
@@ -424,16 +418,24 @@ static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *
             ret = SOFTBUS_ERR;
             break;
         }
+        if(memcpy_s(&node->info.listenerInfo, sizeof(node->info.listenerInfo), info, sizeof(*info)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Copy server option failed!");
+            ReleaseListenerSockets(node);
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
     } while (false);
 
-    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        ReleaseListenerSockets(node);
-        return SOFTBUS_ERR;
+    if (node->info.listenFd > 0) {
+        if (SoftBusMutexLock(&g_fdSetLock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+            ReleaseListenerSockets(node);
+            return SOFTBUS_ERR;
+        }
+        SoftBusSocketFdSet(node->info.listenFd, &g_readSet);
+        g_maxFd = MaxFd(node->info.listenFd, g_maxFd);
+        SoftBusMutexUnlock(&g_fdSetLock);
     }
-    SoftBusSocketFdSet(node->info.listenFd, &g_readSet);
-    g_maxFd = MaxFd(node->info.listenFd, g_maxFd);
-    SoftBusMutexUnlock(&g_fdSetLock);
     return ret;
 }
 
@@ -461,7 +463,15 @@ static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
                 break;
             }
             int32_t cfd;
-            ConnectOption clientAddr = {0};
+            ConnectOption clientAddr = {
+                .type = node->info.listenerInfo.type,
+                .socketOption = {
+                    .addr = {0},
+                    .port = 0,
+                    .protocol = 0,
+                    .moduleId = node->module
+                }
+            };
             int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(node->socketIf->AcceptClient(fd, &clientAddr, &cfd));
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
@@ -536,7 +546,7 @@ static void ProcessNodeData(
     }
 
     if (node->info.status != LISTENER_RUNNING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!", node->module);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!status = %d", node->module, node->info.status);
         SoftBusMutexUnlock(&node->lock);
         return;
     }
@@ -571,16 +581,11 @@ static void ProcessNodeData(
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
-        if (g_listenerList[i] == NULL) {
-            continue;
-        }
         SoftbusListenerNode *node = RequestListenerNode(i);
         if(node == NULL) {
             continue;
         }
-
         ProcessNodeData(node, readSet, writeSet, exceptSet);
-
         ReleaseListenerNode(node);
     }
 }
@@ -611,8 +616,9 @@ EXIT:
     return SOFTBUS_MEM_ERR;
 }
 
-static int32_t SelectThread(void)
+static int32_t SelectThread(void* data)
 {
+    (void)data;
     SoftBusSockTimeOut tv = {0};
     tv.sec = 0;
     tv.usec = TIMEOUT;
@@ -725,10 +731,12 @@ static int32_t StartListenerThread(SoftbusListenerNode *node, ModeType modeType)
 
         g_threadRefCount++;
         (void)SoftBusMutexUnlock(&g_threadLock);
+    } while (false);
 
+    if(ret == SOFTBUS_OK) {
         node->info.modeType = modeType;
         node->info.status = LISTENER_RUNNING;
-    } while (false);
+    }
 
     (void)SoftBusMutexUnlock(&node->lock);
     return ret;
@@ -884,6 +892,7 @@ int32_t StartBaseClient(ListenerModule module)
 int32_t StartBaseListener(const LocalListenerInfo *info)
 {
     if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: bad input", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     ListenerModule module = info->socketOption.moduleId;
@@ -900,24 +909,24 @@ int32_t StartBaseListener(const LocalListenerInfo *info)
             break;
         }
         if (node->info.status != LISTENER_IDLE) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.status=%d", node->info.status);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:listener is not in idle status.status=%d",__func__, node->info.status);
             ret = SOFTBUS_ERR;
             break;
         }
         node->socketIf = GetSocketInterface(info->socketOption.protocol);
         if(node->socketIf == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no such protocol.protocol=%d", info->socketOption.protocol);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:no such protocol.protocol=%d",__func__, info->socketOption.protocol);
             ret = SOFTBUS_ERR;
             break;
         }
         ret = InitListenFd(node, info);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitListenFd failed!ret=%" PRId32, ret);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:InitListenFd failed!ret=%" PRId32,__func__, ret);
             break;
         }
         ret = StartListenerThread(node, SERVER_MODE);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Start listener thread failed!ret=%" PRId32, ret);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Start listener thread failed!ret=%" PRId32,__func__, ret);
             ReleaseListenerSockets(node);
             break;
         }

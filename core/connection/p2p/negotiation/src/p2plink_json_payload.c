@@ -92,7 +92,7 @@ int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type,
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "pack request info.");
     if (request == NULL || data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -129,7 +129,7 @@ int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, 
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "pack response info.");
     if (response == NULL || data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -169,7 +169,7 @@ int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pReque
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "unpack request info.");
     if (request == NULL || data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -209,7 +209,7 @@ int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pResp
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "unpack response info.");
     if (response == NULL || data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 

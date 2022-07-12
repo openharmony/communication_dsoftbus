@@ -25,7 +25,7 @@
 int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -58,7 +58,7 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     size_t networkIdLen;
@@ -80,7 +80,7 @@ int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
 {
     if (data== NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     bool isOnline;
@@ -104,7 +104,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
 int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -125,7 +125,7 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
 int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -150,7 +150,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     int32_t publishId;
@@ -163,7 +163,7 @@ void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
 void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     int32_t refreshId;
@@ -176,7 +176,7 @@ void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
 void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     uint32_t infoSize;

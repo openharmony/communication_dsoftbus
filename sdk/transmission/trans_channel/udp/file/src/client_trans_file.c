@@ -134,7 +134,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
     if (channel == NULL || filePort == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t fileSession;

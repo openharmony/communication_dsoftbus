@@ -144,7 +144,7 @@ int32_t AuthP2pInit(void)
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 

@@ -506,7 +506,7 @@ static int32_t CheckP2pRoleConflict(const char *networkId)
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
     if (networkId == NULL || p2pInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_pendingList == NULL) {
@@ -523,7 +523,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInf
 int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
 {
     if (networkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_pendingList == NULL) {

@@ -171,12 +171,6 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
             return SOFTBUS_ERR;
         }
     }
-
-    const SocketInterface* socketInterface = GetSocketInterface(clientAddr->socketOption.protocol);
-    if(socketInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!protocol=%d", clientAddr->socketOption.protocol);
-        return SOFTBUS_ERR;
-    }
     
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
@@ -192,9 +186,10 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
             clientAddr->socketOption.addr) != EOK) {
         goto EXIT;
     }
-    tcpConnInfoNode->info.socketInfo.port = socketInterface->GetSockPort(cfd);
+    tcpConnInfoNode->info.socketInfo.port = clientAddr->socketOption.port;
     tcpConnInfoNode->info.socketInfo.fd = cfd;
     tcpConnInfoNode->info.socketInfo.moduleId = module;
+    tcpConnInfoNode->info.socketInfo.protocol = clientAddr->socketOption.protocol;
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         goto EXIT;
     }
@@ -389,7 +384,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t fd = OpenClientSocket(option, BIND_ADDR_ALL, false);
+    int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, false);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -418,6 +413,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     tcpConnInfoNode->info.isServer = false;
     tcpConnInfoNode->info.type = CONNECT_TCP;
     tcpConnInfoNode->info.socketInfo.port = option->socketOption.port;
+    tcpConnInfoNode->info.socketInfo.protocol = option->socketOption.protocol;
     tcpConnInfoNode->info.socketInfo.fd = fd;
     tcpConnInfoNode->info.socketInfo.moduleId = option->socketOption.moduleId;
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
@@ -543,52 +539,6 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectionId:%08x is not exists.", connectionId);
     return SOFTBUS_ERR;
 }
-#if 0
-static int32_t OnProxyServerConnectEvent(int32_t events, int32_t cfd, const char *ip)
-{
-    return TcpOnConnectEvent(PROXY, events, cfd, ip);
-}
-
-static int32_t OnAuthP2pServerConnectEvent(int32_t events, int32_t cfd, const char *ip)
-{
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv p2p conned %d", cfd);
-    if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive fail");
-        ConnShutdownSocket(cfd);
-        return SOFTBUS_ERR;
-    }
-    return TcpOnConnectEvent(AUTH_P2P, events, cfd, ip);
-}
-
-static TcpListenerItem g_tcpListenerItems[] = {
-    {
-        .moduleId = PROXY,
-        .listener = {
-            .onConnectEvent = OnProxyServerConnectEvent,
-            .onDataEvent = TcpOnDataEvent
-        }
-    },
-    {
-        .moduleId = AUTH_P2P,
-        .listener = {
-            .onConnectEvent = OnAuthP2pServerConnectEvent,
-            .onDataEvent = TcpOnDataEvent
-        }
-    },
-    /* Note: if add new tcp server, expend it here according to the above codes. */
-};
-
-static SoftbusBaseListener *CheckTcpListener(ListenerModule moduleId)
-{
-    for (uint32_t i = 0; i < sizeof(g_tcpListenerItems) / sizeof(TcpListenerItem); i++) {
-        if (g_tcpListenerItems[i].moduleId == moduleId) {
-            return &(g_tcpListenerItems[i].listener);
-        }
-    }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unsupport ListenerModule, id = %d.", moduleId);
-    return NULL;
-}
-#endif
 
 int32_t TcpStartListening(const LocalListenerInfo *info)
 {

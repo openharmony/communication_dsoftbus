@@ -131,7 +131,7 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK,
         0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d", fd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Create socket failed! ret=%d", __func__, ret);
         return -1;
     }
 
@@ -182,7 +182,6 @@ int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool 
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:using specified bind addr", __func__);
             bindAddr = myIp;
         }
-        
         ret = BindLocalIP(fd, bindAddr, 0);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
@@ -280,8 +279,8 @@ static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd) {
     if(clientAddr != NULL) {
         clientAddr->type = CONNECT_TCP;
         SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
-        clientAddr->socketOption.port = 0;
-        clientAddr->socketOption.moduleId = 0;
+        clientAddr->socketOption.port = GetTcpSockPort(*cfd);
+        clientAddr->socketOption.protocol = LNN_PROTOCOL_IP;
     }
     return SOFTBUS_OK;
 }

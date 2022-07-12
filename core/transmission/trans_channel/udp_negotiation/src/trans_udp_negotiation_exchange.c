@@ -30,7 +30,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -58,7 +58,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
@@ -103,7 +103,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -150,7 +150,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 

@@ -79,7 +79,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
     if (myIP == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     int fd = OpenTcpServer(myIP, 0);
@@ -120,7 +120,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     uint32_t keyLen, DFileMsgReceiver msgReceiver)
 {
     if (peerIp == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 

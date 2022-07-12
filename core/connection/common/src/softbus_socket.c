@@ -105,7 +105,7 @@ void ConnDeinitSockets(void)
     (void)SoftBusMutexDestroy(&g_socketsMutex);
 }
 
-int32_t OpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock) {
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock) {
     if(option == NULL || bindAddr == NULL) {
         return SOFTBUS_ERR;
     }

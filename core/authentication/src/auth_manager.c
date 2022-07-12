@@ -174,7 +174,7 @@ static void HandleAuthDisconnectDevice(uint32_t connectionId)
 static void AuthHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth message: what = %d.", msg->what);
@@ -1977,7 +1977,7 @@ static AuthManager *GetAuthManagerInner(int64_t authId)
 int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authLock) != 0) {
@@ -2040,7 +2040,7 @@ static bool IsAuthLinkTypeMatched(AuthLinkType type, const AuthManager *auth)
 int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, ConnectOption *option)
 {
     if (mac == NULL || strlen(mac) == 0 || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;
@@ -2074,7 +2074,7 @@ int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *
 {
     ConnectOption option = {0};
     if (uuid == NULL || strlen(uuid) == 0 || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (AuthGetActiveConnectOption(uuid, type, &option) != SOFTBUS_OK) {
@@ -2088,7 +2088,7 @@ int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *
 int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option)
 {
     if (uuid == NULL || strlen(uuid) == 0 || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;
@@ -2125,7 +2125,7 @@ int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOp
 int32_t AuthGetActiveBleConnectOption(const char *uuid, bool isServerSide, ConnectOption *option)
 {
     if (uuid == NULL || uuid[0] == '\0' || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;
