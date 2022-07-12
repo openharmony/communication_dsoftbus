@@ -128,12 +128,14 @@ The main code directory structure of DSoftBus is as follows:
             } br;
             struct BleAddr {
                 char bleMac[BT_MAC_LEN];
+                uint8_t udidHash[UDID_HASH_LEN];
             } ble;
             struct IpAddr {
                 char ip[IP_STR_MAX_LEN];
-                int port;
+                uint16_t port; 
             } ip;
         } info;
+        char peerUid[MAX_ACCOUNT_HASH_LEN];
     } ConnectionAddr;
     
     // Address types
@@ -149,7 +151,7 @@ The main code directory structure of DSoftBus is as follows:
     typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     
     // Initiate a connection request.
-    int32_t JoinLNN(ConnectionAddr *target, OnJoinLNNResult cb);
+    int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
     ```
 
 2.  Wait for the connection result. If  **JoinLNN\(\)**  returns success, the DSoftBus accepts the connection request and notifies you of the connection result through the callback. The  **addr**  parameter in the callback matches the  **target**  parameter in  **JoinLNN\(\)**. If  **retCode**  in the callback is  **0**, the connection is successful. In this case, the value of  **networkId**  is valid and will be used in the data transmission and disconnection APIs. If the value of  **retCode**  is not  **0**, the connection fails, and the value of  **networkId**  is invalid.
@@ -161,7 +163,7 @@ The main code directory structure of DSoftBus is as follows:
     typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
     
     // Initiate a disconnection request.
-    int32_t LeaveLNN(const char *networkId, OnLeaveLNNResult cb);
+    int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
     ```
 
 5.  Wait until the disconnection is complete. The  **networkId**  parameter in  **OnLeaveLNNResult\(\)**  matches  **networkId**  in  **LeaveLNN\(\)**. If  **retCode**  in the callback is  **0**, the disconnection is successful; otherwise, the disconnection fails. If the disconnection is successful,  **networkId**  becomes invalid and can no longer be used.
@@ -190,7 +192,7 @@ The main code directory structure of DSoftBus is as follows:
     } INodeStateCb;
     
     // Register the callback for device state events.
-    int32_t RegNodeDeviceStateCb(INodeStateCb *callback);
+    int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback);
     
     // Unregister the callback for device state events.
     int32_t UnregNodeDeviceStateCb(INodeStateCb *callback);
@@ -208,6 +210,8 @@ The main code directory structure of DSoftBus is as follows:
         void (*OnSessionClosed)(int sessionId);
         void (*OnBytesReceived)(int sessionId, const void *data, unsigned int dataLen);
         void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
+        void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
+        void (*OnQosEvent)(int sessionId, int eventId, int tvCount, const QosTv *tvList);
     } ISessionListener;
     
     // Create a session server.
