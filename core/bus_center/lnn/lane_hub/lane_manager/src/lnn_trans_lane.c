@@ -351,6 +351,7 @@ static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
     if (BindLaneIdToProfile(laneId, &profile) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind laneId to profile fail");
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Notify laneAlloc succ, laneId:%u", laneId);
     reqInfo.listener.OnLaneRequestSuccess(laneId, &connInfo);
     UpdateLinkType(laneId, info->type);
     LaneGenerateParam param;
@@ -367,7 +368,7 @@ static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane alloc fail reason:%d", reason);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Notify laneAlloc fail, laneId:%u, reason:%d", laneId, reason);
     reqInfo.listener.OnLaneRequestFail(laneId, LANE_LINK_FAILED);
     if (Lock() != SOFTBUS_OK) {
         return;
