@@ -97,7 +97,10 @@
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/openauthsession_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/removesessionserver_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sendbytes_fuzzer:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/closesession_fuzzer:fuzztest"
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/closesession_fuzzer:fuzztest"，
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/softbussendmessage_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/setfilereceivelistener_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/setfilesendlistener_fuzzer:fuzztest"
         ]
       }
     }
