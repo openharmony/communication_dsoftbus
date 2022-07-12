@@ -265,7 +265,6 @@ int32_t BrDequeueNonBlock(void **msg)
         return SOFTBUS_OK;
     }
     if (IsListEmpty(&g_brQueueList)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait g_sendCond");
         if (BrSoftBusCondWait(&g_sendCond, &g_brQueueLock, DEQUEUE_DELAY) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrSendCondWait failed");
             (void)SoftBusMutexUnlock(&g_brQueueLock);
