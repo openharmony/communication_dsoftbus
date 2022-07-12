@@ -186,7 +186,10 @@ int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
 {
-    (void)infoTypeLen;
+    if (infoTypeLen != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "infoTypeLen is invalid, infoTypeLen = %d", infoTypeLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
     return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);
 }
 
