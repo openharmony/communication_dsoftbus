@@ -54,11 +54,11 @@ int main(int argc, char *argv[])
         return 0;
     }
     int port = 0;
-    if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0){
+    if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0) {
         return 0;
     }
     int port2 = 0;
-    if (sscanf_s(argv[SECOND_ARGV], "%d", &port2) <= 0){
+    if (sscanf_s(argv[SECOND_ARGV], "%d", &port2) <= 0) {
         return 0;
     }
     int ret;
