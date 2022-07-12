@@ -44,7 +44,6 @@
 #define CONNECT_REF_INCRESE 1
 #define CONNECT_REF_DECRESE (-1)
 #define BR_SEND_THREAD_STACK 5120
-#define BR_ACCECT_THREAD_STACK (10*1024)
 #define BR_RECE_THREAD_STACK 4096
 #define MAX_BR_SIZE (40 * 1000)
 #define MAX_BR_PEER_SIZE (3*1024)
@@ -753,6 +752,7 @@ void *ConnBrAccept(void *arg)
             SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
             continue;
         }
+        (void)memset_s(name, sizeof(name), 0, sizeof(name));
         ret = sprintf_s(name, BR_SERVER_NAME_LEN, "SOFTBUS_BR_%d", num);
         if (ret <= 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnBrAccept sprintf_s failed %d", num);
@@ -797,7 +797,6 @@ static int32_t StartLocalListening(const LocalListenerInfo *info)
     pthread_t tid;
     pthread_attr_t threadAttr;
     pthread_attr_init(&threadAttr);
-    pthread_attr_setstacksize(&threadAttr, BR_ACCECT_THREAD_STACK);
     if (pthread_create(&tid, &threadAttr, ConnBrAccept, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create ConnBrAccept failed");
         pthread_attr_destroy(&threadAttr);
