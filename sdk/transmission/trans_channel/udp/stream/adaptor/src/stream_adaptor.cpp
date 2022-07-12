@@ -101,7 +101,8 @@ void StreamAdaptor::ReleaseAdaptor()
     streamManager_->DestroyEnvironment(pkgName_);
     channelId_ = -1;
     if (sessionKey_.first != nullptr) {
-        delete []sessionKey_.first;
+        (void)memset_s(sessionKey_.first, sessionKey_.second, 0, sessionKey_.second);
+        delete [] sessionKey_.first;
     }
     sessionKey_.first = nullptr;
 }

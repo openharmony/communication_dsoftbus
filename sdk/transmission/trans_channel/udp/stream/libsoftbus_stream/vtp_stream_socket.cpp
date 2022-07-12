@@ -293,8 +293,15 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<u
         return false;
     }
 
-    sessionKey_.first = sessionKey.first;
     sessionKey_.second = sessionKey.second;
+    if (sessionKey_.first == nullptr) {
+        sessionKey_.first = new uint8_t[sessionKey_.second];
+    }
+    if (memcpy_s(sessionKey_.first, sessionKey_.second, sessionKey.first, sessionKey.second) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return false;
+    }
+
     streamType_ = streamType;
     std::lock_guard<std::mutex> guard(streamSocketLock_);
     streamFd_ = fd;
@@ -353,8 +360,14 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<u
     }
     isStreamRecv_ = true;
     streamType_ = streamType;
-    sessionKey_.first = sessionKey.first;
     sessionKey_.second = sessionKey.second;
+    if (sessionKey_.first == nullptr) {
+        sessionKey_.first = new uint8_t[sessionKey_.second];
+    }
+    if (memcpy_s(sessionKey_.first, sessionKey_.second, sessionKey.first, sessionKey.second) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return false;
+    }
     auto self = this->GetSelf();
     std::thread([self]() { self->NotifyStreamListener(); }).detach();
 
