@@ -19,6 +19,7 @@
 #include "client_trans_udp_stream_interface.h"
 #include "securec.h"
 #include "session.h"
+#include "softbus_error_code.h"
 
 #define CHANNELID 1
 #define CHANNELID2 2
@@ -29,7 +30,8 @@
 #define SHORT_SLEEP   3
 #define LONG_SLEEP    30
 #define LOOP_ROUND    10
-
+#define SESSION_KEY_LENGTH   32
+#define STREAM_DATA_LENGTH   10
 
 void SetStatus(int channelId, int status)
 {
@@ -47,58 +49,66 @@ static IStreamListener g_callback = {
     .OnStreamReceived = OnStreamReceived,
 };
 
-int main(int argc, char *argv[])
+int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, char *argv[])
 {
-    if (argc != TWO_CLIENT_ARGC) {
-        printf("[client]:Please input server sorcket to connect\n");
-        return 0;
-    }
     int port = 0;
     if (sscanf_s(argv[FIRST_ARGV], "%d", &port) <= 0) {
-        return 0;
+        return SOFTBUS_ERR;
     }
+
     int port2 = 0;
     if (sscanf_s(argv[SECOND_ARGV], "%d", &port2) <= 0) {
-        return 0;
+        return SOFTBUS_ERR;
     }
-    int ret;
 
-    VtpStreamOpenParam p1 = {
-        PKGNAME,
-        "127.0.0.1",
-        "127.0.0.1",
-        port,
-        RAW_STREAM,
-        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
-        32,
-    };
+    p1->pkgName = PKGNAME;
+    p1->myIp = "127.0.0.1";
+    p1->peerIp = "127.0.0.1";
+    p1->peerPort = port;
+    p1->type = RAW_STREAM;
+    p1->sessionKey = (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc";
+    p1->keyLen = SESSION_KEY_LENGTH;
 
-    VtpStreamOpenParam p2 = {
-        PKGNAME,
-        "127.0.0.1",
-        "127.0.0.1",
-        port2,
-        RAW_STREAM,
-        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
-        32,
-    };
+    p2->pkgName = PKGNAME;
+    p2->myIp = "127.0.0.1";
+    p2->peerIp = "127.0.0.1";
+    p2->peerPort = port2;
+    p2->type = RAW_STREAM;
+    p2->sessionKey = (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc";
+    p2->keyLen = SESSION_KEY_LENGTH;
 
-    ret = StartVtpStreamChannelClient(CHANNELID, &p1, &g_callback);
+    return SOFTBUS_OK;
+    
+}
+
+int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStreamListener *callback)
+{
+    if (p1 == NULL || p2 == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    int ret = StartVtpStreamChannelClient(CHANNELID, p1, callback);
+    if (ret ==SOFTBUS_ERR) {
+        return SOFTBUS_ERR;
+    }
     printf("[client]:StartChannelClient ret:%d\n", ret);
 
-    ret = StartVtpStreamChannelClient(CHANNELID2, &p2, &g_callback);
+    ret = StartVtpStreamChannelClient(CHANNELID2, p2, callback);
+    if (ret ==SOFTBUS_ERR) {
+        return SOFTBUS_ERR;
+    }
     printf("[client]:StartChannelClient ret:%d\n", ret);
 
     sleep(SHORT_SLEEP);
 
     StreamData tmpData = {
         "diudiudiu\0",
-        10,
+        STREAM_DATA_LENGTH,
     };
 
     StreamData tmpData2 = {
         "oohoohooh\0",
-        10,
+        STREAM_DATA_LENGTH,
     };
     StreamFrameInfo tmpf = {};
 
@@ -113,6 +123,29 @@ int main(int argc, char *argv[])
     CloseVtpStreamChannel(CHANNELID, PKGNAME);
     CloseVtpStreamChannel(CHANNELID2, PKGNAME);
     sleep(LONG_SLEEP);
+
+    return SOFTBUS_OK;
+
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc != TWO_CLIENT_ARGC) {
+        printf("[client]:Please input server sorcket to connect\n");
+        return SOFTBUS_ERR;
+    }
+    
+    VtpStreamOpenParam p1;
+    VtpStreamOpenParam p2;
+    int ret = ConstructVtpStreamOpenParam(&p1, &p2, argv);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    ret = SendVtpStreamTest(&p1, &p2, &g_callback);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
 
     return 0;
 }
