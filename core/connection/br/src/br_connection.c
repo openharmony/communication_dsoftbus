@@ -192,7 +192,7 @@ static void DeviceConnectPackRequest(int32_t value, uint32_t connectionId)
 
 static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sppDriver connect start.");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sppDriver connect start, connId:%d", connId);
     BrConnectionInfo *brConn = GetConnectionRef(connId);
     if (brConn == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrClient not find connInfo.");
@@ -214,7 +214,7 @@ static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
     }
     if (socketFd == SOFTBUS_ERR) {
         ReleaseConnectionRef(brConn);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sppDriver connect failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sppDriver connect failed, connId:%d", connId);
         return SOFTBUS_BRCONNECTION_CONNECTDEVICE_GETSOCKETIDFAIL;
     }
     brConn->socketFd = socketFd;
@@ -262,6 +262,8 @@ static void ClientNoticeResultBrConnect(uint32_t connId, bool result, int32_t va
                     requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
                 }
             }
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connnect notify, result:%d, connId:%d, requestId:%d",
+                result, connId, requestInfo->requestId);
             ListDelete(&requestInfo->node);
             SoftBusFree(requestInfo);
         }
@@ -443,7 +445,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
         ReleaseBrconnectionNode(newConnInfo);
         return SOFTBUS_ERR;
     }
-
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDeviceFirstTime connId:%d, requestId:%d", connId, requestId);
     if (ConnBrOnEvent(ADD_CONN_BR_CLIENT_CONNECTED_MSG, (int32_t)connId, (int32_t)connId) != SOFTBUS_OK) {
         ReleaseConnectionRef(newConnInfo);
         return SOFTBUS_ERR;
@@ -458,15 +460,18 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[has diff mac device]");
     }
     uint32_t connId = 0;
+    uint32_t connectingReqId = 0;
     int32_t ret = SOFTBUS_OK;
     if (pthread_mutex_lock(&g_brConnLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-    int32_t connState = GetBrConnStateByConnOption(option, &connId);
+    int32_t connState = GetBrConnStateByConnOption(option, &connId, &connectingReqId);
     if (connState == BR_CONNECTION_STATE_CONNECTED) {
         ConnectDeviceExit(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CONNECTING) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%d, current:%d, connecting:%d", connId,
+            requestId, connectingReqId);
         ret = ConnectDeviceStateConnecting(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CLOSING) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BR_CONNECTION_STATE_CLOSING]");
