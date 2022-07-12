@@ -128,12 +128,14 @@
             } br;
             struct BleAddr {
                 char bleMac[BT_MAC_LEN];
+                uint8_t udidHash[UDID_HASH_LEN];
             } ble;
             struct IpAddr {
                 char ip[IP_STR_MAX_LEN];
-                int port;
+                uint16_t port; 
             } ip;
         } info;
+        char peerUid[MAX_ACCOUNT_HASH_LEN];
     } ConnectionAddr;
     
     // 组网连接地址类型
@@ -161,7 +163,7 @@
     typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
     
     // 退网请求
-    int32_t LeaveLNN(const char *networkId, OnLeaveLNNResult cb);
+    int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
     ```
 
 5.  等待退网完成，OnLeaveLNNResult\(\)的networkId和退网请求接口中的networkId互相匹配；retCode为0表示退网成功，否则退网失败。退网成功后，networkId变为无效值，后续不应该被继续使用。
@@ -190,7 +192,7 @@
     } INodeStateCb;
     
     //  注册节点状态事件回调
-    int32_t RegNodeDeviceStateCb(INodeStateCb *callback);
+    int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback);
     
     // 注销节点状态事件回调
     int32_t UnregNodeDeviceStateCb(INodeStateCb *callback);
@@ -208,6 +210,8 @@
         void (*OnSessionClosed)(int sessionId);
         void (*OnBytesReceived)(int sessionId, const void *data, unsigned int dataLen);
         void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
+        void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
+        void (*OnQosEvent)(int sessionId, int eventId, int tvCount, const QosTv *tvList);
     } ISessionListener;
     
     // 创建会话服务
