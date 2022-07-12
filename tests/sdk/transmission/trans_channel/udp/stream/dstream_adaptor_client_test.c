@@ -78,7 +78,6 @@ int ConstructVtpStreamOpenParam(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, 
     p2->keyLen = SESSION_KEY_LENGTH;
 
     return SOFTBUS_OK;
-    
 }
 
 int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStreamListener *callback)
@@ -125,7 +124,6 @@ int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStr
     sleep(LONG_SLEEP);
 
     return SOFTBUS_OK;
-
 }
 
 int main(int argc, char *argv[])
@@ -134,7 +132,6 @@ int main(int argc, char *argv[])
         printf("[client]:Please input server sorcket to connect\n");
         return SOFTBUS_ERR;
     }
-    
     VtpStreamOpenParam p1;
     VtpStreamOpenParam p2;
     int ret = ConstructVtpStreamOpenParam(&p1, &p2, argv);
@@ -147,5 +144,5 @@ int main(int argc, char *argv[])
         return SOFTBUS_ERR;
     }
 
-    return 0;
+    return SOFTBUS_OK;
 }
