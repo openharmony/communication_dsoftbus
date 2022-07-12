@@ -498,7 +498,7 @@ static bool IsTargetSideType(ConnSideType targetType, int32_t connType)
     return true;
 }
 
-int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outConnId)
+int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outConnId, uint32_t *connectingReqId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -511,6 +511,10 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCon
             Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
             if (outConnId != NULL) {
                 *outConnId = itemNode->connectionId;
+            }
+            if (connectingReqId != NULL) {
+                RequestInfo *connectingReq = LIST_ENTRY(itemNode->requestList.next, RequestInfo, node);
+                *connectingReqId = connectingReq->requestId;
             }
             (void)pthread_mutex_unlock(&g_connectionLock);
             return itemNode->state;

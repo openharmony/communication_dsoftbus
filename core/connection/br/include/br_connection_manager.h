@@ -122,7 +122,7 @@ int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *notifyList,
 
 bool HasDiffMacDeviceExit(const ConnectOption *option);
 
-int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCountId);
+int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCountId, uint32_t *connectingReqId);
 
 bool IsBrDeviceReady(uint32_t connId);
 
