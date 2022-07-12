@@ -64,7 +64,6 @@ static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const La
         linkInfo.linkInfo.br.brMac, BT_MAC_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo brmac is failed");
-        callback->OnLaneLinkFail(reqId, -1);
         return SOFTBUS_ERR;
     }
     linkInfo.type = LANE_BR;
