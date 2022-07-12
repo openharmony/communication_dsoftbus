@@ -140,8 +140,7 @@ static int32_t DiscoveryResultTransfer(int32_t retCode)
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
 {
     if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online, no need to notify sdk");
-        return SOFTBUS_OK;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
     }
     return ClientOnRefreshDeviceFound(pkgName, device, sizeof(DeviceInfo));
 }
