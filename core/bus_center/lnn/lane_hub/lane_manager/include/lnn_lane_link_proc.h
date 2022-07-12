@@ -32,13 +32,13 @@ typedef struct {
 } LinkRequest;
 
 typedef struct {
-    uint16_t channel;
+    int32_t channel;
     LaneBandwidth bw;
     WlanConnInfo connInfo;
 } WlanLinkInfo;
 
 typedef struct {
-    uint16_t channel;
+    int32_t channel;
     LaneBandwidth bw;
     P2pConnInfo connInfo;
 } P2pLinkInfo;

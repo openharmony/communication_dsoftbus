@@ -33,6 +33,7 @@ typedef struct {
     uint32_t laneId;
     SoftBusCond cond;
     bool bSucc;
+    bool isFinished;
     LaneConnInfo connInfo;
 } TransReqLaneItem;
 
@@ -114,7 +115,8 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
     }
     item->laneId = laneId;
     item->bSucc = false;
-    memset_s(&(item->connInfo), sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
+    item->isFinished = false;
+    (void)memset_s(&(item->connInfo), sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
 
     if (SoftBusMutexLock(&g_reqLanePendingList->lock) != SOFTBUS_OK) {
         SoftBusFree(item);
@@ -190,6 +192,7 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, cons
                 return SOFTBUS_ERR;
             }
             (void)SoftBusCondSignal(&item->cond);
+            item->isFinished = true;
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
             return SOFTBUS_OK;
         }
@@ -354,12 +357,13 @@ static int32_t TransWaitingRequestCallback(uint32_t laneId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not found lane[%u] in pending.", laneId);
         return SOFTBUS_ERR;
     }
-    
-    int32_t rc = TransSoftBusCondWait(&item->cond, &g_reqLanePendingList->lock, 0);
-    if (rc != SOFTBUS_OK) {
-        (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "wait cond failed laneId[%u].", laneId);
-        return rc;
+    if (item->isFinished == false) {
+        int32_t rc = TransSoftBusCondWait(&item->cond, &g_reqLanePendingList->lock, 0);
+        if (rc != SOFTBUS_OK) {
+            (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "wait cond failed laneId[%u].", laneId);
+            return rc;
+        }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive lane cond laneId[%u].", laneId);
@@ -372,7 +376,7 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneReq
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param error.");
         return SOFTBUS_ERR;
     }
-    
+
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add lane[%u] to pending failed.", laneId);

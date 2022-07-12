@@ -53,7 +53,7 @@ typedef enum {
 typedef struct {
     uint32_t serialNum;
     LaneLinkType linkType;
-    uint16_t phyChannel;
+    int32_t phyChannel;
     LaneBandwidth bw;
     LaneTimeSlotPolicy ts;
     LanePowerType energy;
