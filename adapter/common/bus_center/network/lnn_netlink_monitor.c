@@ -64,7 +64,10 @@ static int32_t CreateNetlinkSocket(void)
         SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
-    (void)memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr));
+    if (memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sockaddr_nl failed");
+        return SOFTBUS_ERR;
+    }
     nladdr.nl_family = SOFTBUS_AF_NETLINK;
     // Kernel will assign a unique nl_pid if set to zero.
     nladdr.nl_pid = 0;
