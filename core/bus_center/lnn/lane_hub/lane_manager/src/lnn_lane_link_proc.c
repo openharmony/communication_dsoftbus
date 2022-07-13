@@ -108,7 +108,7 @@ static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *is
     LnnWlanLinkedInfo info;
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan is disconnect");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetWlanLinkedInfo fail, ret:%d", ret);
         return SOFTBUS_ERR;
     }
     *isConnected = info.isConnected;
