@@ -1316,7 +1316,7 @@ static void AuthListInit(void)
     AuthSessionKeyListInit();
 }
 
-int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
+int32_t AddAuthServer(int32_t cfd, const ConnectOption *clientAddr)
 {
     AuthManager *auth = NULL;
 
@@ -1341,21 +1341,17 @@ int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port)
         SoftBusFree(auth);
         return SOFTBUS_ERR;
     }
-    ConnectOption option;
-    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    option.type = CONNECT_TCP;
-    if (strncpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), ip, strlen(ip))) {
+
+    if (memcpy_s(&auth->option, sizeof(auth->option), clientAddr, sizeof(*clientAddr)) != EOK) {
         (void)SoftBusMutexUnlock(&g_authLock);
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strncpy_s failed");
         SoftBusFree(auth);
         return SOFTBUS_ERR;
     }
-    option.socketOption.port = port;
-    option.socketOption.protocol = LNN_PROTOCOL_IP;
-    auth->option = option;
+
     ListNodeInsert(&g_authServerHead, &auth->node);
     (void)SoftBusMutexUnlock(&g_authLock);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create ip auth as server side");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create auth as server side");
     return SOFTBUS_OK;
 }
 

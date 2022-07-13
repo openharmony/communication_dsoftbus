@@ -485,7 +485,7 @@ static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *conn
 static int32_t SetBrConnInfo(const BrConnInfo *brInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_BR;
-    if (strcpy_s(connOpt->info.brOption.brMac, sizeof(connOpt->info.brOption.brMac),
+    if (strcpy_s(connOpt->brOption.brMac, sizeof(connOpt->brOption.brMac),
             brInfo->brMac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set br mac err");
         return SOFTBUS_ERR;
@@ -497,7 +497,7 @@ static int32_t SetBrConnInfo(const BrConnInfo *brInfo, ConnectOption *connOpt)
 static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_BLE;
-    if (strcpy_s(connOpt->info.bleOption.bleMac, sizeof(connOpt->info.bleOption.bleMac),
+    if (strcpy_s(connOpt->bleOption.bleMac, sizeof(connOpt->bleOption.bleMac),
             bleInfo->bleMac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
         return SOFTBUS_ERR;

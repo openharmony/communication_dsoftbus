@@ -331,13 +331,7 @@ static int32_t AuthOnConnectEvent(ListenerModule module, int32_t events, int32_t
         return SOFTBUS_INVALID_PARAM;
     }
 
-    const SocketInterface* socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
-    if(socketInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!type=%d", LNN_PROTOCOL_IP);
-        return SOFTBUS_ERR;
-    }
-    int32_t port = socketInterface->GetSockPort(cfd);
-    if (port <= 0) {
+    if (clientAddr->socketOption.port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth GetTcpSockPort failed");
         return SOFTBUS_ERR;
     }
@@ -345,8 +339,8 @@ static int32_t AuthOnConnectEvent(ListenerModule module, int32_t events, int32_t
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddTrigger failed");
         return SOFTBUS_ERR;
     }
-    if (CreateServerIpAuth(cfd, clientAddr->socketOption.addr, port) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth CreateServerIpAuth failed");
+    if (AddAuthServer(cfd, clientAddr) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth AddAuthServer failed");
         AuthCloseTcpFd(cfd);
         return SOFTBUS_ERR;
     }
