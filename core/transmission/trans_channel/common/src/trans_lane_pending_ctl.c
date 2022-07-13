@@ -61,7 +61,8 @@ void TransReqLanePendingDeinit(void)
     }
 
     TransReqLaneItem *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_reqLanePendingList->list, TransReqLaneItem, node) {
+    TransReqLaneItem *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_reqLanePendingList->list, TransReqLaneItem, node) {
         (void)SoftBusCondDestroy(&item->cond);
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -133,11 +134,10 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
     ListAdd(&(g_reqLanePendingList->list), &(item->node));
     g_reqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
-    
+
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add tran request to pending [lane=%u].", laneId);
     return SOFTBUS_OK;
 }
-
 
 static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneConnInfo *connInfo)
 {
@@ -191,8 +191,8 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, cons
                 (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
                 return SOFTBUS_ERR;
             }
-            (void)SoftBusCondSignal(&item->cond);
             item->isFinished = true;
+            (void)SoftBusCondSignal(&item->cond);
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
             return SOFTBUS_OK;
         }
@@ -407,7 +407,7 @@ int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneCon
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lane info by option param error.");
         return SOFTBUS_ERR;
     }
-    
+
     *laneId = ApplyLaneId(LANE_TYPE_TRANS);
     if (*laneId <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans apply lane failed.");
