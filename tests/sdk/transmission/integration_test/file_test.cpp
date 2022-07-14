@@ -1,6 +1,21 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <gtest/gtest.h>
 
-#include <inttypes.h>
+#include <cinttypes>
 #include "test_suite.h"
 #include "transport/session.h"
 
@@ -36,19 +51,19 @@ static inline int WaitConnectionReady(int sessionId, uint32_t timeout)
     return 0;
 }
 
-int FtOnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal) {
+static  int FtOnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal) {
     LOG("%s:sessionId=%d,bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, bytesUpload, bytesTotal);
     return 0;
 }
-int FtOnSendFileFinished(int sessionId, const char *firstFile) {
+static  int FtOnSendFileFinished(int sessionId, const char *firstFile) {
     LOG("%s:sessionId=%d,firstfile=%s", __func__, sessionId, firstFile);
     return 0;
 }
-void FtOnFileTransError(int sessionId) {
+static  void FtOnFileTransError(int sessionId) {
     LOG("%s:sessionId=%d", __func__, sessionId);
 }
 
-int EsOnSessionOpened(int sessionId, int result)
+static int EsOnSessionOpened(int sessionId, int result)
 {
     LOG("%s:enter, sessionId=%d, result=%d", __func__, sessionId, result);
     if (sessionId == g_sessionId && result == 0) {
@@ -56,7 +71,7 @@ int EsOnSessionOpened(int sessionId, int result)
     }
     return 0;
 }
-void EsOnSessionClosed(int sessionId)
+static void EsOnSessionClosed(int sessionId)
 {
     LOG("%s:enter", __func__);
     if (sessionId == g_sessionId) {
@@ -65,15 +80,15 @@ void EsOnSessionClosed(int sessionId)
     }
 }
 
-void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen)
+static void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen)
 {
 }
 
-void EsOnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void EsOnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     LOG("%s:enter", __func__);
 }
-void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
+static  void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
     LOG("%s:enter", __func__);
 }
