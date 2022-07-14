@@ -50,8 +50,8 @@ void FtOnFileTransError(int sessionId) {
 
 int EsOnSessionOpened(int sessionId, int result)
 {
-    LOG("%s:enter, sessionId=%d", __func__, sessionId);
-    if (sessionId == g_sessionId) {
+    LOG("%s:enter, sessionId=%d, result=%d", __func__, sessionId, result);
+    if (sessionId == g_sessionId && result == 0) {
         g_sessionEnabled = true;
     }
     return 0;
@@ -126,7 +126,7 @@ HWTEST_F(FileTest, SendFileDstNULL, TestSize.Level0)
 
     const char *sFileList[] = {"/data/send_files/test_a.jpg", "/data/send_files/test_b.jpg"};
 
-    ASSERT_EQ(WaitConnectionReady(g_sessionId, 5), 0);
+    ASSERT_EQ(WaitConnectionReady(g_sessionId, 20), 0);
     LOG("SendFile with sessionId %d", g_sessionId);
     EXPECT_EQ(0, SendFile(g_sessionId, sFileList, nullptr, sizeof(sFileList) / sizeof(const char *)));
 
