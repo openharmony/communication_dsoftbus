@@ -4,7 +4,6 @@
 
 class DeviceManager {
 public:
-    DeviceManager(){};
     ~DeviceManager(){};
 
     std::string GetRemoteByIndex(uint32_t index);
@@ -12,8 +11,10 @@ public:
 
     static DeviceManager* Instance();
     private:
+    DeviceManager(){};
     std::string m_localNetworkId;
     std::vector<std::string> m_remoteList;
     static DeviceManager* m_instance;
 };
+
 
