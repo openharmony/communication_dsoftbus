@@ -181,16 +181,16 @@ int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *d
     return ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
 }
 
-static const char ** GenerateRemoteFiles(const char *sFileList[], uint32_t fileCnt)
+static const char **GenerateRemoteFiles(const char *sFileList[], uint32_t fileCnt)
 {
-    const char ** files = SoftBusCalloc(sizeof(const char *) * fileCnt);
-    if(files == NULL) {
+    const char **files = SoftBusCalloc(sizeof(const char *) * fileCnt);
+    if (files == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:oom", __func__);
         return NULL;
     }
-    for(uint32_t i = 0; i < fileCnt; i++) {
+    for (uint32_t i = 0; i < fileCnt; i++) {
         files[i] = TransGetFileName(sFileList[i]);
-        if(files[i] == NULL) {
+        if (files[i] == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetFileName failed at index %" PRIu32, i);
             SoftBusFree(files);
             return NULL;
@@ -201,7 +201,7 @@ static const char ** GenerateRemoteFiles(const char *sFileList[], uint32_t fileC
 
 int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
-    if(sFileList == NULL || fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
+    if (sFileList == NULL || fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input para failed!fileCount=%" PRIu32, __func__, fileCnt);
         return SOFTBUS_INVALID_PARAM;
     }

@@ -525,7 +525,7 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s], realFullDir[%s]", dirPath, absFullDir);
     const char *fileName = TransGetFileName(fullPath);
-    if(fileName == NULL) {
+    if (fileName == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file name failed");
         goto EXIT_ERR;
     }
@@ -1220,7 +1220,7 @@ static int32_t CreateSendListenerInfo(SendListenerInfo **sendListenerInfo, int32
 
 static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
 {
-    if(sendInfo == NULL) {
+    if (sendInfo == NULL) {
         return;
     }
     DelSendListenerInfo(sendInfo);
