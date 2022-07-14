@@ -12,23 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "device_manager.h"
 
 #include <algorithm>
-#include "device_manager.h"
+#include <unistd.h>
+
 #include "bus_center/softbus_bus_center.h"
 #include "test_suite.h"
 
 DeviceManager* DeviceManager::m_instance = nullptr;
 
-DeviceManager* DeviceManager::Instance() {
-    if(m_instance == nullptr) {
+DeviceManager *DeviceManager::Instance()
+{
+    if (m_instance == nullptr) {
         m_instance = new DeviceManager();
     }
     return m_instance;
 }
 
-std::string DeviceManager::GetRemoteByIndex(uint32_t index) {
-    if(index > m_remoteList.size()) {
+std::string DeviceManager::GetRemoteByIndex(uint32_t index)
+{
+    if (index > m_remoteList.size()) {
         return "NoSuchDevice";
     }
     return m_remoteList[index];
@@ -45,7 +49,7 @@ void DeviceManager::WaitNetworkSizeMoreThan(uint32_t count)
                 break;
             }
             LOG("device count=%d", infoNum);
-            for(uint32_t i = 0; i < infoNum; i++) {
+            for (uint32_t i = 0; i < infoNum; i++) {
                 LOG("%s:networkId=%s", __func__, nodeInfo[i].networkId);
             }
         }
@@ -63,7 +67,7 @@ void DeviceManager::WaitNetworkSizeMoreThan(uint32_t count)
     m_remoteList.clear();
     if (nodeInfo != nullptr) {
         for (uint32_t i = 0; i < infoNum; i++) {
-            if(m_localNetworkId != nodeInfo[i].networkId) {
+            if (m_localNetworkId != nodeInfo[i].networkId) {
                 m_remoteList.push_back(nodeInfo[i].networkId);
             }
         }

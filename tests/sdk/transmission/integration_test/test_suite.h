@@ -16,20 +16,12 @@
 #ifndef ECHO_TEST_SUITE_H
 #define ECHO_TEST_SUITE_H
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <cstdint>
-#include <memory.h>
-#include <cstdlib>
-#include <sys/time.h>
-#include <ctime>
-#include <unistd.h>
-#include <stdio.h>
+#include <cstdio>
 
 #define LOG(FMT, args...) printf(FMT "\n", ##args)
 
-#define ECHO_SERVICE_PKGNAME      "dms"
-#define ECHO_SERVICE_SESSION_NAME "ohos.distributedschedule.dms.echo"
+#define ECHO_SERVICE_PKGNAME               "dms"
+#define ECHO_SERVICE_SESSION_NAME          "ohos.distributedschedule.dms.echo"
 #define ECHO_SERVICE_CONSUMER_SESSION_NAME "ohos.distributedschedule.dms.echo"
 
 #endif
