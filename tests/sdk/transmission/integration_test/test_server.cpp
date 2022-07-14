@@ -16,9 +16,9 @@
 #include "test_suite.h"
 
 #include <getopt.h>
-#include <stddef.h>
+#include <cstddef>
 #include <cstdint>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/time.h>
 #include <sys/times.h>
 #include <ctime>
@@ -28,25 +28,13 @@
 #include "transport/session.h"
 #include "softbus_error_code.h"
 
-
-typedef struct {
-    const char *targetUdid;
-    SessionType dataType;
-    uint32_t packageSize;
-    uint32_t sampleSize;
-} TestConfig;
-
-double g_aveRtt = 0;
-double g_maxRtt = 0;
-
 volatile bool g_sessionEnabled = false;
-volatile uint32_t g_recvSeq = 0;
 int g_sessionId = -1;
 
 static int EsOnSessionOpened(int sessionId, int result)
 {
     LOG("%s:enter", __func__);
-    if(result != SOFTBUS_OK) {
+    if (result != SOFTBUS_OK) {
         LOG("%s:OpenSession failed!errCode=%d", __func__, result);
         return 0;
     }
@@ -57,6 +45,7 @@ static int EsOnSessionOpened(int sessionId, int result)
     LOG("%s:Unexpected session %d opened!", __func__, sessionId);
     return 0;
 }
+
 static void EsOnSessionClosed(int sessionId)
 {
     LOG("%s:enter", __func__);
@@ -71,7 +60,8 @@ static void EsOnDataReceived(int sessionId, const void *data, unsigned int dataL
     LOG("%s:enter", __func__);
 }
 
-static void EsOnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void EsOnStreamReceived(
+    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     LOG("%s:enter", __func__);
 }
@@ -80,26 +70,30 @@ static void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *t
     LOG("%s:enter", __func__);
 }
 
-static int TsOnReceiveFileStarted(int sessionId, const char *files, int fileCnt) {
+static int TsOnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+{
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
     return 0;
 }
 
-static int TsOnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal) {
-    LOG("%s:session=%d, firstFile=%s, bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, firstFile, bytesUpload, bytesTotal);
+static int TsOnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+{
+    LOG("%s:session=%d, firstFile=%s, bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, firstFile,
+        bytesUpload, bytesTotal);
     return 0;
 }
-static void TsOnReceiveFileFinished(int sessionId, const char *files, int fileCnt) {
+static void TsOnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+{
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
 }
-static void TsOnFileTransError(int sessionId) {
+static void TsOnFileTransError(int sessionId)
+{
     LOG("%s:session=%d", __func__, sessionId);
 }
 
 static int ExecTestSuite(void)
 {
-    static ISessionListener listener = {
-        .OnSessionOpened = EsOnSessionOpened,
+    static ISessionListener listener = {.OnSessionOpened = EsOnSessionOpened,
         .OnSessionClosed = EsOnSessionClosed,
         .OnBytesReceived = EsOnDataReceived,
         .OnMessageReceived = EsOnDataReceived,
@@ -119,7 +113,8 @@ static int ExecTestSuite(void)
         .OnFileTransError = TsOnFileTransError,
     };
 
-    ret = SetFileReceiveListener(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &fileRecvListener, "/data/recv_files");
+    ret =
+        SetFileReceiveListener(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &fileRecvListener, "/data/recv_files");
 
     LOG("type x to exit:");
     char c = '0';
@@ -128,7 +123,7 @@ static int ExecTestSuite(void)
     } while (c != 'x');
 
     ret = RemoveSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME);
-    if(ret != 0) {
+    if (ret != 0) {
         LOG("%s: remove session server failed! ret= %d", __func__, ret);
     }
 
