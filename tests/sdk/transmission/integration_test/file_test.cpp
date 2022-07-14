@@ -24,9 +24,7 @@
 const char *groupId = "echo";
 
 using namespace testing::ext;
-
 namespace OHOS {
-
 class FileTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -51,15 +49,18 @@ static inline int WaitConnectionReady(int sessionId, uint32_t timeout)
     return 0;
 }
 
-static  int FtOnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal) {
+static int FtOnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+{
     LOG("%s:sessionId=%d,bytesUpload=%" PRIu64 ", bytesTotal=%" PRIu64, __func__, sessionId, bytesUpload, bytesTotal);
     return 0;
 }
-static  int FtOnSendFileFinished(int sessionId, const char *firstFile) {
+static int FtOnSendFileFinished(int sessionId, const char *firstFile)
+{
     LOG("%s:sessionId=%d,firstfile=%s", __func__, sessionId, firstFile);
     return 0;
 }
-static  void FtOnFileTransError(int sessionId) {
+static void FtOnFileTransError(int sessionId)
+{
     LOG("%s:sessionId=%d", __func__, sessionId);
 }
 
@@ -84,7 +85,8 @@ static void EsOnDataReceived(int sessionId, const void *data, unsigned int dataL
 {
 }
 
-static void EsOnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+static void EsOnStreamReceived(
+    int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     LOG("%s:enter", __func__);
 }
@@ -147,5 +149,4 @@ HWTEST_F(FileTest, SendFileDstNULL, TestSize.Level0)
 
     CloseSession(g_sessionId);
 }
-
 }; // namespace OHOS

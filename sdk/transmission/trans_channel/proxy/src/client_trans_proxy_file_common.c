@@ -168,7 +168,7 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
 
 const char *TransGetFileName(const char *path)
 {
-    if(path == NULL) {
+    if (path == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input is NULL!", __func__);
         return NULL;
     }
