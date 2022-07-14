@@ -19,9 +19,7 @@ module_output_path = "dsoftbus/transmission"
 ohos_executable("softbus_test_server") {
   sources = [ "test_server.cpp" ]
 
-  external_deps = [
-      "dsoftbus:softbus_client"
-  ]
+  external_deps = [ "dsoftbus:softbus_client" ]
 
   part_name = "dsoftbus"
   subsystem_name = "communication"
@@ -29,8 +27,10 @@ ohos_executable("softbus_test_server") {
 
 ohos_unittest("softbus_file_testsuite") {
   module_out_path = module_output_path
-  sources = [ "device_manager.cpp",
-  "file_test.cpp" ]
+  sources = [
+    "device_manager.cpp",
+    "file_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -58,5 +58,8 @@ ohos_unittest("softbus_file_testsuite") {
 
 group("integration_test") {
   testonly = true
-  deps = [ ":softbus_file_testsuite", ":softbus_test_server" ]
+  deps = [
+    ":softbus_file_testsuite",
+    ":softbus_test_server",
+  ]
 }
