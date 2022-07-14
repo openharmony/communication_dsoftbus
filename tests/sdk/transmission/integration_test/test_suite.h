@@ -17,29 +17,7 @@
 #define ECHO_SERVICE_SESSION_NAME "ohos.distributedschedule.dms.echo"
 #define ECHO_SERVICE_CONSUMER_SESSION_NAME "ohos.distributedschedule.dms.echo"
 
-typedef struct {
-    uint32_t seq;
-    uint32_t len;
-    char data[0];
-} TestPackage;
-
 typedef int (*SendMethod)(int sessionId, const void *data, unsigned int len);
-
-static inline TestPackage* GenPackage(uint32_t seq, uint32_t len) {
-    if(len < sizeof(TestPackage)) {
-        return NULL;
-    }
-    TestPackage* package = (TestPackage*)malloc(len);
-    package->seq = seq;
-    package->len = len - sizeof(TestPackage);
-    return package;
-}
-
-#define ReleasePackage(package) \
-    if (package != NULL) {      \
-        free(package);          \
-        package = NULL;         \
-    }
 
 inline time_t GetCurrent(void)
 {
@@ -64,22 +42,6 @@ static inline int32_t ExecWithRetry(int sessionId, const void *data, unsigned in
         }
     }
     return ret;
-}
-
-static inline const TestPackage* VerifyPackage(const void *data, unsigned int dataLen) {
-    if(dataLen < sizeof(TestPackage)) {
-        return NULL;
-    }
-    const TestPackage *package = (TestPackage*)data;
-    if(package->len != (dataLen - sizeof(TestPackage))) {
-        return NULL;
-    }
-    //package->len = dataLen - sizeof(TestPackage);
-    return package;
-}
-
-static inline void ReleaseTestPackage(TestPackage *package) {
-    free(package);
 }
 
 #endif

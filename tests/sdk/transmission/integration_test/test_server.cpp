@@ -82,19 +82,7 @@ void EsOnSessionClosed(int sessionId)
 
 void EsOnDataReceived(int sessionId, const void *data, unsigned int dataLen)
 {
-    g_responseTime = GetCurrent();
     LOG("%s:enter", __func__);
-    const TestPackage *package = VerifyPackage(data, dataLen);
-    if (package == NULL) {
-        LOG("%s:bad package found!", __func__);
-        return;
-    }
-    if (package != NULL) {
-        LOG("%s:recv rsp! seq=%d", __func__, package->seq);
-        if (package->seq > g_recvSeq) {
-            g_recvSeq = package->seq;
-        }
-    }
 }
 
 void EsOnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
@@ -105,83 +93,6 @@ void EsOnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
     LOG("%s:enter", __func__);
 }
-
-void Usage(void)
-{
-    LOG("Usage:");
-    LOG("echo_consumer -t TargetUUID -n 1000 -m \"messageText\" ");
-}
-#if 0
-static bool WaitResponse(uint32_t seq)
-{
-#define SLEEP_TIME 50
-    uint32_t timeout = 60 * 1000 / SLEEP_TIME;
-    while (seq > g_recvSeq && timeout-- > 0) {
-        usleep(SLEEP_TIME);
-    }
-    return g_recvSeq >= seq;
-}
-
-static int SyncSend(uint32_t seq, SessionType type, TestPackage *package)
-{
-    int ret = 0;
-    time_t sendTime = 0;
-
-    SendMethod method = SendMessage;
-    if (type == TYPE_MESSAGE) {
-        method = SendMessage;
-    } else if (type == TYPE_BYTES) {
-        method = SendBytes;
-    } else {
-        LOG("%s:unsupported sessiontype %d", __func__, type);
-        return -1;
-    }
-    ret = ExecWithRetry(g_sessionId, (void *)package, sizeof(TestPackage) + package->len, method, &sendTime);
-    if (ret != 0) {
-        LOG("%s:send data failed!ret=%d", __func__, ret);
-        return ret;
-    } else {
-        LOG("%s:message sent.ret=%d", __func__, ret);
-    }
-
-    LOG("%s:waiting for seq %d", __func__, seq);
-    if (!WaitResponse(seq)) {
-        LOG("%s:wait response timeout!", __func__);
-        return -1;
-    }
-    LOG("%s:Got seq %d", __func__, g_recvSeq);
-
-    CalcRTT(seq, sendTime, g_responseTime);
-    return 0;
-}
-
-static void WaitSessionClose(void)
-{
-    int timeout = 5;
-    while (g_sessionEnabled && (timeout--) > 0) {
-        sleep(1);
-    }
-
-    if(g_sessionEnabled) {
-        LOG("%s:close session timeout!", __func__);
-    }
-}
-
-
-static int WaitConnectionReady(void)
-{
-    int timeout = 5;
-    while (!g_sessionEnabled && (timeout--) > 0) {
-        sleep(1);
-    }
-
-    if (!g_sessionEnabled) {
-        LOG("%s:OpenSession timeout!", __func__);
-        return -1;
-    }
-    return 0;
-}
-#endif
 
 static int TsOnReceiveFileStarted(int sessionId, const char *files, int fileCnt) {
     LOG("%s:session=%d, files=%s, count=%d", __func__, sessionId, files, fileCnt);
@@ -229,46 +140,6 @@ static int ExecTestSuite(const TestConfig *config)
     do {
         c = getchar();
     } while (c != 'x');
-#if 0
-    const char *groupId = "echo";
-    SessionAttribute attr = {
-        .dataType = TYPE_MESSAGE,
-        .linkTypeNum = 3,
-        .linkType = {LINK_TYPE_WIFI_WLAN_5G, LINK_TYPE_WIFI_WLAN_2G, LINK_TYPE_WIFI_P2P}
-    };
-
-    ret =
-        OpenSession(ECHO_SERVICE_CONSUMER_SESSION_NAME, ECHO_SERVICE_SESSION_NAME, config->targetUdid, groupId, &attr);
-    if (ret < 0) {
-        LOG("%s:OpenSession failed!ret=%d", __func__, ret);
-        return -1;
-    }
-    g_sessionId = ret;
-
-    ret = WaitConnectionReady();
-    if (ret != 0) {
-        LOG("%s:connection ready timeout!ret=%d", __func__, ret);
-        return ret;
-    }
-
-    for (uint32_t i = 1; i <= config->sampleSize; i++) {
-        TestPackage *package = GenPackage(i, config->packageSize);
-        if (package == NULL) {
-            LOG("%s:gen package failed!", __func__);
-            return -1;
-        }
-        ret = SyncSend(i, config->dataType, package);
-        if (ret != 0) {
-            LOG("%s:Test send package failed!ret=%d", __func__, ret);
-            break;
-        }
-
-        ReleasePackage(package);
-    }
-
-    CloseSession(g_sessionId);
-    // WaitSessionClose();
-#endif
 
     ret = RemoveSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME);
     if(ret != 0) {
