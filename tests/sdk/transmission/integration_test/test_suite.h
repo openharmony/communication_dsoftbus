@@ -1,13 +1,28 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef ECHO_TEST_SUITE_H
 #define ECHO_TEST_SUITE_H
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 #include <memory.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/time.h>
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -16,32 +31,5 @@
 #define ECHO_SERVICE_PKGNAME      "dms"
 #define ECHO_SERVICE_SESSION_NAME "ohos.distributedschedule.dms.echo"
 #define ECHO_SERVICE_CONSUMER_SESSION_NAME "ohos.distributedschedule.dms.echo"
-
-typedef int (*SendMethod)(int sessionId, const void *data, unsigned int len);
-
-inline time_t GetCurrent(void)
-{
-    struct timespec time;
-    int ret = clock_gettime(CLOCK_MONOTONIC, &time);
-    if(ret != 0){
-        LOG("%s: get time failed!", __func__);
-    }
-    return time.tv_sec * 1000 + time.tv_nsec / 1000000;
-}
-
-static inline int32_t ExecWithRetry(int sessionId, const void *data, unsigned int len, SendMethod method, time_t *sendTime) {
-    uint8_t retryTimes = 5; 
-    int32_t ret = -999;
-    while(retryTimes-- > 0 && ret == -999) {
-        if(sendTime != NULL) {
-            *sendTime = GetCurrent();
-        }
-        ret = method(sessionId, data, len);
-        if(ret == 0) {
-            break;
-        }
-    }
-    return ret;
-}
 
 #endif
