@@ -183,11 +183,11 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BoardcastData *boardcastDat
 static int ConvertCapBitMap(int oldCap)
 {
     switch (oldCap) {
-        case OSD_CAPABILITY_BITMAP: // osdCapability
+        case 1 << OSD_CAPABILITY_BITMAP: // osdCapability
             return 0x10;
-        case CASTPLUS_CAPABILITY_BITMAP:  // castPlus
+        case 1 << CASTPLUS_CAPABILITY_BITMAP:  // castPlus
             return 0x2;
-        case DVKIT_CAPABILITY_BITMAP: // dvkit
+        case 1 << DVKIT_CAPABILITY_BITMAP: // dvkit
             return 0x4;
         default:
             return oldCap;
