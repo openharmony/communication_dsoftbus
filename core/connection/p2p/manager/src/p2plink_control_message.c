@@ -336,6 +336,14 @@ void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
         (strcpy_s(conningItem->peerIp, sizeof(conningItem->peerIp), connedDev->peerIp) != EOK)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error ");
     }
+
+    if (P2pLinkSharelinkReuse() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reuse link failed: invoke P2pLinkSharelinkReuse failed.");
+        P2pLinkConningCallback(conningItem, SOFTBUS_ERR, ERROR_REUSE_FAILED);
+        P2pLinkDelConning(conningItem->connInfo.requestId);
+        return;
+    }
+
     P2pLinkConningCallback(conningItem, SOFTBUS_OK, 0);
     P2pLinkAddPidMacRef(conningItem->connInfo.pid, peerMac);
     P2pLinkAddMyP2pRef();
