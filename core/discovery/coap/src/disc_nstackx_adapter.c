@@ -174,7 +174,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
     discDevInfo->discoveryType = GetDiscType(nstackxDevInfo->mode, nstackxDevInfo->discoveryType);
 
-    if (strncmp(g_localDeviceInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
+    if (strncmp(nstackxDevInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
         discDevInfo->addr[0].type = CONNECTION_ADDR_WLAN;
     } else {
         discDevInfo->addr[0].type = CONNECTION_ADDR_ETH;
