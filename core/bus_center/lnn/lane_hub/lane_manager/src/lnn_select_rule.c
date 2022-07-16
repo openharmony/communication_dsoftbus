@@ -151,12 +151,13 @@ static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
 static int32_t GetLinkedChannelScore(void)
 {
     int32_t frequency = GetWlanLinkedFrequency();
-    if (frequency < 0) {
+    if (frequency <= 0) {
         return LNN_LINK_DEFAULT_SCORE;
     }
     int32_t channel = SoftBusFrequencyToChannel(frequency);
     if (channel < 0) {
-        return UNACCEPT_SCORE;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get curr channel fail");
+        return LNN_LINK_DEFAULT_SCORE;
     }
     int32_t score = LnnGetCurrChannelScore(channel);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current channel:%d, score:%d", channel, score);
