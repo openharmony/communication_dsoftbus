@@ -166,6 +166,35 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
     return ((uchCRCHi << BIT_BYTE_NUM) | uchCRCLo);
 }
 
+const char *TransGetFileName(const char *path)
+{
+    if (path == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input is NULL!", __func__);
+        return NULL;
+    }
+    size_t pathLength = strlen(path);
+    if (pathLength == 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input length is 0!", __func__);
+        return NULL;
+    }
+    if (path[pathLength - 1] == SOFTBUS_PATH_SEPRATOR) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input is dir path!", __func__);
+        return NULL;
+    }
+
+    int i;
+    for (i = pathLength - 1; i >= 0; i--) {
+        if (path[i] == SOFTBUS_PATH_SEPRATOR) {
+            i++;
+            break;
+        }
+        if (i == 0) {
+            break;
+        }
+    }
+    return path + i;
+}
+
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo)
 {
     if (destFile == NULL || outbufferInfo == NULL || fileCnt == 0) {

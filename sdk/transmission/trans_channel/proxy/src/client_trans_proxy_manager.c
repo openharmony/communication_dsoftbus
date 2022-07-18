@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "client_trans_pending.h"
+#include "client_trans_proxy_file_common.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
@@ -180,8 +181,45 @@ int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *d
     return ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
 }
 
-int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[],
-    uint32_t fileCnt)
+static const char **GenerateRemoteFiles(const char *sFileList[], uint32_t fileCnt)
 {
-    return ProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    const char **files = SoftBusCalloc(sizeof(const char *) * fileCnt);
+    if (files == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:oom", __func__);
+        return NULL;
+    }
+    for (uint32_t i = 0; i < fileCnt; i++) {
+        files[i] = TransGetFileName(sFileList[i]);
+        if (files[i] == NULL) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetFileName failed at index %" PRIu32, i);
+            SoftBusFree(files);
+            return NULL;
+        }
+    }
+    return files;
+}
+
+int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+{
+    if (sFileList == NULL || fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input para failed!fileCount=%" PRIu32, __func__, fileCnt);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char **remoteFiles = NULL;
+    const char **generatedRemoteFiles = NULL;
+    if (dFileList == NULL) {
+        generatedRemoteFiles = GenerateRemoteFiles(sFileList, fileCnt);
+        if (generatedRemoteFiles == NULL) {
+            return SOFTBUS_ERR;
+        }
+        remoteFiles = generatedRemoteFiles;
+    } else {
+        remoteFiles = dFileList;
+    }
+    int32_t ret = ProxyChannelSendFile(channelId, sFileList, remoteFiles, fileCnt);
+    if (generatedRemoteFiles != NULL) {
+        SoftBusFree(generatedRemoteFiles);
+        generatedRemoteFiles = NULL;
+    }
+    return ret;
 }
