@@ -98,7 +98,7 @@ int32_t WaitDeviceOnline(const char *pkgName)
         FreeNodeInfo(onlineDevices);
         break;
     }
-    if (networkIdSet_.size() > 0) {
+    if (networkIdSet_.empty() != true) {
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
