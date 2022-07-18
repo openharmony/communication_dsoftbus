@@ -255,6 +255,12 @@ int32_t SoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
     return LnnIpcGetAllMetaNodeInfo(info, infoNum);
 }
 
+int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {

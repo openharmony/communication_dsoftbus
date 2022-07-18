@@ -344,3 +344,22 @@ int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *in
     }
     return GetAllMetaNodeInfoInner(pkgName, infos, infoNum);
 }
+
+int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+{
+    if (pkgName == NULL || callerId == NULL || mode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (CommonInit(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
+    if (len == 0 || len >= CALLER_ID_MAX_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (targetNetworkId != NULL && strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);
+}

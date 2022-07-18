@@ -91,4 +91,15 @@ int32_t ISoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo ipc default impl");
     return SOFTBUS_ERR;
 }
+
+int32_t ISoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    (void)pkgName;
+    (void)callerId;
+    (void)targetNetworkId;
+    (void)mode;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGear ipc default impl");
+    return SOFTBUS_ERR;
+}
 } // namespace OHOS

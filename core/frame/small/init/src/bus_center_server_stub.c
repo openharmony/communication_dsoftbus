@@ -433,3 +433,56 @@ int32_t ServerGetAllMetaNodeInfo(IpcIo *req, IpcIo *reply)
     }
     return SOFTBUS_OK;
 }
+
+int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply)
+{
+    size_t len;
+    bool targetNetworkIdIsNULL = false;
+    const char *targetNetworkId = NULL;
+
+    const char *pkgName = (const char*)ReadString(req, &len);
+    if (pkgName == NULL || len >= PKG_NAME_SIZE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear read pkgName failed!");
+        WriteInt32(reply, SOFTBUS_INVALID_PARAM);
+        return SOFTBUS_ERR;
+    }
+    const char *callerId = (const char*)ReadString(req, &len);
+    if (callerId == NULL || len == 0 || len >= CALLER_ID_MAX_LEN) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear read callerId failed!");
+        WriteInt32(reply, SOFTBUS_INVALID_PARAM);
+        return SOFTBUS_ERR;
+    }
+    if (!ReadBool(req, &targetNetworkIdIsNULL)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear read targetNetworkIdIsNULL failed!");
+        WriteInt32(reply, SOFTBUS_INVALID_PARAM);
+        return SOFTBUS_ERR;
+    }
+    if (!targetNetworkIdIsNULL) {
+        targetNetworkId = (const char*)ReadString(req, &len);
+        if (targetNetworkId == NULL || len != NETWORK_ID_BUF_LEN - 1) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear read targetNetworkId failed!");
+            WriteInt32(reply, SOFTBUS_INVALID_PARAM);
+            return SOFTBUS_ERR;
+        }
+    }
+    const GearMode *mode = (GearMode *)ReadRawData(req, sizeof(GearMode));
+    if (mode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear read gear mode info failed!");
+        WriteInt32(reply, SOFTBUS_INVALID_PARAM);
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = CheckPermission(pkgName, GetCallingUid());
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear no permission.");
+        WriteInt32(reply, ret);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    ret = LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerShiftLnnGear failed!");
+        WriteInt32(reply, ret);
+        return SOFTBUS_ERR;
+    }
+    WriteInt32(reply, SOFTBUS_OK);
+    return SOFTBUS_OK;
+}

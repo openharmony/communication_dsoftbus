@@ -18,14 +18,12 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId,
-    GearMode mode, const HeartbeatImplPolicy *implPolicy)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     (void)pkgName;
-    (void)callingUid;
+    (void)callerId;
     (void)targetNetworkId;
     (void)mode;
-    (void)implPolicy;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub ShiftLNNGear");
     return SOFTBUS_NOT_IMPLEMENT;
 }
