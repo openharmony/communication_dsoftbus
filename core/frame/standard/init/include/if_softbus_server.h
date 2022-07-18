@@ -63,6 +63,8 @@ public:
     virtual int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
     virtual int32_t DeactiveMetaNode(const char *metaNodeId);
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
+    virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+        const GearMode *mode);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

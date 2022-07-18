@@ -106,3 +106,9 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     (void)pkgName;
     return LnnIpcGetAllMetaNodeInfo(infos, infoNum);
 }
+
+int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    return LnnIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
