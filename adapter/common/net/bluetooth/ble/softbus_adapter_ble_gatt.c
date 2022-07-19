@@ -295,6 +295,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
             continue;
         }
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
+            advChannel->advId = -1;
             advChannel->isAdvertising = false;
             SoftBusCondSignal(&advChannel->cond);
         }
