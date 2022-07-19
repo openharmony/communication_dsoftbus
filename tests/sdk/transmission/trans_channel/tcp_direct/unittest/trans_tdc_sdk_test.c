@@ -371,11 +371,11 @@ void TransFuncTest006(void)
 {
     int ret;
     char sessionNames[8][65] = {"1", "2", "3", "4", "5", "6", "7", "8"};
-    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[]); i++) {
+    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
         ret = CreateSessionServer(g_pkgName, sessionNames[i], &g_sessionlistener);
         TEST_ASSERT_TRUE(ret == 0);
     }
-    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[]; i++) {
+    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]; i++) {
         ret = RemoveSessionServer(g_pkgName, sessionNames[i]);
         TEST_ASSERT_TRUE(ret == 0);
     }
