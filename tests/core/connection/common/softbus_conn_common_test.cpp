@@ -311,7 +311,10 @@ HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
 
         LocalListenerInfo info = {
             .type = CONNECT_TCP,
-            .socketOption = {.addr = "127.0.0.1", .port = port, .moduleId = static_cast<ListenerModule>(module), .protocol = LNN_PROTOCOL_IP}
+            .socketOption = {.addr = "127.0.0.1",
+                             .port = port,
+                             .moduleId = static_cast<ListenerModule>(module),
+                             .protocol = LNN_PROTOCOL_IP}
         };
         EXPECT_EQ(SOFTBUS_OK, SetSoftbusBaseListener(static_cast<ListenerModule>(module), listener));
         EXPECT_EQ(port, StartBaseListener(&info));
