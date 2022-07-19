@@ -132,7 +132,8 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     connOpt.type = ConvertConnectType(addrInfo->type);
     switch (connOpt.type) {
         case CONNECT_TCP:
-            if (memcpy_s(connOpt.socketOption.addr, sizeof(connOpt.socketOption.addr), addrInfo->info.ip.ip, IP_LEN) != EOK) {
+            if (memcpy_s(connOpt.socketOption.addr, sizeof(connOpt.socketOption.addr), addrInfo->info.ip.ip, IP_LEN) !=
+                EOK) {
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);

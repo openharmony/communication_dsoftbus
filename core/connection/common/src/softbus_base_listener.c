@@ -176,7 +176,8 @@ static int32_t ReleaseListenerRef(ListenerModule module)
     return SOFTBUS_OK;
 }
 
-static void ReleaseListenerNode(SoftbusListenerNode *node) {
+static void ReleaseListenerNode(SoftbusListenerNode *node)
+{
     if (node == NULL || node->module >= UNUSE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
         return;
@@ -220,7 +221,8 @@ static int32_t CreateSpecifiedListenerModule(ListenerModule module)
     return SOFTBUS_OK;
 }
 
-static int32_t CreateStaticModules(void) {
+static int32_t CreateStaticModules(void)
+{
     for (uint32_t i = 0; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         int32_t ret = CreateSpecifiedListenerModule(i);
         if (ret != SOFTBUS_OK) {
@@ -241,14 +243,14 @@ int32_t InitBaseListener(void)
     }
 
     ret = SoftBusMutexInit(&g_listenerListLock, NULL);
-    if ( ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_listenerListLock init failed.ret=%" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_fdSetLock);
         return ret;
     }
 
     ret = SoftBusMutexInit(&g_threadLock, NULL);
-    if ( ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_threadLock init failed.ret=%" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_listenerListLock);
         (void)SoftBusMutexDestroy(&g_fdSetLock);
@@ -396,7 +398,7 @@ static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *
     }
 
     int32_t ret = SOFTBUS_OK;
-    do {        
+    do {
         int32_t rc = node->socketIf->OpenServerSocket(info);
         if (rc < 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpServer failed, rc=%d", rc);
@@ -688,8 +690,7 @@ static int32_t StopListenerThread(SoftbusListenerNode *node)
 
         node->info.status = LISTENER_IDLE;
         node->info.modeType = UNSET_MODE;
-
-    } while(false);
+    } while (false);
     (void)SoftBusMutexUnlock(&node->lock);
     return ret;
 }
@@ -923,7 +924,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info)
         }
         ret = InitListenFd(node, info);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:InitListenFd failed!ret=%" PRId32,__func__, ret);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:InitListenFd failed!ret=%" PRId32, __func__, ret);
             break;
         }
         ret = StartListenerThread(node, SERVER_MODE);
@@ -1098,8 +1099,8 @@ void DestroyBaseListener(ListenerModule module)
         return;
     }
     (void) SoftBusMutexUnlock(&g_listenerListLock);
-
-    ret = WaitBaseListenerDestroy(module, 30000);
+#define LISTENER_MODULE_DESTROY_TIMEOUT (30*1000)
+    ret = WaitBaseListenerDestroy(module, LISTENER_MODULE_DESTROY_TIMEOUT);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:Destory listener module %" PRIu32 " finished. ret=%" PRId32, __func__, module, ret);
 }
 

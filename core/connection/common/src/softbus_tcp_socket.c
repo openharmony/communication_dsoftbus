@@ -114,11 +114,11 @@ int32_t SetIpTos(int fd, uint32_t tos)
 
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 {
-    if(option == NULL) {
+    if (option == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
         return -1;
     }
-    if(option->type != CONNECT_TCP && option->type != CONNECT_P2P ) {
+    if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:bad type!type=%d", __func__, option->type);
         return -1;
     }
@@ -128,8 +128,8 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     }
 
     int fd;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK,
-        0, (int32_t *)&fd);
+    int ret = SoftBusSocketCreate(
+        SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Create socket failed! ret=%d", __func__, ret);
         return -1;
@@ -147,16 +147,17 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 
 int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
-    if(option == NULL) {
+    if (option == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
         return -1;
     }
-    if(option->type != CONNECT_TCP && option->type != CONNECT_P2P ) {
+    if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:bad type!type=%d", __func__, option->type);
         return -1;
     }
     if (option->socketOption.port <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClientSocket invalid para, port=%d", option->socketOption.port);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClientSocket invalid para, port=%d",
+            option->socketOption.port);
         return -1;
     }
 
@@ -175,8 +176,8 @@ int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool 
 
     SetClientOption(fd);
     if (myIp != NULL) {
-        const char* bindAddr = NULL;
-        if(strcmp(myIp, BIND_ADDR_ALL) == 0) {
+        const char *bindAddr = NULL;
+        if (strcmp(myIp, BIND_ADDR_ALL) == 0) {
             bindAddr = "0.0.0.0";
         } else {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:using specified bind addr", __func__);
@@ -197,8 +198,8 @@ int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool 
     SoftBusInetPtoN(SOFTBUS_AF_INET, option->socketOption.addr, &addr.sinAddr);
     addr.sinPort = SoftBusHtoNs((uint16_t)option->socketOption.port);
     int rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
-    if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS)
-        && (rc != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
+    if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
+        (rc != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,connect rc=%d", fd, rc);
         ConnShutdownSocket(fd);
         return -1;
@@ -263,22 +264,25 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
     return 0;
 }
 
-static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd) {
+static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd)
+{
     SoftBusSockAddrIn addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:memset failed", __func__);
         return SOFTBUS_MEM_ERR;
     }
     uint32_t addrLen = sizeof(addr);
-    int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, cfd));
+    int32_t ret =
+        SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, cfd));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, ret=%" PRId32 "cfd=%d, fd=%d", ret, *cfd, fd);
         return ret;
     }
 
-    if(clientAddr != NULL) {
+    if (clientAddr != NULL) {
         clientAddr->type = CONNECT_TCP;
-        SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
+        SoftBusInetNtoP(
+            SOFTBUS_AF_INET, &addr.sinAddr, clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
         clientAddr->socketOption.port = GetTcpSockPort(*cfd);
         clientAddr->socketOption.protocol = LNN_PROTOCOL_IP;
     }

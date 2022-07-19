@@ -124,7 +124,8 @@ void TransTdcReleaseFd(int32_t fd)
     ConnShutdownSocket(fd);
 }
 
-int32_t TransTdcStopRead(int32_t fd) {
+int32_t TransTdcStopRead(int32_t fd)
+{
     if (fd < 0) {
         return SOFTBUS_OK;
     }
