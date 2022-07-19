@@ -22,7 +22,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_socket.h"
+#include "softbus_tcp_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
 
@@ -1056,18 +1056,33 @@ HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
 {
-    int fd = OpenTcpServerSocket("127.0.0.1", g_port);
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "127.0.0.1",
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .port = g_port,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    int fd = tcp->OpenServerSocket(&info);
     int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    int port = GetTcpSockPort(fd);
+    int port = tcp->GetSockPort(fd);
     EXPECT_EQ(port, g_port);
     ConnCloseSocket(fd);
 
-    fd = OpenTcpServerSocket(nullptr, g_port);
+    fd = tcp->OpenServerSocket(nullptr);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(fd);
-    fd = OpenTcpServerSocket("127.0.0.1", -1);
+
+    info.socketOption.port = -1;
+    fd = tcp->OpenServerSocket(&info);
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(fd);
@@ -1081,15 +1096,30 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
 {
-    int fd = OpenTcpClientSocket(nullptr, "127.0.0.1", g_port, false);
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    ConnectOption option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "127.0.0.1",
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .port = g_port,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    int fd = tcp->OpenClientSocket(nullptr, "127.0.0.1", false);
     int ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(fd);
-    fd = OpenTcpClientSocket(nullptr, nullptr, g_port, false);
+    fd = tcp->OpenClientSocket(nullptr, nullptr, false);
     ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(fd);
-    fd = OpenTcpClientSocket("127.0.0.1", "127.0.0.1", -1, false);
+
+    option.socketOption.port = -1;
+    fd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
     ret = (fd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(fd);
@@ -1103,8 +1133,10 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
 {
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
     int invalidFd = 1;
-    int port = GetTcpSockPort(invalidFd);
+    int port = tcp->GetSockPort(invalidFd);
     int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
@@ -1117,7 +1149,10 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
 */
 HWTEST_F(SoftbusCommonTest, testTcpSocket004, TestSize.Level1)
 {
-    int clientFd = OpenTcpClientSocket(nullptr, "127.5.0.1", g_port, false);
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    int clientFd = tcp->OpenClientSocket(nullptr, "127.5.0.1", false);
     int ret = (clientFd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ssize_t bytes = ConnSendSocketData(clientFd, "Hello world", 11, 0);
