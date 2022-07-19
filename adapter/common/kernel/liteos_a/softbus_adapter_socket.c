@@ -120,7 +120,7 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
 
 static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr * sysAddr)
 {
-    if ((softbusAddr == NULL) || (softbusAddr == NULL)) {
+    if ((softbusAddr == NULL) || (sysAddr == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -137,9 +137,9 @@ static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct s
     return SOFTBUS_ADAPTER_OK;
 }
 
-static int32_t SysAddrToSoftBusAddr(const struct sockaddr * sysAddr, SoftBusSockAddr *softbusAddr)
+static int32_t SysAddrToSoftBusAddr(const struct sockaddr *sysAddr, SoftBusSockAddr *softbusAddr)
 {
-    if ((softbusAddr == NULL) || (softbusAddr == NULL)) {
+    if ((sysAddr == NULL) || (softbusAddr == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
