@@ -377,6 +377,27 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     return SOFTBUS_OK;
 }
 
+static int32_t ConnectTcpDirectPeer(const char *addr, int port)
+{
+    ConnectOption options = {
+        .type = CONNECT_P2P,
+        .socketOption = {
+            .addr = {0},
+            .port = port,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_CLIENT
+        }
+    };
+
+    int32_t ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), addr);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s: strcpy_s failed!ret = %" PRId32, __func__, ret);
+        return -1;
+    }
+
+    return ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
+}
+
 static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 {
     SoftBusLog(
@@ -405,24 +426,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip, port=%d",
         conn->appInfo.peerData.port);
 
-    ConnectOption options = {
-        .type = CONNECT_P2P,
-        .socketOption = {
-            .addr = {0},
-            .port = conn->appInfo.peerData.port,
-            .protocol = LNN_PROTOCOL_IP,
-            .moduleId = DIRECT_CHANNEL_CLIENT
-        }
-    };
-
-    ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), conn->appInfo.peerData.ip);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s: strcpy_s failed!ret = %" PRId32, __func__, ret);
-        ReleaseSessonConnLock();
-        goto EXIT_ERR;
-    }
-
-    fd = ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
+    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.ip, conn->appInfo.peerData.port);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
         ReleaseSessonConnLock();
