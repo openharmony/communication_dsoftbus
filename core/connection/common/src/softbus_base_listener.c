@@ -1049,7 +1049,8 @@ int32_t StopBaseListener(ListenerModule module)
     return ret;
 }
 
-static int32_t WaitBaseListenerDestroy(ListenerModule module, int32_t waitTimeOut) {
+static int32_t WaitBaseListenerDestroy(ListenerModule module, int32_t waitTimeOut)
+{
     const int32_t waitInterval = 100;
     while (waitTimeOut > 0) {
         int32_t ret = SoftBusMutexLock(&g_listenerListLock);
@@ -1098,10 +1099,11 @@ void DestroyBaseListener(ListenerModule module)
         g_listenerList[module] = NULL;
         return;
     }
-    (void) SoftBusMutexUnlock(&g_listenerListLock);
-#define LISTENER_MODULE_DESTROY_TIMEOUT (30*1000)
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+#define LISTENER_MODULE_DESTROY_TIMEOUT (30 * 1000)
     ret = WaitBaseListenerDestroy(module, LISTENER_MODULE_DESTROY_TIMEOUT);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:Destory listener module %" PRIu32 " finished. ret=%" PRId32, __func__, module, ret);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:Destory listener module %" PRIu32 " finished. ret=%" PRId32,
+        __func__, module, ret);
 }
 
 static bool CheckFdIsExist(SoftbusBaseListenerInfo *info, int32_t fd)

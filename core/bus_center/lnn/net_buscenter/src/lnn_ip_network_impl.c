@@ -117,9 +117,10 @@ static void OpenProxyPort(void)
         }
     };
     int32_t port;
+    int32_t ret =
+        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr, sizeof(listenerInfo.socketOption.addr));
 
-    if (LnnGetLocalStrInfo(
-            STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr, sizeof(listenerInfo.socketOption.addr)) != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
         return;
     }

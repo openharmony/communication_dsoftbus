@@ -145,7 +145,23 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     return fd;
 }
 
-int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
+static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
+{
+    if (inputAddr == NULL) {
+        return SOFTBUS_OK;
+    }
+
+    const char *bindAddr = NULL;
+    if (strcmp(inputAddr, BIND_ADDR_ALL) == 0) {
+        bindAddr = "0.0.0.0";
+    } else {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:using specified bind addr", __func__);
+        bindAddr = inputAddr;
+    }
+    return BindLocalIP(fd, bindAddr, 0);
+}
+
+static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
     if (option == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
@@ -175,20 +191,12 @@ int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool 
     }
 
     SetClientOption(fd);
-    if (myIp != NULL) {
-        const char *bindAddr = NULL;
-        if (strcmp(myIp, BIND_ADDR_ALL) == 0) {
-            bindAddr = "0.0.0.0";
-        } else {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:using specified bind addr", __func__);
-            bindAddr = myIp;
-        }
-        ret = BindLocalIP(fd, bindAddr, 0);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
-            ConnShutdownSocket(fd);
-            return -1;
-        }
+    ret = BindTcpClientAddr(fd, myIp);
+    if (ret != SOFTBUS_OK)
+    {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
+        ConnShutdownSocket(fd);
+        return -1;
     }
     SoftBusSockAddrIn addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
@@ -298,6 +306,7 @@ static SocketInterface g_ipSocketInterface = {
     .AcceptClient = AcceptTcpClient,
 };
 
-const SocketInterface *GetTcpProtocol(void) {
+const SocketInterface *GetTcpProtocol(void)
+{
     return &g_ipSocketInterface;
 }

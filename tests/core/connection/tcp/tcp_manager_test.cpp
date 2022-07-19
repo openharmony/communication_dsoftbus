@@ -134,7 +134,7 @@ void CreateServer(void *arg)
     inet_pton(AF_INET, Ip, &servaddr.sin_addr);
     servaddr.sin_port = htons(port);
 
-    if (bind(listenfd, static_cast<struct sockaddr *>(&servaddr), sizeof(servaddr)) == -1) {
+    if (bind(listenfd, reinterpret_cast<struct sockaddr *>(&servaddr), sizeof(servaddr)) == -1) {
         close(listenfd);
         printf("bind socket error: %s(errno: %d)\n", strerror(errno), errno);
         return;
