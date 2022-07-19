@@ -42,7 +42,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
         return SOFTBUS_ERR;
     }
     int ret = SoftBusMutexLock(&g_socketsMutex);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
         return ret;
     }
@@ -55,8 +55,8 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
             break;
         }
     }
-    (void) SoftBusMutexUnlock(&g_socketsMutex);
-    if(ret != SOFTBUS_OK) {
+    (void)SoftBusMutexUnlock(&g_socketsMutex);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "socket type list is full!");
     }
     return ret;
@@ -65,7 +65,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
 const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
     int ret = SoftBusMutexLock(&g_socketsMutex);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
         return NULL;
     }
@@ -76,13 +76,14 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
             break;
         }
     }
-    (void) SoftBusMutexUnlock(&g_socketsMutex);
+    (void)SoftBusMutexUnlock(&g_socketsMutex);
     return result;
 }
 
-int32_t ConnInitSockets(void) {
+int32_t ConnInitSockets(void)
+{
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: init mutex failed!ret=%" PRId32, __func__, ret);
         return ret;
     }
@@ -90,7 +91,7 @@ int32_t ConnInitSockets(void) {
     (void)memset_s(g_socketInterfaces, sizeof(g_socketInterfaces), 0, sizeof(g_socketInterfaces));
 
     ret = RegistSocketProtocol(GetTcpProtocol());
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: regist tcp failed!!ret=%" PRId32, __func__, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
@@ -105,13 +106,15 @@ void ConnDeinitSockets(void)
     (void)SoftBusMutexDestroy(&g_socketsMutex);
 }
 
-int32_t ConnOpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock) {
-    if(option == NULL || bindAddr == NULL) {
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
+{
+    if (option == NULL || bindAddr == NULL) {
         return SOFTBUS_ERR;
     }
-    const SocketInterface* socketInterface = GetSocketInterface(option->socketOption.protocol);
-    if(socketInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!protocol=%d", option->socketOption.protocol);
+    const SocketInterface *socketInterface = GetSocketInterface(option->socketOption.protocol);
+    if (socketInterface == NULL) {
+        SoftBusLog(
+            SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!protocol=%d", option->socketOption.protocol);
         return SOFTBUS_ERR;
     }
     return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);

@@ -87,8 +87,8 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start tcp server for getting port");
         return SOFTBUS_ERR;
     }
-    const SocketInterface * ip = GetSocketInterface(LNN_PROTOCOL_IP);
-    if(ip == NULL) {
+    const SocketInterface *ip = GetSocketInterface(LNN_PROTOCOL_IP);
+    if (ip == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "no ip supportted");
         ConnShutdownSocket(fd);
         return SOFTBUS_NOT_FIND;
