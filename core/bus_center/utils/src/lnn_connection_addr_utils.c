@@ -103,7 +103,7 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
         return true;
     }
     if (option->type == CONNECT_TCP) {
-        if(option->socketOption.protocol != LNN_PROTOCOL_IP) {
+        if (option->socketOption.protocol != LNN_PROTOCOL_IP) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "only ip is supportted");
             return false;
         }

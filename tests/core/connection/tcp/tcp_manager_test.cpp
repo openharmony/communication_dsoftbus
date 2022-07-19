@@ -134,7 +134,7 @@ void CreateServer(void *arg)
     inet_pton(AF_INET, Ip, &servaddr.sin_addr);
     servaddr.sin_port = htons(port);
 
-    if (bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
+    if (bind(listenfd, static_cast<struct sockaddr *>(&servaddr), sizeof(servaddr)) == -1) {
         close(listenfd);
         printf("bind socket error: %s(errno: %d)\n", strerror(errno), errno);
         return;
@@ -146,7 +146,7 @@ void CreateServer(void *arg)
     }
 
     while (true) {
-        if ((connfd = accept(listenfd, (struct sockaddr *)nullptr, nullptr)) == -1) {
+        if ((connfd = accept(listenfd, static_cast<struct sockaddr *>(nullptr), nullptr)) == -1) {
             printf("accept socket error: %s(errno: %d)\n", strerror(errno), errno);
             continue;
         }
@@ -322,7 +322,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
     EXPECT_EQ(1, TcpGetConnNum());
     for (int i = 0; i < 3; i++) {
         char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
-        if (data == NULL) {
+        if (data == nullptr) {
             continue;
         }
         (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
@@ -416,7 +416,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
     head.len = maxDataLen + 1;
 
     char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
-    if (data == NULL) {
+    if (data == nullptr) {
         printf("Failed to assign memory to data.");
         return;
     }
@@ -893,7 +893,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
-    ASSERT_NE(tcp, nullptr); 
+    ASSERT_NE(tcp, nullptr);
     int fd = -1;
     int port = tcp->GetSockPort(fd);
     int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;

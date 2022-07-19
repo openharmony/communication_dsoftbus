@@ -149,7 +149,8 @@ int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInf
             }
             break;
         case CONNECT_TCP: {
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->socketInfo.addr) != EOK) {
+            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->socketInfo.addr) !=
+                EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
                 return SOFTBUS_ERR;
             }

@@ -240,7 +240,8 @@ static int32_t AuthOnDataEvent(ListenerModule module, int32_t events, int32_t fd
     UnpackConnPktHead(&head);
     if (len < (int32_t)headSize) {
         if (len < 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnRecvSocketData failed, DelTrigger. recv len=%zd", len);
+            SoftBusLog(
+                SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnRecvSocketData failed, DelTrigger. recv len=%zd", len);
             (void)DelTrigger(AUTH, fd, READ_TRIGGER);
             AuthNotifyDisconn(fd);
         }

@@ -47,7 +47,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
             .moduleId = DIRECT_CHANNEL_SERVER_P2P
         }
     };
-    if(strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip)!= EOK) {
+    if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy addr failed!", __func__);
         return SOFTBUS_ERR;
     }
@@ -416,7 +416,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     };
 
     ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), conn->appInfo.peerData.ip);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s: strcpy_s failed!ret = %" PRId32, __func__, ret);
         ReleaseSessonConnLock();
         goto EXIT_ERR;

@@ -448,13 +448,13 @@ int32_t ConnServerInit(void)
     }
 
     int32_t ret = ConnInitSockets();
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }

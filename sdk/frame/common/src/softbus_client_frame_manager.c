@@ -142,7 +142,8 @@ static void FreeClientPkgName(void)
     (void)pthread_mutex_unlock(&g_pkgNameLock);
 }
 
-static void ConnClientDeinit(void) {
+static void ConnClientDeinit(void)
+{
     (void)DeinitBaseListener();
     (void)ConnDeinitSockets();
 }
@@ -156,15 +157,16 @@ static void ClientModuleDeinit(void)
     DiscClientDeinit();
 }
 
-static int32_t ConnClientInit() {
+static int32_t ConnClientInit()
+{
     int32_t ret = ConnInitSockets();
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
@@ -190,7 +192,7 @@ static int32_t ClientModuleInit(void)
         goto ERR_EXIT;
     }
 
-    if(ConnClientInit() != SOFTBUS_OK) {
+    if (ConnClientInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init connect manager failed");
         goto ERR_EXIT;
     }

@@ -227,7 +227,10 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
 
         LocalListenerInfo info = {
             .type = CONNECT_TCP,
-            .socketOption = {.addr = "127.0.0.1", .port = port, .moduleId = static_cast<ListenerModule>(module), .protocol = LNN_PROTOCOL_IP}
+            .socketOption = {.addr = "127.0.0.1",
+                             .port = port,
+                             .moduleId = static_cast<ListenerModule>(module),
+                             .protocol = LNN_PROTOCOL_IP}
         };
 
         listener->onConnectEvent = ConnectEvent;

@@ -163,7 +163,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if(module == AUTH_P2P) {
+    if (module == AUTH_P2P) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv p2p conned %d", cfd);
         if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive fail");
@@ -171,7 +171,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
             return SOFTBUS_ERR;
         }
     }
-    
+
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OnConnectEvent malloc TcpConnInfoNode");
@@ -398,7 +398,8 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         result->OnConnectFailed(requestId, SOFTBUS_MALLOC_ERR);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strcpy_s(tcpConnInfoNode->info.socketInfo.addr, sizeof(tcpConnInfoNode->info.socketInfo.addr), option->socketOption.addr) != EOK ||
+    if (strcpy_s(tcpConnInfoNode->info.socketInfo.addr, sizeof(tcpConnInfoNode->info.socketInfo.addr),
+            option->socketOption.addr) != EOK ||
         memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
         ConnShutdownSocket(fd);
         SoftBusFree(tcpConnInfoNode);
