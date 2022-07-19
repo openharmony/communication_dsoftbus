@@ -159,8 +159,8 @@ typedef struct {
 struct ListenerSocketOption {
     char addr[MAX_SOCKET_ADDR_LEN];
     int32_t port;
-    ProtocolType protocol;
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
+    ProtocolType protocol;
 };
 
 typedef struct {
