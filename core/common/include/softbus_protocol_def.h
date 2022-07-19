@@ -39,20 +39,4 @@ typedef uint64_t ProtocolType;
 #define BIND_ADDR_NONE NULL
 #define BIND_ADDR_ALL "0"
 
-#ifndef TEMP_FAILURE_RETRY
-#define TEMP_FAILURE_RETRY(expression) \
-( \
-    __extension__ \
-    ( \
-    {   \
-    long int __result; \
-    do __result = (long int) (expression); \
-    while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
-    __result; \
-    } \
-    ) \
-)
-#endif
-
-
 #endif
