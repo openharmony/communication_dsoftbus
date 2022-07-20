@@ -128,15 +128,15 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX)) {
-        return INVALID_CHANNEL_ID;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {
-        return INVALID_CHANNEL_ID;
+        return SOFTBUS_TRANS_SESSION_GROUP_INVALID;
     }
 
     if (!TransSessionServerIsExist(param->sessionName)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session server invalid");
-        return INVALID_CHANNEL_ID;
+        return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
     }
 
     return TransOpenChannel(param, info);
