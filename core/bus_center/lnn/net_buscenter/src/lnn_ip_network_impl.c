@@ -116,16 +116,14 @@ static void OpenProxyPort(void)
             .moduleId = PROXY
         }
     };
-    int32_t port;
     int32_t ret =
         LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr, sizeof(listenerInfo.socketOption.addr));
-
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
         return;
     }
 
-    port = ConnStartLocalListening(&listenerInfo);
+    int32_t port = ConnStartLocalListening(&listenerInfo);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed\n");
         return;
