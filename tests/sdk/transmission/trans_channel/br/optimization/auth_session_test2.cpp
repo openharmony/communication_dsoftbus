@@ -126,8 +126,8 @@ void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *e
     if (data != nullptr) {
         printf("stream received, sessionid[%d], data = %.*s\n", sessionId, data->bufLen, data->buf);
     }
-    if (ext != nullptr && ext->buf != nullptr && data->bufLen > 0) {
-        printf("stream received, sessionid[%d], extdata = %.*s\n", sessionId, ext->bufLen, ext->buf);
+    if (ext != nullptr && ext->buf != nullptr && ext->bufLen > 0) {
+        printf("stream received, sessionid[%d], ext = %.*s\n", sessionId, ext->bufLen, ext->buf);
     }
 }
 

@@ -120,37 +120,37 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
 
 static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr * sysAddr)
 {
-    if ((softbusAddr == NULL) || (softbusAddr == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter invalid input");
+    if ((softbusAddr == NULL) || (sysAddr == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid input", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     if (memset_s(sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter memset fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memset fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     sysAddr->sa_family = softbusAddr->saFamily;
     if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData, sizeof(softbusAddr->saData))
         != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter memcpy fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memcpy fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
 }
 
-static int32_t SysAddrToSoftBusAddr(const struct sockaddr * sysAddr, SoftBusSockAddr *softbusAddr)
+static int32_t SysAddrToSoftBusAddr(const struct sockaddr *sysAddr, SoftBusSockAddr *softbusAddr)
 {
-    if ((softbusAddr == NULL) || (softbusAddr == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter invalid input");
+    if ((sysAddr == NULL) || (softbusAddr == NULL)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid input", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     if (memset_s(softbusAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter memset fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memset fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     softbusAddr->saFamily = sysAddr->sa_family;
     if (memcpy_s(softbusAddr->saData, sizeof(softbusAddr->saData), sysAddr->sa_data, sizeof(sysAddr->sa_data))
         != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket adapter memcpy fail");
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memcpy fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;

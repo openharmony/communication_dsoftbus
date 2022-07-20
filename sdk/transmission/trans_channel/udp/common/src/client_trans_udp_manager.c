@@ -209,7 +209,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
 
 int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnUdpChannelOpened enter");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnUdpChannelOpened enter");
     if (channel == NULL || udpPort == NULL || sessionName == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
