@@ -316,6 +316,7 @@ typedef struct {
  * @param sessionName Indicates the pointer to the session name, which is the unique ID of the session server.
  * The value cannot be empty and can contain a maximum of 64 characters.
  * @param listener Indicates the pointer to the session callback structure, which cannot be empty.
+ * The common error codes are as follows:
  * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
  * @see RemoveSessionServer
  * @since 1.0
@@ -330,6 +331,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
  * whether the session server is in this package. The value cannot be empty and can contain a maximum of 64 characters.
  * @param sessionName Indicates the pointer to the session name. The value cannot be empty and can contain
  * a maximum of 64 characters.
+ * The common error codes are as follows:
  * @return Returns <b>0</b> if the operation is successful, returns <b>-1</b> otherwise.
  * @see CreateSessionServer
  * @since 1.0
@@ -349,9 +351,11 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
  * @param peerNetworkId remote device id.
  * @param groupId group id.
  * @param attr session attribute {@link SessionAttribute}.
+ * The common error codes are as follows:
  * @return <b>SOFTBUS_TRANS_INVALID_PARAM</b> invalid param.
  * @return <b>INVALID_SESSION_ID</b> open session failed, and return invalid session id.
- * @return return sessionId if the session is opened successfully, returns an error code otherwise.
+ * @return return sessionId if the session is opened successfully,
+ * and the sessionId is greater than 0, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -374,11 +378,12 @@ void CloseSession(int sessionId);
  * @param sessionId Indicates the session ID.
  * @param data Indicates the pointer to the data to send, which cannot be <b>NULL</b>.
  * @param len Indicates the length of the data to send. The maximum length cannot exceed 984 characters.
+ * The common error codes are as follows:
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> param data or len of value is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT</b> The data length exceeds the maximum limit.
  * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> invalid session id.
- * @return Returns <b>SOFTBUS_TRANS_SESSION_OPENING</b> session is currently disable.
- * @return Returns <b>SOFTBUS_ERR</b> failed caused by internal error.
- * @return Returns <b>0</b> if the function is called successfully.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> session is currently disable.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -390,19 +395,29 @@ int SendBytes(int sessionId, const void *data, unsigned int len);
  * @param sessionId Indicates the session ID.
  * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
  * @param len Indicates the length of the message to send.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the input data is NULL or len is Zero.
+ * @return Returns <b>SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT</b> The data length exceeds the maximum limit.
+ * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
 int SendMessage(int sessionId, const void *data, unsigned int len);
 
 /**
- * @brief Sends message based on a session ID.
+ * @brief Sends stream based on a session ID.
  *
  * @param sessionId Indicates the session ID.
- * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
- * @param len Indicates the length of the message to send.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @param data Indicates the pointer to the stream data to send, which cannot be <b>NULL</b>.
+ * @param ext Indicates the pointer to the ext stream data to send, which cannot be <b>NULL</b>.
+ * @param param Indicates the pointer to the stream data of param, which cannot be <b>NULL</b>.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the input param is NULL.
+ * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -414,7 +429,9 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
  * @param sessionId Indicates the session ID.
  * @param sessionName Indicates the pointer to the buffer for storing the session name.
  * @param len Indicates the length of the buffer.
- * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> Indicates invalid value for input param.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -426,7 +443,9 @@ int GetMySessionName(int sessionId, char *sessionName, unsigned int len);
  * @param sessionId Indicates the session ID.
  * @param sessionName Indicates the pointer to the buffer for storing the session name.
  * @param len Indicates the length of the buffer.
- * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> Indicates invalid value for input param.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -438,7 +457,9 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len);
  * @param sessionId Indicates the session ID.
  * @param networkId Indicates the pointer to the buffer for storing the device ID.
  * @param len Indicates the length of the buffer.
- * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> Indicates invalid value for input param.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -464,8 +485,10 @@ int GetSessionSide(int sessionId);
  * @param sessionName Indicates the pointer to the buffer for storing the session name.
  * @param recvListener Indicates the pointer to the file receive listener, which cannot be <b>NULL</b>.
  * @param rootDir Indicates the length of the message to send.
- * @return Returns <b>-998</b> Indicates invalid value for input param.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> Indicates invalid value for input param.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if add pkgName failed.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -473,36 +496,48 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir);
 
 /**
- * @brief Sends message based on pkgName.
+ * @brief Set file sendListener based on pkgName and sessionName .
  *
- * @param sessionId Indicates the session ID.
- * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
- * @param len Indicates the length of the message to send.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @param pkgName Indicates the pointer to the name of the registered package, which can be used to check
+ * whether the session server is in this package. The value cannot be empty and can contain a maximum of 64 characters.
+ * @param sessionName Indicates the pointer to the buffer for storing the session name.
+ * @param sendListener Indicates the pointer to the file send listener, which cannot be <b>NULL</b>.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the input param is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if add pkgName failed.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
 int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
 
 /**
- * @brief Sends message based on a session ID.
+ * @brief Sends file based on a session ID.
  *
  * @param sessionId Indicates the session ID.
- * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
- * @param len Indicates the length of the message to send.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @param sFileList Indicates the pointer to the source file list to send, which cannot be <b>NULL</b>.
+ * @param dFileList Indicates the pointer to the destination file list to send, which cannot be <b>NULL</b>.
+ * @param fileCnt Indicates the number of files to send, whic cannot be <b>0</b>.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the sFileList is NULL or fileCnt is Zero.
+ * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
 /**
- * @brief Sends message based on a session ID.
+ * @brief Qos Report based on a session ID.
  *
  * @param sessionId Indicates the session ID.
- * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
- * @param len Indicates the length of the message to send.
- * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @param appType Indicates the app type.
+ * @param quality Indicates the qos quality mod, and can be set to QOS_IMPROVE.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the param is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> if the param is invalid.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
  * @since 1.0
  * @version 1.0
  */
