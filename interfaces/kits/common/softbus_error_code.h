@@ -32,7 +32,7 @@ enum SoftBusModule {
     SOFTBUS_MOD_DISCOVERY,
     SOFTBUS_MOD_PUBLIC,
 };
-#define SOFTBUS_ERRNO(module) ((0xF << 28) | ((1 << module) << 16))
+#define SOFTBUS_ERRNO(module) ((0xF << 28) | ((1 << (module)) << 16))
 
 enum SoftBusErrNo {
     /* errno begin: 0xF0010000 */

@@ -383,7 +383,7 @@ void CloseSession(int sessionId);
  * @return Returns <b>SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT</b> The data length exceeds the maximum limit.
  * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> invalid session id.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> session is currently disable.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, return other internal errorcode otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -400,7 +400,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len);
  * @return Returns <b>SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT</b> The data length exceeds the maximum limit.
  * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, return other internal errorcode otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -417,7 +417,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len);
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the input param is NULL.
  * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, return other internal errorcode otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -488,7 +488,7 @@ int GetSessionSide(int sessionId);
  * The common error codes are as follows:
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> Indicates invalid value for input param.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if add pkgName failed.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -505,7 +505,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
  * The common error codes are as follows:
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the input param is invalid.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if add pkgName failed.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -522,7 +522,7 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the sFileList is NULL or fileCnt is Zero.
  * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
  * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be enabled.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
  * @since 1.0
  * @version 1.0
  */
@@ -537,7 +537,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
  * The common error codes are as follows:
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the param is invalid.
  * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> if the param is invalid.
- * @return Returns <b>SOFTBUS_OK</b> if the function is called successfully, returns other internal error codes otherwise.
+ * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
  * @since 1.0
  * @version 1.0
  */
