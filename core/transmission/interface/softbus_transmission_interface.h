@@ -76,7 +76,7 @@ int TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkI
  * @param[in] channelId indicates the opened ChannelId.
  * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information.
  * @return <b>SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID</b> Failed to delete channel info.
- * @return <b>SOFTBUS_OK</b> Success to close this proxy channel.
+ * @return <b>SOFTBUS_OK</b> Success to close this proxy channel, returns other internal error codes otherwise.
  */
 int TransCloseNetWorkingChannel(int32_t channelId);
 
@@ -92,7 +92,7 @@ int TransCloseNetWorkingChannel(int32_t channelId);
  * @return <b>SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID</b> Failed to get channel info.
  * @return <b>SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID</b> the channel status is abnormal.
  * @return <b>SOFTBUS_TRANS_PROXY_PACKMSG_ERR</b> Failed to packaged the message data.
- * @return <b>SOFTBUS_OK</b> Success to send message to the channel.
+ * @return <b>SOFTBUS_OK</b> Success to send message to the channel, returns other internal error codes otherwise.
  */
 int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority);
 
@@ -102,7 +102,7 @@ int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dat
  * @see {@link INetworkingListener}
  * @param[in] listener indicates regiestered function callback.
  * @return <b>SOFTBUS_ERR</b> Failed to add listener to channel listener manager.
- * @return <b>SOFTBUS_OK</b> Success to register listener to channel manager.
+ * @return <b>SOFTBUS_OK</b> Success to register listener to channel manager, returns other internal error codes otherwise.
  */
 int TransRegisterNetworkingChannelListener(const INetworkingListener *listener);
 
