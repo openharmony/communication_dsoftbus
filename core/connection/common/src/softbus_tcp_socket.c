@@ -192,8 +192,7 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
 
     SetClientOption(fd);
     ret = BindTcpClientAddr(fd, myIp);
-    if (ret != SOFTBUS_OK)
-    {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BindLocalIP ret=%d", ret);
         ConnShutdownSocket(fd);
         return -1;
