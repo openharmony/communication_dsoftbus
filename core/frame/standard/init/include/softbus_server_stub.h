@@ -64,10 +64,13 @@ private:
     int32_t ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
+    void initMemberFuncMap();
+    void initMemberPermissionMap();
 
     using SoftBusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusServerStubFunc> memberFuncMap_;
+    std::map<uint32_t, const char*> memberPermissionMap_;
 };
 } // namespace OHOS
 
