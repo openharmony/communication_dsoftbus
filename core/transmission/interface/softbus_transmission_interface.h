@@ -102,7 +102,7 @@ int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dat
  * @see {@link INetworkingListener}
  * @param[in] listener indicates regiestered function callback.
  * @return <b>SOFTBUS_ERR</b> Failed to add listener to channel listener manager.
- * @return <b>SOFTBUS_OK</b> Success to register listener to channel manager, returns other internal error codes otherwise.
+ * @return <b>SOFTBUS_OK</b> Success to register channel listener, return other internal errorcodes otherwise.
  */
 int TransRegisterNetworkingChannelListener(const INetworkingListener *listener);
 
