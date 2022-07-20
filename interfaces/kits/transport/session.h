@@ -264,6 +264,17 @@ typedef struct {
      */
     void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
 
+    /**
+     * @brief Called when stream is received.
+     *
+     * This function is used to notify that stream is received.
+     *
+     * @param sessionId Indicates the session ID.
+     * @param data Indicates the pointer to the stream data received.
+     * @param dataLen Indicates the length of the stream received.
+     * @since 1.0
+     * @version 1.0
+     */
     void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext,
         const StreamFrameInfo *param);
 
@@ -338,6 +349,8 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
  * @param peerNetworkId remote device id.
  * @param groupId group id.
  * @param attr session attribute {@link SessionAttribute}.
+ * @return <b>SOFTBUS_TRANS_INVALID_PARAM</b> invalid param.
+ * @return <b>INVALID_SESSION_ID</b> open session failed, and return invalid session id.
  * @return return sessionId if the session is opened successfully, returns an error code otherwise.
  * @since 1.0
  * @version 1.0
@@ -361,7 +374,11 @@ void CloseSession(int sessionId);
  * @param sessionId Indicates the session ID.
  * @param data Indicates the pointer to the data to send, which cannot be <b>NULL</b>.
  * @param len Indicates the length of the data to send. The maximum length cannot exceed 984 characters.
- * @return Returns <b>0</b> if the function is called successfully; returns <b>-1</b> otherwise.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> param data or len of value is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> invalid session id.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_OPENING</b> session is currently disable.
+ * @return Returns <b>SOFTBUS_ERR</b> failed caused by internal error.
+ * @return Returns <b>0</b> if the function is called successfully.
  * @since 1.0
  * @version 1.0
  */
@@ -379,6 +396,16 @@ int SendBytes(int sessionId, const void *data, unsigned int len);
  */
 int SendMessage(int sessionId, const void *data, unsigned int len);
 
+/**
+ * @brief Sends message based on a session ID.
+ *
+ * @param sessionId Indicates the session ID.
+ * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
+ * @param len Indicates the length of the message to send.
+ * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
 
 /**
@@ -417,15 +444,68 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len);
  */
 int GetPeerDeviceId(int sessionId, char *networkId, unsigned int len);
 
+/**
+ * @brief Get session side based on a session ID.
+ *
+ * @param sessionId Indicates the session ID.
+ * @return Returns <b>-1</b> Indicates get session side failed.
+ * @return Returns <b>0</b> Indicates the session is server side.
+ * @return Returns <b>1</b> Indicates the session is client side.
+ * @since 1.0
+ * @version 1.0
+ */
 int GetSessionSide(int sessionId);
 
+/**
+ * @brief Set file receive listener.
+ *
+ * @param pkgName Indicates the pointer to the name of the registered package, which can be used to check
+ * whether the session server is in this package. The value cannot be empty and can contain a maximum of 64 characters.
+ * @param sessionName Indicates the pointer to the buffer for storing the session name.
+ * @param recvListener Indicates the pointer to the file receive listener, which cannot be <b>NULL</b>.
+ * @param rootDir Indicates the length of the message to send.
+ * @return Returns <b>-998</b> Indicates invalid value for input param.
+ * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
 int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir);
 
+/**
+ * @brief Sends message based on pkgName.
+ *
+ * @param sessionId Indicates the session ID.
+ * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
+ * @param len Indicates the length of the message to send.
+ * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
 int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
 
+/**
+ * @brief Sends message based on a session ID.
+ *
+ * @param sessionId Indicates the session ID.
+ * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
+ * @param len Indicates the length of the message to send.
+ * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
+/**
+ * @brief Sends message based on a session ID.
+ *
+ * @param sessionId Indicates the session ID.
+ * @param data Indicates the pointer to the message data to send, which cannot be <b>NULL</b>.
+ * @param len Indicates the length of the message to send.
+ * @return Returns <b>0</b> if the function is called successfully, returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
 
 #ifdef __cplusplus

@@ -339,7 +339,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
             return TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
 }
 

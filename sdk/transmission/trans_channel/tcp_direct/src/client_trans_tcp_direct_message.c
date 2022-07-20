@@ -202,7 +202,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
     int32_t ret = TransTdcProcessPostData(&channel, data, len, FLAG_MESSAGE);
     if (ret != SOFTBUS_OK) {
@@ -215,6 +215,7 @@ int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
 static int32_t TransTdcSendAck(const TcpDirectChannelInfo *channel, int32_t seq)
 {
     if (channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel is null.");
         return SOFTBUS_ERR;
     }
 

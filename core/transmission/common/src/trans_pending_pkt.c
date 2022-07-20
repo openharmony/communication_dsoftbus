@@ -111,7 +111,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pending[%d] list not inited.", type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
 
     SoftBusMutexLock(&pendingList->lock);
@@ -120,7 +120,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         if (item->seq == seqNum && item->channelId == channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
             SoftBusMutexUnlock(&pendingList->lock);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING;
         }
     }
 

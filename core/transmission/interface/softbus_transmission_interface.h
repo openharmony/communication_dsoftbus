@@ -26,18 +26,84 @@ extern "C" {
 #endif
 
 typedef struct {
+    /**
+    * @brief callback after the specified channel is opened.
+    * @see {@link TransRegisterNetworkingChannelListener}
+    * @param[in] channelId indicates that channel is open.
+    * @param[in] uuid indicates the pointer to the uuid.
+    * @param[in] isServer indicates server side or client side.
+    * @return <b>SOFTBUS_ERR</b> the processing failed after the callback.
+    * @return <b>SOFTBUS_OK</b> the processing success after the callback.
+    */
     int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer); // compatible nearby
+    /**
+    * @brief callback after open channel failed.
+    * @see {@link TransRegisterNetworkingChannelListener}
+    * @param[in] channelId indicates the opening channelId.
+    * @param[in] uuid indicates the pointer to the uuid.
+    */
     void (*onChannelOpenFailed)(int32_t channelId, const char *uuid);
+    /**
+    * @brief callback after closed channel.
+    * @see {@link TransRegisterNetworkingChannelListener}
+    * @param[in] channelId indicates the opening channelId.
+    */
     void (*onChannelClosed)(int32_t channelId);
+    /**
+    * @brief callback after receive message.
+    * @see {@link TransRegisterNetworkingChannelListener}
+    * @param[in] channelId indicates the opened channelId.
+    * @param[in] data indicates the pointer to the message data.
+    * @param[in] len indicates the message data of len.
+    */
     void (*onMessageReceived)(int32_t channelId, const char *data, uint32_t len);
 } INetworkingListener;
 
+/**
+ * @brief To open a proxy channel to the specified device.
+ * @see {@link TransCloseNetWorkingChannel}
+ * @param[in] sessionName indicates the pointer to the package name.
+ * @param[in] peerNetworkId indicates the pointer to the peer network id.
+ * @return <b>INVALID_CHANNEL_ID</b> Failed to open channel, return invalid channel id.
+ * @return <b>NewChannelId</b> Success to open channel, and return valid channel id.
+ */
 int TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId);
 
+/**
+ * @brief To close the sepcified proxy channel.
+ * this interface is only called once when the channelId already opened.
+ * @see {@link TransOpenNetWorkingChannel}
+ * @param[in] channelId indicates the opened ChannelId.
+ * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information.
+ * @return <b>SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID</b> Failed to delete channel info.
+ * @return <b>SOFTBUS_OK</b> Success to close this proxy channel.
+ */
 int TransCloseNetWorkingChannel(int32_t channelId);
 
+/**
+ * @brief send message through the sepcified channel.
+ * this interface is current only called once when the sync device info.
+ * @see {@link TransOpenNetWorkingChannel}
+ * @param[in] channelId indicates the opened ChannelId.
+ * @param[in] data indicates the pointer to message data.
+ * @param[in] dataLen indicates the message data of len.
+ * @param[in] priority indicates the message send priority.
+ * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information.
+ * @return <b>SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID</b> Failed to get channel info.
+ * @return <b>SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID</b> the channel status is abnormal.
+ * @return <b>SOFTBUS_TRANS_PROXY_PACKMSG_ERR</b> Failed to packaged the message data.
+ * @return <b>SOFTBUS_OK</b> Success to send message to the channel.
+ */
 int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority);
 
+/**
+ * @brief regiester listener to channel listener manager.
+ * this interface is current only called once when the sync info manager.
+ * @see {@link INetworkingListener}
+ * @param[in] listener indicates regiestered function callback.
+ * @return <b>SOFTBUS_ERR</b> Failed to add listener to channel listener manager.
+ * @return <b>SOFTBUS_OK</b> Success to register listener to channel manager.
+ */
 int TransRegisterNetworkingChannelListener(const INetworkingListener *listener);
 
 #ifdef __cplusplus

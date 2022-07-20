@@ -313,7 +313,7 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
     }
     if (TransProxyGetSendMsgChanInfo(channelId, chanInfo) != SOFTBUS_OK) {
         SoftBusFree(chanInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
     }
     AppType appType = chanInfo->appInfo.appType;
     SoftBusFree(chanInfo);
