@@ -33,8 +33,6 @@
 #include "accesstoken_kit.h"
 
 namespace OHOS {
-
-static uint32_t g_permissionControl = 0;
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -82,9 +80,6 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
 
 static inline int CheckAccessTokenPermission(const char* permission)
 {
-    if (g_permissionControl == 0) {
-        return OHOS::Security::AccessToken::PERMISSION_GRANTED;
-    }
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     return OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
 }
