@@ -86,11 +86,11 @@ static inline int CheckAccessTokenPermission(const char* permission)
 
 SoftBusServerStub::SoftBusServerStub()
 {
-    initMemberFuncMap();
-    initMemberPermissionMap();
+    InitMemberFuncMap();
+    InitMemberPermissionMap();
 }
 
-void SoftBusServerStub::initMemberFuncMap()
+void SoftBusServerStub::InitMemberFuncMap()
 {
     memberFuncMap_[SERVER_START_DISCOVERY] = &SoftBusServerStub::StartDiscoveryInner;
     memberFuncMap_[SERVER_STOP_DISCOVERY] = &SoftBusServerStub::StopDiscoveryInner;
@@ -123,7 +123,7 @@ void SoftBusServerStub::initMemberFuncMap()
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
 }
 
-void SoftBusServerStub::initMemberPermissionMap()
+void SoftBusServerStub::InitMemberPermissionMap()
 {
     memberPermissionMap_[SERVER_START_DISCOVERY] = nullptr;
     memberPermissionMap_[SERVER_STOP_DISCOVERY] = nullptr;
