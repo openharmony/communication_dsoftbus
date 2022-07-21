@@ -38,7 +38,7 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.distributedschedule.dms.*",
+    "SESSION_NAME": "ohos.systemabilitymgr.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "APP_INFO": [
