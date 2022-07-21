@@ -49,16 +49,10 @@ typedef struct {
 static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg)
 {
     int32_t cmdType;
-    char peerMac[P2P_MAC_LEN] = {0};
 
     if (!GetJsonObjectNumberItem(msg, KEY_COMMAND_TYPE, &cmdType)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "parse command type from json failed.");
         return;
-    }
-
-    if (!GetJsonObjectStringItem(msg, KEY_MAC, peerMac, sizeof(peerMac))) {
-        int32_t ret = AuthSetP2pMac(authId, peerMac);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set auth %" PRId64 " ret %d", authId, ret);
     }
 
     switch (cmdType) {
