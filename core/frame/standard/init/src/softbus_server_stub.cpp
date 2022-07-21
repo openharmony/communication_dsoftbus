@@ -174,7 +174,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
 
     auto itPerm = memberPermissionMap_.find(code);
     if (itPerm != memberPermissionMap_.end()) {
-        const char*  permission = itPerm->second;
+        const char* permission = itPerm->second;
         if ((permission != nullptr) &&
             (CheckAccessTokenPermission(permission) != OHOS::Security::AccessToken::PERMISSION_GRANTED)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "permission %s denied!", permission);
