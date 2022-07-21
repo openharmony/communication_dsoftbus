@@ -110,17 +110,17 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
     if ((param->sessionName == nullptr) || (param->peerSessionName == nullptr) ||
         (param->peerDeviceId == nullptr) || (param->groupId == nullptr) || (param->attr == nullptr)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int ret = g_serverProxy->OpenSession(param, info);
     if (ret < SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession failed!\n");
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession failed! ret=%d.\n", ret);
+        return ret;
     }
     return ret;
 }
