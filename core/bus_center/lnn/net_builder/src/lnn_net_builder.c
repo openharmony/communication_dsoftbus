@@ -689,7 +689,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
             LnnRequestLeaveSpecific(info->networkId, CONNECTION_ADDR_MAX);
             break;
         }
-        
+
         LnnConnectionFsm *item = NULL;
         const char *udid = NULL;
         LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
@@ -1466,7 +1466,7 @@ int32_t LnnServerJoin(ConnectionAddr *addr)
     if (PostMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post join lnn message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1488,7 +1488,7 @@ int32_t LnnServerLeave(const char *networkId)
     if (PostMessageToHandler(MSG_TYPE_LEAVE_LNN, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave lnn message failed");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
 }

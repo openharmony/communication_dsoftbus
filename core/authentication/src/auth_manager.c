@@ -564,14 +564,19 @@ int64_t AuthVerifyDevice(AuthVerifyModule moduleId, const ConnectionAddr *addr)
         if (HandleIpVerifyDevice(auth, &option) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "HandleIpVerifyDevice failed");
             (void)AuthHandleLeaveLNN(auth->authId);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NETWORK_AUTH_TCP_ERR;
         }
     } else if (option.type == CONNECT_BR || option.type == CONNECT_BLE) {
         int64_t authId = auth->authId;
         if (ConnConnectDevice(&option, auth->requestId, &g_connResult) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth ConnConnectDevice failed");
-            (void)AuthHandleLeaveLNN(authId);
-            return SOFTBUS_ERR;
+            if (option.type == CONNECT_BR) {
+                (void)AuthHandleLeaveLNN(authId);
+                return SOFTBUS_NETWORK_AUTH_BR_ERR;
+            } else {
+                (void)AuthHandleLeaveLNN(authId);
+                return SOFTBUS_NETWORK_AUTH_BLE_ERR;
+            }
         }
     } else {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth conn type %d is not support", option.type);

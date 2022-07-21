@@ -41,7 +41,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
     }
-    
+
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
     MessageParcel reply;
     MessageOption option;
@@ -65,7 +65,7 @@ int32_t BusCenterServerProxyInit(void)
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Create bus center server proxy failed!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     return SOFTBUS_OK;
 }
@@ -80,7 +80,7 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllOnlineNodeInfo g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
     if (ret != SOFTBUS_OK) {
@@ -94,7 +94,7 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetLocalDeviceInfo g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetLocalDeviceInfo(pkgName, info, infoTypeLen);
     if (ret != SOFTBUS_OK) {
@@ -108,7 +108,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetNodeKeyInfo g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetNodeKeyInfo(pkgName, networkId, key, buf, len);
     if (ret != SOFTBUS_OK) {
@@ -122,7 +122,7 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinLNN g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen);
     if (ret != 0) {
@@ -136,7 +136,7 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN g_serverProxy is nullptr!\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->LeaveLNN(pkgName, networkId);
     if (ret != 0) {
@@ -150,7 +150,7 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StartTimeSync(pkgName, targetNetworkId, accuracy, period);
     if (ret != 0) {
@@ -164,7 +164,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
     if (ret != 0) {
@@ -178,7 +178,7 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->PublishLNN(pkgName, info, infoLen);
     if (ret != 0) {
@@ -192,7 +192,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopPublishLNN g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopPublishLNN(pkgName, publishId);
     if (ret != 0) {
@@ -206,7 +206,7 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->RefreshLNN(pkgName, info, infoTypeLen);
     if (ret != 0) {
@@ -219,7 +219,7 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopRefreshLNN(pkgName, refreshId);
     if (ret != 0) {
@@ -233,7 +233,7 @@ int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *i
     (void)pkgName;
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->ActiveMetaNode(info, metaNodeId);
     if (ret != 0) {
@@ -247,7 +247,7 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
     (void)pkgName;
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->DeactiveMetaNode(metaNodeId);
     if (ret != 0) {
@@ -261,7 +261,7 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     (void)pkgName;
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo g_serverProxy is nullptr!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetAllMetaNodeInfo(infos, infoNum);
     if (ret != 0) {
