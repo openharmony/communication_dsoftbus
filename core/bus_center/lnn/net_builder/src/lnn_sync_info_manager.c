@@ -276,6 +276,7 @@ static void OnChannelCloseCommon(SyncChannelInfo *info, int32_t channelId)
     } else {
         ClearSyncInfoMsg(info, &info->syncMsgList);
         info->clientChannelId = INVALID_CHANNEL_ID;
+        info->isClientOpened = false;
         if (info->serverChannelId == INVALID_CHANNEL_ID) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "free empty sync channel info");
             ListDelete(&info->node);
