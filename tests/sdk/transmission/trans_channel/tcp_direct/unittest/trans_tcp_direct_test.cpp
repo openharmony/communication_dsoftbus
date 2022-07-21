@@ -221,24 +221,24 @@ HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level0)
     g_sessionAttr.dataType = TYPE_BYTES;
 
     ret = OpenSession(NULL, g_sessionName, g_networkid, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 
     ret = OpenSession(g_sessionName, NULL, g_networkid, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 
     ret = OpenSession(g_sessionName, g_sessionName, NULL, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 
     ret = OpenSession(g_sessionName, g_sessionName, g_networkid, NULL, &g_sessionAttr);
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 
     ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupid, NULL);
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 
     g_sessionAttr.dataType = TYPE_BUTT;
     ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupid, &g_sessionAttr);
     g_sessionAttr.dataType = TYPE_BYTES;
-    EXPECT_EQ(INVALID_SESSION_ID, ret);
+    EXPECT_GE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -267,7 +267,7 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = SendMessage(sessionId, data, maxLen + 1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT, ret);
 }
 
 /**
@@ -296,6 +296,6 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = SendMessage(sessionId, data, maxLen + 1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT, ret);
 }
 } // namespace OHOS

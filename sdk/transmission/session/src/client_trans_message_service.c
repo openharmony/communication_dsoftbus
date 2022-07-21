@@ -34,7 +34,8 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     if (len > maxLen) {
-        return SOFTBUS_INVALID_PARAM;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
 
     int32_t channelId = INVALID_CHANNEL_ID;
@@ -44,7 +45,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_OPENING;
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
     return ClientTransChannelSendBytes(channelId, type, data, len);
@@ -62,7 +63,8 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     if (len > maxLen) {
-        return SOFTBUS_INVALID_PARAM;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
@@ -71,7 +73,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_OPENING;
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
     return ClientTransChannelSendMessage(channelId, type, data, len);
@@ -91,10 +93,10 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (type != CHANNEL_TYPE_UDP) {
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+        return SOFTBUS_TRANS_STREAM_ONLY_UDP_CHANNEL;
     }
     if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_OPENING;
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
@@ -115,7 +117,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     }
 
     if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_OPENING;
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
     return ClientTransChannelSendFile(channelId, type, sFileList, dFileList, fileCnt);
