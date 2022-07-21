@@ -126,7 +126,7 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid type");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
 }
@@ -164,7 +164,7 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport channel type");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
 }

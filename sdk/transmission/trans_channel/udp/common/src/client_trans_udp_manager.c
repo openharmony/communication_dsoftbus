@@ -334,11 +334,11 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
 {
     UdpChannel channel = {0};
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     if (!channel.isEnable) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel is not enable.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
     }
     return TransSendStream(channelId, data, ext, param);
 }
@@ -439,11 +439,11 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
 {
     UdpChannel channel = {0};
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     if (!channel.isEnable || channel.dfileId < 0) {
         LOG_ERR("udp channel is not enable.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
     }
     return TransSendFile(channel.dfileId, sFileList, dFileList, fileCnt);
 }

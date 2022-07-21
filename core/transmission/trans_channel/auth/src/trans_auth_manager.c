@@ -627,7 +627,7 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
     int64_t authId = GetAuthIdByChannelId(channelId);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get AuthId failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
     }
 
     AuthDataHead head = {
