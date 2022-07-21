@@ -104,7 +104,7 @@ if (defined(ohos_lite)) {
 
     include_dirs = fillp_include
     include_dirs += [
-      "//utils/native/base/include/",
+      "//commonlibrary/c_utils/base/include/",
       "//third_party/bounds_checking_function/include",
     ]
     sources = fillp_source

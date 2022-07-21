@@ -36,7 +36,7 @@ ohos_unittest("softbus_file_testsuite") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "unittest/common/",
     "$dsoftbus_root_path/adapter/common/include",
@@ -46,13 +46,18 @@ ohos_unittest("softbus_file_testsuite") {
     "$dsoftbus_root_path/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
   } else {
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 }
 

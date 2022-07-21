@@ -38,10 +38,10 @@ ohos_unittest("TransTcpDirectCoreTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
 
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -77,13 +77,18 @@ ohos_unittest("TransTcpDirectCoreTest") {
   deps = [
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
   } else {
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 }
 

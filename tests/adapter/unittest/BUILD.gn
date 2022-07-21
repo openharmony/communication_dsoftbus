@@ -64,12 +64,17 @@ if (defined(ohos_lite)) {
       "//foundation/communication/dsoftbus/adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
-      "//utils/native/base:utils",
     ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
     } else {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
     }
   }
   group("unittest") {

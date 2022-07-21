@@ -42,7 +42,7 @@
           "libsystem_ability_fwk",
           "libsyspara",
           "samgr_proxy",
-          "utils_base"
+          "c_utils"
         ],
         "third_party": [
           "libcoap",
