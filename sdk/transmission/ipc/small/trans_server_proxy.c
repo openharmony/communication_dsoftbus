@@ -148,7 +148,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REMOVE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcRemoveSessionServer callback ret [%d]", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcRemoveSessionServer");
     return ret;
@@ -167,7 +167,7 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteString(&request, param->groupId);
     bool value = WriteRawData(&request, (void*)param->attr, sizeof(SessionAttribute));
     if (!value) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
     TransSerializer transSerializer;
@@ -181,7 +181,7 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
         &transSerializer, OpenSessionProxyCallback);
     if (ans != EC_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcOpenSession callback ret [%d]", transSerializer.ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     info->channelId = transSerializer.transInfo.channelId;
     info->channelType = transSerializer.transInfo.channelType;

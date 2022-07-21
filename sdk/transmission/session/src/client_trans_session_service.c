@@ -93,12 +93,12 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
 
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init softbus err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
 
     if (CheckPackageName(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid pkg name");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_INVALID_PKGNAME;
     }
 
     int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener);
@@ -106,7 +106,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServer is already created in client");
         ret = SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session server err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session server err, ret=%d.", ret);
         return ret;
     }
 
@@ -135,13 +135,15 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remove in server failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remove in server failed, ret=%d.", ret);
         return ret;
     }
 
     ret = ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete session server [%s] failed", sessionName);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete session server[%s] failed, ret=%d.", sessionName, ret);
+        DeleteFileListener(sessionName);
+        return ret;
     }
     DeleteFileListener(sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer ok: ret=%d", ret);
@@ -172,8 +174,8 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param");
-        return INVALID_SESSION_ID;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param, ret=%d.", ret);
+        return SOFTBUS_INVALID_PARAM;
     }
     char *anonyOutMy = NULL;
     char *anonyOutPeer = NULL;
@@ -448,14 +450,14 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server open session err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
-        return INVALID_SESSION_ID;
+        return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
     }
 
     ret = CheckSessionIsOpened(sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
-        return INVALID_SESSION_ID;
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%d, channelId=%d",
         sessionId, transInfo.channelId);
@@ -534,7 +536,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener init softbus client error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
     return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
 }
@@ -548,7 +550,7 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener init softbus client error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
     return TransSetFileSendListener(sessionName, sendListener);
 }
@@ -632,13 +634,13 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err, ret=%d.", ret);
+        return ret;
     }
     if (ClientGetSessionSide(sessionId) != IS_CLIENT) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
             "qos report sessionId[%d] not exist or not client side", sessionId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if ((ret = ClientQosReport(channelId, type, appType, quality)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report sessionId[%d] failed", sessionId);

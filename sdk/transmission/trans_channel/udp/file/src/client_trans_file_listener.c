@@ -65,7 +65,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
 {
     if (g_fileListener == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
     if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file receive listener lock failed");
@@ -115,7 +115,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
 {
     if (g_fileListener == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
     if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file send listener lock failed");
@@ -163,7 +163,7 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
 {
     if (g_fileListener == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
     if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file get listener lock failed");

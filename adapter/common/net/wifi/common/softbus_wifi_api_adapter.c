@@ -213,25 +213,66 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
+static int32_t ConvertSoftBusWifiScaninfoFromWifi(WifiScanInfo *info, SoftBusWifiScanInfo *result, uint32_t *size)
+{
+    if (info == NULL || result == NULL || size == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    for (uint32_t i = 0; i < (*size); i++) {
+        if (strcpy_s(result->ssid, WIFI_MAX_SSID_LEN, info->ssid) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy ssid fail");
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(result->bssid, WIFI_MAC_LEN, info->bssid, sizeof(info->bssid)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy bssid fail");
+            return SOFTBUS_ERR;
+        }
+        result->securityType = info->securityType;
+        result->rssi = info->rssi;
+        result->band = info->band;
+        result->frequency = info->frequency;
+        ++result;
+        ++info;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
-    int32_t ret;
-
     if (size == NULL || result == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para size or result is NULL.");
         return SOFTBUS_ERR;
     }
-    *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * WIFI_SCAN_HOTSPOT_LIMIT);
-    if (*result == NULL) {
+    WifiScanInfo *info = (WifiScanInfo *)SoftBusMalloc(sizeof(WifiScanInfo) * WIFI_SCAN_HOTSPOT_LIMIT);
+    if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi scan information failed.");
         return SOFTBUS_ERR;
     }
+    (void)memset_s(info, sizeof(WifiScanInfo)*WIFI_SCAN_HOTSPOT_LIMIT, 0,
+        sizeof(WifiScanInfo)*WIFI_SCAN_HOTSPOT_LIMIT);
     *size = WIFI_SCAN_HOTSPOT_LIMIT;
-    ret = GetScanInfoList((WifiScanInfo *)*result, (unsigned int *)size);
-    if (ret != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus get wifi scan list failed.");
+    int32_t ret = GetScanInfoList(info, (unsigned int *)size);
+    if (ret != WIFI_SUCCESS || size == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus get wifi scan list failed.");
+        SoftBusFree(info);
         return SOFTBUS_ERR;
     }
+    *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * (*size));
+    if (*result == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc softbus wifi scan information failed.");
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(*result, sizeof(SoftBusWifiScanInfo)* (*size), 0, sizeof(SoftBusWifiScanInfo)* (*size));
+    if (ConvertSoftBusWifiScaninfoFromWifi(info, *result, size) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertSoftBusWifiScaninfoFromWifi failed.");
+        SoftBusFree(*result);
+        *result = NULL;
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(info);
     return SOFTBUS_OK;
 }
 
