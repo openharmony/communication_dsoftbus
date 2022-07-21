@@ -30,6 +30,7 @@
 #include "softbus_server_frame.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
+#include "accesstoken_kit.h"
 
 namespace OHOS {
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -77,66 +78,82 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
+static inline int CheckAccessTokenPermission(const char* permission)
+{
+    uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
+    return OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
+}
+
 SoftBusServerStub::SoftBusServerStub()
 {
-    memberFuncMap_[SERVER_START_DISCOVERY] =
-        &SoftBusServerStub::StartDiscoveryInner;
-    memberFuncMap_[SERVER_STOP_DISCOVERY] =
-        &SoftBusServerStub::StopDiscoveryInner;
-    memberFuncMap_[SERVER_PUBLISH_SERVICE] =
-        &SoftBusServerStub::PublishServiceInner;
-    memberFuncMap_[SERVER_UNPUBLISH_SERVICE] =
-        &SoftBusServerStub::UnPublishServiceInner;
-    memberFuncMap_[MANAGE_REGISTER_SERVICE] =
-        &SoftBusServerStub::SoftbusRegisterServiceInner;
-    memberFuncMap_[SERVER_CREATE_SESSION_SERVER] =
-        &SoftBusServerStub::CreateSessionServerInner;
-    memberFuncMap_[SERVER_REMOVE_SESSION_SERVER] =
-        &SoftBusServerStub::RemoveSessionServerInner;
-    memberFuncMap_[SERVER_OPEN_SESSION] =
-        &SoftBusServerStub::OpenSessionInner;
-    memberFuncMap_[SERVER_OPEN_AUTH_SESSION] =
-        &SoftBusServerStub::OpenAuthSessionInner;
-    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] =
-        &SoftBusServerStub::NotifyAuthSuccessInner;
-    memberFuncMap_[SERVER_CLOSE_CHANNEL] =
-        &SoftBusServerStub::CloseChannelInner;
-    memberFuncMap_[SERVER_SESSION_SENDMSG] =
-        &SoftBusServerStub::SendMessageInner;
-    memberFuncMap_[SERVER_JOIN_LNN] =
-        &SoftBusServerStub::JoinLNNInner;
-    memberFuncMap_[SERVER_LEAVE_LNN] =
-        &SoftBusServerStub::LeaveLNNInner;
-    memberFuncMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] =
-        &SoftBusServerStub::GetAllOnlineNodeInfoInner;
-    memberFuncMap_[SERVER_GET_LOCAL_DEVICE_INFO] =
-        &SoftBusServerStub::GetLocalDeviceInfoInner;
-    memberFuncMap_[SERVER_GET_NODE_KEY_INFO] =
-        &SoftBusServerStub::GetNodeKeyInfoInner;
-    memberFuncMap_[SERVER_START_TIME_SYNC] =
-        &SoftBusServerStub::StartTimeSyncInner;
-    memberFuncMap_[SERVER_STOP_TIME_SYNC] =
-        &SoftBusServerStub::StopTimeSyncInner;
-    memberFuncMap_[SERVER_QOS_REPORT] =
-        &SoftBusServerStub::QosReportInner;
-    memberFuncMap_[SERVER_GRANT_PERMISSION] =
-        &SoftBusServerStub::GrantPermissionInner;
-    memberFuncMap_[SERVER_REMOVE_PERMISSION] =
-        &SoftBusServerStub::RemovePermissionInner;
-    memberFuncMap_[SERVER_PUBLISH_LNN] =
-        &SoftBusServerStub::PublishLNNInner;
-    memberFuncMap_[SERVER_STOP_PUBLISH_LNN] =
-        &SoftBusServerStub::StopPublishLNNInner;
-    memberFuncMap_[SERVER_REFRESH_LNN] =
-        &SoftBusServerStub::RefreshLNNInner;
-    memberFuncMap_[SERVER_STOP_REFRESH_LNN] =
-        &SoftBusServerStub::StopRefreshLNNInner;
-    memberFuncMap_[SERVER_ACTIVE_META_NODE] =
-        &SoftBusServerStub::ActiveMetaNodeInner;
-    memberFuncMap_[SERVER_DEACTIVE_META_NODE] =
-        &SoftBusServerStub::DeactiveMetaNodeInner;
-    memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] =
-        &SoftBusServerStub::GetAllMetaNodeInfoInner;
+    InitMemberFuncMap();
+    InitMemberPermissionMap();
+}
+
+void SoftBusServerStub::InitMemberFuncMap()
+{
+    memberFuncMap_[SERVER_START_DISCOVERY] = &SoftBusServerStub::StartDiscoveryInner;
+    memberFuncMap_[SERVER_STOP_DISCOVERY] = &SoftBusServerStub::StopDiscoveryInner;
+    memberFuncMap_[SERVER_PUBLISH_SERVICE] = &SoftBusServerStub::PublishServiceInner;
+    memberFuncMap_[SERVER_UNPUBLISH_SERVICE] = &SoftBusServerStub::UnPublishServiceInner;
+    memberFuncMap_[MANAGE_REGISTER_SERVICE] = &SoftBusServerStub::SoftbusRegisterServiceInner;
+    memberFuncMap_[SERVER_CREATE_SESSION_SERVER] = &SoftBusServerStub::CreateSessionServerInner;
+    memberFuncMap_[SERVER_REMOVE_SESSION_SERVER] = &SoftBusServerStub::RemoveSessionServerInner;
+    memberFuncMap_[SERVER_OPEN_SESSION] = &SoftBusServerStub::OpenSessionInner;
+    memberFuncMap_[SERVER_OPEN_AUTH_SESSION] = &SoftBusServerStub::OpenAuthSessionInner;
+    memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = &SoftBusServerStub::NotifyAuthSuccessInner;
+    memberFuncMap_[SERVER_CLOSE_CHANNEL] = &SoftBusServerStub::CloseChannelInner;
+    memberFuncMap_[SERVER_SESSION_SENDMSG] = &SoftBusServerStub::SendMessageInner;
+    memberFuncMap_[SERVER_JOIN_LNN] = &SoftBusServerStub::JoinLNNInner;
+    memberFuncMap_[SERVER_LEAVE_LNN] = &SoftBusServerStub::LeaveLNNInner;
+    memberFuncMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] = &SoftBusServerStub::GetAllOnlineNodeInfoInner;
+    memberFuncMap_[SERVER_GET_LOCAL_DEVICE_INFO] = &SoftBusServerStub::GetLocalDeviceInfoInner;
+    memberFuncMap_[SERVER_GET_NODE_KEY_INFO] = &SoftBusServerStub::GetNodeKeyInfoInner;
+    memberFuncMap_[SERVER_START_TIME_SYNC] = &SoftBusServerStub::StartTimeSyncInner;
+    memberFuncMap_[SERVER_STOP_TIME_SYNC] = &SoftBusServerStub::StopTimeSyncInner;
+    memberFuncMap_[SERVER_QOS_REPORT] = &SoftBusServerStub::QosReportInner;
+    memberFuncMap_[SERVER_GRANT_PERMISSION] = &SoftBusServerStub::GrantPermissionInner;
+    memberFuncMap_[SERVER_REMOVE_PERMISSION] = &SoftBusServerStub::RemovePermissionInner;
+    memberFuncMap_[SERVER_PUBLISH_LNN] = &SoftBusServerStub::PublishLNNInner;
+    memberFuncMap_[SERVER_STOP_PUBLISH_LNN] = &SoftBusServerStub::StopPublishLNNInner;
+    memberFuncMap_[SERVER_REFRESH_LNN] = &SoftBusServerStub::RefreshLNNInner;
+    memberFuncMap_[SERVER_STOP_REFRESH_LNN] = &SoftBusServerStub::StopRefreshLNNInner;
+    memberFuncMap_[SERVER_ACTIVE_META_NODE] = &SoftBusServerStub::ActiveMetaNodeInner;
+    memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
+    memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
+}
+
+void SoftBusServerStub::InitMemberPermissionMap()
+{
+    memberPermissionMap_[SERVER_START_DISCOVERY] = nullptr;
+    memberPermissionMap_[SERVER_STOP_DISCOVERY] = nullptr;
+    memberPermissionMap_[SERVER_PUBLISH_SERVICE] = nullptr;
+    memberPermissionMap_[SERVER_UNPUBLISH_SERVICE] = nullptr;
+    memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
+    memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_OPEN_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_OPEN_AUTH_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_NOTIFY_AUTH_SUCCESS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SESSION_SENDMSG] = nullptr;
+    memberPermissionMap_[SERVER_JOIN_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_LEAVE_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GET_LOCAL_DEVICE_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
+    memberPermissionMap_[SERVER_GRANT_PERMISSION] = nullptr;
+    memberPermissionMap_[SERVER_REMOVE_PERMISSION] = nullptr;
+    memberPermissionMap_[SERVER_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_REFRESH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_REFRESH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_ACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -154,6 +171,17 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         }
         return SOFTBUS_ERR;
     }
+
+    auto itPerm = memberPermissionMap_.find(code);
+    if (itPerm != memberPermissionMap_.end()) {
+        const char *permission = itPerm->second;
+        if ((permission != nullptr) &&
+            (CheckAccessTokenPermission(permission) != OHOS::Security::AccessToken::PERMISSION_GRANTED)) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "permission %s denied!", permission);
+            return SOFTBUS_PERMISSION_DENIED;
+        }
+    }
+    
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
