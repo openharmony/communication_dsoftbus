@@ -31,6 +31,10 @@
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 #include "accesstoken_kit.h"
+#include "access_token.h"
+#include "privacy_kit.h"
+
+using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -78,10 +82,19 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
-static inline int CheckAccessTokenPermission(const char* permission)
+static inline int CheckAndRecordAccessToken(const char* permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
-    return OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
+    int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
+
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenCaller);
+    int32_t successCnt = (int32_t)(ret == PERMISSION_GRANTED);
+    int32_t failCnt = 1 - successCnt;
+    if (type == TOKEN_HAP) {
+        PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
+    }
+    
+    return ret;
 }
 
 SoftBusServerStub::SoftBusServerStub()
@@ -176,7 +189,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     if (itPerm != memberPermissionMap_.end()) {
         const char *permission = itPerm->second;
         if ((permission != nullptr) &&
-            (CheckAccessTokenPermission(permission) != OHOS::Security::AccessToken::PERMISSION_GRANTED)) {
+            (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "permission %s denied!", permission);
             return SOFTBUS_PERMISSION_DENIED;
         }
