@@ -92,6 +92,10 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
+    if (nlh->nlmsg_len < NNLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wrong len");
+        return;
+    }
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
     LnnNetIfType type = LNN_NETIF_TYPE_ETH;
     char ifnameBuffer[NET_IF_NAME_LEN];
