@@ -152,6 +152,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
+      "//base/security/access_token/interfaces/innerkits/privacy/include",
     ]
     sources = dsoftbus_server_common_src
     sources += [
