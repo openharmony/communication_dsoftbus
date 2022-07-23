@@ -482,22 +482,22 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     uint32_t addrTypeLen;
     if (!data.ReadUint32(addrTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read addr type length failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
     if (addr == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read addr failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = JoinLNN(clientName, addr, addrTypeLen);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -507,17 +507,17 @@ int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &rep
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusLeaveLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const char *networkId = data.ReadCString();
     if (networkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusLeaveLNNInner read networkId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = LeaveLNN(clientName, networkId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -531,19 +531,19 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!data.ReadUint32(infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner read info type length failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner get info failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner node info is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!reply.WriteInt32(infoNum)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner write infoNum failed!");
@@ -556,7 +556,7 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, (int32_t)infoTypeLen * infoNum)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner write node info failed!");
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_IPC_ERR;
         }
         SoftBusFree(nodeInfo);
     }
@@ -571,24 +571,24 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
 
     infoTypeLen = sizeof(NodeBasicInfo);
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner malloc info type length failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (GetLocalDeviceInfo(clientName, nodeInfo, infoTypeLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner get local info failed");
         SoftBusFree(nodeInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
     if (!reply.WriteRawData(nodeInfo, infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfoInner write node info failed!");
         SoftBusFree(nodeInfo);
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SoftBusFree(nodeInfo);
     return SOFTBUS_OK;
@@ -604,50 +604,50 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const char *networkId = data.ReadCString();
     if (networkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read networkId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t key;
     if (!data.ReadInt32(key)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read key failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t infoLen = GetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t len;
     if (!data.ReadInt32(len)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (len < infoLen) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len is invalid param!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
     if (buf == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner malloc buffer failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (GetNodeKeyInfo(clientName, networkId, key, (unsigned char *)buf, infoLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner get key info failed!");
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
     if (!reply.WriteInt32(infoLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner write info length failed!");
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (!reply.WriteRawData(buf, infoLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner write key info failed!");
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     SoftBusFree(buf);
     return SOFTBUS_OK;
@@ -658,27 +658,27 @@ int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const char *targetNetworkId = data.ReadCString();
     if (targetNetworkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read targetNetworkId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t accuracy;
     if (!data.ReadInt32(accuracy)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read accuracy failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t period;
     if (!data.ReadInt32(period)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read period failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = StartTimeSync(pkgName, targetNetworkId, accuracy, period);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -688,17 +688,17 @@ int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel 
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read pkgName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const char *targetNetworkId = data.ReadCString();
     if (targetNetworkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read targetNetworkId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = StopTimeSync(pkgName, targetNetworkId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -789,22 +789,22 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info type length failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = PublishLNN(clientName, info, infoTypeLen);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -814,17 +814,17 @@ int32_t SoftBusServerStub::StopPublishLNNInner(MessageParcel &data, MessageParce
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t publishId;
     if (!data.ReadInt32(publishId)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner read publishId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = StopPublishLNN(clientName, publishId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopPublishLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -834,22 +834,22 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info type length failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     const void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = RefreshLNN(clientName, info, infoTypeLen);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -859,17 +859,17 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner read clientName failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t refreshId;
     if (!data.ReadInt32(refreshId)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner read refreshId failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     int32_t retReply = StopRefreshLNN(clientName, refreshId);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusStopRefreshLNNInner write reply failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -879,15 +879,15 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
     MetaNodeConfigInfo *info = (MetaNodeConfigInfo *)data.ReadRawData(sizeof(MetaNodeConfigInfo));
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode read meta node config info failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
     if (ActiveMetaNode(info, metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR;
     }
     if (!reply.WriteCString(metaNodeId)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode write meta node id failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -897,10 +897,10 @@ int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessagePar
     const char *metaNodeId = (const char *)data.ReadCString();
     if (metaNodeId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeactiveMetaNode read meta node id failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (DeactiveMetaNode(metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_DEACTIVE_META_NODE_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -912,18 +912,18 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
 
     if (!data.ReadInt32(infoNum)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo read infoNum failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR;
     }
     if (!reply.WriteInt32(infoNum)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write infoNum failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     if (infoNum > 0 && !reply.WriteRawData(infos, infoNum * sizeof(MetaNodeInfo))) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write meta node info failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }

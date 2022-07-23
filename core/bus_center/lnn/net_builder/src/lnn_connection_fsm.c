@@ -424,7 +424,7 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
     buf = LnnGetExchangeNodeInfo((int32_t)connInfo->authId, authType, SOFT_BUS_NEW_V1, &bufSize, &head.flag);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]pack local device info fail", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
+        CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_PACK_DEVID_FAILED);
         return SOFTBUS_ERR;
     }
 
