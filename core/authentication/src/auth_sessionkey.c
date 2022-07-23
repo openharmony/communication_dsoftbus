@@ -293,12 +293,12 @@ int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *dat
     int32_t ret = AuthGetDeviceKey(devInfo.deviceKey, MAX_DEVICE_KEY_LEN, &(devInfo.deviceKeyLen), option);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthGetDeviceKey failed");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     int32_t seq;
     if (memcpy_s(&seq, sizeof(int32_t), data, sizeof(int32_t)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     devInfo.seq = seq;
     data += sizeof(int32_t);
@@ -307,19 +307,19 @@ int32_t AuthDecrypt(const ConnectOption *option, AuthSideFlag side, uint8_t *dat
     sessionKeyList = GetSessionKeyByDevinfo(&devInfo);
     if (sessionKeyList == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetSessionKeyByDevinfo failed");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
 
     AesGcmCipherKey cipherKey = {0};
     cipherKey.keyLen = sessionKeyList->sessionKeyLen;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKeyList->sessionKey, sessionKeyList->sessionKeyLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     if (SoftBusDecryptDataWithSeq(&cipherKey, data, len, outBuf->buf,
         &outBuf->outLen, sessionKeyList->seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusDecryptDataWithSeq failed");
-        return SOFTBUS_ENCRYPT_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
 }

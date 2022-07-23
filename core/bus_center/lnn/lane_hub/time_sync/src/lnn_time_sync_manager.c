@@ -503,7 +503,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     para = SoftBusMalloc(sizeof(StartTimeSyncReqMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc stop time sync request msg para fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (strncpy_s(para->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK ||
         strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)) != EOK) {
@@ -521,7 +521,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     if (PostMessageToHandler(MSG_TYPE_START_TIME_SYNC, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post start time sync msg fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -541,7 +541,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
     para = SoftBusMalloc(sizeof(StopTimeSyncReqMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc stop time sync request msg para fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (strncpy_s(para->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK ||
         strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)) != EOK) {
@@ -552,7 +552,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
     if (PostMessageToHandler(MSG_TYPE_STOP_TIME_SYNC, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post stop time sync msg fail");
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
 }

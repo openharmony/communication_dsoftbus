@@ -22,16 +22,17 @@
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
+    int32_t ret;
     if (!isInnerRequest) {
-        if (DiscPublishService(pkgName, info) != SOFTBUS_OK) {
+        if ((ret = DiscPublishService(pkgName, info)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscPublishService failed\n");
-            return SOFTBUS_ERR;
+            return ret;
         }
         return SOFTBUS_OK;
     }
-    if (DiscStartScan(MODULE_LNN, info) != SOFTBUS_OK) {
+    if ((ret = DiscStartScan(MODULE_LNN, info)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStartScan failed\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -54,20 +55,21 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
 
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
 {
+    int32_t ret;
     if (!isInnerRequest) {
-        if (DiscStartDiscovery(pkgName, info, &cb->serverCb) != SOFTBUS_OK) {
+        if ((ret = DiscStartDiscovery(pkgName, info, &cb->serverCb)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStartDiscovery failed\n");
-            return SOFTBUS_ERR;
+            return ret;
         }
         return SOFTBUS_OK;
     }
-    if (DiscSetDiscoverCallback(MODULE_LNN, &cb->innerCb) != SOFTBUS_OK) {
+    if ((ret = DiscSetDiscoverCallback(MODULE_LNN, &cb->innerCb)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscSetDiscoverCallback failed\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (DiscStartAdvertise(MODULE_LNN, info) != SOFTBUS_OK) {
+    if ((ret = DiscStartAdvertise(MODULE_LNN, info)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DiscStartAdvertise failed\n");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
