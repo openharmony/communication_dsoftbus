@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   softbus_permission_inc = [
     "$dsoftbus_core_path/common/security/permission/include",
     "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
-    "//base/security/permission/interfaces/kits/permission_lite",
+    "//base/security/permission_lite/interfaces/kits",
   ]
   if (ohos_kernel_type == "liteos_m") {
     softbus_permission_src = [ "$dsoftbus_core_path/common/security/permission/mini/softbus_permission.c" ]
@@ -29,7 +29,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_core_path/common/security/permission/small/softbus_permission.c",
     ]
     softbus_permission_deps = [
-      "//base/security/permission/services/permission_lite/pms_client:pms_client",
+      "//base/security/permission_lite/services/pms_client:pms_client",
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
