@@ -93,7 +93,7 @@ static int32_t StopListenerThread(SoftbusListenerNode *node);
 static SoftbusListenerNode *RequestListenerNode(ListenerModule module)
 {
     if (module >= UNUSE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Invalid listener module.", __func__);
         return NULL;
     }
     int32_t ret = SoftBusMutexLock(&g_listenerListLock);
@@ -152,7 +152,7 @@ static int32_t ReleaseListenerRef(ListenerModule module)
     }
     int32_t ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&node->lock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return ret;
     }
     node->ref--;
@@ -232,6 +232,33 @@ static int32_t CreateStaticModules(void)
         }
     }
     return SOFTBUS_OK;
+}
+
+uint32_t CreateListenerModule(void)
+{
+    uint32_t moduleId = UNUSE_BUTT;
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock g_listenerListLock failed!.", __func__);
+        return moduleId;
+    }
+
+    for (uint32_t i = LISTENER_MODULE_DYNAMIC_START; i <= LISTENER_MODULE_DYNAMIC_END; i++) {
+        if (g_listenerList[i] != NULL) {
+            continue;
+        }
+        int32_t ret = CreateSpecifiedListenerModule(i);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
+                __func__, i, ret);
+            break;
+        }
+        moduleId = i;
+        break;
+    }
+
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+    return moduleId;
 }
 
 int32_t InitBaseListener(void)
@@ -457,27 +484,30 @@ static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
     SoftbusBaseListener listener = {0};
     listener.onConnectEvent = node->listener->onConnectEvent;
     listener.onDataEvent = node->listener->onDataEvent;
+    const SocketInterface *socketIf = node->socketIf;
+    ListenerModule module = node->module;
+    ConnectType connectType = node->info.listenerInfo.type;
     SoftBusMutexUnlock(&node->lock);
 
     if (fd == listenFd) {
         while (true) {
-            if (node->socketIf == NULL || node->socketIf->AcceptClient == NULL) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept func not found! module=%d", node->module);
+            if (socketIf == NULL || socketIf->AcceptClient == NULL) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept func not found! module=%d", module);
                 break;
             }
             int32_t cfd;
             ConnectOption clientAddr = {
-                .type = node->info.listenerInfo.type,
-                .socketOption = {.addr = {0}, .port = 0, .protocol = 0, .moduleId = node->module}
+                .type = connectType,
+                .socketOption = {.addr = {0}, .port = 0, .protocol = 0, .moduleId = module}
             };
-            int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(node->socketIf->AcceptClient(fd, &clientAddr, &cfd));
+            int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(socketIf->AcceptClient(fd, &clientAddr, &cfd));
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, cfd=%d, module=%d, fd=%d", cfd,
-                    node->module, fd);
+                    module, fd);
                 break;
             }
             if (listener.onConnectEvent != NULL) {
-                listener.onConnectEvent(node->module, events, cfd, &clientAddr);
+                listener.onConnectEvent(module, events, cfd, &clientAddr);
             } else {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
                 SoftBusSocketClose(cfd);
@@ -485,7 +515,7 @@ static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
         }
     } else {
         if (listener.onDataEvent != NULL) {
-            listener.onDataEvent(node->module, events, fd);
+            listener.onDataEvent(module, events, fd);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onDataEvent callback");
         }
@@ -750,7 +780,7 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
 
     int32_t ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&node->lock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return ret;
     }
 

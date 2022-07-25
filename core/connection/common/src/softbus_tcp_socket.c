@@ -282,7 +282,7 @@ static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd)
     int32_t ret =
         SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, cfd));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, ret=%" PRId32 "cfd=%d, fd=%d", ret, *cfd, fd);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, ret=%" PRId32 " cfd=%d, fd=%d", ret, *cfd, fd);
         return ret;
     }
 
