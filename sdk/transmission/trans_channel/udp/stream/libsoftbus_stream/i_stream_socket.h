@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 #include <queue>
+#include <securec.h>
 #include <utility>
 
 #include "i_stream.h"
@@ -50,12 +51,20 @@ public:
         streamType_ = INVALID;
         isBlocked_ = false;
     }
-    virtual ~IStreamSocket() = default;
+    virtual ~IStreamSocket()
+    {
+        if (sessionKey_.first != nullptr) {
+            (void)memset_s(sessionKey_.first, sessionKey_.second, 0, sessionKey_.second);
+            delete [] sessionKey_.first;
+        }
+        sessionKey_.first = nullptr;
+    }
 
-    virtual bool CreateClient(IpAndPort &local, int streamType, const std::string &sessionKey) = 0; // socket + bind
+    virtual bool CreateClient(IpAndPort &local, int streamType,
+        std::pair<uint8_t*, uint32_t> sessionKey) = 0; // socket + bind
     virtual bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
-        const std::string &sessionKey) = 0;
-    virtual bool CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey) = 0;
+        std::pair<uint8_t*, uint32_t> sessionKey) = 0;
+    virtual bool CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) = 0;
 
     virtual void DestroyStreamSocket() = 0;
 
@@ -131,7 +140,7 @@ protected:
     std::condition_variable streamReceiveCv_;
     int streamType_ = INVALID;
     bool isBlocked_;
-    std::string sessionKey_;
+    std::pair<uint8_t*, uint32_t> sessionKey_ = std::make_pair(nullptr, 0);
 };
 } // namespace SoftBus
 } // namespace Communication

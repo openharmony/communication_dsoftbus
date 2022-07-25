@@ -53,9 +53,9 @@ public:
         std::shared_ptr<IStreamManagerListener> streamListener);
 
     virtual int CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
-        int streamType, const std::string &sessionKey) = 0; // 堵塞式
+        int streamType, std::pair<uint8_t*, uint32_t> sessionKey) = 0; // block
     virtual int CreateStreamServerChannel(IpAndPort &local, Proto protocol,
-        int streamType, const std::string &sessionKey) = 0; // 非堵塞， 内部起线程堵塞式accept
+        int streamType, std::pair<uint8_t*, uint32_t> sessionKey) = 0; // Non-block
     virtual bool DestroyStreamDataChannel() = 0;
 
     virtual bool Send(std::unique_ptr<IStream>) = 0;

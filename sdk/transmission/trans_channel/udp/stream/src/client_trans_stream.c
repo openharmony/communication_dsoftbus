@@ -120,7 +120,8 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             NULL,
             -1,
             streamType,
-            channel->sessionKey,
+            (uint8_t*)channel->sessionKey,
+            channel->keyLen,
         };
 
         int32_t port = StartVtpStreamChannelServer(channel->channelId, &p1, &g_streamCallcb);
@@ -137,7 +138,8 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             channel->peerIp,
             channel->peerPort,
             streamType,
-            channel->sessionKey,
+            (uint8_t *)channel->sessionKey,
+            channel->keyLen,
         };
 
         int ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);

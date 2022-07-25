@@ -53,11 +53,11 @@ public:
     ~VtpStreamSocket() override;
     std::shared_ptr<VtpStreamSocket> GetSelf();
 
-    bool CreateClient(IpAndPort &local, int streamType, const std::string &sessionKey) override;
+    bool CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
     bool CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
-        const std::string &sessionKey) override;
+        std::pair<uint8_t*, uint32_t> sessionKey) override;
 
-    bool CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey) override;
+    bool CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
 
     void DestroyStreamSocket() override;
 

@@ -68,10 +68,10 @@ public:
     virtual ~StreamManager() = default;
 
     int CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
-        int streamType, const std::string &sessionKey) override;
+        int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
 
     int CreateStreamServerChannel(IpAndPort &local, Proto protocol, int streamType,
-        const std::string &sessionKey) override;
+        std::pair<uint8_t*, uint32_t> sessionKey) override;
 
     bool DestroyStreamDataChannel() override;
 

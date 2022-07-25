@@ -18,9 +18,11 @@
 
 #include <atomic>
 #include <sys/types.h>
+#include <utility>
 
 #include "client_trans_udp_stream_interface.h"
 #include "i_stream_manager.h"
+#include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "stream_common.h"
 
@@ -29,13 +31,22 @@ class StreamAdaptor : public std::enable_shared_from_this<StreamAdaptor> {
 public:
     StreamAdaptor() = delete;
     explicit StreamAdaptor(const std::string &pkgName);
-    ~StreamAdaptor() = default;
+    ~StreamAdaptor()
+    {
+        if (sessionKey_.first != nullptr) {
+            (void)memset_s(sessionKey_.first, sessionKey_.second, 0, sessionKey_.second);
+            delete [] sessionKey_.first;
+        }
+        sessionKey_.first = nullptr;
+    }
 
-    static ssize_t Encrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen, const char* sessionKey);
-    static ssize_t Decrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen, const char *sessionKey);
+    static ssize_t Encrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen,
+        std::pair<uint8_t*, uint32_t> sessionKey);
+    static ssize_t Decrypt(const void *in, ssize_t inLen, void *out, ssize_t outLen,
+        std::pair<uint8_t*, uint32_t> sessionKey);
     static ssize_t GetEncryptOverhead();
     int GetStreamType();
-    const char *GetSessionKey();
+    const std::pair<uint8_t*, uint32_t> GetSessionKey();
     int64_t GetChannelId();
     const IStreamListener *GetListenerCallback();
     std::shared_ptr<Communication::SoftBus::IStreamManager> GetStreamManager();
@@ -52,7 +63,7 @@ private:
     int streamType_ = StreamType::INVALID;
     bool serverSide_;
     std::string pkgName_ {};
-    std::string sessionKey_;
+    std::pair<uint8_t*, uint32_t> sessionKey_ = std::make_pair(nullptr, 0);
     const IStreamListener *callback_ = nullptr;
     std::atomic<bool> enableState_ = {false};
 };

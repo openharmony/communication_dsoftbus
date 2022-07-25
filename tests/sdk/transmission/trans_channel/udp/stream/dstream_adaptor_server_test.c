@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
@@ -22,6 +23,8 @@
 #define CHANNELID2 2
 #define PKGNAME   "test"
 #define LONG_SLEEP    600
+#define SESSION_KEY_LENGTH   32
+#define STREAM_DATA_LENGTH   10
 
 void SetStatus(int channelId, int status)
 {
@@ -35,7 +38,7 @@ void OnStreamReceived(int channelId, const StreamData *data, const StreamData *e
 
     StreamData tmpData = {
         "peipeipei\0",
-        10,
+        STREAM_DATA_LENGTH,
     };
     StreamFrameInfo tmpf = {};
     int ret = SendVtpStream(channelId, &tmpData, NULL, &tmpf);
@@ -57,7 +60,8 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc",
+        SESSION_KEY_LENGTH,
     };
 
     VtpStreamOpenParam p2 = {
@@ -66,7 +70,8 @@ int main()
         NULL,
         -1,
         RAW_STREAM,
-        "abcdefghabcdefghabcdefghabcdefgh",
+        (uint8_t*)"abcdef\0ghabcdefghabcdefghfgdabc",
+        SESSION_KEY_LENGTH,
     };
 
     ret = StartVtpStreamChannelServer(CHANNELID, &p1, &g_callback);
