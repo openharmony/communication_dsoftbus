@@ -63,7 +63,7 @@ static int32_t GetErrorCode(void)
     return errCode;
 }
 
-int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
+int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int *socketFd)
 {
     if (socketFd == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socketFd is null");
@@ -103,10 +103,10 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  v
 
 int32_t SoftBusSocketGetError(int32_t socketFd)
 {
-    int32_t err = 0;
-    int32_t errSize = sizeof(err);
+    int err = 0;
+    socklen_t errSize = sizeof(err);
 
-    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, (socklen_t *)&errSize);
+    int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
         return ret;

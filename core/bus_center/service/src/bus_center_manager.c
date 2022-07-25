@@ -35,6 +35,12 @@
 #define DEFAULT_DELAY_LEN 1000
 #define RETRY_MAX 10
 
+int32_t __attribute__((weak)) InitNodeAddrAllocator(void)
+{
+    return SOFTBUS_OK;
+}
+void __attribute__((weak)) DeinitNodeAddrAllocator(void) {}
+
 typedef int32_t (*LnnInitDelayImpl)(void);
 
 typedef enum {
@@ -158,6 +164,10 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane hub fail!");
         return SOFTBUS_ERR;
     }
+    if (InitNodeAddrAllocator() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init nodeAddr failed.");
+        return SOFTBUS_ERR;
+    }
     if (StartDelayInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
@@ -168,6 +178,7 @@ int32_t BusCenterServerInit(void)
 
 void BusCenterServerDeinit(void)
 {
+    DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();
     LnnDeinitNetworkManager();

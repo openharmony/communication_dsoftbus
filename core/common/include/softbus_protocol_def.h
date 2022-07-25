@@ -36,7 +36,6 @@ typedef uint32_t LnnProtocolAbility;
 #define LNN_PROTOCOL_ALL   ((uint64_t)-1)
 typedef uint64_t ProtocolType;
 
-#define BIND_ADDR_NONE NULL
 #define BIND_ADDR_ALL "0"
 
 #endif

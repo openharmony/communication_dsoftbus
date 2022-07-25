@@ -57,6 +57,8 @@ extern "C" {
 
 #define WAIT_SERVER_READY_INTERVAL 200
 
+#define NODE_ADDR_LOOPBACK "0"
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;

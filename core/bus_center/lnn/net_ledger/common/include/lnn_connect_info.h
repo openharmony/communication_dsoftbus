@@ -27,10 +27,11 @@ extern "C" {
 #define LOCAL_IP "127.0.0.1"
 #define DEFAULT_IP ""
 #define DEFAULT_MAC ""
+#define MAX_ADDR_LEN 46
 
 typedef struct {
     char netIfName[NET_IF_NAME_LEN];
-    char deviceIp[IP_MAX_LEN];
+    char deviceIp[MAX_ADDR_LEN];
     char macAddr[MAC_LEN];
     int authPort;
     int proxyPort;
