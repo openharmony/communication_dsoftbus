@@ -13,16 +13,6 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-native_source_path = rebase_path("$dsoftbus_root_path")
-ble_enhanced_impl =
-    "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
-enhanced_range = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                             [
-                               "$native_source_path",
-                               "$ble_enhanced_impl",
-                             ],
-                             "value")
-
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
@@ -69,17 +59,11 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/range/softbus_adapter_range.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
 
       deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
-
-      if (enhanced_range) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-        deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
-      } else {
-        sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
-      }
 
       if (dsoftbus_feature_encrypt == 0) {
         sources +=
@@ -112,6 +96,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/range/softbus_adapter_range.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = [
@@ -119,13 +104,6 @@ if (defined(ohos_lite)) {
         "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
-
-      if (enhanced_range) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-        deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
-      } else {
-        sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
-      }
 
       if (dsoftbus_feature_encrypt == 0) {
         sources +=
@@ -174,7 +152,19 @@ if (defined(ohos_lite)) {
       "//utils/native/base:utils",
     ]
 
+    native_source_path = rebase_path("$dsoftbus_root_path")
+
+    ble_enhanced_impl =
+        "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
+    enhanced_range = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                 [
+                                   "$native_source_path",
+                                   "$ble_enhanced_impl",
+                                 ],
+                                 "value")
+
     if (enhanced_range) {
+      include_dirs += [ "//base/msdp/algorithm/ble_range/include" ]
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
       public_deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
     } else {
