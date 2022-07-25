@@ -237,7 +237,7 @@ static void OnAuthConnOpened(uint32_t requestId, int64_t authId)
     conn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
     ReleaseSessonConnLock();
 
-    if (VerifyP2p(authId, conn->appInfo.myData.ip, conn->appInfo.myData.port, conn->req) != SOFTBUS_OK) {
+    if (VerifyP2p(authId, conn->appInfo.myData.addr, conn->appInfo.myData.port, conn->req) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthConnOpened verify p2p fail");
         goto EXIT_ERR;
     }
@@ -417,7 +417,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     }
     channelId = conn->channelId;
 
-    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.ip, IP_LEN, &conn->appInfo.peerData.port);
+    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply unpack fail: ret=%d", ret);
         ReleaseSessonConnLock();
@@ -426,7 +426,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip, port=%d",
         conn->appInfo.peerData.port);
 
-    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.ip, conn->appInfo.peerData.port);
+    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
         ReleaseSessonConnLock();
@@ -519,7 +519,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     newChannelId = conn->channelId;
     (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    ret = StartP2pListener(conn->appInfo.myData.ip, &conn->appInfo.myData.port);
+    ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(conn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel start listener fail");

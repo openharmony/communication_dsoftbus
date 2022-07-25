@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 #endif
+#define LNN_PHYSICAL_SUBNET_ALL_NETIF "*"
 
 typedef enum {
     LNN_SUBNET_IDLE, // can be enable
@@ -35,7 +36,7 @@ typedef enum {
 
 typedef struct LnnPhysicalSubnet {
     char ifName[NET_IF_NAME_LEN];
-    ProtocolType protocolType;
+    const LnnProtocolManager *protocol;
     LnnPhysicalSubnetStatus status;
     void (*Destroy)(struct LnnPhysicalSubnet *);
     void (*OnNetifStatusChanged)(struct LnnPhysicalSubnet *);

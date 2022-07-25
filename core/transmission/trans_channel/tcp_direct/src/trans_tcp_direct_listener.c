@@ -99,7 +99,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, int32_t chanId, const char *ip)
+static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, int32_t chanId, const ConnectOption *clientAddr)
 {
     (void)events;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -123,11 +123,12 @@ static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, 
         return SOFTBUS_ERR;
     }
 
-    if (strcpy_s(conn->appInfo.peerData.ip, sizeof(conn->appInfo.peerData.ip), ip) != EOK) {
+    if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip to app info failed.");
         SoftBusFree(conn);
         return SOFTBUS_MEM_ERR;
     }
+    conn->appInfo.protocol = clientAddr->socketOption.protocol;
 
     char *authState = "";
     if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
@@ -170,7 +171,7 @@ static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const 
         return ret;
     }
 
-    ret = CreateSessionConnNode(module, events, cfd, channelId, clientAddr->socketOption.addr);
+    ret = CreateSessionConnNode(module, events, cfd, channelId, clientAddr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
@@ -278,7 +279,7 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
 
 int32_t TransTdcStopSessionListener(ListenerModule module)
 {
-    TransTdcStopSessionProc();
+    TransTdcStopSessionProc(module);
     int32_t ret = StopBaseListener(module);
     return ret;
 }

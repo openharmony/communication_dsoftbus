@@ -162,6 +162,12 @@ extern "C" {
 #define NUM_BUF_SIZE 4
 
 /**
+ * @brief Indicates the maximum length of the node address.
+ *
+ */
+#define SHORT_ADDRESS_MAX_LEN 8
+
+/**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
  *
  * @since 1.0

@@ -473,9 +473,8 @@ static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *conn
 {
     connOpt->type = CONNECT_TCP;
     connOpt->socketOption.port = (int32_t)connInfo->port;
-    connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
-    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr),
-            connInfo->ip) != EOK) {
+    connOpt->socketOption.protocol = connInfo->protocol;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set wlan localIp err");
         return SOFTBUS_ERR;
     }

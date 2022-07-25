@@ -19,14 +19,20 @@
 
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_score.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
+#include "lnn_network_manager.h"
+#include "lnn_node_info.h"
+#include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
+#include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "wifi_device.h"
 
@@ -124,7 +130,63 @@ static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *is
     return SOFTBUS_OK;
 }
 
-static void FillWlanLinkInfo(LaneLinkInfo *linkInfo, bool is5GBand, int32_t channel, uint16_t port)
+struct SelectProtocolReq {
+    LnnNetIfType localIfType;
+    ProtocolType selectedProtocol;
+    ProtocolType remoteSupporttedProtocol;
+    uint8_t currPri;
+};
+
+VisitNextChoice FindBestProtocol(const LnnPhysicalSubnet *subnet, void *priv)
+{
+    if (subnet == NULL || priv == NULL || subnet->protocol == NULL) {
+        return CHOICE_FINISH_VISITING;
+    }
+    struct SelectProtocolReq *req = (struct SelectProtocolReq *)priv;
+    if (subnet->status == LNN_SUBNET_RUNNING && (subnet->protocol->supportedNetif & req->localIfType) != 0 &&
+        subnet->protocol->pri > req->currPri && (subnet->protocol->id & req->remoteSupporttedProtocol) != 0) {
+        req->currPri = subnet->protocol->pri;
+        req->selectedProtocol = subnet->protocol->id;
+    }
+
+    return CHOICE_VISIT_NEXT;
+}
+
+static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWorkId, ProtocolType acceptableProtocols)
+{
+    NodeInfo *remoteNodeInfo = LnnGetNodeInfoById(netWorkId, CATEGORY_NETWORK_ID);
+    if (remoteNodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: no such network id.", __func__);
+        return SOFTBUS_ERR;
+    }
+
+    const NodeInfo *localNode = LnnGetLocalNodeInfo();
+    if (localNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: get local node info failed!", __func__);
+        return SOFTBUS_ERR;
+    }
+
+    struct SelectProtocolReq req = {
+        .localIfType = ifType,
+        .remoteSupporttedProtocol = remoteNodeInfo->supportedProtocols & acceptableProtocols,
+        .selectedProtocol = 0,
+        .currPri = 0,
+    };
+
+    if ((req.remoteSupporttedProtocol & LNN_PROTOCOL_NIP) != 0 &&
+        (strcmp(remoteNodeInfo->nodeAddress, NODE_ADDR_LOOPBACK) == 0 ||
+            strcmp(localNode->nodeAddress, NODE_ADDR_LOOPBACK) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "%s: newip temporarily unavailable!", __func__);
+        req.remoteSupporttedProtocol ^= LNN_PROTOCOL_NIP;
+    }
+
+    (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnLaneSelectProtocol protocol = %lld", req.selectedProtocol);
+    return req.selectedProtocol;
+}
+
+static void FillWlanLinkInfo(LaneLinkInfo *linkInfo, bool is5GBand, int32_t channel, uint16_t port, ProtocolType protocol)
 {
     if (is5GBand) {
         linkInfo->type = LANE_WLAN_5G;
@@ -134,7 +196,7 @@ static void FillWlanLinkInfo(LaneLinkInfo *linkInfo, bool is5GBand, int32_t chan
     WlanLinkInfo *wlan = &(linkInfo->linkInfo.wlan);
     wlan->channel = channel;
     wlan->bw = LANE_BW_RANDOM;
-    wlan->connInfo.protocol = 0; /* IP */
+    wlan->connInfo.protocol = protocol;
     wlan->connInfo.port = port;
 }
 
@@ -145,16 +207,32 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     }
     LaneLinkInfo linkInfo;
     int32_t port = 0;
-    int32_t ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP,
-        linkInfo.linkInfo.wlan.connInfo.ip, IP_STR_MAX_LEN);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemote wlan ip error, ret: %d", ret);
-        return SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_OK;
+    ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL;
+    if (reqInfo->transType != LANE_T_MSG && reqInfo->transType != LANE_T_BYTE) {
+        acceptableProtocols ^= LNN_PROTOCOL_NIP;
     }
-    if (strnlen(linkInfo.linkInfo.wlan.connInfo.ip, IP_STR_MAX_LEN) == 0 ||
-        strncmp(linkInfo.linkInfo.wlan.connInfo.ip, "127.0.0.1", strlen("127.0.0.1")) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wlan ip not found.");
-        return SOFTBUS_ERR;
+    ProtocolType protocol =
+        LnnLaneSelectProtocol(LNN_NETIF_TYPE_WLAN | LNN_NETIF_TYPE_ETH, reqInfo->peerNetworkId, acceptableProtocols);
+    if (protocol == LNN_PROTOCOL_IP) {
+        ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP,
+            linkInfo.linkInfo.wlan.connInfo.addr, sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemote wlan ip error, ret: %d", ret);
+            return SOFTBUS_ERR;
+        }
+        if (strnlen(linkInfo.linkInfo.wlan.connInfo.addr, sizeof(linkInfo.linkInfo.wlan.connInfo.addr)) == 0 ||
+            strncmp(linkInfo.linkInfo.wlan.connInfo.addr, "127.0.0.1", strlen("127.0.0.1")) == 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wlan ip not found.");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_NODE_ADDR,
+            linkInfo.linkInfo.wlan.connInfo.addr, sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemote wlan addr error, ret: %d", ret);
+            return SOFTBUS_ERR;
+        }
     }
     if (reqInfo->transType == LANE_T_MSG) {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
@@ -176,7 +254,8 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     if (!isConnected) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan is disconnected");
     }
-    FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port);
+
+    FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port, protocol);
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
 }

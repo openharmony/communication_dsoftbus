@@ -43,7 +43,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
             (void)GetJsonObjectNumberItem(msg, "MY_PORT", &(appInfo->peerData.port));
-            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.ip, IP_LEN);
+            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             break;
@@ -87,7 +87,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
-            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.ip, IP_LEN);
+            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -110,7 +110,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
-            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.ip);
+            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
@@ -158,7 +158,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_OPEN:
             (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
             (void)AddNumberToJsonObject(msg, "MY_PORT", appInfo->myData.port);
-            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.ip);
+            (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             break;

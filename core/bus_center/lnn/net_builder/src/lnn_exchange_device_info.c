@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <securec.h>
 
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -47,6 +48,10 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack master node info Fail.");
             return SOFTBUS_ERR;
         }
+        if(!AddStringToJsonObject(json, NODE_ADDR, info->nodeAddress)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack node address Fail.");
+            return SOFTBUS_ERR;
+        }
     }
 
     if (!AddStringToJsonObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
@@ -59,7 +64,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
         !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
         !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info)) ||
-        !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)info->supportedProtocols)) {
+        !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddStringToJsonObject Fail.");
         return SOFTBUS_ERR;
     }
@@ -82,6 +87,10 @@ static void UnPackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack master node info fail");
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "unpack master weight: %d", info->masterWeight);
+        if(!GetJsonObjectStringItem(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no node address packed. set to address %s", NODE_ADDR_LOOPBACK);
+            (void)strcpy_s(info->nodeAddress, sizeof(info->nodeAddress), NODE_ADDR_LOOPBACK);
+        }
     }
 
     (void)GetJsonObjectStringItem(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
