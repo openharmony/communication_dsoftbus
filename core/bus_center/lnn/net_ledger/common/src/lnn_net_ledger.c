@@ -64,8 +64,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char *)info, infoLen);
         case NODE_KEY_UUID:
             return LnnGetLocalStrInfo(STRING_KEY_UUID, (char *)info, infoLen);
-		case NODE_KEY_MASTER_UDID:
-            return LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, (char *)info, infoLen);	
+        case NODE_KEY_MASTER_UDID:
+            return LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, (char *)info, infoLen);
         case NODE_KEY_BR_MAC:
             return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
         case NODE_KEY_IP_ADDRESS:

@@ -88,7 +88,7 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
 
 int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
-    if(subnet == NULL || subnet->protocol == NULL) {
+    if (subnet == NULL || subnet->protocol == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol of subnet is required!", __func__);
         return SOFTBUS_ERR;
     }
@@ -124,7 +124,8 @@ void DoNotifyAddressChange(const char *ifName, ProtocolType protocolType)
             continue;
         }
 
-        if (strcmp(g_physicalSubnets[i]->ifName, LNN_PHYSICAL_SUBNET_ALL_NETIF) != 0 && strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
+        if (strcmp(g_physicalSubnets[i]->ifName, LNN_PHYSICAL_SUBNET_ALL_NETIF) != 0 &&
+            strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
         }
 
