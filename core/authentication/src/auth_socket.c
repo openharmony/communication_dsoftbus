@@ -34,7 +34,7 @@ static SoftbusBaseListener g_ethListener = {0};
 
 int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
 {
-    char localIp[IP_MAX_LEN] = {0};
+    char localIp[IP_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, sizeof(localIp)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get local ip failed");
         return SOFTBUS_ERR;

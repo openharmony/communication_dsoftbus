@@ -64,6 +64,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char *)info, infoLen);
         case NODE_KEY_UUID:
             return LnnGetLocalStrInfo(STRING_KEY_UUID, (char *)info, infoLen);
+        case NODE_KEY_MASTER_UDID:
+            return LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, (char *)info, infoLen);
         case NODE_KEY_BR_MAC:
             return LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)info, infoLen);
         case NODE_KEY_IP_ADDRESS:
@@ -136,10 +138,12 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return UDID_BUF_LEN;
         case NODE_KEY_UUID:
             return UUID_BUF_LEN;
+        case NODE_KEY_MASTER_UDID:
+            return UDID_BUF_LEN;
         case NODE_KEY_BR_MAC:
             return MAC_LEN;
         case NODE_KEY_IP_ADDRESS:
-            return IP_MAX_LEN;
+            return IP_LEN;
         case NODE_KEY_DEV_NAME:
             return DEVICE_NAME_BUF_LEN;
         case NODE_KEY_NETWORK_CAPABILITY:

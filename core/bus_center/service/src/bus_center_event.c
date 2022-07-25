@@ -294,6 +294,27 @@ void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyNodeAddressChanged(const char *addr)
+{
+    if (addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:nullptr!", __func__);
+        return;
+    }
+    LnnNodeAddrChangedEvent eventInfo;
+    (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
+    eventInfo.basic.event = LNN_EVENT_NODE_ADDR_CHANGED;
+    if (strcpy_s(eventInfo.addr, sizeof(eventInfo.addr), addr) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:strcpy_s failed", __func__);
+        return;
+    }
+    if (strcmp(addr, NODE_ADDR_LOOPBACK) == 0) {
+        eventInfo.delFlag = true;
+    } else {
+        eventInfo.delFlag = false;
+    }
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+}
+
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;

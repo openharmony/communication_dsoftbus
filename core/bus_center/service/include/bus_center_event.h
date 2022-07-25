@@ -35,6 +35,7 @@ typedef enum {
     LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
     LNN_EVENT_RELATION_CHANGED,
     LNN_EVENT_NODE_MASTER_STATE_CHANGED,
+    LNN_EVENT_NODE_ADDR_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -80,6 +81,12 @@ typedef struct {
     bool isMasterNode;
 } LnnMasterNodeChangedEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    char addr[SHORT_ADDRESS_MAX_LEN];
+    bool delFlag;
+} LnnNodeAddrChangedEvent;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -102,6 +109,8 @@ void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint
 void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
 
 void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
+
+void LnnNotifyNodeAddressChanged(const char* addr);
 
 #ifdef __cplusplus
 }

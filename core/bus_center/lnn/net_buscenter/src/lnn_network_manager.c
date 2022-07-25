@@ -47,6 +47,12 @@ static ListNode g_netIfNameList = {
 };
 
 int32_t RegistIPProtocolManager(void);
+int32_t RegistNewIPProtocolManager(void);
+
+int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
+{
+    return SOFTBUS_OK;
+}
 
 static LnnNetIfManagerBuilder g_netifBuilders[LNN_MAX_NUM_TYPE] = {0};
 
@@ -209,7 +215,6 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         } else {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "network protocol have no init\n");
         }
-        protocolMgr->id = i;
         g_networkProtocols[i] = protocolMgr;
         break;
     }
@@ -256,7 +261,7 @@ bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
 {
     VisitNextChoice result = CHOICE_VISIT_NEXT;
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
-        if (g_networkProtocols[i] != NULL) {
+        if (g_networkProtocols[i] == NULL) {
             continue;
         }
         result = callback(g_networkProtocols[i], data);
@@ -330,6 +335,17 @@ static VerifyCallback g_verifyCb = {
     .onGroupDeleted = OnGroupDeleted,
 };
 
+static VisitNextChoice GetAllProtocols(const LnnProtocolManager *manager, void *data)
+{
+    if (manager == NULL || data == NULL) {
+        return CHOICE_FINISH_VISITING;
+    }
+
+    ProtocolType *type = (ProtocolType *)data;
+    *type |= manager->id;
+    return CHOICE_VISIT_NEXT;
+}
+
 int32_t LnnInitNetworkManager(void)
 {
     RegistNetIfMgr(LNN_ETH_TYPE, CreateEthNetifMgr);
@@ -349,6 +365,12 @@ int32_t LnnInitNetworkManager(void)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "IP protocol registed.\n");
 
+    ret = RegistNewIPProtocolManager();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist newip protocol manager failed,ret=%d\n", ret);
+        return ret;
+    }
+
     ret = AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
@@ -358,6 +380,19 @@ int32_t LnnInitNetworkManager(void)
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init subnet manager failed!,ret=%d\n", ret);
+        return ret;
+    }
+
+    ProtocolType type = 0;
+    if (!LnnVisitProtocol(GetAllProtocols, &type)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get all protocol failed!");
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set supported protocol to %lld.", type);
+    ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set supported protocol failed!,ret=%d\n", ret);
         return ret;
     }
 
@@ -413,6 +448,8 @@ void LnnDeinitNetworkManager(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network manager failed\n");
     }
 
+    LnnDeinitPhysicalSubnetManager();
+
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->Deinit == NULL) {
             continue;
@@ -420,8 +457,6 @@ void LnnDeinitNetworkManager(void)
         g_networkProtocols[i]->Deinit(g_networkProtocols[i]);
         g_networkProtocols[i] = NULL;
     }
-
-    LnnDeinitPhysicalSubnetManager();
 }
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)

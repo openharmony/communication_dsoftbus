@@ -88,6 +88,10 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
 
 int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
+    if (subnet == NULL || subnet->protocol == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol of subnet is required!", __func__);
+        return SOFTBUS_ERR;
+    }
     int32_t ret = SOFTBUS_OK;
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoRegistSubnet(subnet));
     return ret;
@@ -96,7 +100,7 @@ int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 static int32_t DoUnregistSubnetByType(ProtocolType type)
 {
     for (uint8_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
-        if (g_physicalSubnets[i] != NULL && g_physicalSubnets[i]->protocolType == type) {
+        if (g_physicalSubnets[i] != NULL && g_physicalSubnets[i]->protocol->id == type) {
             if (g_physicalSubnets[i]->Destroy != NULL) {
                 g_physicalSubnets[i]->Destroy(g_physicalSubnets[i]);
             }
@@ -116,11 +120,12 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 void DoNotifyAddressChange(const char *ifName, ProtocolType protocolType)
 {
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
-        if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocolType != protocolType) {
+        if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
         }
 
-        if (strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
+        if (strcmp(g_physicalSubnets[i]->ifName, LNN_PHYSICAL_SUBNET_ALL_NETIF) != 0 &&
+            strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
         }
 
@@ -138,7 +143,7 @@ void LnnNotifyPhysicalSubnetAddressChanged(const char *ifName, ProtocolType prot
 static void EnableResetingSubnetByType(ProtocolType protocolType)
 {
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
-        if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocolType != protocolType) {
+        if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
         }
         if (g_physicalSubnets[i]->OnSoftbusNetworkDisconnected != NULL) {

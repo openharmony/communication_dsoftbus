@@ -615,6 +615,22 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(buf, len, info->nodeAddress) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -664,6 +680,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_MASTER_NODE_UDID, DlGetMasterUdid},
     {STRING_KEY_P2P_MAC, DlGetP2pMac},
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
+    {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
     {NUM_KEY_PROXY_PORT, DlGetProxyPort},
@@ -1237,4 +1254,24 @@ int32_t LnnSetDistributedConnCapability(const char *networkId, uint64_t connCapa
     nodeInfo->netCapacity = (uint32_t)connCapability;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
+{
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    int ret = strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), addr);
+    if (ret != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set node addr failed!ret=%d", ret);
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }

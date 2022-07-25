@@ -70,6 +70,7 @@ typedef struct {
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];
     char masterUdid[UDID_BUF_LEN];
+    char nodeAddress[SHORT_ADDRESS_MAX_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
@@ -114,7 +115,7 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
 const char *LnnGetP2pMac(const NodeInfo *info);
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
-uint64_t LnnGetSupportedProtocols(NodeInfo *info);
+uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 
 #ifdef __cplusplus
