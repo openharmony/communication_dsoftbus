@@ -18,7 +18,10 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "bus_center_manager.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
+#include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -90,6 +93,47 @@ void UniqueIdInit(void)
     g_uniqueId = (uint64_t)(time.tv_usec);
 }
 
+static int32_t GetRemoteIpByNodeAddr(char *ip, uint32_t size, const char *addr)
+{
+    NodeBasicInfo *info = NULL;
+    int32_t num = 0;
+
+    if (LnnGetAllOnlineNodeInfo(&info, &num) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
+        return SOFTBUS_ERR;
+    }
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "no online node");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (num == 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "num is 0");
+        SoftBusFree(info);
+        return SOFTBUS_NOT_FIND;
+    }
+    for (int32_t i = 0; i < num; i++) {
+        char *tmpNetworkId = info[i].networkId;
+        char nodeAddr[SHORT_ADDRESS_MAX_LEN] = {0};
+        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_NODE_ADDR, nodeAddr, sizeof(nodeAddr)) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: get node addr failed!", __func__);
+            continue;
+        }
+        if (strcmp(nodeAddr, addr) == 0) {
+            if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_WLAN_IP, ip, size) == SOFTBUS_OK) {
+                SoftBusFree(info);
+                return SOFTBUS_OK;
+            } else {
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: get ip failed!", __func__);
+                break;
+            }
+        }
+    }
+
+    SoftBusFree(info);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: no find", __func__);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectOption *option)
 {
     if (key == NULL || len == NULL || option == NULL) {
@@ -112,9 +156,16 @@ int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectO
             *len = BT_MAC_LEN;
             break;
         case CONNECT_TCP:
-            if (strcpy_s(key, size, option->socketOption.addr) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                return SOFTBUS_ERR;
+            if (option->socketOption.protocol == LNN_PROTOCOL_IP) {
+                if (strcpy_s(key, size, option->socketOption.addr) != EOK) {
+                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
+                    return SOFTBUS_ERR;
+                }
+            } else {
+                if (GetRemoteIpByNodeAddr(key, size, option->socketOption.addr) != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetRemoteIpByNodeAddr failed");
+                    return SOFTBUS_ERR;
+                }
             }
             *len = IP_LEN;
             break;
@@ -261,6 +312,16 @@ bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *opt
             if (option2->type == CONNECT_TCP && option2->socketOption.protocol == option1->socketOption.protocol &&
                 strcmp(option1->socketOption.addr, option2->socketOption.addr) == 0) {
                 return true;
+            }
+            if (option2->type == CONNECT_TCP && option2->socketOption.protocol != LNN_PROTOCOL_IP) {
+                char remoteIp[IP_LEN] = {0};
+                if (GetRemoteIpByNodeAddr(remoteIp, sizeof(remoteIp), option2->socketOption.addr) != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: get remote ip failed", __func__);
+                    break;
+                }
+                if (strcmp(option1->socketOption.addr, remoteIp) == 0) {
+                    return true;
+                }
             }
             break;
         case CONNECT_BR:

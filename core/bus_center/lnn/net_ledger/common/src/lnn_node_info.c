@@ -139,7 +139,7 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
         return;
     }
-    if (strncpy_s(info->connectInfo.deviceIp, IP_MAX_LEN, ip, strlen(ip)) != EOK) {
+    if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
     }
     return;
@@ -288,7 +288,7 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
     return info->p2pInfo.goMac;
 }
 
-uint64_t LnnGetSupportedProtocols(NodeInfo *info)
+uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

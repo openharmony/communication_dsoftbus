@@ -131,7 +131,7 @@ static void NotifyWlanLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 {
     EXPECT_TRUE((linkInfo->type == LANE_WLAN_2P4G) || (linkInfo->type == LANE_WLAN_5G));
     EXPECT_EQ(linkInfo->linkInfo.wlan.connInfo.port, REMOTE_SESSION_PORT);
-    EXPECT_STREQ(REMOTE_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.ip);
+    EXPECT_STREQ(REMOTE_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.addr);
     printf("WLAN: linkSuccess, reqId:0x%x\n", reqId);
 }
 

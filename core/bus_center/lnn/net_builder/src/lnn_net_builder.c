@@ -1370,6 +1370,72 @@ static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *network
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update conn capability succ.");
 }
 
+static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+{
+    size_t addrLen = strnlen((const char *)msg, len);
+    if (addrLen == len || addrLen == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad addr received!networkId=%s", __func__,
+            AnonymizesNetworkID(networkId));
+        return;
+    }
+    int ret = LnnSetDLNodeAddr(networkId, CATEGORY_NETWORK_ID, (const char *)msg);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:update node addr failed!networkId=%s,ret=%d", __func__,
+            AnonymizesNetworkID(networkId), ret);
+    }
+}
+
+int32_t LnnUpdateNodeAddr(const char *addr)
+{
+    if (addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeBasicInfo *info = NULL;
+    int32_t infoNum, i;
+    char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char addrHis[SHORT_ADDRESS_MAX_LEN];
+
+    if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, addrHis, SHORT_ADDRESS_MAX_LEN) == SOFTBUS_OK) {
+        if (strlen(addr) == strlen(addrHis) && (strcmp(addr, addrHis) == 0)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s update the same node addr", __func__);
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s start updating node addr", __func__);
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, sizeof(localNetworkId));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get local network id failed!", __func__);
+        return SOFTBUS_ERR;
+    }
+
+    ret = LnnSetLocalStrInfo(STRING_KEY_NODE_ADDR, addr);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:set local node addr failed!ret=%d", __func__, ret);
+        return ret;
+    }
+    ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get all online node info fail", __func__);
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s:online nodes count=%d", __func__, infoNum);
+        for (i = 0; i < infoNum; ++i) {
+            if (strcmp(localNetworkId, info[i].networkId) == 0) {
+                continue;
+            }
+            SoftBusLog(
+                SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "sync node address to %s", AnonymizesNetworkID(info[i].networkId));
+            if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_NODE_ADDR, info[i].networkId, (const uint8_t *)addr, strlen(addr) + 1,
+                    NULL) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync node address to %s failed",
+                    AnonymizesNetworkID(info[i].networkId));
+            }
+        }
+        SoftBusFree(info);
+    }
+    LnnNotifyNodeAddressChanged(addr);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
@@ -1396,6 +1462,10 @@ int32_t LnnInitNetBuilder(void)
     }
     if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register sync master elect msg fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register node addr changed msg fail");
         return SOFTBUS_ERR;
     }
     if (ConifgLocalLedger() != SOFTBUS_OK) {

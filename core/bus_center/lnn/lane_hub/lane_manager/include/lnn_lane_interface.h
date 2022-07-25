@@ -75,7 +75,7 @@ typedef struct {
 
 typedef struct {
     uint16_t protocol;
-    char ip[IP_LEN];
+    char addr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
 } WlanConnInfo;
 
