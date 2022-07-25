@@ -38,6 +38,7 @@ newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 if (newip_enhanced) {
   import(
       "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/newip.gni")
+
   conn_common_src += newip_connection_src
   conn_common_inc += newip_connection_include
 }
