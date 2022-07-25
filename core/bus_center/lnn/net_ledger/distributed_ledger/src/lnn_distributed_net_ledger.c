@@ -624,7 +624,7 @@ static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
 
-    if(strcpy_s(buf, len, info->nodeAddress) != EOK) {
+    if (strcpy_s(buf, len, info->nodeAddress) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
         return SOFTBUS_MEM_ERR;
     }

@@ -49,7 +49,8 @@ static ListNode g_netIfNameList = {
 int32_t RegistIPProtocolManager(void);
 int32_t RegistNewIPProtocolManager(void);
 
-int32_t __attribute__ ((weak)) RegistNewIPProtocolManager(void) {
+int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
+{
     return SOFTBUS_OK;
 }
 
@@ -383,14 +384,14 @@ int32_t LnnInitNetworkManager(void)
     }
 
     ProtocolType type = 0;
-    if(!LnnVisitProtocol(GetAllProtocols, &type)) {
+    if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get all protocol failed!");
         return SOFTBUS_ERR;
     }
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set supported protocol to %lld.", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
-    if(ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set supported protocol failed!,ret=%d\n", ret);
         return ret;
     }

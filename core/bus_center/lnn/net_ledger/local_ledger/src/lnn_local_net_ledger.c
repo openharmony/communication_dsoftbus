@@ -640,13 +640,14 @@ static int32_t LlGetSupportedProtocols(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t LlGetNodeAddr(void *buf, uint32_t len) {
+static int32_t LlGetNodeAddr(void *buf, uint32_t len)
+{
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if(strcpy_s((char*)buf, len, info->nodeAddress) != EOK) {
+    if (strcpy_s((char *)buf, len, info->nodeAddress) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
         return SOFTBUS_MEM_ERR;
     }

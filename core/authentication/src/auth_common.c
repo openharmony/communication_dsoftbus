@@ -114,11 +114,11 @@ static int32_t GetRemoteIpByNodeAddr(char *ip, uint32_t size, const char *addr)
     for (int32_t i = 0; i < num; i++) {
         char *tmpNetworkId = info[i].networkId;
         char nodeAddr[SHORT_ADDRESS_MAX_LEN] = {0};
-        if(LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_NODE_ADDR, nodeAddr, sizeof(nodeAddr)) != SOFTBUS_OK) {
+        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_NODE_ADDR, nodeAddr, sizeof(nodeAddr)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: get node addr failed!", __func__);
             continue;
         }
-        if(strcmp(nodeAddr, addr) == 0) {
+        if (strcmp(nodeAddr, addr) == 0) {
             if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_WLAN_IP, ip, size) == SOFTBUS_OK) {
                 SoftBusFree(info);
                 return SOFTBUS_OK;

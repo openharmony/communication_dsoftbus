@@ -99,7 +99,8 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, int32_t chanId, const ConnectOption *clientAddr)
+static int32_t CreateSessionConnNode(
+    ListenerModule module, int events, int fd, int32_t chanId, const ConnectOption *clientAddr)
 {
     (void)events;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -116,14 +117,15 @@ static int32_t CreateSessionConnNode(ListenerModule module, int events, int fd, 
     conn->listenMod = module;
     conn->authId = AUTH_INVALID_ID;
 
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId,
-        sizeof(conn->appInfo.myData.deviceId)) != 0) {
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
+        0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local deviceId failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
 
-    if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) != EOK) {
+    if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) !=
+        EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip to app info failed.");
         SoftBusFree(conn);
         return SOFTBUS_MEM_ERR;

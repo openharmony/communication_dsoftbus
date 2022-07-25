@@ -623,7 +623,8 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         case CONNECT_TCP:
             appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
             appInfo->routeType = WIFI_STA;
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
+            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
+                SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PrepareAppInfoForUdpOpen get local ip fail");
                 return SOFTBUS_ERR;
             }

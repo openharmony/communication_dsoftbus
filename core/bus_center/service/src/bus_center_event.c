@@ -301,7 +301,7 @@ void LnnNotifyNodeAddressChanged(const char *addr)
         return;
     }
     LnnNodeAddrChangedEvent eventInfo;
-    (void)memset(&eventInfo, 0, sizeof(eventInfo));
+    (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
     eventInfo.basic.event = LNN_EVENT_NODE_ADDR_CHANGED;
     if (strcpy_s(eventInfo.addr, sizeof(eventInfo.addr), addr) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:strcpy_s failed", __func__);

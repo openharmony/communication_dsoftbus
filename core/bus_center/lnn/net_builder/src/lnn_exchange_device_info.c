@@ -48,7 +48,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack master node info Fail.");
             return SOFTBUS_ERR;
         }
-        if(!AddStringToJsonObject(json, NODE_ADDR, info->nodeAddress)) {
+        if (!AddStringToJsonObject(json, NODE_ADDR, info->nodeAddress)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pack node address Fail.");
             return SOFTBUS_ERR;
         }
@@ -87,8 +87,9 @@ static void UnPackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack master node info fail");
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "unpack master weight: %d", info->masterWeight);
-        if(!GetJsonObjectStringItem(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no node address packed. set to address %s", NODE_ADDR_LOOPBACK);
+        if (!GetJsonObjectStringItem(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
+            SoftBusLog(
+                SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no node address packed. set to address %s", NODE_ADDR_LOOPBACK);
             (void)strcpy_s(info->nodeAddress, sizeof(info->nodeAddress), NODE_ADDR_LOOPBACK);
         }
     }
