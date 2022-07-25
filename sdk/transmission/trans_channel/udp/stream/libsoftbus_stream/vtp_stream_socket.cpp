@@ -284,7 +284,7 @@ void VtpStreamSocket::FillpAppStatistics()
     }
 }
 
-bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, const std::string &sessionKey)
+bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     int fd = CreateAndBindSocket(local);
     if (fd == -1) {
@@ -293,7 +293,15 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, const std::
         return false;
     }
 
-    sessionKey_ = sessionKey;
+    sessionKey_.second = sessionKey.second;
+    if (sessionKey_.first == nullptr) {
+        sessionKey_.first = new uint8_t[sessionKey_.second];
+    }
+    if (memcpy_s(sessionKey_.first, sessionKey_.second, sessionKey.first, sessionKey.second) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return false;
+    }
+
     streamType_ = streamType;
     std::lock_guard<std::mutex> guard(streamSocketLock_);
     streamFd_ = fd;
@@ -306,7 +314,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, const std::
 }
 
 bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
-    const std::string &sessionKey)
+    std::pair<uint8_t*, uint32_t> sessionKey)
 {
     if (!CreateClient(local, streamType, sessionKey)) {
         return false;
@@ -327,7 +335,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
     return connectRet;
 }
 
-bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::string &sessionKey)
+bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateVtpServer start");
     listenFd_ = CreateAndBindSocket(local);
@@ -352,7 +360,14 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, const std::
     }
     isStreamRecv_ = true;
     streamType_ = streamType;
-    sessionKey_ = sessionKey;
+    sessionKey_.second = sessionKey.second;
+    if (sessionKey_.first == nullptr) {
+        sessionKey_.first = new uint8_t[sessionKey_.second];
+    }
+    if (memcpy_s(sessionKey_.first, sessionKey_.second, sessionKey.first, sessionKey.second) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return false;
+    }
     auto self = this->GetSelf();
     std::thread([self]() { self->NotifyStreamListener(); }).detach();
 
@@ -501,8 +516,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
             "packet.GetPacketLen() = %zd, GetEncryptOverhead() = %zd", packet.GetPacketLen(), GetEncryptOverhead());
         data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
-        ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(),
-            data.get() + FRAME_HEADER_LEN, len);
+        ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
         if (encLen != len) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                 "encrypted failed, dataLen = %zd, encryptLen = %zd", len, encLen);
@@ -1331,7 +1345,7 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.c_str(), SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
@@ -1355,7 +1369,7 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.c_str(), SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey_.first, sessionKey_.second) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
         return SOFTBUS_ERR;
     }
