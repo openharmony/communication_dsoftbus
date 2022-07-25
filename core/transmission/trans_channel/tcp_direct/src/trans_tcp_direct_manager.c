@@ -79,7 +79,7 @@ static void TransTdcTimerProc(void)
     ReleaseSessonConnLock();
 }
 
-void TransTdcStopSessionProc(void)
+void TransTdcStopSessionProc(ListenerModule listenMod)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc");
     SessionConn *item = NULL;
@@ -93,6 +93,9 @@ void TransTdcStopSessionProc(void)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
+        if (listenMod != item->listenMod) {
+            continue;
+        }
         OnSesssionOpenFailProc(item);
         ListDelete(&item->node);
         sessionList->cnt--;
@@ -168,25 +171,35 @@ void TransTdcDeathCallback(const char *pkgName)
 static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 {
     appInfo->peerData.port = connInfo->socketOption.port;
-    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connInfo->socketOption.addr) != EOK) {
+    if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connInfo->socketOption.addr) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo cpy fail");
         return SOFTBUS_MEM_ERR;
     }
 
-    if (connInfo->type == CONNECT_TCP) {
-        appInfo->routeType = WIFI_STA;
-        if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.ip, sizeof(appInfo->myData.ip)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local ip fail");
+    appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
+    appInfo->protocol = connInfo->socketOption.protocol;
+
+    if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
+        if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
+            SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local nip fail");
             return SOFTBUS_ERR;
         }
     } else {
-        appInfo->routeType = WIFI_P2P;
-        if (P2pLinkGetLocalIp(appInfo->myData.ip, sizeof(appInfo->myData.ip)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get p2p ip fail");
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        if (connInfo->type == CONNECT_TCP) {
+            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
+                SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local ip fail");
+                return SOFTBUS_ERR;
+            }
+
+        } else {
+            if (P2pLinkGetLocalIp(appInfo->myData.addr, sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get p2p ip fail");
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
         }
     }
-
     return SOFTBUS_OK;
 }
 

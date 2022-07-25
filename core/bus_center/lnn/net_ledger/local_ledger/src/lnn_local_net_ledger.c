@@ -627,7 +627,8 @@ static int32_t UpdateP2pRole(const void *p2pRole)
 
 static int32_t LlUpdateSupportedProtocols(const void *transProtos)
 {
-    return LnnSetSupportedProtocols(&g_localNetLedger.localInfo, *((uint64_t*)transProtos));
+    uint64_t *protocols = (uint64_t *)transProtos;
+    return LnnSetSupportedProtocols(&g_localNetLedger.localInfo, *protocols);
 }
 
 static int32_t LlGetSupportedProtocols(void *buf, uint32_t len)
@@ -639,6 +640,33 @@ static int32_t LlGetSupportedProtocols(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetNodeAddr(void *buf, uint32_t len) {
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if(strcpy_s((char*)buf, len, info->nodeAddress) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LlUpdateNodeAddr(const void *addr)
+{
+    if (addr == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (strcpy_s(info->nodeAddress, sizeof(info->nodeAddress), (const char*)addr) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -647,9 +675,10 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_DEV_TYPE, DEVICE_TYPE_BUF_LEN, LlGetDeviceType, UpdateLocalDeviceType},
     {STRING_KEY_DEV_NAME, DEVICE_NAME_BUF_LEN, LlGetDeviceName, UpdateLocalDeviceName},
     {STRING_KEY_BT_MAC, MAC_LEN, LlGetBtMac, UpdateLocalBtMac},
-    {STRING_KEY_WLAN_IP, IP_MAX_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
+    {STRING_KEY_WLAN_IP, IP_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
     {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
     {STRING_KEY_MASTER_NODE_UDID, UDID_BUF_LEN, L1GetMasterNodeUdid, UpdateMasterNodeUdid},
+    {STRING_KEY_NODE_ADDR, SHORT_ADDRESS_MAX_LEN, LlGetNodeAddr, LlUpdateNodeAddr},
     {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},

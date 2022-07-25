@@ -70,6 +70,7 @@ typedef struct {
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];
     char masterUdid[UDID_BUF_LEN];
+    char nodeAddress[SHORT_ADDRESS_MAX_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
