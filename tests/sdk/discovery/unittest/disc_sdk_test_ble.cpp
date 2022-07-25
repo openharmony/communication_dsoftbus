@@ -239,7 +239,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest002, TestSize.Level1)
 
 /**
  * @tc.name: PublishServiceTest003
- * @tc.desc: Extern module publish£¬use the same parameter again, perform two subscriptions.
+ * @tc.desc: Extern module publishuse the same parameter again, perform two subscriptions.
  * @tc.in: test module, test number, Test Levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
@@ -451,49 +451,41 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest009, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -520,49 +512,41 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest010, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -708,7 +692,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest003, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest004
- * @tc.desc:Test extern module active discover£¬use wrong Medium and Freq Under the BLE.
+ * @tc.desc:Test extern module active discoveruse wrong Medium and Freq Under the BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
@@ -742,7 +726,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest004, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest005
- * @tc.desc:Test extern module active discover£¬use Diff Freq Under the BLE.
+ * @tc.desc:Test extern module active discoveruse Diff Freq Under the BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -789,7 +773,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest005, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest006
- * @tc.desc:Test extern module passive discover£¬use Diff Freq Under the BLE.
+ * @tc.desc:Test extern module passive discoveruse Diff Freq Under the BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -860,49 +844,41 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest007, TestSize.Level1)
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -931,54 +907,46 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest008, TestSize.Level1)
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
  * @tc.name: UnpublishServiceTest001
- * @tc.desc: Extern module stop publish£¬use the wrong parameter.
+ * @tc.desc: Extern module stop publishuse the wrong parameter.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
@@ -1004,7 +972,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest001, TestSize.Level1)
 
 /**
  * @tc.name: UnpublishServiceTest002
- * @tc.desc: Extern module stop publish£¬use the normal parameter.
+ * @tc.desc: Extern module stop publishuse the normal parameter.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -1029,7 +997,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest002, TestSize.Level1)
 
 /**
  * @tc.name: UnpublishServiceTest003
- * @tc.desc: Extern module stop publish£¬release the same parameter again, perform two subscriptions.
+ * @tc.desc: Extern module stop publishrelease the same parameter again, perform two subscriptions.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
@@ -1154,49 +1122,41 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest006, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -1223,55 +1183,46 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest007, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
 }
 
 /**
  * @tc.name: StopDiscoveryTest001
- * @tc.desc: Extern module stop discover£¬use the wrong parameter.
+ * @tc.desc: Extern module stop discoveruse the wrong parameter.
  * @tc.in: test module, test number, Test Levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
@@ -1297,7 +1248,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest001, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest002
- * @tc.desc: Extern module stop discover£¬use the normal parameter.
+ * @tc.desc: Extern module stop discoveruse the normal parameter.
  * @tc.in: test module, test number, Test Levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -1323,7 +1274,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest002, TestSize.Level1)
 
 /**
  * @tc.name: StopDiscoveryTest003
- * @tc.desc: Extern module stop discover£¬release the same parameter again, perform two subscriptions.
+ * @tc.desc: Extern module stop discoverrelease the same parameter again, perform two subscriptions.
  * @tc.in: test module, test number, Test Levels.
  * @tc.out: Zero
  * @tc.type: FUNC
