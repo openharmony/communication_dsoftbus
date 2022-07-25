@@ -115,7 +115,7 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
 const char *LnnGetP2pMac(const NodeInfo *info);
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
-uint64_t LnnGetSupportedProtocols(NodeInfo *info);
+uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 
 #ifdef __cplusplus
