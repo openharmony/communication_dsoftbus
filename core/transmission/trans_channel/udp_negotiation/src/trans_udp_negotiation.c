@@ -608,8 +608,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 
 static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *appInfo, int32_t *channelId)
 {
-    appInfo->peerData.port = connOpt->info.ipOption.port;
-    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connOpt->info.ipOption.ip) != EOK) {
+    appInfo->peerData.port = connOpt->socketOption.port;
+    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connOpt->socketOption.addr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
 
@@ -713,7 +713,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
 static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
     if (option == NULL || info == NULL || info->module != MODULE_UDP_INFO) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp module callback enter.");

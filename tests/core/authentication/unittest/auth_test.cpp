@@ -193,7 +193,7 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_AND_DECRYPT_Test_001, TestSize.Level0)
     ConnectOption option;
     option.type = CONNECT_BR;
 
-    ret = memcpy_s(option.info.brOption.brMac, BT_MAC_LEN, SERVER_MAC, BT_MAC_LEN);
+    ret = memcpy_s(option.brOption.brMac, BT_MAC_LEN, SERVER_MAC, BT_MAC_LEN);
     EXPECT_TRUE(ret == EOK);
     uint32_t totalLen = strlen((char *)ENCRYPT_DATA) + AuthGetEncryptHeadLen();
     uint8_t *sendBuf = (uint8_t *)SoftBusMalloc(totalLen);
@@ -208,7 +208,7 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_AND_DECRYPT_Test_001, TestSize.Level0)
     ConnectOption option1;
     option1.type = CONNECT_BR;
 
-    ret = memcpy_s(option1.info.brOption.brMac, BT_MAC_LEN, CLIENT_MAC, BT_MAC_LEN);
+    ret = memcpy_s(option1.brOption.brMac, BT_MAC_LEN, CLIENT_MAC, BT_MAC_LEN);
     EXPECT_TRUE(ret == EOK);
     uint8_t *recvBuf = (uint8_t *)SoftBusMalloc(strlen((char *)ENCRYPT_DATA) + 1);
     if (recvBuf == NULL) {

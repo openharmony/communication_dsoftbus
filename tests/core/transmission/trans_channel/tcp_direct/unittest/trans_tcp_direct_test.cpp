@@ -23,6 +23,7 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_message.h"
+#include "softbus_protocol_def.h"
 
 #define TEST_ASSERT_TRUE(ret)  \
     if (ret) {                 \
@@ -70,15 +71,40 @@ void TransTcpDirectTest::TearDownTestCase(void)
 HWTEST_F(TransTcpDirectTest, StartSessionListenerTest001, TestSize.Level1)
 {
     int ret = 0;
-    char const *ip = "192.168.8.119";
-    int port = 6000;
-    ret = TransTdcStartSessionListener(NULL, port);
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = 6000,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI
+        }
+    };
+    ret = TransTdcStartSessionListener(UNUSE_BUTT, &info);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = TransTdcStartSessionListener(ip, -1);
+    LocalListenerInfo info2 = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "192.168.8.119",
+            .port = -1,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI
+        }
+    };
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info2);
     TEST_ASSERT_TRUE(ret != 0);
 
-    ret = TransTdcStartSessionListener(NULL, -1);
+    LocalListenerInfo info3 = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = -1,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI
+        }
+    };
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info3);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -91,7 +117,7 @@ HWTEST_F(TransTcpDirectTest, StartSessionListenerTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectTest, StoptSessionListenerTest001, TestSize.Level1)
 {
     int ret = 0;
-    ret = TransTdcStopSessionListener();
+    ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
     TEST_ASSERT_TRUE(ret != 0);
 }
 
@@ -105,12 +131,17 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
 {
     int ret = 0;
     AppInfo appInfo;
-    ConnectOption connInfo;
+    ConnectOption connInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .port = 6000,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = MODULE_MESSAGE_SERVICE
+        }
+    };
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    (void)memset_s(&connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    connInfo.type = CONNECT_TCP;
-    connInfo.info.ipOption.port = 6000;
-    if (strcpy_s(connInfo.info.ipOption.ip, sizeof(connInfo.info.ipOption.ip), "192.168.8.1") != EOK) {
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), "192.168.8.1") != EOK) {
         return;
     }
     int fd = 1;

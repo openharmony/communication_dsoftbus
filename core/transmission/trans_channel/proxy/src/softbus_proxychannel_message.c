@@ -102,7 +102,7 @@ static int32_t GetConnectOptionByConnId(uint32_t connId, bool isBle, bool isAuth
         return SOFTBUS_ERR;
     }
     if (isBle && option->type == CONNECT_BR) {
-        if (GetRemoteUuidByBtMac(option->info.brOption.brMac, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        if (GetRemoteUuidByBtMac(option->brOption.brMac, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid by btmac fail");
             return SOFTBUS_ERR;
         }

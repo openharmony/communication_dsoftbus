@@ -1381,7 +1381,7 @@ void P2pLinkNegoStop(void)
 int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
 {
     if (callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     (void)memset_s(&g_p2pLinkNegoCb, sizeof(P2pLinkNegoCb), 0, sizeof(P2pLinkNegoCb));

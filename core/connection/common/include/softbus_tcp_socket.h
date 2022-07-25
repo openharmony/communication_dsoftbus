@@ -22,44 +22,19 @@
 #include <sys/uio.h>
 
 #include "softbus_adapter_errcode.h"
+#include "softbus_protocol_def.h"
+#include "softbus_socket.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
-#ifndef SOFTBUS_TEMP_FAILURE_RETRY
-#define SOFTBUS_TEMP_FAILURE_RETRY(expression) \
-( \
-    __extension__ \
-    ( \
-    {   \
-    long int __result; \
-    do __result = (long int) (expression); \
-    while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
-    __result; \
-    } \
-    ) \
-)
-#endif
+const SocketInterface *GetTcpProtocol(void);
 
-enum {
-    SOFTBUS_SOCKET_OUT, // writable
-    SOFTBUS_SOCKET_IN, // readable
-    SOFTBUS_SOCKET_EXCEPTION, // exception
-};
-
-int32_t OpenTcpServerSocket(const char *ip, int32_t port);
-int32_t OpenTcpClientSocket(const char *peerIp, const char *myIp, int32_t port, bool isNonBlock);
-int32_t GetTcpSockPort(int32_t fd);
-ssize_t SendTcpData(int32_t fd, const char *buf, size_t len, int32_t timeout);
-ssize_t RecvTcpData(int32_t fd, char *buf, size_t len, int32_t timeout);
-void CloseTcpFd(int32_t fd);
-void TcpShutDown(int32_t fd);
-int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
 int32_t SetIpTos(int fd, uint32_t tos);
-int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
-int32_t ConnGetSocketErr(int32_t fd);
+
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -77,14 +77,21 @@ static void CloseAuthPort(void)
 
 static int32_t OpenSessionPort(void)
 {
-    char ipAddr[IP_LEN] = {0};
     int32_t port;
-
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) != SOFTBUS_OK) {
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = 0,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI
+        }
+    };
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, info.socketOption.addr, sizeof(info.socketOption.addr)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
         return SOFTBUS_ERR;
     }
-    port = TransTdcStartSessionListener(ipAddr, 0);
+    port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open session server failed\n");
         return SOFTBUS_ERR;
@@ -94,28 +101,29 @@ static int32_t OpenSessionPort(void)
 
 static void CloseSessionPort(void)
 {
-    TransTdcStopSessionListener();
+    TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
     (void)LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, IP_DEFAULT_PORT);
 }
 
 static void OpenProxyPort(void)
 {
-    LocalListenerInfo listenerInfo = {0};
-    char ipAddr[IP_LEN] = {0};
-    int32_t port;
-
-    listenerInfo.type = CONNECT_TCP;
-    listenerInfo.info.ipListenerInfo.port = 0;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, IP_LEN) != SOFTBUS_OK) {
+    LocalListenerInfo listenerInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = 0,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = PROXY
+        }
+    };
+    int32_t ret =
+        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr, sizeof(listenerInfo.socketOption.addr));
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
         return;
     }
-    if (strncpy_s(listenerInfo.info.ipListenerInfo.ip, IP_LEN, ipAddr, strlen(ipAddr)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip failed\n");
-        return;
-    }
-    listenerInfo.info.ipListenerInfo.moduleId = PROXY;
-    port = ConnStartLocalListening(&listenerInfo);
+
+    int32_t port = ConnStartLocalListening(&listenerInfo);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed\n");
         return;
@@ -125,9 +133,15 @@ static void OpenProxyPort(void)
 
 static void CloseProxyPort(void)
 {
-    LocalListenerInfo listenerInfo = {0};
-    listenerInfo.type = CONNECT_TCP;
-    listenerInfo.info.ipListenerInfo.moduleId = PROXY;
+    LocalListenerInfo listenerInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = 0,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = PROXY
+        }
+    };
     if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConnStopLocalListening fail!\n");
     }

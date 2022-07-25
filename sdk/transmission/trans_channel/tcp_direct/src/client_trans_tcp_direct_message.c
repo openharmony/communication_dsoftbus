@@ -28,6 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
@@ -169,7 +170,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusFree(buf);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
-    ssize_t ret = SendTcpData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
+    ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to send tcp data. ret: %d", ret);
         SoftBusFree(buf);
@@ -475,7 +476,7 @@ int32_t TransTdcRecvData(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find data buf node.");
         return SOFTBUS_ERR;
     }
-    int32_t ret = RecvTcpData(node->fd, node->w, node->size - (node->w - node->data), 0);
+    int32_t ret = ConnRecvSocketData(node->fd, node->w, node->size - (node->w - node->data), 0);
     if (ret <= 0) {
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");

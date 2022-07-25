@@ -19,12 +19,14 @@
 #include <unistd.h>
 
 #include "common_list.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
 
@@ -37,51 +39,302 @@
 #define THREADPOOL_THREADNUM 1
 #define THREADPOOL_QUEUE_NUM 10
 
-typedef enum {
-    LISTENER_IDLE,
-    LISTENER_PREPARED,
-    LISTENER_RUNNING,
-    LISTENER_ERROR,
-} ListenerStatus;
-
 typedef struct {
     ListNode node;
     int32_t fd;
 } FdNode;
 
+enum BaseListenerStatus {
+    LISTENER_IDLE = 0,
+    LISTENER_RUNNING,
+    LISTENER_CLOSEING,
+};
+
 typedef struct {
     ListNode node;
+    LocalListenerInfo listenerInfo;
     int32_t listenFd;
-    char ip[IP_LEN];
     int32_t listenPort;
     int32_t fdCount;
     ModeType modeType;
-    ListenerStatus status;
+    enum BaseListenerStatus status;
 } SoftbusBaseListenerInfo;
 
 typedef struct {
     ListenerModule module;
     SoftbusBaseListener *listener;
-    SoftbusBaseListenerInfo *info;
+    const SocketInterface *socketIf;
+    SoftbusBaseListenerInfo info;
+    uint32_t ref;
     SoftBusMutex lock;
-    bool lockInit;
 } SoftbusListenerNode;
 
-typedef struct {
-    SoftBusMutex lock;
-    bool lockInit;
-}SoftBusSetLock;
+static SoftbusListenerNode *g_listenerList[UNUSE_BUTT] = {0};
+static SoftBusMutex g_listenerListLock;
 
-static SoftbusListenerNode g_listenerList[UNUSE_BUTT] = {0};
+
+static SoftBusMutex g_threadLock;
+static int32_t g_threadRefCount = 0;
+
 static ThreadPool *g_threadPool = NULL;
 static SoftBusFdSet g_readSet;
 static SoftBusFdSet g_writeSet;
 static SoftBusFdSet g_exceptSet;
 static int32_t g_maxFd;
-static SoftBusSetLock g_fdSetLock = {
-    .lockInit = false,
-};
-static bool g_fdSetInit = false;
+static SoftBusMutex g_fdSetLock;
+
+static void ReleaseListenerSockets(SoftbusListenerNode* node);
+static void UpdateMaxFd(void);
+static void ClearListenerFdList(const ListNode *cfdList);
+static void InitListenerInfo(SoftbusBaseListenerInfo *listenerInfo);
+static int32_t ShutdownBaseListener(SoftbusListenerNode *node);
+static int32_t StopListenerThread(SoftbusListenerNode *node);
+
+static SoftbusListenerNode *RequestListenerNode(ListenerModule module)
+{
+    if (module >= UNUSE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Invalid listener module.", __func__);
+        return NULL;
+    }
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock g_listenerListLock failed!.", __func__);
+        return NULL;
+    }
+
+    SoftbusListenerNode *node = g_listenerList[module];
+    do {
+        if (node == NULL) {
+            break;
+        }
+        if (node->info.status == LISTENER_CLOSEING) {
+            node = NULL;
+            break;
+        }
+        ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock node failed!.", __func__);
+            node = NULL;
+            break;
+        }
+        node->ref++;
+        SoftBusMutexUnlock(&node->lock);
+    } while (false);
+
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+    return node;
+}
+
+static void ReleaseListenerSockets(SoftbusListenerNode *node)
+{
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return;
+    }
+    if (node->info.listenFd >= 0) {
+        ConnShutdownSocket(node->info.listenFd);
+    }
+    node->info.listenFd = -1;
+    node->info.listenPort = -1;
+    node->info.modeType = UNSET_MODE;
+    node->info.fdCount = 0;
+    ClearListenerFdList(&(node->info.node));
+    SoftBusMutexUnlock(&node->lock);
+    UpdateMaxFd();
+}
+
+// Node: get g_listenerListLock first
+static int32_t ReleaseListenerRef(ListenerModule module)
+{
+    SoftbusListenerNode *node = g_listenerList[module];
+    if (node == NULL) {
+        return SOFTBUS_NOT_FIND;
+    }
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return ret;
+    }
+    node->ref--;
+
+    if (node->ref == 0) {
+        g_listenerList[module] = NULL;
+
+        if (node->listener != NULL) {
+            SoftBusFree(node->listener);
+            node = NULL;
+        }
+        ReleaseListenerSockets(node);
+        (void)StopListenerThread(node);
+        (void)SoftBusMutexUnlock(&node->lock);
+        (void)SoftBusMutexDestroy(&node->lock);
+        SoftBusFree(node);
+    } else {
+        (void)SoftBusMutexUnlock(&node->lock);
+    }
+
+    return SOFTBUS_OK;
+}
+
+static void ReleaseListenerNode(SoftbusListenerNode *node)
+{
+    if (node == NULL || node->module >= UNUSE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
+        return;
+    }
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock g_listenerListLock failed!.", __func__);
+        return;
+    }
+
+    ret = ReleaseListenerRef(node->module);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: release node failed!.", __func__);
+    }
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+}
+
+// Node: get g_listenerListLock first
+static int32_t CreateSpecifiedListenerModule(ListenerModule module)
+{
+    SoftbusListenerNode *node = (SoftbusListenerNode *)SoftBusCalloc(sizeof(SoftbusListenerNode));
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:oom!", __func__);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    // init lock
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&node->lock, &mutexAttr) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:init lock failed!", __func__);
+        SoftBusFree(node);
+        return SOFTBUS_LOCK_ERR;
+    }
+    InitListenerInfo(&node->info);
+
+    node->module = module;
+    node->ref = 1;
+
+    g_listenerList[module] = node;
+    return SOFTBUS_OK;
+}
+
+static int32_t CreateStaticModules(void)
+{
+    for (uint32_t i = 0; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        int32_t ret = CreateSpecifiedListenerModule(i);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
+                __func__, i, ret);
+            return ret;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+uint32_t CreateListenerModule(void)
+{
+    uint32_t moduleId = UNUSE_BUTT;
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock g_listenerListLock failed!.", __func__);
+        return moduleId;
+    }
+
+    for (uint32_t i = LISTENER_MODULE_DYNAMIC_START; i <= LISTENER_MODULE_DYNAMIC_END; i++) {
+        if (g_listenerList[i] != NULL) {
+            continue;
+        }
+        int32_t ret = CreateSpecifiedListenerModule(i);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
+                __func__, i, ret);
+            break;
+        }
+        moduleId = i;
+        break;
+    }
+
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+    return moduleId;
+}
+
+int32_t InitBaseListener(void)
+{
+    int32_t ret = SoftBusMutexInit(&g_fdSetLock, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_fdSetLock init failed.ret=%" PRId32, ret);
+        return ret;
+    }
+
+    ret = SoftBusMutexInit(&g_listenerListLock, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_listenerListLock init failed.ret=%" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_fdSetLock);
+        return ret;
+    }
+
+    ret = SoftBusMutexInit(&g_threadLock, NULL);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_threadLock init failed.ret=%" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_listenerListLock);
+        (void)SoftBusMutexDestroy(&g_fdSetLock);
+        return ret;
+    }
+
+    g_threadPool = ThreadPoolInit(THREADPOOL_THREADNUM, THREADPOOL_QUEUE_NUM);
+    if (g_threadPool == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Init thread pool failed.");
+        (void)SoftBusMutexDestroy(&g_fdSetLock);
+        (void)SoftBusMutexDestroy(&g_listenerListLock);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    (void)memset_s(g_listenerList, sizeof(g_listenerList), 0, sizeof(g_listenerList));
+
+    SoftBusSocketFdZero(&g_readSet);
+    SoftBusSocketFdZero(&g_writeSet);
+    SoftBusSocketFdZero(&g_exceptSet);
+
+    ret = CreateStaticModules();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Create static listener module failed! ret=%" PRId32, ret);
+        (void)ThreadPoolDestroy(g_threadPool);
+        (void)SoftBusMutexDestroy(&g_fdSetLock);
+        (void)SoftBusMutexDestroy(&g_listenerListLock);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+void DeinitBaseListener(void)
+{
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
+        return;
+    }
+
+    for (uint32_t i = 0; i < UNUSE_BUTT; i++) {
+        (void)ShutdownBaseListener(g_listenerList[i]);
+        (void)ReleaseListenerRef((ListenerModule)i);
+        g_listenerList[i] = NULL;
+    }
+
+    if (g_threadPool != NULL) {
+        ret = ThreadPoolDestroy(g_threadPool);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Destroy thread pool failed.ret=%" PRId32, ret);
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+    (void)SoftBusMutexDestroy(&g_listenerListLock);
+    (void)SoftBusMutexDestroy(&g_fdSetLock);
+    (void)SoftBusMutexDestroy(&g_threadLock);
+}
 
 static int32_t FdCopy(const SoftBusFdSet *dest, const SoftBusFdSet *src)
 {
@@ -96,48 +349,40 @@ static int32_t MaxFd(int32_t fd1, int32_t fd2)
 static void UpdateMaxFd(void)
 {
     int32_t tmpMax = -1;
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock g_listenerListLock failed!.", __func__);
+        return;
+    }
 
     for (int i = 0; i < UNUSE_BUTT; i++) {
-        if (g_listenerList[i].info == NULL || g_listenerList[i].info->status != LISTENER_RUNNING) {
+        if (g_listenerList[i] == NULL) {
             continue;
         }
-
-        if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
+        if (SoftBusMutexLock(&g_listenerList[i]->lock) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
             continue;
         }
 
-        SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
-        if (listenerInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listenerInfo is NULL");
-            SoftBusMutexUnlock(&g_listenerList[i].lock);
-            continue;
+        if (g_listenerList[i]->info.status == LISTENER_RUNNING) {
+            tmpMax = MaxFd(g_listenerList[i]->info.listenFd, tmpMax);
+            FdNode *item = NULL;
+            FdNode *nextItem = NULL;
+            LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_listenerList[i]->info.node, FdNode, node)
+            {
+                tmpMax = MaxFd(item->fd, tmpMax);
+            }
         }
-
-        tmpMax = MaxFd(listenerInfo->listenFd, tmpMax);
-        FdNode *item = NULL;
-        FdNode *nextItem = NULL;
-        LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &listenerInfo->node, FdNode, node) {
-            tmpMax = MaxFd(item->fd, tmpMax);
-        }
-        SoftBusMutexUnlock(&g_listenerList[i].lock);
+        (void)SoftBusMutexUnlock(&g_listenerList[i]->lock);
     }
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
 
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
     g_maxFd = tmpMax;
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
-}
-
-static int32_t CheckModule(ListenerModule module)
-{
-    if (module >= UNUSE_BUTT || module < PROXY) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return SOFTBUS_OK;
+    SoftBusMutexUnlock(&g_fdSetLock);
 }
 
 static int32_t CheckTrigger(TriggerType triggerType)
@@ -153,7 +398,7 @@ static void ClearListenerFdList(const ListNode *cfdList)
 {
     FdNode *item = NULL;
 
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return;
     }
@@ -165,142 +410,104 @@ static void ClearListenerFdList(const ListNode *cfdList)
         SoftBusSocketFdClr(item->fd, &g_exceptSet);
         SoftBusFree(item);
     }
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
 }
 
-static int32_t InitListenFd(ListenerModule module, const char *ip, int32_t port)
+static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *info)
 {
-    if (CheckModule(module) != SOFTBUS_OK || ip == NULL || port < 0) {
+    if (node == NULL || info == NULL || info->socketOption.port < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
-    int32_t rc = OpenTcpServerSocket(ip, port);
-    if (rc < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpServer failed, rc=%d", rc);
-        return SOFTBUS_TCP_SOCKET_ERR;
-    }
-    listenerInfo->listenFd = rc;
-    rc = SoftBusSocketListen(listenerInfo->listenFd, DEFAULT_BACKLOG);
-    if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listen failed, rc=%d", rc);
-        ResetBaseListener(module);
-        return SOFTBUS_TCP_SOCKET_ERR;
-    }
-    listenerInfo->fdCount = 1;
-    listenerInfo->listenPort = GetTcpSockPort(listenerInfo->listenFd);
-    if (memcpy_s(listenerInfo->ip, IP_LEN, ip, IP_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Copy ip failed");
-        ResetBaseListener(module);
-        return SOFTBUS_MEM_ERR;
-    }
-    if (listenerInfo->listenPort < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetSockPort failed, listenPort_=%d", listenerInfo->listenPort);
-        ResetBaseListener(module);
-        return SOFTBUS_ERR;
-    }
 
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        ResetBaseListener(module);
-        return SOFTBUS_ERR;
-    }
-    SoftBusSocketFdSet(listenerInfo->listenFd, &g_readSet);
-    g_maxFd = MaxFd(listenerInfo->listenFd, g_maxFd);
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
-
-    return SOFTBUS_OK;
-}
-
-void ResetBaseListener(ListenerModule module)
-{
-    if (CheckModule(module) != SOFTBUS_OK) {
-        return;
-    }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        return;
-    }
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return;
-    }
-    if (listenerInfo->listenFd >= 0) {
-        TcpShutDown(listenerInfo->listenFd);
-    }
-    listenerInfo->listenFd = -1;
-    listenerInfo->listenPort = -1;
-    listenerInfo->status = LISTENER_IDLE;
-    listenerInfo->modeType = UNSET_MODE;
-    listenerInfo->fdCount = 0;
-    ClearListenerFdList(&listenerInfo->node);
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
-    UpdateMaxFd();
-}
-
-void ResetBaseListenerSet(ListenerModule module)
-{
-    if (CheckModule(module) != SOFTBUS_OK) {
-        return;
-    }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        return;
-    }
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return;
-    }
-    ClearListenerFdList(&listenerInfo->node);
-    listenerInfo->fdCount = 0;
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
-    UpdateMaxFd();
-}
-
-static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
-{
-    if (CheckModule(module) != SOFTBUS_OK) {
+    if (node->socketIf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no protocol inited!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+
+    int32_t ret = SOFTBUS_OK;
+    do {
+        int32_t rc = node->socketIf->OpenServerSocket(info);
+        if (rc < 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpServer failed, rc=%d", rc);
+            return SOFTBUS_TCP_SOCKET_ERR;
+        }
+        node->info.listenFd = rc;
+        rc = SoftBusSocketListen(node->info.listenFd, DEFAULT_BACKLOG);
+        if (rc != 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listen failed, rc=%d", rc);
+            ReleaseListenerSockets(node);
+            ret = SOFTBUS_TCP_SOCKET_ERR;
+            break;
+        }
+        node->info.fdCount = 1;
+        node->info.listenPort = node->socketIf->GetSockPort(node->info.listenFd);
+        if (node->info.listenPort < 0) {
+            SoftBusLog(
+                SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetSockPort failed, listenPort_=%d", node->info.listenPort);
+            ReleaseListenerSockets(node);
+            ret = SOFTBUS_ERR;
+            break;
+        }
+        if (memcpy_s(&node->info.listenerInfo, sizeof(node->info.listenerInfo), info, sizeof(*info)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Copy server option failed!");
+            ReleaseListenerSockets(node);
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
+    } while (false);
+
+    if (node->info.listenFd > 0) {
+        if (SoftBusMutexLock(&g_fdSetLock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+            ReleaseListenerSockets(node);
+            return SOFTBUS_ERR;
+        }
+        SoftBusSocketFdSet(node->info.listenFd, &g_readSet);
+        g_maxFd = MaxFd(node->info.listenFd, g_maxFd);
+        SoftBusMutexUnlock(&g_fdSetLock);
+    }
+    return ret;
+}
+
+static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
+{
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "event lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_listenerList[module].info == NULL || g_listenerList[module].listener == NULL) {
+    if (node->listener == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "info or listener is null");
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
+        SoftBusMutexUnlock(&node->lock);
         return SOFTBUS_ERR;
     }
-    int32_t listenFd = g_listenerList[module].info->listenFd;
+    int32_t listenFd = node->info.listenFd;
     SoftbusBaseListener listener = {0};
-    listener.onConnectEvent = g_listenerList[module].listener->onConnectEvent;
-    listener.onDataEvent = g_listenerList[module].listener->onDataEvent;
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
+    listener.onConnectEvent = node->listener->onConnectEvent;
+    listener.onDataEvent = node->listener->onDataEvent;
+    const SocketInterface *socketIf = node->socketIf;
+    ListenerModule module = node->module;
+    ConnectType connectType = node->info.listenerInfo.type;
+    SoftBusMutexUnlock(&node->lock);
 
     if (fd == listenFd) {
         while (true) {
-            SoftBusSockAddrIn addr;
-            if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memset failed");
-                return SOFTBUS_ERR;
-            }
-            uint32_t addrLen = sizeof(addr);
-            int32_t cfd;
-            int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr,
-                (int32_t *)&addrLen, &cfd));
-            if (ret < 0) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                    "accept failed, cfd=%d, module=%d, fd=%d", cfd, module, fd);
+            if (socketIf == NULL || socketIf->AcceptClient == NULL) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept func not found! module=%d", module);
                 break;
             }
-            char ip[IP_LEN] = {0};
-            SoftBusInetNtoP(SOFTBUS_AF_INET, &addr.sinAddr, ip, sizeof(ip));
+            int32_t cfd;
+            ConnectOption clientAddr = {
+                .type = connectType,
+                .socketOption = {.addr = {0}, .port = 0, .protocol = 0, .moduleId = module}
+            };
+            int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(socketIf->AcceptClient(fd, &clientAddr, &cfd));
+            if (ret != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, cfd=%d, module=%d, fd=%d", cfd,
+                    module, fd);
+                break;
+            }
             if (listener.onConnectEvent != NULL) {
-                listener.onConnectEvent(events, cfd, ip);
+                listener.onConnectEvent(module, events, cfd, &clientAddr);
             } else {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onConnectEvent callback");
                 SoftBusSocketClose(cfd);
@@ -308,7 +515,7 @@ static int32_t OnEvent(ListenerModule module, int32_t fd, uint32_t events)
         }
     } else {
         if (listener.onDataEvent != NULL) {
-            listener.onDataEvent(events, fd);
+            listener.onDataEvent(module, events, fd);
         } else {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Please set onDataEvent callback");
         }
@@ -334,7 +541,8 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
     *fdArrLen = 0;
 
     FdNode *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, list, FdNode, node) {
+    LIST_FOR_EACH_ENTRY(item, list, FdNode, node)
+    {
         if (*fdArrLen == fdArrSize) {
             int32_t *tmp = NULL;
 
@@ -358,54 +566,63 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
     return SOFTBUS_OK;
 }
 
+static void ProcessNodeData(
+    SoftbusListenerNode *node, SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
+{
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return;
+    }
+
+    if (node->info.status != LISTENER_RUNNING) {
+        SoftBusLog(
+            SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!status = %d", node->module, node->info.status);
+        SoftBusMutexUnlock(&node->lock);
+        return;
+    }
+    int32_t listenFd = node->info.listenFd;
+    int32_t *fdArr = NULL;
+    int32_t fdArrLen = 0;
+
+    if (CreateFdArr(&fdArr, &fdArrLen, &node->info.node) != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&node->lock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateFdArr failed, module:%d", node->module);
+        return;
+    }
+    SoftBusMutexUnlock(&node->lock);
+
+    if ((listenFd > 0) && SoftBusSocketFdIsset(listenFd, readSet)) {
+        OnEvent(node, listenFd, SOFTBUS_SOCKET_IN);
+    }
+    for (int j = 0; j < fdArrLen; j++) {
+        if (SoftBusSocketFdIsset(fdArr[j], readSet)) {
+            OnEvent(node, fdArr[j], SOFTBUS_SOCKET_IN);
+        }
+        if (SoftBusSocketFdIsset(fdArr[j], writeSet)) {
+            OnEvent(node, fdArr[j], SOFTBUS_SOCKET_OUT);
+        }
+        if (SoftBusSocketFdIsset(fdArr[j], exceptSet)) {
+            OnEvent(node, fdArr[j], SOFTBUS_SOCKET_EXCEPTION);
+        }
+    }
+    SoftBusFree(fdArr);
+}
+
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
-        if (g_listenerList[i].info == NULL) {
+        SoftbusListenerNode *node = RequestListenerNode(i);
+        if (node == NULL) {
             continue;
         }
-        if (SoftBusMutexLock(&g_listenerList[i].lock) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-            continue;
-        }
-        SoftbusBaseListenerInfo *listenerInfo = g_listenerList[i].info;
-        if (listenerInfo == NULL || listenerInfo->status != LISTENER_RUNNING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "module %d is not running!", i);
-            SoftBusMutexUnlock(&g_listenerList[i].lock);
-            continue;
-        }
-        int32_t listenFd = listenerInfo->listenFd;
-        int32_t *fdArr = NULL;
-        int32_t fdArrLen = 0;
-
-        if (CreateFdArr(&fdArr, &fdArrLen, &listenerInfo->node) != SOFTBUS_OK) {
-            SoftBusMutexUnlock(&g_listenerList[i].lock);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateFdArr failed, module:%d", i);
-            continue;
-        }
-        SoftBusMutexUnlock(&g_listenerList[i].lock);
-
-        if ((listenFd > 0) && SoftBusSocketFdIsset(listenFd, readSet)) {
-            OnEvent((ListenerModule)i, listenFd, SOFTBUS_SOCKET_IN);
-        }
-        for (int j = 0; j < fdArrLen; j++) {
-            if (SoftBusSocketFdIsset(fdArr[j], readSet)) {
-                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_IN);
-            }
-            if (SoftBusSocketFdIsset(fdArr[j], writeSet)) {
-                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_OUT);
-            }
-            if (SoftBusSocketFdIsset(fdArr[j], exceptSet)) {
-                OnEvent((ListenerModule)i, fdArr[j], SOFTBUS_SOCKET_EXCEPTION);
-            }
-        }
-        SoftBusFree(fdArr);
+        ProcessNodeData(node, readSet, writeSet, exceptSet);
+        ReleaseListenerNode(node);
     }
 }
 
 static int32_t SetSelect(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
@@ -418,25 +635,26 @@ static int32_t SetSelect(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusF
     if (FdCopy(exceptSet, &g_exceptSet) != EOK) {
         goto EXIT;
     }
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
 
     return SOFTBUS_OK;
 EXIT:
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
     SoftBusSocketFdZero(readSet);
     SoftBusSocketFdZero(writeSet);
     SoftBusSocketFdZero(exceptSet);
     return SOFTBUS_MEM_ERR;
 }
 
-static int32_t SelectThread(void)
+static int32_t SelectThread(void *data)
 {
+    (void)data;
     SoftBusSockTimeOut tv = {0};
     tv.sec = 0;
     tv.usec = TIMEOUT;
     int32_t timeOut = 0;
-    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SELECT_INTERVAL, (unsigned char *)&timeOut,
-        sizeof(timeOut)) == SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_SUPPORT_SELECT_INTERVAL, (unsigned char *)&timeOut, sizeof(timeOut)) ==
+        SOFTBUS_OK) {
         tv.usec = (long)timeOut;
     }
     SoftBusFdSet readSet;
@@ -466,80 +684,155 @@ static int32_t SelectThread(void)
     }
 }
 
-static int32_t StartThread(ListenerModule module, ModeType modeType)
+static int32_t StopListenerThread(SoftbusListenerNode *node)
 {
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        return SOFTBUS_ERR;
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed!ret=%" PRId32, __func__, ret);
+        return ret;
     }
-    listenerInfo->modeType = modeType;
-    listenerInfo->status = LISTENER_RUNNING;
 
-    return ThreadPoolAddJob(g_threadPool, (int32_t(*)(void *))SelectThread,
-        NULL, PERSISTENT, (uintptr_t)0);
+    do {
+        if (node->info.status != LISTENER_RUNNING) {
+            SoftBusLog(
+                SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:node not running.status=%d", __func__, node->info.status);
+            break;
+        }
+
+        ret = SoftBusMutexLock(&g_threadLock);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock g_threadLock failed!ret=%" PRId32, __func__, ret);
+            break;
+        }
+
+        --g_threadRefCount;
+
+        if (g_threadRefCount <= 0) {
+            ret = ThreadPoolRemoveJob(g_threadPool, (uintptr_t)0);
+            if (ret != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:remove job failed!ret=%" PRId32, __func__, ret);
+                (void)SoftBusMutexUnlock(&g_threadLock);
+                break;
+            }
+        }
+
+        (void)SoftBusMutexUnlock(&g_threadLock);
+
+        node->info.status = LISTENER_IDLE;
+        node->info.modeType = UNSET_MODE;
+    } while (false);
+    (void)SoftBusMutexUnlock(&node->lock);
+    return ret;
 }
 
-static int32_t PrepareBaseListener(ListenerModule module, ModeType modeType)
+static int32_t StartListenerThread(SoftbusListenerNode *node, ModeType modeType)
 {
-    if (CheckModule(module) != SOFTBUS_OK) {
-        return SOFTBUS_INVALID_PARAM;
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed!ret=%" PRId32, __func__, ret);
+        return ret;
     }
 
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
-
-    if (g_threadPool == NULL) {
-        g_threadPool = ThreadPoolInit(THREADPOOL_THREADNUM, THREADPOOL_QUEUE_NUM);
-        if (g_threadPool == NULL) {
-            return SOFTBUS_MALLOC_ERR;
+    do {
+        if (node->info.status != LISTENER_IDLE) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:bad status(%d)", __func__, node->info.status);
+            ret = SOFTBUS_ERR;
+            break;
         }
+
+        ret = SoftBusMutexLock(&g_threadLock);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock g_threadLock failed!ret=%" PRId32, __func__, ret);
+            break;
+        }
+
+        if (g_threadRefCount > 0) {
+            g_threadRefCount++;
+            (void)SoftBusMutexUnlock(&g_threadLock);
+            break;
+        }
+
+        ret = ThreadPoolAddJob(g_threadPool, (int32_t(*)(void *))SelectThread, NULL, PERSISTENT, (uintptr_t)0);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:start thread failed!ret=%" PRId32, __func__, ret);
+            (void)SoftBusMutexUnlock(&g_threadLock);
+            break;
+        }
+
+        g_threadRefCount++;
+        (void)SoftBusMutexUnlock(&g_threadLock);
+    } while (false);
+
+    if (ret == SOFTBUS_OK) {
+        node->info.modeType = modeType;
+        node->info.status = LISTENER_RUNNING;
     }
 
-    int ret = StartThread(module, modeType);
-    if (ret != SOFTBUS_OK && ret != SOFTBUS_ALREADY_EXISTED) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "StartThread failed");
-        return SOFTBUS_ERR;
+    (void)SoftBusMutexUnlock(&node->lock);
+    return ret;
+}
+
+static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
+{
+    if (node == NULL) {
+        return SOFTBUS_NOT_FIND;
     }
 
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return ret;
+    }
+
+    ret = StopListenerThread(node);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: stop listener failed!ret=%" PRId32, __func__, ret);
+    }
+    node->info.status = LISTENER_CLOSEING;
+    SoftBusMutexUnlock(&node->lock);
     return SOFTBUS_OK;
 }
 
-static SoftbusBaseListenerInfo *CreateNewListenerInfo(void)
+static void InitListenerInfo(SoftbusBaseListenerInfo *listenerInfo)
 {
-    SoftbusBaseListenerInfo *listenerInfo = (SoftbusBaseListenerInfo *)SoftBusCalloc(sizeof(SoftbusBaseListenerInfo));
-    if (listenerInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Malloc error");
-        return NULL;
-    }
     listenerInfo->modeType = UNSET_MODE;
     listenerInfo->fdCount = 0;
     listenerInfo->listenFd = -1;
     listenerInfo->listenPort = -1;
     listenerInfo->status = LISTENER_IDLE;
     ListInit(&listenerInfo->node);
+}
 
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
-        SoftBusFree(listenerInfo);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock g_fdSetLock failed");
-        return NULL;
+uint32_t RequireListenerModule(void)
+{
+    uint32_t moduleId = CONN_INVALID_LISTENER_MODULE_ID;
+    if (SoftBusMutexLock(&g_listenerListLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return CONN_INVALID_LISTENER_MODULE_ID;
     }
-    if (g_fdSetInit == false) {
-        SoftBusSocketFdZero(&g_readSet);
-        SoftBusSocketFdZero(&g_writeSet);
-        SoftBusSocketFdZero(&g_exceptSet);
-        g_fdSetInit = true;
-    }
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
 
-    return listenerInfo;
+    for (uint32_t i = 0; i < UNUSE_BUTT; i++) {
+        if (g_listenerList[i] != NULL) {
+            continue;
+        }
+
+        int32_t ret = CreateSpecifiedListenerModule(i);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:create listener failed! ret=%" PRId32, __func__, ret);
+            break;
+        }
+        moduleId = i;
+        break;
+    }
+
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+    return moduleId;
 }
 
 static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
 {
     int32_t ret = SOFTBUS_OK;
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
@@ -562,7 +855,7 @@ static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
             break;
     }
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
 
     return ret;
 }
@@ -570,7 +863,7 @@ static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
 static int32_t DelTriggerFromSet(int32_t fd, TriggerType triggerType)
 {
     int32_t ret = SOFTBUS_OK;
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
@@ -593,215 +886,262 @@ static int32_t DelTriggerFromSet(int32_t fd, TriggerType triggerType)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid trigger type");
             break;
     }
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
 
     return ret;
 }
 
 int32_t StartBaseClient(ListenerModule module)
 {
-    if (CheckModule(module) != SOFTBUS_OK) {
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
         return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (g_fdSetLock.lockInit == false) {
-        if (SoftBusMutexInit(&g_fdSetLock.lock, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_fdSetLock init failed.");
-            return SOFTBUS_ERR;
-        }
-        g_fdSetLock.lockInit = true;
     }
     int32_t ret;
 
-    g_listenerList[module].module = module;
-    if (g_listenerList[module].listener == NULL || !g_listenerList[module].lockInit) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BaseListener not set, start failed.");
-        return SOFTBUS_ERR;
-    }
-    if (g_listenerList[module].info == NULL) {
-        g_listenerList[module].info = CreateNewListenerInfo();
-        if (g_listenerList[module].info == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc listenerInfo err");
-            return SOFTBUS_MALLOC_ERR;
+    do {
+        if (node->listener == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BaseListener not set, start failed.");
+            ret = SOFTBUS_ERR;
+            break;
         }
-    }
-    if (g_listenerList[module].info->status != LISTENER_IDLE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
-        return SOFTBUS_ERR;
-    }
-    g_listenerList[module].info->status = LISTENER_PREPARED;
-    ret = PrepareBaseListener(module, CLIENT_MODE);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StartBaseClient %s",
-        (ret == SOFTBUS_OK) ? "SUCCESS" : "FAILED");
+        if (node->info.status != LISTENER_IDLE) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
+            ret = SOFTBUS_ERR;
+            break;
+        }
+        ret = StartListenerThread(node, CLIENT_MODE);
+        SoftBusLog(
+            SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StartBaseClient %s", (ret == SOFTBUS_OK) ? "SUCCESS" : "FAILED");
+    } while (false);
+
+    ReleaseListenerNode(node);
 
     return ret;
 }
 
-int32_t StartBaseListener(ListenerModule module, const char *ip, int32_t port, ModeType modeType)
+int32_t StartBaseListener(const LocalListenerInfo *info)
 {
-    if (CheckModule(module) != SOFTBUS_OK || port < 0 || ip == NULL) {
+    if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: bad input", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (g_fdSetLock.lockInit == false) {
-        if (SoftBusMutexInit(&g_fdSetLock.lock, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_fdSetLock init failed.");
-            return SOFTBUS_ERR;
-        }
-        g_fdSetLock.lockInit = true;
+    ListenerModule module = info->socketOption.moduleId;
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
     }
-
     int32_t ret;
-
-    g_listenerList[module].module = module;
-    if (g_listenerList[module].listener == NULL || !g_listenerList[module].lockInit) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BaseListener not set, start failed.");
-        return SOFTBUS_ERR;
-    }
-    if (g_listenerList[module].info == NULL) {
-        g_listenerList[module].info = CreateNewListenerInfo();
-        if (g_listenerList[module].info == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc listenerInfo err");
-            return SOFTBUS_MALLOC_ERR;
+    do {
+        if (node->listener == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BaseListener not set, start failed.");
+            ret = SOFTBUS_ERR;
+            break;
         }
-    }
-    if (g_listenerList[module].info->status != LISTENER_IDLE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "listener is not in idle status.");
-        return SOFTBUS_ERR;
-    }
-    ret = InitListenFd(module, ip, port);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitListenFd failed");
-        return ret;
-    }
-    g_listenerList[module].info->status = LISTENER_PREPARED;
-    ret = PrepareBaseListener(module, modeType);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+        if (node->info.status != LISTENER_IDLE) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:listener is not in idle status.status=%d", __func__,
+                node->info.status);
+            ret = SOFTBUS_ERR;
+            break;
+        }
+        node->socketIf = GetSocketInterface(info->socketOption.protocol);
+        if (node->socketIf == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:no such protocol.protocol=%d", __func__,
+                info->socketOption.protocol);
+            ret = SOFTBUS_ERR;
+            break;
+        }
+        ret = InitListenFd(node, info);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:InitListenFd failed!ret=%" PRId32, __func__, ret);
+            break;
+        }
+        ret = StartListenerThread(node, SERVER_MODE);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(
+                SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:Start listener thread failed!ret=%" PRId32, __func__, ret);
+            ReleaseListenerSockets(node);
+            break;
+        }
+    } while (false);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StartBaseListener success, fd = %d, module = %d",
-        g_listenerList[module].info->listenPort, module);
-
-    return g_listenerList[module].info->listenPort;
+        node->info.listenPort, module);
+    int32_t port = node->info.listenPort;
+    ReleaseListenerNode(node);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return port;
 }
 
 int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *listener)
 {
-    if (CheckModule(module) != SOFTBUS_OK || listener == NULL) {
+    if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_listenerList[module].listener != NULL) {
-        if (memcpy_s(listener, sizeof(SoftbusBaseListener), g_listenerList[module].listener,
-            sizeof(SoftbusBaseListener)) != EOK) {
-            SoftBusMutexUnlock(&g_listenerList[module].lock);
-            return SOFTBUS_MEM_ERR;
+    int32_t ret = SOFTBUS_OK;
+    do {
+        if (node->listener == NULL) {
+            ret = SOFTBUS_NOT_FIND;
+            break;
         }
-    } else {
-        SoftBusFree(listener);
-        return SOFTBUS_ERR;
-    }
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
+        if (memcpy_s(listener, sizeof(SoftbusBaseListener), node->listener, sizeof(SoftbusBaseListener)) != EOK) {
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
+    } while (false);
+    (void)SoftBusMutexUnlock(&node->lock);
+    (void)ReleaseListenerNode(node);
     return SOFTBUS_OK;
 }
 
 int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener *listener)
 {
-    if (CheckModule(module) != SOFTBUS_OK || listener == NULL ||
-        listener->onConnectEvent == NULL || listener->onDataEvent == NULL) {
+    if (listener == NULL || listener->onConnectEvent == NULL || listener->onDataEvent == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!g_listenerList[module].lockInit) {
-        SoftBusMutexAttr mutexAttr;
-        mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-        if (SoftBusMutexInit(&g_listenerList[module].lock, &mutexAttr) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-        g_listenerList[module].lockInit = true;
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
     }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set listener lock failed");
+        (void)ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_listenerList[module].listener == NULL) {
-        g_listenerList[module].listener = (SoftbusBaseListener *)SoftBusCalloc(sizeof(SoftbusBaseListener));
-        if (g_listenerList[module].listener == NULL) {
-            (void)SoftBusMutexUnlock(&g_listenerList[module].lock);
-            return SOFTBUS_MALLOC_ERR;
+
+    int32_t ret = SOFTBUS_OK;
+    do {
+        if (node->listener == NULL) {
+            node->listener = (SoftbusBaseListener *)SoftBusCalloc(sizeof(SoftbusBaseListener));
+            if (node->listener == NULL) {
+                ret = SOFTBUS_MALLOC_ERR;
+                break;
+            }
         }
-    }
-    if (memcpy_s(g_listenerList[module].listener, sizeof(SoftbusBaseListener),
-        listener, sizeof(SoftbusBaseListener)) != EOK) {
-        (void)SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return SOFTBUS_MEM_ERR;
-    }
-    (void)SoftBusMutexUnlock(&g_listenerList[module].lock);
-    return SOFTBUS_OK;
+        if (memcpy_s(node->listener, sizeof(SoftbusBaseListener), listener, sizeof(SoftbusBaseListener)) != EOK) {
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
+    } while (false);
+    (void)SoftBusMutexUnlock(&node->lock);
+    (void)ReleaseListenerNode(node);
+    return ret;
 }
 
 int32_t StopBaseListener(ListenerModule module)
 {
-    if (CheckModule(module) != SOFTBUS_OK) {
-        return SOFTBUS_INVALID_PARAM;
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
     }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-    SoftbusBaseListenerInfo *listenerInfo = g_listenerList[module].info;
-    if (listenerInfo == NULL) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return SOFTBUS_ERR;
-    }
-    if (listenerInfo->status != LISTENER_RUNNING) {
-        listenerInfo->status = LISTENER_IDLE;
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
+
+    int32_t ret = SOFTBUS_OK;
+    do {
+        if (node->info.listenFd > 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del listen fd from readSet, fd = %d, module = %d.",
+                node->info.listenFd, module);
+            DelTriggerFromSet(node->info.listenFd, READ_TRIGGER);
+            ConnShutdownSocket(node->info.listenFd);
+            UpdateMaxFd();
+        }
+        node->info.listenFd = -1;
+
+        ret = StopListenerThread(node);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "stop listen thread failed!ret = %" PRId32 ", module = %d.",
+                ret, module);
+            break;
+        }
+    } while (false);
+    SoftBusMutexUnlock(&node->lock);
+    ReleaseListenerNode(node);
+    return ret;
+}
+
+static int32_t WaitBaseListenerDestroy(ListenerModule module, int32_t waitTimeOut)
+{
+    const int32_t waitInterval = 100;
+    while (waitTimeOut > 0) {
+        int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+            return SOFTBUS_LOCK_ERR;
+        }
+
+        if (g_listenerList[module] != NULL) {
+            SoftBusMutexUnlock(&g_listenerListLock);
+            SoftBusSleepMs(waitInterval);
+            waitTimeOut -= waitInterval;
+            continue;
+        }
+        (void)SoftBusMutexUnlock(&g_listenerListLock);
         return SOFTBUS_OK;
     }
-    listenerInfo->status = LISTENER_IDLE;
-    if (listenerInfo->listenFd > 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del listen fd from readSet, fd = %d, module = %d.",
-            listenerInfo->listenFd, module);
-        DelTriggerFromSet(listenerInfo->listenFd, READ_TRIGGER);
-        TcpShutDown(listenerInfo->listenFd);
-        UpdateMaxFd();
-    }
-    listenerInfo->listenFd = -1;
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
-
-    return SOFTBUS_OK;
+    return SOFTBUS_TIMOUT;
 }
 
 void DestroyBaseListener(ListenerModule module)
 {
-    if (CheckModule(module) != SOFTBUS_OK) {
+    if (module >= UNUSE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
         return;
     }
-    ResetBaseListener(module);
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:Destory listener module %" PRIu32, __func__, module);
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
         return;
     }
-    if (g_listenerList[module].info != NULL) {
-        SoftBusFree(g_listenerList[module].info);
-        g_listenerList[module].info = NULL;
-    }
-    if (g_listenerList[module].listener != NULL) {
-        SoftBusFree(g_listenerList[module].listener);
-        g_listenerList[module].listener = NULL;
-    }
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
-}
 
+    ret = ShutdownBaseListener(g_listenerList[module]);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&g_listenerListLock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:shutdown listener failed!ret=%" PRId32, __func__, ret);
+        g_listenerList[module] = NULL;
+        return;
+    }
+
+    ret = ReleaseListenerRef(module);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&g_listenerListLock);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:release listener failed!ret=%" PRId32, __func__, ret);
+        g_listenerList[module] = NULL;
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_listenerListLock);
+#define LISTENER_MODULE_DESTROY_TIMEOUT (30 * 1000)
+    ret = WaitBaseListenerDestroy(module, LISTENER_MODULE_DESTROY_TIMEOUT);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:Destory listener module %" PRIu32 " finished. ret=%" PRId32,
+        __func__, module, ret);
+}
 
 static bool CheckFdIsExist(SoftbusBaseListenerInfo *info, int32_t fd)
 {
     FdNode *item = NULL;
     FdNode *nextItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &info->node, FdNode, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &info->node, FdNode, node)
+    {
         if (item->fd == fd) {
             return true;
         }
@@ -827,7 +1167,8 @@ static void DelFdNode(SoftbusBaseListenerInfo *info, int32_t fd)
     FdNode *item = NULL;
     FdNode *nextItem = NULL;
 
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &info->node, FdNode, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &info->node, FdNode, node)
+    {
         if (item->fd == fd) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -839,89 +1180,108 @@ static void DelFdNode(SoftbusBaseListenerInfo *info, int32_t fd)
 
 int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 {
-    if (CheckModule(module) != SOFTBUS_OK || fd < 0 || CheckTrigger(triggerType) != SOFTBUS_OK) {
+    if (fd < 0 || CheckTrigger(triggerType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid AddTrigger Param");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-    SoftbusBaseListenerInfo *info = g_listenerList[module].info;
-    if (info == NULL || info->fdCount > MAX_LISTEN_EVENTS) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot AddTrigger any more");
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = SOFTBUS_OK;
 
-    if (AddTriggerToSet(fd, triggerType) != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return SOFTBUS_ERR;
-    }
+    do {
+        if (node->info.fdCount > MAX_LISTEN_EVENTS) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot AddTrigger any more");
+            ret = SOFTBUS_ERR;
+            break;
+        }
 
-    if (CheckFdIsExist(info, fd)) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd exist");
-        return SOFTBUS_OK;
-    }
+        ret = AddTriggerToSet(fd, triggerType);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "AddTrigger failed!ret=%" PRId32 " Module=%" PRIu32 "TriggerType=%d", ret, module, triggerType);
+            break;
+        }
 
-    if (AddNewFdNode(info, fd) != SOFTBUS_OK) {
-        (void)DelTriggerFromSet(fd, triggerType);
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        return SOFTBUS_ERR;
-    }
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
+        if (CheckFdIsExist(&node->info, fd)) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd exist");
+            break;
+        }
 
-    if (SoftBusMutexLock(&(g_fdSetLock.lock)) != 0) {
+        if (AddNewFdNode(&node->info, fd) != SOFTBUS_OK) {
+            (void)DelTriggerFromSet(fd, triggerType);
+            ret = SOFTBUS_ERR;
+            break;
+        }
+    } while (false);
+
+    SoftBusMutexUnlock(&node->lock);
+    ReleaseListenerNode(node);
+
+    if (SoftBusMutexLock(&g_fdSetLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_OK;
     }
     g_maxFd = MaxFd(fd, g_maxFd);
-    SoftBusMutexUnlock(&(g_fdSetLock.lock));
+    SoftBusMutexUnlock(&g_fdSetLock);
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "AddTrigger fd:%d success, current fdcount:%d, module:%d, triggerType:%d",
-        fd, info->fdCount, module, triggerType);
+        "AddTrigger fd:%d success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount, module,
+        triggerType);
     return SOFTBUS_OK;
 }
 
 int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 {
-    if (CheckModule(module) != SOFTBUS_OK || fd < 0 || CheckTrigger(triggerType)) {
+    if (fd < 0 || CheckTrigger(triggerType)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid AddTrigger Param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_listenerList[module].lock) != SOFTBUS_OK) {
+
+    SoftbusListenerNode *node = RequestListenerNode(module);
+    if (node == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: no listner with module %" PRIu32, __func__, module);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-    SoftbusBaseListenerInfo *info = g_listenerList[module].info;
-    if (info == NULL) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "DelTrigger base listener info is NULL");
-        return SOFTBUS_ERR;
-    }
 
-    if (DelTriggerFromSet(fd, triggerType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "del trigger fail: fd = %d, trigger = %d", fd, triggerType);
-    }
+    do {
+        if (DelTriggerFromSet(fd, triggerType) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del trigger fail: fd = %d, trigger = %d", fd, triggerType);
+        }
 
-    if (SoftBusSocketFdIsset(fd, &g_writeSet) || SoftBusSocketFdIsset(fd, &g_readSet) ||
-        SoftBusSocketFdIsset(fd, &g_exceptSet)) {
-        SoftBusMutexUnlock(&g_listenerList[module].lock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-            "DelTrigger [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
-            fd, info->fdCount, module, triggerType);
-        return SOFTBUS_OK;
-    }
+        if (SoftBusSocketFdIsset(fd, &g_writeSet) || SoftBusSocketFdIsset(fd, &g_readSet) ||
+            SoftBusSocketFdIsset(fd, &g_exceptSet)) {
+            SoftBusMutexUnlock(&g_listenerList[module]->lock);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+                "DelTrigger [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
+                module, triggerType);
+            break;
+        }
 
-    DelFdNode(info, fd);
+        DelFdNode(&node->info, fd);
+    } while (false);
+
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "DelTrigger and node [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
-        fd, info->fdCount, module, triggerType);
-    SoftBusMutexUnlock(&g_listenerList[module].lock);
+        "DelTrigger and node [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
+        module, triggerType);
+
+    SoftBusMutexUnlock(&node->lock);
+    ReleaseListenerNode(node);
     UpdateMaxFd();
 
     return SOFTBUS_OK;

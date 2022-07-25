@@ -25,7 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_json.h"
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_message.h"
@@ -36,18 +36,23 @@ static char g_p2pSessionIp[IP_LEN] = {0};
 
 static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 {
-    SoftbusBaseListener listener = {0};
-    int32_t ret;
     int32_t listenerPort;
 
-    GetTdcBaseListener(&listener);
-    ret = SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, &listener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener set listener fail");
-        return ret;
+    LocalListenerInfo info = {
+        .type = CONNECT_P2P,
+        .socketOption = {
+            .addr = "",
+            .port = *port,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_SERVER_P2P
+        }
+    };
+    if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy addr failed!", __func__);
+        return SOFTBUS_ERR;
     }
 
-    listenerPort = StartBaseListener(DIRECT_CHANNEL_SERVER_P2P, ip, *port, SERVER_MODE);
+    listenerPort = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
     if (listenerPort < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartNewP2pListener start listener fail");
         return SOFTBUS_ERR;
@@ -372,6 +377,27 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     return SOFTBUS_OK;
 }
 
+static int32_t ConnectTcpDirectPeer(const char *addr, int port)
+{
+    ConnectOption options = {
+        .type = CONNECT_P2P,
+        .socketOption = {
+            .addr = {0},
+            .port = port,
+            .protocol = LNN_PROTOCOL_IP,
+            .moduleId = DIRECT_CHANNEL_CLIENT
+        }
+    };
+
+    int32_t ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), addr);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s: strcpy_s failed!ret = %" PRId32, __func__, ret);
+        return -1;
+    }
+
+    return ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
+}
+
 static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 {
     SoftBusLog(
@@ -400,7 +426,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply peer wifi: ip, port=%d",
         conn->appInfo.peerData.port);
 
-    fd = OpenTcpClientSocket(conn->appInfo.peerData.ip, NULL, conn->appInfo.peerData.port, true);
+    fd = ConnectTcpDirectPeer(conn->appInfo.peerData.ip, conn->appInfo.peerData.port);
     if (fd <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply conn fail: fd=%d", fd);
         ReleaseSessonConnLock();

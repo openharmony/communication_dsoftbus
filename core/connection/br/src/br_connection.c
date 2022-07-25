@@ -313,7 +313,7 @@ static int32_t NotifyServerConn(int connectionId, const char *mac, int32_t sideT
     connectionInfo.isAvailable = 1;
     connectionInfo.isServer = sideType;
     connectionInfo.type = CONNECT_BR;
-    if (strcpy_s(connectionInfo.info.brInfo.brMac, BT_MAC_LEN, mac) != EOK) {
+    if (strcpy_s(connectionInfo.brInfo.brMac, BT_MAC_LEN, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NotifyServerConn scpy error");
         return SOFTBUS_ERR;
     }
@@ -382,7 +382,7 @@ static void ConnectDeviceExit(uint32_t connId, uint32_t requestId, const Connect
     connectionInfo.isAvailable = 1;
     connectionInfo.isServer = connInfo->sideType;
     connectionInfo.type = CONNECT_BR;
-    if (strcpy_s(connectionInfo.info.brInfo.brMac, BT_MAC_LEN, connInfo->mac) != EOK) {
+    if (strcpy_s(connectionInfo.brInfo.brMac, BT_MAC_LEN, connInfo->mac) != EOK) {
         ReleaseConnectionRef(connInfo);
         return;
     }
@@ -436,7 +436,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
     requestInfo->requestId = requestId;
     (void)memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result));
     ListAdd(&newConnInfo->requestList, &requestInfo->node);
-    if (strcpy_s(newConnInfo->mac, sizeof(newConnInfo->mac), option->info.brOption.brMac) != EOK) {
+    if (strcpy_s(newConnInfo->mac, sizeof(newConnInfo->mac), option->brOption.brMac) != EOK) {
         ReleaseBrconnectionNode(newConnInfo);
         return SOFTBUS_ERR;
     }

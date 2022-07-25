@@ -100,7 +100,7 @@ AuthManager *AuthGetManagerByAuthId(int64_t authId);
 AuthManager *AuthGetManagerByConnId(uint16_t id);
 AuthManager *AuthGetManagerByFd(int32_t fd);
 AuthManager *AuthGetManagerByConnectionId(uint32_t connectionId);
-int32_t CreateServerIpAuth(int32_t cfd, const char *ip, int32_t port);
+int32_t AddAuthServer(int32_t cfd, const ConnectOption *clientAddr);
 void AuthHandlePeerSyncDeviceInfo(AuthManager *auth, uint8_t *data, uint32_t len);
 void HandleReceiveDeviceId(AuthManager *auth, uint8_t *data);
 void HandleReceiveAuthData(AuthManager *auth, int32_t module, uint8_t *data, uint32_t dataLen);

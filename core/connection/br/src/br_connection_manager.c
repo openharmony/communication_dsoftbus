@@ -264,7 +264,7 @@ int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
             info->isAvailable = 1;
             info->isServer = itemNode->sideType;
             info->type = CONNECT_BR;
-            if (strcpy_s(info->info.brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
+            if (strcpy_s(info->brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetConnInfo scpy error");
                 (void)pthread_mutex_unlock(&g_connectionLock);
                 return SOFTBUS_BRCONNECTION_GETCONNINFO_ERROR;
@@ -418,7 +418,7 @@ static int32_t InitConnectionInfo(ConnectionInfo *connectionInfo, const BrConnec
     (*connectionInfo).isAvailable = 0;
     (*connectionInfo).isServer = itemNode->sideType;
     (*connectionInfo).type = CONNECT_BR;
-    if (strcpy_s((*connectionInfo).info.brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
+    if (strcpy_s((*connectionInfo).brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitConnInfo scpy error");
         return SOFTBUS_BRCONNECTION_STRNCPY_ERROR;
     }
@@ -471,7 +471,7 @@ bool HasDiffMacDeviceExit(const ConnectOption *option)
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->sideType == BR_CLIENT_TYPE) {
-            if (Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) != 0) {
+            if (Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) != 0) {
                 res = true;
                 break;
             }
@@ -507,8 +507,8 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCon
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (IsTargetSideType(option->info.brOption.sideType, itemNode->sideType) &&
-            Strnicmp(itemNode->mac, option->info.brOption.brMac, BT_MAC_LEN) == 0) {
+        if (IsTargetSideType(option->brOption.sideType, itemNode->sideType) &&
+            Strnicmp(itemNode->mac, option->brOption.brMac, BT_MAC_LEN) == 0) {
             if (outConnId != NULL) {
                 *outConnId = itemNode->connectionId;
             }
@@ -557,7 +557,7 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
     BrConnectionInfo *itemNode = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) {
+        if (Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) == 0) {
             *socketFd = itemNode->socketFd;
             *sideType = itemNode->sideType;
             itemNode->state = BR_CONNECTION_STATE_CLOSING;
@@ -587,7 +587,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if ((Strnicmp(itemNode->mac, option->info.brOption.brMac, sizeof(itemNode->mac)) == 0) &&
+        if ((Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) == 0) &&
             (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection true");
             (void)pthread_mutex_unlock(&g_connectionLock);

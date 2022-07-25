@@ -39,6 +39,9 @@
 #include "softbus_log.h"
 
 #define OPEN_AUTH_CHAN_DELAY  200
+
+#define AUTH_P2P_KEEP_ALIVE_TIME 10
+
 typedef struct {
     int64_t authId;
     int32_t pid;
