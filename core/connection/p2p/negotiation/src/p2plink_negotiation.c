@@ -27,6 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "auth_interface.h"
 
 #define P2PLINK_VERSION 2
 #define P2PLINK_NEG_TIMEOUT 5000
@@ -822,6 +823,11 @@ static void IdleStateProcess(P2pLoopMsg msgType, void *param)
 static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connected success");
+    int32_t ret = AuthSetP2pMac(conneResult->authId, conneResult->peerMac);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthSetP2pMac fail ret: %d", ret);
+    }
+
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {
         if (g_p2pLinkNegoCb.onConnected != NULL) {
             g_p2pLinkNegoCb.onConnected(g_p2pLinkNegoFsm.linkInfo.requestId, conneResult);
@@ -1117,6 +1123,7 @@ static void OnGroupConnectSuccess(bool isNeedDhcp)
         return;
     }
 
+    g_p2pLinkNegoFsm.result.authId = g_p2pLinkNegoFsm.linkInfo.authId;
     OnConnectSuccess(&(g_p2pLinkNegoFsm.result));
 }
 
