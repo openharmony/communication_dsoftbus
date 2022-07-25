@@ -50,8 +50,8 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
+      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb/include",
+      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 
@@ -63,8 +63,8 @@ if (defined(ohos_lite)) {
       "${ability_runtime_path}/frameworks/native/ability/native:data_ability_helper",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
+      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
+      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
     ]
   }
 }
