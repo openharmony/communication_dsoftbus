@@ -1330,7 +1330,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest004, TestSize.Level1)
     testInfo.freq = SUPER_HIGH;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);    
+    EXPECT_TRUE(ret == 0);
 }
 
 /**
