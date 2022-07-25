@@ -215,18 +215,19 @@ static int32_t GetAuthConnectOption(int32_t channelId, uint32_t cipherFlag, Conn
         return SOFTBUS_ERR;
     }
     // get br or ble auth opthion
-    if (GetP2pAuthOptionByCipherFlag(conn->appInfo.peerData.ip, cipherFlag, option) == SOFTBUS_OK) {
+    if (conn->appInfo.protocol == LNN_PROTOCOL_IP &&
+        GetP2pAuthOptionByCipherFlag(conn->appInfo.peerData.addr, cipherFlag, option) == SOFTBUS_OK) {
         SoftBusFree(conn);
         return SOFTBUS_OK;
     }
-    if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), conn->appInfo.peerData.ip) != 0) {
+    if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), conn->appInfo.peerData.addr) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s peer ip err");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
     option->type = CONNECT_TCP;
     option->socketOption.port = conn->appInfo.peerData.port;
-    option->socketOption.protocol = LNN_PROTOCOL_IP;
+    option->socketOption.protocol = conn->appInfo.protocol;
     SoftBusFree(conn);
     return SOFTBUS_OK;
 }

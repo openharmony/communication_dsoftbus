@@ -18,6 +18,7 @@
 
 #include "session.h"
 #include "softbus_def.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +69,7 @@ typedef struct {
     int uid;
     int pid;
     char authState[AUTH_STATE_SIZE_MAX];
-    char ip[IP_LEN];
+    char addr[MAX_SOCKET_ADDR_LEN];
     int port;
     int64_t channelId;
 } AppInfoData;
@@ -86,6 +87,7 @@ typedef struct {
     AppType appType;
     AppInfoData myData;
     AppInfoData peerData;
+    ProtocolType protocol;
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;

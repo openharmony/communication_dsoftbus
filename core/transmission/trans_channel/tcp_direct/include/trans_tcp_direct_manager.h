@@ -56,7 +56,7 @@ void TransTdcDeathCallback(const char *pkgName);
 
 int32_t TransOpenDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
-void TransTdcStopSessionProc(void);
+void TransTdcStopSessionProc(ListenerModule listenMod);
 
 #ifdef __cplusplus
 }

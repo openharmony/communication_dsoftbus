@@ -99,7 +99,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = isServerSide;
     info.businessType = appInfo->businessType;
-    info.myIp = (char*)appInfo->myData.ip;
+    info.myIp = (char*)appInfo->myData.addr;
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
@@ -114,7 +114,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.streamType = (int32_t)appInfo->streamType;
     if (!isServerSide) {
         info.peerPort = appInfo->peerData.port;
-        info.peerIp = (char*)appInfo->peerData.ip;
+        info.peerIp = (char*)appInfo->peerData.addr;
     }
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         (char *)&appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
@@ -370,7 +370,7 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
             return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
         }
     }
-    if (strcpy_s(appInfo->myData.ip, IP_LEN, localIp) != EOK) {
+    if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
         return SOFTBUS_ERR;
     }
@@ -609,7 +609,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *appInfo, int32_t *channelId)
 {
     appInfo->peerData.port = connOpt->socketOption.port;
-    if (strcpy_s(appInfo->peerData.ip, IP_LEN, connOpt->socketOption.addr) != EOK) {
+    if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connOpt->socketOption.addr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
 
@@ -623,18 +623,20 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         case CONNECT_TCP:
             appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
             appInfo->routeType = WIFI_STA;
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.ip, sizeof(appInfo->myData.ip)) != SOFTBUS_OK) {
+            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PrepareAppInfoForUdpOpen get local ip fail");
                 return SOFTBUS_ERR;
             }
+            appInfo->protocol = connOpt->socketOption.protocol;
             break;
         case CONNECT_P2P:
             appInfo->udpConnType = UDP_CONN_TYPE_P2P;
             appInfo->routeType = WIFI_P2P;
-            if (P2pLinkGetLocalIp(appInfo->myData.ip, sizeof(appInfo->myData.ip)) != SOFTBUS_OK) {
+            if (P2pLinkGetLocalIp(appInfo->myData.addr, sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PrepareAppInfoForUdpOpen get p2p ip fail");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
+            appInfo->protocol = connOpt->socketOption.protocol;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid connType.");

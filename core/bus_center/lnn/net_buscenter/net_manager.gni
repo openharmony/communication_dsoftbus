@@ -27,3 +27,21 @@ bus_center_net_mgr_inc = [
   "$dsoftbus_root_path/core/adapter/bus_center/include",
 ]
 bus_center_net_mgr_deps = []
+
+native_source_path = rebase_path("$dsoftbus_root_path")
+newip_dir = "dsoftbus_enhance/components/newip"
+newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                             [
+                               "$native_source_path",
+                               "$newip_dir",
+                             ],
+                             "value")
+
+if (newip_enhanced) {
+  import(
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/newip.gni")
+
+  bus_center_net_mgr_src += newip_manager_src
+  bus_center_net_mgr_inc += newip_manager_include
+  bus_center_net_mgr_deps += newip_manager_deps
+}

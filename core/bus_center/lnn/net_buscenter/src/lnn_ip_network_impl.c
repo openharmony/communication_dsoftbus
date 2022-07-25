@@ -37,6 +37,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 
 #define IP_DEFAULT_PORT 0
@@ -357,7 +358,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, SubnetManagerEvent 
     };
     subnet->status = transactMap[event][isAccepted ? EVENT_RESULT_ACCEPTED : EVENT_RESULT_REJECTED];
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet [%s, %u] state change to %d", subnet->ifName,
-        subnet->protocolType, subnet->status);
+        subnet->protocol->id, subnet->status);
 }
 
 static SubnetManagerEvent GetEventInOther(LnnPhysicalSubnet *subnet)
@@ -438,7 +439,7 @@ static void OnNetifStatusChanged(LnnPhysicalSubnet *subnet)
     TransactIpSubnetState(subnet, event, (ret == SOFTBUS_OK));
 }
 
-static LnnPhysicalSubnet *CreateIpSubnetManager(const char *ifName)
+static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager *self, const char *ifName)
 {
     LnnPhysicalSubnet *subnet = (LnnPhysicalSubnet *)SoftBusCalloc(sizeof(LnnPhysicalSubnet));
     if (subnet == NULL) {
@@ -448,7 +449,7 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const char *ifName)
 
     do {
         subnet->Destroy = DestroyIpSubnetManager;
-        subnet->protocolType = LNN_PROTOCOL_IP;
+        subnet->protocol = self;
         subnet->status = LNN_SUBNET_IDLE;
         subnet->OnNetifStatusChanged = OnNetifStatusChanged;
         subnet->OnSoftbusNetworkDisconnected = OnSoftbusNetworkDisconnected;
@@ -468,7 +469,7 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const char *ifName)
 static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, void *data)
 {
     (void)data;
-    if (subnet->protocolType == LNN_PROTOCOL_IP) {
+    if (subnet->protocol->id == LNN_PROTOCOL_IP) {
         LnnNotifyPhysicalSubnetAddressChanged(subnet->ifName, LNN_PROTOCOL_IP);
     }
     return CHOICE_VISIT_NEXT;
@@ -533,7 +534,7 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!\n", __func__);
         return SOFTBUS_ERR;
     }
-    LnnPhysicalSubnet *manager = CreateIpSubnetManager(netifMgr->ifName);
+    LnnPhysicalSubnet *manager = CreateIpSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:oom!\n", __func__);
         return SOFTBUS_ERR;
@@ -557,8 +558,8 @@ void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
 }
 
 static LnnProtocolManager g_ipProtocol = {
-    .id = 0,
-    .pri = 0,
+    .id = LNN_PROTOCOL_IP,
+    .pri = 10,
     .supportedNetif = LNN_NETIF_TYPE_ETH | LNN_NETIF_TYPE_WLAN,
     .Init = LnnInitIpProtocol,
     .Deinit = LnnDeinitIpNetwork,
