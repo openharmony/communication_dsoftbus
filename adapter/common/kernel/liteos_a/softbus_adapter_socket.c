@@ -63,7 +63,7 @@ static int32_t GetErrorCode(void)
     return errCode;
 }
 
-int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int *socketFd)
+int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
 {
     if (socketFd == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socketFd is null");
