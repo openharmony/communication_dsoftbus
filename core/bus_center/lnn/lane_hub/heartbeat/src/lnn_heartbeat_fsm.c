@@ -532,7 +532,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
         return false;
     }
     option.type = CONNECT_BR;
-    if (strcpy_s(option.info.brOption.brMac, BT_MAC_LEN, brMac) != EOK) {
+    if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, brMac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strcpy_s bt mac err");
         return false;
     }
@@ -558,7 +558,7 @@ static bool HbHasActiveBleConnection(const char *networkId)
         return false;
     }
     option.type = CONNECT_BLE;
-    if (memcpy_s(option.info.bleOption.deviceIdHash, UDID_HASH_LEN, udidHash, sizeof(udidHash)) != EOK) {
+    if (memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, udidHash, sizeof(udidHash)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB memcpy_s udid hash err");
         return false;
     }

@@ -81,7 +81,7 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
 {
     (void)msgType;
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
 
@@ -122,7 +122,7 @@ static void P2pLinkNegoDataRecv(int64_t authId, const ConnectOption *option, con
 {
     unsigned char distinguish[] = "p2p rcv";
     if (option == NULL || info == NULL || info->module != MODULE_P2P_LINK || info->data == NULL || info->len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     SignalingMsgPrint(distinguish, (unsigned char *)info->data, (unsigned char)info->len, SOFTBUS_LOG_CONN);

@@ -20,22 +20,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-
-static int32_t OpenConnTcp(const char *peerIp, int32_t peerPort)
-{
-    if (peerIp == NULL || peerPort < 0) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t fd = OpenTcpClientSocket(peerIp, NULL, peerPort, false);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenConnTcp connect fail: fd=%d", fd);
-        return DISABLE_FD;
-    }
-    return fd;
-}
 
 int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
@@ -51,7 +38,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    int32_t fd = OpenConnTcp(connInfo->info.ipOption.ip, connInfo->info.ipOption.port);
+    int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, false);
     if (fd < 0) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel connect fail");
@@ -77,6 +64,6 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_ERR;
     }
     *channelId = newchannelId;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel end: channelId=%d", newchannelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenTcpDirectChannel end: channelId=%d", newchannelId);
     return SOFTBUS_OK;
 }

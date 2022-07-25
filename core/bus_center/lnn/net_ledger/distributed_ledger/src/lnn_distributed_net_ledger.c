@@ -1001,7 +1001,7 @@ bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
     NodeInfo *node = NULL;
     if (networkId == NULL || info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return false;
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {

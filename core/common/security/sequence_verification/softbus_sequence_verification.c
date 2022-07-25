@@ -157,7 +157,7 @@ static bool IsPassFlipNegativeCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSe
 bool IsPassSeqCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
 {
     if (seqVerifyInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return false;
     }
     bool isDifferentSign = IsDifferentSign(seqVerifyInfo->minSeq, seqVerifyInfo->maxSeq);

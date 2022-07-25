@@ -28,7 +28,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 #include "trans_pending_pkt.h"
@@ -852,7 +852,7 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
 static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const SliceHead *head,
     const char *data, uint32_t len)
 {
-    if (data == NULL || len <= 0) {
+    if (data == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_channelSliceProcessorList == NULL) {

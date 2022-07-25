@@ -132,18 +132,20 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     connOpt.type = ConvertConnectType(addrInfo->type);
     switch (connOpt.type) {
         case CONNECT_TCP:
-            if (memcpy_s(connOpt.info.ipOption.ip, IP_LEN, addrInfo->info.ip.ip, IP_LEN) != EOK) {
+            if (memcpy_s(connOpt.socketOption.addr, sizeof(connOpt.socketOption.addr), addrInfo->info.ip.ip, IP_LEN) !=
+                EOK) {
                 return SOFTBUS_MEM_ERR;
             }
-            connOpt.info.ipOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
+            connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
+            connOpt.socketOption.protocol = LNN_PROTOCOL_IP;
             break;
         case CONNECT_BLE:
-            if (memcpy_s(connOpt.info.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
+            if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
                 return SOFTBUS_MEM_ERR;
             }
             break;
         case CONNECT_BR:
-            if (memcpy_s(connOpt.info.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
+            if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
                 return SOFTBUS_MEM_ERR;
             }
             break;

@@ -227,7 +227,7 @@ int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
 int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     info->p2pInfo.p2pRole = p2pRole;
@@ -237,7 +237,7 @@ int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
 int32_t LnnGetP2pRole(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return 0;
     }
     return info->p2pInfo.p2pRole;
@@ -246,7 +246,7 @@ int32_t LnnGetP2pRole(const NodeInfo *info)
 int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
 {
     if (info == NULL || p2pMac == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(info->p2pInfo.p2pMac, sizeof(info->p2pInfo.p2pMac), p2pMac) != EOK) {
@@ -259,7 +259,7 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
 const char *LnnGetP2pMac(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return NULL;
     }
     return info->p2pInfo.p2pMac;
@@ -268,7 +268,7 @@ const char *LnnGetP2pMac(const NodeInfo *info)
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 {
     if (info == NULL || goMac == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -282,7 +282,7 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 const char *LnnGetP2pGoMac(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return NULL;
     }
     return info->p2pInfo.goMac;
@@ -291,7 +291,7 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
 uint64_t LnnGetSupportedProtocols(NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return 0;
     }
     return info->supportedProtocols;

@@ -23,7 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
-#include "softbus_tcp_socket.h"
+#include "softbus_socket.h"
 
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {

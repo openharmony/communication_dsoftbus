@@ -198,7 +198,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     if ((deviceList == NULL) || (deviceCount == 0)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "%s:invalid param.", __func__);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Disc device found, count=%u", deviceCount);
