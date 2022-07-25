@@ -577,49 +577,41 @@ HWTEST_F(Disc_Test, PublishServiceTest013, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -646,49 +638,41 @@ HWTEST_F(Disc_Test, PublishServiceTest014, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -715,49 +699,41 @@ HWTEST_F(Disc_Test, PublishServiceTest015, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -784,49 +760,41 @@ HWTEST_F(Disc_Test, PublishServiceTest016, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -894,8 +862,6 @@ HWTEST_F(Disc_Test, StartDiscoveryTest001, TestSize.Level0)
 HWTEST_F(Disc_Test, StartDiscoveryTest002, TestSize.Level0)
 {
     int ret;
-
-
     g_sInfo.subscribeId = GetSubscribeId();
     ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
@@ -1212,7 +1178,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest009, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest010
- * @tc.desc:  Test extern module passive discover£¬use wrong Medium and Freq Under the COAP.
+ * @tc.desc:  Test extern module passive discoveruse wrong Medium and Freq Under the COAP.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -1246,7 +1212,7 @@ HWTEST_F(Disc_Test, StartDiscoveryTest010, TestSize.Level0)
 
 /**
  * @tc.name: StartDiscoveryTest011
- * @tc.desc:  Test extern module passive discover£¬use wrong Medium and Freq Under the AUTO.
+ * @tc.desc:  Test extern module passive discoveruse wrong Medium and Freq Under the AUTO.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -1446,49 +1412,41 @@ HWTEST_F(Disc_Test, StartDiscoveryTest014, TestSize.Level1)
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -1517,49 +1475,41 @@ HWTEST_F(Disc_Test, StartDiscoveryTest015, TestSize.Level1)
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == 0);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -1808,49 +1758,41 @@ HWTEST_F(Disc_Test, UnPublishServiceTest008, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -1877,50 +1819,41 @@ HWTEST_F(Disc_Test, UnPublishServiceTest009, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
 }
 
 /**
@@ -1947,49 +1880,41 @@ HWTEST_F(Disc_Test, UnPublishServiceTest010, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -2016,49 +1941,41 @@ HWTEST_F(Disc_Test, UnPublishServiceTest011, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "hicall";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "profile";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "homevisionPic";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "castPlus";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "aaCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "ddmpCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret == 0);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 }
 
 /**
