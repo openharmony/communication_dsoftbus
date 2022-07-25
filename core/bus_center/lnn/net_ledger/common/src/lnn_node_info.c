@@ -288,7 +288,7 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
     return info->p2pInfo.goMac;
 }
 
-uint64_t LnnGetSupportedProtocols(NodeInfo *info)
+uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
