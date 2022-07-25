@@ -423,7 +423,6 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest008, TestSize.Level1)
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
-
 }
 
 /**
@@ -1331,8 +1330,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest004, TestSize.Level1)
     testInfo.freq = SUPER_HIGH;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
-    
+    EXPECT_TRUE(ret == 0);    
 }
 
 /**
