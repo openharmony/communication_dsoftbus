@@ -31,9 +31,6 @@ static int g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
 static const char *g_pkgName_1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
-static const char* g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
-
-const int32_t ERRO_CAPDATA_LEN = 514;
 
 class DiscSdkTestBle : public testing::Test {
 public:
