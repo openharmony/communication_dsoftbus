@@ -434,7 +434,7 @@ static void DeleteOverTimeMsgIdRecord(MsgIdList *msgIdList, struct timespec *cur
         if (curTime->tv_sec - msgIdList->msgIdRecord[i].recvTime.tv_sec < COAP_MSGID_SURVIVAL_SECONDS) {
             return;
         }
-        if (i == g_msgIdList->endIdx) {
+        if (i == msgIdList->endIdx) {
             msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
             msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
             return;
@@ -443,8 +443,8 @@ static void DeleteOverTimeMsgIdRecord(MsgIdList *msgIdList, struct timespec *cur
         i = msgIdList->startIdx;
         if (cycleTimes > COAP_MAX_MSGID_RESERVE_NUM) {
             DFINDER_LOGE(TAG, "cycle too many times, error must occurred and init msgList");
-            g_msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
-            g_msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
+            msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
+            msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
             break;
         }
         cycleTimes++;
