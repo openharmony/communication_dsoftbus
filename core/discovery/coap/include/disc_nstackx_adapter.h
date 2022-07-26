@@ -42,8 +42,6 @@ typedef struct {
 typedef struct {
     int32_t freq;
     DiscCoapMode mode;
-    char *businessData;
-    unsigned int businessDataLen;
 } DiscCoapOption;
 
 int32_t DiscNstackxInit(void);
