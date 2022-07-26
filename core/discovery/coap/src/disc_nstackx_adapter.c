@@ -438,7 +438,6 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
             return;
         }
     } else if (status == LINK_STATUS_DOWN) {
-        g_localDeviceInfo->ifNums = 0;
         if (strcpy_s(g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr), INVALID_IP_ADDR) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "strcpy_s networkIpAddr failed.");
