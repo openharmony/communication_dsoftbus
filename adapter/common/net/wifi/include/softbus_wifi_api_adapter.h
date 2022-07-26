@@ -25,7 +25,7 @@ extern "C" {
 #define WIFI_MAC_LEN 6
 #define WIFI_MAX_KEY_LEN 65
 #define WIFI_MAX_CONFIG_SIZE 10
-#define WIFI_SCAN_HOTSPOT_LIMIT 64
+#define WIFI_MAX_SCAN_HOTSPOT_LIMIT 128
 #define MAX_CALLBACK_NUM 5
 
 typedef struct {
@@ -36,17 +36,23 @@ typedef struct {
     int32_t netId;
     int32_t isHiddenSsid;
 } SoftBusWifiDevConf;
+
 typedef struct {
     /* call back for scan result */
     void (*onSoftBusWifiScanResult)(int state, int size);
 } ISoftBusScanResult;
+
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
     unsigned char bssid[WIFI_MAC_LEN];
-    int securityType;
-    int rssi;
-    int band;
-    int frequency;
+    int32_t securityType;
+    int32_t rssi;
+    int32_t band;
+    int32_t frequency;
+    int32_t channelWidth;
+    int32_t centerFrequency0;
+    int32_t centerFrequency1;
+    int64_t timestamp;
 } SoftBusWifiScanInfo;
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
