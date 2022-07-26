@@ -182,5 +182,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "ohos.msdp.spatialawareness.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "ohos.msdp.spatialawareness",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
