@@ -47,7 +47,7 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
                                       uint32_t len, int32_t type)
 {
     (void)pkgName;
-    return TransOnChannelMsgReceived(channelId, channelType, data, len, type);
+    return TransOnChannelMsgReceived(channelId, channelType, data, len, (SessionPktType)type);
 }
 
 int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)

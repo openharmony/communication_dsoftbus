@@ -846,7 +846,7 @@ int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if ((item->cb.events & EVENT_NODE_STATE_INFO_CHANGED) != 0) {
-            item->cb.onNodeBasicInfoChanged(type, basicInfo);
+            item->cb.onNodeBasicInfoChanged((NodeBasicInfoType)type, basicInfo);
         }
     }
     ClearNodeStateCbList(&dupList);
@@ -887,14 +887,14 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode)
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason)
 {
     if (g_busCenterClient.publishCb.OnPublishResult != NULL) {
-        g_busCenterClient.publishCb.OnPublishResult(publishId, reason);
+        g_busCenterClient.publishCb.OnPublishResult(publishId, (PublishResult)reason);
     }
 }
 
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
 {
     if (g_busCenterClient.refreshCb.OnDiscoverResult != NULL) {
-        g_busCenterClient.refreshCb.OnDiscoverResult(refreshId, reason);
+        g_busCenterClient.refreshCb.OnDiscoverResult(refreshId, (RefreshResult)reason);
     }
 }
 
