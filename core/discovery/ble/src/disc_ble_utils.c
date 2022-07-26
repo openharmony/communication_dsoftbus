@@ -232,55 +232,82 @@ int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const 
     return SOFTBUS_OK;
 }
 
-static int32_t ParseRecvAdvData(const unsigned char *data, uint32_t dataLen, unsigned char type,
-    uint32_t index, void *value)
+/* A helper function for copying TLV value to destination */
+static int32_t CopyValue(void *dst, uint32_t dstLen, void *src, uint32_t srcLen, const char *hint)
 {
-    if (data == NULL || value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ParseRecvAdvData input param invalid");
-        return SOFTBUS_INVALID_PARAM;
+    if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse tlv memcpy failed, "
+            "tlvType: %s, tlvLen: %d, dstLen: %d,", hint, srcLen, dstLen);
+            return SOFTBUS_MEM_ERR;
     }
-    if (dataLen <= index) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "index >= dataLen");
-        return 0;
+    return SOFTBUS_OK;
+}
+
+/* A helper function for convert br mac bin address to string address */
+static int32_t CopyBrAddrValue(DeviceWrapper *device, const unsigned char *src, uint32_t srcLen)
+{
+    int i = device->info->addrNum;
+    int32_t ret = ConvertBtMacToStr(device->info->addr[i].info.br.brMac, BT_MAC_LEN,
+        (uint8_t *)src, srcLen);
+    if (ret == SOFTBUS_OK) {
+        device->info->addr[i].type = CONNECTION_ADDR_BR;
+        device->info->addrNum += 1;
+        return SOFTBUS_OK;
     }
-    if (type != ((data[index] & DATA_TYPE_MASK) >> BYTE_SHIFT)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "type check failed");
-        return 0;
-    }
-    uint32_t len = (uint32_t)(data[index] & DATA_LENGTH_MASK);
-    if (index + TL_LEN >= dataLen) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "advData out of range");
-        return SOFTBUS_ERR;
-    }
-    if (len == 0) {
-        return 0;
-    }
-    if (memcpy_s(value, len, &data[index + 1], len) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ParseRecvAdvData memcpy failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    return len + TL_LEN;
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse tlv convert br failed, "
+        "tlvType: TLV_TYPE_BR_MAC, tlvLen: %d, dstLen: %d", srcLen, BT_MAC_LEN);
+    return ret;
 }
 
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, uint32_t dataLen)
 {
-    device->info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
-    int32_t curLen = POS_TLV + ADV_HEAD_LEN;
-    unsigned char devType;
-    int32_t len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_ID_HASH, curLen, device->info->devId);
-    PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_TYPE, curLen, &devType);
-    PACKET_CHECK_LENGTH(len);
-    device->info->devType = (DeviceType)devType;
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_BR_MAC, curLen, device->info->addr[0].info.ble.bleMac);
-    PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_RANGE_POWER, curLen, &(device->power));
-    PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_CUST, curLen, device->info->custData);
-    PACKET_CHECK_LENGTH(len);
-    len = ParseRecvAdvData(data, dataLen, TLV_TYPE_DEVICE_NAME, curLen, device->info->devName);
-    PACKET_CHECK_LENGTH(len);
-    return SOFTBUS_OK;
+    uint32_t curLen = POS_TLV + ADV_HEAD_LEN;
+    unsigned char type =  0;
+    uint32_t len = 0;
+    int32_t ret = SOFTBUS_OK;
+    while (curLen < dataLen) {
+        type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
+        len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
+        if (curLen + TL_LEN + len > dataLen) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unexperted advData: out of range, "
+                "tlvType: %d, tlvLen: %d, current pos: %d, total pos: %d", type, len, curLen, dataLen);
+            return SOFTBUS_ERR;
+        }
+        switch (type) {
+            case TLV_TYPE_DEVICE_ID_HASH:
+                ret = CopyValue(device->info->devId, DISC_MAX_DEVICE_ID_LEN,
+                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_ID_HASH");
+                break;
+            case TLV_TYPE_DEVICE_TYPE:
+                ret = CopyValue(&device->info->devType, DEVICE_TYPE_LEN,
+                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_TYPE");
+                break;
+            case TLV_TYPE_DEVICE_NAME:
+                ret = CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
+                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_NAME");
+                break;
+            case TLV_TYPE_CUST:
+                ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,
+                    &data[curLen + 1], len, "TLV_TYPE_CUST");
+                break;
+            case TLV_TYPE_BR_MAC:
+                ret = CopyBrAddrValue(device, &data[curLen + 1], len);
+                break;
+            case TLV_TYPE_RANGE_POWER:
+                ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, &data[curLen + 1], len, "TLV_TYPE_RANGE_POWER");
+                break;
+            default:
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "Unknown TLV, tlvType: %d, tlvLen: %d, just skip",
+                    type, len);
+                break;
+        }
+        if (ret != SOFTBUS_OK) {
+            break;
+        }
+        // move cursor to next TLV
+        curLen += len + 1;
+    }
+    return ret;
 }
 
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *data, uint32_t dataLen)
@@ -294,36 +321,45 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "copy accountHash failed");
         return SOFTBUS_MEM_ERR;
     }
+    device->info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
 
-    if (dataLen <= MAX_BROADCAST_DATA_LEN + SCAN_RSP_HEADER_LEN) {
-        return ParseRecvTlvs(device, data, dataLen);
+    // ble scan data consists of multiple ADStructures
+    // ADStructure format: <length (1 octet)> <type (1 octet)> <data(length octect - 1)>
+    // More info about ADStructure, please ref Generic Access Profile Specification
+    // We only use Flag(0x01) + ServiceData(0x16) + Manufacture(0xff) in order, so we should join them together
+    // before parse
+    int32_t scanRspPtr = 0;
+    int32_t scanRspTlvLen = 0;
+    int32_t nextAdsPtr = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
+    while (nextAdsPtr < dataLen) {
+        if (data[nextAdsPtr + 1] == RSP_TYPE) {
+            scanRspPtr = nextAdsPtr;
+            scanRspTlvLen = data[scanRspPtr] - RSP_HEAD_LEN + 1;
+            break;
+        }
+        nextAdsPtr += data[nextAdsPtr] + 1;
     }
 
-    // it needs to skip scan resp AD Structure header when TLV overflow to scan rsp
-    uint32_t indScanRspDataLen = dataLen - SCAN_RSP_HEADER_LEN;
-    unsigned char *copyData = SoftBusCalloc(indScanRspDataLen);
+    int32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
+    unsigned char *copyData = SoftBusCalloc(advLen + scanRspTlvLen);
     if (copyData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed.");
         return SOFTBUS_MEM_ERR;
     }
-
-    if (memcpy_s(copyData, MAX_BROADCAST_DATA_LEN, data, MAX_BROADCAST_DATA_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s adv failed, can not skip scan resp flag.");
+    if (memcpy_s(copyData, advLen, data, advLen) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s adv failed, advLen: %d", advLen);
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
-
-    const unsigned char *destScanbRspTlv = copyData + MAX_BROADCAST_DATA_LEN;
-    int destScanRspTlvLen = indScanRspDataLen - MAX_BROADCAST_DATA_LEN;
-    const unsigned char *srcScanRspTlv = data + MAX_BROADCAST_DATA_LEN + SCAN_RSP_HEADER_LEN;
-    uint32_t srcScanRspTlvLen = dataLen-MAX_BROADCAST_DATA_LEN-SCAN_RSP_HEADER_LEN;
-    if (memcpy_s(destScanbRspTlv, destScanRspTlvLen, srcScanRspTlv,  srcScanRspTlvLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s scan rsp failed, can not skip scan resp flag.");
-        SoftBusFree(copyData);
-        return SOFTBUS_MEM_ERR;
+    if (scanRspTlvLen != 0) {
+        if (memcpy_s(copyData + advLen, scanRspTlvLen, data + scanRspPtr + RSP_HEAD_LEN, scanRspTlvLen) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s scan resp failed, advLen: %d, "
+                "scanRspTlvLen: %d.", advLen, scanRspTlvLen);
+            SoftBusFree(copyData);
+            return SOFTBUS_MEM_ERR;
+        }
     }
-
-    int32_t ret = ParseRecvTlvs(device, copyData, indScanRspDataLen);
+    int32_t ret = ParseRecvTlvs(device, copyData, advLen + scanRspTlvLen);
     SoftBusFree(copyData);
     return ret;
 }
