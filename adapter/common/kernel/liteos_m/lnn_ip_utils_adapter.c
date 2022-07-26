@@ -40,8 +40,8 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 #ifdef HISPARK_PEGASUS_USE_NETIF_GET_ADDR
     netifapi_netif_get_addr(netif, ipAddr, netMask, gw);
 #else
-    ipAddr = netif_ip4_addr(netif);
-    netMask = netif_ip4_netmask(netif);
+    ipAddr = (ip4_addr_t *)netif_ip4_addr(netif);
+    netMask = (ip4_addr_t *)netif_ip4_netmask(netif);
     gw = netif_ip4_gw(netif);
 #endif
     ipStr = ip4addr_ntoa(ipAddr);

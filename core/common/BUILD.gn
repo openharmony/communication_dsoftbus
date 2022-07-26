@@ -56,12 +56,14 @@ if (defined(ohos_lite)) {
       "$hilog_lite_include_path",
     ]
     include_dirs += conn_common_inc + trans_common_inc
-    cflags = [
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Os",
-    ]
-    cflags_cc = cflags
+    if (board_toolchain_type != "iccarm") {
+      cflags = [
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Os",
+      ]
+      cflags_cc = cflags
+    }
   }
 
   target(build_type, "softbus_utils") {
@@ -69,11 +71,13 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
     sources = common_utils_src
     sources += conn_common_src + trans_common_src
-    cflags = [
-      "-Wall",
-      "-fPIC",
-      "-std=c99",
-    ]
+    if (board_toolchain_type != "iccarm") {
+      cflags = [
+        "-Wall",
+        "-fPIC",
+        "-std=c99",
+      ]
+    }
     if (ohos_kernel_type == "liteos_m") {
       defines = [ "SOFTBUS_MINI_SYSTEM" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
