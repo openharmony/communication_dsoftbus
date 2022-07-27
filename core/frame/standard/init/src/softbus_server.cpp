@@ -30,6 +30,8 @@
 #include "system_ability_definition.h"
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
+#include "softbus_hidumper.h"
+#include "string_ex.h"
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -246,6 +248,28 @@ int32_t SoftBusServer::DeactiveMetaNode(const char *metaNodeId)
 int32_t SoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
 {
     return LnnIpcGetAllMetaNodeInfo(info, infoNum);
+}
+
+int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
+{
+    if (fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "hidumper fd is invalid\n");
+        return SOFTBUS_ERR;
+    }
+    std::vector<std::string> argsStr;
+    for (auto item : args) {
+        argsStr.emplace_back(Str16ToStr8(item));
+    }
+
+    int argc = argsStr.size();
+    const char *argv[argc];
+
+    for (int i = 0; i < argc; i++) {
+        argv[i] = argsStr[i].c_str();
+    }
+
+    int nRet = SoftBusDumpProcess(fd, argc, argv);
+    return nRet;
 }
 
 void SoftBusServer::OnStart()

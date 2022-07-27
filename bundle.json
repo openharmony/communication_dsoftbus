@@ -71,6 +71,9 @@
             }
           }
         ],
+        "hisysevent_config": [
+          "//foundation/communication/dsoftbus/hisysevent.yaml"
+        ],
         "test": [
           "//foundation/communication/dsoftbus/tests/adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
