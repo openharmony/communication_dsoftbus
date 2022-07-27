@@ -26,7 +26,7 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 {
     (void)timerId;
 
-    void *id = osTimerNew((osTimerFunc_t)timerFunc, type, NULL, NULL);
+    void *id = osTimerNew((osTimerFunc_t)timerFunc, (osTimerType_t)type, NULL, NULL);
     if (id != NULL) {
         HILOG_INFO(SOFTBUS_HILOG_ID, "create timer success");
         return id;
