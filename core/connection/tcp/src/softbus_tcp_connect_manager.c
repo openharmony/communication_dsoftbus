@@ -391,6 +391,16 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
 
+    if (option->socketOption.keepAlive == 1) {
+        if (ConnSetTcpKeepAlive(fd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set keepalive fail, fd: %d", fd);
+            ConnShutdownSocket(fd);
+            result->OnConnectFailed(requestId, SOFTBUS_ERR);
+            return SOFTBUS_ERR;
+        }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive successfully, fd: %d", fd);
+    }
+    
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc TcpConnInfoNode failed");
