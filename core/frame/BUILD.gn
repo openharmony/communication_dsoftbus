@@ -57,12 +57,14 @@ if (defined(ohos_lite)) {
         "common/src/softbus_server_frame.c",
         "mini/src/softbus_server_stub.c",
       ]
-      cflags = [
-        "-Wall",
-        "-fPIC",
-        "-std=c99",
-      ]
-      cflags_cc = cflags
+      if (board_toolchain_type != "iccarm") {
+        cflags = [
+          "-Wall",
+          "-fPIC",
+          "-std=c99",
+        ]
+        cflags_cc = cflags
+      }
       deps = dsoftbus_server_common_deps
       deps += [
         "$dsoftbus_root_path/adapter:softbus_adapter",

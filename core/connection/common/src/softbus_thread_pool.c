@@ -107,7 +107,7 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to create thread pool");
         return NULL;
     }
-
+    int32_t countSuccess = 0;
     pool->pthreads = (SoftBusThread *)SoftBusCalloc((int32_t)(sizeof(SoftBusThread) * threadNum));
     if (pool->pthreads == NULL) {
         SoftBusFree(pool);
@@ -121,7 +121,6 @@ ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
         goto EXIT;
     }
 
-    int32_t countSuccess = 0;
     for (int32_t i = 0; i < pool->threadNum; ++i) {
         ThreadAttr attr = {"ThreadPoolWorker", 0, SOFTBUS_PRIORITY_LOWEST};
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "create pthread now.");
