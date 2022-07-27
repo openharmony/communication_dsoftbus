@@ -502,30 +502,6 @@ static int32_t GetDirPath(const char *fullPath, char *dirPath, int32_t dirPathLe
     return SOFTBUS_OK;
 }
 
-static int32_t GetFileName(const char *fullPath, char *fileName, int32_t fileNameLen)
-{
-    if ((fullPath == NULL) || (strlen(fullPath) < 1) || (fullPath[strlen(fullPath) - 1] == PATH_SEPARATOR)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid input param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t i;
-    int32_t dirFullLen = (int32_t)strlen(fullPath);
-    for (i = dirFullLen - 1; i >= 0; i--) {
-        if (fullPath[i] == PATH_SEPARATOR) {
-            i++;
-            break;
-        }
-        if (i == 0) {
-            break;
-        }
-    }
-    if (strcpy_s(fileName, fileNameLen, fullPath + i) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s filename error, fileNameLen[%d]", fileNameLen);
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t pathSize)
 {
     char *dirPath = (char *)SoftBusCalloc(MAX_FILE_PATH_NAME_LEN);
@@ -548,9 +524,8 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s], realFullDir[%s]", dirPath, absFullDir);
-    char *fileName = dirPath;
-    memset_s(fileName, MAX_FILE_PATH_NAME_LEN, 0, MAX_FILE_PATH_NAME_LEN);
-    if (GetFileName(fullPath, fileName, MAX_FILE_PATH_NAME_LEN) != SOFTBUS_OK) {
+    const char *fileName = TransGetFileName(fullPath);
+    if (fileName == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file name failed");
         goto EXIT_ERR;
     }
@@ -650,22 +625,14 @@ static ProxyFileMutexLock *GetSessionFileLock(int32_t channelId)
     return sessionLock;
 }
 
-static void DelSessionFileLock(int32_t channelId)
+static void DelSessionFileLock(ProxyFileMutexLock *sessionLock)
 {
-    if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+    if (sessionLock == NULL) {
         return;
     }
-    ProxyFileMutexLock *item = NULL;
-    ProxyFileMutexLock *sessionLock = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_sessionFileLockList, ProxyFileMutexLock, node) {
-        if (item->channelId == channelId) {
-            sessionLock = item;
-            break;
-        }
-    }
-    if (sessionLock == NULL) {
-        (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
+
+    if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:lock mutex failed", __func__);
         return;
     }
     sessionLock->count--;
@@ -1172,20 +1139,11 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, uint32_t maxL
 static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
-    if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile arg filecnt[%d] error", fileCnt);
-        return SOFTBUS_ERR;
-    }
-    if (!IsValidFileString(sFileList, fileCnt, MAX_FILE_PATH_NAME_LEN) ||
-        !IsValidFileString(dFileList, fileCnt, MAX_FILE_PATH_NAME_LEN)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile invalid arg input");
-        return SOFTBUS_ERR;
-    }
     int32_t ret;
     for (uint32_t index = 0; index < fileCnt; index++) {
         ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file %s, failed", sFileList[index]);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file %s failed.ret=%" PRId32, sFileList[index], ret);
             return SOFTBUS_ERR;
         }
     }
@@ -1232,9 +1190,59 @@ static int32_t GetSendListenerInfoByChannelId(int32_t channelId, SendListenerInf
     return SOFTBUS_OK;
 }
 
+static int32_t CreateSendListenerInfo(SendListenerInfo **sendListenerInfo, int32_t channelId)
+{
+    SendListenerInfo *sendInfo = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    if (sendInfo == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    int32_t ret;
+    do {
+        ret = GetSendListenerInfoByChannelId(channelId, sendInfo);
+        if (ret != SOFTBUS_OK) {
+            break;
+        }
+
+        ret = AddSendListenerInfo(sendInfo);
+        if (ret != SOFTBUS_OK) {
+            break;
+        }
+    } while (false);
+
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(sendInfo);
+        sendInfo = NULL;
+    }
+
+    *sendListenerInfo = sendInfo;
+    return ret;
+}
+
+static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
+{
+    if (sendInfo == NULL) {
+        return;
+    }
+    DelSendListenerInfo(sendInfo);
+    SoftBusFree(sendInfo);
+}
+
 int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans start");
+    if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile arg filecnt[%d] error", fileCnt);
+        return SOFTBUS_ERR;
+    }
+    if (sFileList == NULL || !IsValidFileString(sFileList, fileCnt, MAX_FILE_PATH_NAME_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile invalid arg sFileList");
+        return SOFTBUS_ERR;
+    }
+    if (dFileList == NULL || !IsValidFileString(dFileList, fileCnt, MAX_FILE_PATH_NAME_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sendfile invalid arg dFileList");
+        return SOFTBUS_ERR;
+    }
+
     ProxyFileMutexLock *sessionLock = GetSessionFileLock(channelId);
     if (sessionLock == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file get file lock failed");
@@ -1242,44 +1250,42 @@ int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const c
     }
     if (SoftBusMutexLock(&sessionLock->sendLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file lock file mutex failed");
+        DelSessionFileLock(sessionLock);
         return SOFTBUS_LOCK_ERR;
     }
-    
-    SendListenerInfo *sendInfo = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
-    if (sendInfo == NULL) {
-        (void)SoftBusMutexUnlock(&sessionLock->sendLock);
-        DelSessionFileLock(channelId);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    int32_t ret = SOFTBUS_INVALID_PARAM;
-    if (GetSendListenerInfoByChannelId(channelId, sendInfo) != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    ret = AddSendListenerInfo(sendInfo);
+
+    SendListenerInfo *sendInfo = NULL;
+    int32_t ret;
+    do {
+        ret = CreateSendListenerInfo(&sendInfo, channelId);
+        if (ret != SOFTBUS_OK || sendInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create send listener info failed! ret=%" PRId32, ret);
+            break;
+        }
+        ret = ProxyStartSendFile(sendInfo, sFileList, dFileList, fileCnt);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file failed!ret=%" PRId32, ret);
+            DeletePendingPacket(sendInfo->sessionId, sendInfo->waitSeq);
+            ret = SOFTBUS_TRANS_PROXY_SENDMSG_ERR;
+            break;
+        }
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans ok");
+    } while (false);
+
     if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file trans error");
+        if (sendInfo != NULL && sendInfo->fileListener.sendListener.OnFileTransError != NULL) {
+            sendInfo->fileListener.sendListener.OnFileTransError(sendInfo->sessionId);
+        }
     }
-    if (ProxyStartSendFile(sendInfo, sFileList, dFileList, fileCnt) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file failed");
-        DeletePendingPacket(sendInfo->sessionId, sendInfo->waitSeq);
-        DelSendListenerInfo(sendInfo);
-        ret = SOFTBUS_TRANS_PROXY_SENDMSG_ERR;
-        goto EXIT_ERR;
+
+    if (sendInfo != NULL) {
+        ReleaseSendListenerInfo(sendInfo);
+        sendInfo = NULL;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans ok");
-    DelSendListenerInfo(sendInfo);
+
     (void)SoftBusMutexUnlock(&sessionLock->sendLock);
-    DelSessionFileLock(channelId);
-    SoftBusFree(sendInfo);
-    return SOFTBUS_OK;
-EXIT_ERR:
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy send file trans error");
-    (void)SoftBusMutexUnlock(&sessionLock->sendLock);
-    DelSessionFileLock(channelId);
-    if (sendInfo->fileListener.sendListener.OnFileTransError != NULL) {
-        sendInfo->fileListener.sendListener.OnFileTransError(sendInfo->sessionId);
-    }
-    SoftBusFree(sendInfo);
+    DelSessionFileLock(sessionLock);
     return ret;
 }
 
