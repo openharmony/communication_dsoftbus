@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -31,7 +32,14 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_INVALID_PARAM;
     }
 
-    SessionConn *newConn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_WIFI, false);
+    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    if(module == UNUSE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+
+    SessionConn *newConn = CreateNewSessinConn(module, false);
     if (newConn == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -57,7 +65,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         SoftBusFree(newConn);
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(DIRECT_CHANNEL_SERVER_WIFI, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(module, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel add trigger fail");
         TransDelSessionConnById(newConn->channelId);
         TransSrvDelDataBufNode(newchannelId);

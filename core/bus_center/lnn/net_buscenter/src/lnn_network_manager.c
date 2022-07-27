@@ -498,3 +498,34 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
     }
     return ret;
 }
+
+struct FindProtocolByTypeRequest {
+    ProtocolType protocol;
+    LnnProtocolManager *manager;
+};
+
+static VisitNextChoice FindProtocolByType(const LnnProtocolManager *manager, void *data)
+{
+    struct FindProtocolByTypeRequest *request = (struct FindProtocolByTypeRequest *)data;
+    if (manager->id == request->protocol) {
+        request->manager = manager;
+        return CHOICE_FINISH_VISITING;
+    } else {
+        return CHOICE_VISIT_NEXT;
+    }
+}
+
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+{
+    struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
+    if (LnnVisitProtocol(FindProtocolByType, &request)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: not such protocol! protocolId=%d", __func__, protocol);
+        return UNUSE_BUTT;
+    }
+    if (request.manager == NULL) {
+        SoftBusLog(
+            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol manager is null! protocolId=%d", __func__, protocol);
+        return UNUSE_BUTT;
+    }
+    return request.manager->GetListenerModule(mode);
+}
