@@ -366,6 +366,38 @@ int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId
     return SOFTBUS_OK;
 }
 
+static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectResult *result, uint32_t connectionId,
+    uint32_t requestId, int32_t fd)
+{
+    TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
+    if (tcpConnInfoNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc TcpConnInfoNode failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    
+    if (strcpy_s(tcpConnInfoNode->info.info.ipInfo.ip, IP_LEN, option->info.ipOption.ip) != EOK ||
+        memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
+        SoftBusFree(tcpConnInfoNode);
+        return SOFTBUS_ERR;
+    }
+
+    tcpConnInfoNode->requestId = requestId;
+    tcpConnInfoNode->connectionId = connectionId;
+    tcpConnInfoNode->info.isAvailable = true;
+    tcpConnInfoNode->info.isServer = false;
+    tcpConnInfoNode->info.type = CONNECT_TCP;
+    tcpConnInfoNode->info.info.ipInfo.port = option->info.ipOption.port;
+    tcpConnInfoNode->info.info.ipInfo.fd = fd;
+    tcpConnInfoNode->info.info.ipInfo.moduleId = option->info.ipOption.moduleId;
+    if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddTcpConnInfo failed");
+        SoftBusFree(tcpConnInfoNode);
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     if (TcpConnectDeviceCheckArg(option, requestId, result) == SOFTBUS_ERR) {
@@ -379,33 +411,19 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
 
-    TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
-    if (tcpConnInfoNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc TcpConnInfoNode failed");
-        TcpShutDown(fd);
-        result->OnConnectFailed(requestId, SOFTBUS_MALLOC_ERR);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (strcpy_s(tcpConnInfoNode->info.info.ipInfo.ip, IP_LEN, option->info.ipOption.ip) != EOK ||
-        memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
-        TcpShutDown(fd);
-        SoftBusFree(tcpConnInfoNode);
-        result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        return SOFTBUS_ERR;
+    if (option->info.ipOption.keepAlive == 1) {
+        if (ConnSetTcpKeepAlive(fd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set keepalive fail, fd: %d", fd);
+            TcpShutDown(fd);
+            result->OnConnectFailed(requestId, SOFTBUS_ERR);
+            return SOFTBUS_ERR;
+        }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive successfully, fd: %d", fd);
     }
 
     uint32_t connectionId = CalTcpConnectionId(fd);
-    tcpConnInfoNode->requestId = requestId;
-    tcpConnInfoNode->connectionId = connectionId;
-    tcpConnInfoNode->info.isAvailable = true;
-    tcpConnInfoNode->info.isServer = false;
-    tcpConnInfoNode->info.type = CONNECT_TCP;
-    tcpConnInfoNode->info.info.ipInfo.port = option->info.ipOption.port;
-    tcpConnInfoNode->info.info.ipInfo.fd = fd;
-    tcpConnInfoNode->info.info.ipInfo.moduleId = option->info.ipOption.moduleId;
-    if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
+    if (WrapperAddTcpConnInfo(option, result, connectionId, requestId, fd) != SOFTBUS_OK) {
         TcpShutDown(fd);
-        SoftBusFree(tcpConnInfoNode);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }

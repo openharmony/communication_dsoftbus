@@ -202,6 +202,7 @@ int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *opt
             }
             option->info.ipOption.port = info->info.ipInfo.port;
             option->info.ipOption.moduleId = AUTH_P2P;
+            option->info.ipOption.keepAlive = 1;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport link type, type = %d.", info->type);
