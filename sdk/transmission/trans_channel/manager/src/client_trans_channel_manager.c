@@ -171,7 +171,7 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *
 
 void DeleteFileListener(const char *sessionName)
 {
-    return TransUdpDeleteFileListener(sessionName);
+    TransUdpDeleteFileListener(sessionName);
 }
 
 int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len)

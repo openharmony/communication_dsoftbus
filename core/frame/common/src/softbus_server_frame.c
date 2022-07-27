@@ -55,6 +55,7 @@ bool GetServerIsInit(void)
 
 void InitSoftBusServer(void)
 {
+    int32_t ret;
     SoftbusConfigInit();
 
     if (ServerStubInit() != SOFTBUS_OK) {
@@ -94,7 +95,7 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    int32_t ret = P2pLinkInit();
+    ret = P2pLinkInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");

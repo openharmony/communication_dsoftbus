@@ -170,7 +170,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     }
 
     discDevInfo->addrNum = 1;
-    discDevInfo->devType = nstackxDevInfo->deviceType;
+    discDevInfo->devType = (DeviceType)nstackxDevInfo->deviceType;
     discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
     discDevInfo->discoveryType = GetDiscType(nstackxDevInfo->mode, nstackxDevInfo->discoveryType);
 

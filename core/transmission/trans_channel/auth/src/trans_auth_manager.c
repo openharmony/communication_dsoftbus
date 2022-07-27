@@ -647,7 +647,8 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
     if (!chanInfo.isConnOptValid) {
         return SOFTBUS_ERR;
     }
-    ConnectionAddr addr = {0};
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
         return SOFTBUS_ERR;
     }
