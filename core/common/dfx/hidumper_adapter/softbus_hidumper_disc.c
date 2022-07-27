@@ -31,7 +31,7 @@ static void SoftBusDumpDiscHelp(int fd)
     dprintf(fd, "   -l         List all the dump item of disc\n");
     dprintf(fd, "   BleInfoManager       List all the dump item of conn\n");
     dprintf(fd, "   BleAdvertiser  List all the dump item of buscenter\n");
-    dprintf(fd, "   BleListener      List all the dump item of trans\n");    
+    dprintf(fd, "   BleListener      List all the dump item of trans\n"); 
     dprintf(fd, "   PublicMgr    List all the dump item of dstream\n");
     dprintf(fd, "   SubscribeMgr      List all the dump item of dfile\n");
     dprintf(fd, "   CapabilityData    List all the dump item of dfinder\n");

@@ -68,7 +68,7 @@ if (defined(ohos_lite)) {
     include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
     include_dirs += conn_common_inc + trans_common_inc
     sources = common_utils_src
-    sources += conn_common_src + trans_common_src + dfx_src
+    sources += conn_common_src + trans_common_src
     cflags = [
       "-Wall",
       "-fPIC",
