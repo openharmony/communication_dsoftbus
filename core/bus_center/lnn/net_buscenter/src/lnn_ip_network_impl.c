@@ -549,6 +549,17 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     return SOFTBUS_OK;
 }
 
+static ListenerModule LnnGetIpListenerModule(ListenerMode mode)
+{
+    if(mode == LNN_LISTENER_MODE_PROXY) {
+        return PROXY;
+    } else if(mode == LNN_LISTENER_MODE_DIRECT) {
+        return DIRECT_CHANNEL_SERVER_WIFI;
+    } else {
+        return UNUSE_BUTT;
+    }
+}
+
 void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
 {
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler);
@@ -556,6 +567,7 @@ void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
     LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_IP);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "%s:ip network deinited", __func__);
 }
+
 
 static LnnProtocolManager g_ipProtocol = {
     .id = LNN_PROTOCOL_IP,
@@ -565,6 +577,7 @@ static LnnProtocolManager g_ipProtocol = {
     .Deinit = LnnDeinitIpNetwork,
     .Enable = LnnEnableIpProtocol,
     .Disable = NULL,
+    .GetListenerModule = LnnGetIpListenerModule
 };
 
 int32_t RegistIPProtocolManager(void)

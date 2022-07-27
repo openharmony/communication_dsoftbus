@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -642,6 +643,13 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     ProxyConnInfo conn;
     int32_t ret;
 
+    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    if(module == UNUSE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     int32_t chanNewId = TransProxyGetNewMyId();
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
@@ -684,7 +692,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     }
     result.OnConnectFailed = TransOnConnectFailed;
     result.OnConnectSuccessed = TransOnConnectSuccessed;
-    connChan->connInfo.socketOption.moduleId = PROXY;
+    connChan->connInfo.socketOption.moduleId = module;
     ret = ConnConnectDevice(&(connChan->connInfo), reqId, &result);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
