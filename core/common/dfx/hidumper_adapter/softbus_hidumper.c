@@ -37,7 +37,7 @@ void SoftBusDumpShowHelp(int fd)
     dprintf(fd, "   disc       List all the dump item of disc\n");
     dprintf(fd, "   conn       List all the dump item of conn\n");
     dprintf(fd, "   buscenter  List all the dump item of buscenter\n");
-    dprintf(fd, "   trans      List all the dump item of trans\n");    
+    dprintf(fd, "   trans      List all the dump item of trans\n");
     dprintf(fd, "   dstream    List all the dump item of dstream\n");
     dprintf(fd, "   dfile      List all the dump item of dfile\n");
     dprintf(fd, "   dfinder    List all the dump item of dfinder\n");
@@ -57,7 +57,7 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     if (argc == 0 || strcmp(argv[0], "-h")) {
         SoftBusDumpShowHelp(fd);
         return SOFTBUS_OK;
-    } 
+    }
 
     const char **argvPtr = NULL;
     if (argc == 1) {
@@ -65,19 +65,19 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     } else {
         argvPtr = &argv[1];
     }
-    argc = argc - 1;
+    int argcNew = argc - 1;
     if (strcmp(argv[0], SOFTBUS_DISC_MODULE) == 0) {
-        SoftBusDiscDumpHander(fd, argc, argvPtr);
+        SoftBusDiscDumpHander(fd, argcNew, argvPtr);
     } else if (strcmp(argv[0], SOFTBUS_CONN_MODULE) == 0) {
-        SoftBusConnDumpHander(fd, argc, argvPtr);
-    } else if (strcmp(argv[0], SOFTBUS_DSTREAM_MODULE) == 0){
-        SoftBusNStackDstreamDumpHander(fd, argc, argvPtr);
-    }  else if (strcmp(argv[0], SOFTBUS_DFILE_MODULE) == 0){
-        SoftBusNStackDfileDumpHander(fd, argc, argvPtr);
-    }  else if (strcmp(argv[0], SOFTBUS_DFINDER_MODULE) == 0){
-        SoftBusNStackDumpDfinderHander(fd, argc, argvPtr);
-    }  else if (strcmp(argv[0], SOFTBUS_DMSG_MODULE) == 0){
-        SoftBusNStackDmsgDumpHander(fd, argc, argvPtr);
+        SoftBusConnDumpHander(fd, argcNew, argvPtr);
+    } else if (strcmp(argv[0], SOFTBUS_DSTREAM_MODULE) == 0) {
+        SoftBusNStackDstreamDumpHander(fd, argcNew, argvPtr);
+    }  else if (strcmp(argv[0], SOFTBUS_DFILE_MODULE) == 0) {
+        SoftBusNStackDfileDumpHander(fd, argcNew, argvPtr);
+    }  else if (strcmp(argv[0], SOFTBUS_DFINDER_MODULE) == 0) {
+        SoftBusNStackDumpDfinderHander(fd, argcNew, argvPtr);
+    }  else if (strcmp(argv[0], SOFTBUS_DMSG_MODULE) == 0) {
+        SoftBusNStackDmsgDumpHander(fd, argcNew, argvPtr);
     } else {
         SoftBusDumpErrInfo(fd, argv[0]);
         SoftBusDumpShowHelp(fd);
