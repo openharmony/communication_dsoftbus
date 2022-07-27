@@ -44,7 +44,7 @@ int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc 
     return SOFTBUS_OK;
 }
 
-static void InitStatisticEvtReportFunc()
+static void InitStatisticEvtReportFunc(void)
 {
     for (int i = SOFTBUS_STATISTIC_EVT_START; i < SOFTBUS_STATISTIC_EVT_BUTT; i++) {
         g_statisticEvtReportFunc[i] = NULL;

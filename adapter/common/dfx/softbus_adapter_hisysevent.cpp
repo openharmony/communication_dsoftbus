@@ -14,8 +14,10 @@
  */
 #include <string>
 #include <sstream>
+#include <cstring>
 #include "softbus_error_code.h"
 #include "softbus_adapter_log.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_hisysevent.h"
 
 static const char* g_paramTypeTable[SOFTBUS_EVT_PARAMTYPE_BUTT] = {
@@ -74,7 +76,7 @@ static void AppendParamValue(stringstream& strStream, SoftBusEvtParam& evtParam)
     }
 }
 
-static const char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
+static char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
 {
     string outStr;
     stringstream strStream(outStr);
@@ -89,7 +91,13 @@ static const char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
         AppendParamValue(strStream, reportMsg->paramArray[i]);
     }
 
-    return outStr.c_str();
+    unsigned int strlen = outStr.length();
+    char* msgStr = (char*)SoftBusMalloc(strlen + 1);
+    if (msgStr != NULL) {
+        strcpy_s(msgStr, strlen + 1, outStr.c_str());
+    }
+    
+    return msgStr;
 }
 
 #ifdef __cplusplus
@@ -104,8 +112,13 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         return SOFTBUS_ERR;
     }
     
-    const char* reportMsgStr = ConvertReportMsgToStr(reportMsg);
+    char* reportMsgStr = ConvertReportMsgToStr(reportMsg);
+    if (reportMsgStr == NULL) {
+        return SOFTBUS_ERR;
+    }
+    
     HILOG_INFO(SOFTBUS_HILOG_ID, "[COMM]%{public}s", reportMsgStr);
+    SoftBusFree((void*)reportMsgStr);
 
     return SOFTBUS_OK;
 }
