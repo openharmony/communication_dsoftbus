@@ -28,6 +28,7 @@
 #include "softbus_utils.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
+#include "softbus_hisysevt_common.h"
 
 static bool g_isInit = false;
 
@@ -55,7 +56,6 @@ bool GetServerIsInit(void)
 
 void InitSoftBusServer(void)
 {
-    int32_t ret;
     SoftbusConfigInit();
 
     if (ServerStubInit() != SOFTBUS_OK) {
@@ -95,13 +95,18 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    ret = P2pLinkInit();
+    int32_t ret = P2pLinkInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
             goto ERR_EXIT;
         }
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
+    }
+    
+    if (InitSoftbusSysEvt() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus sysevt dfx init failed.");
+        goto ERR_EXIT;
     }
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
