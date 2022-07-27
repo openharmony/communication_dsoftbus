@@ -69,8 +69,9 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_utils") {
     include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
     include_dirs += conn_common_inc + trans_common_inc
+    dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_common_virtual.c" ]
     sources = common_utils_src
-    sources += conn_common_src + trans_common_src
+    sources += conn_common_src + trans_common_src + dfx_src
     if (board_toolchain_type != "iccarm") {
       cflags = [
         "-Wall",
@@ -94,6 +95,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
     ]
@@ -108,6 +110,10 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
     sources = common_utils_src
     sources += conn_common_src + trans_common_src
+    dfx_source = [
+      "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
+    ]
+    sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
     defines += [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
