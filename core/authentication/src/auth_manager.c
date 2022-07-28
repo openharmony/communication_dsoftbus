@@ -1104,6 +1104,10 @@ static void AuthOnDisConnect(uint32_t connectionId, const ConnectionInfo *info)
     if (!IsP2PLink(auth) && type != CONNECT_BR) {
         return;
     }
+    if (auth->status != AUTH_PASSED && auth->connCb.onConnOpenFailed != NULL) {
+        auth->connCb.onConnOpenFailed(auth->requestId, SOFTBUS_ERR);
+        auth->connCb.onConnOpenFailed = NULL;
+    }
     EventRemove(id);
     if (SoftBusMutexLock(&g_authLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "lock mutex failed");
