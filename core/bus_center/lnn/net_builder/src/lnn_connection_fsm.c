@@ -30,6 +30,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_bus_center.h"
 #include "softbus_log.h"
 
 #define STATE_AUTH_INDEX 0
@@ -38,6 +39,9 @@
 #define STATE_ONLINE_INDEX 3
 #define STATE_LEAVING_INDEX 4
 #define STATE_NUM_MAX (STATE_LEAVING_INDEX + 1)
+
+#define SECOND_TO_MSENC 1000
+#define MILLISECOND_TO_MICRO 1000
 
 #define JOIN_LNN_TIMEOUT_LEN  (15 * 1000UL)
 #define LEAVE_LNN_TIMEOUT_LEN (5 * 1000UL)
@@ -180,6 +184,38 @@ static void ReportResult(const char *udid, ReportCategory report)
     }
 }
 
+int64_t LnnUpTimeMs(void)
+{
+    SoftBusSysTime t;
+    t.sec = 0;
+    t.usec = 0;
+    SoftBusGetTime(&t);
+    int64_t when = t.sec * SECOND_TO_MSENC + t.usec / MILLISECOND_TO_MICRO;
+    return when;
+}
+
+static void ReportLnnDfx(LnnConnectionFsm *connFsm, int32_t retCode)
+{
+    LnnConntionInfo *connInfo = &connFsm->connInfo;
+    connFsm->statisticData.type = connInfo->addr.type;
+    connFsm->statisticData.retCode = retCode;
+    if (retCode == SOFTBUS_OK) {
+        connFsm->statisticData.endTime = LnnUpTimeMs();
+        if (AddStatisticDuration(&connFsm->statisticData) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add static duration");
+        }
+    }
+    if (AddStatisticRateOfSuccess(&connFsm->statisticData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add rate success");
+    }
+    if (retCode != SOFTBUS_OK) {
+        SoftBusEvtReportMsg msg = {0};
+        if (CreateBusCenterFaultEvt(&msg, retCode, &connInfo->addr) == SOFTBUS_OK && msg.paramArray != NULL) {
+            (void)ReportBusCenterFaultEvt(&msg);
+        }
+    }
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -187,6 +223,9 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
 
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
+    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_AUTO) != 0) { // only report auto network
+        ReportLnnDfx(connFsm, retCode);
+    }
     if (retCode == SOFTBUS_OK) {
         report = LnnAddOnlineNode(connInfo->nodeInfo);
         NotifyJoinResult(connFsm, networkId, retCode);
