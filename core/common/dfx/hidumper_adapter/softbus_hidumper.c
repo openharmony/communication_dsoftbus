@@ -86,4 +86,3 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     
     return SOFTBUS_OK;
 }
-

@@ -14,7 +14,6 @@
  */
 #ifndef SOFTBUS_HIDUMPER_CONN_H
 #define SOFTBUS_HIDUMPER_CONN_H
-#include <stdio.h>
 
 typedef enum {
     SOFTBUS_CONN_DUMP_VAR_BLECONNECTLIST = 0,
@@ -26,7 +25,7 @@ typedef enum {
     SOFTBUS_CONN_DUMP_VAR_P2PCONNECTINGDEVICE,
     SOFTBUS_CONN_DUMP_VAR_P2PCONNECTEDDEVICE,
 
-    SOFTBUS_CONN_DUMP_VAR_BUTT,    
+    SOFTBUS_CONN_DUMP_VAR_BUTT,
 } SoftBusConnDumpVar;
 typedef int SoftBusConnDumpCb(int fd);
 int SoftBusRegConnDumpCb(int varId, SoftBusConnDumpCb cb);
