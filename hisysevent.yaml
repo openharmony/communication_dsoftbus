@@ -99,3 +99,23 @@ TRANS_OPEN_SESSION_TIME_COST:
 TRANS_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: the transmission fail }
   ERROR_CODE: {type: INT32, desc: error code }
+
+BUS_CENTER_FAULT_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: bus center all the exception}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_STR: {type: STRING, desc: error code string}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_SUCCESS_RATE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn rate of success}
+  TOTAL_COUNT: {type: INT32, desc: lnn total count}
+  SUCCESS_COUNT: {type: INT32, desc: lnn success count}
+  SUCCESS_RATE: {type: FLOAT, desc: lnn rate of success}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn duration}
+  AVG_DURATION: {type: INT32, desc: lnn average duration}
+  MAX_DURATION: {type: INT32, desc: lnn max duration}
+  MIN_DURATION: {type: INT32, desc: lnn min duration}
+  CONN_TYPE: {type: INT32, desc: connection type}

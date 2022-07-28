@@ -229,6 +229,7 @@ static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create connection fsm failed");
         return NULL;
     }
+    connFsm->statisticData.beginTime = LnnUpTimeMs();
     if (LnnStartConnectionFsm(connFsm) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start connection fsm[id=%u] failed", connFsm->id);
         LnnDestroyConnectionFsm(connFsm);
@@ -603,6 +604,7 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     }
     connFsm->connInfo.peerVersion = msgPara->peerVersion;
+    connFsm->statisticData.authTime = LnnUpTimeMs();
     if (LnnSendAuthKeyGenMsgToConnFsm(connFsm) != SOFTBUS_OK) {
         if (isCreate) {
             StopConnectionFsm(connFsm);

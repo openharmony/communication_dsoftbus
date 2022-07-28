@@ -12,16 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_error_code.h"
-#include "softbus_log.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_hisysevent.h"
-#include "message_handler.h"
-#include "securec.h"
-#include "softbus_hisysevt_discreporter.h"
-#include "softbus_hisysevt_connreporter.h"
-#include "softbus_hisysevt_transreporter.h"
+
 #include "softbus_hisysevt_common.h"
+
+#include "securec.h"
+
+#include "message_handler.h"
+#include "softbus_adapter_hisysevent.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "softbus_hisysevt_bus_center.h"
+#include "softbus_hisysevt_connreporter.h"
+#include "softbus_hisysevt_discreporter.h"
+#include "softbus_hisysevt_transreporter.h"
+#include "softbus_log.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0
@@ -130,6 +134,9 @@ int32_t InitSoftbusSysEvt()
     InitStatisticEvtReportFunc();
     
     if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (InitBusCenterDfx() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
