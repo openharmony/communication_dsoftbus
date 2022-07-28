@@ -95,6 +95,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
@@ -104,13 +105,20 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_utils") {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/bus_center/utils/include",
       "//third_party/cJSON",
       "//third_party/bounds_checking_function/include",
     ]
     include_dirs += conn_common_inc + trans_common_inc
     sources = common_utils_src
     sources += conn_common_src + trans_common_src
-    dfx_source = [ "dfx/hisysevent_adapter/softbus_hisysevt_common.c" ]
+    dfx_source = [
+      "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
+      "dfx/hidumper_adapter/softbus_hidumper.c",
+      "dfx/hidumper_adapter/softbus_hidumper_disc.c",
+      "dfx/hidumper_adapter/softbus_hidumper_conn.c",
+      "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
+    ]
     sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
     defines += [ "SOFTBUS_STANDARD_SYSTEM" ]
