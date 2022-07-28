@@ -369,3 +369,22 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
             return SOFTBUS_INVALID_PARAM;
     }
 }
+
+int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo)
+{
+    if (info == NULL || pkgName == NULL || sessionName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch ((ChannelType)channelType) {
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return TcpTranGetAppInfobyChannelId(channelId, appInfo);
+        case CHANNEL_TYPE_PROXY:
+            return TransProxyGetAppInfoByChanId(channelId, appInfo);
+        case CHANNEL_TYPE_UDP:
+            return TransGetUdpAppInfoByChannelId(channelId, appInfo);
+        case CHANNEL_TYPE_AUTH:
+            return TransGetAuthAppInfoByChanId(channelId, appInfo);
+        default:
+            return SOFTBUS_INVALID_PARAM;
+    }
+}
