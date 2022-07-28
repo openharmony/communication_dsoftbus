@@ -15,7 +15,6 @@
 
 #ifndef SOFTBUS_HIDUMPER_DISC_H
 #define SOFTBUS_HIDUMPER_DISC_H
-#include <stdio.h>
 
 typedef enum {
     SOFTBUS_DISC_DUMP_VAR_BLEINFOMANGER = 0,
@@ -26,7 +25,7 @@ typedef enum {
     SOFTBUS_DISC_DUMP_VAR_CAPABILITYDATA,
     SOFTBUS_DISC_DUMP_VAR_LOCALDEVINFO,
 
-    SOFTBUS_DISC_DUMP_VAR_BUTT,    
+    SOFTBUS_DISC_DUMP_VAR_BUTT,
 } SoftBusDiscDumpVar;
 
 typedef int SoftBusDiscDumpCb(int fd);

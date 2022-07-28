@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdio.h>
 #include <string.h>
 #include "softbus_errcode.h"
 #include "softbus_hidumper.h"
@@ -51,7 +52,7 @@ int SoftBusConnDumpHander(int fd, int argc, const char **argv)
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;
     }
-    
+
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpConnHelp(fd);
         return SOFTBUS_OK;
