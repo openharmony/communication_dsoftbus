@@ -15,6 +15,15 @@
 #ifndef HISYSEVENT_TRANS_REPORTER_H
 #define HISYSEVENT_TRANS_REPORTER_H
 
+typedef enum {
+    SOFTBUS_EVT_OPEN_SESSION_SUCC,
+    SOFTBUS_EVT_OPEN_SESSION_FAIL,
+} SoftBusOpenSessionStatus;
 
+void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
+
+int32_t SoftbusReportTransError(int32_t errcode);
+
+void InitTransStatisticSysEvt();
 
 #endif /* HISYSEVENT_TRANS_REPORTER_H */

@@ -85,38 +85,22 @@ CONN_FAULT:
   CONN_PARAM_WIFISTATUS: {type: UINT8, desc: wifi status }
   CONN_PARAM_CHNL_QUALITY: {type: FLOAT, desc: channel quality }
 
-TRANS_OPEN_SESSION_NUMBER:
+TRANS_OPEN_SESSION_CNT:
   __BASE: {type: STATISTIC, level: MINOR, desc: the success count and the fail count of open session }
   SUCCESS_CNT: {type: UINT32, desc: the success count of open session }
   FAIL_CNT: {type: UINT32, desc: the fail count of open session }
-  SUCCESS_RATE: {type: UINT32, desc: the success rate of open session }
+  SUCCESS_RATE: {type: FLOAT, desc: the success rate of open session }
 
-TRANS_OPEN_SESSION_TIME_CONSUMING:
+TRANS_OPEN_SESSION_TIME_COST:
   __BASE: {type: STATISTIC, level: MINOR, desc: the time comsuming of open session }
-  MAX_TIME_CONSUMING: {type: UINT32, desc: the max time comsuming of open session }
-  MIN_TIME_CONSUMING: {type: UINT32, desc: the min time comsuming of open session }
-  AVE_TIME_CONSUMING: {type: UINT32, desc: the average time comsuming of open session }
+  MAX_TIME_COST: {type: UINT32, desc: the max time comsuming of open session }
+  MIN_TIME_COST: {type: UINT32, desc: the min time comsuming of open session }
+  AVE_TIME_COST: {type: UINT32, desc: the average time comsuming of open session }
   TIMES_UNDER_500MS: {type: UINT32, desc: the times unders 500ms of open session }
   TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms~1s of open session }
   TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s~2s of open session }
   TIMES_ABOVE_2S: {type: UINT32, desc: the times above 2s of open session }
 
-TRANS_IPC_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: ipc communication fail }
-  ERROR_CODE: {type: INT32, desc: error code }
-
-TRANS_PERMISSION_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: access token check fail }
-  ERROR_CODE: {type: INT32, desc: error code }
-
-TRANS_GET_LNN_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: get lnn resource fail }
-  ERROR_CODE: {type: INT32, desc: error code }
-
-TRANS_CHANNEL_INIT_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: init logic channel fail }
-  ERROR_CODE: {type: INT32, desc: error code }
-
-TRANS_SESSION_NEGO_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: session negotiation fail }
+TRANS_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: the transmission fail }
   ERROR_CODE: {type: INT32, desc: error code }

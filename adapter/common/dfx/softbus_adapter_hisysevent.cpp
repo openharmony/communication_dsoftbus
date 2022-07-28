@@ -121,6 +121,38 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     return SOFTBUS_OK;
 }
 
+void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
+{
+    if (msg == nullptr) {
+        return;
+    }
+
+    for (int32_t i = 0; i < msg->paramNum; ++i) {
+        if (msg->paramArray[i] != nullptr) {
+            SoftBusFree(msg->paramArray[i]);
+        }
+    }
+    SoftBusFree(msg);
+}
+
+SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
+{
+    SoftBusEvtReportMsg *msg = SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    if (msg == nullptr) {
+        return nullptr;
+    }
+
+    for (int32_t i = 0; i < paramNum; ++i) {
+        msg->paramArray[i] = SoftBusMalloc(sizeof(SoftBusEvtParam));
+        if (msg->paramArray[i] == nullptr) {
+            msg->paramNum = i;
+            SoftbusFreeEvtReporMsg(msg);
+            return nullptr;
+        }
+    }
+    return msg;
+}
+
 #ifdef __cplusplus
 #if __cplusplus
 }
