@@ -643,7 +643,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     ProxyConnInfo conn;
     int32_t ret;
 
-    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
     if(module == UNUSE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
         return SOFTBUS_INVALID_PARAM;
