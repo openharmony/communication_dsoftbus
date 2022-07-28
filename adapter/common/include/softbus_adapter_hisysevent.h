@@ -26,7 +26,7 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_HISYSEVT_NAME_LEN  32
+#define SOFTBUS_HISYSEVT_NAME_LEN  48
 #define SOFTBUS_HISYSEVT_PARAM_LEN 16
 
 typedef enum {
@@ -96,6 +96,10 @@ typedef struct {
 } SoftBusEvtReportMsg;
 
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg);
+
+SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum);
+
+void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg);
 
 #ifdef __cplusplus
 #if __cplusplus
