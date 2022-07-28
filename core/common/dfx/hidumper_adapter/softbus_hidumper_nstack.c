@@ -24,6 +24,10 @@ static void SoftBusDumpNStackHelp(int fd)
 
 int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+    
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
         return SOFTBUS_OK;
@@ -33,6 +37,10 @@ int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
 }
 int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
         return SOFTBUS_OK;
@@ -42,6 +50,10 @@ int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 }
 int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
         return SOFTBUS_OK;
@@ -52,6 +64,10 @@ int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 
 int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
         return SOFTBUS_OK;
