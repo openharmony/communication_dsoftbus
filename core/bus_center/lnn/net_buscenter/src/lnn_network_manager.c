@@ -502,7 +502,7 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 
 struct FindProtocolByTypeRequest {
     ProtocolType protocol;
-    LnnProtocolManager *manager;
+    const LnnProtocolManager *manager;
 };
 
 static VisitNextChoice FindProtocolByType(const LnnProtocolManager *manager, void *data)
@@ -523,7 +523,7 @@ ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: not such protocol! protocolId=%d", __func__, protocol);
         return UNUSE_BUTT;
     }
-    if (request.manager == NULL) {
+    if (request.manager == NULL || request.manager->GetListenerModule == NULL) {
         SoftBusLog(
             SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol manager is null! protocolId=%d", __func__, protocol);
         return UNUSE_BUTT;
