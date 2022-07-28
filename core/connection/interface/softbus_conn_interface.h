@@ -123,6 +123,7 @@ typedef struct {
             char ip[IP_LEN];
             int32_t port;
             int32_t moduleId; /* For details, see {@link ListenerModule}. */
+            int32_t keepAlive;
         } ipOption;
     } info;
 } ConnectOption;
