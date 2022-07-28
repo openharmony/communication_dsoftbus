@@ -198,7 +198,9 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
 {
     int32_t ret = SOFTBUS_OK;
 
-    if (protocolMgr == NULL) {
+    if (protocolMgr == NULL || protocolMgr->GetListenerModule == NULL || protocolMgr->Init == NULL ||
+        protocolMgr->Enable == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad input protocol!", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -224,7 +226,6 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
 int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
 {
     uint8_t i;
-
     if (protocolMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!\n", __func__);
         return SOFTBUS_ERR;
@@ -497,4 +498,35 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
             ret = SOFTBUS_ERR;
     }
     return ret;
+}
+
+struct FindProtocolByTypeRequest {
+    ProtocolType protocol;
+    const LnnProtocolManager *manager;
+};
+
+static VisitNextChoice FindProtocolByType(const LnnProtocolManager *manager, void *data)
+{
+    struct FindProtocolByTypeRequest *request = (struct FindProtocolByTypeRequest *)data;
+    if (manager->id == request->protocol) {
+        request->manager = manager;
+        return CHOICE_FINISH_VISITING;
+    } else {
+        return CHOICE_VISIT_NEXT;
+    }
+}
+
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+{
+    struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
+    if (LnnVisitProtocol(FindProtocolByType, &request)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: not such protocol! protocolId=%d", __func__, protocol);
+        return UNUSE_BUTT;
+    }
+    if (request.manager == NULL || request.manager->GetListenerModule == NULL) {
+        SoftBusLog(
+            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol manager is null! protocolId=%d", __func__, protocol);
+        return UNUSE_BUTT;
+    }
+    return request.manager->GetListenerModule(mode);
 }
