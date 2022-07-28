@@ -37,7 +37,7 @@ static void SoftBusDumpDiscHelp(int fd)
 
 int SoftBusRegDiscDumpCb(int varId, SoftBusDiscDumpCb *cb)
 {
-    if (varId >= SOFTBUS_DISC_DUMP_VAR_BUTT || varId < SOFTBUS_DISC_DUMP_VAR_BLEINFOMANGER) {
+    if (varId >= SOFTBUS_DISC_DUMP_VAR_BUTT || varId < SOFTBUS_DISC_DUMP_VAR_BLEINFOMANGER || cb == NULL) {
         return SOFTBUS_ERR;
     }
     g_DiscDumpCallback[varId] = cb;
@@ -46,6 +46,10 @@ int SoftBusRegDiscDumpCb(int varId, SoftBusDiscDumpCb *cb)
 
 int SoftBusDiscDumpHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpDiscHelp(fd);
         return SOFTBUS_OK;

@@ -39,7 +39,7 @@ static void SoftBusDumpConnHelp(int fd)
 
 int SoftBusRegConnDumpCb(int varId, SoftBusConnDumpCb cb)
 {
-    if (varId >= SOFTBUS_CONN_DUMP_VAR_BUTT || varId < SOFTBUS_CONN_DUMP_VAR_BLECONNECTLIST) {
+    if (varId >= SOFTBUS_CONN_DUMP_VAR_BUTT || varId < SOFTBUS_CONN_DUMP_VAR_BLECONNECTLIST || cb == NULL) {
         return SOFTBUS_ERR;
     }
     g_ConnDumpCallback[varId] = cb;
@@ -48,11 +48,15 @@ int SoftBusRegConnDumpCb(int varId, SoftBusConnDumpCb cb)
 
 int SoftBusConnDumpHander(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
+    }
+    
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpConnHelp(fd);
         return SOFTBUS_OK;
     }
-    
+
     if (argc == 1 && strcmp(argv[0], "-l") == 0) {
         SoftBusDumpConnHelp(fd);
         return SOFTBUS_OK;
