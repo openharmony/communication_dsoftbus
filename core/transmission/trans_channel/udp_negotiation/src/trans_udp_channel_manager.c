@@ -418,3 +418,26 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetChannelObj not found: channelId=%d", channelId);
     return NULL;
 }
+
+int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
+{
+    if ((g_udpChannelMgr == NULL) && (appInfo == NULL)) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId) {
+            memcpy_s(appInfo, sizeof(AppInfo), &udpChannelNode->info, sizeof(AppInfo);
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    return SOFTBUS_ERR;
+}

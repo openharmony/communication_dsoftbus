@@ -654,3 +654,25 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
     }
     return LnnNotifyDiscoveryDevice(&addr);
 }
+
+int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
+{
+    if (appInfo == NULL || g_authChannelList == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AppInfo, node) {
+        if (info->appInfo.myData.channelId == channelId) {
+            memcpy_s(appInfo, sizeof(AppInfo), &info->appInfo, sizeof(AppInfo));
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    SoftBusMutexUnlock(&g_authChannelList->lock);
+    return SOFTBUS_ERR;
+}
+
