@@ -162,7 +162,7 @@ static int32_t ReleaseListenerRef(ListenerModule module)
 
         if (node->listener != NULL) {
             SoftBusFree(node->listener);
-            node = NULL;
+            node->listener = NULL;
         }
         ReleaseListenerSockets(node);
         (void)StopListenerThread(node);
@@ -1136,7 +1136,7 @@ void DestroyBaseListener(ListenerModule module)
         __func__, module, ret);
 }
 
-static bool CheckFdIsExist(SoftbusBaseListenerInfo *info, int32_t fd)
+static bool CheckFdIsExist(const SoftbusBaseListenerInfo *info, int32_t fd)
 {
     FdNode *item = NULL;
     FdNode *nextItem = NULL;
@@ -1266,19 +1266,15 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 
         if (SoftBusSocketFdIsset(fd, &g_writeSet) || SoftBusSocketFdIsset(fd, &g_readSet) ||
             SoftBusSocketFdIsset(fd, &g_exceptSet)) {
-            SoftBusMutexUnlock(&g_listenerList[module]->lock);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                "DelTrigger [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
-                module, triggerType);
             break;
         }
 
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:[fd:%d] removed from all fdSet. del fdnode", __func__, fd);
         DelFdNode(&node->info, fd);
     } while (false);
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "DelTrigger and node [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
-        module, triggerType);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:[fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
+        __func__, fd, node->info.fdCount, module, triggerType);
 
     SoftBusMutexUnlock(&node->lock);
     ReleaseListenerNode(node);
