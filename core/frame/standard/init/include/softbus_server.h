@@ -60,7 +60,7 @@ public:
     int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) override;
     int32_t DeactiveMetaNode(const char *metaNodeId) override;
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum) override;
-
+    int Dump(int fd, const std::vector<std::u16string> &args) override;
 protected:
     void OnStart() override;
     void OnStop() override;
