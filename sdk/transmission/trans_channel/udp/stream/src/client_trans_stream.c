@@ -20,6 +20,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_server_proxy.h"
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
@@ -95,10 +96,21 @@ static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvL
     g_udpChannelMgrCb->OnQosEvent(channelId, eventId, tvCount, tvList);
 }
 
+static void OnFrameStats(int32_t channelId, const StreamSendStats *data)
+{
+    int32_t ret = ServerIpcStreamStats(channelId, CHANNEL_TYPE_UDP, data);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify frame stats to server, channelId:%d", channelId);
+    if ((ret != SOFTBUS_OK) && (ret != SOFTBUS_NOT_IMPLEMENT)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ipc to server fail, reason:%d", ret);
+        return;
+    }
+}
+
 static IStreamListener g_streamCallcb = {
     .OnStatusChange = SetStreamChannelStatus,
     .OnStreamReceived = OnStreamReceived,
     .OnQosEvent = OnQosEvent,
+    .OnFrameStats = OnFrameStats,
 };
 
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)

@@ -408,6 +408,44 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
     return serverRet;
 }
 
+int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *statsData)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats channelId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats channelType failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData((void *)statsData, sizeof(StreamSendStats))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write streamSendStats failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_STREAM_STATS, data, reply, option);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats send request failed, ret:%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats read serverRet failed");
+        return SOFTBUS_ERR;
+    }
+    return ret;
+}
+
 int32_t TransServerProxy::GrantPermission(int uid, int pid, const char *sessionName)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();

@@ -101,6 +101,18 @@ public:
         }
     }
 
+    void OnFrameStats(const StreamSendStats *data)
+    {
+        if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnFrameStats != nullptr) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "StreamAdaptorListener: OnFrameStats for channelId = %" PRId64, adaptor_->GetChannelId());
+            adaptor_->GetListenerCallback()->OnFrameStats(adaptor_->GetChannelId(), data);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "Get ListenerCallback by StreamAdaptor is failed, channelId = %" PRId64, adaptor_->GetChannelId());
+        }
+    }
+
 private:
     std::shared_ptr<StreamAdaptor> adaptor_ = nullptr;
 };

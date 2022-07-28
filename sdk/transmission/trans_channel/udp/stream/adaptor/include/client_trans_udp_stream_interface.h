@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "session.h"
+#include "softbus_trans_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -46,6 +47,7 @@ typedef struct {
     void (*OnStreamReceived)(int32_t channelId, const StreamData *data, const StreamData *ext,
         const StreamFrameInfo *param);
     void (*OnQosEvent)(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);
+    void (*OnFrameStats)(int32_t channelId, const StreamSendStats *data);
 } IStreamListener;
 
 typedef struct {

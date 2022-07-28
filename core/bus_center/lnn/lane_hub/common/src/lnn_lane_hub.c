@@ -18,6 +18,7 @@
 #include "bus_center_event.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_lane.h"
+#include "lnn_lane_qos.h"
 #include "lnn_lane_manager.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
@@ -31,6 +32,10 @@ int32_t LnnInitLaneHub(void)
     }
     if (InitLane() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitQos() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init laneQos fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitTimeSync() != SOFTBUS_OK) {
@@ -55,6 +60,7 @@ int32_t LnnInitLaneHubDelay(void)
 
 void LnnDeinitLaneHub(void)
 {
+    LnnDeinitQos();
     DeinitLane();
     LnnDeinitTimeSync();
     LnnDeinitHeartbeat();

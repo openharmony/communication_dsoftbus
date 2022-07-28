@@ -315,3 +315,11 @@ int32_t ServerIpcRemovePermission(const char *sessionName)
     (void)sessionName;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    (void)channelId;
+    (void)channelType;
+    (void)data;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

@@ -32,6 +32,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_trans_def.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
 
@@ -176,9 +177,41 @@ std::shared_ptr<VtpStreamSocket> VtpStreamSocket::GetSelf()
     return shared_from_this();
 }
 
+int VtpStreamSocket::HandleFrameStats(int fd, const FtEventCbkInfo *info)
+{
+    StreamSendStats stats = {};
+    if (memcpy_s(&stats, sizeof(StreamSendStats), &info->info.frameSendStats,
+        sizeof(info->info.frameSendStats)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamStats info memcpy fail");
+        return -1;
+    }
+    auto itLock = g_streamSocketLockMap.find(fd);
+    if (itLock != g_streamSocketLockMap.end()) {
+        auto itListener = g_streamReceiverMap.find(fd);
+        if (itListener != g_streamReceiverMap.end()) {
+            std::thread([itListener, stats, &itLock]() {
+                std::lock_guard<std::mutex> guard(itLock->second);
+                itListener->second->OnFrameStats(&stats);
+            }).detach();
+        } else {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamReceiver for fd = %d is empty in the map", fd);
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamSocketLock for fd = %d is empty in the map", fd);
+    }
+    return 0;
+}
+
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
 int VtpStreamSocket::FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info)
 {
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stats info is nullptr");
+        return -1;
+    }
+    if (info->evt == FT_EVT_FRAME_STATS) {
+        return HandleFrameStats(fd, info);
+    }
 #if (defined(FILLP_SUPPORT_BW_DET) && defined(FILLP_SUPPORT_BW_DET))
     if (info->evt == FT_EVT_BW_DET || info->evt == FT_EVT_JITTER_DET) {
         int32_t eventId = TRANS_STREAM_QUALITY_EVENT;
@@ -326,12 +359,10 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
 #endif
 
     bool connectRet = Connect(remote);
-#ifdef FILLP_SUPPORT_BW_DET
     if (connectRet) {
         bool isServer = false;
         RegisterMetricCallback(isServer); /* register the callback function */
     }
-#endif
     return connectRet;
 }
 
@@ -718,7 +749,7 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
 {
     VtpStreamSocket::AddStreamSocketLock(streamFd_, streamSocketLock_);
     VtpStreamSocket::AddStreamSocketListener(streamFd_, streamReceiver_);
-#if (defined(FILLP_SUPPORT_BW_DET) && defined(FILLP_SUPPORT_BW_DET))
+#if (defined(FILLP_SUPPORT_BW_DET))
     int regStatisticsRet = FtApiRegEventCallbackFunc(streamFd_, FillpBwAndJitterStatistics);
     if (isServer) {
         if (regStatisticsRet == 0) {
@@ -789,11 +820,11 @@ bool VtpStreamSocket::Accept()
         streamReceiver_->OnStreamStatus(STREAM_CONNECTED);
     }
 
+    bool isServer = true;
+    RegisterMetricCallback(isServer); /* register the callback function */
     /* enable the bandwidth and CQE estimation algorithms for current ftsocket */
 #ifdef FILLP_SUPPORT_BW_DET
-    bool isServer = true;
     EnableBwEstimationAlgo(streamFd_, isServer);
-    RegisterMetricCallback(isServer); /* register the callback function */
 #endif
 #ifdef FILLP_SUPPORT_CQE
     EnableJitterDetectionAlgo(streamFd_);
