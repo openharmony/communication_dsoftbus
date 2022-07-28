@@ -33,7 +33,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
 
     ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
-    if(module == UNUSE_BUTT) {
+    if (module == UNUSE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
         return SOFTBUS_INVALID_PARAM;
     }

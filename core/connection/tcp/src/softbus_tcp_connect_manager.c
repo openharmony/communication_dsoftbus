@@ -193,7 +193,6 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         goto EXIT;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:add connection %" PRIu32, __func__, tcpConnInfoNode->connectionId);
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
         goto EXIT;
     }
@@ -405,7 +404,6 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     tcpConnInfoNode->info.socketInfo.protocol = option->socketOption.protocol;
     tcpConnInfoNode->info.socketInfo.fd = fd;
     tcpConnInfoNode->info.socketInfo.moduleId = option->socketOption.moduleId;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:add connection %" PRIu32, __func__, tcpConnInfoNode->connectionId);
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddTcpConnInfo failed");
         SoftBusFree(tcpConnInfoNode);

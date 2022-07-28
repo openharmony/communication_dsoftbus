@@ -551,9 +551,9 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
 
 static ListenerModule LnnGetIpListenerModule(ListenerMode mode)
 {
-    if(mode == LNN_LISTENER_MODE_PROXY) {
+    if (mode == LNN_LISTENER_MODE_PROXY) {
         return PROXY;
-    } else if(mode == LNN_LISTENER_MODE_DIRECT) {
+    } else if (mode == LNN_LISTENER_MODE_DIRECT) {
         return DIRECT_CHANNEL_SERVER_WIFI;
     } else {
         return UNUSE_BUTT;
