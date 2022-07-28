@@ -91,7 +91,7 @@ static char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
 
     unsigned int strlen = outStr.length();
     char* msgStr = (char*)SoftBusMalloc(strlen + 1);
-    if (msgStr != NULL) {
+    if (msgStr != nullptr) {
         strcpy_s(msgStr, strlen + 1, outStr.c_str());
     }
     
@@ -106,12 +106,12 @@ extern "C" {
 
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
 {
-    if (reportMsg == NULL) {
+    if (reportMsg == nullptr) {
         return SOFTBUS_ERR;
     }
     
     char* reportMsgStr = ConvertReportMsgToStr(reportMsg);
-    if (reportMsgStr == NULL) {
+    if (reportMsgStr == nullptr) {
         return SOFTBUS_ERR;
     }
     
