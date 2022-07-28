@@ -114,7 +114,7 @@ if (defined(ohos_lite)) {
     sources += conn_common_src + trans_common_src
     dfx_source = [
       "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
-      "softbus_hisysevt_transreporter.c",
+      "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
       "dfx/hidumper_adapter/softbus_hidumper.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
