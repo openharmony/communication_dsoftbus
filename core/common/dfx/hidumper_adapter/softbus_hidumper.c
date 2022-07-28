@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "softbus_error_code.h"
+#include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_nstack.h"
@@ -32,21 +32,22 @@
 
 void SoftBusDumpShowHelp(int fd)
 {
-    dprintf(fd, "Usage: [-h] [disc] [conn] [buscenter] [trans] [dstream] [dfile] [dfinder] [dmsg]\n");
-    dprintf(fd, "   -h         List all the module of softbus\n");
-    dprintf(fd, "   disc       List all the dump item of disc\n");
-    dprintf(fd, "   conn       List all the dump item of conn\n");
-    dprintf(fd, "   buscenter  List all the dump item of buscenter\n");
-    dprintf(fd, "   trans      List all the dump item of trans\n");
-    dprintf(fd, "   dstream    List all the dump item of dstream\n");
-    dprintf(fd, "   dfile      List all the dump item of dfile\n");
-    dprintf(fd, "   dfinder    List all the dump item of dfinder\n");
-    dprintf(fd, "   dmsg       List all the dump item of dmsg\n");
+    dprintf(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
+    dprintf(fd, "   Option: [-h] [disc] [conn] [buscenter] [trans] [dstream] [dfile] [dfinder] [dmsg]\n");
+    dprintf(fd, "           -h         List all the module of softbus\n");
+    dprintf(fd, "           disc       List all the dump item of disc\n");
+    dprintf(fd, "           conn       List all the dump item of conn\n");
+    dprintf(fd, "           buscenter  List all the dump item of buscenter\n");
+    dprintf(fd, "           trans      List all the dump item of trans\n");
+    dprintf(fd, "           dstream    List all the dump item of dstream\n");
+    dprintf(fd, "           dfile      List all the dump item of dfile\n");
+    dprintf(fd, "           dfinder    List all the dump item of dfinder\n");
+    dprintf(fd, "           dmsg       List all the dump item of dmsg\n");
 }
 
 void SoftBusDumpErrInfo(int fd, const char *argv)
 {
-    dprintf(fd, "the command is not exist, please ipnut again!\n");
+    dprintf(fd, "the command %s is invalid, please input again!\n", argv);
 }
 
 int SoftBusDumpProcess(int fd, int argc, const char **argv)

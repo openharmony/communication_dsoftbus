@@ -15,5 +15,21 @@
 
 #ifndef SOFTBUS_HIDUMPER_DISC_H
 #define SOFTBUS_HIDUMPER_DISC_H
+#include <stdio.h>
+
+typedef enum {
+    SOFTBUS_DISC_DUMP_VAR_BLEINFOMANGER = 0,
+    SOFTBUS_DISC_DUMP_VAR_BLEADVERTISER,
+    SOFTBUS_DISC_DUMP_VAR_BLELISTENER,
+    SOFTBUS_DISC_DUMP_VAR_PUBLICMGR,
+    SOFTBUS_DISC_DUMP_VAR_SUBSCRIBEMGR,
+    SOFTBUS_DISC_DUMP_VAR_CAPABILITYDATA,
+    SOFTBUS_DISC_DUMP_VAR_LOCALDEVINFO,
+
+    SOFTBUS_DISC_DUMP_VAR_BUTT,    
+} SoftBusDiscDumpVar;
+
+typedef int SoftBusDiscDumpCb(int fd);
+int SoftBusRegDiscDumpCb(int varId, SoftBusDiscDumpCb cb);
 int SoftBusDiscDumpHander(int fd, int argc, const char **argv);
 #endif /* SOFTBUS_HIDUMPER_DISC_H */

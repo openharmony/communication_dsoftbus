@@ -14,7 +14,7 @@
  */
 #ifndef SOFTBUS_HIDUMPER_NSTACK_H
 #define SOFTBUS_HIDUMPER_NSTACK_H
-
+#include <stdio.h>
 int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv);
 int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv);
 int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv);

@@ -21,7 +21,7 @@ extern "C" {
 #endif
 #endif
 
-typedef int (*SoftBusHiDumperCb)(int fd, int argc, char **argv);
+void SoftBusDumpErrInfo(int fd, const char *argv);
 int SoftBusDumpProcess(int fd, int argc, const char **argv);
 #ifdef __cplusplus
 #if __cplusplus
