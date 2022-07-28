@@ -637,7 +637,7 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
+static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
@@ -664,13 +664,16 @@ static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const Connec
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Connect dev reqid %d", reqId);
     (void)memcpy_s(&(connChan->connInfo), sizeof(ConnectOption), connInfo, sizeof(ConnectOption));
+    connChan->connInfo.socketOption.moduleId = moduleId;
     if (TransAddConnItem(connChan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn add repeat");
         SoftBusFree(connChan);
         return SOFTBUS_OK;
     }
-    result.OnConnectFailed = TransOnConnectFailed;
-    result.OnConnectSuccessed = TransOnConnectSuccessed;
+    ConnectResult result = {
+        .OnConnectFailed = TransOnConnectFailed,
+        .OnConnectSuccessed = TransOnConnectSuccessed
+    };
     int32_t ret = ConnConnectDevice(&(connChan->connInfo), reqId, &result);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
@@ -682,24 +685,19 @@ static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const Connec
 
 int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
-    ConnectResult result = {0};
     ProxyConnInfo conn;
-    int32_t ret;
-
-    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
-    if (module == UNUSE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
-    connInfo->socketOption.moduleId = module;
-
     int32_t chanNewId = TransProxyGetNewMyId();
     *channelId = chanNewId;
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         return TransProxyConnExistProc(&conn, appInfo, chanNewId);
     } else {
-        return TransProxyOpenNewConnChannel(appInfo, connInfo, chanNewId);
+        ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+        if (module == UNUSE_BUTT) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+        return TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
     }
 }
 
