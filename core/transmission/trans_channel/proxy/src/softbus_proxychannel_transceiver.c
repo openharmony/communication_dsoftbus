@@ -637,7 +637,7 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
@@ -648,7 +648,7 @@ static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const Connec
     chan->reqId = (int32_t)reqId;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     chan->type = connInfo->type;
-    if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
+    if (TransProxyCreateChanInfo(chan, channelId, appInfo) != SOFTBUS_OK) {
         SoftBusFree(chan);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyCreateChanInfo err");
         return SOFTBUS_ERR;
@@ -656,12 +656,11 @@ static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const Connec
 
     ProxyConnInfo *connChan = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
     if (connChan == NULL) {
-        TransProxyDelChanByChanId(chanNewId);
+        TransProxyDelChanByChanId(channelId);
         return SOFTBUS_ERR;
     }
     connChan->requestId = reqId;
     connChan->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
-    *channelId = chanNewId;
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Connect dev reqid %d", reqId);
     (void)memcpy_s(&(connChan->connInfo), sizeof(ConnectOption), connInfo, sizeof(ConnectOption));
@@ -676,7 +675,7 @@ static int32_t TransProxyOpenNewConnChannel(const AppInfo *appInfo, const Connec
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
         TransDelConnByReqId(reqId);
-        TransProxyDelChanByChanId(chanNewId);
+        TransProxyDelChanByChanId(channelId);
     }
     return ret;
 }
@@ -696,14 +695,11 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     connInfo->socketOption.moduleId = module;
 
     int32_t chanNewId = TransProxyGetNewMyId();
+    *channelId = chanNewId;
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
-        if (TransProxyConnExistProc(&conn, appInfo, chanNewId) == SOFTBUS_ERR) {
-            return SOFTBUS_ERR;
-        }
-        *channelId = chanNewId;
-        return SOFTBUS_OK;
+        return TransProxyConnExistProc(&conn, appInfo, chanNewId);
     } else {
-        return TransProxyOpenNewConnChannel(appInfo, connInfo, channelId);
+        return TransProxyOpenNewConnChannel(appInfo, connInfo, chanNewId);
     }
 }
 
