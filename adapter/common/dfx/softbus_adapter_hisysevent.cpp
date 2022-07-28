@@ -14,7 +14,7 @@
  */
 #include <string>
 #include <sstream>
-#include <cstring>
+#include <securec.h>
 #include "softbus_error_code.h"
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
@@ -39,9 +39,7 @@ static const char* g_evtTypeTable[SOFTBUS_EVT_TYPE_BUTT] = {
     "BEHAVIOR"
 };
 
-using namespace std;
-
-static void AppendParamValue(stringstream& strStream, SoftBusEvtParam& evtParam)
+static void AppendParamValue(std::stringstream& strStream, SoftBusEvtParam& evtParam)
 {
     switch (evtParam.paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
@@ -78,8 +76,8 @@ static void AppendParamValue(stringstream& strStream, SoftBusEvtParam& evtParam)
 
 static char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
 {
-    string outStr;
-    stringstream strStream(outStr);
+    std::string outStr;
+    std::stringstream strStream(outStr);
 
     strStream << "EvtName: " << (const char*)reportMsg->evtName <<" And EvtType: ";
     strStream << (const char*)g_evtTypeTable[reportMsg->evtType];
