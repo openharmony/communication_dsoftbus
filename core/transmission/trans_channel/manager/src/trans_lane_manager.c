@@ -175,3 +175,36 @@ void TransLaneMgrDeathCallback(const char *pkgName)
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return;
 }
+
+static void GetTransSessionInfoByLane(TransLaneInfo * laneItem, AppInfo *appInfo)
+{
+    if (TransGetAppInfoByChanId(laneItem->channelId, laneItem->channelType, appInfo) != SOFTBUS_OK) {
+        return;
+    }
+}
+
+void TransSessionInfoForEach()
+{
+    if (g_channelLaneList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
+        return;
+    }
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    if (appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionInfoForEach malloc appInfo failed");
+        return;
+    }
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+        
+    TransLaneInfo *laneItem = NULL;
+    LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
+        GetTransSessionInfoByLane(laneItem, appInfo);
+    }
+    
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    return;
+
+}
