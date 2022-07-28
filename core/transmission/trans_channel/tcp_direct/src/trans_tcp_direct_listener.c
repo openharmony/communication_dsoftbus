@@ -155,7 +155,7 @@ static int32_t CreateSessionConnNode(
     return SOFTBUS_OK;
 }
 
-static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
+static int32_t TdcOnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Exception occurred");
@@ -206,7 +206,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     TransSrvDelDataBufNode(channelId);
 }
 
-static int32_t OnDataEvent(ListenerModule module, int events, int fd)
+static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
@@ -215,7 +215,7 @@ static int32_t OnDataEvent(ListenerModule module, int events, int fd)
         return SOFTBUS_ERR;
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info.", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info. appfd=%d", conn->appInfo.fd, fd);
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
         DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
         DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
@@ -266,12 +266,13 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
         return SOFTBUS_INVALID_PARAM;
     }
 
-    static SoftbusBaseListener g_sessionListener = {
-        .onConnectEvent = OnConnectEvent,
-        .onDataEvent = OnDataEvent
+    static SoftbusBaseListener sessionListener = {
+        .onConnectEvent = TdcOnConnectEvent,
+        .onDataEvent = TdcOnDataEvent
     };
 
-    int32_t ret = SetSoftbusBaseListener(module, &g_sessionListener);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:set listener for module %d.", __func__, module);
+    int32_t ret = SetSoftbusBaseListener(module, &sessionListener);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Set BaseListener Failed.", __func__);
         return ret;
