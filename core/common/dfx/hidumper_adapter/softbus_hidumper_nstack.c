@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
 #include <string.h>
+#include "softbus_errcode.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_nstack.h"
 
@@ -26,36 +26,36 @@ int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
 {
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
-        return 0;
+        return SOFTBUS_OK;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
 int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 {
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
-        return 0;
+        return SOFTBUS_OK;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
 int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 {
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
-        return 0;
+        return SOFTBUS_OK;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
 
 int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
 {
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpNStackHelp(fd);
-        return 0;
+        return SOFTBUS_OK;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
