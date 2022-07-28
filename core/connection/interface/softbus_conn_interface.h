@@ -145,6 +145,7 @@ struct SocketOption {
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
+    int32_t keepAlive;
 };
 
 typedef struct {
