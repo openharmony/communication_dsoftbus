@@ -637,7 +637,8 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
+static int32_t TransProxyOpenNewConnChannel(
+    ListenerModule moduleId, const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
@@ -670,10 +671,7 @@ static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const AppIn
         SoftBusFree(connChan);
         return SOFTBUS_OK;
     }
-    ConnectResult result = {
-        .OnConnectFailed = TransOnConnectFailed,
-        .OnConnectSuccessed = TransOnConnectSuccessed
-    };
+    ConnectResult result = {.OnConnectFailed = TransOnConnectFailed, .OnConnectSuccessed = TransOnConnectSuccessed};
     int32_t ret = ConnConnectDevice(&(connChan->connInfo), reqId, &result);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
