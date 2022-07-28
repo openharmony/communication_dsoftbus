@@ -162,7 +162,7 @@ static int32_t ReleaseListenerRef(ListenerModule module)
 
         if (node->listener != NULL) {
             SoftBusFree(node->listener);
-            node = NULL;
+            node->listener = NULL;
         }
         ReleaseListenerSockets(node);
         (void)StopListenerThread(node);
