@@ -24,6 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_channel_manager.h"
 #include "softbus_hidumper_trans.h"
 
 typedef struct {
@@ -50,17 +51,17 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
         case LANE_BR:
             return DUMPER_LANE_BR;
         case LANE_BLE:
-            return DUMPER_LANE_BLE;,
+            return DUMPER_LANE_BLE;
         case LANE_P2P:
-            return DUMPER_LANE_P2P;,
+            return DUMPER_LANE_P2P;
         case LANE_WLAN_2P4G:
-            return DUMPER_LANE_WLAN;,
+            return DUMPER_LANE_WLAN;
         case LANE_WLAN_5G:
-            return DUMPER_LANE_WLAN;,
+            return DUMPER_LANE_WLAN;
         case LANE_ETH:
-            return DUMPER_LANE_ETH;,
+            return DUMPER_LANE_ETH;
         default:
-            return DUMPER_LANE_LINK_TYPE_BUTT;,
+            return DUMPER_LANE_LINK_TYPE_BUTT;
     }
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }

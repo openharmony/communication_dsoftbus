@@ -20,6 +20,7 @@
 
 #include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {

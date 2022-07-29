@@ -38,6 +38,7 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 int32_t TransChannelInit(void)
 {
