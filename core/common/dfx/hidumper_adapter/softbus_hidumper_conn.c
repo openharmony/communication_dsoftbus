@@ -63,7 +63,7 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
             }
         }
     }
-    
+
     if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
         SoftBusDumpErrInfo(fd, argv[0]);
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);

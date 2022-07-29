@@ -30,7 +30,7 @@ int SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
-    } 
+    }
     int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
     return nRet;
 }
