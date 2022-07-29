@@ -230,4 +230,12 @@ int32_t SoftBusServerProxyFrame::QosReport(int32_t channelId, int32_t chanType, 
     (void)quality;
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    (void)channelId;
+    (void)channelType;
+    (void)data;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

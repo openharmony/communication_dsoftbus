@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef QOS_PERCEPTION_MANAGER_H
-#define QOS_PERCEPTION_MANAGER_H
+#ifndef SOFTBUS_QOS_H
+#define SOFTBUS_QOS_H
 
 #include "softbus_def.h"
 

@@ -29,7 +29,7 @@ extern "C" {
 
 typedef struct {
     void (*OnLaneIdEnabled)(uint32_t laneId, uint32_t laneProfileId);
-    void (*OnLaneIdDisabled)(uint32_t laneId);
+    void (*OnLaneIdDisabled)(uint32_t laneId, uint32_t laneProfileId);
 } ILaneIdStateListener;
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener);

@@ -19,6 +19,7 @@
 #include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
 #include "securec.h"
+#include "string_ex.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
@@ -30,8 +31,7 @@
 #include "system_ability_definition.h"
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
-#include "softbus_hidumper.h"
-#include "string_ex.h"
+#include "softbus_hidumper_interface.h"
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -213,6 +213,11 @@ int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetwo
 int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     return QosReportExecute(channelId, chanType, appType, quality);
+}
+
+int32_t SoftBusServer::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    return TransStreamStats(channelId, channelType, data);
 }
 
 int32_t SoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)

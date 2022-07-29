@@ -53,6 +53,7 @@ public:
         int32_t period) = 0;
     virtual int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
     virtual int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) = 0;
+    virtual int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) = 0;
     virtual int32_t GrantPermission(int uid, int pid, const char *sessionName);
     virtual int32_t RemovePermission(const char *sessionName);
     virtual int32_t PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);

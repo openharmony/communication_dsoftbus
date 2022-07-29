@@ -21,6 +21,7 @@
 #include "i_stream.h"
 #include "i_stream_msg_manager.h"
 #include "session.h"
+#include "softbus_trans_def.h"
 #include "stream_common.h"
 
 namespace Communication {
@@ -32,6 +33,7 @@ public:
     virtual void OnStreamReceived(std::unique_ptr<IStream> stream) = 0;
     virtual void OnStreamStatus(int status) = 0;
     virtual void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) = 0;
+    virtual void OnFrameStats(const StreamSendStats *data) = 0;
 };
 
 class IStreamManager {
