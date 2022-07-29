@@ -176,6 +176,8 @@ private:
 
     static void RemoveStreamSocketListener(int fd);
 
+    static int HandleFrameStats(int fd, const FtEventCbkInfo *info);
+
     static int FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info);
 
     void FillpAppStatistics();

@@ -33,6 +33,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *info);
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt);
 
+int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data);
+
 int32_t TransNotifyAuthSuccess(int32_t channelId);
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
