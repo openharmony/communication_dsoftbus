@@ -97,7 +97,7 @@ int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varLis
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
-    } 
+    }
     
     SoftBusDumpVarNode *varNode = SoftBusCreateDumpVarNode(dumpVar, cb);
     if (varNode == NULL) {
@@ -150,7 +150,7 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
     return handlerNode;
 }
 
-void SoftBusHiDumperDeInit()
+void SoftBusHiDumperDeInit(void)
 {
     ListNode *item = NULL;
     ListNode *nextItem = NULL;
@@ -164,7 +164,7 @@ void SoftBusHiDumperDeInit()
 
 int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
-    if (strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN || 
+    if (strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN ||
         handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler invalid param");
         return SOFTBUS_ERR;

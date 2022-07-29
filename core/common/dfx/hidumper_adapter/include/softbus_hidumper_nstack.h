@@ -15,5 +15,5 @@
 #ifndef SOFTBUS_HIDUMPER_NSTACK_H
 #define SOFTBUS_HIDUMPER_NSTACK_H
 
-int SoftBusNStackHiDumperInit();
+int SoftBusNStackHiDumperInit(void);
 #endif /* SOFTBUS_HIDUMPER_NSTACK_H */

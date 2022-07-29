@@ -62,28 +62,32 @@ static int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-int SoftBusNStackHiDumperInit()
+int SoftBusNStackHiDumperInit(void)
 {
     int nRet = SOFTBUS_OK;
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP, &SoftBusNStackDstreamDumpHander);
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP,
+                                     &SoftBusNStackDstreamDumpHander);
     if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return nRet;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP, &SoftBusNStackDfileDumpHander);
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
+                                     &SoftBusNStackDfileDumpHander);
     if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return nRet;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP, &SoftBusNStackDumpDfinderHander);
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
+                                     &SoftBusNStackDumpDfinderHander);
     if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return nRet;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP, &SoftBusNStackDmsgDumpHander);
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
+                                     &SoftBusNStackDmsgDumpHander);
     if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return nRet;

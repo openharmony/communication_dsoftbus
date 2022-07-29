@@ -72,7 +72,7 @@ int SoftBusDiscDumpHander(int fd, int argc, const char **argv)
     return nRet;
 }
 
-int SoftBusDiscHiDumperInit()
+int SoftBusDiscHiDumperInit(void)
 {
     int nRet = SOFTBUS_OK;
     nRet = SoftBusRegHiDumperHandler(SOFTBUS_DISC_MODULE_NAME, SOFTBUS_DISC_MODULE_HELP, &SoftBusDiscDumpHander);
@@ -83,7 +83,7 @@ int SoftBusDiscHiDumperInit()
     return nRet;
 }
 
-void SoftConnHiDumperDiscDeInit()
+void SoftConnHiDumperDiscDeInit(void)
 {
     SoftBusReleaseDumpVar(&g_disc_var_list);
 }

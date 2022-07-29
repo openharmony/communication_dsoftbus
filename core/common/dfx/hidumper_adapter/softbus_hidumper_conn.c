@@ -30,7 +30,7 @@ int SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
         return SOFTBUS_ERR;
-    } 
+    }
     int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
     return nRet;
 }
@@ -71,7 +71,7 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
     return nRet;
 }
 
-int SoftBusConnHiDumperInit()
+int SoftBusConnHiDumperInit(void)
 {
     int nRet = SOFTBUS_OK;
     nRet = SoftBusRegHiDumperHandler(SOFTBUS_CONN_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP, &SoftBusConnDumpHander);
@@ -82,7 +82,7 @@ int SoftBusConnHiDumperInit()
     return nRet;
 }
 
-void SoftConnHiDumperConnDeInit()
+void SoftConnHiDumperConnDeInit(void)
 {
     SoftBusReleaseDumpVar(&g_conn_var_list);
 }
