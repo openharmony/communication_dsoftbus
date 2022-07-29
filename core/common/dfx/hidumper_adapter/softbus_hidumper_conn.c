@@ -15,75 +15,74 @@
 #include <stdio.h>
 #include <string.h>
 #include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_log.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_conn.h"
 
-#define SOFTBUS_CONN_DUMP_BLECONNECTLIST "BLEConnectList"
-#define SOFTBUS_CONN_DUMP_BLGATTCINFOLIST "BleGattCInfoList"
-#define SOFTBUS_CONN_DUMP_BLEGATTSERVICE "BleGattService"
-#define SOFTBUS_CONN_DUMP_BRCONNECTLIST "BRConnectList"
-#define SOFTBUS_CONN_DUMP_BRPENDINGLIST "BRPendingList"
-#define SOFTBUS_CONN_DUMP_TCPCONNECTLIST "TCPConnectList"
-#define SOFTBUS_CONN_DUMP_P2PCONNECTINGDEVICE "P2PConnectingDevice"
-#define SOFTBUS_CONN_DUMP_P2PCONNECTEDDEVICE "P2PConnecedDevice"
+#define SOFTBUS_CONN_MODULE_NAME "conn"
+#define SOFTBUS_CONN_MODULE_HELP "List all the dump item of conn"
 
-static SoftBusConnDumpCb  *g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BUTT];
+static LIST_HEAD(g_conn_var_list);
 
-static void SoftBusDumpConnHelp(int fd)
+int SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
-    dprintf(fd, "Usage: hidumper -s 4700 -a conn [Option] \n");
-    dprintf(fd, "   [-h] | [-l <BLEConnectList| BleGattCInfoList| BleGattService| BRConnectList| BRPendingList| ");
-    dprintf(fd, " TCPConnectList| P2PConnectingDevice| P2PConnectedDevice>]\n");
-    dprintf(fd, "   -h         List all the dump item in conn module\n");
-    dprintf(fd, "   -l <item>  Dump the item in conn module, item is nesessary\n");
-}
-
-int SoftBusRegConnDumpCb(int varId, SoftBusConnDumpCb cb)
-{
-    if (varId >= SOFTBUS_CONN_DUMP_VAR_BUTT || varId < SOFTBUS_CONN_DUMP_VAR_BLECONNECTLIST || cb == NULL) {
+    if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
         return SOFTBUS_ERR;
-    }
-    g_ConnDumpCallback[varId] = cb;
-    return SOFTBUS_OK;
+    } 
+    int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
+    return nRet;
 }
 
-int SoftBusConnDumpHander(int fd, int argc, const char **argv)
+static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;
     }
 
     if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpConnHelp(fd);
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
         return SOFTBUS_OK;
     }
 
     if (argc == 1 && strcmp(argv[0], "-l") == 0) {
-        SoftBusDumpConnHelp(fd);
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
         return SOFTBUS_OK;
     }
     int nRet = SOFTBUS_OK;
+    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
     if (strcmp(argv[0], "-l") == 0) {
-        if (strcmp(argv[1], SOFTBUS_CONN_DUMP_BLECONNECTLIST) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BLECONNECTLIST](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_BLGATTCINFOLIST) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BLGATTCINFOLIST](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_BLEGATTSERVICE) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BLEGATTSERVICE](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_BRCONNECTLIST) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BRCONNECTLIST](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_BRPENDINGLIST) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_BRPENDINGLIST](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_TCPCONNECTLIST) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_TCPCONNECTLIST](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_P2PCONNECTINGDEVICE) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_P2PCONNECTINGDEVICE](fd);
-        } else if (strcmp(argv[1], SOFTBUS_CONN_DUMP_P2PCONNECTEDDEVICE) == 0) {
-            nRet = g_ConnDumpCallback[SOFTBUS_CONN_DUMP_VAR_P2PCONNECTEDDEVICE](fd);
-        } else {
-            SoftBusDumpErrInfo(fd, argv[1]);
-            SoftBusDumpConnHelp(fd);
+        ListNode *item = NULL;
+        LIST_FOR_EACH(item, &g_conn_var_list) {
+            SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
+            if (strcmp(itemNode->varName, argv[1]) == 0) {
+                itemNode->dumpCallback(fd);
+                isModuleExist = SOFTBUS_DUMP_EXIST;
+                break;
+            }
         }
     }
+    
+    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+        SoftBusDumpErrInfo(fd, argv[0]);
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
+    }
     return nRet;
+}
+
+int SoftBusConnHiDumperInit()
+{
+    int nRet = SOFTBUS_OK;
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_CONN_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP, &SoftBusConnDumpHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusConnDumpHander regist fail");
+        return nRet;
+    }
+    return nRet;
+}
+
+void SoftConnHiDumperConnDeInit()
+{
+    SoftBusReleaseDumpVar(&g_conn_var_list);
 }
