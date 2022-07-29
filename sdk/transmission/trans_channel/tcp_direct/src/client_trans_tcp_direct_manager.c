@@ -158,7 +158,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     if (sessionName == NULL || channel == NULL) {
         return SOFTBUS_ERR;
     }
-
+    int32_t ret;
     TcpDirectChannelInfo *item = NULL;
     (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
@@ -186,7 +186,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         goto EXIT_ERR;
     }
 
-    int32_t ret = ConnSetTcpKeepAlive(channel->fd, HEART_TIME);
+    ret = ConnSetTcpKeepAlive(channel->fd, HEART_TIME);
     if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
         SoftBusFree(item);

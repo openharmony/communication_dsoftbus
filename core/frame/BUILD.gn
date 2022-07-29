@@ -49,6 +49,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/bus_center",
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
         "$softbus_adapter_config/spec_config",
         "//base/security/device_auth/interfaces/innerkits",
       ]
@@ -57,12 +58,14 @@ if (defined(ohos_lite)) {
         "common/src/softbus_server_frame.c",
         "mini/src/softbus_server_stub.c",
       ]
-      cflags = [
-        "-Wall",
-        "-fPIC",
-        "-std=c99",
-      ]
-      cflags_cc = cflags
+      if (board_toolchain_type != "iccarm") {
+        cflags = [
+          "-Wall",
+          "-fPIC",
+          "-std=c99",
+        ]
+        cflags_cc = cflags
+      }
       deps = dsoftbus_server_common_deps
       deps += [
         "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -82,6 +85,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/include",
         "$softbus_adapter_config/spec_config",
         "$dsoftbus_root_path/interfaces/kits/transport",
+        "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
         "//base/security/device_auth/interfaces/innerkits",
         "//utils/native/lite/include",
         "//third_party/bounds_checking_function/include",
@@ -152,6 +156,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "//base/security/access_token/interfaces/innerkits/privacy/include",
     ]
     sources = dsoftbus_server_common_src
