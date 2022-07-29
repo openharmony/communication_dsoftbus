@@ -162,7 +162,7 @@ static int32_t ReleaseListenerRef(ListenerModule module)
 
         if (node->listener != NULL) {
             SoftBusFree(node->listener);
-            node = NULL;
+            node->listener = NULL;
         }
         ReleaseListenerSockets(node);
         (void)StopListenerThread(node);
@@ -1055,27 +1055,24 @@ int32_t StopBaseListener(ListenerModule module)
         ReleaseListenerNode(node);
         return SOFTBUS_LOCK_ERR;
     }
-
-    int32_t ret = SOFTBUS_OK;
-    do {
-        if (node->info.listenFd > 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del listen fd from readSet, fd = %d, module = %d.",
-                node->info.listenFd, module);
-            DelTriggerFromSet(node->info.listenFd, READ_TRIGGER);
-            ConnShutdownSocket(node->info.listenFd);
-            UpdateMaxFd();
-        }
-        node->info.listenFd = -1;
-
-        ret = StopListenerThread(node);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "stop listen thread failed!ret = %" PRId32 ", module = %d.",
-                ret, module);
-            break;
-        }
-    } while (false);
+    
+    int32_t listenFd = node->info.listenFd;
+    node->info.listenFd = -1;
+    int32_t ret = StopListenerThread(node);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "stop listen thread failed!ret = %" PRId32 ", module = %d.",
+            ret, module);
+    }
     SoftBusMutexUnlock(&node->lock);
     ReleaseListenerNode(node);
+
+    if (listenFd > 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "del listen fd from readSet, fd = %d, module = %d.",
+            listenFd, module);
+        DelTriggerFromSet(listenFd, READ_TRIGGER);
+        ConnShutdownSocket(listenFd);
+        UpdateMaxFd();
+    }
     return ret;
 }
 
@@ -1136,7 +1133,7 @@ void DestroyBaseListener(ListenerModule module)
         __func__, module, ret);
 }
 
-static bool CheckFdIsExist(SoftbusBaseListenerInfo *info, int32_t fd)
+static bool CheckFdIsExist(const SoftbusBaseListenerInfo *info, int32_t fd)
 {
     FdNode *item = NULL;
     FdNode *nextItem = NULL;
@@ -1266,19 +1263,15 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 
         if (SoftBusSocketFdIsset(fd, &g_writeSet) || SoftBusSocketFdIsset(fd, &g_readSet) ||
             SoftBusSocketFdIsset(fd, &g_exceptSet)) {
-            SoftBusMutexUnlock(&g_listenerList[module]->lock);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                "DelTrigger [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
-                module, triggerType);
             break;
         }
 
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:[fd:%d] removed from all fdSet. del fdnode", __func__, fd);
         DelFdNode(&node->info, fd);
     } while (false);
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "DelTrigger and node [fd:%d] success, current fdcount:%d, module:%d, triggerType:%d", fd, node->info.fdCount,
-        module, triggerType);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s:[fd:%d] success, current fdcount:%d, module:%d, triggerType:%d",
+        __func__, fd, node->info.fdCount, module, triggerType);
 
     SoftBusMutexUnlock(&node->lock);
     ReleaseListenerNode(node);

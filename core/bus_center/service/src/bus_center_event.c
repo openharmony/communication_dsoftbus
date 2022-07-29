@@ -326,7 +326,9 @@ int32_t LnnInitBusCenterEvent(void)
     g_notifyHandler.looper = looper;
     g_notifyHandler.HandleMessage = HandleNotifyMessage;
 
-    SoftBusMutexInit(&g_eventCtrl.lock, NULL);
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&g_eventCtrl.lock, &mutexAttr);
     for (i = 0; i < LNN_EVENT_TYPE_MAX; ++i) {
         ListInit(&g_eventCtrl.handlers[i]);
     }

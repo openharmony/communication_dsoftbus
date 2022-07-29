@@ -174,7 +174,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
 
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OnConnectEvent malloc TcpConnInfoNode");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: malloc TcpConnInfoNode", __func__);
         return SOFTBUS_MALLOC_ERR;
     }
 
