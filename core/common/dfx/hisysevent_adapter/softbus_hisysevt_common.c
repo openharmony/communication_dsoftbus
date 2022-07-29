@@ -127,7 +127,9 @@ int32_t InitSoftbusSysEvt()
 {
     InitStatisticEvtReportFunc();
     
-    InitTransStatisticSysEvt();
+    if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
 
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }

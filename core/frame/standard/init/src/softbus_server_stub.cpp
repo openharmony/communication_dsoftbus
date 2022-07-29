@@ -33,6 +33,7 @@
 #include "accesstoken_kit.h"
 #include "access_token.h"
 #include "privacy_kit.h"
+#include "softbus_hisysevt_transreporter.h"
 
 using namespace OHOS::Security::AccessToken;
 
@@ -82,7 +83,7 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
-static inline int CheckAndRecordAccessToken(const char* permission)
+static inline int32_t CheckAndRecordAccessToken(const char* permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
@@ -95,6 +96,15 @@ static inline int CheckAndRecordAccessToken(const char* permission)
     }
     
     return ret;
+}
+
+static inline void SoftbusReportPermissionFaultEvt(uint32_t ipcCode)
+{
+    if ((ipcCode == SERVER_OPEN_SESSION) || (ipcCode == SERVER_OPEN_AUTH_SESSION)) {
+        if (SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Permission Fault Evt Failed!");
+        }
+    }
 }
 
 SoftBusServerStub::SoftBusServerStub()
@@ -190,8 +200,9 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         const char *permission = itPerm->second;
         if ((permission != nullptr) &&
             (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "permission %s denied!", permission);
-            return SOFTBUS_PERMISSION_DENIED;
+            SoftbusReportPermissionFaultEvt(code);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "access token permission %s denied!", permission);
+            return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
     
@@ -374,6 +385,9 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
+        if (SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Permission Fault Evt Failed!");
+        }
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
