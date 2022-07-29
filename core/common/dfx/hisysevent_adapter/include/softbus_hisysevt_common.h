@@ -16,6 +16,12 @@
 #define HISYSEVENT_DISC_REPORTER_H
 #include "softbus_adapter_hisysevent.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t InitSoftbusSysEvt();
 
 typedef enum {
@@ -31,5 +37,11 @@ typedef int32_t(*StatisticEvtReportFunc)(void);
 StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type);
 
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* HISYSEVENT_DISC_REPORTER_H */
