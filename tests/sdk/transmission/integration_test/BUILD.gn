@@ -27,10 +27,7 @@ ohos_executable("softbus_test_server") {
 
 ohos_unittest("softbus_file_testsuite") {
   module_out_path = module_output_path
-  sources = [
-    "device_manager.cpp",
-    "file_test.cpp",
-  ]
+  sources = [ "device_manager.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",

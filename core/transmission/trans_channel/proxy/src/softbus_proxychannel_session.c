@@ -663,7 +663,7 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
         return SOFTBUS_DECRYPT_ERR;
     }
 
-    if (TransProxySessionDataLenCheck(dataInfo.outLen, dataHead->flags) != SOFTBUS_OK) {
+    if (TransProxySessionDataLenCheck(dataInfo.outLen, (ProxyPacketType)(dataHead->flags)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data len is too large %d type %d",
             dataInfo.outLen, dataHead->flags);
         SoftBusFree(dataInfo.outData);

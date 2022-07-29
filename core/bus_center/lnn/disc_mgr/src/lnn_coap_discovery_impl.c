@@ -77,8 +77,6 @@ int32_t LnnStartCoapPublish(void)
         .capability = LNN_DISC_CAPABILITY,
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
         .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
-        .businessData = NULL,
-        .businessDataLen = 0,
     };
     return LnnPublishService(NULL, &publishInfo, true);
 }
@@ -105,8 +103,6 @@ int32_t LnnStartCoapDiscovery(void)
         .capability = LNN_DISC_CAPABILITY,
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
         .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
-        .businessData = NULL,
-        .businessDataLen = 0,
     };
     InnerCallback callback = {
         .innerCb = g_discCb,

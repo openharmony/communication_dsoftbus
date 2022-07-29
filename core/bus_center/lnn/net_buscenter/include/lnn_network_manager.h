@@ -18,9 +18,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "bus_center_info_key.h"
 #include "common_list.h"
 #include "softbus_bus_center.h"
+#include "softbus_conn_interface.h"
 #include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
@@ -55,11 +57,17 @@ typedef enum {
 
 typedef VisitNextChoice (*VisitNetifCallback)(const LnnNetIfMgr *, void *);
 
+typedef enum {
+    LNN_LISTENER_MODE_PROXY,
+    LNN_LISTENER_MODE_DIRECT
+} ListenerMode;
+
 typedef struct LnnProtocolManager {
     int32_t (*Init)(struct LnnProtocolManager *self);
     void (*Deinit)(struct LnnProtocolManager *self);
     int32_t (*Enable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
     int32_t (*Disable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
+    ListenerModule (*GetListenerModule)(ListenerMode mode);
     ProtocolType id;
     LnnNetIfType supportedNetif;
     uint16_t pri;
@@ -75,6 +83,8 @@ void LnnDeinitNetworkManager(void);
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type);
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
+
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode);
 
 bool LnnIsAutoNetWorkingEnabled(void);
 
