@@ -14,5 +14,10 @@
  */
 #ifndef SOFTBUS_HIDUMPER_CONN_H
 #define SOFTBUS_HIDUMPER_CONN_H
-int SoftBusConnDumpHander(int fd, int argc, const char **argv);
+
+#include "softbus_hidumper.h"
+
+int SoftBusConnHiDumperInit(void);
+int SoftBusRegConnDumpCb(int varId, SoftBusVarDumpCb cb);
+void SoftConnHiDumperConnDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_CONN_H */

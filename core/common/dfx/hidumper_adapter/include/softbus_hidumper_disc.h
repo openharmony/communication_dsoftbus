@@ -15,5 +15,10 @@
 
 #ifndef SOFTBUS_HIDUMPER_DISC_H
 #define SOFTBUS_HIDUMPER_DISC_H
-int SoftBusDiscDumpHander(int fd, int argc, const char **argv);
+
+#include "softbus_hidumper.h"
+
+int SoftBusDiscHiDumperInit(void);
+int SoftBusRegDiscDumpCb(char *dumpVar, SoftBusVarDumpCb cb);
+void SoftConnHiDumperDiscDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_DISC_H */
