@@ -231,6 +231,7 @@ int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *opt
             }
             option->socketOption.port = info->info.ipInfo.port;
             option->socketOption.protocol = LNN_PROTOCOL_IP;
+            option->socketOption.keepAlive = 1;
             break;
         case AUTH_LINK_TYPE_BR:
             option->type = CONNECT_BR;
