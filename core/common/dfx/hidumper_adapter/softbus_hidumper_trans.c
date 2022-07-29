@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "softbus_hidumper.h"
+#include "softbus_hidumper_trans.h"
 
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
