@@ -115,6 +115,7 @@ if (defined(ohos_lite)) {
     dfx_source = [
       "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
       "dfx/hidumper_adapter/softbus_hidumper.c",
+      "dfx/hidumper_adapter/softbus_hidumper_interface.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
