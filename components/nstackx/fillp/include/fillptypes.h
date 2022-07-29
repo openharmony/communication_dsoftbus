@@ -577,8 +577,35 @@ struct FrameInfo {
  * the event type
  */
 typedef enum {
+    FT_EVT_FRAME_STATS,
     FT_EVT_MAX,
 } FtEnumEventType;
+
+typedef enum {
+    FILLP_FRAME_COST_LT10MS = 0,
+    FILLP_FRAME_COST_LT30MS,
+    FILLP_FRAME_COST_LT50MS,
+    FILLP_FRAME_COST_LT75MS,
+    FILLP_FRAME_COST_LT100MS,
+    FILLP_FRAME_COST_LT120MS,
+    FILLP_FRAME_COST_GE120MS,
+    FILLP_FRAME_COST_MAX,
+} FillpFrameCost;
+
+typedef enum {
+    FILLP_FRAME_BIT_RATE_LT3M = 0,
+    FILLP_FRAME_BIT_RATE_LT6M,
+    FILLP_FRAME_BIT_RATE_LT10M,
+    FILLP_FRAME_BIT_RATE_LT20M,
+    FILLP_FRAME_BIT_RATE_LT30M,
+    FILLP_FRAME_BIT_RATE_GE30M,
+    FILLP_FRAME_BIT_RATE_MAX,
+} FillpFrameBitRate;
+
+typedef struct {
+    FILLP_UINT32 costTimeStatsCnt[FILLP_FRAME_COST_MAX];
+    FILLP_UINT32 sendBitRateStatsCnt[FILLP_FRAME_BIT_RATE_MAX];
+} FillpFrameSendStats;
 
 /**
  * Structure of event callback information.
@@ -586,6 +613,7 @@ typedef enum {
 typedef struct {
     FtEnumEventType evt;
     union {
+        FillpFrameSendStats frameSendStats;
         FILLP_UINT32 reserved;
     } info;
 } FtEventCbkInfo;
