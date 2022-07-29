@@ -55,6 +55,7 @@ private:
     int32_t StartTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t QosReportInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StreamStatsInner(MessageParcel &data, MessageParcel &reply);
     int32_t GrantPermissionInner(MessageParcel &data, MessageParcel &reply);
     int32_t RemovePermissionInner(MessageParcel &data, MessageParcel &reply);
     int32_t PublishLNNInner(MessageParcel &data, MessageParcel &reply);

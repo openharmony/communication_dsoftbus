@@ -59,6 +59,11 @@ public:
             listener_->OnQosEvent(eventId, tvCount, tvList);
         }
 
+        void OnFrameStats(const StreamSendStats *data) override
+        {
+            listener_->OnFrameStats(data);
+        }
+
     private:
         std::shared_ptr<IStreamManagerListener> listener_ = nullptr;
     };

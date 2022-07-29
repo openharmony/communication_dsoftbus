@@ -420,7 +420,8 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, NULL},
     {LOOP_TYPE_BR_SEND, NULL},
     {LOOP_TYPE_BR_RECV, NULL},
-    {LOOP_TYPE_P2P, NULL}
+    {LOOP_TYPE_P2P, NULL},
+    {LOOP_TYPE_LANE, NULL}
 };
 
 SoftBusLooper *GetLooper(int type)
@@ -434,7 +435,7 @@ SoftBusLooper *GetLooper(int type)
     return NULL;
 }
 
-static void SetLooper(int type, SoftBusLooper *looper)
+void SetLooper(int type, SoftBusLooper *looper)
 {
     uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
     for (uint32_t i = 0; i < len; i++) {

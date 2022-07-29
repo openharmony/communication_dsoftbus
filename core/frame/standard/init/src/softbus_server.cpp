@@ -215,6 +215,11 @@ int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t ap
     return QosReportExecute(channelId, chanType, appType, quality);
 }
 
+int32_t SoftBusServer::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    return TransStreamStats(channelId, channelType, data);
+}
+
 int32_t SoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
 {
     return LnnIpcPublishLNN(pkgName, info, infoTypeLen);

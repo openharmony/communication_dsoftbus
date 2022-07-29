@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_lane_assign.h"
+#include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link_proc.h"
@@ -159,7 +160,7 @@ void RegisterLaneIdListener(const ILaneIdStateListener *listener)
         SoftBusFree(newNode);
         return;
     }
-    ListAdd(&g_laneListenerList.list, &newNode->node);
+    ListTailInsert(&g_laneListenerList.list, &newNode->node);
     g_laneListenerList.cnt++;
     Unlock();
 }
@@ -231,7 +232,7 @@ static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
     SoftBusFree(listener);
 }
 
-static void LaneIdDisabled(uint32_t laneId)
+static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -241,7 +242,7 @@ static void LaneIdDisabled(uint32_t laneId)
     }
     for (uint32_t i = 0; i < listenerNum; i++) {
         if (listener[i].OnLaneIdDisabled != NULL) {
-            listener[i].OnLaneIdDisabled(laneId);
+            listener[i].OnLaneIdDisabled(laneId, laneProfileId);
         }
     }
     SoftBusFree(listener);
@@ -338,6 +339,10 @@ static int32_t LaneDelayInit(void)
 
 int32_t InitLane(void)
 {
+    if (LnnInitLaneLooper() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneLooper fail");
+        return SOFTBUS_ERR;
+    }
     if (InitLaneModel() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneModel fail");
         return SOFTBUS_ERR;
@@ -370,6 +375,7 @@ void DeinitLane(void)
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();
+    LnnDeinitLaneLooper();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         g_laneObject[LANE_TYPE_TRANS]->Deinit();
     }
