@@ -1370,10 +1370,10 @@ static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *network
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update conn capability succ.");
 }
 
-static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
+static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size)
 {
-    size_t addrLen = strnlen((const char *)msg, len);
-    if (addrLen == len || addrLen == 0) {
+    size_t addrLen = strnlen((const char *)msg, size);
+    if (addrLen != size - 1 || addrLen == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad addr received!networkId=%s", __func__,
             AnonymizesNetworkID(networkId));
         return;

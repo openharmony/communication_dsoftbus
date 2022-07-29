@@ -51,8 +51,6 @@ int32_t ServerPublishService(IpcIo *req, IpcIo *reply)
         .medium = info->commonSerializer.medium,
         .mode = info->commonSerializer.mode,
         .publishId = info->commonSerializer.id.publishId,
-        .businessData = NULL,
-        .businessDataLen = 0
     };
     int32_t callingUid = GetCallingUid();
     if (!CheckDiscPermission(callingUid, pkgName)) {
@@ -112,8 +110,6 @@ int32_t ServerStartDiscovery(IpcIo *req, IpcIo *reply)
         .subscribeId = info->commonSerializer.id.subscribeId,
         .isSameAccount = info->isSameAccount,
         .isWakeRemote = info->isWakeRemote,
-        .businessData = NULL,
-        .businessDataLen = 0
     };
     int32_t callingUid = GetCallingUid();
     if (!CheckDiscPermission(callingUid, pkgName)) {
