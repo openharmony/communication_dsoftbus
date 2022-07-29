@@ -37,7 +37,8 @@ uint8_t SoftBusCreateFirstDiscDurationEvt(SoftBusEvtReportMsg *msg, uint8_t medi
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_MEDIUM) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
@@ -87,14 +88,16 @@ uint8_t SoftBusCreateScanTimesEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_MEDIUM) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.u8v = medium;
 
     msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_SCAN_COUNTER) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_SCAN_COUNTER) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
@@ -123,21 +126,24 @@ uint8_t SoftBusCreateDiscFaultEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint
     }
 
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_MEDIUM) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.u8v = medium;
 
     msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_ERROR_TYPE) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_ERROR_TYPE) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramValue.u8v = errorType;
 
     msg->paramArray[SOFTBUS_EVT_PARAM_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_ERROR_CODE) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
+        DISC_PARAM_ERROR_CODE) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
@@ -175,7 +181,8 @@ uint8_t SoftBusCreateDiscStartupEvt(SoftBusEvtReportMsg *msg, char *PackageName)
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, PackageName) != EOK) {
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.str, 
+        SOFTBUS_HISYSEVT_PARAM_LEN, PackageName) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
     }
