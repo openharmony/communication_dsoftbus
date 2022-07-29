@@ -23,7 +23,7 @@ typedef enum {
 
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
-int32_t SoftbusReportTransError(int32_t errcode);
+int32_t SoftbusReportTransErrorEvt(int32_t errcode);
 
 void InitTransStatisticSysEvt(void);
 

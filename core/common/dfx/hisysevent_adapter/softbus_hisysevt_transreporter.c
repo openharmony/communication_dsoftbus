@@ -14,6 +14,8 @@
  */
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_log.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_hisysevt_common.h"
 #include "softbus_hisysevt_transreporter.h"
 
@@ -41,12 +43,14 @@
 #define TIME_COST_2S (2000)
 
 typedef struct {
+    SoftBusMutex lock;
     uint32_t failCnt;
     uint32_t successCnt;
     float successRate;
 }OpenSessionCntStruct;
 
 typedef struct {
+    SoftBusMutex lock;
     uint32_t maxTimeCost;
     uint32_t minTimeCost;
     uint32_t aveTimeCost;
@@ -61,12 +65,22 @@ static OpenSessionTimeStruct g_openSessionTime;
 
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
 {
+    if (SoftBusMutexLock(&g_openSessionCnt.lock) != SOFTBUS_OK) {
+        return;
+    }
+    
     g_openSessionCnt.failCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
     g_openSessionCnt.successCnt += (isSucc == SOFTBUS_EVT_OPEN_SESSION_SUCC);
     int totalCnt = g_openSessionCnt.failCnt + g_openSessionCnt.successCnt;
     g_openSessionCnt.successRate = (float)(g_openSessionCnt.successCnt)/(float)(totalCnt);
 
+    (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
+
     if (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC) {
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_openSessionTime.lock) != SOFTBUS_OK) {
         return;
     }
     
@@ -88,20 +102,42 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     } else {
         g_openSessionTime.timesOn2s++;
     }
+
+    (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
 
 static inline void clearOpenSessionCnt(void)
 {
-    memset_s(&g_openSessionCnt, sizeof(OpenSessionCntStruct), 0, sizeof(OpenSessionCntStruct));
+    memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex),
+        0, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
 }
 
 static inline void clearOpenSessionTime(void)
 {
-    memset_s(&g_openSessionTime, sizeof(OpenSessionTimeStruct), 0, sizeof(OpenSessionTimeStruct));
+    memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex),
+        0, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
+}
+
+static inline int32_t InitOpenSessionEvtMutexLock(void)
+{
+    SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
+    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
 }
 
 static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 {
+    if (SoftBusMutexLock(&g_openSessionCnt.lock) != SOFTBUS_OK) {
+        return;
+    }
+    
     // event
     strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_CNT);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -124,6 +160,10 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_SUCCESS_RATE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
     param->paramValue.f = g_openSessionCnt.successRate;
+    
+    clearOpenSessionCnt();
+
+    (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
 }
 
 
@@ -137,13 +177,15 @@ static int32_t SoftbusReportOpenSessionCntEvt()
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
 
-    clearOpenSessionCnt();
-
     return ret;
 }
 
 static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
 {
+    if (SoftBusMutexLock(&g_openSessionTime.lock) != SOFTBUS_OK) {
+        return;
+    }
+    
     // event
     strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -190,6 +232,10 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_ABOVE_2S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesOn2s;
+
+    clearOpenSessionTime();
+
+    (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
 
 static int32_t SoftbusReportOpenSessionTimeEvt()
@@ -201,8 +247,6 @@ static int32_t SoftbusReportOpenSessionTimeEvt()
     CreateOpenSessionTimeMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
-
-    clearOpenSessionTime();
 
     return ret;
 }
@@ -234,11 +278,18 @@ int32_t SoftbusReportTransErrorEvt(int32_t errcode)
     return ret;
 }
 
-void InitTransStatisticSysEvt(void)
+int32_t InitTransStatisticSysEvt(void)
 {
+    if (InitOpenSessionEvtMutexLock() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Trans Statistic Evt Lock Init Fail!");
+        return SOFTBUS_ERR;
+    }
+    
     clearOpenSessionCnt();
     clearOpenSessionTime();
 
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT, SoftbusReportOpenSessionCntEvt);
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST, SoftbusReportOpenSessionTimeEvt);
+
+    return SOFTBUS_OK;
 }
