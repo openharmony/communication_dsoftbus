@@ -21,16 +21,9 @@
 #include "softbus_log.h"
 #include "softbus_hidumper.h"
 
-typedef struct {
-    ListNode node;
-    char moduleName[SOFTBUS_MODULE_NAME_LEN];
-    char helpInfo[SOFTBUS_MODULE_HELP_LEN];
-    DumpHandlerFunc dumpHandler;
-} HandlerNode;
-
 static LIST_HEAD(g_hidumperhander_list);
 
-static void SoftBusDumpShowHelp(int fd)
+void SoftBusDumpShowHelp(int fd)
 {
     dprintf(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
     dprintf(fd, "  Option: [-h] ");
@@ -73,7 +66,7 @@ void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
     dprintf(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
 }
 
-SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)
+static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)
 {
     SoftBusDumpVarNode *varNode = SoftBusCalloc(sizeof(SoftBusDumpVarNode));
     if (varNode == NULL) {
@@ -177,41 +170,7 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
     return SOFTBUS_OK;
 }
 
-int SoftBusDumpProcess(int fd, int argc, const char **argv)
+ListNode *SoftBusGetHiDumpHandler()
 {
-    if (fd <= 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
-        return SOFTBUS_ERR;
-    }
-
-    if (argc == 0 || strcmp(argv[0], "-h")) {
-        SoftBusDumpShowHelp(fd);
-        return SOFTBUS_OK;
-    }
-
-    const char **argvPtr = NULL;
-    if (argc == 1) {
-        *argvPtr = NULL;
-    } else {
-        argvPtr = &argv[1];
-    }
-    int argcNew = argc - 1;
-
-    ListNode *item = NULL;
-    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
-    LIST_FOR_EACH(item, &g_hidumperhander_list) {
-        HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
-        if (strcmp(itemNode->moduleName, argv[0]) == 0) {
-            itemNode->dumpHandler(fd, argcNew, argvPtr);
-            isModuleExist = SOFTBUS_DUMP_EXIST;
-            break;
-        }
-    }
-
-    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
-        SoftBusDumpErrInfo(fd, argv[0]);
-        SoftBusDumpShowHelp(fd);
-    }
-    
-    return SOFTBUS_OK;
+    return &g_hidumperhander_list;
 }
