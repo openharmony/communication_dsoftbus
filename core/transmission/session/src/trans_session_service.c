@@ -30,14 +30,14 @@
 
 static bool g_transSessionInitFlag = false;
 
-
+#define TIME_THOUSANDS_FACTOR (1000)
 static inline int64_t GetTimeMillis(void)
 {
     SoftBusSysTime t;
     t.sec = 0;
     t.usec = 0;
     SoftBusGetTime(&t);
-    int64_t when = t.sec * TIME_THOUSANDS_MULTIPLIER + (t.usec / TIME_THOUSANDS_MULTIPLIER);
+    int64_t when = t.sec * TIME_THOUSANDS_FACTOR + (t.usec / TIME_THOUSANDS_FACTOR);
     return when;
 }
 
