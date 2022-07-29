@@ -49,7 +49,20 @@ if (defined(ohos_lite)) {
             [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
         defines = [ "HISPARK_PEGASUS_USE_NETIF_GET_ADDR" ]
       }
-      cflags = [ "-Wall" ]
+      if (board_toolchain_type == "iccarm") {
+        include_dirs += [
+          "//third_party/lwip/src/include",
+          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
+        ]
+        cflags = [
+          "--diag_suppress",
+          "Pe226",
+        ]
+        cflag_cc = cflags
+        ldflags = [ "-lpthread" ]
+      } else {
+        cflags = [ "-Wall" ]
+      }
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
@@ -138,6 +151,7 @@ if (defined(ohos_lite)) {
     sources = [
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
+      "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
       "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
@@ -180,7 +194,10 @@ if (defined(ohos_lite)) {
     }
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [
+        "hisysevent_native:libhisysevent",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
     }
     part_name = "dsoftbus"
     subsystem_name = "communication"
