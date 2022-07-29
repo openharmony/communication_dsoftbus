@@ -33,26 +33,21 @@ typedef struct {
 } SoftBusDumpVarNode;
 
 typedef int (*DumpHandlerFunc)(int fd, int argc, const char **argv);
+
+typedef struct {
+    ListNode node;
+    char moduleName[SOFTBUS_MODULE_NAME_LEN];
+    char helpInfo[SOFTBUS_MODULE_HELP_LEN];
+    DumpHandlerFunc dumpHandler;
+} HandlerNode;
+
+void SoftBusDumpShowHelp(int fd);
 void SoftBusDumpErrInfo(int fd, const char *argv);
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList);
-SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb);
 int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *subModoleVarList);
 void SoftBusReleaseDumpVar(ListNode *varList);
 void SoftBusHiDumperInit(void);
 int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-int SoftBusDumpProcess(int fd, int argc, const char **argv);
-
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif
-#endif
+ListNode *SoftBusGetHiDumpHandler();
 
 #endif
