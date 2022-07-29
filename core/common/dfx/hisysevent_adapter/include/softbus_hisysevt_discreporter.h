@@ -36,7 +36,7 @@ uint8_t SoftBusCreateDiscStartupEvt(SoftBusEvtReportMsg *msg, char *PackageName)
 uint8_t SoftBusCreateConnDurationEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint32_t maxConnDuration,
     uint32_t minConnDuration, int avgConnDuration);
 uint8_t SoftBusCreateScanTimesEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint32_t discDuration);
-uint8_t SoftBusCreateDiscFaultEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint8_t errorType, 
+uint8_t SoftBusCreateDiscFaultEvt(SoftBusEvtReportMsg *msg, uint8_t medium, uint8_t errorType,
     uint8_t errorCode, uint32_t errorCount);
 
 #endif /* HISYSEVENT_DISC_REPORTER_H */
