@@ -1198,4 +1198,3 @@ int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
     return SOFTBUS_ERR;
 }
 
-
