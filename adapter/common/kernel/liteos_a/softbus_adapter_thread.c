@@ -19,6 +19,7 @@
 #include "softbus_adapter_thread.h"
 
 #include <pthread.h>
+#include <sched.h>
 #include <securec.h>
 #include <stdio.h>
 #include <string.h>
@@ -215,7 +216,7 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
 #endif
 
     struct sched_param periorityParam;
-    (void)memset_s(&periorityParam, sizeof(pthread_attr_setschedparam), 0, sizeof(pthread_attr_setschedparam));
+    (void)memset_s(&periorityParam, sizeof(periorityParam), 0, sizeof(periorityParam));
     struct sched_param defaultPeri;
     pthread_attr_getschedparam(attr, &defaultPeri);
     switch (threadAttr->prior) {

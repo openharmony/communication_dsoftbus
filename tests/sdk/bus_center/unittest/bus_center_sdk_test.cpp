@@ -21,6 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -32,7 +34,6 @@ constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID = 0;
 constexpr int32_t ERRO_CAPDATA_LEN = 514;
 static int32_t g_subscribeId = 0;
 static int32_t g_publishId = 0;
-const int32_t ERROR_FREQ = 5;
 
 class BusCenterSdkTest : public testing::Test {
 public:
@@ -40,6 +41,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void AddPermission();
 };
 
 void BusCenterSdkTest::SetUpTestCase()
@@ -52,10 +54,31 @@ void BusCenterSdkTest::TearDownTestCase()
 
 void BusCenterSdkTest::SetUp()
 {
+    AddPermission();
 }
 
 void BusCenterSdkTest::TearDown()
 {
+}
+
+void BusCenterSdkTest::AddPermission()
+{
+    uint64_t tokenId;
+    const char *perms[2];
+    perms[0] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    perms[1] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 0,
+        .dcaps = NULL,
+        .perms = perms,
+        .acls = NULL,
+        .processName = "dsoftbus_service",
+        .aplStr = "system_core",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
 }
 
 static int32_t GetSubscribeId(void)
@@ -426,58 +449,6 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: PublishLNNTest003
- * @tc.desc: Test coap active publish, publish broadcasts at different frequencies.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(BusCenterSdkTest, PublishLNNTest003, TestSize.Level1)
-{
-    int32_t ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = COAP,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .businessData = "businessData1",
-        .businessDataLen = strlen("businessData1"),
-        .ranging = true
-    };
-
-    ret = PublishLNN(TEST_PKG_NAME, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.freq = MID;
-    ret = PublishLNN(TEST_PKG_NAME, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.freq = HIGH;
-    ret = PublishLNN(TEST_PKG_NAME, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(TEST_PKG_NAME, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.freq = (ExchangeFreq)ERROR_FREQ;
-    ret = PublishLNN(TEST_PKG_NAME, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    ret = StopPublishLNN(TEST_PKG_NAME, testInfo.publishId);
-    EXPECT_TRUE(ret != 0);
-}
-
-/**
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
@@ -550,58 +521,5 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     EXPECT_TRUE(ret == 0);
     ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
     EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: RefreshLNNTest003
- * @tc.desc:Test coap active discover, discover broadcasts at different freq.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(BusCenterSdkTest, RefreshLNNTest003, TestSize.Level1)
-{
-    int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = COAP,
-        .freq = LOW,
-        .isSameAccount = true,
-        .isWakeRemote = false,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3"),
-        .businessData = "businessData1",
-        .businessDataLen = strlen("businessData1")
-    };
-    
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
-    
-    testInfo.freq = MID;
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
-    
-    testInfo.freq = HIGH;
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
-    
-    testInfo.freq = SUPER_HIGH;
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, testInfo.subscribeId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.freq = (ExchangeFreq)ERROR_FREQ;
-    ret = RefreshLNN(TEST_PKG_NAME, &testInfo, &g_refreshCb);
-    EXPECT_TRUE(ret != 0);
-    ret = StopRefreshLNN(TEST_PKG_NAME, testInfo.subscribeId);
-    EXPECT_TRUE(ret != 0);
 }
 } // namespace OHOS
