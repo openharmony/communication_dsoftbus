@@ -134,7 +134,7 @@ int32_t RecvNetlinkResponse(int32_t nlSockFd, struct NlmsgCallback *nlcb)
     };
 
     int32_t recvLen;
-    char buf[MAX_NETLINK_BUFFER_LEN] = { 0 };
+    char buf[MAX_NETLINK_BUFFER_LEN] = {0};
     iovRecv.iov_base = buf;
     iovRecv.iov_len = MAX_NETLINK_BUFFER_LEN;
 
