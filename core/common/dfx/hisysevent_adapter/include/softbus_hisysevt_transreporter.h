@@ -15,13 +15,14 @@
 #ifndef HISYSEVENT_TRANS_REPORTER_H
 #define HISYSEVENT_TRANS_REPORTER_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
-#include <stdint.h>
 typedef enum {
     SOFTBUS_EVT_OPEN_SESSION_SUCC,
     SOFTBUS_EVT_OPEN_SESSION_FAIL,
@@ -29,7 +30,7 @@ typedef enum {
 
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
-int32_t SoftbusReportTransErrorEvt(int32_t errcode);
+void SoftbusReportTransErrorEvt(int32_t errcode);
 
 int32_t InitTransStatisticSysEvt(void);
 

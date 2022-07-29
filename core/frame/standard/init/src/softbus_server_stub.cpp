@@ -101,9 +101,7 @@ static inline int32_t CheckAndRecordAccessToken(const char* permission)
 static inline void SoftbusReportPermissionFaultEvt(uint32_t ipcCode)
 {
     if ((ipcCode == SERVER_OPEN_SESSION) || (ipcCode == SERVER_OPEN_AUTH_SESSION)) {
-        if (SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Permission Fault Evt Failed!");
-        }
+        SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
     }
 }
 
@@ -385,9 +383,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
-        if (SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Permission Fault Evt Failed!");
-        }
+        SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED);
+        
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }

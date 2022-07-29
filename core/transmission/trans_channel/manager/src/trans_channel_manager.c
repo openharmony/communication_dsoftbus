@@ -199,9 +199,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     if (TransGetLaneInfo(param, &connInfo, &laneId) != SOFTBUS_OK) {
-        if (SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Get Lane Fault Evt Failed!");
-        }
+        SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get laneId[%u], link type[%u].", laneId, connInfo.type);
@@ -215,9 +213,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId)) != SOFTBUS_OK) {
-        if (SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SOFTBUS Write Get Lane Fault Evt Failed!");
-        }
+        SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         goto EXIT_ERR;
     }
 

@@ -265,17 +265,21 @@ static inline void CreateTransErrMsg(SoftBusEvtReportMsg* msg, int32_t errcode)
     param->paramValue.i32v = errcode;
 }
 
-int32_t SoftbusReportTransErrorEvt(int32_t errcode)
+void SoftbusReportTransErrorEvt(int32_t errcode)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Alloc EvtReport Msg Fail!");
+        return;
     }
+    
     CreateTransErrMsg(msg, errcode);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
 
-    return ret;
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Sys Evt Witre ErrCode %d FAIL!", errcode);
+    }
 }
 
 int32_t InitTransStatisticSysEvt(void)
