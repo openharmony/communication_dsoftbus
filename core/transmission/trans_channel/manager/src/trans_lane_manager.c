@@ -44,16 +44,23 @@ static void GetTransSessionInfoByLane(TransLaneInfo * laneItem, AppInfo *appInfo
     }
 }
 
-static inline TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
+static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
 {
     switch (type) {
-        case LANE_BR : return DUMPER_LANE_BR;
-        case LANE_BLE : return DUMPER_LANE_BLE;,
-        case LANE_P2P : return DUMPER_LANE_P2P;,
-        case LANE_WLAN_2P4G : return DUMPER_LANE_WLAN;,
-        case LANE_WLAN_5G : return DUMPER_LANE_WLAN;,
-        case LANE_ETH : return DUMPER_LANE_ETH;,
-        default : return DUMPER_LANE_LINK_TYPE_BUTT;,
+        case LANE_BR:
+            return DUMPER_LANE_BR;
+        case LANE_BLE:
+            return DUMPER_LANE_BLE;,
+        case LANE_P2P:
+            return DUMPER_LANE_P2P;,
+        case LANE_WLAN_2P4G:
+            return DUMPER_LANE_WLAN;,
+        case LANE_WLAN_5G:
+            return DUMPER_LANE_WLAN;,
+        case LANE_ETH:
+            return DUMPER_LANE_ETH;,
+        default:
+            return DUMPER_LANE_LINK_TYPE_BUTT;,
     }
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }
@@ -77,14 +84,11 @@ static void TransLaneChannelForEachShowInfo(int fd)
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
         GetTransSessionInfoByLane(laneItem, appInfo);
-        SoftBusTransDumpRunningSession(fd, 
+        SoftBusTransDumpRunningSession(fd,
             ConvertLaneLinkTypeToDumper(laneItem->laneConnInfo.type), appInfo);
     }
     
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    
-    return;
-
 }
 
 int32_t TransLaneMgrInit(void)

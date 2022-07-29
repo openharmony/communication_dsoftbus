@@ -35,13 +35,13 @@ const char* g_dataTypeList[BUSINESS_TYPE_BUTT] = {
     "Stream",
 };
 
-typedef struct{
-	const char* cmd;
-	ShowDumpInfosFunc *showDumpInfosFunc;
+typedef struct {
+    const char* cmd;
+    ShowDumpInfosFunc *showDumpInfosFunc;
 }TransHiDumperCmd;
 
 typedef enum {
-	TRANS_HIDUMPER_CMD_REGISTED_SESSION_LIST = 0,
+    TRANS_HIDUMPER_CMD_REGISTED_SESSION_LIST = 0,
     TRANS_HIDUMPER_CMD_CONCURRENT_SESSION_LIST,
 
     TRANS_HIDUMPER_CMD_BUTT
@@ -56,53 +56,55 @@ void ShowTransDumpHelperInfo(int fd)
 
 ShowDumpInfosFunc g_ShowRegisterSessionInfosFunc = NULL;
 
-void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func) {
+void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func)
+{
     g_ShowRegisterSessionInfosFunc = func;
 }
 
 ShowDumpInfosFunc g_ShowRunningSessionInfosFunc = NULL;
-void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func) {
+void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
+{
     g_ShowRunningSessionInfosFunc = func;
 }
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
-     dprintf(fd, "PkgName               : %s\n", pkgName);
-     dprintf(fd, "SessionName           : %s\n", sessionName);
-     dprintf(fd, "PID                   : %d\n", uid);
-     dprintf(fd, "UID                   : %d\n", pid);
+    dprintf(fd, "PkgName               : %s\n", pkgName);
+    dprintf(fd, "SessionName           : %s\n", sessionName);
+    dprintf(fd, "PID                   : %d\n", uid);
+    dprintf(fd, "UID                   : %d\n", pid);
 }
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
-     dprintf(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
-     dprintf(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
-     dprintf(fd, "PeerDeviceId          : %s\n", appInfo->peerData.deviceId);
-     dprintf(fd, "LinkType              : %s\n", g_linkTypeList[type]);
-     dprintf(fd, "SourceAddress         : %s\n", appInfo->myData.addr);
-     dprintf(fd, "DestAddress           : %s\n", appInfo->peerData.addr);
-     dprintf(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
+    dprintf(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
+    dprintf(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
+    dprintf(fd, "PeerDeviceId          : %s\n", appInfo->peerData.deviceId);
+    dprintf(fd, "LinkType              : %s\n", g_linkTypeList[type]);
+    dprintf(fd, "SourceAddress         : %s\n", appInfo->myData.addr);
+    dprintf(fd, "DestAddress           : %s\n", appInfo->peerData.addr);
+    dprintf(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
 }
 
 TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
-	{CMD_REGISTED_SESSION_LIST, &g_ShowRegisterSessionInfosFunc},
-	{CMD_CONCURRENT_SESSION_LIST, &g_ShowRunningSessionInfosFunc}
+    {CMD_REGISTED_SESSION_LIST, &g_ShowRegisterSessionInfosFunc},
+    {CMD_CONCURRENT_SESSION_LIST, &g_ShowRunningSessionInfosFunc}
 };
 
 void SoftBusTransDumpHander(int fd, int argc, const char **argv)
 {
-	if ((argc != 2) || (strcmp(argv[0], "-l") != 0)) {
-		ShowTransDumpHelperInfo(fd);
-		return;
-	}
+    if ((argc != 2) || (strcmp(argv[0], "-l") != 0)) {
+        ShowTransDumpHelperInfo(fd);
+        return;
+    }
 
-	for (unsigned int i = 0; i < TRANS_HIDUMPER_CMD_BUTT; i++) {
-		if (strcmp(argv[1], g_transHiDumperCmdList[i].cmd) == 0) {
-			(*g_transHiDumperCmdList[i].showDumpInfosFunc)(fd);
-			return;
-		}
-	}
+    for (unsigned int i = 0; i < TRANS_HIDUMPER_CMD_BUTT; i++) {
+        if (strcmp(argv[1], g_transHiDumperCmdList[i].cmd) == 0) {
+            (*g_transHiDumperCmdList[i].showDumpInfosFunc)(fd);
+            return;
+        }
+    }
 
-	ShowTransDumpHelperInfo(fd);
+    ShowTransDumpHelperInfo(fd);
 }
