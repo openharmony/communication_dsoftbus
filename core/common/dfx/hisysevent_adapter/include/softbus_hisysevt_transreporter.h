@@ -25,6 +25,6 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
 int32_t SoftbusReportTransErrorEvt(int32_t errcode);
 
-void InitTransStatisticSysEvt(void);
+int32_t InitTransStatisticSysEvt(void);
 
 #endif /* HISYSEVENT_TRANS_REPORTER_H */
