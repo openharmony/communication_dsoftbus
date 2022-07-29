@@ -14,6 +14,7 @@
  */
 #ifndef HISYSEVENT_TRANS_REPORTER_H
 #define HISYSEVENT_TRANS_REPORTER_H
+#include <stdint.h>
 
 typedef enum {
     SOFTBUS_EVT_OPEN_SESSION_SUCC,
