@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 #include "securec.h"
-#include "softbus_hisysevt_transreporter.h"
+#include "softbus_error_code.h"
 #include "softbus_hisysevt_common.h"
+#include "softbus_hisysevt_transreporter.h"
 
 #define STATISTIC_EVT_TRANS_OPEN_SESSION_CNT "TRANS_OPEN_SESSION_CNT"
 #define STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST "TRANS_OPEN_SESSION_TIME_COST"
@@ -89,36 +90,36 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     }
 }
 
-static inline void clearOpenSessionCnt()
+static inline void clearOpenSessionCnt(void)
 {
     memset_s(&g_openSessionCnt, sizeof(OpenSessionCntStruct), 0, sizeof(OpenSessionCntStruct));
 }
 
-static inline void clearOpenSessionTime()
+static inline void clearOpenSessionTime(void)
 {
     memset_s(&g_openSessionTime, sizeof(OpenSessionTimeStruct), 0, sizeof(OpenSessionTimeStruct));
 }
 
 static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 {
-    //event
+    // event
     strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_CNT);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
 
-    //param 0
+    // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_SUCCESS_CNT);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionCnt.successCnt;
 
-    //param 1
+    // param 1
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_FAIL_CNT);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = (g_openSessionCnt.failCnt);
 
-    //param 2
+    // param 2
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_SUCCESS_RATE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
@@ -128,13 +129,13 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 
 static int32_t SoftbusReportOpenSessionCntEvt()
 {
-	SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
     CreateOpenSessionCntMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
-	SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReporMsg(msg);
 
     clearOpenSessionCnt();
 
@@ -143,48 +144,48 @@ static int32_t SoftbusReportOpenSessionCntEvt()
 
 static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
 {
-    //event
+    // event
     strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_SEVEN;
 
-    //param 0
+    // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_MAX_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.maxTimeCost;
 
-    //param 1
+    // param 1
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_MIN_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.minTimeCost;
 
-    //param 2
+    // param 2
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_AVE_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.aveTimeCost;
 
-    //param 3
+    // param 3
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_UNDER_500MS);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn500ms;
 
-    //param 4
+    // param 4
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_BETWEEN_500MS_1S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn500and1s;
 
-    //param 5
+    // param 5
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FIVE];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_BETWEEN_1S_2S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn1and2s;
 
-    //param 6
+    // param 6
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_SIX];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_ABOVE_2S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
@@ -193,13 +194,13 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
 
 static int32_t SoftbusReportOpenSessionTimeEvt()
 {
-	SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_SEVEN);
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_SEVEN);
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
     CreateOpenSessionTimeMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
-	SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReporMsg(msg);
 
     clearOpenSessionTime();
 
@@ -208,12 +209,12 @@ static int32_t SoftbusReportOpenSessionTimeEvt()
 
 static inline void CreateTransErrMsg(SoftBusEvtReportMsg* msg, int32_t errcode)
 {
-    //event
+    // event
     strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, FAULT_EVT_TRANS_FAULT);
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
     msg->paramNum = SOFTBUS_EVT_PARAM_ONE;
 
-    //param 0
+    // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_ERRCODE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
@@ -222,18 +223,18 @@ static inline void CreateTransErrMsg(SoftBusEvtReportMsg* msg, int32_t errcode)
 
 int32_t SoftbusReportTransErrorEvt(int32_t errcode)
 {
-	SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
     CreateTransErrMsg(msg, errcode);
     int ret = SoftbusWriteHisEvt(msg);
-	SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReporMsg(msg);
 
     return ret;
 }
 
-void InitTransStatisticSysEvt()
+void InitTransStatisticSysEvt(void)
 {
     clearOpenSessionCnt();
     clearOpenSessionTime();

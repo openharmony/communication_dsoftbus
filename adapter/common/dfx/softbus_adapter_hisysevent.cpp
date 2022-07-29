@@ -136,7 +136,7 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
 
 SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
-    SoftBusEvtReportMsg *msg = SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
     if (msg == nullptr) {
         return nullptr;
     }
