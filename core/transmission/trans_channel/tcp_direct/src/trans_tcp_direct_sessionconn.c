@@ -307,7 +307,7 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
         if (connInfo->channelId == channelId) {
             memcpy_s(appInfo, sizeof(AppInfo), &connInfo->appInfo, sizeof(AppInfo));
             ReleaseSessonConnLock();
-            return SOFTBUS_OK
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessonConnLock();

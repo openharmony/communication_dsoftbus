@@ -18,6 +18,7 @@
 
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 #if __cplusplus

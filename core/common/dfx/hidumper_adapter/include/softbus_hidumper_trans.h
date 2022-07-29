@@ -36,7 +36,7 @@ void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func);
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid);
 
-void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo appInfo);
+void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo);
 
 void SoftBusTransDumpHander(int fd, int argc, const char **argv);
 

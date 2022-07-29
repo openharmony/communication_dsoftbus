@@ -432,7 +432,7 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channelId) {
-            memcpy_s(appInfo, sizeof(AppInfo), &udpChannelNode->info, sizeof(AppInfo);
+            memcpy_s(appInfo, sizeof(AppInfo), &udpChannelNode->info, sizeof(AppInfo));
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
         }
