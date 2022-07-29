@@ -319,7 +319,7 @@ bool GetSignalingMsgSwitch(void)
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
 {
     int ret = 0;
-    char signalingMsgBuf[BUF_HEX_LEN] = ;
+    char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
         return;
