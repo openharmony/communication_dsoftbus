@@ -23,7 +23,6 @@ ohos_executable("SoftBusDumpDeviceInfo") {
   ]
 
   deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/sdk:softbus_client",
   ]
   part_name = "dsoftbus"
