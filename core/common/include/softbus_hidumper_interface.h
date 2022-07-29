@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SOFTBUS_HIDUMPER_H
-#define SOFTBUS_HIDUMPER_H
+#ifndef SOFTBUS_HIDUMPER_INTERFACE_H
+#define SOFTBUS_HIDUMPER_INTERFACE_H
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
-typedef int (*SoftBusHiDumperCb)(int fd, int argc, char **argv);
 int SoftBusDumpProcess(int fd, int argc, const char **argv);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif
