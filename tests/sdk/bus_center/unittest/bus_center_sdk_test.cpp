@@ -21,6 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -39,6 +41,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void AddPermission();
 };
 
 void BusCenterSdkTest::SetUpTestCase()
@@ -51,10 +54,31 @@ void BusCenterSdkTest::TearDownTestCase()
 
 void BusCenterSdkTest::SetUp()
 {
+    AddPermission();
 }
 
 void BusCenterSdkTest::TearDown()
 {
+}
+
+void BusCenterSdkTest::AddPermission()
+{
+    uint64_t tokenId;
+    const char *perms[2];
+    perms[0] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    perms[1] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 0,
+        .dcaps = NULL,
+        .perms = perms,
+        .acls = NULL,
+        .processName = "dsoftbus_service",
+        .aplStr = "system_core",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
 }
 
 static int32_t GetSubscribeId(void)
