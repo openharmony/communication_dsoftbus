@@ -57,7 +57,7 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
         LIST_FOR_EACH(item, &g_conn_var_list) {
             SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
             if (strcmp(itemNode->varName, argv[1]) == 0) {
-                itemNode->dumpCallback(fd);
+                nRet = itemNode->dumpCallback(fd);
                 isModuleExist = SOFTBUS_DUMP_EXIST;
                 break;
             }
