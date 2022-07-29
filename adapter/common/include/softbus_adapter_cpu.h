@@ -27,6 +27,10 @@ extern "C" {
 #define MB() BARRIER()
 #define WMB() BARRIER()
 #define RMB() BARRIER()
+#elif defined __ICCARM__
+#define MB()
+#define WMB()
+#define RMB()
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
 #define DSB() __asm__ volatile("dsb" ::: "memory")
 #ifdef __aarch64__

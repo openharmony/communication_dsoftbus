@@ -50,7 +50,7 @@ static void TdcLockInit(void)
     }
     return;
 }
-static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
+static int32_t ClientTdcOnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
 {
     (void)module;
     (void)events;
@@ -59,7 +59,7 @@ static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const 
     return SOFTBUS_OK;
 }
 
-static int32_t OnDataEvent(ListenerModule module, int events, int32_t fd)
+static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
 {
     (void)module;
     TcpDirectChannelInfo channel;
@@ -85,11 +85,6 @@ static int32_t OnDataEvent(ListenerModule module, int events, int32_t fd)
     return SOFTBUS_OK;
 }
 
-static SoftbusBaseListener g_listener = {
-    .onConnectEvent = OnConnectEvent,
-    .onDataEvent = OnDataEvent,
-};
-
 int32_t TransTdcCreateListener(int32_t fd)
 {
     static bool isInitedFlag = false;
@@ -98,7 +93,12 @@ int32_t TransTdcCreateListener(int32_t fd)
     if (isInitedFlag == false) {
         isInitedFlag = true;
 
-        if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &g_listener) != SOFTBUS_OK) {
+        static SoftbusBaseListener listener = {
+            .onConnectEvent = ClientTdcOnConnectEvent,
+            .onDataEvent = ClientTdcOnDataEvent,
+        };
+
+        if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &listener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
             SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
