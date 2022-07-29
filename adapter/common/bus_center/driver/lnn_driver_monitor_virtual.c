@@ -17,6 +17,7 @@
 
 #include "softbus_errcode.h"
 
+
 int32_t LnnInitDriverMonitorImpl(void)
 {
     return SOFTBUS_OK;
