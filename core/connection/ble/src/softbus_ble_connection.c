@@ -81,7 +81,7 @@ static const int BLE_ROLE_SERVER = 2;
 
 static LIST_HEAD(g_connection_list);
 static ConnectCallback *g_connectCallback = NULL;
-static ConnectFuncInterface g_bleInterface = { 0 };
+static ConnectFuncInterface g_bleInterface = {0};
 static SoftBusMutex g_connectionLock;
 
 static void PackRequest(int32_t delta, uint32_t connectionId);
