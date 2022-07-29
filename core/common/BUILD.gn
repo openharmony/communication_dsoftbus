@@ -119,6 +119,8 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
+      "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
+      "dfx/hisysevent_adapter/softbus_hisysevt_connreporter.c",
     ]
     sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
