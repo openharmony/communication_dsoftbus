@@ -1155,6 +1155,7 @@ static void ConnectingStateProcess(P2pLoopMsg msgType, void *param)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "connecting state process, msg type = %d.", msgType);
     switch (msgType) {
         case MAGICLINK_CONN_GROUP_TIME_OUT:
+            P2pLinkRemoveGcGroup();
             TimeoutErrorProcess(ERROR_CONNECT_GROUP_FAILED, ERROR_PEER_CONNECT_GROUP_FAILED);
             break;
         case MAGICLINK_ON_CONNECTED:
