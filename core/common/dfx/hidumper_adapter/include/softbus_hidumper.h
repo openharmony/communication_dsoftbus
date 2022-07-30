@@ -48,7 +48,7 @@ int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *subMod
 void SoftBusReleaseDumpVar(ListNode *varList);
 void SoftBusHiDumperInit(void);
 int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
-ListNode *SoftBusGetHiDumpHandler();
-int SoftBusHiDumperModuleInit();
-void SoftBusHiDumperModuleDeInit();
+ListNode *SoftBusGetHiDumpHandler(void);
+int SoftBusHiDumperModuleInit(void);
+void SoftBusHiDumperModuleDeInit(void);
 #endif
