@@ -17,7 +17,6 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -29,18 +28,6 @@
 #include "trans_session_manager.h"
 
 static bool g_transSessionInitFlag = false;
-
-#define TIME_THOUSANDS_FACTOR (1000)
-static inline int64_t GetTimeMillis(void)
-{
-    SoftBusSysTime t;
-    t.sec = 0;
-    t.usec = 0;
-    SoftBusGetTime(&t);
-    int64_t when = t.sec * TIME_THOUSANDS_FACTOR + (t.usec / TIME_THOUSANDS_FACTOR);
-    return when;
-}
-
 
 int TransServerInit(void)
 {
@@ -153,9 +140,9 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
         return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
     }
 
-    uint64_t timeStart = GetTimeMillis();
+    uint64_t timeStart = GetSoftbusRecordTimeMillis();
     int32_t ret = TransOpenChannel(param, info);
-    uint64_t timediff = GetTimeMillis() - timeStart;
+    uint64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     
     SoftBusOpenSessionStatus isSucc = (ret == SOFTBUS_OK) ?
         SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
