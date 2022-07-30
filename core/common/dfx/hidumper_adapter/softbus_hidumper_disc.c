@@ -83,7 +83,7 @@ int SoftBusDiscHiDumperInit(void)
     return nRet;
 }
 
-void SoftConnHiDumperDiscDeInit(void)
+void SoftBusHiDumperDiscDeInit(void)
 {
     SoftBusReleaseDumpVar(&g_disc_var_list);
 }
