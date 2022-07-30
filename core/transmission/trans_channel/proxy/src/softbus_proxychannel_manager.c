@@ -1172,3 +1172,29 @@ void TransProxyDeathCallback(const char *pkgName)
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
 }
+
+int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
+{
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+
+    if (g_proxyChannelList == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == chanId) {
+            (void)memcpy_s(appInfo, sizeof(AppInfo), &item->appInfo, sizeof(AppInfo));
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_ERR;
+}
+

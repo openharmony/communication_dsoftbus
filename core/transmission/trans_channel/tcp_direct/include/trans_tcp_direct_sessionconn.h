@@ -85,6 +85,8 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
 
 int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status);
 
+int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

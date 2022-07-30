@@ -18,6 +18,7 @@
 
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -33,7 +34,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
 int32_t TransNotifyAuthDataSuccess(int32_t channelId);
 int32_t TransCloseAuthChannel(int32_t channelId);
 int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len);
-
+int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo);
 #ifdef __cplusplus
 #if __cplusplus
 }
