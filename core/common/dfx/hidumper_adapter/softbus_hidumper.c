@@ -191,7 +191,7 @@ int SoftBusHiDumperModuleInit(void)
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_ERR;
+    return SOFTBUS_OK;
 }
 
 void SoftBusHiDumperModuleDeInit(void)
