@@ -153,7 +153,13 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
         return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
     }
 
+    uint64_t timeStart = GetTimeMillis();
     int32_t ret = TransOpenChannel(param, info);
+    uint64_t timediff = GetTimeMillis() - timeStart;
+    
+    SoftBusOpenSessionStatus isSucc = (ret == SOFTBUS_OK) ?
+        SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
+    SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
     
     return ret;
 }
