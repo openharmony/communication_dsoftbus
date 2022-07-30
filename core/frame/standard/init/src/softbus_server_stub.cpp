@@ -372,6 +372,9 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int32_t retReply;
     SessionParam param;
     TransSerializer transSerializer;
+    uint64_t timeStart = 0;
+    uint64_t timediff = 0;
+    SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
     param.sessionName = data.ReadCString();
     param.peerSessionName = data.ReadCString();
     param.peerDeviceId = data.ReadCString();
@@ -389,12 +392,11 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
 
-    uint64_t timeStart = GetSoftbusRecordTimeMillis();
+    timeStart = GetSoftbusRecordTimeMillis();
     retReply = OpenSession(&param, &(transSerializer.transInfo));
-    uint64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    timediff = GetSoftbusRecordTimeMillis() - timeStart;
 
-    SoftBusOpenSessionStatus isSucc = (retReply == SOFTBUS_OK) ?
-        SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
+    isSucc = (retReply == SOFTBUS_OK) ? SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
     SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
 
 EXIT:
