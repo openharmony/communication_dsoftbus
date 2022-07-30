@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "lnn_lane_qos.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
@@ -305,6 +306,53 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
         SoftBusFree(appInfo);
     }
     return channelId;
+}
+
+static uint32_t MergeStatsInterval(uint32_t *data, uint32_t left, uint32_t right)
+{
+    uint32_t result = 0;
+    while (left <= right) {
+        result += data[left];
+        left++;
+    }
+    return result;
+}
+
+static void ConvertStreamStats(const StreamSendStats *src, FrameSendStats *dest)
+{
+    uint32_t *srcCostCnt = (uint32_t *)(src->costTimeStatsCnt);
+    uint32_t *srcBitRate = (uint32_t *)(src->sendBitRateStatsCnt);
+    uint32_t *destCostCnt = dest->costTimeStatsCnt;
+    uint32_t *destBitRate = dest->sendBitRateStatsCnt;
+    destCostCnt[FRAME_COST_TIME_SMALL] = srcCostCnt[FRAME_COST_LT10MS];
+    destCostCnt[FRAME_COST_TIME_MEDIUM] = MergeStatsInterval(srcCostCnt, FRAME_COST_LT30MS, FRAME_COST_LT100MS);
+    destCostCnt[FRAME_COST_TIME_LARGE] = srcCostCnt[FRAME_COST_LT120MS] + srcCostCnt[FRAME_COST_GE120MS];
+    destBitRate[FRAME_BIT_RATE_SMALL] = srcBitRate[FRAME_BIT_RATE_LT3M];
+    destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT6M, FRAME_BIT_RATE_LT30M);
+    destBitRate[FRAME_BIT_RATE_LARGE] = srcBitRate[FRAME_BIT_RATE_GE30M];
+}
+
+int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamStats data is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t laneId;
+    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, streamStatsInfo cannot be processed");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "transStreamStats channelId:%d, laneId:0x%x", channelId, laneId);
+    LaneIdStatsInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    info.laneId = laneId;
+    info.statsType = LANE_T_STREAM;
+    FrameSendStats *stats = &info.statsInfo.stream.frameStats;
+    ConvertStreamStats(data, stats);
+    LnnReportLaneIdStatsInfo(&info, 1); /* only report stream stats */
+    return SOFTBUS_OK;
 }
 
 int32_t TransNotifyAuthSuccess(int32_t channelId)

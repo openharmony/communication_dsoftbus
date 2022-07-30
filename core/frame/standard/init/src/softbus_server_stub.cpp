@@ -133,6 +133,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_START_TIME_SYNC] = &SoftBusServerStub::StartTimeSyncInner;
     memberFuncMap_[SERVER_STOP_TIME_SYNC] = &SoftBusServerStub::StopTimeSyncInner;
     memberFuncMap_[SERVER_QOS_REPORT] = &SoftBusServerStub::QosReportInner;
+    memberFuncMap_[SERVER_STREAM_STATS] = &SoftBusServerStub::StreamStatsInner;
     memberFuncMap_[SERVER_GRANT_PERMISSION] = &SoftBusServerStub::GrantPermissionInner;
     memberFuncMap_[SERVER_REMOVE_PERMISSION] = &SoftBusServerStub::RemovePermissionInner;
     memberFuncMap_[SERVER_PUBLISH_LNN] = &SoftBusServerStub::PublishLNNInner;
@@ -166,6 +167,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
+    memberPermissionMap_[SERVER_STREAM_STATS] = nullptr;
     memberPermissionMap_[SERVER_GRANT_PERMISSION] = nullptr;
     memberPermissionMap_[SERVER_REMOVE_PERMISSION] = nullptr;
     memberPermissionMap_[SERVER_PUBLISH_LNN] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
@@ -762,6 +764,31 @@ int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &re
     int32_t retReply = QosReport(channelId, channelType, appType, quality);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QosReportInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StreamStatsInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StreamStatsInner read channelId fail");
+        return SOFTBUS_ERR;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StreamStatsInner read channelType fail");
+        return SOFTBUS_ERR;
+    }
+    StreamSendStats *stats = (StreamSendStats *)data.ReadRawData(sizeof(StreamSendStats));
+    if (stats == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read StreamSendStats fail, stats is nullptr");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = StreamStats(channelId, channelType, stats);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StreamStatsInner write reply fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -175,3 +175,23 @@ void TransLaneMgrDeathCallback(const char *pkgName)
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return;
 }
+
+int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId)
+{
+    if ((laneId == NULL) || (g_channelLaneList == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    TransLaneInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
+        if (item->channelId == channelId) {
+            *laneId = item->laneId;
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    return SOFTBUS_ERR;
+}

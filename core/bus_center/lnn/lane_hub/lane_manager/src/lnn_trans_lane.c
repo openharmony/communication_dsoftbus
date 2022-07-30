@@ -268,8 +268,8 @@ static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
     param.transType = infoNode->info.transType;
     param.priority = 0; /* default:0 */
     uint32_t profileId = GenerateLaneProfileId(&param);
+    g_laneIdCallback->OnLaneIdDisabled(laneId, profileId);
     UnbindLaneIdFromProfile(laneId, profileId);
-    g_laneIdCallback->OnLaneIdDisabled(laneId);
 }
 
 static int32_t Free(uint32_t laneId)
@@ -527,7 +527,7 @@ static int32_t InitLooper(void)
 {
     g_laneLoopHandler.name = "transLaneLooper";
     g_laneLoopHandler.HandleMessage = MsgHandler;
-    g_laneLoopHandler.looper = CreateNewLooper("Lane-looper");
+    g_laneLoopHandler.looper = GetLooper(LOOP_TYPE_LANE);
     if (g_laneLoopHandler.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "transLane init looper fail");
         return SOFTBUS_ERR;
