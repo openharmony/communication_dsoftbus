@@ -100,7 +100,7 @@ static inline int32_t CheckAndRecordAccessToken(const char* permission)
 
 static inline void SoftbusReportPermissionFaultEvt(uint32_t ipcCode)
 {
-    if ((ipcCode == SERVER_OPEN_SESSION) || (ipcCode == SERVER_OPEN_AUTH_SESSION)) {
+    if (ipcCode == SERVER_OPEN_SESSION) {
         SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
     }
 }
@@ -388,7 +388,14 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
+
+    uint64_t timeStart = GetSoftbusRecordTimeMillis();
     retReply = OpenSession(&param, &(transSerializer.transInfo));
+    uint64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+
+    SoftBusOpenSessionStatus isSucc = (ret == SOFTBUS_OK) ?
+        SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
+    SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
 
 EXIT:
     transSerializer.ret = retReply;
