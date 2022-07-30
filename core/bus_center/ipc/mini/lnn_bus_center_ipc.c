@@ -114,6 +114,7 @@ int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTyp
 {
     (void)infoTypeLen;
     PublishInfo pubInfo;
+    (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     ConvertVoidToPublishInfo(info, &pubInfo);
     int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
     LnnOnPublishLNNResult(pubInfo.publishId, PublishResultTransfer(ret));
@@ -129,6 +130,7 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTyp
 {
     (void)infoTypeLen;
     SubscribeInfo subInfo;
+    (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
     InnerCallback callback = {

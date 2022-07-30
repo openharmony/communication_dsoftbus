@@ -14,88 +14,76 @@
  */
 #include <stdio.h>
 #include <string.h>
+
+#include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_log.h"
 #include "softbus_hidumper_disc.h"
 
-#define SOFTBUS_DISC_DUMP_BLEINFOMANGER "BleInfoManager"
-#define SOFTBUS_DISC_DUMP_BLEADVERTISER "BleAdvertiser"
-#define SOFTBUS_DISC_DUMP_BLELISTENER "BleListener"
-#define SOFTBUS_DISC_DUMP_PUBLICMGR "PublicMgr"
-#define SOFTBUS_DISC_DUMP_SUBSCRIBEMGR "SubscribeMgr"
-#define SOFTBUS_DISC_DUMP_CAPABILITYDATA "CapabilityData"
-#define SOFTBUS_DISC_DUMP_LOCALDEVINFO "LocalDevInfo"
+#define SOFTBUS_DISC_MODULE_NAME "disc"
+#define SOFTBUS_DISC_MODULE_HELP "List all the dump item of disc"
 
-static void SoftBusDumpDiscHelp(int fd)
-{
-    dprintf(fd, "Usage: [-h] [-l] [disc] [conn] [buscenter] [trans] [dstream] [dfile] [dfinder] [dmsg]\n");
-    dprintf(fd, "   -h         List all the dump item of disc\n");
-    dprintf(fd, "   -l         List all the dump item of disc\n");
-    dprintf(fd, "   BleInfoManager       List all the dump item of conn\n");
-    dprintf(fd, "   BleAdvertiser  List all the dump item of buscenter\n");
-    dprintf(fd, "   BleListener      List all the dump item of trans\n");
-    dprintf(fd, "   PublicMgr    List all the dump item of dstream\n");
-    dprintf(fd, "   SubscribeMgr      List all the dump item of dfile\n");
-    dprintf(fd, "   CapabilityData    List all the dump item of dfinder\n");
-    dprintf(fd, "   LocalDevInfo       List all the dump item of dmsg\n");
-}
+static LIST_HEAD(g_disc_var_list);
 
-static void SoftBusDumpDiscBleInfoManager(int fd)
+int SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
-    dprintf(fd, "BleInfoManager info:");
-}
-
-static void SoftBusDumpDiscBleAdvertiser(int fd)
-{
-    dprintf(fd, "BleAdvertiser info:");
-}
-
-static void SoftBusDumpDiscBleListener(int fd)
-{
-    dprintf(fd, "BleListener info:");
-}
-
-static void SoftBusDumpDiscPublicMgr(int fd)
-{
-    dprintf(fd, "PublicMgr info:");
-}
-
-static void SoftBusDumpDiscSubscribeMgr(int fd)
-{
-    dprintf(fd, "Subscribe Manager info:");
-}
-
-static void SoftBusDumpDiscCapabilityData(int fd)
-{
-    dprintf(fd, "CapabilityData info:");
-}
-
-static void SoftBusDumpDiscLocalDevInfo(int fd)
-{
-    dprintf(fd, "LocalDevInfo info:");
+    if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
+        return SOFTBUS_ERR;
+    }
+    int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
+    return nRet;
 }
 
 int SoftBusDiscDumpHander(int fd, int argc, const char **argv)
 {
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpDiscHelp(fd);
-        return 0;
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDiscDumpHander invalid param");
+        return SOFTBUS_ERR;
     }
 
+    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_DISC_MODULE_NAME, &g_disc_var_list);
+        return SOFTBUS_OK;
+    }
+
+    if (argc == 1 && strcmp(argv[0], "-l") == 0) {
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_DISC_MODULE_NAME, &g_disc_var_list);
+        return SOFTBUS_OK;
+    }
+    int nRet = SOFTBUS_OK;
+    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
     if (strcmp(argv[0], "-l") == 0) {
-        if (strcmp(argv[1], SOFTBUS_DISC_DUMP_BLEINFOMANGER) == 0) {
-            SoftBusDumpDiscBleInfoManager(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_BLEADVERTISER) == 0) {
-            SoftBusDumpDiscBleAdvertiser(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_BLELISTENER) == 0) {
-            SoftBusDumpDiscBleListener(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_PUBLICMGR) == 0) {
-            SoftBusDumpDiscPublicMgr(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_SUBSCRIBEMGR) == 0) {
-            SoftBusDumpDiscSubscribeMgr(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_CAPABILITYDATA) == 0) {
-            SoftBusDumpDiscCapabilityData(fd);
-        } else if (strcmp(argv[1], SOFTBUS_DISC_DUMP_LOCALDEVINFO) == 0) {
-            SoftBusDumpDiscLocalDevInfo(fd);
+        ListNode *item = NULL;
+        LIST_FOR_EACH(item, &g_disc_var_list) {
+            SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
+            if (strcmp(itemNode->varName, argv[1]) == 0) {
+                nRet = itemNode->dumpCallback(fd);
+                isModuleExist = SOFTBUS_DUMP_EXIST;
+                break;
+            }
         }
     }
-    return 1;
+
+    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+        SoftBusDumpErrInfo(fd, argv[0]);
+        SoftBusDumpSubModuleHelp(fd, SOFTBUS_DISC_MODULE_NAME, &g_disc_var_list);
+    }
+    return nRet;
+}
+
+int SoftBusDiscHiDumperInit(void)
+{
+    int nRet = SOFTBUS_OK;
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DISC_MODULE_NAME, SOFTBUS_DISC_MODULE_HELP, &SoftBusDiscDumpHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb registe fail");
+        return nRet;
+    }
+    return nRet;
+}
+
+void SoftConnHiDumperDiscDeInit(void)
+{
+    SoftBusReleaseDumpVar(&g_disc_var_list);
 }

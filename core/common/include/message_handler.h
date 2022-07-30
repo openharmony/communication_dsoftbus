@@ -63,12 +63,15 @@ enum LooperType {
     LOOP_TYPE_DEFAULT = 1,
     LOOP_TYPE_BR_SEND,
     LOOP_TYPE_BR_RECV,
-    LOOP_TYPE_P2P
+    LOOP_TYPE_P2P,
+    LOOP_TYPE_LANE
 };
 
 SoftBusLooper *GetLooper(int looper);
 
 int LooperInit(void);
+
+void SetLooper(int type, SoftBusLooper *looper);
 
 void LooperDeinit(void);
 

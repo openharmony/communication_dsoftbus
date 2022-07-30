@@ -28,7 +28,6 @@
 #define JSON_WLAN_IP "wifiIpAddr"
 #define JSON_HW_ACCOUNT "hwAccountHashVal"
 #define JSON_SERVICE_DATA "serviceData"
-#define JSON_BUSINESS_DATA "bData"
 #define SERVICE_DATA_PORT "port"
 #define DEVICE_UDID "UDID"
 #define AUTH_PORT_LEN 6
@@ -106,15 +105,6 @@ static void ParseServiceData(const cJSON *data, DeviceInfo *device)
     device->addr[0].info.ip.port = (uint16_t)authPort;
 }
 
-static void ParseBusinessData(const cJSON *data, DeviceInfo *device)
-{
-    if (!GetJsonObjectStringItem(data, JSON_BUSINESS_DATA, device->businessData, sizeof(device->businessData))) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "parse businessData data failed.");
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "parse businessData=%s", device->businessData);
-}
-
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
 {
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
@@ -126,7 +116,6 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     ParseWifiIpAddr(reserveInfo, device);
     ParseHwAccountHash(reserveInfo, device);
     ParseServiceData(reserveInfo, device);
-    ParseBusinessData(reserveInfo, device);
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
 }
@@ -147,17 +136,15 @@ static int32_t ParseDeviceUdid(const NSTACKX_DeviceInfo *nstackxDevice, DeviceIn
     return SOFTBUS_OK;
 }
 
-static uint8_t GetDiscType(uint8_t mode, uint8_t discoveryType)
+static bool IsReport(uint8_t mode, uint8_t discoveryType)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "device found from nstackx: mode=%d, discoveryType=%d",
-        mode, discoveryType);
     if (discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
-        return DISCOVERY_TYPE_ACTIVE;
+        return true;
     }
     if (mode == PUBLISH_MODE_PROACTIVE) {
-        return DISCOVERY_TYPE_ACTIVE;
+        return true;
     }
-    return DISCOVERY_TYPE_PASSIVE;
+    return false;
 }
 
 static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
@@ -172,7 +159,10 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     discDevInfo->addrNum = 1;
     discDevInfo->devType = (DeviceType)nstackxDevInfo->deviceType;
     discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
-    discDevInfo->discoveryType = GetDiscType(nstackxDevInfo->mode, nstackxDevInfo->discoveryType);
+    if (!IsReport(nstackxDevInfo->mode, nstackxDevInfo->discoveryType)) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "publishers do not need to report devices.");
+        return SOFTBUS_ERR;
+    }
 
     if (strncmp(nstackxDevInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
         discDevInfo->addr[0].type = CONNECTION_ADDR_WLAN;
@@ -306,7 +296,7 @@ static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
     return SOFTBUS_OK;
 }
 
-static int32_t SetDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
+static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
 {
     if (option->mode == ACTIVE_PUBLISH) {
         discSet->discoveryMode = PUBLISH_MODE_PROACTIVE;
@@ -319,8 +309,6 @@ static int32_t SetDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const Di
         return SOFTBUS_ERR;
     }
     discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
-    discSet->businessData = option->businessData;
-    discSet->length = option->businessDataLen;
     discSet->advertiseCount = discFreq & DISC_FREQ_COUNT_MASK;
     discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
     return SOFTBUS_OK;
@@ -337,7 +325,11 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
         return SOFTBUS_INVALID_PARAM;
     }
     NSTACKX_DiscoverySettings discSet;
-    if (SetDiscoverySettings(&discSet, option) != SOFTBUS_OK) {
+    if (memset_s(&discSet, sizeof(NSTACKX_DiscoverySettings), 0, sizeof(NSTACKX_DiscoverySettings)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memset failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (ConvertDiscoverySettings(&discSet, option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set discovery settings failed");
         return SOFTBUS_ERR;
     }

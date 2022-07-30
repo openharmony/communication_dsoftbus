@@ -14,48 +14,83 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "softbus_errcode.h"
+#include "softbus_log.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_nstack.h"
 
-static void SoftBusDumpNStackHelp(int fd)
-{
-    dprintf(fd, "s%\n", "test");
-}
+#define SOFTBUS_DSTREAM_MODULE_NAME "dstream"
+#define SOFTBUS_DSTREAM_MODULE_HELP "List all the dump item of dstream"
+#define SOFTBUS_DFILE_MODULE_NAME "dfile"
+#define SOFTBUS_DFILE_MODULE_HELP "List all the dump item of dfile"
+#define SOFTBUS_DFINDLER_MODULE_NAME "dfinder"
+#define SOFTBUS_DFINDLER_MODULE_HELP "List all the dump item of dfinder"
+#define SOFTBUS_DMSG_MODULE_NAME "dmsg"
+#define SOFTBUS_DMSG_MODULE_HELP "List all the dump item of dmsg"
 
-int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
+static int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
 {
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpNStackHelp(fd);
-        return 0;
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
-int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
+static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 {
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpNStackHelp(fd);
-        return 0;
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
-int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
+static int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 {
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpNStackHelp(fd);
-        return 0;
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
     }
 
-    return 1;
+    return SOFTBUS_OK;
 }
 
-int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
+static int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
 {
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
-        SoftBusDumpNStackHelp(fd);
-        return 0;
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        return SOFTBUS_ERR;
     }
 
-    return 1;
+    return SOFTBUS_OK;
+}
+
+int SoftBusNStackHiDumperInit(void)
+{
+    int nRet = SOFTBUS_OK;
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP,
+                                     &SoftBusNStackDstreamDumpHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        return nRet;
+    }
+
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
+                                     &SoftBusNStackDfileDumpHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        return nRet;
+    }
+
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
+                                     &SoftBusNStackDumpDfinderHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        return nRet;
+    }
+
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
+                                     &SoftBusNStackDmsgDumpHander);
+    if (nRet == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        return nRet;
+    }
+    return nRet;
 }

@@ -32,8 +32,6 @@ typedef struct {
     uint32_t capabilityBitmap[CAPABILITY_NUM];
     unsigned char *capabilityData;
     uint32_t dataLen;
-    char *businessData;
-    unsigned int businessDataLen;
     bool ranging;
 } PublishOption;
 
@@ -44,8 +42,6 @@ typedef struct {
     uint32_t capabilityBitmap[CAPABILITY_NUM];
     unsigned char *capabilityData;
     uint32_t dataLen;
-    char *businessData;
-    unsigned int businessDataLen;
 } SubscribeOption;
 
 typedef struct {

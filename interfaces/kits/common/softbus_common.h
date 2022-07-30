@@ -130,12 +130,6 @@ extern "C" {
 #define MAX_CAPABILITYDATA_LEN 513
 
 /**
- * @brief Indicates the maximum length of the business data in <b>PublishInfo</b> and <b>SubscribeInfo</b>.
- *
- */
-#define MAX_BUSINESSDATA_LEN 300
-
-/**
  * @brief Indicates the maximum length of the custom data in <b>IDiscoveryCallback</b>.
  *
  */
@@ -224,16 +218,6 @@ typedef enum  {
     /* Proactive */
     DISCOVER_MODE_ACTIVE  = 0xAA
 } DiscoverMode;
-
-/**
- * @brief Enumerates the type in which device are founded.
- */
-enum {
-    /* Passive */
-    DISCOVERY_TYPE_PASSIVE = 1,
-    /* ACTIVE */
-    DISCOVERY_TYPE_ACTIVE = 2
-};
 
 /**
  * @brief Enumerates media, such as Bluetooth, Wi-Fi, and USB, used for publishing services.
@@ -340,10 +324,6 @@ typedef struct {
     unsigned char *capabilityData;
     /** Maximum length of the capability data for service publishing (512 bytes) */
     unsigned int dataLen;
-    /** The business data for service publishing */
-    const char *businessData;
-    /** Maximum length of the business data for service publishing (299 bytes) */
-    unsigned int businessDataLen;
     /** Whether the device should be ranged  by discoverers.*/
     bool ranging;
 } PublishInfo;
@@ -371,10 +351,6 @@ typedef struct {
     unsigned char *capabilityData;
     /** Maximum length of the capability data for service subscription (512 bytes) */
     unsigned int dataLen;
-    /** The business data for service subscription */
-    const char *businessData;
-    /** Maximum length of the business data for service subscription (299 bytes) */
-    unsigned int businessDataLen;
 } SubscribeInfo;
 
 /**
@@ -427,10 +403,6 @@ typedef struct {
     unsigned int capabilityBitmap[DISC_MAX_CAPABILITY_NUM];
     /** Custom data. Its length is specified by {@link DISC_MAX_CUST_DATA_LEN}. */
     char custData[DISC_MAX_CUST_DATA_LEN];
-    /** Type of discovery */
-    uint8_t discoveryType;
-    /** Business data. Its length is specified by {@link MAX_BUSINESSDATA_LEN}. */
-    char businessData[MAX_BUSINESSDATA_LEN];
     /** The distance of dicovered device, in centimeters(cm)*/
     int32_t range;
 } DeviceInfo;
