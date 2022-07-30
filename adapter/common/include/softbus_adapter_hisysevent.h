@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "message_handler.h"
 
 #ifdef __cplusplus
 #if __cplusplus
