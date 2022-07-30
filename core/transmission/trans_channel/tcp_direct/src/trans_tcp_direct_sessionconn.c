@@ -297,3 +297,20 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
+{
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionConn *connInfo = NULL;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->channelId == channelId) {
+            memcpy_s(appInfo, sizeof(AppInfo), &connInfo->appInfo, sizeof(AppInfo));
+            ReleaseSessonConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessonConnLock();
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TcpTranGetAppInfobyChannelId not find: channelId=%d", channelId);
+    return SOFTBUS_NOT_FIND;
+}

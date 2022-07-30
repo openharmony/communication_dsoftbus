@@ -33,6 +33,7 @@
 #include "accesstoken_kit.h"
 #include "access_token.h"
 #include "privacy_kit.h"
+#include "softbus_hisysevt_transreporter.h"
 
 using namespace OHOS::Security::AccessToken;
 
@@ -82,7 +83,7 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
-static inline int CheckAndRecordAccessToken(const char* permission)
+static inline int32_t CheckAndRecordAccessToken(const char* permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
@@ -95,6 +96,13 @@ static inline int CheckAndRecordAccessToken(const char* permission)
     }
     
     return ret;
+}
+
+static inline void SoftbusReportPermissionFaultEvt(uint32_t ipcCode)
+{
+    if (ipcCode == SERVER_OPEN_SESSION) {
+        SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
+    }
 }
 
 SoftBusServerStub::SoftBusServerStub()
@@ -192,8 +200,9 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         const char *permission = itPerm->second;
         if ((permission != nullptr) &&
             (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "permission %s denied!", permission);
-            return SOFTBUS_PERMISSION_DENIED;
+            SoftbusReportPermissionFaultEvt(code);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "access token permission %s denied!", permission);
+            return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
     
@@ -365,6 +374,9 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int32_t retReply;
     SessionParam param;
     TransSerializer transSerializer;
+    uint64_t timeStart = 0;
+    uint64_t timediff = 0;
+    SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
     param.sessionName = data.ReadCString();
     param.peerSessionName = data.ReadCString();
     param.peerDeviceId = data.ReadCString();
@@ -376,10 +388,18 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
+        SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED);
+        
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
+
+    timeStart = GetSoftbusRecordTimeMillis();
     retReply = OpenSession(&param, &(transSerializer.transInfo));
+    timediff = GetSoftbusRecordTimeMillis() - timeStart;
+
+    isSucc = (retReply == SOFTBUS_OK) ? SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
+    SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
 
 EXIT:
     transSerializer.ret = retReply;

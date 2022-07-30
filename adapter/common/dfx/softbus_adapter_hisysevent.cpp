@@ -18,6 +18,7 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
+#include "message_handler.h"
 #include "softbus_adapter_hisysevent.h"
 
 static const char* g_paramTypeTable[SOFTBUS_EVT_PARAMTYPE_BUTT] = {
@@ -119,6 +120,34 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     SoftBusFree((void*)reportMsgStr);
 
     return SOFTBUS_OK;
+}
+
+void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
+{
+    if (msg == nullptr) {
+        return;
+    }
+
+    if (msg->paramArray != nullptr) {
+        SoftBusFree(msg->paramArray);
+    }
+    
+    SoftBusFree(msg);
+}
+
+SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
+{
+    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    if (msg == nullptr) {
+        return nullptr;
+    }
+
+    msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
+    if (msg->paramArray == nullptr) {
+        SoftbusFreeEvtReporMsg(msg);
+    }
+    
+    return msg;
 }
 
 #ifdef __cplusplus

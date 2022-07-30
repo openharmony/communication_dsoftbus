@@ -105,6 +105,8 @@ typedef enum {
     BUSINESS_TYPE_BYTE = 2,
     BUSINESS_TYPE_FILE = 3,
     BUSINESS_TYPE_STREAM = 4,
+
+    BUSINESS_TYPE_BUTT,
 } BusinessType;
 
 typedef struct {

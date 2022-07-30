@@ -16,12 +16,18 @@
 #define HISYSEVENT_DISC_REPORTER_H
 #include "softbus_adapter_hisysevent.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t InitSoftbusSysEvt();
 
 typedef enum {
-    SOFTBUS_STATISTIC_EVT_START,
-    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_NUMBER = SOFTBUS_STATISTIC_EVT_START,
-    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_CONSUMING,
+    SOFTBUS_STATISTIC_EVT_START = 0,
+    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT = SOFTBUS_STATISTIC_EVT_START,
+    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST,
 
     SOFTBUS_STATISTIC_EVT_BUTT,
 }StatisticEvtType;
@@ -31,5 +37,11 @@ typedef int32_t(*StatisticEvtReportFunc)(void);
 StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type);
 
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* HISYSEVENT_DISC_REPORTER_H */
