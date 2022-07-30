@@ -37,7 +37,7 @@ uint8_t SoftBusCreateConnDurationEvt(SoftBusEvtReportMsg *msg, uint8_t medium, u
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
-    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN, 
+    if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
         CONN_PARAM_MEDIUM) != EOK) {
         SoftBusFree(msg->paramArray);
         return SOFTBUS_ERR;
