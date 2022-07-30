@@ -180,17 +180,6 @@ ListNode *SoftBusGetHiDumpHandler(void)
 
 int SoftBusHiDumperModuleInit(void)
 {
-    if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
