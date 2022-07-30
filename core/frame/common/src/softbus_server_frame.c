@@ -111,7 +111,6 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;
