@@ -14,9 +14,13 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "securec.h"
+#include "softbus_error_code.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_trans.h"
 
+#define MAX_HELP_INFO_LEN (100)
+#define MODULE_NAME_TRAN "trans"
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
 
@@ -47,11 +51,17 @@ typedef enum {
     TRANS_HIDUMPER_CMD_BUTT
 }TransHiDumperCmdType;
 
+char g_transHelpInfo[MAX_HELP_INFO_LEN];
+
+void InitTranHelpInfo()
+{
+    sprintf_s(g_transHelpInfo, sizeof(g_transHelpInfo), "Usage: -l [%s] [%s]\n",
+        CMD_REGISTED_SESSION_LIST, CMD_CONCURRENT_SESSION_LIST);
+}
+
 void ShowTransDumpHelperInfo(int fd)
 {
-    dprintf(fd, "Usage: -l [%s] [%s]\n", CMD_REGISTED_SESSION_LIST, CMD_CONCURRENT_SESSION_LIST);
-    dprintf(fd, "  %20s    List all the registed sessionlist\n", CMD_REGISTED_SESSION_LIST);
-    dprintf(fd, "  %20s    List all the running sessionlist\n", CMD_CONCURRENT_SESSION_LIST);
+    dprintf(fd, "%s", g_transHelpInfo);
 }
 
 ShowDumpInfosFunc g_ShowRegisterSessionInfosFunc = NULL;
@@ -87,24 +97,31 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     dprintf(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
 }
 
-TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
+static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
     {CMD_REGISTED_SESSION_LIST, &g_ShowRegisterSessionInfosFunc},
     {CMD_CONCURRENT_SESSION_LIST, &g_ShowRunningSessionInfosFunc}
 };
 
-void SoftBusTransDumpHander(int fd, int argc, const char **argv)
+int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
     if ((argc != 2) || (strcmp(argv[0], "-l") != 0)) {
         ShowTransDumpHelperInfo(fd);
-        return;
+        return SOFTBUS_OK;
     }
 
     for (unsigned int i = 0; i < TRANS_HIDUMPER_CMD_BUTT; i++) {
         if (strcmp(argv[1], g_transHiDumperCmdList[i].cmd) == 0) {
             (*g_transHiDumperCmdList[i].showDumpInfosFunc)(fd);
-            return;
+            return SOFTBUS_OK;
         }
     }
 
     ShowTransDumpHelperInfo(fd);
+    return SOFTBUS_OK
+}
+
+void initSoftBusTransDumpHandler()
+{
+    InitTranHelpInfo();
+    SoftBusRegHiDumperHandler(MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
 }
