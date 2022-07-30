@@ -296,7 +296,7 @@ static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
     return SOFTBUS_OK;
 }
 
-static int32_t SetDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
+static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
 {
     if (option->mode == ACTIVE_PUBLISH) {
         discSet->discoveryMode = PUBLISH_MODE_PROACTIVE;
@@ -329,7 +329,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memset failed");
         return SOFTBUS_MEM_ERR;
     }
-    if (SetDiscoverySettings(&discSet, option) != SOFTBUS_OK) {
+    if (ConvertDiscoverySettings(&discSet, option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set discovery settings failed");
         return SOFTBUS_ERR;
     }
