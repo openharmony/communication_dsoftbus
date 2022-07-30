@@ -20,6 +20,7 @@
 
 #include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,10 @@ void TransChannelDeathCallback(const char *pkgName);
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionNameLen);
+
+
+int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo);
+
 #ifdef __cplusplus
 }
 #endif

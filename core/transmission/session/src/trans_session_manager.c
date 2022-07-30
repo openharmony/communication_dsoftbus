@@ -22,10 +22,30 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_channel_callback.h"
+#include "softbus_hidumper_trans.h"
 
 #define MAX_SESSION_SERVER_NUM 32
 
 static SoftBusList *g_sessionServerList = NULL;
+
+static void TransSessionForEachShowInfo(int fd)
+{
+    if (g_sessionServerList == NULL) {
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return;
+    }
+
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        SoftBusTransDumpRegisterSession(fd, pos->pkgName, pos->sessionName, pos->uid, pos->pid);
+    }
+    
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+}
 
 int32_t TransSessionMgrInit(void)
 {
@@ -36,6 +56,8 @@ int32_t TransSessionMgrInit(void)
     if (g_sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }
+
+    SetShowRegisterSessionInfosFunc(TransSessionForEachShowInfo);
     return SOFTBUS_OK;
 }
 
