@@ -53,9 +53,9 @@ typedef enum {
 
 char g_transHelpInfo[MAX_HELP_INFO_LEN];
 
-void InitTranHelpInfo()
+void InitTranHelpInfo(void)
 {
-    sprintf_s(g_transHelpInfo, sizeof(g_transHelpInfo), "Usage: -l [%s] [%s]\n",
+    (void)sprintf_s(g_transHelpInfo, sizeof(g_transHelpInfo), "Usage: -l [%s] [%s]\n",
         CMD_REGISTED_SESSION_LIST, CMD_CONCURRENT_SESSION_LIST);
 }
 
@@ -117,10 +117,10 @@ int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
     }
 
     ShowTransDumpHelperInfo(fd);
-    return SOFTBUS_OK
+    return SOFTBUS_OK;
 }
 
-void initSoftBusTransDumpHandler()
+void initSoftBusTransDumpHandler(void)
 {
     InitTranHelpInfo();
     SoftBusRegHiDumperHandler(MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
