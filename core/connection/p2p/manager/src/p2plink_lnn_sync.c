@@ -62,7 +62,7 @@ void P2pLinkLnnSync(void)
     }
 
     if (strcmp(P2pLinkGetMyMac(), g_lnnMyP2pMac) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync mymac %s->%s", g_lnnMyP2pMac, P2pLinkGetMyMac());
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync lnn p2p mymac");
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, P2pLinkGetMyMac()) == SOFTBUS_OK) {
             if (strcpy_s(g_lnnMyP2pMac, sizeof(g_lnnMyP2pMac), P2pLinkGetMyMac()) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
