@@ -173,12 +173,12 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
     return SOFTBUS_OK;
 }
 
-ListNode *SoftBusGetHiDumpHandler()
+ListNode *SoftBusGetHiDumpHandler(void)
 {
     return &g_hidumperhander_list;
 }
 
-int SoftBusHiDumperModuleInit()
+int SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -194,7 +194,7 @@ int SoftBusHiDumperModuleInit()
     return SOFTBUS_ERR;
 }
 
-void SoftBusHiDumperModuleDeInit()
+void SoftBusHiDumperModuleDeInit(void)
 {
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
