@@ -27,6 +27,8 @@ common_utils_src = [
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
   "utils/softbus_utils.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
 ]
 
 if (defined(ohos_lite)) {
@@ -69,9 +71,8 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_utils") {
     include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
     include_dirs += conn_common_inc + trans_common_inc
-    dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_common_virtual.c" ]
     sources = common_utils_src
-    sources += conn_common_src + trans_common_src + dfx_src
+    sources += conn_common_src + trans_common_src
     if (board_toolchain_type != "iccarm") {
       cflags = [
         "-Wall",
@@ -113,8 +114,6 @@ if (defined(ohos_lite)) {
     sources = common_utils_src
     sources += conn_common_src + trans_common_src
     dfx_source = [
-      "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
-      "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
       "dfx/hidumper_adapter/softbus_hidumper.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",

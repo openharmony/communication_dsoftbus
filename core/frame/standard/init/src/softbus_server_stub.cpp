@@ -393,7 +393,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     retReply = OpenSession(&param, &(transSerializer.transInfo));
     uint64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
 
-    SoftBusOpenSessionStatus isSucc = (ret == SOFTBUS_OK) ?
+    SoftBusOpenSessionStatus isSucc = (retReply == SOFTBUS_OK) ?
         SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
     SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
 
