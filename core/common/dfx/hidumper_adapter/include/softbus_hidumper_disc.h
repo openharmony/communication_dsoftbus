@@ -20,5 +20,5 @@
 
 int SoftBusDiscHiDumperInit(void);
 int SoftBusRegDiscDumpCb(char *dumpVar, SoftBusVarDumpCb cb);
-void SoftConnHiDumperDiscDeInit(void);
+void SoftBusHiDumperDiscDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_DISC_H */

@@ -18,9 +18,9 @@
 
 #include "common_list.h"
 
-#define SOFTBUS_MODULE_NAME_LEN 16
+#define SOFTBUS_MODULE_NAME_LEN 32
 #define SOFTBUS_MODULE_HELP_LEN 128
-#define SOFTBUS_DUMP_VAR_NAME_LEN 16
+#define SOFTBUS_DUMP_VAR_NAME_LEN 32
 #define SOFTBUS_DUMP_EXIST 1
 #define SOFTBUS_DUMP_NOT_EXIST 0
 
@@ -49,5 +49,6 @@ void SoftBusReleaseDumpVar(ListNode *varList);
 void SoftBusHiDumperInit(void);
 int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
 ListNode *SoftBusGetHiDumpHandler();
-
+int SoftBusHiDumperModuleInit();
+void SoftBusHiDumperModuleDeInit();
 #endif

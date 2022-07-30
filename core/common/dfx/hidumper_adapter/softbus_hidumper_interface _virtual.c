@@ -12,20 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUS_HIDUMPER_INTERFACE_H
-#define SOFTBUS_HIDUMPER_INTERFACE_H
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-int SoftBusDumpProcess(int fd, int argc, const char **argv);
-int SoftBusHidumperInit(void);
-void SoftBusHiDumperDeinit(void);
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __cplusplus */
+#include <string.h>
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+#include "softbus_hidumper.h"
+#include "softbus_hidumper_interface.h"
 
-#endif
+int SoftBusDumpProcess(int fd, int argc, const char **argv)
+{
+    (void)fd;
+    (void)argc;
+    (void)argv;
+    
+    return SOFTBUS_OK;
+}
+
+int SoftBusHidumperInit()
+{
+    return SOFTBUS_OK;
+}
+
+void SoftBusHiDumperDeinit()
+{
+    return;
+}

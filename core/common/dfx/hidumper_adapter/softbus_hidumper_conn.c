@@ -82,7 +82,7 @@ int SoftBusConnHiDumperInit(void)
     return nRet;
 }
 
-void SoftConnHiDumperConnDeInit(void)
+void SoftBusHiDumperConnDeInit(void)
 {
     SoftBusReleaseDumpVar(&g_conn_var_list);
 }

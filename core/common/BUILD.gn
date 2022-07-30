@@ -73,7 +73,10 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_utils") {
     include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
     include_dirs += conn_common_inc + trans_common_inc
-    dfx_src = [ "dfx/hidumper_adapter/softbus_hidumper_trans_virtual.c" ]
+    dfx_src = [
+      "dfx/hisysevent_adapter/softbus_hisysevt_common_virtual.c",
+      "dfx/hidumper_adapter/softbus_hidumper_interface_virtual.c",
+    ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
     if (board_toolchain_type != "iccarm") {
