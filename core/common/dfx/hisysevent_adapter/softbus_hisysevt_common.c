@@ -18,6 +18,7 @@
 #include "softbus_adapter_hisysevent.h"
 #include "message_handler.h"
 #include "securec.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_hisysevt_common.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
@@ -125,6 +126,10 @@ static void ReportStatisticEvtPeriod(SoftBusMessage* msg)
 int32_t InitSoftbusSysEvt()
 {
     InitStatisticEvtReportFunc();
+    
+    if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
 
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }

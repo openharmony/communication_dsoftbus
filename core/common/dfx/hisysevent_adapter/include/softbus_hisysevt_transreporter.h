@@ -12,10 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
-#include "softbus_error_code.h"
+#ifndef HISYSEVENT_TRANS_REPORTER_H
+#define HISYSEVENT_TRANS_REPORTER_H
 
-int32_t InitSoftbusSysEvt(void)
-{
-    return SOFTBUS_OK;
+#include <stdint.h>
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+typedef enum {
+    SOFTBUS_EVT_OPEN_SESSION_SUCC,
+    SOFTBUS_EVT_OPEN_SESSION_FAIL,
+} SoftBusOpenSessionStatus;
+
+void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
+
+void SoftbusReportTransErrorEvt(int32_t errcode);
+
+int32_t InitTransStatisticSysEvt(void);
+
+int64_t GetSoftbusRecordTimeMillis(void);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+
+#endif /* HISYSEVENT_TRANS_REPORTER_H */
