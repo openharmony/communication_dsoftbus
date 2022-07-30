@@ -20,7 +20,7 @@ extern "C" {
 #endif
 #endif
 int SoftBusDumpProcess(int fd, int argc, const char **argv);
-int SoftBusHidumperInit(void);
+int SoftBusHiDumperInit(void);
 void SoftBusHiDumperDeinit(void);
 #ifdef __cplusplus
 #if __cplusplus

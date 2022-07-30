@@ -106,15 +106,11 @@ void InitSoftBusServer(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
     }
     
-    if (InitSoftbusSysEvt() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus sysevt dfx init failed.");
+    if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus dfx init failed.");
         goto ERR_EXIT;
     }
 
-    if (SoftBusHidumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus hidumper dfx init failed.");
-        goto ERR_EXIT;
-    }
 
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");

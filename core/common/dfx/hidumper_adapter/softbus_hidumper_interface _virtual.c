@@ -27,12 +27,12 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-int SoftBusHidumperInit()
+int SoftBusHiDumperInit(void)
 {
     return SOFTBUS_OK;
 }
 
-void SoftBusHiDumperDeinit()
+void SoftBusHiDumperDeinit(void)
 {
     return;
 }
