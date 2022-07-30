@@ -79,6 +79,7 @@ static void TransLaneChannelForEachShowInfo(int fd)
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        SoftBusFree(appInfo);
         return;
     }
         
@@ -90,6 +91,7 @@ static void TransLaneChannelForEachShowInfo(int fd)
     }
     
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    SoftBusFree(appInfo);
 }
 
 int32_t TransLaneMgrInit(void)
