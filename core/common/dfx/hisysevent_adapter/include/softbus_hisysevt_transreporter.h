@@ -34,6 +34,8 @@ void SoftbusReportTransErrorEvt(int32_t errcode);
 
 int32_t InitTransStatisticSysEvt(void);
 
+int64_t GetSoftbusRecordTimeMillis(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

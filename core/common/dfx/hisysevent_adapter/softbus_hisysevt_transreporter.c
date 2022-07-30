@@ -16,6 +16,7 @@
 #include "softbus_error_code.h"
 #include "softbus_log.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_hisysevt_common.h"
 #include "softbus_hisysevt_transreporter.h"
 
@@ -62,6 +63,18 @@ typedef struct {
 
 static OpenSessionCntStruct g_openSessionCnt;
 static OpenSessionTimeStruct g_openSessionTime;
+
+#define TIME_THOUSANDS_FACTOR (1000)
+
+int64_t GetSoftbusRecordTimeMillis(void)
+{
+    SoftBusSysTime t;
+    t.sec = 0;
+    t.usec = 0;
+    SoftBusGetTime(&t);
+    int64_t when = t.sec * TIME_THOUSANDS_FACTOR + (t.usec / TIME_THOUSANDS_FACTOR);
+    return when;
+}
 
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
 {
