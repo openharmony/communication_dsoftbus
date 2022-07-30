@@ -23,7 +23,6 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -654,3 +653,25 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
     }
     return LnnNotifyDiscoveryDevice(&addr);
 }
+
+int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
+{
+    if (appInfo == NULL || g_authChannelList == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (info->appInfo.myData.channelId == channelId) {
+            memcpy_s(appInfo, sizeof(AppInfo), &info->appInfo, sizeof(AppInfo));
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    SoftBusMutexUnlock(&g_authChannelList->lock);
+    return SOFTBUS_ERR;
+}
+
