@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_hisysevent.h"
 
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
@@ -20,12 +21,30 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     return 0;
 }
 
-SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
-{
-    return NULL;
-}
-
 void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
 {
-    return;
+    if (msg == NULL) {
+        return;
+    }
+
+    if (msg->paramArray != NULL) {
+        SoftBusFree(msg->paramArray);
+    }
+    
+    SoftBusFree(msg);
+}
+
+SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
+{
+    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    if (msg == NULL) {
+        return NULL;
+    }
+
+    msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
+    if (msg->paramArray == NULL) {
+        SoftbusFreeEvtReporMsg(msg);
+    }
+    
+    return msg;
 }

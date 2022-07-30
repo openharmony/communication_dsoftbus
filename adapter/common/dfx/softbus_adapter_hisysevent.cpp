@@ -18,6 +18,7 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
+#include "message_handler.h"
 #include "softbus_adapter_hisysevent.h"
 
 static const char* g_paramTypeTable[SOFTBUS_EVT_PARAMTYPE_BUTT] = {
