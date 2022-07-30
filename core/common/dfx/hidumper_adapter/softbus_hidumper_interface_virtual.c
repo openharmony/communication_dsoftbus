@@ -12,11 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <string.h>
 #include "softbus_errcode.h"
-#include "softbus_log.h"
-#include "softbus_hidumper.h"
-#include "softbus_hidumper_interface.h"
 
 int SoftBusDumpProcess(int fd, int argc, const char **argv)
 {
