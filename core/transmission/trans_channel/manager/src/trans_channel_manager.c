@@ -39,6 +39,7 @@
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "softbus_hisysevt_transreporter.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 int32_t TransChannelInit(void)
 {
@@ -417,6 +418,25 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
             return TransUdpGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
         case CHANNEL_TYPE_AUTH:
             return TransAuthGetNameByChanId(info->channelId, pkgName, sessionName, pkgLen, sessionNameLen);
+        default:
+            return SOFTBUS_INVALID_PARAM;
+    }
+}
+
+int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo)
+{
+    if (appInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch ((ChannelType)channelType) {
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return TcpTranGetAppInfobyChannelId(channelId, appInfo);
+        case CHANNEL_TYPE_PROXY:
+            return TransProxyGetAppInfoByChanId(channelId, appInfo);
+        case CHANNEL_TYPE_UDP:
+            return TransGetUdpAppInfoByChannelId(channelId, appInfo);
+        case CHANNEL_TYPE_AUTH:
+            return TransGetAuthAppInfoByChanId(channelId, appInfo);
         default:
             return SOFTBUS_INVALID_PARAM;
     }

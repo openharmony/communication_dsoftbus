@@ -73,6 +73,7 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_utils") {
     include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
     include_dirs += conn_common_inc + trans_common_inc
+    dfx_src = [ "dfx/hidumper_adapter/softbus_hidumper_trans_virtual.c" ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src
     if (board_toolchain_type != "iccarm") {
@@ -121,6 +122,7 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
+      "dfx/hidumper_adapter/softbus_hidumper_trans.c",
     ]
     sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]

@@ -47,4 +47,5 @@ int32_t TransProxyGetChiper(int32_t channelId, uint8_t *chiper);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
 void TransProxyDeathCallback(const char *pkgName);
+int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo);
 #endif
