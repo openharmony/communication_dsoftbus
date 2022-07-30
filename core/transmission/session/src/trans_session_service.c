@@ -23,7 +23,6 @@
 #include "softbus_permission.h"
 #include "softbus_qos.h"
 #include "softbus_utils.h"
-#include "softbus_hisysevt_transreporter.h"
 #include "trans_channel_manager.h"
 #include "trans_session_manager.h"
 
@@ -140,13 +139,5 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
         return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
     }
 
-    uint64_t timeStart = GetSoftbusRecordTimeMillis();
-    int32_t ret = TransOpenChannel(param, info);
-    uint64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
-    
-    SoftBusOpenSessionStatus isSucc = (ret == SOFTBUS_OK) ?
-        SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL;
-    SoftbusRecordOpenSession(isSucc, (uint32_t)timediff);
-    
-    return ret;
+    return TransOpenChannel(param, info);
 }
