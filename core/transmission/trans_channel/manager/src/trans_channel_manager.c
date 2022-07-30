@@ -38,6 +38,7 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "trans_tcp_direct_sessionconn.h"
 
 int32_t TransChannelInit(void)
@@ -200,6 +201,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     if (TransGetLaneInfo(param, &connInfo, &laneId) != SOFTBUS_OK) {
+        SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get laneId[%u], link type[%u].", laneId, connInfo.type);
@@ -210,8 +212,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     transInfo->channelType = TransGetChannelType(param, &connInfo);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane[%u] get channel type[%u].", laneId, transInfo->channelType);
+
     if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId)) != SOFTBUS_OK) {
+        SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         goto EXIT_ERR;
     }
 
