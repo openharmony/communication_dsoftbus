@@ -152,25 +152,25 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     }
     
     // event
-    strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_CNT);
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANS_OPEN_SESSION_CNT);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
 
     // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_SUCCESS_CNT);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_SUCCESS_CNT);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionCnt.successCnt;
 
     // param 1
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_FAIL_CNT);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_FAIL_CNT);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = (g_openSessionCnt.failCnt);
 
     // param 2
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_SUCCESS_RATE);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_SUCCESS_RATE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
     param->paramValue.f = g_openSessionCnt.successRate;
     
@@ -200,49 +200,49 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
     }
     
     // event
-    strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST);
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_SEVEN;
 
     // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_MAX_TIME_COST);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_MAX_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.maxTimeCost;
 
     // param 1
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_MIN_TIME_COST);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_MIN_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.minTimeCost;
 
     // param 2
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_AVE_TIME_COST);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_AVE_TIME_COST);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.aveTimeCost;
 
     // param 3
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_UNDER_500MS);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TIMES_UNDER_500MS);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn500ms;
 
     // param 4
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_BETWEEN_500MS_1S);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TIMES_BETWEEN_500MS_1S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn500and1s;
 
     // param 5
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FIVE];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_BETWEEN_1S_2S);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TIMES_BETWEEN_1S_2S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesIn1and2s;
 
     // param 6
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_SIX];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_TIMES_ABOVE_2S);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TIMES_ABOVE_2S);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesOn2s;
 
@@ -267,13 +267,13 @@ static int32_t SoftbusReportOpenSessionTimeEvt()
 static inline void CreateTransErrMsg(SoftBusEvtReportMsg* msg, int32_t errcode)
 {
     // event
-    strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN + 1, FAULT_EVT_TRANS_FAULT);
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, FAULT_EVT_TRANS_FAULT);
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
     msg->paramNum = SOFTBUS_EVT_PARAM_ONE;
 
     // param 0
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
-    strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN + 1, TRANS_PARAM_ERRCODE);
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_ERRCODE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
     param->paramValue.i32v = errcode;
 }
