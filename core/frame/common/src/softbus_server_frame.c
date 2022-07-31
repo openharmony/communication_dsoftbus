@@ -62,7 +62,7 @@ static int32_t InitP2pLink(void)
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
-	    return ret;
+            return ret;
         }
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
     }
