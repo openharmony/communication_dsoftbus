@@ -22,6 +22,8 @@
 #include "softbus_hidumper_disc.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_nstack.h"
+#include "softbus_hidumper_buscenter.h"
+#include "softbus_hidumper_trans.h"
 #include "softbus_hidumper.h"
 
 static LIST_HEAD(g_hidumperhander_list);
@@ -76,7 +78,6 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDum
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCreateDumpVarNode malloc fail.");
         return NULL;
     }
-    ListInit(&varNode->node);
     if (strcpy_s(varNode->varName, SOFTBUS_DUMP_VAR_NAME_LEN, varName) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCreateDumpVarNode set varName  %s fail.", varName);
         SoftBusFree(varNode);
@@ -128,7 +129,6 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode malloc fail.");
         return NULL;
     }
-    ListInit(&handlerNode->node);
     if (strcpy_s(handlerNode->moduleName, SOFTBUS_MODULE_NAME_LEN, moduleName) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get moduleName fail.");
         SoftBusFree(handlerNode);
@@ -180,6 +180,23 @@ ListNode *SoftBusGetHiDumpHandler(void)
 
 int SoftBusHiDumperModuleInit(void)
 {
+    if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    initSoftBusTransDumpHandler();
     return SOFTBUS_OK;
 }
 
@@ -187,6 +204,7 @@ void SoftBusHiDumperModuleDeInit(void)
 {
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
+    SoftBusHiDumperBusCenterDeInit();
     SoftBusHiDumperReleaseHandler();
 }
 

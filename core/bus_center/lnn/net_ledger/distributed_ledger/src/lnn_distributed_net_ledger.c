@@ -29,8 +29,11 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_buscenter.h"
+#include "bus_center_manager.h"
 
 #define NUM_BUF_SIZE 4
+#define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
         if ((networkId) == NULL || (buf) == NULL) {                        \
             return SOFTBUS_INVALID_PARAM;                               \
@@ -136,34 +139,6 @@ static void InitLaneStatus(void)
 {
     uint32_t len = LNN_LINK_TYPE_BUTT * sizeof(int32_t);
     (void)memset_s(g_distributedNetLedger.laneCount, len, 0, len);
-}
-
-int32_t LnnInitDistributedLedger(void)
-{
-    if (g_distributedNetLedger.status == DL_INIT_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Distributed Ledger already init");
-        return SOFTBUS_OK;
-    }
-
-    if (InitDistributedInfo(&g_distributedNetLedger.distributedInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitDistributedInfo ERROR!");
-        g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
-    }
-
-    if (InitConnectionCode(&g_distributedNetLedger.cnnCode) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitConnectionCode ERROR!");
-        g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusMutexInit(&g_distributedNetLedger.lock, NULL) != SOFTBUS_OK) {
-        g_distributedNetLedger.status = DL_INIT_FAIL;
-        return SOFTBUS_ERR;
-    }
-    InitLaneStatus();
-    g_distributedNetLedger.status = DL_INIT_SUCCESS;
-    return SOFTBUS_OK;
 }
 
 void LnnDeinitDistributedLedger(void)
@@ -1274,4 +1249,53 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
+}
+
+int SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
+{
+    dprintf(fd, "-----RemoteDeviceInfo-----\n");
+    NodeBasicInfo *remoteNodeInfo = NULL;
+    int32_t infoNum = 0;
+    if (LnnGetAllOnlineNodeInfo(&remoteNodeInfo, &infoNum) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllOnlineNodeInfo failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "remote device num = %d\n", infoNum);
+    for (int i = 0; i < infoNum; i++) {
+        dprintf(fd, "\n[NO.%d]\n", i+1);
+        SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitDistributedLedger(void)
+{
+    if (g_distributedNetLedger.status == DL_INIT_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Distributed Ledger already init");
+        return SOFTBUS_OK;
+    }
+
+    if (InitDistributedInfo(&g_distributedNetLedger.distributedInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitDistributedInfo ERROR!");
+        g_distributedNetLedger.status = DL_INIT_FAIL;
+        return SOFTBUS_ERR;
+    }
+
+    if (InitConnectionCode(&g_distributedNetLedger.cnnCode) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitConnectionCode ERROR!");
+        g_distributedNetLedger.status = DL_INIT_FAIL;
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexInit(&g_distributedNetLedger.lock, NULL) != SOFTBUS_OK) {
+        g_distributedNetLedger.status = DL_INIT_FAIL;
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusRegBusCenterVarDump(SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
+        &SoftBusDumpBusCenterRemoteDeviceInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump regist fail");
+        return SOFTBUS_ERR;
+    }
+    InitLaneStatus();
+    g_distributedNetLedger.status = DL_INIT_SUCCESS;
+    return SOFTBUS_OK;
 }
