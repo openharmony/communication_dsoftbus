@@ -104,7 +104,7 @@ void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format
         HILOG_WARN(SOFTBUS_HILOG_ID, "Nstackx log len error");
         return;
     }
-    SoftBusOutPrint(szStr, level);
+    SoftBusOutPrint(szStr, (SoftBusLogLevel)level);
 
     return;
 }
