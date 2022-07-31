@@ -63,13 +63,12 @@ int SoftBusDiscDumpHander(int fd, int argc, const char **argv)
                 break;
             }
         }
-		if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+        if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
             SoftBusDumpErrInfo(fd, argv[1]);
             SoftBusDumpSubModuleHelp(fd, SOFTBUS_DISC_MODULE_NAME, &g_disc_var_list);
         }
     }
 
-    
     return nRet;
 }
 
