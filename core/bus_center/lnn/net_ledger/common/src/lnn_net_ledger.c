@@ -155,3 +155,111 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return SOFTBUS_ERR;
     }
 }
+
+int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_UDID;
+    unsigned char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Udid failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "Udid = %s\n", udid);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_UUID;
+    unsigned char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Uuid failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "Uuid = %s\n", uuid);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_BR_MAC;
+    unsigned char brMac[BT_MAC_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo brMac failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "BrMac = %s\n", brMac);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_IP_ADDRESS;
+    unsigned char ipAddr[IP_STR_MAX_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, ipAddr, IP_STR_MAX_LEN) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo ipAddr failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "IpAddr = %s\n", ipAddr);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_NETWORK_CAPABILITY;
+    int32_t netCapacity = 0;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, NUM_BUF_SIZE) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netCapacity failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "NetCapacity = %d\n", netCapacity);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_NETWORK_TYPE;
+    int32_t netType = 0;
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, NUM_BUF_SIZE) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netType failed!");
+        return SOFTBUS_ERR;
+    }
+    dprintf(fd, "NetType = %d\n", netType);
+    return SOFTBUS_OK;
+}
+
+void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
+{
+    dprintf(fd, "DeviceName = %s\n", nodeInfo->deviceName);
+    dprintf(fd, "NetworkId = %s\n", nodeInfo->networkId);
+    if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUdid failed!");
+        return;
+    }
+    if (SoftbusDumpPrintUuid(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUuid failed!");
+        return;
+    }
+    if (SoftbusDumpPrintMac(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintMac failed!");
+        return;
+    }
+    if (SoftbusDumpPrintIp(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintIp failed!");
+        return;
+    }
+    if (SoftbusDumpPrintNetCapacity(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintNetCapacity failed!");
+        return;
+    }
+    if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintNetType failed!");
+        return;
+    }
+}

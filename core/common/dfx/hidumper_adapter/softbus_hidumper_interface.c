@@ -24,7 +24,7 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
         return SOFTBUS_ERR;
     }
 
-    if (argc == 0 || strcmp(argv[0], "-h")) {
+    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
         SoftBusDumpShowHelp(fd);
         return SOFTBUS_OK;
     }
