@@ -19,9 +19,9 @@
 extern "C" {
 #endif
 #endif
-
 int SoftBusDumpProcess(int fd, int argc, const char **argv);
-
+int SoftBusHiDumperInit(void);
+void SoftBusHiDumperDeinit(void);
 #ifdef __cplusplus
 #if __cplusplus
 }

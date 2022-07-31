@@ -19,6 +19,9 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_log.h"
+#include "softbus_hidumper_disc.h"
+#include "softbus_hidumper_conn.h"
+#include "softbus_hidumper_nstack.h"
 #include "softbus_hidumper.h"
 
 static LIST_HEAD(g_hidumperhander_list);
@@ -142,7 +145,7 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
     return handlerNode;
 }
 
-void SoftBusHiDumperDeInit(void)
+void SoftBusHiDumperReleaseHandler(void)
 {
     ListNode *item = NULL;
     ListNode *nextItem = NULL;
@@ -170,7 +173,20 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
     return SOFTBUS_OK;
 }
 
-ListNode *SoftBusGetHiDumpHandler()
+ListNode *SoftBusGetHiDumpHandler(void)
 {
     return &g_hidumperhander_list;
 }
+
+int SoftBusHiDumperModuleInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void SoftBusHiDumperModuleDeInit(void)
+{
+    SoftBusHiDumperDiscDeInit();
+    SoftBusHiDumperConnDeInit();
+    SoftBusHiDumperReleaseHandler();
+}
+
