@@ -236,14 +236,12 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "accept : %{public}s", strerror(errno));
         return GetErrorCode();
-    } else {
-        if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept sys addr to softbus addr failed");
-            return SOFTBUS_ADAPTER_ERR;
-        }
-        *acceptFd = ret;
-        return SOFTBUS_ADAPTER_OK;
     }
+    if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept sys addr to softbus addr failed");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    *acceptFd = ret;
     return SOFTBUS_ADAPTER_OK;
 }
 

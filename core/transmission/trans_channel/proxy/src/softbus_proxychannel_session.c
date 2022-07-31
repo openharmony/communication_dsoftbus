@@ -1001,7 +1001,7 @@ int32_t TransSliceManagerInit(void)
     if (g_channelSliceProcessorList == NULL) {
         return SOFTBUS_ERR;
     }
-    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, (void *)TransProxySliceTimerProc) != SOFTBUS_OK) {
+    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, TransProxySliceTimerProc) != SOFTBUS_OK) {
         DestroySoftBusList(g_channelSliceProcessorList);
         return SOFTBUS_ERR;
     }
