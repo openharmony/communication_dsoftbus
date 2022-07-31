@@ -105,6 +105,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
 } else {
+  cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
@@ -119,6 +120,9 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/bus_center/utils/include",
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "//third_party/cJSON",
       "//third_party/bounds_checking_function/include",
     ]
@@ -145,6 +149,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson_static",
     ]
