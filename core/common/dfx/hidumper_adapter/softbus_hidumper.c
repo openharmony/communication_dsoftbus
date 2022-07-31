@@ -133,7 +133,6 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
         SoftBusFree(handlerNode);
         return NULL;
     }
-
     if (strcpy_s(handlerNode->helpInfo, SOFTBUS_MODULE_HELP_LEN, helpInfo) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get helpInfo fail");
         SoftBusFree(handlerNode);
