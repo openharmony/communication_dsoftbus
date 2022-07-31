@@ -36,7 +36,6 @@ static int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
 
     return SOFTBUS_OK;
 }
-
 static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
@@ -45,7 +44,6 @@ static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 
     return SOFTBUS_OK;
 }
-
 static int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
