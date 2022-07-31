@@ -61,7 +61,7 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
         case LANE_ETH:
             return DUMPER_LANE_ETH;
         default:
-            return DUMPER_LANE_LINK_TYPE_BUTT;
+            break;
     }
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }

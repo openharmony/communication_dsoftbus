@@ -180,9 +180,11 @@ static void AuthHandler(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth message: what = %d.", msg->what);
     switch (msg->what) {
         case AUTH_TIMEOUT:
-            return HandleAuthTimeout((uint16_t)(msg->arg1));
+            HandleAuthTimeout((uint16_t)(msg->arg1));
+            break;
         case AUTH_DISCONNECT_DEVICE:
-            return HandleAuthDisconnectDevice((uint32_t)(msg->arg1));
+            HandleAuthDisconnectDevice((uint32_t)(msg->arg1));
+            break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown auth message.");
             break;
@@ -549,7 +551,8 @@ int64_t AuthVerifyDevice(AuthVerifyModule moduleId, const ConnectionAddr *addr)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (!LnnConvertAddrToOption(addr, &option)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth LnnConverAddrToOption failed");
         return SOFTBUS_ERR;
@@ -1783,7 +1786,8 @@ static bool IsNeedVerifyAgain(ConnectOption *option, uint32_t requestId,
 
 static int32_t AuthOpenCommonConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (ConvertAuthConnInfoToOption(info, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "convert AuthConnInfo to ConnectOption failed.");
         return SOFTBUS_ERR;
@@ -1822,7 +1826,8 @@ int32_t AuthStartListening(const AuthListennerInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LocalListenerInfo local = {0};
+    LocalListenerInfo local;
+    (void)memset_s(&local, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
@@ -1847,7 +1852,8 @@ int32_t AuthStopListening(const AuthListennerInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LocalListenerInfo local = {0};
+    LocalListenerInfo local;
+    (void)memset_s(&local, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
@@ -2077,7 +2083,8 @@ int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, Connect
 
 int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *connInfo)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (uuid == NULL || strlen(uuid) == 0 || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;

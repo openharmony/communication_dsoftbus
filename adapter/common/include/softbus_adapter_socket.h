@@ -93,11 +93,11 @@ typedef struct {
     char saData[SA_DATA_SIZE];
 } SoftBusSockAddr;
 
+#pragma pack (1)
 typedef struct {
     unsigned long sAddr;
 } SoftBusInAddr;
 
-#pragma pack (1)
 typedef struct {
     uint16_t sinFamily; /* address family */
     uint16_t sinPort; /* Port number */
