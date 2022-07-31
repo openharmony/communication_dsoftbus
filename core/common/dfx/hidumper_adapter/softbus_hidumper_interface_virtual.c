@@ -12,9 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUS_HIDUMPER_NSTACK_H
-#define SOFTBUS_HIDUMPER_NSTACK_H
+#include "softbus_errcode.h"
 
-int SoftBusNStackHiDumperInit(void);
-void SoftBusNStackHiDumperDeInit(void);
-#endif /* SOFTBUS_HIDUMPER_NSTACK_H */
+int SoftBusDumpProcess(int fd, int argc, const char **argv)
+{
+    (void)fd;
+    (void)argc;
+    (void)argv;
+    
+    return SOFTBUS_OK;
+}
+
+int SoftBusHiDumperInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void SoftBusHiDumperDeinit(void)
+{
+    return;
+}

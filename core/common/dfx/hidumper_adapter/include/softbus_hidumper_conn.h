@@ -19,5 +19,5 @@
 
 int SoftBusConnHiDumperInit(void);
 int SoftBusRegConnDumpCb(int varId, SoftBusVarDumpCb cb);
-void SoftConnHiDumperConnDeInit(void);
+void SoftBusHiDumperConnDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_CONN_H */
