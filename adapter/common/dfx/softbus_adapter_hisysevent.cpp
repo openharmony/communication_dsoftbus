@@ -65,7 +65,7 @@ static void ReportParamValue(SoftBusEvtParam& evtParam)
                 evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u32v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT64:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}ll",
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}llu",
                 evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned long long)evtParam.paramValue.u64v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_FLOAT:
