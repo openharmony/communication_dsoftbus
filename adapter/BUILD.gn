@@ -50,15 +50,10 @@ if (defined(ohos_lite)) {
         defines = [ "HISPARK_PEGASUS_USE_NETIF_GET_ADDR" ]
       }
       if (board_toolchain_type == "iccarm") {
-        include_dirs += [
-          "//third_party/lwip/src/include",
-          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
-        ]
         cflags = [
           "--diag_suppress",
-          "Pe226",
+          "Pe226,Pe513",
         ]
-        cflag_cc = cflags
         ldflags = [ "-lpthread" ]
       } else {
         cflags = [ "-Wall" ]

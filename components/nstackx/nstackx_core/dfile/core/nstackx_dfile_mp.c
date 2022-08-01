@@ -18,6 +18,7 @@
 #include "nstackx_dfile_transfer.h"
 #include "nstackx_file_manager.h"
 #include "nstackx_log.h"
+#include "nstackx_dfile_dfx.h"
 #include "securec.h"
 #define TAG "nStackXDfileMp"
 

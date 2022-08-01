@@ -142,7 +142,8 @@ static int32_t GetChiperParam(ProxyMessage *msg, bool *isBle, bool *isAuthServer
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     OutBuf deBuf = {0};
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: invalid message length(%d)", len);
         return SOFTBUS_ERR;
@@ -213,7 +214,8 @@ static uint8_t *PackEncrypedMessage(ProxyMessageHead *msg, uint32_t connId,
     const uint8_t *payload, uint32_t payloadLen, uint32_t *outLen)
 {
     OutBuf encBuf = {0};
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     uint32_t connHeadLen = ConnGetHeadSize();
     bool isAuthServer = ((msg->chiper & AUTH_SERVER_SIDE) != 0);
     bool isBle = ((msg->chiper & USE_BLE_CIPHER) != 0);

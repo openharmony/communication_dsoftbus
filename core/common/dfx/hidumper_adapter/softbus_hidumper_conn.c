@@ -41,7 +41,7 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
         return SOFTBUS_ERR;
     }
 
-    if (argc == 0 || strcmp(argv[0], "-h") == 0) {
+    if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0))) {
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
         return SOFTBUS_OK;
     }
@@ -62,11 +62,10 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
                 break;
             }
         }
-    }
-
-    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
-        SoftBusDumpErrInfo(fd, argv[0]);
-        SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
+        if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+            SoftBusDumpErrInfo(fd, argv[1]);
+            SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
+        }
     }
     return nRet;
 }

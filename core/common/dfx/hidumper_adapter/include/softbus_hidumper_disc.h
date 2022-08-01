@@ -19,6 +19,6 @@
 #include "softbus_hidumper.h"
 
 int SoftBusDiscHiDumperInit(void);
-int SoftBusRegDiscDumpCb(char *dumpVar, SoftBusVarDumpCb cb);
+int SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperDiscDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_DISC_H */

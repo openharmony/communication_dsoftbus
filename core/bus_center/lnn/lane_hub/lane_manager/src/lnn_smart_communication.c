@@ -62,6 +62,7 @@ static bool IsSupportUdp(LnnLaneProperty prop)
 static void GetLaneEntryList(const LnnPreferredLinkList *linkList, LnnLaneProperty prop,
     SmartLaneMapEntry *laneEntryList)
 {
+    uint32_t i = 0;
     if (linkList == NULL || linkList->linkTypeNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "PreferredLinkList not set, prop = %d.", prop);
         goto DEFAULT;
@@ -71,7 +72,6 @@ static void GetLaneEntryList(const LnnPreferredLinkList *linkList, LnnLaneProper
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "too many link type, num = %d.", linkList->linkTypeNum);
         goto DEFAULT;
     }
-    uint32_t i = 0;
     for (; i < linkList->linkTypeNum; i++) {
         if (linkList->linkType[i] < LINK_TYPE_WIFI_WLAN_5G || linkList->linkType[i] > LINK_TYPE_MAX) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invaild link type: %d", linkList->linkType[i]);
