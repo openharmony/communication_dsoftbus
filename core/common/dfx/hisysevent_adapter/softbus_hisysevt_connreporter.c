@@ -55,20 +55,27 @@ typedef struct {
 static ConnTimeDur g_connTimeDur[SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT];
 static ConnSuccRate g_connSuccRate[SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT];
 
-static inline int32_t InitConnEvtMutexLock(void)
+static inline int32_t InitConnItemMutexLock(uint32_t index, SoftBusMutexAttr *mutexAttr)
 {
-    SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
-        if (SoftBusMutexInit(&g_connTimeDur[i].lock, &mutexAttr) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-
-        if (SoftBusMutexInit(&g_connSuccRate[i].lock, &mutexAttr) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&g_connTimeDur[i].lock);
-            return SOFTBUS_ERR;
-        }
+    if (SoftBusMutexInit(&g_connTimeDur[index].lock, mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexInit(&g_connSuccRate[index].lock, mutexAttr) != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_connTimeDur[index].lock);
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t InitConnEvtMutexLock(void)
+{
+    SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
+    int32_t nRet = SOFTBUS_OK;
+    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+        nRet = InitConnItemMutexLock(i, &mutexAttr);
+    }
+
+    return nRet;
 }
 
 static inline void ClearConnTimeDur(void)

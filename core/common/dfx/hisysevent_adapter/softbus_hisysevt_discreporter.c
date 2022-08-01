@@ -59,27 +59,32 @@ static FirstDiscTime g_firstDiscTime[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscScanTimes g_scanTimes[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscFault g_discFault[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 
+static int32_t InitDiscItemMutexLock(uint32_t index, SoftBusMutexAttr *mutexAttr)
+{
+    if (SoftBusMutexInit(&g_firstDiscTime[index].lock, mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexInit(&g_scanTimes[index].lock, mutexAttr) != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_firstDiscTime[index].lock);
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexInit(&g_discFault[index].lock, mutexAttr) != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_firstDiscTime[index].lock);
+        (void)SoftBusMutexDestroy(&g_scanTimes[index].lock);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t InitDiscEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
+    int32_t nRet = SOFTBUS_OK;
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        if (SoftBusMutexInit(&g_firstDiscTime[i].lock, &mutexAttr) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-
-        if (SoftBusMutexInit(&g_scanTimes[i].lock, &mutexAttr) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
-            return SOFTBUS_ERR;
-        }
-
-        if (SoftBusMutexInit(&g_discFault[i].lock, &mutexAttr) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
-            (void)SoftBusMutexUnlock(&g_scanTimes[i].lock);
-            return SOFTBUS_ERR;
-        }
+        nRet = InitDiscItemMutexLock(i, &mutexAttr);
     }
 
-    return SOFTBUS_OK;
+    return nRet;
 }
 
 static inline void ClearFirstDiscTime(void)
