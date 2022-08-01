@@ -241,6 +241,9 @@ static inline bool CapsChaCha(const struct DFileSession *session)
     return (session->fileManager->keyLen == CHACHA20_KEY_LENGTH) && (session->capability & NSTACKX_CAPS_CHACHA);
 }
 
+void NSTACKX_DFileAssembleFunc(void *softObj, const DFileEvent *info);
+void DFileSetEvent(void *softObj, DFileEventFunc func);
+
 #ifdef __cplusplus
 }
 #endif

@@ -22,6 +22,7 @@
 #include "nstackx_dfile_config.h"
 #include "nstackx_dfile_mp.h"
 #include "nstackx_congestion.h"
+#include "nstackx_dfile_dfx.h"
 #ifdef MBEDTLS_INCLUDED
 #include "nstackx_mbedtls.h"
 #else
@@ -30,6 +31,9 @@
 #include "nstackx_dfile_private.h"
 #include "securec.h"
 #include "nstackx_socket.h"
+#ifdef DFILE_ENABLE_HIDUMP
+#include "nstackx_getopt.h"
+#endif
 
 #define TAG "nStackXDFile"
 #define Coverity_Tainted_Set(pkt)
@@ -39,19 +43,13 @@
 
 /* this lock will been destroy only when process exit. */
 static pthread_mutex_t g_dFileSessionIdMutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t g_dFileSessionChainMutex = PTHREAD_MUTEX_INITIALIZER;
-static List g_dFileSessionChain = {&(g_dFileSessionChain), &(g_dFileSessionChain)};
+pthread_mutex_t g_dFileSessionChainMutex = PTHREAD_MUTEX_INITIALIZER;
+List g_dFileSessionChain = {&(g_dFileSessionChain), &(g_dFileSessionChain)};
 static uint16_t g_dFileSessionId = 0;
 /* currently enabled capabilities */
 static uint32_t g_capabilities = NSTACKX_CAPS_WLAN_CATAGORY | NSTACKX_CAPS_CHACHA;
 /* wlan catagory from APP */
 static uint32_t g_wlanCatagory = NSTACKX_WLAN_CAT_TCP;
-
-typedef struct DFileSessionNode {
-    List list;
-    uint16_t sessionId;
-    DFileSession *session;
-} DFileSessionNode;
 
 typedef struct {
     DFileSession *session;
@@ -87,7 +85,11 @@ static int32_t GetDFileSessionId(uint16_t *sessionId)
     return NSTACKX_EOK;
 }
 
+#ifdef DFILE_ENABLE_HIDUMP
+DFileSessionNode *GetDFileSessionNodeById(uint16_t sessionId)
+#else
 static DFileSessionNode *GetDFileSessionNodeById(uint16_t sessionId)
+#endif
 {
     List *pos = NULL;
     DFileSessionNode *node = NULL;
@@ -469,6 +471,8 @@ static void DFileSendFileInner(void *arg)
     DFileSendFileCtx *ctx = arg;
     DFileSession *session = ctx->session;
     DFileMsg data;
+
+    DFileSendFileBeginEvent();
 
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
     if (session == NULL) {
@@ -911,6 +915,13 @@ static DFileSession *DFileSessionCreate(DFileSessionType type, DFileMsgReceiver 
     DFileSession *session = calloc(1, sizeof(DFileSession));
     if (session == NULL) {
         return NULL;
+    }
+
+    if (type == DFILE_SESSION_TYPE_CLIENT) {
+        DFileClientCreateEvent();
+    }
+    if (type == DFILE_SESSION_TYPE_SERVER) {
+        DFileServerCreateEvent();
     }
 
     DFileSessionBaseInit(session, type, msgReceiver, sessionId);
@@ -1561,4 +1572,59 @@ int32_t NSTACKX_DFileSetCapabilities(uint32_t capabilities, uint32_t value)
     (void)(capabilities);
     (void)(value);
     return NSTACKX_EOK;
+}
+
+#ifdef DFILE_ENABLE_HIDUMP
+int32_t NSTACKX_DFileDump(uint32_t argc, const char **arg, void *softObj, DFileDumpFunc dump)
+{
+    int32_t ret = 0, c = 0;
+    char *message = NULL;
+    char *opt = NULL;
+    size_t size = 0;
+    message = (char *)malloc(DUMP_INFO_MAX * sizeof(char));
+    if (message == NULL) {
+        LOGE(TAG, "malloc failed");
+        return NSTACKX_EFAILED;
+    }
+    (void)memset_s(message, DUMP_INFO_MAX, 0, DUMP_INFO_MAX);
+
+    NstackGetOptMsg optMsg;
+    (void)NstackInitGetOptMsg(&optMsg);
+
+    while ((c = NstackGetOpt(&optMsg, argc, arg, "s:m:hl")) != NSTACK_GETOPT_END_OF_STR) {
+        switch (c) {
+            case 'h':
+                ret = HidumpHelp(message, &size);
+                break;
+            case 'l':
+                ret = HidumpList(message, &size);
+                break;
+            case 'm':
+                opt = (char *)NstackGetOptArgs(&optMsg);
+                ret = HidumpMessage(message, &size, opt);
+                break;
+            case 's':
+                opt = (char *)NstackGetOptArgs(&optMsg);
+                ret = HidumpInformation(message, &size, opt);
+                break;
+            default:
+                LOGE(TAG, "unknown option");
+                ret = HidumpHelp(message, &size);
+                break;
+        }
+        if (ret != NSTACKX_EOK) {
+            free(message);
+            return ret;
+        }
+        dump(softObj, message, size);
+        (void)memset_s(message, DUMP_INFO_MAX, 0, DUMP_INFO_MAX);
+    }
+    free(message);
+    return ret;
+}
+#endif
+
+void NSTACKX_DFileSetEventFunc(void *softObj, DFileEventFunc func)
+{
+    DFileSetEvent(softObj, func);
 }
