@@ -68,6 +68,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
 int32_t LnnGetNodeKeyInfoLen(int32_t key);
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len);
 bool LnnIsMasterNode(void);
+void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 
 int32_t LnnServerJoin(ConnectionAddr *addr);
 int32_t LnnServerLeave(const char *networkId);
