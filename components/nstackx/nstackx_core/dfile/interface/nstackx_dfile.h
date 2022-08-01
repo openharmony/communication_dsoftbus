@@ -30,7 +30,6 @@
 #endif
 
 #include "nstackx_error.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -190,6 +189,57 @@ typedef struct {
     socklen_t addrLen;
 } NSTACKX_ServerParaMp;
 
+/* nStack HIEVENT接口设计 */
+typedef enum {
+    DFile_EVENT_TYPE_FAULT,
+    DFile_EVENT_TYPE_STATISTIC,
+    DFile_EVENT_TYPE_SECURITY,
+    DFile_EVENT_TYPE_BEHAVIOR,
+} DFileEventType;
+
+typedef enum {
+    DFile_EVENT_LEVEL_CRITICAL,
+    DFile_EVENT_LEVEL_MINOR,
+} DFileEventLevel;
+
+typedef enum {
+    DFile_PARAM_TYPE_BOOL,
+    DFile_PARAM_TYPE_UINT8,
+    DFile_PARAM_TYPE_UINT16,
+    DFile_PARAM_TYPE_INT32,
+    DFile_PARAM_TYPE_UINT32,
+    DFile_PARAM_TYPE_UINT64,
+    DFile_PARAM_TYPE_FLOAT,
+    DFile_PARAM_TYPE_DOUBLE,
+    DFile_PARAM_TYPE_STRING
+} DFileEventParamType;
+
+#define DFile_EVENT_NAME_LEN 128
+#define DFile_EVENT_TAG_LEN 16
+
+typedef struct {
+    DFileEventParamType type;
+    char name[DFile_EVENT_NAME_LEN];
+    union {
+        uint8_t u8v;
+        uint16_t u16v;
+        int32_t i32v;
+        uint32_t u32v;
+        uint64_t u64v;
+        float f;
+        double d;
+        char str[DFile_EVENT_NAME_LEN];
+    } value;
+} DFileEventParam;
+
+typedef struct {
+    char eventName[DFile_EVENT_NAME_LEN];
+    DFileEventType type;
+    DFileEventLevel level;
+    uint32_t paramNum;
+    DFileEventParam *params;
+} DFileEvent;
+
 /*
  * Create DFile server session.
  * param: localAddr - filled with local ip addr, port and family for socket binding
@@ -312,6 +362,18 @@ NSTACKX_EXPORT int32_t NSTACKX_DFileRegisterLog(DFileLogImpl logImpl);
 NSTACKX_EXPORT uint32_t NSTACKX_DFileGetCapabilities(void);
 
 NSTACKX_EXPORT int32_t NSTACKX_DFileSetCapabilities(uint32_t capabilities, uint32_t value);
+
+#ifdef DFILE_ENABLE_HIDUMP
+
+typedef void (*DFileDumpFunc)(void *softObj, const char *data, uint32_t len);
+
+NSTACKX_EXPORT int32_t NSTACKX_DFileDump(uint32_t argc, const char **arg, void *softObj, DFileDumpFunc dump);
+#endif
+
+/* 软总线提供的回调支持多线程调用，事件的触发频率要求(表格整理出来，什么时候触发，触发频率) */
+typedef void (*DFileEventFunc)(void *softObj, const DFileEvent *info);
+
+NSTACKX_EXPORT void NSTACKX_DFileSetEventFunc(void *softObj, DFileEventFunc func);
 
 #ifdef __cplusplus
 }
