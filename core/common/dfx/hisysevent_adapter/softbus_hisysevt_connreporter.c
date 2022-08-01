@@ -64,6 +64,7 @@ static inline int32_t InitConnEvtMutexLock(void)
         }
 
         if (SoftBusMutexInit(&g_connSuccRate[i].lock, &mutexAttr) != SOFTBUS_OK) {
+            (void)SoftBusMutexUnlock(&g_connTimeDur[i].lock);
             return SOFTBUS_ERR;
         }
     }
@@ -286,7 +287,8 @@ void SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t ti
     }
 
     g_connTimeDur[medium].totalConnTime += time;
-    g_connTimeDur[medium].avgConnDur = (uint32_t)(g_connTimeDur[medium].totalConnTime / g_connSuccRate[medium].succTime);
+    g_connTimeDur[medium].avgConnDur = (uint32_t)(g_connTimeDur[medium].totalConnTime /
+        g_connSuccRate[medium].succTime);
 
     (void)SoftBusMutexUnlock(&g_connTimeDur[medium].lock);
 }
