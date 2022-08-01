@@ -59,7 +59,7 @@ static FirstDiscTime g_firstDiscTime[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscScanTimes g_scanTimes[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscFault g_discFault[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 
-static inline int32_t InitDiscEvtMutexLock(void)
+static int32_t InitDiscEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
@@ -255,7 +255,7 @@ static int32_t SoftBusReportDiscFaultEvt()
         return SOFTBUS_ERR;
     }
     for (uint8_t i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        for(int32_t k = 0; k < SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT; k++) {
+        for (int32_t k = 0; k < SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT; k++) {
             if (SoftBusCreateDiscFaultMsg(msg, i, k) != SOFTBUS_OK) {
                 return SOFTBUS_ERR;
             }
@@ -263,14 +263,14 @@ static int32_t SoftBusReportDiscFaultEvt()
                 return SOFTBUS_ERR;
             }
         }
-     }
+    }
 
     SoftbusFreeEvtReporMsg(msg);
     ClearDiscFault();
     return SOFTBUS_OK;
 }
 
-static inline int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, char *pkgName)
+static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, char *pkgName)
 {
     // event
     (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, BEHAVIOR_EVT_DISC_START);
@@ -323,7 +323,7 @@ int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
     } else if (time < g_firstDiscTime[medium].minDiscDur) {
         g_firstDiscTime[medium].minDiscDur = time;
     }
-    g_firstDiscTime[medium].avgDiscDur = (uint32_t)(g_firstDiscTime[medium].totalDiscTime / 
+    g_firstDiscTime[medium].avgDiscDur = (uint32_t)(g_firstDiscTime[medium].totalDiscTime /
         g_firstDiscTime[medium].discCnt);
     if (SoftBusMutexUnlock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
         return SOFTBUS_ERR;

@@ -266,7 +266,8 @@ void SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t ti
     g_connSuccRate[medium].failTime += (isSucc != SOFTBUS_EVT_CONN_SUCC);
     g_connSuccRate[medium].succTime += (isSucc == SOFTBUS_EVT_CONN_SUCC);
     g_connSuccRate[medium].totalCnt += 1;
-    g_connSuccRate[medium].succRate = (float)(g_connSuccRate[medium].succTime)/(float)(g_connSuccRate[medium].totalCnt);
+    g_connSuccRate[medium].succRate = (float)(g_connSuccRate[medium].succTime) /
+        (float)(g_connSuccRate[medium].totalCnt);
 
     (void)SoftBusMutexUnlock(&g_connSuccRate[medium].lock);
 
