@@ -43,19 +43,45 @@ static const char* g_evtTypeTable[SOFTBUS_EVT_TYPE_BUTT] = {
 
 static void ReportParamValue(SoftBusEvtParam& evtParam)
 {
-    if (evtParam.paramType == SOFTBUS_EVT_PARAMTYPE_FLOAT) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}f",
-            evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.f);
-    } else if (evtParam.paramType == SOFTBUS_EVT_PARAMTYPE_DOUBLE) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
-            evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.d);
-    } else if (evtParam.paramType == SOFTBUS_EVT_PARAMTYPE_STRING) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}s",
-            evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.str);
-    } else {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}d",
-            evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue);
-    }
+    switch (evtParam.paramType) {
+        case SOFTBUS_EVT_PARAMTYPE_BOOL:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.b);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_UINT8:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u8v);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_UINT16:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u16v);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_INT32:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}d",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (int)evtParam.paramValue.i32v);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_UINT32:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u32v);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_UINT64:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}ll",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned long long)evtParam.paramValue.u64v);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_FLOAT:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}f",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.f);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_DOUBLE:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.d);
+            break;
+        case SOFTBUS_EVT_PARAMTYPE_STRING:
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}s",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.str);
+            break;
+        default:
+            break;
 }
 
 static void ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
