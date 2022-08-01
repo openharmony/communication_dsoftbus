@@ -290,22 +290,38 @@ int32_t AddStatisticDuration(LnnStatisticData *data)
 
 static int32_t ReportStatisticBleDurationEvt(void)
 {
-    return SoftbusWriteHisEvt(&g_bleDuration);
+    int32_t ret = SoftbusWriteHisEvt(&g_bleDuration);
+    if (g_bleDuration.paramArray != NULL) {
+        SoftBusFree(g_bleDuration.paramArray);
+    }
+    return ret;
 }
 
 static int32_t ReportStatisticWlanDurationEvt(void)
 {
-    return SoftbusWriteHisEvt(&g_coapDuration);
+    int32_t ret = SoftbusWriteHisEvt(&g_coapDuration);
+    if (g_coapDuration.paramArray != NULL) {
+        SoftBusFree(g_coapDuration.paramArray);
+    }
+    return ret;
 }
 
 static int32_t ReportStatisticWlanSuccessRataEvt(void)
 {
-    return SoftbusWriteHisEvt(&g_coapSuccessRate);
+    int32_t ret = SoftbusWriteHisEvt(&g_coapSuccessRate);
+    if (g_coapSuccessRate.paramArray != NULL) {
+        SoftBusFree(g_coapSuccessRate.paramArray);
+    }
+    return ret;
 }
 
 static int32_t ReportStatisticBleSuccessRataEvt(void)
 {
-    return SoftbusWriteHisEvt(&g_bleSuccessRate);
+    int32_t ret = SoftbusWriteHisEvt(&g_bleSuccessRate);
+    if (g_bleSuccessRate.paramArray != NULL) {
+        SoftBusFree(g_bleSuccessRate.paramArray);
+    }
+    return ret;
 }
 
 static int32_t MakeFaultEvt(SoftBusEvtReportMsg *msg)
@@ -372,7 +388,11 @@ int32_t ReportBusCenterFaultEvt(SoftBusEvtReportMsg *msg)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not match msg name!!!");
         return SOFTBUS_ERR;
     }
-    return SoftbusWriteHisEvt(msg);
+    int32_t ret = SoftbusWriteHisEvt(msg);
+    if (msg->paramArray != NULL) {
+        SoftBusFree(msg->paramArray);
+    }
+    return ret;
 }
 
 int32_t InitBusCenterDfx(void)
