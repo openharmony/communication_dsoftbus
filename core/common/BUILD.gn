@@ -29,6 +29,8 @@ common_utils_src = [
   "utils/softbus_utils.c",
   "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
   "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_connreporter.c",
 ]
 
 if (defined(ohos_lite)) {
