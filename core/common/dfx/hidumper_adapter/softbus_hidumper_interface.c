@@ -50,7 +50,7 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     }
 
     if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
-        SoftBusDumpErrInfo(fd, argv[0]);
+        SoftBusDumpErrInfo(fd, argv[1]);
         SoftBusDumpShowHelp(fd);
     }
     

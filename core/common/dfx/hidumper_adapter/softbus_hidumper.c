@@ -73,7 +73,7 @@ void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
 
 static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)
 {
-    SoftBusDumpVarNode *varNode = SoftBusCalloc(sizeof(SoftBusDumpVarNode));
+    SoftBusDumpVarNode *varNode = (SoftBusDumpVarNode *)SoftBusCalloc(sizeof(SoftBusDumpVarNode));
     if (varNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCreateDumpVarNode malloc fail.");
         return NULL;
@@ -129,13 +129,13 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode malloc fail.");
         return NULL;
     }
+
     if (strcpy_s(handlerNode->moduleName, SOFTBUS_MODULE_NAME_LEN, moduleName) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get moduleName fail.");
         SoftBusFree(handlerNode);
         return NULL;
     }
-
-    if (strcpy_s(handlerNode->helpInfo, SOFTBUS_MODULE_NAME_LEN, helpInfo) != EOK) {
+    if (strcpy_s(handlerNode->helpInfo, SOFTBUS_MODULE_HELP_LEN, helpInfo) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get helpInfo fail");
         SoftBusFree(handlerNode);
         return NULL;
@@ -164,6 +164,7 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler invalid param");
         return SOFTBUS_ERR;
     }
+
     HandlerNode *handlerNode = CreateHiDumperHandlerNode(moduleName, helpInfo, handler);
     if (handlerNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler node create fail");

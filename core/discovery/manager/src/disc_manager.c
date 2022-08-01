@@ -1042,7 +1042,7 @@ void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
     }
 }
 
-static void DiscUpdateLocalDeviceInfo(type)
+static void DiscUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {
         g_discBleInterface->UpdateLocalDeviceInfo(type);

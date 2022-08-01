@@ -519,18 +519,20 @@ static int32_t GetAbsFullPath(const char *fullPath, char *recvAbsPath, int32_t p
         SoftBusFree(dirPath);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (GetAndCheckRealPath(dirPath, absFullDir) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get full abs file failed");
-        goto EXIT_ERR;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s], realFullDir[%s]", dirPath, absFullDir);
+    int32_t fileNameLength = -1;
+    int32_t dirPathLength = -1;
     const char *fileName = TransGetFileName(fullPath);
     if (fileName == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file name failed");
         goto EXIT_ERR;
     }
-    int32_t fileNameLength = strlen(fileName);
-    int32_t dirPathLength = strlen(absFullDir);
+    if (GetAndCheckRealPath(dirPath, absFullDir) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get full abs file failed");
+        goto EXIT_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dirPath[%s], realFullDir[%s]", dirPath, absFullDir);
+    fileNameLength = strlen(fileName);
+    dirPathLength = strlen(absFullDir);
     if (pathSize < (fileNameLength + dirPathLength + 1)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy name is too large, dirLen:%d, fileNameLen:%d",
             dirPathLength, fileNameLength);
@@ -1708,19 +1710,21 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
     }
     int32_t ret = SOFTBUS_ERR;
     int32_t fileCount;
+    char *fullRecvPath = NULL;
+    char *absRecvPath = NULL;
     char *firstFilePath = BufferToFileList(frame->data, frame->frameLength, &fileCount);
     if (firstFilePath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "buffer to file list fail");
         goto EXIT_ERR;
     }
-    char *fullRecvPath = GetFullRecvPath(firstFilePath, recipient->fileListener.rootDir);
+    fullRecvPath = GetFullRecvPath(firstFilePath, recipient->fileListener.rootDir);
     SoftBusFree(firstFilePath);
     if (IsPathValid(fullRecvPath) == false) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file list path is invalid");
         SoftBusFree(fullRecvPath);
         goto EXIT_ERR;
     }
-    char *absRecvPath = (char *)SoftBusCalloc(PATH_MAX + 1);
+    absRecvPath = (char *)SoftBusCalloc(PATH_MAX + 1);
     if (absRecvPath == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc absFullDir fail");
         SoftBusFree(fullRecvPath);
