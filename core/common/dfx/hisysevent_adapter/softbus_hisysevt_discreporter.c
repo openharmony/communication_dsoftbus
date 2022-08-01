@@ -68,10 +68,13 @@ static int32_t InitDiscEvtMutexLock(void)
         }
 
         if (SoftBusMutexInit(&g_scanTimes[i].lock, &mutexAttr) != SOFTBUS_OK) {
+            (void)SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             return SOFTBUS_ERR;
         }
 
         if (SoftBusMutexInit(&g_discFault[i].lock, &mutexAttr) != SOFTBUS_OK) {
+            (void)SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
+            (void)SoftBusMutexUnlock(&g_scanTimes[i].lock);
             return SOFTBUS_ERR;
         }
     }
@@ -153,8 +156,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt()
 static inline void ClearScanTimes(void)
 {
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        memset_s(&g_scanTimes[i].scanTimes, sizeof(DiscScanTimes) - sizeof(SoftBusMutex),
-            0, sizeof(DiscScanTimes) - sizeof(SoftBusMutex));
+        g_scanTimes[i].scanTimes = 0;
     }
 }
 
