@@ -20,6 +20,7 @@
 #include "lnn_node_info.h"
 #include "lnn_state_machine.h"
 #include "softbus_bus_center.h"
+#include "softbus_hisysevt_bus_center.h"
 
 #ifndef LNN_CONNECTION_FSM_H
 #define LNN_CONNECTION_FSM_H
@@ -77,6 +78,7 @@ typedef struct tagLnnConnectionFsm {
     LnnConntionInfo connInfo;
     LnnConnectionFsmStopCallback stopCallback;
     bool isDead;
+    LnnStatisticData statisticData;
 } LnnConnectionFsm;
 
 typedef struct {
@@ -102,6 +104,7 @@ int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
+int64_t LnnUpTimeMs(void);
 
 #ifdef __cplusplus
 #if __cplusplus
