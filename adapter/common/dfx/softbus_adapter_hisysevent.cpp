@@ -50,7 +50,7 @@ static void ReportParamValue(SoftBusEvtParam& evtParam)
         HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
             evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.d);
     } else if (evtParam.paramType == SOFTBUS_EVT_PARAMTYPE_STRING) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
+        HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}s",
             evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.str);
     } else {
         HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}d",
