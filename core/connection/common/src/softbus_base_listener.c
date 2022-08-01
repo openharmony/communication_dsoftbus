@@ -224,7 +224,7 @@ static int32_t CreateSpecifiedListenerModule(ListenerModule module)
 static int32_t CreateStaticModules(void)
 {
     for (uint32_t i = 0; i < LISTENER_MODULE_DYNAMIC_START; i++) {
-        int32_t ret = CreateSpecifiedListenerModule(i);
+        int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
                 __func__, i, ret);
@@ -247,7 +247,7 @@ uint32_t CreateListenerModule(void)
         if (g_listenerList[i] != NULL) {
             continue;
         }
-        int32_t ret = CreateSpecifiedListenerModule(i);
+        int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
                 __func__, i, ret);
@@ -611,7 +611,7 @@ static void ProcessNodeData(
 static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
-        SoftbusListenerNode *node = RequestListenerNode(i);
+        SoftbusListenerNode *node = RequestListenerNode((ListenerModule)i);
         if (node == NULL) {
             continue;
         }
@@ -816,7 +816,7 @@ uint32_t RequireListenerModule(void)
             continue;
         }
 
-        int32_t ret = CreateSpecifiedListenerModule(i);
+        int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:create listener failed! ret=%" PRId32, __func__, ret);
             break;

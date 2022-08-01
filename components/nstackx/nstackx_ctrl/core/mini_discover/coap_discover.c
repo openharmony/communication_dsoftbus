@@ -98,7 +98,7 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
 
 void GetBuildCoapParam(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp, CoapBuildParam *param)
 {
-    param->remoteIp = remoteIp;
+    param->remoteIp = (char *)remoteIp;
     param->uriPath = COAP_DEVICE_DISCOVER_URI;
     if (remoteUrl != NULL) {
         param->msgType = COAP_TYPE_CON;
@@ -117,7 +117,7 @@ static int32_t CreateUnicastCoapParam(const char *remoteUrl, const char *remoteI
     if ((remoteUrl == NULL) || (remoteIp == NULL)) {
         return NSTACKX_EFAILED;
     }
-    param->remoteIp = remoteIp;
+    param->remoteIp = (char *)remoteIp;
     param->uriPath = COAP_DEVICE_DISCOVER_URI;
     param->msgType = COAP_TYPE_CON;
     param->methodType = COAP_METHOD_POST;
@@ -131,6 +131,9 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
         return;
     }
     char *remoteUrl = NULL;
+    CoapBuildParam param;
+    (void)memset_s(&param, sizeof(CoapBuildParam), 0, sizeof(CoapBuildParam));
+    char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
     DeviceInfo *deviceInfo = (DeviceInfo *)malloc(sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
         DFINDER_LOGE(TAG, "malloc device info failed");
@@ -159,8 +162,6 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
         DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
         goto FAIL;
     }
-    char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    CoapBuildParam param = {0};
     (void)inet_ntop(AF_INET, &(deviceInfo->netChannelInfo.wifiApInfo.ip), wifiIpAddr, sizeof(wifiIpAddr));
     GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
     if (remoteUrl != NULL) {

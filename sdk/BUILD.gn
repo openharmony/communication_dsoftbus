@@ -75,12 +75,17 @@ target(build_type, "softbus_client") {
   defines = TRANS_SDK_DEFINES
 
   if (defined(ohos_lite)) {
-    configs -= [ "//build/lite/config:language_cpp" ]
-    cflags = [ "-fPIC" ]
-    cflags_cc = [
-      "-std=c++14",
-      "-fPIC",
-    ]
+    cflags_cc = [ "-stdc=c++14" ]
+    if (board_toolchain_type != "iccarm") {
+      configs -= [ "//build/lite/config:language_cpp" ]
+      cflags = [ "-fPIC" ]
+      cflags_cc += [ "-fPIC" ]
+    } else {
+      cflags = [
+        "--diag_suppress",
+        "Pa153",
+      ]
+    }
     ldflags = [ "-lstdc++" ]
   } else {
     cflags = [ "-fPIC" ]

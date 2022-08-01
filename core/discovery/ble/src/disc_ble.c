@@ -364,6 +364,47 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
     return false;
 }
 
+static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
+{
+    // convert ble bin mac to string mac before report
+    char bleMac[BT_MAC_LEN] = {0};
+    if (ConvertBtMacToStr(bleMac, BT_MAC_LEN,
+        (uint8_t *)foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "convertBleAddr convert ble mac to string failed");
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN);
+    if (memcpy_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "convertBleAddr memcpy_s failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
+{
+    int32_t range = -1;
+    if (power != SOFTBUS_ILLEGAL_BLE_POWER) {
+        SoftBusRangeParam param = {
+            .rssi = *(signed char *)(&rssi),
+            .power = power,
+            .addr = {0}
+        };
+        if (memcpy_s(param.addr, BT_ADDR_LEN, foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RangeDevice memcpy_s failed");
+            return SOFTBUS_ERR;
+        }
+        int ret = SoftBusBleRange(&param, &range);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RangeDevice range device failed, ret=%d", ret);
+            range = -1;
+            // range failed should report device continuely
+        }
+    }
+    foundInfo->range = range;
+    return SOFTBUS_OK;
+}
+
 static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, char rssi, DeviceInfo *foundInfo)
 {
     DeviceWrapper device = {
@@ -382,31 +423,20 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
-
-    int32_t range = -1;
-    if (device.power != SOFTBUS_ILLEGAL_BLE_POWER) {
-        SoftBusRangeParam param = {
-            .rssi = *(signed char *)(&rssi),
-            .power = device.power,
-            .addr = {0}
-        };
-        if (memcpy_s(param.addr, BT_ADDR_LEN, foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ProcessDisNonPacket memcpy_s failed");
-            (void)SoftBusMutexUnlock(&g_bleInfoLock);
-            return;
-        }
-        int ret = SoftBusBleRange(&param, &range);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ProcessDisNonPacket range device failed, ret=%d", ret);
-            range = -1;
-            // range failed should report device continuely
-        }
-    }
-    foundInfo->range = range;
-    
-    unsigned int tempCap = 0;
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
+
+    if (RangeDevice(foundInfo, rssi, device.power) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "range device failed");
+        return;
+    }
+
+    if (ConvertBleAddr(foundInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "convert ble address failed");
+        return;
+    }
+    
+    unsigned int tempCap = 0;
     if (ProcessHwHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
@@ -770,6 +800,7 @@ static int32_t StartAdvertiser(int32_t adv)
         return StopAdvertiser(adv);
     }
     BoardcastData boardcastData;
+    (void)memset_s(&boardcastData, sizeof(BoardcastData), 0, sizeof(BoardcastData));
     if (GetBroadcastData(&advertiser->deviceInfo, adv, &boardcastData) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GetBoardcastData failed");
         return SOFTBUS_ERR;
