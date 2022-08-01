@@ -18,6 +18,6 @@
 #include "softbus_hidumper.h"
 
 int SoftBusConnHiDumperInit(void);
-int SoftBusRegConnDumpCb(int varId, SoftBusVarDumpCb cb);
+int SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperConnDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_CONN_H */
