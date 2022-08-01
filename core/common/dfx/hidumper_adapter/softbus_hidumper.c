@@ -22,6 +22,8 @@
 #include "softbus_hidumper_disc.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_nstack.h"
+#include "softbus_hidumper_buscenter.h"
+#include "softbus_hidumper_trans.h"
 #include "softbus_hidumper.h"
 
 static LIST_HEAD(g_hidumperhander_list);
@@ -191,6 +193,11 @@ int SoftBusHiDumperModuleInit(void)
         return SOFTBUS_ERR;
     }
 
+    if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    initSoftBusTransDumpHandler();
     return SOFTBUS_OK;
 }
 
@@ -198,6 +205,7 @@ void SoftBusHiDumperModuleDeInit(void)
 {
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
+    SoftBusHiDumperBusCenterDeInit();
     SoftBusHiDumperReleaseHandler();
 }
 
