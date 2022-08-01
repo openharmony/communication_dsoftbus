@@ -27,10 +27,11 @@ common_utils_src = [
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
   "utils/softbus_utils.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_bus_center.c",
   "dfx/hisysevent_adapter/softbus_hisysevt_common.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
-  "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
   "dfx/hisysevent_adapter/softbus_hisysevt_connreporter.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
+  "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
 ]
 
 if (defined(ohos_lite)) {
@@ -130,7 +131,6 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
       "dfx/hidumper_adapter/softbus_hidumper_trans.c",
       "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
-      "dfx/hisysevent_adapter/softbus_hisysevt_bus_center.c",
     ]
     sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
