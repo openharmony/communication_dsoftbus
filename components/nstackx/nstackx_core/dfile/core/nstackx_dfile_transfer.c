@@ -27,6 +27,7 @@
 #include "nstackx_log.h"
 #include "nstackx_timer.h"
 #include "nstackx_util.h"
+#include "nstackx_dfile_dfx.h"
 #include "securec.h"
 
 #define TAG "nStackXDFile"
@@ -483,6 +484,7 @@ static void WaitForFileHeaderConfirm(DFileTrans *dFileTrans, DFileSendState *nex
         } else {
             *nextState = STATE_SEND_FILE_FAIL;
             dFileTrans->errorCode = DFILE_TRANS_INTERNAL_ERROR;
+            WaitFileHeaderTimeoutEvent(dFileTrans->errorCode);
         }
         return;
     }
