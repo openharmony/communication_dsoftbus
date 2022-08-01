@@ -913,11 +913,8 @@ static void StartScaner(void)
         return;
     }
     if (g_isScanning) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "scanner already start");
-        if (StopScaner() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "stop scanner failed");
-            return;
-        }
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "scanner already start, no need start again");
+        return;
     }
     SoftBusBleScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
