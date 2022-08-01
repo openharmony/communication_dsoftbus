@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUS_HISYSEVT_COMMON_H
-#define SOFTBUS_HISYSEVT_COMMON_H
+#ifndef SOFTBUS_HISYSEVT_DISCREPORTER_H
+#define SOFTBUS_HISYSEVT_DISCREPORTER_H
+
 #include "softbus_adapter_hisysevent.h"
 
 #ifdef __cplusplus
@@ -22,27 +23,22 @@ extern "C" {
 #endif
 #endif
 
+typedef enum {
+    SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE = 0,
+    SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
 
-int32_t InitSoftbusSysEvt();
+    SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT,
+} SoftBusDiscMedium;
 
 typedef enum {
-    SOFTBUS_STATISTIC_EVT_START = 0,
-    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT = SOFTBUS_STATISTIC_EVT_START,
-    SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST,
-    SOFTBUS_STATISTIC_EVT_FIRST_DISC_DURATION,
-    SOFTBUS_STATISTIC_EVT_DISC_SCAN_TIMES,
-    SOFTBUS_STATISTIC_EVT_DISC_FAULT,
-    SOFTBUS_STATISTIC_EVT_CONN_DURATION,
-    SOFTBUS_STATISTIC_EVT_CONN_SUCC_RATE,
+    SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT = 0,
+    SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT,
+}SoftBusDiscErrCode;
 
-    SOFTBUS_STATISTIC_EVT_BUTT,
-}StatisticEvtType;
-
-typedef int32_t(*StatisticEvtReportFunc)(void);
-
-StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type);
-
-int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func);
+int32_t SoftbusRecordDiscScanTimes(uint8_t medium);
+int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time);
+int32_t SoftbusRecordDiscFault(uint8_t medium, uint32_t errCode);
+int32_t InitDiscStatisticSysEvt(void);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -50,4 +46,4 @@ int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc 
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* SOFTBUS_HISYSEVT_COMMON_H */
+#endif /* SOFTBUS_HISYSEVT_DISCREPORTER_H */

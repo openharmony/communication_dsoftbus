@@ -18,6 +18,8 @@
 #include "softbus_adapter_hisysevent.h"
 #include "message_handler.h"
 #include "securec.h"
+#include "softbus_hisysevt_discreporter.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_hisysevt_common.h"
 
@@ -131,5 +133,12 @@ int32_t InitSoftbusSysEvt()
         return SOFTBUS_ERR;
     }
 
+    if (InitDiscStatisticSysEvt() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    if (InitConnStatisticSysEvt() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }
