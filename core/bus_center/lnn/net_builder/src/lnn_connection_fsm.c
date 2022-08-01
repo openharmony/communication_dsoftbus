@@ -30,7 +30,6 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
-#include "softbus_hisysevt_bus_center.h"
 #include "softbus_log.h"
 
 #define STATE_AUTH_INDEX 0
