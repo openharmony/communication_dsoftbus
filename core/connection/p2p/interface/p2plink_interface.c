@@ -146,7 +146,7 @@ static void LoopP2pLinkIsRoleConfict(P2pLoopMsg msgType, void *arg)
             sem_post(&loopInfo->wait);
             return;
         }
-        if ((requestInfo->expectedRole != ROLE_AUTO) && 
+        if ((requestInfo->expectedRole != ROLE_AUTO) &&
             (requestInfo->expectedRole != P2pLinkGetRole())) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "role is confict");
             loopInfo->result = ERROR_CONNECTED_WITH_MISMATCHED_ROLE;
