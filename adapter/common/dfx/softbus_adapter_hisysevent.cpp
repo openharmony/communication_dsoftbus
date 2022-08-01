@@ -82,6 +82,7 @@ static void ReportParamValue(SoftBusEvtParam& evtParam)
             break;
         default:
             break;
+    }
 }
 
 static void ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
