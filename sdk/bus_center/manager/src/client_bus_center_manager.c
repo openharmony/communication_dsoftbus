@@ -297,7 +297,7 @@ static int32_t ConvertPublishInfoToVoid(const PublishInfo *pubInfo, void **info,
     }
     *(bool *)buf = pubInfo->ranging;
     buf += sizeof(bool);
-    *infoLen = (void *)buf - *info;
+    *infoLen = buf - (char *)*info;
     return SOFTBUS_OK;
 }
 
@@ -330,7 +330,7 @@ static int32_t ConvertSubscribeInfoToVoid(const SubscribeInfo *subInfo, void **i
     buf += strlen(subInfo->capability) + 1;
     *(int32_t *)buf = subInfo->dataLen;
     buf += sizeof(int32_t);
-    *infoLen = (void *)buf - *info;
+    *infoLen = buf - (char *)*info;
     if (subInfo->dataLen > 0) {
         if (memcpy_s(buf, subInfo->dataLen, (char *)subInfo->capabilityData, subInfo->dataLen) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->capabilityData fail");
