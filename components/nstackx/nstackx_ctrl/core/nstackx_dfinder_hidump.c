@@ -6,6 +6,7 @@
  */
 
 #include "nstackx_dfinder_hidump.h"
+#include <inttypes.h>
 #include "nstackx_dfinder_log.h"
 #include "nstackx_util.h"
 #include "nstackx_getopt.h"
@@ -105,46 +106,54 @@ static int DumpStatisticsInfo(char *buf, uint32_t size)
     uint32_t index = 0;
     const uint64_t *stat = GetStatistics();
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, CRLF"DFinder statistics:"CRLF);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_INVALID_OPT_AND_PAYLOAD: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_INVALID_OPT_AND_PAYLOAD: %" PRIu64 CRLF,
         stat[STATS_INVALID_OPT_AND_PAYLOAD]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DECODE_FAILED: %llu"CRLF, stat[STATS_DECODE_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ENCODE_FAILED: %llu"CRLF, stat[STATS_ENCODE_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_HEADER_FAILED: %llu"CRLF, stat[STATS_CREATE_HEADER_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_BUILD_PKT_FAILED: %llu"CRLF, stat[STATS_BUILD_PKT_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SOCKET_ERROR: %llu"CRLF, stat[STATS_SOCKET_ERROR]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_EPOLL_ERROR: %llu"CRLF, stat[STATS_EPOLL_ERROR]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SERVER_FAILED: %llu"CRLF, stat[STATS_CREATE_SERVER_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_CLIENT_FAILED: %llu"CRLF, stat[STATS_CREATE_CLIENT_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_LOOPBACK_PKT: %llu"CRLF, stat[STATS_DROP_LOOPBACK_PKT]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_MSG_FAILED: %llu"CRLF, stat[STATS_SEND_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_REQUEST_FAILED: %llu"CRLF, stat[STATS_SEND_REQUEST_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_MSG_ID: %llu"CRLF, stat[STATS_DROP_MSG_ID]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_SERVICE_MSG_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DECODE_FAILED: %" PRIu64 CRLF, stat[STATS_DECODE_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ENCODE_FAILED: %" PRIu64 CRLF, stat[STATS_ENCODE_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_HEADER_FAILED: %" PRIu64 CRLF,
+        stat[STATS_CREATE_HEADER_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_BUILD_PKT_FAILED: %" PRIu64 CRLF, stat[STATS_BUILD_PKT_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SOCKET_ERROR: %" PRIu64 CRLF, stat[STATS_SOCKET_ERROR]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_EPOLL_ERROR: %" PRIu64 CRLF, stat[STATS_EPOLL_ERROR]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SERVER_FAILED: %" PRIu64 CRLF,
+        stat[STATS_CREATE_SERVER_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_CLIENT_FAILED: %" PRIu64 CRLF,
+        stat[STATS_CREATE_CLIENT_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_LOOPBACK_PKT: %" PRIu64 CRLF, stat[STATS_DROP_LOOPBACK_PKT]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_MSG_FAILED: %" PRIu64 CRLF, stat[STATS_SEND_MSG_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_REQUEST_FAILED: %" PRIu64 CRLF,
+	stat[STATS_SEND_REQUEST_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_MSG_ID: %" PRIu64 CRLF, stat[STATS_DROP_MSG_ID]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_SERVICE_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_HANDLE_SERVICE_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_INVALID_RESPONSE_MSG: %llu"CRLF, stat[STATS_INVALID_RESPONSE_MSG]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_POST_SD_REQUEST_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_INVALID_RESPONSE_MSG: %" PRIu64 CRLF,
+	stat[STATS_INVALID_RESPONSE_MSG]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_POST_SD_REQUEST_FAILED: %" PRIu64 CRLF,
         stat[STATS_POST_SD_REQUEST_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ABORT_SD: %llu"CRLF, stat[STATS_ABORT_SD]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_START_SD_FAILED: %llu"CRLF, stat[STATS_START_SD_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SERVICE_MSG_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ABORT_SD: %" PRIu64 CRLF, stat[STATS_ABORT_SD]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_START_SD_FAILED: %" PRIu64 CRLF, stat[STATS_START_SD_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SERVICE_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_CREATE_SERVICE_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_SD_RESPONSE_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_SD_RESPONSE_FAILED: %" PRIu64 CRLF,
         stat[STATS_SEND_SD_RESPONSE_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_BACKUP_DEVICE_DB_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_BACKUP_DEVICE_DB_FAILED: %" PRIu64 CRLF,
         stat[STATS_BACKUP_DEVICE_DB_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_UPDATE_DEVICE_DB_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_UPDATE_DEVICE_DB_FAILED: %" PRIu64 CRLF,
         stat[STATS_UPDATE_DEVICE_DB_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_CONTEX_FAILED: %llu"CRLF, stat[STATS_CREATE_CONTEX_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SESSION_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_CONTEX_FAILED: %" PRIu64 CRLF,
+	stat[STATS_CREATE_CONTEX_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SESSION_FAILED: %" PRIu64 CRLF,
         stat[STATS_CREATE_SESSION_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PREPARE_SD_MSG_FAILED: %llu"CRLF,
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PREPARE_SD_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_PREPARE_SD_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PARSE_SD_MSG_FAILED: %llu"CRLF, stat[STATS_PARSE_SD_MSG_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ALLOC_RECORD_FAILED: %llu"CRLF, stat[STATS_ALLOC_RECORD_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_FREE_RECORD_FAILED: %llu"CRLF, stat[STATS_FREE_RECORD_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_OVER_DEVICE_LIMIT: %llu"CRLF, stat[STATS_OVER_DEVICE_LIMIT]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PARSE_SD_MSG_FAILED: %" PRIu64 CRLF,
+	stat[STATS_PARSE_SD_MSG_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ALLOC_RECORD_FAILED: %" PRIu64 CRLF,
+	stat[STATS_ALLOC_RECORD_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_FREE_RECORD_FAILED: %" PRIu64 CRLF, stat[STATS_FREE_RECORD_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_OVER_DEVICE_LIMIT: %" PRIu64 CRLF, stat[STATS_OVER_DEVICE_LIMIT]);
     return NSTACKX_EOK;
 }
 
