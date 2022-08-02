@@ -208,7 +208,8 @@ static void ReportLnnDfx(LnnConnectionFsm *connFsm, int32_t retCode)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add rate success");
     }
     if (retCode != SOFTBUS_OK) {
-        SoftBusEvtReportMsg msg = {0};
+        SoftBusEvtReportMsg msg;
+        (void)memset_s(&msg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg));
         if (CreateBusCenterFaultEvt(&msg, retCode, &connInfo->addr) == SOFTBUS_OK && msg.paramArray != NULL) {
             (void)ReportBusCenterFaultEvt(&msg);
         }
