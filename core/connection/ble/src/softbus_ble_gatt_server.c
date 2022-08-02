@@ -15,6 +15,7 @@
 
 #include "softbus_ble_gatt_server.h"
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -35,6 +36,9 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_conn.h"
+
+#define BLE_GATT_SERVICE "bleGattService"
 
 typedef enum {
     BLE_GATT_SERVICE_INITIAL = 0,
@@ -70,6 +74,7 @@ static SoftBusHandler g_bleAsyncHandler = {
 static SoftBusGattsCallback g_bleGattsCallback = { 0 };
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusMutex g_serviceStateLock;
+static int BleGattServiceDump(int fd);
 static SoftBusGattService g_gattService = {
     .state = BLE_GATT_SERVICE_INITIAL,
     .svcId = -1,
@@ -673,5 +678,19 @@ int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
     SoftBusMutexAttr attr;
     attr.type = SOFTBUS_MUTEX_RECURSIVE;
     SoftBusMutexInit(&g_serviceStateLock, &attr);
+    SoftBusRegConnVarDump(BLE_GATT_SERVICE, &BleGattServiceDump);
     return ret;
+}
+
+static int BleGattServiceDump(int fd)
+{
+    dprintf(fd, "\n-----------------BLEGattService Info-------------------\n");
+    dprintf(fd, "GattService state               : %s\n", g_gattService.state);
+    dprintf(fd, "BleGattService svcId            : %d\n", g_gattService.svcId);
+    dprintf(fd, "BleGattService bleConnChardId   : %d\n", g_gattService.bleConnCharaId);
+    dprintf(fd, "BleGattService bleConnDesId     : %d\n", g_gattService.bleConnDesId);
+    dprintf(fd, "BleGattService bleNetCharaId    : %d\n", g_gattService.bleNetCharaId);
+    dprintf(fd, "BleGattService bleNetDesId      : %d\n", g_gattService.bleNetDesId);
+
+    return SOFTBUS_OK;
 }

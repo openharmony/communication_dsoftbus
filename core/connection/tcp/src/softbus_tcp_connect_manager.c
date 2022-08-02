@@ -15,6 +15,7 @@
 
 #include "softbus_tcp_connect_manager.h"
 
+#include <stdio.h>
 #include <arpa/inet.h>
 
 #include "securec.h"
@@ -31,9 +32,12 @@
 #include "softbus_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_conn.h"
 
 #define INVALID_DATA (-1)
 #define AUTH_P2P_KEEP_ALIVE_TIME 10
+
+#define TCP_CONNECT_INFO "tcpConnectInfo"
 
 static int32_t g_tcpMaxConnNum;
 static int32_t g_tcpTimeOut;
@@ -61,6 +65,7 @@ static void DelTcpConnInfo(uint32_t connectionId);
 static void DelAllConnInfo(ListenerModule moduleId);
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr);
 static int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd);
+static int TcpConnectInfoDump(int fd);
 
 int32_t TcpGetConnNum(void)
 {
@@ -658,5 +663,27 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
         }
         g_tcpConnInfoList->cnt = 0;
     }
+    SoftBusRegConnVarDump(TCP_CONNECT_INFO, &TcpConnectInfoDump);
     return &g_tcpInterface;
+}
+
+static int TcpConnectInfoDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------TcpConnect Info-------------------\n");
+    LIST_FOR_EACH(item, &g_tcpConnInfoList->list) {
+        TcpConnInfoNode *itemNode = LIST_ENTRY(item, TcpConnInfoNode, node);
+        dprintf(fd, "Tcp Connect connectionId          : %u\n", itemNode->connectionId);
+        dprintf(fd, "Connection Info isAvailable       : %d\n", itemNode->info.isAvailable);
+        dprintf(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
+        dprintf(fd, "Connection Info type              : %d\n", itemNode->info.type);
+        dprintf(fd, "SocketInfo                        :\n");
+        dprintf(fd, "SocketInfo addr                   : %s\n", itemNode->info.socketInfo.addr);
+        dprintf(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
+        dprintf(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
+        dprintf(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
+        dprintf(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);
+        dprintf(fd, "Connection Info requestId          : %d\n", itemNode->requestId);
+    }
+    return SOFTBUS_OK;
 }

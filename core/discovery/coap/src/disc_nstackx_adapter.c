@@ -15,6 +15,7 @@
 
 #include "disc_nstackx_adapter.h"
 
+#include <stdio.h>
 #include <string.h>
 #include "bus_center_manager.h"
 #include "nstackx.h"
@@ -24,6 +25,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_hidumper_disc.h"
 
 #define JSON_WLAN_IP "wifiIpAddr"
 #define JSON_HW_ACCOUNT "hwAccountHashVal"
@@ -38,9 +40,12 @@
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND 1000
 
+#define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
+
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static char *g_capabilityData = NULL;
+static int NstackxLocalDevInfoDump(int fd);
 
 static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
@@ -499,7 +504,7 @@ int32_t DiscNstackxInit(void)
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
-
+    SoftBusRegDiscVarDump(NSTACKX_LOCAL_DEV_INFO, &NstackxLocalDevInfoDump);
     return SOFTBUS_OK;
 }
 
@@ -507,4 +512,26 @@ void DiscNstackxDeinit(void)
 {
     NSTACKX_Deinit();
     DeinitLocalInfo();
+}
+
+static int NstackxLocalDevInfoDump(int fd)
+{
+    dprintf(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
+    dprintf(fd, "name                                : %s\n", g_localDeviceInfo->name);
+    dprintf(fd, "deviceId                            : %s\n", g_localDeviceInfo->deviceId);
+    dprintf(fd, "btMacAddr                           : %s\n", g_localDeviceInfo->btMacAddr);
+    dprintf(fd, "wifiMacAddr                         : %s\n", g_localDeviceInfo->wifiMacAddr);
+    dprintf(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
+    dprintf(fd, "localIfInfo networkIpAddr           : %s\n", g_localDeviceInfo->localIfInfo->networkIpAddr);
+    dprintf(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
+    dprintf(fd, "networkIpAddr                       : %s\n", g_localDeviceInfo->networkIpAddr);
+    dprintf(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
+    dprintf(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
+    dprintf(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
+    dprintf(fd, "version                             : %s\n", g_localDeviceInfo->version);
+    dprintf(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
+    dprintf(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
+    dprintf(fd, "capabilityData                          : %n", g_capabilityData);
+
+    return SOFTBUS_OK;
 }
