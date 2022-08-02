@@ -142,6 +142,7 @@ typedef struct {
     uint32_t freq;
     bool isSameAccount;
     bool isWakeRemote;
+    bool ranging;
 } BleOption;
 
 static ScanSetting g_scanTable[FREQ_BUTT] = {
@@ -961,6 +962,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isSameAccount = false;
         bleOption->isWakeRemote = false;
         bleOption->freq = (uint32_t)(option->publishOption->freq);
+        bleOption->ranging = option->publishOption->ranging;
     } else {
         bleOption->optionCapBitMap = option->subscribeOption->capabilityBitmap;
         bleOption->custDataLen = option->subscribeOption->dataLen;
@@ -968,6 +970,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isSameAccount = option->subscribeOption->isSameAccount;
         bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
         bleOption->freq = (uint32_t)(option->subscribeOption->freq);
+        bleOption->ranging = false;
     }
     bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(bleOption->optionCapBitMap[0]);
 }
@@ -993,7 +996,6 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         if (!CheckCapBitMapExist(CAPABILITY_NUM, info->capBitMap, pos)) {
             (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
             info->needUpdate = true;
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "RegisterCapability set update");
         }
         info->capCount[pos] += 1;
         info->isSameAccount[pos] = isSameAccount;
@@ -1014,6 +1016,12 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         }
         info->capDataLen[pos] = custDataLen;
     }
+
+    if (bleOption.ranging) {
+        info->rangingRefCnt += 1;
+        info->needUpdate = true;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -1027,14 +1035,17 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
     uint32_t *optionCapBitMap = NULL;
     bool isSameAccount = false;
     bool isWakeRemote = false;
+    bool ranging = false;
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
         optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
+        ranging = option->publishOption->ranging;
     } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
         optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
         isSameAccount = option->subscribeOption->isSameAccount;
         isWakeRemote = option->subscribeOption->isWakeRemote;
+        ranging = false;
     }
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos) ||
@@ -1048,12 +1059,16 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
             info->capabilityData[pos] = NULL;
             info->capDataLen[pos] = 0;
             info->needUpdate = true;
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UnregisterCapability set update");
         }
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
         info->freq[pos] = -1;
     }
+    if (ranging && info->rangingRefCnt > 0) {
+        info->rangingRefCnt -= 1;
+        info->needUpdate = true;
+    }
+    
     return SOFTBUS_OK;
 }
 
@@ -1062,37 +1077,42 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if (option == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t rangingCnt;
+
     DiscBleOption regOption;
     if (publishFlags == BLE_PUBLISH) {
         regOption.publishOption = (PublishOption *)option;
         regOption.subscribeOption = NULL;
-        rangingCnt = regOption.publishOption->ranging == true ? 1 : 0;
     } else {
         regOption.publishOption = NULL;
         regOption.subscribeOption = (SubscribeOption *)option;
-        rangingCnt = 0;
     }
     unsigned char index = publishFlags | activeFlags;
     if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
+    uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
+    int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
         if (RegisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RegisterCapability failed.");
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
-        g_bleInfoManager[index].rangingRefCnt += rangingCnt;
     } else {
         if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
-        g_bleInfoManager[index].rangingRefCnt -= rangingCnt;
     }
+    
+    uint32_t newCap = g_bleInfoManager[index].capBitMap[0];
+    int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble discovery request summary, action: (%d, %d, %d) cap: %d->%d, "
+        "ref ranging count: %d->%d", isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount,
+        newRangingRefCount);
+    
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
