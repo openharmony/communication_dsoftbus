@@ -298,7 +298,7 @@ static int32_t CoapSendRequest(uint8_t coapType, const char *url, char *data, si
 {
     int32_t ret = CoapSendRequestEx(coapType, url, data, dataLen, reqeustPara);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(SEND_REQUEST_FAILED);
+        IncStatistics(STATS_SEND_REQUEST_FAILED);
     }
     return ret;
 }
@@ -441,7 +441,7 @@ static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *se
     }
 
     if (HndPostServiceDiscoverEx(session, request, response) != NSTACKX_EOK) {
-        IncStatistics(HANDLE_DEVICE_DISCOVER_MSG_FAILED);
+        IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
     }
 }
 
@@ -464,7 +464,7 @@ static void DeleteOverTimeMsgIdRecord(MsgIdList *msgIdList, struct timespec *cur
         msgIdList->startIdx = (msgIdList->startIdx + 1) % COAP_MAX_MSGID_RESERVE_NUM;
         i = msgIdList->startIdx;
         if (cycleTimes > COAP_MAX_MSGID_RESERVE_NUM) {
-            IncStatistics(DROP_MSG_ID);
+            IncStatistics(STATS_DROP_MSG_ID);
             DFINDER_LOGE(TAG, "cycle too many times, error must occurred and init msgList");
             msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
             msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
@@ -523,7 +523,7 @@ static uint8_t RefreshMsgIdList(coap_mid_t msgId)
         }
         i = (i + 1) % COAP_MAX_MSGID_RESERVE_NUM;
         if (cycleTimes > COAP_MAX_MSGID_RESERVE_NUM) {
-            IncStatistics(DROP_MSG_ID);
+            IncStatistics(STATS_DROP_MSG_ID);
             DFINDER_LOGE(TAG, "cycle too many times, error must occurred and init msgList");
             g_msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
             g_msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
@@ -668,7 +668,7 @@ static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session
     const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
 {
     if (HndPostServiceMsgEx(resource, session, request, query, response) != NSTACKX_EOK) {
-        IncStatistics(HANDLE_SERVICE_MSG_FAILED);
+        IncStatistics(STATS_HANDLE_SERVICE_MSG_FAILED);
     }
 }
 
@@ -783,7 +783,7 @@ static int32_t CoapPostServiceDiscover(void)
 {
     int32_t ret = CoapPostServiceDiscoverEx();
     if (ret != NSTACKX_EOK) {
-        IncStatistics(POST_SD_REQUEST_FAILED);
+        IncStatistics(STATS_POST_SD_REQUEST_FAILED);
     }
     return ret;
 }
@@ -823,13 +823,13 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF
     if (g_discoverCount >= g_coapDiscoverTargetCount || !IsApConnected()) {
-        IncStatistics(ABORT_SD);
+        IncStatistics(STATS_ABORT_SD);
         CoapServiceDiscoverStop();
         return;
     }
 #else
     if (g_discoverCount >= g_coapDiscoverTargetCount || !IsWifiApConnected()) {
-        IncStatistics(ABORT_SD);
+        IncStatistics(STATS_ABORT_SD);
         /* Discover done, or wifi AP disconnected. */
         CoapServiceDiscoverStop();
         return;
@@ -853,7 +853,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
     return;
 
 L_ERR_DISCOVER:
-    IncStatistics(ABORT_SD);
+    IncStatistics(STATS_ABORT_SD);
     /* Abort service discover by not starting timer. */
     DFINDER_LOGE(TAG, "abort service discovery, have tried %u request", g_discoverCount);
     /* Reset g_discoverCount to allow new request from user. */
@@ -952,7 +952,7 @@ static uint8_t NetworkIsConnected()
 void CoapServiceDiscoverInner(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery inner");
         return;
     }
@@ -980,7 +980,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail when discovery inner");
         return;
     }
@@ -995,7 +995,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery inner AN");
         return;
     }
@@ -1017,7 +1017,7 @@ void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery configurable");
         return;
     }
@@ -1044,7 +1044,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
         /* First discover */
 #ifdef DFINDER_SAVE_DEVICE_LIST
         if (BackupDeviceDB() != NSTACKX_EOK) {
-            IncStatistics(START_SD_FAILED);
+            IncStatistics(STATS_START_SD_FAILED);
             DFINDER_LOGE(TAG, "backup device list fail when discovery configurable");
             return;
         }
@@ -1085,7 +1085,7 @@ static uint8_t *CreateServiceMsgFrame(const char *moduleName, const char *device
 
     frame = (uint8_t *)calloc(1U, bufferLen);
     if (frame == NULL) {
-        IncStatistics(CREATE_SERVICE_MSG_FAILED);
+        IncStatistics(STATS_CREATE_SERVICE_MSG_FAILED);
         return NULL;
     }
     if (memcpy_s(frame, bufferLen, &frameLen, sizeof(frameLen)) != EOK) {
@@ -1118,7 +1118,7 @@ static uint8_t *CreateServiceMsgFrame(const char *moduleName, const char *device
     *dataLen = bufferLen;
     return frame;
 L_ERR_SEND_MSG:
-    IncStatistics(CREATE_SERVICE_MSG_FAILED);
+    IncStatistics(STATS_CREATE_SERVICE_MSG_FAILED);
     free(frame);
     return NULL;
 }
@@ -1482,6 +1482,6 @@ static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettin
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
 {
     if (SendDiscoveryRspEx(responseSettings) != NSTACKX_EOK) {
-        IncStatistics(SEND_SD_RESPONSE_FAILED);
+        IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
     }
 }

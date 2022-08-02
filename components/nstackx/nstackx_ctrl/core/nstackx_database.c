@@ -171,7 +171,7 @@ void *DatabaseAllocRecord(void *dbptr)
 {
     void *record = DatabaseAllocRecordEx(dbptr);
     if (record == NULL) {
-        IncStatistics(ALLOC_RECORD_FAILED);
+        IncStatistics(STATS_ALLOC_RECORD_FAILED);
     }
     return record;
 }
@@ -205,7 +205,7 @@ static int32_t DatabaseFreeRecordEx(void *dbptr, const void *ptr)
 void DatabaseFreeRecord(void *dbptr, const void *ptr)
 {
     if (DatabaseFreeRecordEx(dbptr, ptr) != 0) {
-        IncStatistics(FREE_RECORD_FAILED);
+        IncStatistics(STATS_FREE_RECORD_FAILED);
     }
 }
 

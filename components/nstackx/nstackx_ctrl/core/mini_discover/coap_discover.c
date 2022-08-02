@@ -182,7 +182,7 @@ FAIL:
 static void HndPostServiceDiscover(const CoapPacket *pkt)
 {
     if (HndPostServiceDiscoverEx(pkt) != NSTACKX_EOK) {
-        IncStatistics(HANDLE_DEVICE_DISCOVER_MSG_FAILED);
+        IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
     }
 }
 
@@ -259,7 +259,7 @@ static int32_t CoapPostServiceDiscover(void)
 {
     int32_t ret = CoapPostServiceDiscoverEx();
     if (ret != NSTACKX_EOK) {
-        IncStatistics(POST_SD_REQUEST_FAILED);
+        IncStatistics(STATS_POST_SD_REQUEST_FAILED);
     }
     return ret;
 }
@@ -335,7 +335,7 @@ static void CoapServiceDiscoverFirstTime(void)
 void CoapServiceDiscoverInner(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for mini");
         return;
     }
@@ -363,7 +363,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail");
         return;
     }
@@ -377,7 +377,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         return;
     }
 
@@ -396,7 +396,7 @@ void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for configurable");
         return;
     }
@@ -424,7 +424,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
-        IncStatistics(START_SD_FAILED);
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail");
         return;
     }
@@ -520,7 +520,7 @@ static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettin
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
 {
     if (SendDiscoveryRspEx(responseSettings) != NSTACKX_EOK) {
-        IncStatistics(SEND_SD_RESPONSE_FAILED);
+        IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
     }
 }
 

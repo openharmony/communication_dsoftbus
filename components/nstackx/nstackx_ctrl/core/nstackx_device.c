@@ -782,7 +782,7 @@ int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
 {
     int32_t ret = UpdateDeviceDbEx(deviceInfo, forceUpdate);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(UPDATE_DEVICE_DB_FAILED);
+        IncStatistics(STATS_UPDATE_DEVICE_DB_FAILED);
     }
     return ret;
 }
@@ -2243,7 +2243,7 @@ int32_t BackupDeviceDB(void)
 {
     int32_t ret = BackupDeviceDBEx();
     if (ret != NSTACKX_EOK) {
-        IncStatistics(BACKUP_DEVICE_DB_FAILED);
+        IncStatistics(STATS_BACKUP_DEVICE_DB_FAILED);
     }
     return ret;
 }
