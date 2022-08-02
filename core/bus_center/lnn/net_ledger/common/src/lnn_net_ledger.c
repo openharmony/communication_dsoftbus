@@ -23,6 +23,8 @@
 #include "lnn_meta_node_ledger.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
 
 int32_t LnnInitNetLedger(void)
 {
@@ -160,12 +162,15 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
-    unsigned char udid[UDID_BUF_LEN] = {0};
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != 0) {
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Udid failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "Udid = %s\n", udid);
+
+    char *anonyOut = DataMasking((char *)udid, strlen(udid), ID_DELIMITER);
+    dprintf(fd, "Udid = %s\n", anonyOut);
+    SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
 
@@ -173,12 +178,15 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UUID;
-    unsigned char uuid[UUID_BUF_LEN] = {0};
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != 0) {
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)uuid, UUID_BUF_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Uuid failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "Uuid = %s\n", uuid);
+
+    char *anonyOut = DataMasking((char *)uuid, strlen(uuid), ID_DELIMITER);
+    dprintf(fd, "Uuid = %s\n", anonyOut);
+    SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
 
@@ -186,12 +194,15 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_BR_MAC;
-    unsigned char brMac[BT_MAC_LEN] = {0};
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != 0) {
+    char brMac[BT_MAC_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)brMac, BT_MAC_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo brMac failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "BrMac = %s\n", brMac);
+
+    char *anonyOut = DataMasking((char *)brMac, strlen(brMac), MAC_DELIMITER);
+    dprintf(fd, "BrMac = %s\n", anonyOut);
+    SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
 
@@ -199,12 +210,15 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_IP_ADDRESS;
-    unsigned char ipAddr[IP_STR_MAX_LEN] = {0};
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, ipAddr, IP_STR_MAX_LEN) != 0) {
+    char ipAddr[IP_STR_MAX_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo ipAddr failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "IpAddr = %s\n", ipAddr);
+
+    char *anonyOut = DataMasking((char *)ipAddr, strlen(ipAddr), IP_DELIMITER);
+    dprintf(fd, "IpAddr = %s\n", anonyOut);
+    SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
 
@@ -236,8 +250,14 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
 
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 {
+    if (fd <= 0 || nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param is null");
+        return;
+    }
     dprintf(fd, "DeviceName = %s\n", nodeInfo->deviceName);
-    dprintf(fd, "NetworkId = %s\n", nodeInfo->networkId);
+    char *anonyOut = DataMasking(nodeInfo->networkId, strlen(nodeInfo->networkId), ID_DELIMITER);
+    dprintf(fd, "NetworkId = %s\n", anonyOut);
+    SoftBusFree(anonyOut);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUdid failed!");
         return;
