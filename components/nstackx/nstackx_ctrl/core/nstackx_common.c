@@ -1386,7 +1386,7 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
     uint32_t i;
     for (i = 0; i < argc; i++) {
         if (argv[i] == NULL) {
-            DFINDER_LOGE(TAG, "argv[%d] is null", i);
+            DFINDER_LOGE(TAG, "argv[%u] is null", i);
             return NSTACKX_EFAILED;
         }
     }
