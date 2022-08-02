@@ -172,7 +172,7 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
 {
     int32_t ret = CoapParseOptionsAndPayloadEx(pkt, buf, buflen);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(INVALID_OPT_AND_PAYLOAD);
+        IncStatistics(STATS_INVALID_OPT_AND_PAYLOAD);
     }
     return ret;
 }
@@ -255,7 +255,7 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     int32_t ret = CoapSoftBusDecodeEx(pkt, buf, bufLen);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(DECODE_FAILED);
+        IncStatistics(STATS_DECODE_FAILED);
     }
     return ret;
 }
@@ -307,7 +307,7 @@ static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam
 {
     int32_t ret = CoapCreateHeaderEx(pkt, pktParam, buf);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(CREATE_HEADER_FAILED);
+        IncStatistics(STATS_CREATE_HEADER_FAILED);
     }
     return ret;
 }
@@ -588,7 +588,7 @@ static int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, 
 {
     int32_t ret = CoapSoftBusEncodeEx(pkt, param, payload, buf);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(ENCODE_FAILED);
+        IncStatistics(STATS_ENCODE_FAILED);
     }
     return ret;
 }
@@ -705,7 +705,7 @@ int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapRe
 {
     int32_t ret = BuildCoapPktEx(param, pktPayload, sndPktBuff, isAck);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(BUILD_PKT_FAILED);
+        IncStatistics(STATS_BUILD_PKT_FAILED);
     }
     return ret;
 }

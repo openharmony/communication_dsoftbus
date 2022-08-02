@@ -16,7 +16,7 @@
 #include "nstackx_statistics.h"
 #include <securec.h>
 
-static uint64_t g_statistics[STATISTICS_MAX];
+static uint64_t g_statistics[STATS_MAX];
 
 void InitStatistics(void)
 {
@@ -28,7 +28,7 @@ void IncStatistics(StatisticsType type)
     g_statistics[type]++;
 }
 
-const uint64_t *GetStatistics()
+const uint64_t *GetStatistics(void)
 {
     return &g_statistics[0];
 }

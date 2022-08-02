@@ -124,7 +124,7 @@ static void SmartGeniusCallback(void *arg)
     socklen = sizeof(struct sockaddr_nl);
     len = recvfrom(task->taskfd, innerBuf, BUFLEN, 0, (struct sockaddr *)&peer, &socklen);
     if (len <= 0) {
-        IncStatistics(SOCKET_ERROR);
+        IncStatistics(STATS_SOCKET_ERROR);
         DFINDER_LOGE(TAG, "recvfrom error %d", errno);
         return;
     }

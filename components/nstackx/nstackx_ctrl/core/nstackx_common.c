@@ -233,7 +233,7 @@ static void *NstackMainLoop(void *arg)
         ret = EpollLoop(g_epollfd, -1);
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
         if (ret == NSTACKX_EFAILED) {
-            IncStatistics(EPOLL_ERROR);
+            IncStatistics(STATS_EPOLL_ERROR);
             DFINDER_LOGE(TAG, "epoll loop failed");
 #ifndef DFINDER_USE_MINI_NSTACKX
             DeRegisterCoAPEpollTask();

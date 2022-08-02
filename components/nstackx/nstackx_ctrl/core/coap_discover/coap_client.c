@@ -152,7 +152,7 @@ coap_response_t CoapMessageHandler(coap_session_t *session,
     return COAP_RESPONSE_OK;
 
 FAIL:
-    IncStatistics(INVALID_RESPONSE_MSG);
+    IncStatistics(STATS_INVALID_RESPONSE_MSG);
     return COAP_RESPONSE_FAIL;
 }
 
@@ -225,7 +225,7 @@ coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needB
 {
     coap_context_t *context = CoapGetContextEx(node, port, needBind, ip);
     if (context == NULL) {
-        IncStatistics(CREATE_CONTEX_FAILED);
+        IncStatistics(STATS_CREATE_CONTEX_FAILED);
     }
     return context;
 }
@@ -328,7 +328,7 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
 {
     coap_session_t *session = CoapGetSessionEx(ctx, localAddr, localPort, coapServerParameter);
     if (session == NULL) {
-        IncStatistics(CREATE_SESSION_FAILED);
+        IncStatistics(STATS_CREATE_SESSION_FAILED);
     }
     return session;
 }

@@ -488,7 +488,7 @@ char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx)
 {
     char *str = PrepareServiceDiscoverWithIdxEx(isBroadcast, idx);
     if (str == NULL) {
-        IncStatistics(PREPARE_SD_MSG_FAILED);
+        IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
     }
     return str;
 }
@@ -497,7 +497,7 @@ char *PrepareServiceDiscover(uint8_t isBroadcast)
 {
     char *str = PrepareServiceDiscoverEx(isBroadcast);
     if (str == NULL) {
-        IncStatistics(PREPARE_SD_MSG_FAILED);
+        IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
     }
     return str;
 }
@@ -558,7 +558,7 @@ int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **
 {
     int32_t ret = ParseServiceDiscoverEx(buf, deviceInfo, remoteUrlPtr);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(PARSE_SD_MSG_FAILED);
+        IncStatistics(STATS_PARSE_SD_MSG_FAILED);
     }
     return ret;
 }

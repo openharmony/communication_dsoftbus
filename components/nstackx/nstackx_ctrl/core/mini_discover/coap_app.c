@@ -88,14 +88,14 @@ static void HandleReadEvent(int32_t fd)
     socklen_t len = sizeof(struct sockaddr_in);
     ssize_t nRead = recvfrom(fd, recvBuffer, COAP_MAX_PDU_SIZE, 0, (struct sockaddr *)&remoteAddr, &len);
     if ((nRead == 0) || (nRead < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)) {
-        IncStatistics(SOCKET_ERROR);
+        IncStatistics(STATS_SOCKET_ERROR);
         free(recvBuffer);
         DFINDER_LOGE(TAG, "receive from remote packet failed");
         return;
     }
 
     if (IsLoopBackPacket(&remoteAddr)) {
-        IncStatistics(DROP_LOOPBACK_PKT);
+        IncStatistics(STATS_DROP_LOOPBACK_PKT);
         free(recvBuffer);
         return;
     }
@@ -155,7 +155,7 @@ static int32_t CoapCreateUdpClient(const struct sockaddr_in *sockAddr, uint8_t i
 {
     int32_t ret = CoapCreateUdpClientEx(sockAddr, isBroadCast);
     if (ret == NSTACKX_EFAILED) {
-        IncStatistics(CREATE_CLIENT_FAILED);
+        IncStatistics(STATS_CREATE_CLIENT_FAILED);
     }
     return ret;
 }
@@ -169,7 +169,7 @@ static int32_t CoapSocketSend(const SocketInfo *socket, const uint8_t *buffer, s
     socklen_t dstAddrLen = sizeof(struct sockaddr_in);
     int32_t ret = sendto(socket->cliendFd, buffer, length, 0, (struct sockaddr *)&socket->dstAddr, dstAddrLen);
     if (ret != length) {
-        IncStatistics(SOCKET_ERROR);
+        IncStatistics(STATS_SOCKET_ERROR);
         DFINDER_LOGE(TAG, "sendto failed, ret = %d, errno = %d", ret, errno);
     }
     return ret;
@@ -254,7 +254,7 @@ int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool i
 {
     int32_t ret = CoapSendMessageEx(param, isBroadcast, isAckMsg);
     if (ret != DISCOVERY_ERR_SUCCESS) {
-        IncStatistics(SEND_MSG_FAILED);
+        IncStatistics(STATS_SEND_MSG_FAILED);
     }
     return ret;
 }
@@ -299,7 +299,7 @@ static void CoAPEpollErrorHandle(void *data)
     if (task->taskfd < 0) {
         return;
     }
-    IncStatistics(SOCKET_ERROR);
+    IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     g_ctxSocketErrFlag = NSTACKX_TRUE;
     DFINDER_LOGE(TAG, "coap socket error occurred and close it");
@@ -415,7 +415,7 @@ int32_t CoapServerInit(const struct in_addr *ip)
 {
     int32_t ret = CoapServerInitEx(ip);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(CREATE_SERVER_FAILED);
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
     }
     return ret;
 }

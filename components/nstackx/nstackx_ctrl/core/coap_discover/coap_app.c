@@ -153,7 +153,7 @@ static void CoAPEpollErrorHandle(void *data)
     if (socket == NULL) {
         return;
     }
-    IncStatistics(SOCKET_ERROR);
+    IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     EpollTask *currEpollTask = NULL;
 
@@ -187,7 +187,7 @@ static void CoAPEpollErrorHandle(void *data)
         return;
     }
     coap_socket_t *socket = task->ptr;
-    IncStatistics(SOCKET_ERROR);
+    IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     if (socket == NULL) {
         return;
@@ -443,7 +443,7 @@ int32_t CoapSelectWait(TaskListInfo *taskListInfo)
     if (ret < 0) {
         int lastError = WSAGetLastError();
         if (lastError != WSAEINVAL) {
-            IncStatistics(SOCKET_ERROR);
+            IncStatistics(STATS_SOCKET_ERROR);
             DFINDER_LOGE(TAG, "select error ret lastError: %d", lastError);
             return NSTACKX_EFAILED;
         }
@@ -498,7 +498,7 @@ static void *CoapIoMonitorLoop(void *arg)
             break;
         }
         if (CoapSelectWait(&taskListInfo) == NSTACKX_EFAILED) {
-            IncStatistics(SOCKET_ERROR);
+            IncStatistics(STATS_SOCKET_ERROR);
             DFINDER_LOGE(TAG, "Coap select failure");
             break;
         }
@@ -579,7 +579,7 @@ int32_t CoapServerInitWithIdx(const struct in_addr *ip, uint32_t idx, const char
 {
     int32_t ret = CoapServerInitWithIdxEx(ip, idx, networkName);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(CREATE_SERVER_FAILED);
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
     }
     return ret;
 }
@@ -618,7 +618,7 @@ int32_t CoapServerInit(const struct in_addr *ip)
 {
     int32_t ret = CoapServerInitEx(ip);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(CREATE_SERVER_FAILED);
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
     }
     return ret;
 }
@@ -662,7 +662,7 @@ int32_t CoapP2pServerInit(const struct in_addr *ip)
 {
     int32_t ret = CoapP2pServerInitEx(ip);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(CREATE_SERVER_FAILED);
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
     }
     return ret;
 }
@@ -706,7 +706,7 @@ int32_t CoapUsbServerInit(const struct in_addr *ip)
 {
     int32_t ret = CoapUsbServerInitEx(ip);
     if (ret != NSTACKX_EOK) {
-        IncStatistics(CREATE_SERVER_FAILED);
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
     }
     return ret;
 }
