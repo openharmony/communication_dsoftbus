@@ -35,6 +35,7 @@
 #include "nstackx_timer.h"
 #include "nstackx_util.h"
 #include "json_payload.h"
+#include "nstackx_statistics.h"
 
 #ifdef DFINDER_USE_MINI_NSTACKX
 #include "cmsis_os2.h"
@@ -87,6 +88,7 @@ void NotifyDFinderMsgRecver(DFinderMsgType msgType)
     }
 }
 
+/* check if we need to reply a unicast based on businessType. */
 int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
 {
     switch (businessType) {
@@ -231,6 +233,7 @@ static void *NstackMainLoop(void *arg)
         ret = EpollLoop(g_epollfd, -1);
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
         if (ret == NSTACKX_EFAILED) {
+            IncStatistics(EPOLL_ERROR);
             DFINDER_LOGE(TAG, "epoll loop failed");
 #ifndef DFINDER_USE_MINI_NSTACKX
             DeRegisterCoAPEpollTask();
@@ -389,7 +392,7 @@ int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 #ifndef DFINDER_USE_MINI_NSTACKX
     CoapInitSubscribeModuleInner(); /* initialize subscribe module number */
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
-
+    InitStatistics();
     g_nstackInitState = NSTACKX_INIT_STATE_DONE;
     DFINDER_LOGI(TAG, "DFinder init successfully");
     return NSTACKX_EOK;

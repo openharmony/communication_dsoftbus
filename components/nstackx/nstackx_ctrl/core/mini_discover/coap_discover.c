@@ -27,6 +27,7 @@
 #include "nstackx_dfinder_log.h"
 #include "nstackx_timer.h"
 #include "securec.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
 
@@ -125,10 +126,11 @@ static int32_t CreateUnicastCoapParam(const char *remoteUrl, const char *remoteI
     return NSTACKX_EOK;
 }
 
-void HndPostServiceDiscover(const CoapPacket *pkt)
+static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
 {
+    int32_t ret = NSTACKX_EFAILED;
     if (pkt == NULL) {
-        return;
+        return ret;
     }
     char *remoteUrl = NULL;
     CoapBuildParam param;
@@ -137,7 +139,7 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
     DeviceInfo *deviceInfo = (DeviceInfo *)malloc(sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
         DFINDER_LOGE(TAG, "malloc device info failed");
-        return;
+        return ret;
     }
     (void)memset_s(deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     if (HndPostServiceDiscoverInner(pkt->payload.buffer, pkt->payload.len, &remoteUrl, deviceInfo) != NSTACKX_EOK) {
@@ -154,7 +156,6 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
         goto FAIL;
     }
-
     if (g_forceUpdate) {
         g_forceUpdate = NSTACKX_FALSE;
     }
@@ -165,16 +166,24 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
     (void)inet_ntop(AF_INET, &(deviceInfo->netChannelInfo.wifiApInfo.ip), wifiIpAddr, sizeof(wifiIpAddr));
     GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
     if (remoteUrl != NULL) {
-        /* check if we need to reply a unicast based on businessType. */
         if (CheckBusinessTypeReplyUnicast(deviceInfo->businessType) == NSTACKX_EOK) {
             (void)CoapSendMessage(&param, NSTACKX_FALSE, false);
         }
     } else {
         (void)CoapSendMessage(&param, NSTACKX_FALSE, true);
     }
+    ret = NSTACKX_EOK;
 FAIL:
     free(remoteUrl);
     free(deviceInfo);
+    return ret;
+}
+
+static void HndPostServiceDiscover(const CoapPacket *pkt)
+{
+    if (HndPostServiceDiscoverEx(pkt) != NSTACKX_EOK) {
+        IncStatistics(HANDLE_DEVICE_DISCOVER_MSG_FAILED);
+    }
 }
 
 static uint32_t GetDiscoverInterval(uint32_t discoverCount)
@@ -204,7 +213,7 @@ static void CoapServiceDiscoverStop(void)
     g_userRequest = NSTACKX_FALSE;
 }
 
-static int32_t CoapPostServiceDiscover(void)
+static int32_t CoapPostServiceDiscoverEx(void)
 {
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     char ifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
@@ -244,6 +253,15 @@ static int32_t CoapPostServiceDiscover(void)
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
+}
+
+static int32_t CoapPostServiceDiscover(void)
+{
+    int32_t ret = CoapPostServiceDiscoverEx();
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(POST_SD_REQUEST_FAILED);
+    }
+    return ret;
 }
 
 static void CoapServiceDiscoverTimerHandle(void *argument)
@@ -317,6 +335,7 @@ static void CoapServiceDiscoverFirstTime(void)
 void CoapServiceDiscoverInner(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
+        IncStatistics(START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for mini");
         return;
     }
@@ -344,6 +363,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
+        IncStatistics(START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail");
         return;
     }
@@ -357,6 +377,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
+        IncStatistics(START_SD_FAILED);
         return;
     }
 
@@ -375,6 +396,7 @@ void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 {
     if (!IsWifiApConnected()) {
+        IncStatistics(START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for configurable");
         return;
     }
@@ -402,6 +424,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
+        IncStatistics(START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail");
         return;
     }
@@ -463,35 +486,42 @@ void SetCoapDiscoverType(CoapBroadcastType type)
     g_coapDiscoverType = (uint32_t)type;
 }
 
-void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
+static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettings)
 {
     if (responseSettings == NULL) {
-        return;
+        return NSTACKX_EFAILED;
     }
 
     if (responseSettings->businessData == NULL) {
         DFINDER_LOGE(TAG, "businessData is null");
-        return;
+        return NSTACKX_EFAILED;
     }
 
     if (SetLocalDeviceBusinessDataUnicast(responseSettings->businessData,
                                           responseSettings->length) != NSTACKX_EOK) {
-        return;
+        return NSTACKX_EFAILED;
     }
     char remoteUrl[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
     char host[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (strncpy_s(host, sizeof(host), responseSettings->remoteIp,
         strlen(responseSettings->remoteIp)) != EOK) {
         DFINDER_LOGE(TAG, "discoveryRsp remoteIp copy error");
-        return;
+        return NSTACKX_EFAILED;
     }
     if (sprintf_s(remoteUrl, sizeof(remoteUrl), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
         DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
-        return;
+        return NSTACKX_EFAILED;
     }
     CoapBuildParam param = {0};
     CreateUnicastCoapParam(remoteUrl, host, &param);
-    (void)CoapSendMessage(&param, NSTACKX_FALSE, false);
+    return CoapSendMessage(&param, NSTACKX_FALSE, false);
+}
+
+void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
+{
+    if (SendDiscoveryRspEx(responseSettings) != NSTACKX_EOK) {
+        IncStatistics(SEND_SD_RESPONSE_FAILED);
+    }
 }
 
 void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration)

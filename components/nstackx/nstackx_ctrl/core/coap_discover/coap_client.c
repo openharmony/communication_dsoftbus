@@ -33,6 +33,7 @@
 #include "nstackx_error.h"
 #include "nstackx_dfinder_log.h"
 #include "nstackx_util.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
 
@@ -121,7 +122,7 @@ coap_response_t CoapMessageHandler(coap_session_t *session,
 {
     if (received == NULL) {
         DFINDER_LOGE(TAG, "received error");
-        return COAP_RESPONSE_FAIL;
+        goto FAIL;
     }
     (void)session;
     (void)sent;
@@ -133,22 +134,26 @@ coap_response_t CoapMessageHandler(coap_session_t *session,
     (void)memset_s(&optIter, sizeof(optIter), 0, sizeof(optIter));
     if (coap_pdu_get_type(received) == COAP_MESSAGE_RST) {
         DFINDER_LOGD(TAG, "got RST");
-        return COAP_RESPONSE_FAIL;
+        goto FAIL;
     }
 
     if (coap_check_option(received, COAP_OPTION_OBSERVE, &optIter)) {
         DFINDER_LOGE(TAG, "observe not support.");
-        return COAP_RESPONSE_FAIL;
+        goto FAIL;
     }
     blockOpt2 = coap_check_option(received, COAP_OPTION_BLOCK2, &optIter);
     blockOpt1 = coap_check_option(received, COAP_OPTION_BLOCK1, &optIter);
     if ((blockOpt1 != NULL) || (blockOpt2 != NULL)) {
         DFINDER_LOGE(TAG, "block not support.");
-        return COAP_RESPONSE_FAIL;
+        goto FAIL;
     }
     coap_pdu_code_t rcv_code = coap_pdu_get_code(received);
     DFINDER_LOGD(TAG, "%d.%02d", COAP_RESPONSE_CLASS(rcv_code), rcv_code & 0x1F);
     return COAP_RESPONSE_OK;
+
+FAIL:
+    IncStatistics(INVALID_RESPONSE_MSG);
+    return COAP_RESPONSE_FAIL;
 }
 
 static void InitAddrinfo(struct addrinfo *hints)
@@ -162,7 +167,8 @@ static void InitAddrinfo(struct addrinfo *hints)
     hints->ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 }
 
-coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needBind, const struct in_addr *ip)
+static coap_context_t *CoapGetContextEx(const char *node, const char *port,
+    uint8_t needBind, const struct in_addr *ip)
 {
     struct addrinfo hints;
     struct addrinfo *result = NULL;
@@ -215,6 +221,15 @@ coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needB
     return ctx;
 }
 
+coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needBind, const struct in_addr *ip)
+{
+    coap_context_t *context = CoapGetContextEx(node, port, needBind, ip);
+    if (context == NULL) {
+        IncStatistics(CREATE_CONTEX_FAILED);
+    }
+    return context;
+}
+
 static coap_session_t *CoapGetSessionInner(struct addrinfo *result, coap_context_t *ctx,
     const CoapServerParameter *coapServerParameter)
 {
@@ -256,7 +271,7 @@ static void CoapSetAckTimeOut(coap_session_t *session)
     coap_session_set_ack_random_factor(session, COAP_ACK_RANDOM_FACTOR);
 }
 
-coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const char *localPort,
+static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAddr, const char *localPort,
     const CoapServerParameter *coapServerParameter)
 {
     coap_session_t *session = NULL;
@@ -305,6 +320,16 @@ coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const
         session = coap_new_client_session(ctx, NULL, dst, proto);
     }
     CoapSetAckTimeOut(session);
+    return session;
+}
+
+coap_session_t *CoapGetSession(coap_context_t *ctx, const char *localAddr, const char *localPort,
+    const CoapServerParameter *coapServerParameter)
+{
+    coap_session_t *session = CoapGetSessionEx(ctx, localAddr, localPort, coapServerParameter);
+    if (session == NULL) {
+        IncStatistics(CREATE_SESSION_FAILED);
+    }
     return session;
 }
 

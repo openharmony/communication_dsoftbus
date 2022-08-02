@@ -41,6 +41,7 @@
 #include "coap_app.h"
 #include "coap_discover.h"
 #include "json_payload.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXDFinder"
 
@@ -757,7 +758,7 @@ static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t i
     return NSTACKX_EOK;
 }
 
-int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
+static int32_t UpdateDeviceDbEx(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
 {
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
@@ -775,6 +776,15 @@ int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
         }
     }
     return NSTACKX_EOK;
+}
+
+int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
+{
+    int32_t ret = UpdateDeviceDbEx(deviceInfo, forceUpdate);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(UPDATE_DEVICE_DB_FAILED);
+    }
+    return ret;
 }
 #else
 int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
@@ -2195,7 +2205,7 @@ L_ERR_DEVICE_DB_BACKUP_LIST:
 }
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-int32_t BackupDeviceDB(void)
+static int32_t BackupDeviceDBEx(void)
 {
     void *db = g_deviceList;
     void *backupDB = g_deviceListBackup;
@@ -2227,6 +2237,15 @@ int32_t BackupDeviceDB(void)
         }
     }
     return NSTACKX_EOK;
+}
+
+int32_t BackupDeviceDB(void)
+{
+    int32_t ret = BackupDeviceDBEx();
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(BACKUP_DEVICE_DB_FAILED);
+    }
+    return ret;
 }
 
 void *GetDeviceDB(void)
