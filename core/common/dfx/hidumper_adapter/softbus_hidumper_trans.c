@@ -16,10 +16,14 @@
 #include <string.h>
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_trans.h"
 
 #define MAX_HELP_INFO_LEN (100)
+#define MAX_ID_LEN (10)
+#define DEC (10)
 #define MODULE_NAME_TRAN "trans"
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
@@ -80,21 +84,40 @@ void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
+    char uidArr[MAX_ID_LEN];
+    char pidArr[MAX_ID_LEN];
+    (void)sprintf_s(uidArr, sizeof(uidArr), "%d", uid);
+    (void)sprintf_s(pidArr, sizeof(pidArr), "%d", pid);
+
+    char *uidStr = DataMasking(uidArr, sizeof(uidArr), ID_DELIMITER);
+    char *pidStr = DataMasking(pidArr, sizeof(pidArr), ID_DELIMITER);
+
     dprintf(fd, "PkgName               : %s\n", pkgName);
     dprintf(fd, "SessionName           : %s\n", sessionName);
-    dprintf(fd, "PID                   : %d\n", uid);
-    dprintf(fd, "UID                   : %d\n", pid);
+    dprintf(fd, "PID                   : %s\n", uidStr);
+    dprintf(fd, "UID                   : %s\n", pidStr);
+
+    SoftBusFree(uidStr);
+    SoftBusFree(pidStr);
 }
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
+    char *deviceId = DataMasking(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), ID_DELIMITER);
+    char *srcAddr = DataMasking(appInfo->myData.addr, sizeof(appInfo->myData.addr), IP_DELIMITER);
+    char *dstAddr = DataMasking(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), IP_DELIMITER);
+
     dprintf(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
     dprintf(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
-    dprintf(fd, "PeerDeviceId          : %s\n", appInfo->peerData.deviceId);
+    dprintf(fd, "PeerDeviceId          : %s\n", deviceId);
     dprintf(fd, "LinkType              : %s\n", g_linkTypeList[type]);
-    dprintf(fd, "SourceAddress         : %s\n", appInfo->myData.addr);
-    dprintf(fd, "DestAddress           : %s\n", appInfo->peerData.addr);
+    dprintf(fd, "SourceAddress         : %s\n", srcAddr);
+    dprintf(fd, "DestAddress           : %s\n", dstAddr);
     dprintf(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
+
+    SoftBusFree(deviceId);
+    SoftBusFree(srcAddr);
+    SoftBusFree(dstAddr);
 }
 
 static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
@@ -120,7 +143,7 @@ int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-void initSoftBusTransDumpHandler(void)
+void SoftBusTransDumpHandlerInit(void)
 {
     InitTranHelpInfo();
     SoftBusRegHiDumperHandler(MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
