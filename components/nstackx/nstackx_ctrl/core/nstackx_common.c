@@ -36,6 +36,8 @@
 #include "nstackx_util.h"
 #include "json_payload.h"
 #include "nstackx_statistics.h"
+#include "nstackx_dfinder_hidump.h"
+#include "nstackx_dfinder_hievent.h"
 
 #ifdef DFINDER_USE_MINI_NSTACKX
 #include "cmsis_os2.h"
@@ -80,6 +82,16 @@ static EventProcessRatePara g_processRatePara;
 static uint32_t g_continuousBusyIntervals;
 
 static int32_t CheckDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySettings);
+
+List *GetEventNodeChain(void)
+{
+    return &g_eventNodeChain;
+}
+
+EpollDesc GetEpollFD(void)
+{
+    return g_epollfd;
+}
 
 void NotifyDFinderMsgRecver(DFinderMsgType msgType)
 {
@@ -514,6 +526,7 @@ static void DeviceDiscoverStopInner(void *argument)
 {
     (void)argument;
     CoapServiceDiscoverStopInner();
+    NotifyStatisticsEvent();
 }
 
 int32_t NSTACKX_StartDeviceFind(void)
@@ -1345,3 +1358,64 @@ int32_t NSTACKX_DFinderRegisterLog(DFinderLogCallback userLogCallback)
     return ret;
 }
 #endif
+
+#ifdef NSTACKX_DFINDER_HIDUMP
+#define MAX_DUMP_ARGC 10
+int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump)
+{
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    if (dump == NULL) {
+        DFINDER_LOGE(TAG, "dump is null");
+        return NSTACKX_EFAILED;
+    }
+    
+    if (argc == 0 || argc > MAX_DUMP_ARGC) {
+        DFINDER_LOGE(TAG, "argc is invalid %u", argc);
+        return NSTACKX_EFAILED;
+    }
+    
+    if (argv == NULL) {
+        DFINDER_LOGE(TAG, "argv is null");
+        return NSTACKX_EFAILED;
+    }
+    
+    uint32_t i;
+    for (i = 0; i < argc; i++) {
+        if (argv[i] == NULL) {
+            DFINDER_LOGE(TAG, "argv[%d] is null", i);
+            return NSTACKX_EFAILED;
+        }
+    }
+
+    return DFinderDump(argv, argc, softObj, dump);
+}
+#else
+int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump)
+{
+    (void)argv;
+    (void)argc;
+    (void)softObj;
+    (void)dump;
+    DFINDER_LOGE(TAG, "Unsupport dfinder dump");
+    return NSTACKX_EFAILED;
+}
+#endif
+
+int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
+{
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    if (func == NULL) {
+        DFINDER_LOGE(TAG, "func is null");
+        return NSTACKX_EFAILED;
+    }
+
+    return SetEventFunc(softobj, func);
+}

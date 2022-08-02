@@ -43,6 +43,8 @@ List *GetMainLoopEvendChain(void);
 uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount);
 int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType);
 int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
+List *GetEventNodeChain(void);
+EpollDesc GetEpollFD(void);
 
 #ifdef __cplusplus
 };
