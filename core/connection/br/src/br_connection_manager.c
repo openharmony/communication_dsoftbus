@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include <sys/prctl.h>
 
 #include "br_connection_manager.h"
@@ -36,11 +37,15 @@
 #include "string.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
+#include "softbus_hidumper_conn.h"
+
+#define BR_CONNECTION_INFO "brConnectionInfo"
 
 static pthread_mutex_t g_connectionLock = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static uint16_t g_nextConnectionId = 0;
+static int BrConnectionInfoDump(int fd);
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {
@@ -422,6 +427,7 @@ static int32_t InitConnectionInfo(ConnectionInfo *connectionInfo, const BrConnec
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitConnInfo scpy error");
         return SOFTBUS_BRCONNECTION_STRNCPY_ERROR;
     }
+    SoftBusRegConnVarDump(BR_CONNECTION_INFO, &BrConnectionInfoDump);
     return SOFTBUS_OK;
 }
 
@@ -598,4 +604,36 @@ bool BrCheckActiveConnection(const ConnectOption *option)
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection false");
     return false;
+}
+
+static int BrConnectionInfoDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------BRConnect Info-------------------\n");
+    LIST_FOR_EACH(item, &g_connection_list) {
+        BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
+        dprintf(fd, "connectionId                  : %d\n", itemNode->connectionId);
+        dprintf(fd, "socketFd                      : %d\n", itemNode->socketFd);
+        dprintf(fd, "sideType                      : %d\n", itemNode->sideType);
+        dprintf(fd, "Br Mac                        : %s\n", itemNode->mac);
+        dprintf(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
+        dprintf(fd, "br state                      : %d\n", itemNode->state);
+        dprintf(fd, "refCount                      : %s\n", itemNode->refCount);
+        dprintf(fd, "refCountRemote                : %d\n", itemNode->refCountRemote);
+        dprintf(fd, "infoObjRefCount               : %d\n", itemNode->infoObjRefCount);
+        dprintf(fd, "recvBuf                       : %s\n", itemNode->recvBuf);
+        dprintf(fd, "recvSize                      : %d\n", itemNode->recvSize);
+        dprintf(fd, "recvPos                       : %s\n", itemNode->recvPos);
+        dprintf(fd, "conGestState                  : %s\n", itemNode->conGestState);
+        dprintf(fd, "request Info: \n");
+        LIST_FOR_EACH(item, &(itemNode->requestList)) {
+            RequestInfo *requestNode = LIST_ENTRY(item, RequestInfo, node);
+            dprintf(fd, "requestId                 : %d\n", requestNode->requestId);
+        }
+        dprintf(fd, "seq                           : %d\n", itemNode->seq);
+        dprintf(fd, "waitSeq                       : %lu\n", itemNode->waitSeq);
+        dprintf(fd, "windows                       : %d\n", itemNode->windows);
+        dprintf(fd, "ackTimeoutCount               : %d\n", itemNode->ackTimeoutCount);
+    }
+    return SOFTBUS_OK;
 }

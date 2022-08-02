@@ -14,6 +14,7 @@
  */
 #include "softbus_ble_connection.h"
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -42,6 +43,7 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_conn.h"
 
 #define SEND_QUEUE_UNIT_NUM 128
 #define CONNECT_REF_INCRESE 1
@@ -55,6 +57,8 @@
 #define KEY_REF_NUM "KEY_REF_NUM"
 #define TYPE_HEADER_SIZE 4
 #define INVALID_CLIENID (-1)
+#define BLE_CONNECTION_INFO "BleConnectionInfo"
+
 typedef enum {
     BLE_CONNECTION_STATE_CONNECTING = 0,
     BLE_CONNECTION_STATE_CONNECTED,
@@ -86,6 +90,7 @@ static SoftBusMutex g_connectionLock;
 
 static void PackRequest(int32_t delta, uint32_t connectionId);
 static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType);
+static int BleConnectionDump(int fd);
 
 static uint32_t AllocBleConnectionIdLocked()
 {
@@ -1236,5 +1241,43 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
     }
     g_connectCallback = (ConnectCallback*)callback;
     InitBleInterface();
+    SoftBusRegConnVarDump(BLE_CONNECTION_INFO, &BleConnectionDump);
     return &g_bleInterface;
+}
+
+static int BleConnectionDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
+    LIST_FOR_EACH(item, &g_connection_list) {
+        BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
+        dprintf(fd, "halConnId                     : %d\n", itemNode->halConnId);
+        dprintf(fd, "connId                        : %d\n", itemNode->connId);
+        dprintf(fd, "btMac                         : %s\n", itemNode->btBinaryAddr.addr);
+        dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
+        dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
+        dprintf(fd, "Connection Info type          : %s\n", itemNode->info.type);
+        dprintf(fd, "BleInfo: \n");
+        dprintf(fd, "BleInfo addr                  : %s\n", itemNode->info.bleInfo.bleMac);
+        dprintf(fd, "BleInfo deviceIdHash          : %s\n", itemNode->info.bleInfo.deviceIdHash);
+        dprintf(fd, "Connection state              : %d\n", itemNode->state);
+        dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
+        dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
+        dprintf(fd, "Connection peerType           : %s\n", itemNode->peerType);
+        dprintf(fd, "Connection peerDevId          : %s\n", itemNode->peerDevId);
+        dprintf(fd, "request Info: \n");
+        LIST_FOR_EACH(item, &itemNode->requestList) {
+            BleRequestInfo *requestNode = LIST_ENTRY(item, BleRequestInfo, node);
+            dprintf(fd, "request isUsed                : %d\n", requestNode->requestId);
+        }
+        dprintf(fd, "Connection recvCache          : \n");
+        for (int i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
+            dprintf(fd, "recvCache isUsed              : %d\n", itemNode->recvCache[i].isUsed);
+            dprintf(fd, "recvCache timeStamp           : %d\n", itemNode->recvCache[i].timeStamp);
+            dprintf(fd, "recvCache seq                 : %d\n", itemNode->recvCache[i].seq);
+            dprintf(fd, "recvCache currentSize         : %d\n", itemNode->recvCache[i].currentSize);
+            dprintf(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
+        }
+    }
+    return SOFTBUS_OK;
 }
