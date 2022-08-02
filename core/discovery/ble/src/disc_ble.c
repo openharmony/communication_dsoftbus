@@ -16,6 +16,7 @@
 #include "disc_ble.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "common_list.h"
 #include "disc_ble_constant.h"
@@ -35,6 +36,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "softbus_adapter_range.h"
+#include "softbus_hidumper_disc.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -67,6 +69,10 @@
 #define BIT_HEART_BIT 0x20
 #define BIT_CON 0x80
 #define BIT_CON_POS 7
+
+#define BLE_INFO_MANAGER "bleInfoManager"
+#define BlE_ADVERTISER "bleAdvertiser"
+#define RECV_MESSAGE_INFO "recvMessageInfo"
 
 typedef enum {
     PUBLISH_ACTIVE_SERVICE,
@@ -178,6 +184,9 @@ static int32_t ReplyPassiveNonBroadcast(void);
 static void ClearRecvMessage(void);
 static int32_t StopScaner(void);
 static void AssembleNonOptionalTlv(DeviceInfo *info, BoardcastData *boardcastData);
+static int BleInfoDump(int fd);
+static int BleAdvertiserDump(int fd);
+static int RecvMessageInfoDump(int fd);
 
 /* This function is used to compatibled with mobile phone, will remove later */
 static int ConvertCapBitMap(int oldCap)
@@ -1645,6 +1654,9 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
         goto EXIT;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit success");
+    SoftBusRegDiscVarDump(BLE_INFO_MANAGER, &BleInfoDump);
+    SoftBusRegDiscVarDump(BlE_ADVERTISER, &BleAdvertiserDump);
+    SoftBusRegDiscVarDump(RECV_MESSAGE_INFO, &RecvMessageInfoDump);
     return &g_discBleFuncInterface;
 
 EXIT:
@@ -1703,4 +1715,66 @@ void DiscBleDeinit(void)
     RecvMessageDeinit();
     DiscBleInfoDeinit();
     AdvertiserDeinit();
+}
+
+static int BleInfoDump(int fd)
+{
+    dprintf(fd, "-----------------BleInfoManager Info-------------------\n");
+    for (int i = 0; i < BLE_INFO_COUNT; i++) {
+        dprintf(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
+        dprintf(fd, "BleInfo capBitMap                       : %u\n", g_bleInfoManager[i].capBitMap);
+        dprintf(fd, "BleInfo capCount                        : %d\n", g_bleInfoManager[i].capCount);
+        dprintf(fd, "BleInfo capabilityData                  : %s\n", g_bleInfoManager[i].capabilityData);
+        dprintf(fd, "BleInfo capDataLen                      : %u\n", g_bleInfoManager[i].capDataLen);
+        dprintf(fd, "BleInfo isSameAccount                   : %d\n", g_bleInfoManager[i].isSameAccount);
+        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", g_bleInfoManager[i].isWakeRemote);
+        dprintf(fd, "BleInfo freq                            : %d\n", g_bleInfoManager[i].freq);
+        dprintf(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
+    }
+    return SOFTBUS_OK;
+}
+
+static int BleAdvertiserDump(int fd)
+{
+    dprintf(fd, "\n-----------------BleAdvertiser Info-------------------\n");
+    for (int i = 0; i < NUM_ADVERTISER; i++) {
+        dprintf(fd, "BleAdvertiser advId                     : %d\n", g_bleAdvertiser[i].advId);
+        dprintf(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
+        dprintf(fd, "DeviceInfo                              : \n");
+        dprintf(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
+        dprintf(fd, "accountHash                             : %s\n", g_bleAdvertiser[i].deviceInfo.accountHash);
+        dprintf(fd, "devType                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devType);
+        dprintf(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
+        dprintf(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
+        dprintf(fd, "addr type                               : %s\n",
+                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
+        dprintf(fd, "addr ble bleMac                         : %s\n",
+                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac);
+        dprintf(fd, "addr ble udidHash                       : %s\n",
+                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash);
+        dprintf(fd, "addr peerUid                            : %s\n",
+                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid);
+        dprintf(fd, "capabilityBitmapNum                     : %u\n",
+                g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
+        dprintf(fd, "capabilityBitmap                        : %u\n", g_bleAdvertiser[i].deviceInfo.capabilityBitmap);
+        dprintf(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
+        dprintf(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
+    }
+    return SOFTBUS_OK;
+}
+
+static int RecvMessageInfoDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------RecvMessage Info-------------------\n");
+    dprintf(fd, "RecvMessageInfo numNeedBrMac           : %u\n", g_recvMessageInfo.numNeedBrMac);
+    dprintf(fd, "RecvMessageInfo numNeedResp            : %u\n", g_recvMessageInfo.numNeedResp);
+    LIST_FOR_EACH(item, &g_recvMessageInfo.node)
+    {
+        RecvMessage *recvNode = LIST_ENTRY(item, RecvMessage, node);
+        dprintf(fd, "RecvMessage capBitMap                  : %s\n", recvNode->capBitMap);
+        dprintf(fd, "RecvMessage key                        : %s\n", recvNode->key);
+        dprintf(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
+    }
+    return SOFTBUS_OK;
 }

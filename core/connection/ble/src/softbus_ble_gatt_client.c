@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdio.h>
 
 #include "cJSON.h"
 #include "common_list.h"
@@ -30,9 +31,12 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_conn.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512
+#define BLE_GATTC_INFO "BleGattcInfo"
+
 typedef enum {
     BLE_GATT_CLIENT_INITIAL = 0,
     BLE_GATT_CLIENT_STARTING,
@@ -75,6 +79,7 @@ static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
 static bool g_gattcIsInited = false;
 static bool UpdateBleGattcInfoStateInner(BleGattcInfo *infoNode, int32_t newState);
+static int BleGattcDump(int fd);
 
 static BleGattcInfo *CreateNewBleGattcInfo(SoftBusBtAddr *bleAddr)
 {
@@ -677,6 +682,21 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
     }
     RegistGattcCallback(cb);
     g_gattcIsInited = true;
+    SoftBusRegConnVarDump(BLE_GATTC_INFO, &BleGattcDump);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "init gattc success!");
+    return SOFTBUS_OK;
+}
+
+static int BleGattcDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
+    dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
+    LIST_FOR_EACH(item, &(g_gattcInfoList->list)) {
+        BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
+        dprintf(fd, "clientId                  : %d\n", itemNode->clientId);
+        dprintf(fd, "state                     : %d\n", itemNode->state);
+        dprintf(fd, "btMac                     : %s\n", itemNode->peerAddr.addr);
+    }
     return SOFTBUS_OK;
 }
