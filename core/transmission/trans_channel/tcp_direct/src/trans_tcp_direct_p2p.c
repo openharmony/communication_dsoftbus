@@ -370,11 +370,11 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     }
 
     ret = SendAuthData(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply);
+    cJSON_free(reply);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pRequest end");
-    cJSON_free(reply);
     return SOFTBUS_OK;
 }
 
