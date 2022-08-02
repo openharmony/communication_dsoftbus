@@ -15,6 +15,7 @@
 
 #include "p2plink_lnn_sync.h"
 
+#include <stdio.h>
 #include "securec.h"
 #include "string.h"
 
@@ -27,11 +28,14 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_hidumper_conn.h"
+
+#define LNN_MAC_INFO "lnnMacInfo"
 
 static int32_t g_lnnRole = 0;
 static char g_lnnMyP2pMac[P2P_MAC_LEN] = {0};
 static char g_lnnGoMac[P2P_MAC_LEN] = {0};
-
+static int P2pLnnDump(int fd);
 static int32_t P2pLinkLnnSyncSetGoMac()
 {
     if (LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, P2pLinkGetGoMac()) == SOFTBUS_OK) {
@@ -90,9 +94,17 @@ void P2pLinkLnnSync(void)
             }
         }
     }
-
+    SoftBusRegConnVarDump(LNN_MAC_INFO, &P2pLnnDump);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "lnn sync flag %d", change);
     if (change == 1) {
         LnnSyncP2pInfo();
     }
+}
+
+static int P2pLnnDump(int fd)
+{
+    dprintf(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
+    dprintf(fd, "lnnMyP2pMac               :%s\n", g_lnnMyP2pMac);
+    dprintf(fd, "lnnGoP2pMac               :%s\n", g_lnnGoMac);
+    return SOFTBUS_OK;
 }
