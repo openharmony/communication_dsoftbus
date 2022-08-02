@@ -38,6 +38,6 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo);
 
-void initSoftBusTransDumpHandler(void);
+void SoftBusTransDumpHandlerInit(void);
 
 #endif /* SOFTBUS_HIDUMPER_TRANS_H */

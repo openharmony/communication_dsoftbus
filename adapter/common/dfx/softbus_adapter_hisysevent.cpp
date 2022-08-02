@@ -36,6 +36,7 @@ static const char* g_paramTypeTable[SOFTBUS_EVT_PARAMTYPE_BUTT] = {
 
 static const char* g_evtTypeTable[SOFTBUS_EVT_TYPE_BUTT] = {
     "FAULT",
+    "FAULT",
     "STATISTIC",
     "SECURITY",
     "BEHAVIOR"
