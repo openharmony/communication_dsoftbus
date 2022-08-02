@@ -618,6 +618,74 @@ typedef struct {
     } info;
 } FtEventCbkInfo;
 
+#define FILLP_DFX_EVENT_NAME_LEN 128
+
+typedef enum {
+    FILLP_DFX_EVENT_TYPE_FAULT,
+    FILLP_DFX_EVENT_TYPE_STATISTIC,
+    FILLP_DFX_EVENT_TYPE_SECURITY,
+    FILLP_DFX_EVENT_TYPE_BEHAVIOR,
+} FillpDfxEvtType;
+
+typedef enum {
+    FILLP_DFX_EVENT_LEVEL_CRITICAL,
+    FILLP_DFX_EVENT_LEVEL_MINOR,
+} FillpDfxEventLevel;
+
+typedef enum {
+    FILLP_DFX_PARAM_TYPE_BOOL,
+    FILLP_DFX_PARAM_TYPE_UINT8,
+    FILLP_DFX_PARAM_TYPE_UINT16,
+    FILLP_DFX_PARAM_TYPE_INT32,
+    FILLP_DFX_PARAM_TYPE_UINT32,
+    FILLP_DFX_PARAM_TYPE_UINT64,
+    FILLP_DFX_PARAM_TYPE_FLOAT,
+    FILLP_DFX_PARAM_TYPE_DOUBLE,
+    FILLP_DFX_PARAM_TYPE_STRING
+} FillpDfxEventParamType;
+
+typedef struct {
+    FillpDfxEventParamType type;
+    FILLP_CHAR paramName[FILLP_DFX_EVENT_NAME_LEN];
+    union {
+        FILLP_UINT8 u8v;
+        FILLP_UINT16 u16v;
+        FILLP_INT32 i32v;
+        FILLP_UINT32 u32v;
+        FILLP_ULLONG u64v;
+        float f;
+        double d;
+        FILLP_CHAR str[FILLP_DFX_EVENT_NAME_LEN];
+    } val;
+} FillpDfxEventParam;
+
+typedef struct {
+    FILLP_CHAR eventName[FILLP_DFX_EVENT_NAME_LEN];
+    FillpDfxEvtType type;
+    FillpDfxEventLevel level;
+    FILLP_UINT32 paramNum;
+    FillpDfxEventParam *paramArray;
+} FillpDfxEvent;
+
+/**
+ * @ingroup fillpevt
+ * @brief  report dstream event
+ *
+ * @param[in] softObj   any usefull message to FillpDfxEventCb
+ * @param[in]    info   event detail
+ */
+typedef void (*FillpDfxEventCb)(void *softObj, const FillpDfxEvent *info);
+
+/**
+ * @ingroup fillpevt
+ * @brief  function to printf data.
+ *
+ * @param[in] softObj   any usefull message to FillpDfxDumpFunc
+ * @param[in]    data   dump string to print
+ * @param[in]     len   lenth of data
+ */
+typedef void (*FillpDfxDumpFunc)(void *softObj, const FILLP_CHAR *data, FILLP_UINT32 len);
+
 #ifdef __cplusplus
 }
 #endif
