@@ -34,6 +34,10 @@ extern "C" {
 
 #define TIMER_TIMEOUT 1000 // 1s
 
+#define MAC_DELIMITER ':'
+#define IP_DELIMITER '.'
+#define ID_DELIMITER ' '
+
 typedef void (*TimerFunCallback)(void);
 
 typedef enum {
@@ -83,6 +87,8 @@ bool GetSignalingMsgSwitch(void);
  * @param[in] module softbus log module.
  */
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
+
+char *DataMasking(const char *data, uint32_t length, char delimiter);
 
 #ifdef __cplusplus
 #if __cplusplus
