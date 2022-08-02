@@ -16,6 +16,7 @@
 #include "coap_adapter.h"
 #include "nstackx_dfinder_log.h"
 #include "securec.h"
+#include "nstackx_statistics.h"
 
 #define COAP_MAX_ENDPOINTS_NUM 64
 #define COAP_LOW_DELTA_NUM 13
@@ -126,7 +127,7 @@ static int32_t CoapParseOption(CoapOption *option, uint16_t *runningDelta, const
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, uint32_t buflen)
+static int32_t CoapParseOptionsAndPayloadEx(CoapPacket *pkt, const uint8_t *buf, uint32_t buflen)
 {
     uint8_t optionIndex = 0;
     uint16_t delta = 0;
@@ -167,6 +168,15 @@ static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, u
     return DISCOVERY_ERR_SUCCESS;
 }
 
+static int32_t CoapParseOptionsAndPayload(CoapPacket *pkt, const uint8_t *buf, uint32_t buflen)
+{
+    int32_t ret = CoapParseOptionsAndPayloadEx(pkt, buf, buflen);
+    if (ret != DISCOVERY_ERR_SUCCESS) {
+        IncStatistics(INVALID_OPT_AND_PAYLOAD);
+    }
+    return ret;
+}
+
 static int32_t CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     if (bufLen < HEADER_LEN) {
@@ -183,7 +193,7 @@ static int32_t CoapParseHeader(CoapPacket *pkt, const uint8_t *buf, uint32_t buf
     return DISCOVERY_ERR_SUCCESS;
 }
 
-int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
+static int32_t CoapSoftBusDecodeEx(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
 {
     int32_t ret;
     if (pkt == NULL || buf == NULL) {
@@ -241,7 +251,16 @@ int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
     return DISCOVERY_ERR_SUCCESS;
 }
 
-static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
+int32_t CoapSoftBusDecode(CoapPacket *pkt, const uint8_t *buf, uint32_t bufLen)
+{
+    int32_t ret = CoapSoftBusDecodeEx(pkt, buf, bufLen);
+    if (ret != DISCOVERY_ERR_SUCCESS) {
+        IncStatistics(DECODE_FAILED);
+    }
+    return ret;
+}
+
+static int32_t CoapCreateHeaderEx(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
 {
     if (buf->len != 0) {
         DFINDER_LOGE(TAG, "CoapCreateHeader invalid argument");
@@ -282,6 +301,15 @@ static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam
     }
     pkt->len = buf->len = HEADER_LEN;
     return DISCOVERY_ERR_SUCCESS;
+}
+
+static int32_t CoapCreateHeader(CoapPacket *pkt, const CoapPacketParam *pktParam, CoapReadWriteBuffer *buf)
+{
+    int32_t ret = CoapCreateHeaderEx(pkt, pktParam, buf);
+    if (ret != DISCOVERY_ERR_SUCCESS) {
+        IncStatistics(CREATE_HEADER_FAILED);
+    }
+    return ret;
 }
 
 static int32_t CoapAddData(CoapPacket *pkt, const CoapBuffer *payload, CoapReadWriteBuffer *buf)
@@ -527,7 +555,7 @@ static int32_t CoapCreateBody(CoapPacket *pkt, const CoapPacketParam *param, con
     return DISCOVERY_ERR_SUCCESS;
 }
 
-int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *payload,
+static int32_t CoapSoftBusEncodeEx(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *payload,
     CoapReadWriteBuffer *buf)
 {
     int32_t ret;
@@ -553,6 +581,16 @@ int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const C
     }
 
     return DISCOVERY_ERR_SUCCESS;
+}
+
+static int32_t CoapSoftBusEncode(CoapPacket *pkt, const CoapPacketParam *param, const CoapBuffer *payload,
+    CoapReadWriteBuffer *buf)
+{
+    int32_t ret = CoapSoftBusEncodeEx(pkt, param, payload, buf);
+    if (ret != DISCOVERY_ERR_SUCCESS) {
+        IncStatistics(ENCODE_FAILED);
+    }
+    return ret;
 }
 
 void CoapSoftBusInitMsgId(void)
@@ -617,7 +655,8 @@ static void BuildCoapPktParam(const CoapBuildParam *buildParam, CoapPacketParam 
     outParam->msgId = buildParam->msgId;
 }
 
-int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff, bool isAck)
+static int32_t BuildCoapPktEx(const CoapBuildParam *param, const char *pktPayload,
+    CoapReadWriteBuffer *sndPktBuff, bool isAck)
 {
     if (param == NULL || sndPktBuff == NULL || sndPktBuff->readWriteBuf == NULL) {
         DFINDER_LOGE(TAG, "BuildCoapPkt invalid");
@@ -660,4 +699,13 @@ int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapRe
     }
 
     return DISCOVERY_ERR_SUCCESS;
+}
+
+int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapReadWriteBuffer *sndPktBuff, bool isAck)
+{
+    int32_t ret = BuildCoapPktEx(param, pktPayload, sndPktBuff, isAck);
+    if (ret != DISCOVERY_ERR_SUCCESS) {
+        IncStatistics(BUILD_PKT_FAILED);
+    }
+    return ret;
 }
