@@ -34,6 +34,9 @@ int32_t LnnInitLwipMonitorImpl(void);
 int32_t LnnInitWifiServiceMonitorImpl(void);
 
 int32_t LnnInitDriverMonitorImpl(void);
+
+int32_t LnnInitScreenStateMonitorImpl(void);
+
 #ifdef __cplusplus
 }
 #endif
