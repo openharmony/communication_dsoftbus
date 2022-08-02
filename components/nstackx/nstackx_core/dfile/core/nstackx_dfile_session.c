@@ -208,10 +208,10 @@ void NoticeSessionProgress(DFileSession *session)
 {
     DFileMsg data;
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
-    if ((FileManagerGetTotalBytes(session->fileManager, &data.transferUpdate.totalBytes) == NSTACKX_EOK) &&
-        (FileManagerGetBytesTransferred(session->fileManager, &data.transferUpdate.bytesTransferred) == NSTACKX_EOK) &&
-        (data.transferUpdate.bytesTransferred <= data.transferUpdate.totalBytes) &&
-        (data.transferUpdate.bytesTransferred > 0)) {
+    if (FileManagerGetTotalBytes(session->fileManager, &data.transferUpdate.totalBytes) == NSTACKX_EOK &&
+        FileManagerGetBytesTransferred(session->fileManager, &data.transferUpdate.bytesTransferred) == NSTACKX_EOK &&
+        data.transferUpdate.bytesTransferred <= data.transferUpdate.totalBytes &&
+        data.transferUpdate.bytesTransferred > 0) {
         NotifyMsgRecver(session, DFILE_ON_SESSION_IN_PROGRESS, &data);
     }
 }
