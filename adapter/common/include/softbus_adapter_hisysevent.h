@@ -25,8 +25,8 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_HISYSEVT_NAME_LEN  48
-#define SOFTBUS_HISYSEVT_PARAM_LEN 16
+#define SOFTBUS_HISYSEVT_NAME_LEN  32
+#define SOFTBUS_HISYSEVT_PARAM_LEN 32
 
 typedef enum {
     SOFTBUS_EVT_PARAM_ZERO = 0,
