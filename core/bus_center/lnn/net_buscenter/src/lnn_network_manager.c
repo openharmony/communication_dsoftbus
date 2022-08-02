@@ -474,6 +474,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
     }
     return SOFTBUS_ERR;
 }
+
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
