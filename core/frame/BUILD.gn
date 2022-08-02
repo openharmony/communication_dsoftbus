@@ -179,7 +179,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
       "//third_party/cJSON:cjson_static",
-      "//utils/native/base:utils",
     ]
     if (is_standard_system) {
       external_deps = bus_center_server_external_deps

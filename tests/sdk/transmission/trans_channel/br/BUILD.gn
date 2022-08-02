@@ -35,9 +35,11 @@ ohos_unittest("auth_session_gtest") {
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
   sources = [ "auth_session_test.cpp" ]
 }
