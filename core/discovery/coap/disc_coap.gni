@@ -27,6 +27,7 @@ disc_coap_inc = [
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",
+  "$dsoftbus_root_path/core/common/include",
   "//third_party/cJSON",
 ]
 disc_coap_deps = []
