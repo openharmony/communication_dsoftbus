@@ -106,6 +106,7 @@ static int32_t SetBufData(char *buf, const AuthManager *auth, const AuthDataHead
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s failed");
         return SOFTBUS_ERR;
     }
+    cJSON_free(data);
     return SOFTBUS_OK;
 }
 
