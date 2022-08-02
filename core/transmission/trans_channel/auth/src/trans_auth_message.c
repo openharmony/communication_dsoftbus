@@ -100,5 +100,6 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
         return SOFTBUS_MEM_ERR;
     }
     cJSON_Delete(obj);
+    cJSON_free(data);
     return SOFTBUS_OK;
 }
