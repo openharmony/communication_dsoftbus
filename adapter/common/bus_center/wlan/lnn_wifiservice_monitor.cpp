@@ -52,7 +52,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
-    SoftBusWifiState state = SOFTBUS_UNKNOWN;
+    SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
@@ -78,7 +78,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
             }
         }
     }
-    if (state != SOFTBUS_UNKNOWN) {
+    if (state != SOFTBUS_WIFI_UNKNOWN) {
         LnnNotifyWlanStateChangeEvent(state);
     }
 }

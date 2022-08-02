@@ -80,7 +80,7 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
 
 static void ProcessWlanEvent(struct HdfSBuf *data)
 {
-    LnnNotifyWlanStateChangeEvent(SOFTBUS_UNKNOWN);
+    LnnNotifyWlanStateChangeEvent(SOFTBUS_WIFI_UNKNOWN);
 }
 
 static int32_t OnReceiveDriverEvent(
