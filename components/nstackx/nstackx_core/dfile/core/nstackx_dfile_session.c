@@ -1505,8 +1505,6 @@ void *DFileSenderHandle(void *arg)
     uint32_t socketWaitMs = GetSocketWaitMs(session->clientSendThreadNum);
     uint8_t isBind = NSTACKX_FALSE;
 
-    PeerShuttedEvent();
-
     if (CreateAddiSendThread(session) != NSTACKX_EOK) {
         PostFatalEvent(session);
         return NULL;
@@ -1538,6 +1536,7 @@ void *DFileSenderHandle(void *arg)
         }
         ret = DFileSessionSendFrame(session, &queueNode, &unsent, &before, socketIndex);
         if (ret < 0 && ret != NSTACKX_EAGAIN) {
+            PeerShuttedEvent();
             PostFatalEvent(session);
             break;
         }
@@ -1799,8 +1798,6 @@ void *DFileReceiverHandle(void *arg)
     int32_t ret = NSTACKX_EAGAIN;
     uint8_t isBind = NSTACKX_FALSE;
 
-    PeerShuttedEvent();
-
     LOGI(TAG, "recv thread start");
     DFileRecverPre(session);
     while (!session->closeFlag) {
@@ -1820,6 +1817,7 @@ void *DFileReceiverHandle(void *arg)
 
         ret = DFileSocketRecv(session);
         if (ret != NSTACKX_EAGAIN && ret != NSTACKX_EOK) {
+            PeerShuttedEvent();
             break;
         }
     }

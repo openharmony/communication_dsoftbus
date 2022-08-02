@@ -484,7 +484,6 @@ static void WaitForFileHeaderConfirm(DFileTrans *dFileTrans, DFileSendState *nex
         } else {
             *nextState = STATE_SEND_FILE_FAIL;
             dFileTrans->errorCode = DFILE_TRANS_INTERNAL_ERROR;
-            WaitFileHeaderTimeoutEvent(dFileTrans->errorCode);
         }
         return;
     }
@@ -493,6 +492,7 @@ static void WaitForFileHeaderConfirm(DFileTrans *dFileTrans, DFileSendState *nex
         if (dFileTrans->headerRetryCnt > dFileTrans->config.maxCtrlFrameRetryCnt) {
             *nextState = STATE_SEND_FILE_FAIL;
             dFileTrans->errorCode = DFILE_TRANS_FILE_HEADER_CONFIRM_TIMEOUT;
+            WaitFileHeaderTimeoutEvent(dFileTrans->errorCode);
             return;
         }
         dFileTrans->headerRetryCnt++;
