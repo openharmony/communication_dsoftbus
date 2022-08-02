@@ -1719,13 +1719,13 @@ static int BleInfoDump(int fd)
     dprintf(fd, "-----------------BleInfoManager Info-------------------\n");
     for (int i = 0; i < BLE_INFO_COUNT; i++) {
         dprintf(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
-        dprintf(fd, "BleInfo capBitMap                       : %u\n", g_bleInfoManager[i].capBitMap);
-        dprintf(fd, "BleInfo capCount                        : %d\n", g_bleInfoManager[i].capCount);
-        dprintf(fd, "BleInfo capabilityData                  : %s\n", g_bleInfoManager[i].capabilityData);
-        dprintf(fd, "BleInfo capDataLen                      : %u\n", g_bleInfoManager[i].capDataLen);
-        dprintf(fd, "BleInfo isSameAccount                   : %d\n", g_bleInfoManager[i].isSameAccount);
-        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", g_bleInfoManager[i].isWakeRemote);
-        dprintf(fd, "BleInfo freq                            : %d\n", g_bleInfoManager[i].freq);
+        dprintf(fd, "BleInfo capBitMap                       : %u\n", *(g_bleInfoManager[i].capBitMap));
+        dprintf(fd, "BleInfo capCount                        : %d\n", *(g_bleInfoManager[i].capCount));
+        dprintf(fd, "BleInfo capabilityData                  : %s\n", *(g_bleInfoManager[i].capabilityData));
+        dprintf(fd, "BleInfo capDataLen                      : %u\n", *(g_bleInfoManager[i].capDataLen));
+        dprintf(fd, "BleInfo isSameAccount                   : %d\n", *(g_bleInfoManager[i].isSameAccount));
+        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", *(g_bleInfoManager[i].isWakeRemote));
+        dprintf(fd, "BleInfo freq                            : %d\n", *(g_bleInfoManager[i].freq));
         dprintf(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
     }
     return SOFTBUS_OK;
@@ -1740,20 +1740,27 @@ static int BleAdvertiserDump(int fd)
         dprintf(fd, "DeviceInfo                              : \n");
         dprintf(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
         dprintf(fd, "accountHash                             : %s\n", g_bleAdvertiser[i].deviceInfo.accountHash);
-        dprintf(fd, "devType                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devType);
+        dprintf(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
         dprintf(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
         dprintf(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
-        dprintf(fd, "addr type                               : %s\n",
+        dprintf(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
-        dprintf(fd, "addr ble bleMac                         : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac);
-        dprintf(fd, "addr ble udidHash                       : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash);
-        dprintf(fd, "addr peerUid                            : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid);
+        char *bleMac = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
+                                   BT_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "Connection bleMac                       : %s\n", bleMac);
+        SoftBusFree(bleMac);
+        char *hash = DataMasking((char *)(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash),
+                                 UDID_HASH_LEN, ID_DELIMITER);
+        dprintf(fd, "Connection bleHash                      : %s\n", hash);
+        SoftBusFree(hash);
+        char *peerUid = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid,
+                                    MAX_ACCOUNT_HASH_LEN, ID_DELIMITER);
+        dprintf(fd, "Connection peerUid                      : %s\n", peerUid);
+        SoftBusFree(peerUid);
         dprintf(fd, "capabilityBitmapNum                     : %u\n",
                 g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
-        dprintf(fd, "capabilityBitmap                        : %u\n", g_bleAdvertiser[i].deviceInfo.capabilityBitmap);
+        dprintf(fd, "capabilityBitmap                        : %u\n",
+                *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
         dprintf(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
         dprintf(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
     }
@@ -1769,7 +1776,7 @@ static int RecvMessageInfoDump(int fd)
     LIST_FOR_EACH(item, &g_recvMessageInfo.node)
     {
         RecvMessage *recvNode = LIST_ENTRY(item, RecvMessage, node);
-        dprintf(fd, "RecvMessage capBitMap                  : %s\n", recvNode->capBitMap);
+        dprintf(fd, "RecvMessage capBitMap                  : %u\n", recvNode->capBitMap[0]);
         dprintf(fd, "RecvMessage key                        : %s\n", recvNode->key);
         dprintf(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
     }
