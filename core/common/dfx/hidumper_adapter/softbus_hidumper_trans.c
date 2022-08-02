@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_trans.h"
-#include "softbus_utils.h"
 
 #define MAX_HELP_INFO_LEN (100)
 #define MAX_ID_LEN (10)
@@ -86,13 +86,16 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 {
     char uidArr[MAX_ID_LEN];
     char pidArr[MAX_ID_LEN];
-    char *uidStr = DataMasking(itoa(uid, uidArr, DEC), sizeof(uidArr), ID_DELIMITER);
-    char *pidStr = DataMasking(itoa(pid, pidArr, DEC), sizeof(pidArr), ID_DELIMITER);
+    (void)sprintf_s(uidArr, sizeof(uidArr), "%d", uid);
+    (void)sprintf_s(pidArr, sizeof(pidArr), "%d", pid);
+
+    char *uidStr = DataMasking(uidArr, sizeof(uidArr), ID_DELIMITER);
+    char *pidStr = DataMasking(pidArr, sizeof(pidArr), ID_DELIMITER);
 
     dprintf(fd, "PkgName               : %s\n", pkgName);
     dprintf(fd, "SessionName           : %s\n", sessionName);
-    dprintf(fd, "PID                   : %d\n", uidStr);
-    dprintf(fd, "UID                   : %d\n", pidStr);
+    dprintf(fd, "PID                   : %s\n", uidStr);
+    dprintf(fd, "UID                   : %s\n", pidStr);
 
     SoftBusFree(uidStr);
     SoftBusFree(pidStr);
