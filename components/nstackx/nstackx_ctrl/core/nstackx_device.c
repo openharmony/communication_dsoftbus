@@ -732,6 +732,7 @@ static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t i
         internalDevice = CreateNewDevice(g_deviceList, deviceInfo);
 #endif
         if (internalDevice == NULL) {
+            IncStatistics(STATS_OVER_DEVICE_LIMIT);
             return NSTACKX_ENOMEM;
         }
         updated = NSTACKX_TRUE;
