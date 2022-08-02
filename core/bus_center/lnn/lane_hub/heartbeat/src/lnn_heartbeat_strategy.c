@@ -173,8 +173,6 @@ static VerifyCallback g_verifyCb = {
 
 int32_t LnnStartHeartbeatDelay(void)
 {
-    uint64_t delayMillis;
-
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
     if (LnnRemoveHbFsmMsg(EVENT_HB_START, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -183,10 +181,6 @@ int32_t LnnStartHeartbeatDelay(void)
         return SOFTBUS_ERR;
     }
     if (LnnHbFsmStart(STATE_HB_MASTER_NODE_INDEX, 0) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    delayMillis = (uint64_t)g_strategy.gearMode.duration * HB_TIME_FACTOR;
-    if (LnnHbFsmStop(delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 

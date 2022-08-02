@@ -19,7 +19,6 @@
 #include "br_connection_queue.h"
 #include "br_pending_packet.h"
 #include "br_trans_manager.h"
-#include "bus_center_manager.h"
 #include "common_list.h"
 #include "message_handler.h"
 #include "securec.h"
@@ -1116,24 +1115,6 @@ static int32_t BrConnLooperInit(void)
     return SOFTBUS_OK;
 }
 
-static void UpdateLocalBtMac(void)
-{
-    SoftBusBtAddr mac;
-    if (SoftBusGetBtMacAddr(&mac) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Get bt mac addr fail");
-        return;
-    }
-    char macStr[BT_MAC_LEN] = {0};
-    if (ConvertBtMacToStr(macStr, sizeof(macStr), mac.addr, sizeof(mac.addr)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert bt mac to str fail");
-        return;
-    }
-    if (LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Set bt mac to local fail");
-        return;
-    }
-}
-
 static void StateChangedCallback(int32_t listenerId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChanged id: %d, status: %d", listenerId, status);
@@ -1142,7 +1123,6 @@ static void StateChangedCallback(int32_t listenerId, int32_t status)
     info.type = CONNECT_BR;
     if (status == SOFTBUS_BR_STATE_TURN_ON) {
         g_brEnable = status;
-        UpdateLocalBtMac();
         (void)StartLocalListening(&info);
     } else if (status == SOFTBUS_BR_STATE_TURN_OFF) {
         g_brEnable = status;

@@ -59,6 +59,8 @@ void LnnNotifyPhysicalSubnetAddressChanged(const char *ifName, ProtocolType type
 typedef VisitNextChoice (*LnnVisitPhysicalSubnetCallback)(const LnnPhysicalSubnet *, void *);
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data);
 
+void LnnNotifyAllTypeOffline(ConnectionAddrType type);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
