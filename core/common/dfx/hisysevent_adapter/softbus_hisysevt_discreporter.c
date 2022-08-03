@@ -42,7 +42,7 @@ typedef struct {
     uint32_t minDiscDur;
     uint64_t totalDiscTime;
     uint32_t discCnt;
-    float avgDiscDur;
+    uint32_t avgDiscDur;
 } FirstDiscTime;
 
 typedef struct {
@@ -227,7 +227,9 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISC_FAULT) != EOK) {
+        return SOFTBUS_ERR;
+    }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
 
