@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
- * Description: This file defines fillp dfx function
- * Author:
- * Create: 2022-07-16
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "fillp_dfx.h"
@@ -447,7 +455,6 @@ static FILLP_INT32 DoShowSockConfigRes(FILLP_INT sockIndex, FILLP_CONST struct G
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              max recv rate: %u Kbps"CRLF, fc->maxRecvRate);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              packet size: %u"CRLF, fc->pktSize);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              slow start: %u"CRLF, fc->slowStart);
-    // FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              differentiated transmission: %hhu"CRLF, fc->differTransmit);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "Timer config: connection timeout: %u(s)"CRLF, common->connectTimeout);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              retry timeout: %u(s)"CRLF, common->connRetryTimeout);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              disconnect retry timeout: %u(s)"CRLF,
@@ -678,18 +685,16 @@ FILLP_INT FillpDfxDump(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj
             case 'V':
                 FillpDumpShowVer(softObj, dump);
                 break;
-            case 'm':
-                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
-                // (void)FillpApiSetMgtMsgLog(ret);
-                break;
             default:
                 goto FAIL;
         }
     }
     return 0;
 FAIL:
-    dump(softObj, errMsg, strlen(errMsg) + 1);
-    FillpDumpShowHelp(softObj, dump);
+    if (dump != NULL) {
+        dump(softObj, errMsg, strlen(errMsg) + 1);
+        FillpDumpShowHelp(softObj, dump);
+    }
     return -1;
 }
 
