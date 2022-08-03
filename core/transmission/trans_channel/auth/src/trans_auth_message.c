@@ -91,14 +91,14 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
         return SOFTBUS_PARSE_JSON_ERR;        
     }
     char *data = cJSON_PrintUnformatted(obj);
-    cJSON_Delete(obj);
     if (data == NULL) {
+        cJSON_Delete(obj);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (memcpy_s(cJsonStr, ERR_MSG_MAX_LEN, data, strlen(data)) != EOK) {
-        cJSON_free(data);
+        cJSON_Delete(obj);
         return SOFTBUS_MEM_ERR;
     }
-    cJSON_free(data);
+    cJSON_Delete(obj);
     return SOFTBUS_OK;
 }
