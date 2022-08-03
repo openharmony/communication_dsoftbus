@@ -466,7 +466,7 @@ static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAd
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
         return;
     }
-    g_softBusBleConnCb->BleDisconnectCallback(halConnInfo);
+    g_softBusBleConnCb->BleDisconnectCallback(halConnInfo, SOFTBUS_BLECONNECTION_SERVER_DISCONNECT);
 }
 
 static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)

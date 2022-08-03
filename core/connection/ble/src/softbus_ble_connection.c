@@ -787,6 +787,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
         itemNode->state = BLE_CONNECTION_STATE_CONNECTED;
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);
+    SoftbusGattcHandShakeEvent(halConnId);
     if (SendSelfBasicInfo(connId, BLE_ROLE_CLIENT) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendSelfBasicInfo error");
     }
@@ -878,7 +879,7 @@ static void ReleaseBleConnectionInfo(BleConnectionInfo *info)
 }
 
 static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
-    ConnectionInfo connectionInfo, int32_t value)
+    ConnectionInfo connectionInfo, int32_t errCode)
 {
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
@@ -887,7 +888,7 @@ static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId
             BleRequestInfo *requestInfo = LIST_ENTRY(item, BleRequestInfo, node);
             if (requestInfo->callback.OnConnectFailed != NULL) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BleNotifyDisconnect]connectionId=%d", connectionId);
-                requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
+                requestInfo->callback.OnConnectFailed(requestInfo->requestId, errCode);
             }
             ListDelete(&requestInfo->node);
             SoftBusFree(requestInfo);
@@ -900,7 +901,7 @@ static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId
     }
 }
 
-static void BleDisconnectCallback(BleHalConnInfo halConnInfo)
+static void BleDisconnectCallback(BleHalConnInfo halConnInfo, int32_t errCode)
 {
     ListNode *bleItem = NULL;
     ListNode *item = NULL;
@@ -932,7 +933,7 @@ static void BleDisconnectCallback(BleHalConnInfo halConnInfo)
     }
     ReleaseBleConnectionInfo(bleNode);
     if (connectionId != 0) {
-        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, halConnInfo.isServer);
+        BleNotifyDisconnect(&notifyList, connectionId, connectionInfo, errCode);
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);
 }
@@ -1096,6 +1097,7 @@ static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32
                 (void)SoftBusMutexUnlock(&g_connectionLock);
                 return;
             }
+            SoftbusGattcOnRecvHandShakeRespon(targetNode->halConnId);
             targetNode->state = BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED;
             if (BleOnDataUpdate(targetNode) != SOFTBUS_OK) {
                 (void)SoftBusMutexUnlock(&g_connectionLock);
