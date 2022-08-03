@@ -138,13 +138,9 @@ if (defined(ohos_lite)) {
   }
 
   ohos_shared_library("softbus_adapter") {
-    cflags = [ "-DFILLP_LINUX" ]
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "$dsoftbus_root_path/components/nstackx/fillp/include",
-      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
-      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
       "//commonlibrary/c_utils/base/include",
       "//third_party/bounds_checking_function/include",
@@ -153,7 +149,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
-      "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_nstack.c",
       "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
@@ -163,9 +158,6 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/log/softbus_adapter_log.c",
     ]
     public_deps = [
-      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
-      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
-      "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
       "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
       "//third_party/bounds_checking_function:libsec_static",
     ]
