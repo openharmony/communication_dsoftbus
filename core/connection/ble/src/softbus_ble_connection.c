@@ -1255,22 +1255,30 @@ static int BleConnectionDump(int fd)
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         dprintf(fd, "halConnId                     : %d\n", itemNode->halConnId);
         dprintf(fd, "connId                        : %d\n", itemNode->connId);
-        dprintf(fd, "btMac                         : %s\n", itemNode->btBinaryAddr.addr);
+        char *addr = DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER);
+        dprintf(fd, "btMac                         : %s\n", addr);
+        SoftBusFree(addr);
         dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
         dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
         dprintf(fd, "Connection Info type          : %s\n", itemNode->info.type);
         dprintf(fd, "BleInfo: \n");
-        dprintf(fd, "BleInfo addr                  : %s\n", itemNode->info.bleInfo.bleMac);
-        dprintf(fd, "BleInfo deviceIdHash          : %s\n", itemNode->info.bleInfo.deviceIdHash);
+        char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "BleInfo addr                  : %s\n", bleMac);
+        SoftBusFree(bleMac);
+        char *deviceIdHash = DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER);
+        dprintf(fd, "BleInfo deviceIdHash          : %s\n", deviceIdHash);
+        SoftBusFree(deviceIdHash);
         dprintf(fd, "Connection state              : %d\n", itemNode->state);
         dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
         dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
         dprintf(fd, "Connection peerType           : %s\n", itemNode->peerType);
-        dprintf(fd, "Connection peerDevId          : %s\n", itemNode->peerDevId);
+        char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
+        dprintf(fd, "Connection peerDevId          : %s\n", peerDevId);
+        SoftBusFree(peerDevId);
         dprintf(fd, "request Info: \n");
         LIST_FOR_EACH(item, &itemNode->requestList) {
             BleRequestInfo *requestNode = LIST_ENTRY(item, BleRequestInfo, node);
-            dprintf(fd, "request isUsed                : %d\n", requestNode->requestId);
+            dprintf(fd, "request isUsed                : %u\n", requestNode->requestId);
         }
         dprintf(fd, "Connection recvCache          : \n");
         for (int i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {

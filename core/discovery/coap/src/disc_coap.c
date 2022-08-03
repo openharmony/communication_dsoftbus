@@ -21,6 +21,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 #include "softbus_hidumper_disc.h"
 
 #define INT32_MAX_BIT_NUM 32
@@ -499,7 +500,7 @@ DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
         return NULL;
     }
     SoftBusRegDiscVarDump(COAP_PUBLISH_INFO, &CoapPubInfoDump);
-    SoftBusRegDiscVarDump(COAP_PUBLISH_INFO, &CoapSubInfoDump);
+    SoftBusRegDiscVarDump(COAP_SUBSCRIBE_INFO, &CoapSubInfoDump);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap discovery init success.");
     return &g_discCoapFuncInterface;
 }
@@ -513,8 +514,8 @@ void DiscCoapDeinit(void)
 static int CoapPubInfoDump(int fd)
 {
     dprintf(fd, "\n---------------CoapPublishInfo------------------\n");
-        dprintf(fd, "publish allCap              : %s\n", g_publishMgr->allCap);
-        dprintf(fd, "publish capCount            : %d\n", g_publishMgr->capCount);
+        dprintf(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
+        dprintf(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
         dprintf(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
         dprintf(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
     return SOFTBUS_OK;
@@ -522,9 +523,9 @@ static int CoapPubInfoDump(int fd)
 
 static int CoapSubInfoDump(int fd)
 {
-    dprintf(fd, "\n---------------CoapPublishInfo------------------\n");
-        dprintf(fd, "subscribe allCap            : %d\n", g_subscribeMgr->allCap);
-        dprintf(fd, "subscribe capCount          : %d\n", g_subscribeMgr->capCount);
+    dprintf(fd, "\n---------------CoapSubscribeInfo------------------\n");
+        dprintf(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
+        dprintf(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
         dprintf(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
         dprintf(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
     return SOFTBUS_OK;

@@ -29,4 +29,5 @@ conn_manager_src +=
 conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/connection/interface",
+  "$dsoftbus_root_path/core/common/include",
 ]

@@ -24,7 +24,7 @@ p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/message/include",
   "$dsoftbus_root_path/core/connection/p2p/negotiation/include",
   "$dsoftbus_root_path/core/connection/p2p/adapter",
-
+  "$dsoftbus_root_path/core/common/include",
   "//foundation/communication/wifi/wifi/interfaces/kits/c",
 ]
 
