@@ -269,3 +269,17 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     }
     return ret;
 }
+
+int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    int ret = g_serverProxy->ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear failed!");
+    }
+    return ret;
+}

@@ -143,6 +143,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_ACTIVE_META_NODE] = &SoftBusServerStub::ActiveMetaNodeInner;
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
+    memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -177,6 +178,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_ACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -984,6 +986,42 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
     if (infoNum > 0 && !reply.WriteRawData(infos, infoNum * sizeof(MetaNodeInfo))) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo write meta node info failed!");
         return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t retReply;
+    const char *targetNetworkId = NULL;
+    const GearMode *mode = NULL;
+
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    const char *callerId = data.ReadCString();
+    if (callerId == nullptr || strnlen(callerId, CALLER_ID_MAX_LEN) >= CALLER_ID_MAX_LEN) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read callerId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.ReadBool()) {
+        targetNetworkId = data.ReadCString();
+        if (targetNetworkId == NULL || strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read targetNetworkId failed!");
+            return SOFTBUS_ERR;
+        }
+    }
+    mode = (GearMode *)data.ReadRawData(sizeof(GearMode));
+    if (mode == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read mode failed!");
+        return SOFTBUS_ERR;
+    }
+    retReply = ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner write reply failed!");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

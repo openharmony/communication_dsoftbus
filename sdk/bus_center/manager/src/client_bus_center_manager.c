@@ -691,6 +691,11 @@ int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_
     return ServerIpcGetAllMetaNodeInfo(pkgName, infos, infoNum);
 }
 
+int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+{
+    return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+}
+
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;

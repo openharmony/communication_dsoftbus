@@ -105,6 +105,14 @@ extern "C" {
 #define META_NODE_BYPASS_INFO_LEN 64
 
 /**
+ * @brief Indicates the maximum length of the callerId, including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define CALLER_ID_MAX_LEN 128
+
+/**
  * @brief The maximum of meta node {@link MetaNodeConfigInfo.bypassInfo}.
  *
  * @since 1.0
@@ -400,6 +408,18 @@ typedef struct {
 } MetaNodeInfo;
 
 /**
+ * @brief Defines heartbeat mode parameter, see {@link GearMode}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    ModeCycle cycle;        /**< Heartbeat mode cycle */
+    ModeDuration duration;  /**< Heartbeat mode duration */
+    bool wakeupFlag;        /**< Heartbeat wakeup peer device or not */
+} GearMode;
+
+/**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
  *
  * @param addr Indicates the pointer to the address of the peer device.
@@ -678,6 +698,22 @@ int32_t DeactiveMetaNode(const char *pkgName, const char *metaNodeId);
  * @version 1.0
  */
 int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
+
+/**
+ * @brief Modify heartbeat parameters and trigger a temporary heartbeat.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param callerId The id of the caller, whitch cannot be <b>NULL</b>, and maxium length is {@CALLER_ID_MAX_LEN}.
+ * @param targetNetworkId The networkId of the target device to refresh online state, and could be <b>NULL</b>.
+ * @param mode The duration or cycle parameter of heartbeat. For details, see {@link GearMode}.
+ *
+ * @return Returns <b>0</b> if the call is success; returns any other value if it fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 
 #ifdef __cplusplus
 }
