@@ -178,6 +178,7 @@ ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_ACTIVE_META_NODE, ServerActiveMetaNode},
     { SERVER_DEACTIVE_META_NODE, ServerDeactiveMetaNode },
     { SERVER_GET_ALL_META_NODE_INFO, ServerGetAllMetaNodeInfo },
+    { SERVER_SHIFT_LNN_GEAR, ServerShiftLnnGear },
     { SERVER_CREATE_SESSION_SERVER, ServerCreateSessionServer },
     { SERVER_REMOVE_SESSION_SERVER, ServerRemoveSessionServer },
     { SERVER_OPEN_SESSION, ServerOpenSession },

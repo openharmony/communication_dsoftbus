@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_heartbeat_strategy.h"
 #include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
@@ -159,6 +160,11 @@ int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
 int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
     return LnnGetAllMetaNodeInfo(infos, infoNum);
+}
+
+int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+{
+    return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
