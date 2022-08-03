@@ -179,7 +179,7 @@ FAIL:
     return ret;
 }
 
-static void HndPostServiceDiscover(const CoapPacket *pkt)
+void HndPostServiceDiscover(const CoapPacket *pkt)
 {
     if (HndPostServiceDiscoverEx(pkt) != NSTACKX_EOK) {
         IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
