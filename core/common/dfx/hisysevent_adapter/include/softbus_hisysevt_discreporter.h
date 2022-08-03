@@ -39,6 +39,7 @@ int32_t SoftbusRecordDiscScanTimes(uint8_t medium);
 int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time);
 int32_t SoftbusRecordDiscFault(uint8_t medium, uint32_t errCode);
 int32_t InitDiscStatisticSysEvt(void);
+int32_t SoftBusReportDiscStartupEvt(char *PackageName);
 
 #ifdef __cplusplus
 #if __cplusplus

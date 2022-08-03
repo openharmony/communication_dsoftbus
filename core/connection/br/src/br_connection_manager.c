@@ -615,25 +615,27 @@ static int BrConnectionInfoDump(int fd)
         dprintf(fd, "connectionId                  : %d\n", itemNode->connectionId);
         dprintf(fd, "socketFd                      : %d\n", itemNode->socketFd);
         dprintf(fd, "sideType                      : %d\n", itemNode->sideType);
-        dprintf(fd, "Br Mac                        : %s\n", itemNode->mac);
+        char *tempMac = DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER);
+        dprintf(fd, "btMac                         : %s\n", tempMac);
+        SoftBusFree(tempMac);
         dprintf(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
         dprintf(fd, "br state                      : %d\n", itemNode->state);
-        dprintf(fd, "refCount                      : %s\n", itemNode->refCount);
+        dprintf(fd, "refCount                      : %d\n", itemNode->refCount);
         dprintf(fd, "refCountRemote                : %d\n", itemNode->refCountRemote);
         dprintf(fd, "infoObjRefCount               : %d\n", itemNode->infoObjRefCount);
         dprintf(fd, "recvBuf                       : %s\n", itemNode->recvBuf);
         dprintf(fd, "recvSize                      : %d\n", itemNode->recvSize);
-        dprintf(fd, "recvPos                       : %s\n", itemNode->recvPos);
-        dprintf(fd, "conGestState                  : %s\n", itemNode->conGestState);
+        dprintf(fd, "recvPos                       : %d\n", itemNode->recvPos);
+        dprintf(fd, "conGestState                  : %d\n", itemNode->conGestState);
         dprintf(fd, "request Info: \n");
         LIST_FOR_EACH(item, &(itemNode->requestList)) {
             RequestInfo *requestNode = LIST_ENTRY(item, RequestInfo, node);
-            dprintf(fd, "requestId                 : %d\n", requestNode->requestId);
+            dprintf(fd, "requestId                 : %u\n", requestNode->requestId);
         }
-        dprintf(fd, "seq                           : %d\n", itemNode->seq);
+        dprintf(fd, "seq                           : %lu\n", itemNode->seq);
         dprintf(fd, "waitSeq                       : %lu\n", itemNode->waitSeq);
-        dprintf(fd, "windows                       : %d\n", itemNode->windows);
-        dprintf(fd, "ackTimeoutCount               : %d\n", itemNode->ackTimeoutCount);
+        dprintf(fd, "windows                       : %u\n", itemNode->windows);
+        dprintf(fd, "ackTimeoutCount               : %u\n", itemNode->ackTimeoutCount);
     }
     return SOFTBUS_OK;
 }

@@ -678,12 +678,14 @@ static int TcpConnectInfoDump(int fd)
         dprintf(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         dprintf(fd, "Connection Info type              : %d\n", itemNode->info.type);
         dprintf(fd, "SocketInfo                        :\n");
-        dprintf(fd, "SocketInfo addr                   : %s\n", itemNode->info.socketInfo.addr);
+        char *addr = DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER);
+        dprintf(fd, "SocketInfo addr                   : %s\n", addr);
+        SoftBusFree(addr);
         dprintf(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
         dprintf(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
         dprintf(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
         dprintf(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);
-        dprintf(fd, "Connection Info requestId          : %d\n", itemNode->requestId);
+        dprintf(fd, "Connection Info requestId         : %d\n", itemNode->requestId);
     }
     return SOFTBUS_OK;
 }

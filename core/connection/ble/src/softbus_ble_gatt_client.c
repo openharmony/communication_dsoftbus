@@ -814,7 +814,9 @@ static int BleGattcDump(int fd)
         BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
         dprintf(fd, "clientId                  : %d\n", itemNode->clientId);
         dprintf(fd, "state                     : %d\n", itemNode->state);
-        dprintf(fd, "btMac                     : %s\n", itemNode->peerAddr.addr);
+        char *addr = DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER);
+        dprintf(fd, "btMac                     : %s\n", addr);
+        SoftBusFree(addr);
     }
     return SOFTBUS_OK;
 }
