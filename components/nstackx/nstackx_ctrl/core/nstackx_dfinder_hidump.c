@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
- * Description: implementation of dfinder hidump
- * Author: NA
- * Create: 2022-07-21
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "nstackx_dfinder_hidump.h"
@@ -122,14 +130,14 @@ static int DumpStatisticsInfo(char *buf, uint32_t size)
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_LOOPBACK_PKT: %" PRIu64 CRLF, stat[STATS_DROP_LOOPBACK_PKT]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_MSG_FAILED: %" PRIu64 CRLF, stat[STATS_SEND_MSG_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_SEND_REQUEST_FAILED: %" PRIu64 CRLF,
-	stat[STATS_SEND_REQUEST_FAILED]);
+        stat[STATS_SEND_REQUEST_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_DROP_MSG_ID: %" PRIu64 CRLF, stat[STATS_DROP_MSG_ID]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_SERVICE_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_HANDLE_SERVICE_MSG_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_INVALID_RESPONSE_MSG: %" PRIu64 CRLF,
-	stat[STATS_INVALID_RESPONSE_MSG]);
+        stat[STATS_INVALID_RESPONSE_MSG]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_POST_SD_REQUEST_FAILED: %" PRIu64 CRLF,
         stat[STATS_POST_SD_REQUEST_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ABORT_SD: %" PRIu64 CRLF, stat[STATS_ABORT_SD]);
@@ -143,16 +151,17 @@ static int DumpStatisticsInfo(char *buf, uint32_t size)
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_UPDATE_DEVICE_DB_FAILED: %" PRIu64 CRLF,
         stat[STATS_UPDATE_DEVICE_DB_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_CONTEX_FAILED: %" PRIu64 CRLF,
-	stat[STATS_CREATE_CONTEX_FAILED]);
+        stat[STATS_CREATE_CONTEX_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_CREATE_SESSION_FAILED: %" PRIu64 CRLF,
         stat[STATS_CREATE_SESSION_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PREPARE_SD_MSG_FAILED: %" PRIu64 CRLF,
         stat[STATS_PREPARE_SD_MSG_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_PARSE_SD_MSG_FAILED: %" PRIu64 CRLF,
-	stat[STATS_PARSE_SD_MSG_FAILED]);
+        stat[STATS_PARSE_SD_MSG_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_ALLOC_RECORD_FAILED: %" PRIu64 CRLF,
-	stat[STATS_ALLOC_RECORD_FAILED]);
-    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_FREE_RECORD_FAILED: %" PRIu64 CRLF, stat[STATS_FREE_RECORD_FAILED]);
+        stat[STATS_ALLOC_RECORD_FAILED]);
+    DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_FREE_RECORD_FAILED: %" PRIu64 CRLF,
+        stat[STATS_FREE_RECORD_FAILED]);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "STATS_OVER_DEVICE_LIMIT: %" PRIu64 CRLF, stat[STATS_OVER_DEVICE_LIMIT]);
     return NSTACKX_EOK;
 }
@@ -180,6 +189,7 @@ static int DumpHelp(char *buf, uint32_t size)
     return NSTACKX_EOK;
 }
 
+#define DFINDER_DUMP_STRTOL_BASE 10
 static const char *g_dfinderDumpOpts = "hsm:";
 int DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump)
 {
@@ -200,7 +210,7 @@ int DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc
                 break;
             case 'm':
 #ifdef DFINDER_SET_CTRL_MSG_LOG
-                (void)SetMgtMsgLog((int32_t)strtol(NstackGetOptArgs(&optMsg), NULL, 10));
+                (void)SetMgtMsgLog((int32_t)strtol(NstackGetOptArgs(&optMsg), NULL, DFINDER_DUMP_STRTOL_BASE));
 #endif
                 break;
             default:
