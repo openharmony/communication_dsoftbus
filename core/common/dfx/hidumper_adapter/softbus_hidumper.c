@@ -151,7 +151,7 @@ void SoftBusHiDumperReleaseHandler(void)
     ListNode *nextItem = NULL;
     LIST_FOR_EACH_SAFE(item, nextItem, &g_hidumperhander_list) {
         HandlerNode *handlerNode = LIST_ENTRY(item, HandlerNode, node);
-        ListDelete(&handlerNode->node);;
+        ListDelete(&handlerNode->node);
         SoftBusFree(handlerNode);
     }
     SoftBusFree(&g_hidumperhander_list);
@@ -197,7 +197,7 @@ int SoftBusHiDumperModuleInit(void)
         return SOFTBUS_ERR;
     }
 
-    SoftBusTransDumpHandlerInit();
+    initSoftBusTransDumpHandler();
     return SOFTBUS_OK;
 }
 
