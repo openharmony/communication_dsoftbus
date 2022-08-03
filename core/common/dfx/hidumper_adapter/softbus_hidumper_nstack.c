@@ -17,9 +17,9 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_hidumper.h"
-#include "softbus_hidumper_nstack.h"
 #include "fillpinc.h"
 #include "nstackx_dfile.h"
+#include "softbus_hidumper_nstack.h"
 
 #define SOFTBUS_DSTREAM_MODULE_NAME "dstream"
 #define SOFTBUS_DSTREAM_MODULE_HELP "List all the dump item of dstream"
@@ -39,7 +39,7 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
     size_t dataLen = strnlen(data, SOFTBUF_NSTACK_DUMP_BUF_LEN);
     if (dataLen == 0 || dataLen == SOFTBUF_NSTACK_DUMP_BUF_LEN || dataLen != len) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-        "SoftBufNstackDumpFunc len error, data strlen %d, len %d.", dataLen, len);
+            "SoftBufNstackDumpFunc len error, data strlen %d, len %d.", dataLen, len);
         return;
     }
     SOFTBUS_NSTACK_PRINT(fd, "%s", data);

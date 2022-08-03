@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "softbus_adapter_hisysevent_nstack.h"
 #include "softbus_adapter_hisysevent.h"
 #include "fillpinc.h"
 #include "nstackx_dfile.h"
@@ -188,18 +189,6 @@ static void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
-#if 0
-static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
-{
-    NstackDfxEvent nstackInfo;
-    if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(DFinderEvent)) != EOK) {
-        LOG_ERR("change DFinderEvent to NstackDfxEvent failed!");
-        return;
-    }
-    NstackHiEventCb(softObj, &nstackInfo);
-}
-#endif
-
 static void DFileHiEventCb(void *softObj, const DFileEvent *info)
 {
     NstackDfxEvent nstackInfo;
@@ -215,10 +204,6 @@ void NstackInitHiEvent(void)
     if (FtSetDfxEventCb(NULL, DstreamHiEventCb) != 0) {
         LOG_ERR("FtSetDfxEventCb failed!");
     }
-#if 0
-    if (DFinderSetEventFunc(NULL, DstreamHiEventCb) != 0) {
-        LOG_ERR("NSTACKX_DFileSetEventFunc failed!");
-    }
-#endif
+
     NSTACKX_DFileSetEventFunc(NULL, DFileHiEventCb);
 }
