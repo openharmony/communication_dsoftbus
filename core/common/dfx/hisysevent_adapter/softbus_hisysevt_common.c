@@ -26,7 +26,7 @@
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
-#include "softbus_adapter_hisysevent_nstack.h"
+#include "softbus_hisysevt_nstack.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0

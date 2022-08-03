@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "softbus_adapter_hisysevent_nstack.h"
-#include "softbus_adapter_hisysevent.h"
+#include <securec.h>
 #include "fillpinc.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
-#include <securec.h>
+#include "softbus_adapter_hisysevent.h"
+#include "softbus_hisysevt_nstack.h"
 
 /* below define must keep the same with DStream DFinder DMsg DFile */
 #define NSTACK_DFX_EVENT_NAME_LEN 128
