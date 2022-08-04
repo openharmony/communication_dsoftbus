@@ -68,8 +68,8 @@ void TransServerDeinit(void)
 
 void TransServerDeathCallback(const char *pkgName)
 {
-    TransDelItemByPackageName(pkgName);
     TransChannelDeathCallback(pkgName);
+    TransDelItemByPackageName(pkgName);
 }
 
 int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
