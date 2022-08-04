@@ -1260,7 +1260,7 @@ static int BleConnectionDump(int fd)
         SoftBusFree(addr);
         dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
         dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
-        dprintf(fd, "Connection Info type          : %s\n", itemNode->info.type);
+        dprintf(fd, "Connection Info type          : %u\n", itemNode->info.type);
         dprintf(fd, "BleInfo: \n");
         char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
         dprintf(fd, "BleInfo addr                  : %s\n", bleMac);
@@ -1271,7 +1271,7 @@ static int BleConnectionDump(int fd)
         dprintf(fd, "Connection state              : %d\n", itemNode->state);
         dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
         dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
-        dprintf(fd, "Connection peerType           : %s\n", itemNode->peerType);
+        dprintf(fd, "Connection peerType           : %d\n", itemNode->peerType);
         char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
         dprintf(fd, "Connection peerDevId          : %s\n", peerDevId);
         SoftBusFree(peerDevId);
