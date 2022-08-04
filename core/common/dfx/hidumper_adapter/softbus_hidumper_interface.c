@@ -43,7 +43,12 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     LIST_FOR_EACH(item, hidumperHandlerList) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
         if (strcmp(itemNode->moduleName, argv[0]) == 0) {
-            itemNode->dumpHandler(fd, argcNew, argvPtr);
+            if (strcmp(argv[0], "dstream") == 0 || strcmp(argv[0], "dfinder") == 0 ||
+                strcmp(argv[0], "dfile") == 0 || strcmp(argv[0], "dmsg") == 0) {
+                itemNode->dumpHandler(fd, argc, argv);
+            } else {
+                itemNode->dumpHandler(fd, argcNew, argvPtr);
+            }
             isModuleExist = SOFTBUS_DUMP_EXIST;
             break;
         }

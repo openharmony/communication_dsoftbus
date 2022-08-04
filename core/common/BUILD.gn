@@ -82,6 +82,7 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_disc_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_interface_virtual.c",
+      "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c",
     ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
@@ -105,6 +106,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
 } else {
+  cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
       "$dsoftbus_root_path/core/common/include",
@@ -119,6 +121,9 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/bus_center/utils/include",
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "//third_party/cJSON",
       "//third_party/bounds_checking_function/include",
     ]
@@ -133,6 +138,7 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
       "dfx/hidumper_adapter/softbus_hidumper_trans.c",
       "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
+      "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
     ]
     sources += dfx_source
     defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
@@ -145,6 +151,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson_static",
     ]

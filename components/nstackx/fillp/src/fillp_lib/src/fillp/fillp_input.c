@@ -21,6 +21,7 @@
 #include "net.h"
 #include "fillp_common.h"
 #include "fillp_output.h"
+#include "fillp_dfx.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -274,6 +275,7 @@ static void FillpHdlDataInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *b
     if ((netconnState != CONN_STATE_CLOSING) && (netconnState != CONN_STATE_CONNECTED)) {
         // Drop it silently
         FILLP_LOGDBG("not connected or connecting, drop it !!!!!");
+        FillpDfxPktNotify(FILLP_GET_SOCKET(pcb)->index, FILLP_DFX_PKT_PARSE_FAIL, 1U);
         return;
     }
 
@@ -447,6 +449,7 @@ static void FillpNackInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
     struct FillpSeqPktNum seqPktNum;
 
     if (FillpCheckNackPacket(pcb, p) != 0) {
+        FillpDfxPktNotify(ftSock->index, FILLP_DFX_PKT_PARSE_FAIL, 1U);
         return;
     }
 
@@ -929,6 +932,7 @@ void FillpDoInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf, struct S
         FILLP_LOGINF("FillpDoInput: recv buffer length incorrect, dataLen = %d is greater than pktSize = %zu,"
                      "flag:%u, pktNum:%u, seqNum:%u",
                      buf->len, pcb->pktSize, head->flag, head->pktNum, head->seqNum);
+        FillpDfxPktNotify(ftSock->index, FILLP_DFX_PKT_PARSE_FAIL, 1U);
         return;
     }
 
@@ -936,7 +940,7 @@ void FillpDoInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf, struct S
         FILLP_LOGINF("FillpDoInput: fillp_sock_id:%d protocol head incorrect. "
                      "dataLen = %u greater than buflen = %d, flag:%u, pktNum:%u, seqNum:%u",
                      ftSock->index, head->dataLen, buf->len, head->flag, head->pktNum, head->seqNum);
-
+        FillpDfxPktNotify(ftSock->index, FILLP_DFX_PKT_PARSE_FAIL, 1U);
         return;
     }
     FillpDoInputPktType(pcb, buf, inst, (FILLP_UINT16)FILLP_PKT_GET_TYPE(head->flag));
