@@ -34,10 +34,14 @@
 
 #define LNN_DEFAULT_IF_NAME_WLAN "wlan0"
 #define LNN_DEFAULT_IF_NAME_ETH  "eth0"
+#define LNN_DEFAULT_IF_NAME_BR   "br0"
+#define LNN_DEFAULT_IF_NAME_BLE  "ble0"
 
 typedef enum {
     LNN_ETH_TYPE = 0,
     LNN_WLAN_TYPE,
+    LNN_BR_TYPE,
+    LNN_BLE_TYPE,
     LNN_MAX_NUM_TYPE,
 } LnnNetIfNameType;
 
@@ -54,11 +58,17 @@ int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
     return SOFTBUS_OK;
 }
 
+int32_t __attribute__ ((weak)) RegistBtProtocolManager(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "regist virtual bt protocol manager");
+    return SOFTBUS_OK;
+}
+
 static LnnNetIfManagerBuilder g_netifBuilders[LNN_MAX_NUM_TYPE] = {0};
 
 static LnnProtocolManager *g_networkProtocols[LNN_NETWORK_MAX_PROTOCOL_COUNT] = {0};
 
-static LnnNetIfMgr *CreateEthNetifMgr(const char *netIfName)
+static LnnNetIfMgr *CreateNetifMgr(const char *netIfName)
 {
     if (netIfName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invalid!");
@@ -160,6 +170,20 @@ static int32_t SetIfNameDefaultVal(void)
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+
+    netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
+    if (netIfMgr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BR netIfMgr failed!");
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+
+    netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
+    if (netIfMgr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BLE netIfMgr failed!");
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     return SOFTBUS_OK;
 }
 
@@ -211,11 +235,12 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         if (protocolMgr->Init != NULL) {
             ret = protocolMgr->Init(protocolMgr);
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network protocol failed!ret=%d\n", ret);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network protocol failed! ret=%d", ret);
                 break;
             }
         } else {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "network protocol have no init\n");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "network protocol (supportedNetif=%u) have no init",
+                protocolMgr->supportedNetif);
         }
         g_networkProtocols[i] = protocolMgr;
         break;
@@ -227,7 +252,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
 {
     uint8_t i;
     if (protocolMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!\n", __func__);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -240,7 +265,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
             return SOFTBUS_OK;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:no such protocol!\n", __func__);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:no such protocol!", __func__);
     return SOFTBUS_ERR;
 }
 
@@ -278,7 +303,7 @@ static void RestartCoapDiscovery(void)
     char ifName[NET_IF_NAME_LEN] = {0};
     int32_t authPort = 0;
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!");
         return;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
@@ -292,7 +317,7 @@ static void RestartCoapDiscovery(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
     LnnStopDiscovery();
     if (LnnStartDiscovery() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed");
     }
     SetCallLnnStatus(true);
 }
@@ -349,22 +374,31 @@ static VisitNextChoice GetAllProtocols(const LnnProtocolManager *manager, void *
 
 int32_t LnnInitNetworkManager(void)
 {
-    RegistNetIfMgr(LNN_ETH_TYPE, CreateEthNetifMgr);
-    RegistNetIfMgr(LNN_WLAN_TYPE, CreateEthNetifMgr);
+    RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_BR_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_BLE_TYPE, CreateNetifMgr);
 
     int32_t ret = LnnInitManagerByConfig();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Read net config failed!ret=%d\n", ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Read net config failed!ret=%d", ret);
         return ret;
     }
 
     // Regist default protocols
     ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist ip protocol manager failed,ret=%d\n", ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist ip protocol manager failed,ret=%d", ret);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "IP protocol registed.\n");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "IP protocol registed.");
+
+    ret = RegistBtProtocolManager();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist bt protocol manager failed,ret=%d", ret);
+        return ret;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BT protocol registed.");
 
     ret = RegistNewIPProtocolManager();
     if (ret != SOFTBUS_OK) {
@@ -380,7 +414,7 @@ int32_t LnnInitNetworkManager(void)
 
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init subnet manager failed!,ret=%d\n", ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init subnet manager failed!,ret=%d", ret);
         return ret;
     }
 
@@ -406,7 +440,7 @@ int32_t LnnInitNetworkManagerDelay(void)
 
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!");
         return SOFTBUS_ERR;
     }
 
@@ -420,11 +454,11 @@ int32_t LnnInitNetworkManagerDelay(void)
             if ((g_networkProtocols[i]->supportedNetif & item->type) != 0) {
                 int32_t ret = g_networkProtocols[i]->Enable(g_networkProtocols[i], item);
                 if (ret != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "enable protocol (%d) for netif %s failed\n", i,
+                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "enable protocol (%d) for netif %s failed", i,
                         item->ifName);
                 }
                 SoftBusLog(
-                    SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "enable protocol (%d) for netif %s success\n", i, item->ifName);
+                    SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "enable protocol (%d) for netif %s success", i, item->ifName);
             }
         }
     }
@@ -435,7 +469,7 @@ bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isEnabled = false;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isEnabled,
-        sizeof(LnnIsAutoNetWorkingEnabled())) != SOFTBUS_OK) {
+        sizeof(isEnabled)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get autoNetworkingSwitch from config file");
         return true;
     }
@@ -446,7 +480,7 @@ void LnnDeinitNetworkManager(void)
 {
     uint32_t i;
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network manager failed\n");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network manager failed");
     }
 
     LnnDeinitPhysicalSubnetManager();
@@ -476,6 +510,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
     }
     return SOFTBUS_ERR;
 }
+
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
@@ -493,6 +528,12 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
             break;
         case LNN_NETIF_TYPE_WLAN:
             *type = CONNECTION_ADDR_WLAN;
+            break;
+        case LNN_NETIF_TYPE_BR:
+            *type = CONNECTION_ADDR_BR;
+            break;
+        case LNN_NETIF_TYPE_BLE:
+            *type = CONNECTION_ADDR_BLE;
             break;
         default:
             ret = SOFTBUS_ERR;

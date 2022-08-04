@@ -17,6 +17,7 @@
 #include "spunge_app.h"
 #include "res.h"
 #include "socket_common.h"
+#include "fillp_dfx.h"
 #include "spunge_message.h"
 
 #ifdef __cplusplus
@@ -585,6 +586,7 @@ static void SpungeHandleMsgDoShutdown(void *value, struct SpungeInstance *inst)
         goto FINISH;
     }
 
+    FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_CLOSE);
     SpungeShutdownSock(sock, howValue);
 
     if (readShut && writeShut) {
@@ -687,6 +689,7 @@ static void SpungeHandleMsgClose(void *value, struct SpungeInstance *inst)
     conn->closeSet = 1;
     sock->allocState = SOCK_ALLOC_STATE_WAIT_TO_CLOSE;
 
+    FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_CLOSE);
     SpungeShutdownSock(sock, SPUNGE_SHUT_RDWR);
 
     SpungeCloseMsgFreeSrc(conn, sock);
