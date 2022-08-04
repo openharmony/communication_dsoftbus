@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 typedef int32_t (*LnnInitEventMonitorImpl)(void);
+typedef void (*LnnDeinitEventMonitorImpl)(void);
 
 int32_t LnnInitNetlinkMonitorImpl(void);
 
@@ -34,6 +35,10 @@ int32_t LnnInitLwipMonitorImpl(void);
 int32_t LnnInitWifiServiceMonitorImpl(void);
 
 int32_t LnnInitDriverMonitorImpl(void);
+
+int32_t LnnInitBtStateMonitorImpl(void);
+void LnnDeinitBtStateMonitorImpl(void);
+
 #ifdef __cplusplus
 }
 #endif
