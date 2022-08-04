@@ -71,7 +71,7 @@ std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtp
 std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
 std::map<int, std::shared_ptr<IStreamSocketListener>> VtpStreamSocket::g_streamReceiverMap;
 
-static inline ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo, StreamFrameInfo* streamFrameInfo)
+static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo, Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
 {
     frameInfo->frameType = (FILLP_INT)(streamFrameInfo->frameType);
     frameInfo->seqNum = (FILLP_INT)(streamFrameInfo->seqNum);
@@ -571,7 +571,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
         len += FRAME_HEADER_LEN;
 
-        StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
+        Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
         FrameInfo frameInfo;
         ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
         ret = FtSendFrame(streamFd_, data.get(), len, 0, &frameInfo);

@@ -37,7 +37,9 @@ struct StreamFrameInfo {
     uint32_t seqNum = 0;
     uint32_t level = 0;
     FrameType frameType = NONE;
-    uint32_t timestamp = 0;
+    uint32_t seqSubNum = 0;
+    uint32_t bitMap = 0;
+    uint32_t timeStamp = 0;
     uint32_t bitrate = 0;
 };
 
