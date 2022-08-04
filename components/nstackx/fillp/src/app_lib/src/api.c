@@ -20,7 +20,7 @@
 #include "res.h"
 #include "callbacks.h"
 #include "epoll_app.h"
-
+#include "fillp_dfx.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1552,6 +1552,30 @@ FILLP_ULLONG DLL_API FtGetStackTime(FILLP_INT instInx)
 FILLP_INT DLL_API FtApiEventInfoGet(IN FILLP_INT fd, IO FtEventCbkInfo *info)
 {
     return SockEventInfoGet(fd, info);
+}
+
+FILLP_INT DLL_API FtSetDfxEventCb(void *softObj, FillpDfxEventCb evtCb)
+{
+    if (evtCb == NULL) {
+        FILLP_LOGERR("evtCb is null");
+        return -1;
+    }
+    FillpDfxEvtCbSet(softObj, evtCb);
+    return 0;
+}
+
+FILLP_INT FtDfxHiDumper(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj, FillpDfxDumpFunc dump)
+{
+#ifdef FILLP_ENABLE_DFX_HIDUMPER
+    return FillpDfxDump(argc, argv, softObj, dump);
+#else
+    (void)argc;
+    (void)argv;
+    (void)softObj;
+    (void)dump;
+    FILLP_LOGERR("unsupport FtFillpDfxDump");
+    return -1;
+#endif /* FILLP_ENABLE_DFX_HIDUMPER */
 }
 
 #ifdef __cplusplus

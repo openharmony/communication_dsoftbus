@@ -363,12 +363,9 @@ NSTACKX_EXPORT uint32_t NSTACKX_DFileGetCapabilities(void);
 
 NSTACKX_EXPORT int32_t NSTACKX_DFileSetCapabilities(uint32_t capabilities, uint32_t value);
 
-#ifdef DFILE_ENABLE_HIDUMP
-
 typedef void (*DFileDumpFunc)(void *softObj, const char *data, uint32_t len);
 
 NSTACKX_EXPORT int32_t NSTACKX_DFileDump(uint32_t argc, const char **arg, void *softObj, DFileDumpFunc dump);
-#endif
 
 /* 软总线提供的回调支持多线程调用，事件的触发频率要求(表格整理出来，什么时候触发，触发频率) */
 typedef void (*DFileEventFunc)(void *softObj, const DFileEvent *info);
