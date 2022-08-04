@@ -70,7 +70,7 @@ typedef struct {
 
 typedef struct {
     void (*BleOnDataReceived)(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value);
-    void (*BleDisconnectCallback)(BleHalConnInfo halConnInfo);
+    void (*BleDisconnectCallback)(BleHalConnInfo halConnInfo, int32_t errCode);
     void (*BleConnectCallback)(int32_t halConnId, const char *bleStrMac, const SoftBusBtAddr *btAddr);
     BleConnectionInfo* (*GetBleConnInfoByHalConnId)(BleHalConnInfo halConnInfo);
 } SoftBusBleConnCalback;

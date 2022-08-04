@@ -76,11 +76,14 @@ void LnnDeinitPhysicalSubnetManager(void)
 static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
 {
     for (uint8_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
-        if (g_physicalSubnets[i] == NULL) {
-            g_physicalSubnets[i] = subnet;
-            g_physicalSubnets[i]->OnNetifStatusChanged(g_physicalSubnets[i]);
-            return SOFTBUS_OK;
+        if (g_physicalSubnets[i] != NULL) {
+            continue;
         }
+        g_physicalSubnets[i] = subnet;
+        if (g_physicalSubnets[i]->OnNetifStatusChanged != NULL) {
+            g_physicalSubnets[i]->OnNetifStatusChanged(g_physicalSubnets[i]);
+        }
+        return SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: subnet list is full", __func__);
     return SOFTBUS_ERR;

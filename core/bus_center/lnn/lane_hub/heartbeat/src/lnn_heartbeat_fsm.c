@@ -369,7 +369,7 @@ static int32_t OnTryAsMasterNode(const SoftBusMessage *msg)
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    uint64_t delayMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    uint64_t delayMillis = (uint64_t)gearMode.cycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
     if (LnnPostDelayMsgToHbFsm(EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -429,7 +429,7 @@ static int32_t OnRepeatCycle(const SoftBusMessage *msg)
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    uint64_t delayMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR;
+    uint64_t delayMillis = (uint64_t)gearMode.cycle * HB_TIME_FACTOR;
     if (LnnPostDelayMsgToHbFsm(EVENT_HB_REPEAT_CYCLE, NULL, delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -666,7 +666,7 @@ static int32_t OnCheckDeviceStatus(const SoftBusMessage *msg)
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
-    offlineMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR;
+    offlineMillis = (uint64_t)gearMode.cycle * HB_TIME_FACTOR;
     nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     for (i = 0; i < infoNum; i++) {
         NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);

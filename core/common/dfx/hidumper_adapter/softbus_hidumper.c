@@ -197,7 +197,7 @@ int SoftBusHiDumperModuleInit(void)
         return SOFTBUS_ERR;
     }
 
-    initSoftBusTransDumpHandler();
+    SoftBusTransDumpHandlerInit();
     return SOFTBUS_OK;
 }
 

@@ -37,6 +37,7 @@ typedef enum {
     ACTIVE_META_NODE,
     DEACTIVE_META_NODE,
     GET_ALL_META_NODE,
+    SHIFT_LNN_GEAR,
 } FunID;
 
 typedef struct {
@@ -92,6 +93,9 @@ static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
                     info->data = (void *)ReadBuffer(reply, infoSize);
                 }
             }
+            break;
+        case SHIFT_LNN_GEAR:
+            ReadInt32(reply, &(info->retCode));
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unknown funid");
@@ -561,5 +565,41 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
         }
     }
     *infoNum = reply.arg1;
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    if (pkgName == NULL || callerId == NULL || mode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear g_serverProxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    bool targetNetworkIdIsNull = targetNetworkId == NULL ? true : false;
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&request, pkgName);
+    WriteString(&request, callerId);
+    WriteBool(&request, targetNetworkIdIsNull);
+    if (!targetNetworkIdIsNull) {
+        WriteString(&request, targetNetworkId);
+    }
+    WriteRawData(&request, mode, sizeof(GearMode));
+    Reply reply = {0};
+    reply.id = SHIFT_LNN_GEAR;
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SHIFT_LNN_GEAR, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear invoke failed[%d, %d]",
+            ans, reply.retCode);
+        return ans != SOFTBUS_OK ? SOFTBUS_ERR : reply.retCode;
+    }
     return SOFTBUS_OK;
 }

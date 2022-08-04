@@ -81,7 +81,7 @@ typedef struct {
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
-    int32_t authChannelId;
+    int32_t authChannelId[CONNECTION_ADDR_MAX];
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
@@ -93,6 +93,7 @@ const char *LnnGetDeviceUdid(const NodeInfo *info);
 int32_t LnnSetDeviceUdid(NodeInfo *info, const char *udid);
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
 int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type);
+int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type);
 bool LnnIsNodeOnline(const NodeInfo *info);
 void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status);
 const char *LnnGetBtMac(const NodeInfo *info);

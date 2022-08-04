@@ -24,10 +24,11 @@
 
 #include "p2plink_common.h"
 #include "p2plink_device.h"
-
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 
 #define LNN_MAC_INFO "lnnMacInfo"
@@ -66,7 +67,7 @@ void P2pLinkLnnSync(void)
     }
 
     if (strcmp(P2pLinkGetMyMac(), g_lnnMyP2pMac) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync mymac %s->%s", g_lnnMyP2pMac, P2pLinkGetMyMac());
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync lnn p2p mymac");
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, P2pLinkGetMyMac()) == SOFTBUS_OK) {
             if (strcpy_s(g_lnnMyP2pMac, sizeof(g_lnnMyP2pMac), P2pLinkGetMyMac()) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
@@ -104,7 +105,12 @@ void P2pLinkLnnSync(void)
 static int P2pLnnDump(int fd)
 {
     dprintf(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
-    dprintf(fd, "lnnMyP2pMac               :%s\n", g_lnnMyP2pMac);
-    dprintf(fd, "lnnGoP2pMac               :%s\n", g_lnnGoMac);
+    char *lnnMyP2pMac = DataMasking(g_lnnMyP2pMac, P2P_MAC_LEN, MAC_DELIMITER);
+    dprintf(fd, "lnnMyP2pMac               :%s\n", lnnMyP2pMac);
+    SoftBusFree(lnnMyP2pMac);
+    char *lnnGoP2pMac = DataMasking(g_lnnGoMac, P2P_MAC_LEN, MAC_DELIMITER);
+    dprintf(fd, "lnnGoP2pMac               :%s\n", lnnGoP2pMac);
+    SoftBusFree(lnnGoP2pMac);
+
     return SOFTBUS_OK;
 }
