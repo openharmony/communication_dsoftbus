@@ -26,6 +26,7 @@
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
+#include "softbus_hisysevt_nstack.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0
@@ -147,5 +148,6 @@ int32_t InitSoftbusSysEvt()
     if (InitConnStatisticSysEvt() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    NstackInitHiEvent();
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }
