@@ -48,8 +48,8 @@ static int32_t HbMonitorInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor init mutex fail!");
         return SOFTBUS_ERR;
     }
-    g_strategy.gearMode.modeCycle = LOW_FREQ_CYCLE;
-    g_strategy.gearMode.modeDuration = LONG_DURATION;
+    g_strategy.gearMode.cycle = LOW_FREQ_CYCLE;
+    g_strategy.gearMode.duration = LONG_DURATION;
     g_strategy.gearMode.wakeupFlag = false;
     g_strategy.callingUid = HB_INVALID_UID;
     return SOFTBUS_OK;
@@ -67,56 +67,13 @@ static void HbMonitorDeinit(void)
     SoftBusMutexDestroy(&g_strategy.lock);
 }
 
-static int32_t ResetHeartbeatParam(int32_t callingUid, GearMode mode, const HeartbeatImplPolicy *implPolicy)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
-    if (SoftBusMutexLock(&g_strategy.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB reset param lock mutex fail!");
-        return SOFTBUS_ERR;
-    }
-
-    if (g_strategy.callingUid == HB_INVALID_UID || g_strategy.callingUid == callingUid) {
-        g_strategy.gearMode = mode;
-    } else {
-        if (g_strategy.gearMode.modeCycle <= mode.modeCycle) {
-            g_strategy.gearMode.modeCycle = mode.modeCycle;
-        }
-        if (g_strategy.gearMode.modeDuration >= mode.modeDuration) {
-            g_strategy.gearMode.modeDuration = mode.modeDuration;
-        }
-    }
-
-    if (implPolicy != NULL) {
-        HeartbeatImplPolicy *tmpImplPolicy = (HeartbeatImplPolicy *)SoftBusCalloc(sizeof(HeartbeatImplPolicy));
-        if (tmpImplPolicy == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB calloc tmpImplPolicy err");
-            (void)SoftBusMutexUnlock(&g_strategy.lock);
-            return SOFTBUS_MALLOC_ERR;
-        }
-        tmpImplPolicy->type = implPolicy->type;
-        tmpImplPolicy->info = implPolicy->info;
-        g_strategy.policy[implPolicy->type].implPolicy = tmpImplPolicy;
-        tmpImplPolicy = NULL;
-    }
-    (void)SoftBusMutexUnlock(&g_strategy.lock);
-    return SOFTBUS_OK;
-}
-
-int32_t ShiftLNNGear(const char *pkgName, int32_t callingUid, const char *targetNetworkId, GearMode mode,
-    const HeartbeatImplPolicy *implPolicy)
-{
-    if (pkgName == NULL || callingUid <= HB_INVALID_UID) {
+    if (pkgName == NULL || mode == NULL || callerId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB target networkId:%s is offline",
-            AnonymizesNetworkID(targetNetworkId));
-        return SOFTBUS_NETWORK_NODE_OFFLINE;
-    }
-    if (ResetHeartbeatParam(callingUid, mode, implPolicy) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB reset gearMode param fail");
-        return SOFTBUS_ERR;
-    }
+    (void)targetNetworkId;
     return SOFTBUS_OK;
 }
 
@@ -166,7 +123,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     if (LnnGetHeartbeatGearMode(&gearMode) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    delayMillis = (uint64_t)gearMode.modeCycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    delayMillis = (uint64_t)gearMode.cycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "heartbeat(HB) start offline countdown");
     if (LnnHbProcessDeviceLost(networkId, addrType, delayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err");
@@ -224,8 +181,6 @@ static VerifyCallback g_verifyCb = {
 
 int32_t LnnStartHeartbeatDelay(void)
 {
-    uint64_t delayMillis;
-
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
     if (LnnRemoveHbFsmMsg(EVENT_HB_START, 0, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -234,10 +189,6 @@ int32_t LnnStartHeartbeatDelay(void)
         return SOFTBUS_ERR;
     }
     if (LnnHbFsmStart(STATE_HB_MASTER_NODE_INDEX, 0) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    delayMillis = (uint64_t)g_strategy.gearMode.modeDuration * HB_TIME_FACTOR;
-    if (LnnHbFsmStop(delayMillis) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 

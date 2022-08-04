@@ -16,7 +16,6 @@
 #ifndef LNN_HEARTBEAT_MANAGER_H
 #define LNN_HEARTBEAT_MANAGER_H
 
-#include "softbus_common.h"
 #include "lnn_node_info.h"
 
 #ifdef __cplusplus

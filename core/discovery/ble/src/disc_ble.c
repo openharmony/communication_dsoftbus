@@ -142,6 +142,7 @@ typedef struct {
     uint32_t freq;
     bool isSameAccount;
     bool isWakeRemote;
+    bool ranging;
 } BleOption;
 
 static ScanSetting g_scanTable[FREQ_BUTT] = {
@@ -961,6 +962,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isSameAccount = false;
         bleOption->isWakeRemote = false;
         bleOption->freq = (uint32_t)(option->publishOption->freq);
+        bleOption->ranging = option->publishOption->ranging;
     } else {
         bleOption->optionCapBitMap = option->subscribeOption->capabilityBitmap;
         bleOption->custDataLen = option->subscribeOption->dataLen;
@@ -968,6 +970,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->isSameAccount = option->subscribeOption->isSameAccount;
         bleOption->isWakeRemote = option->subscribeOption->isWakeRemote;
         bleOption->freq = (uint32_t)(option->subscribeOption->freq);
+        bleOption->ranging = false;
     }
     bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(bleOption->optionCapBitMap[0]);
 }
@@ -993,7 +996,6 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         if (!CheckCapBitMapExist(CAPABILITY_NUM, info->capBitMap, pos)) {
             (void)SetCapBitMapPos(CAPABILITY_NUM, info->capBitMap, pos);
             info->needUpdate = true;
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "RegisterCapability set update");
         }
         info->capCount[pos] += 1;
         info->isSameAccount[pos] = isSameAccount;
@@ -1014,6 +1016,12 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         }
         info->capDataLen[pos] = custDataLen;
     }
+
+    if (bleOption.ranging) {
+        info->rangingRefCnt += 1;
+        info->needUpdate = true;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -1027,14 +1035,17 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
     uint32_t *optionCapBitMap = NULL;
     bool isSameAccount = false;
     bool isWakeRemote = false;
+    bool ranging = false;
     if (option->publishOption != NULL) {
         optionCapBitMap = option->publishOption->capabilityBitmap;
         optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
+        ranging = option->publishOption->ranging;
     } else {
         optionCapBitMap = option->subscribeOption->capabilityBitmap;
         optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
         isSameAccount = option->subscribeOption->isSameAccount;
         isWakeRemote = option->subscribeOption->isWakeRemote;
+        ranging = false;
     }
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos) ||
@@ -1048,12 +1059,16 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
             info->capabilityData[pos] = NULL;
             info->capDataLen[pos] = 0;
             info->needUpdate = true;
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UnregisterCapability set update");
         }
         info->isSameAccount[pos] = isSameAccount;
         info->isWakeRemote[pos] = isWakeRemote;
         info->freq[pos] = -1;
     }
+    if (ranging && info->rangingRefCnt > 0) {
+        info->rangingRefCnt -= 1;
+        info->needUpdate = true;
+    }
+    
     return SOFTBUS_OK;
 }
 
@@ -1062,37 +1077,42 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if (option == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t rangingCnt;
+
     DiscBleOption regOption;
     if (publishFlags == BLE_PUBLISH) {
         regOption.publishOption = (PublishOption *)option;
         regOption.subscribeOption = NULL;
-        rangingCnt = regOption.publishOption->ranging == true ? 1 : 0;
     } else {
         regOption.publishOption = NULL;
         regOption.subscribeOption = (SubscribeOption *)option;
-        rangingCnt = 0;
     }
     unsigned char index = publishFlags | activeFlags;
     if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
+    uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
+    int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
         if (RegisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RegisterCapability failed.");
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
-        g_bleInfoManager[index].rangingRefCnt += rangingCnt;
     } else {
         if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
-        g_bleInfoManager[index].rangingRefCnt -= rangingCnt;
     }
+    
+    uint32_t newCap = g_bleInfoManager[index].capBitMap[0];
+    int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble discovery request summary, action: (%d, %d, %d) cap: %d->%d, "
+        "ref ranging count: %d->%d", isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount,
+        newRangingRefCount);
+    
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
@@ -1719,13 +1739,13 @@ static int BleInfoDump(int fd)
     dprintf(fd, "-----------------BleInfoManager Info-------------------\n");
     for (int i = 0; i < BLE_INFO_COUNT; i++) {
         dprintf(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
-        dprintf(fd, "BleInfo capBitMap                       : %u\n", g_bleInfoManager[i].capBitMap);
-        dprintf(fd, "BleInfo capCount                        : %d\n", g_bleInfoManager[i].capCount);
-        dprintf(fd, "BleInfo capabilityData                  : %s\n", g_bleInfoManager[i].capabilityData);
-        dprintf(fd, "BleInfo capDataLen                      : %u\n", g_bleInfoManager[i].capDataLen);
-        dprintf(fd, "BleInfo isSameAccount                   : %d\n", g_bleInfoManager[i].isSameAccount);
-        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", g_bleInfoManager[i].isWakeRemote);
-        dprintf(fd, "BleInfo freq                            : %d\n", g_bleInfoManager[i].freq);
+        dprintf(fd, "BleInfo capBitMap                       : %u\n", *(g_bleInfoManager[i].capBitMap));
+        dprintf(fd, "BleInfo capCount                        : %d\n", *(g_bleInfoManager[i].capCount));
+        dprintf(fd, "BleInfo capabilityData                  : %s\n", *(g_bleInfoManager[i].capabilityData));
+        dprintf(fd, "BleInfo capDataLen                      : %u\n", *(g_bleInfoManager[i].capDataLen));
+        dprintf(fd, "BleInfo isSameAccount                   : %d\n", *(g_bleInfoManager[i].isSameAccount));
+        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", *(g_bleInfoManager[i].isWakeRemote));
+        dprintf(fd, "BleInfo freq                            : %d\n", *(g_bleInfoManager[i].freq));
         dprintf(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
     }
     return SOFTBUS_OK;
@@ -1740,20 +1760,27 @@ static int BleAdvertiserDump(int fd)
         dprintf(fd, "DeviceInfo                              : \n");
         dprintf(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
         dprintf(fd, "accountHash                             : %s\n", g_bleAdvertiser[i].deviceInfo.accountHash);
-        dprintf(fd, "devType                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devType);
+        dprintf(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
         dprintf(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
         dprintf(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
-        dprintf(fd, "addr type                               : %s\n",
+        dprintf(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
-        dprintf(fd, "addr ble bleMac                         : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac);
-        dprintf(fd, "addr ble udidHash                       : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash);
-        dprintf(fd, "addr peerUid                            : %s\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid);
+        char *bleMac = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
+                                   BT_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "Connection bleMac                       : %s\n", bleMac);
+        SoftBusFree(bleMac);
+        char *hash = DataMasking((char *)(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash),
+                                 UDID_HASH_LEN, ID_DELIMITER);
+        dprintf(fd, "Connection bleHash                      : %s\n", hash);
+        SoftBusFree(hash);
+        char *peerUid = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid,
+                                    MAX_ACCOUNT_HASH_LEN, ID_DELIMITER);
+        dprintf(fd, "Connection peerUid                      : %s\n", peerUid);
+        SoftBusFree(peerUid);
         dprintf(fd, "capabilityBitmapNum                     : %u\n",
                 g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
-        dprintf(fd, "capabilityBitmap                        : %u\n", g_bleAdvertiser[i].deviceInfo.capabilityBitmap);
+        dprintf(fd, "capabilityBitmap                        : %u\n",
+                *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
         dprintf(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
         dprintf(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
     }
@@ -1769,7 +1796,7 @@ static int RecvMessageInfoDump(int fd)
     LIST_FOR_EACH(item, &g_recvMessageInfo.node)
     {
         RecvMessage *recvNode = LIST_ENTRY(item, RecvMessage, node);
-        dprintf(fd, "RecvMessage capBitMap                  : %s\n", recvNode->capBitMap);
+        dprintf(fd, "RecvMessage capBitMap                  : %u\n", recvNode->capBitMap[0]);
         dprintf(fd, "RecvMessage key                        : %s\n", recvNode->key);
         dprintf(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
     }

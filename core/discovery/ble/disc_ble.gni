@@ -13,7 +13,10 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-ble_discovery_inc = [ "$dsoftbus_root_path/core/discovery/ble/include" ]
+ble_discovery_inc = [
+  "$dsoftbus_root_path/core/discovery/ble/include",
+  "$dsoftbus_root_path/core/common/include",
+]
 ble_discovery_deps = []
 if (dsoftbus_feature_disc_ble == false) {
   ble_discovery_src =

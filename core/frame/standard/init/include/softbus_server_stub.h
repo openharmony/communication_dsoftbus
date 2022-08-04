@@ -65,6 +65,7 @@ private:
     int32_t ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply);
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
 

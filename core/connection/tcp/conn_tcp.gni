@@ -23,4 +23,7 @@ if (dsoftbus_feature_conn_tcp == true) {
   ]
 }
 
-tcp_connection_inc = [ "$dsoftbus_root_path/core/connection/tcp/include" ]
+tcp_connection_inc = [
+  "$dsoftbus_root_path/core/connection/tcp/include",
+  "$dsoftbus_root_path/core/common/include",
+]

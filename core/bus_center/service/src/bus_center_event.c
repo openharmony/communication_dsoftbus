@@ -263,7 +263,7 @@ void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info
 
 void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
 {
-    if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_UNKNOWN) {
+    if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_WIFI_UNKNOWN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
         return;
     }
@@ -279,6 +279,18 @@ void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
     }
     LnnMonitorScreenStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_STATE_CHANGED, .status = state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyBtStateChangeEvent(void *state)
+{
+    SoftBusBtState *btState = (SoftBusBtState *)state;
+    if (*btState < SOFTBUS_BLE_TURN_ON || *btState >= SOFTBUS_BT_UNKNOWN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad btState %d", *btState);
+        return;
+    }
+    LnnMonitorBtStateChangedEvent event = {.basic.event = LNN_EVENT_BT_STATE_CHANGED, .status = (uint8_t)(*btState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(btState);
 }
 
 void LnnNotifyAddressChangedEvent(const char *ifName)
