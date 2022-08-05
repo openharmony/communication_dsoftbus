@@ -64,7 +64,7 @@ public:
 
     virtual int GetSeqNum() const = 0;
     virtual uint32_t GetStreamId() const = 0;
-    virtual StreamFrameInfo* GetStreamFrameInfo() const = 0;
+    virtual const StreamFrameInfo* GetStreamFrameInfo() const = 0;
 };
 }; // namespace SoftBus
 }; // namespace Communication
