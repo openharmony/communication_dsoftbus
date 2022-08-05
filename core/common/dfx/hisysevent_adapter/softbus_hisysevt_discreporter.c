@@ -42,7 +42,7 @@ typedef struct {
     uint32_t minDiscDur;
     uint64_t totalDiscTime;
     uint32_t discCnt;
-    float avgDiscDur;
+    uint32_t avgDiscDur;
 } FirstDiscTime;
 
 typedef struct {
