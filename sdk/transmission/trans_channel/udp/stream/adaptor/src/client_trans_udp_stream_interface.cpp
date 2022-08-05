@@ -35,7 +35,8 @@ namespace {
     std::mutex g_mutex;
 }
 
-static inline void ConvertStreamFrameInfo(StreamFrameInfo *inFrameInfo, Communication::SoftBus::StreamFrameInfo *outFrameInfo)
+static inline void ConvertStreamFrameInfo(StreamFrameInfo *inFrameInfo, 
+    Communication::SoftBus::StreamFrameInfo *outFrameInfo)
 {
     outFrameInfo->streamId = 0;
     outFrameInfo->seqNum = (uint32_t)(inFrameInfo->seqNum);
@@ -45,7 +46,6 @@ static inline void ConvertStreamFrameInfo(StreamFrameInfo *inFrameInfo, Communic
     outFrameInfo->bitMap = (uint32_t)inFrameInfo->bitMap;
     outFrameInfo->timeStamp = (uint32_t)inFrameInfo->timeStamp;
     outFrameInfo->bitrate = 0;
-    
 }
 
 int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamData *ext, const StreamFrameInfo *param)
