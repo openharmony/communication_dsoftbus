@@ -273,6 +273,7 @@ struct FillpConnReqAckClient {
 #define FILLP_ONE_EXT_PARA_LENGTH 2
 
 enum FillpPacketExt {
+    FILLP_PKT_EXT_START,
     FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT = 1,
     FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE,
     FILLP_PKT_EXT_CONNECT_CARRY_CHARACTER,
@@ -345,6 +346,7 @@ typedef enum InnerfillpClientfourhandshakestateEnum {
 
 #define FILLP_HEADER_SET_PKT_TYPE(flag, type) ((flag) |= ((FILLP_UINT16)((type)&0x0f) << 8))
 #define FILLP_PKT_GET_TYPE(flag) (((flag)&0x0f00) >> 8)
+#define FILLP_PKT_GET_FLAG(flag) ((flag) & 0x00ff)
 
 #define FILLP_HEADER_SET_PROTOCOL_VERSION(flag, ver) ((flag) |= ((FILLP_UINT16)((ver)&0x0f) << 12))
 #define FILLP_PKT_GET_PROTCOL_VERSION(flag) (((flag)&0xf000) >> 12)
@@ -431,6 +433,10 @@ void FillpConnConnectionEstFailure(struct FillpPcb *pcb, FILLP_CONST struct NetB
 void FillpConnConfirmAckInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p);
 
 void FillpFinInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, FILLP_BOOL *pcbFreed);
+
+struct FtNetconn;
+
+FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, struct FtNetconn *conn);
 
 #ifdef __cplusplus
 }

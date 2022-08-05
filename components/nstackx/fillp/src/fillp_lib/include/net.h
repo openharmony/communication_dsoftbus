@@ -81,6 +81,10 @@ struct FtNetconn {
     size_t iovCount;
     struct iovec sendIov[UDP_MAX_SEG];
 #endif
+
+#ifdef FILLP_MGT_MSG_LOG
+    FILLP_BOOL extParameterExisted[FILLP_PKT_EXT_BUTT];
+#endif
 };
 
 #define NETCONN_GET_OSSOCK(_conn, _instIdx) ((_conn)->osSocket[(_instIdx)])

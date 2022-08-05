@@ -94,6 +94,10 @@ static inline void FillpLogGetNowTime(struct timeval *tv, struct tm *nowTime)
 #define FILLP_SHOWLEVELBUTT(fmt, ...) \
         FILLP_LOG_IN(FILLP_DBG_LVL_BUTT, FILLP_DBG_SHOW_LEVEL, "F-SHOWLEVELBUTT", fmt, ##__VA_ARGS__)
 
+#ifdef FILLP_MGT_MSG_LOG
+#define FILLP_LOGMGTMSG(fmt, ...) FILLP_LOG_IN(FILLP_DBG_LVL_INFO, FILLP_DBG_LOG, "F-LOGMGTMSG", fmt, ##__VA_ARGS__)
+#endif
+
 #ifdef __cplusplus
 }
 #endif
