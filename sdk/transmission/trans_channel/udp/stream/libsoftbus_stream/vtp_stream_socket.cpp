@@ -71,7 +71,7 @@ std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtp
 std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
 std::map<int, std::shared_ptr<IStreamSocketListener>> VtpStreamSocket::g_streamReceiverMap;
 
-static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo, 
+static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
     const Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
 {
     frameInfo->frameType = (FILLP_INT)(streamFrameInfo->frameType);

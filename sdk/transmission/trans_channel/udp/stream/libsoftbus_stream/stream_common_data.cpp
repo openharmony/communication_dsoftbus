@@ -27,7 +27,7 @@ std::unique_ptr<IStream> IStream::MakeCommonStream(StreamData &data, const Strea
     return stream;
 }
 
-StreamCommonData::StreamCommonData(uint32_t streamId, uint16_t seq, StreamFrameInfo& frameInfo)
+StreamCommonData::StreamCommonData(uint32_t streamId, uint16_t seq, const StreamFrameInfo& frameInfo)
 {
     curSeqNum_ = seq;
     curStreamId_ = streamId;
