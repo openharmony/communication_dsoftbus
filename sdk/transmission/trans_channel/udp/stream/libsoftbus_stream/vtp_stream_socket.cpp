@@ -26,6 +26,7 @@
 
 #include "fillpinc.h"
 #include "raw_stream_data.h"
+#include "stream_common_data.h"
 #include "session.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_adapter_crypto.h"
@@ -69,6 +70,17 @@ std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtp
 
 std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
 std::map<int, std::shared_ptr<IStreamSocketListener>> VtpStreamSocket::g_streamReceiverMap;
+
+static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
+    const Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
+{
+    frameInfo->frameType = (FILLP_INT)(streamFrameInfo->frameType);
+    frameInfo->seqNum = (FILLP_INT)(streamFrameInfo->seqNum);
+    frameInfo->subSeqNum = (FILLP_INT)(streamFrameInfo->seqSubNum);
+    frameInfo->level = (FILLP_INT)(streamFrameInfo->level);
+    frameInfo->timestamp = (FILLP_SLONG)streamFrameInfo->timeStamp;
+    frameInfo->bitMap = (FILLP_UINT32)streamFrameInfo->bitMap;
+}
 
 void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
 {
@@ -530,11 +542,15 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         }
     }
 
+    int ret = -1;
     std::unique_ptr<char[]> data = nullptr;
     ssize_t len = 0;
+    
     if (streamType_ == RAW_STREAM) {
         data = stream->GetBuffer();
         len = stream->GetBufferLen();
+
+        ret = FtSend(streamFd_, data.get(), len, 0);
     } else if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
         StreamPacketizer packet(streamType_, std::move(stream));
 
@@ -555,9 +571,13 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         }
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
         len += FRAME_HEADER_LEN;
-    }
 
-    int ret = FtSend(streamFd_, data.get(), len, 0);
+        const Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
+        FrameInfo frameInfo;
+        ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
+        ret = FtSendFrame(streamFd_, data.get(), len, 0, &frameInfo);
+    }
+    
     if (ret == -1) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send failed, errorno: %d", FtGetErrno());
         return false;

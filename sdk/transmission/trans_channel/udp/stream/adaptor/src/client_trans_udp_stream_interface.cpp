@@ -35,6 +35,19 @@ namespace {
     std::mutex g_mutex;
 }
 
+static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
+    Communication::SoftBus::StreamFrameInfo *outFrameInfo)
+{
+    outFrameInfo->streamId = 0;
+    outFrameInfo->seqNum = (uint32_t)(inFrameInfo->seqNum);
+    outFrameInfo->level = (uint32_t)(inFrameInfo->level);
+    outFrameInfo->frameType = (Communication::SoftBus::FrameType)(inFrameInfo->frameType);
+    outFrameInfo->seqSubNum = (uint32_t)inFrameInfo->seqSubNum;
+    outFrameInfo->bitMap = (uint32_t)inFrameInfo->bitMap;
+    outFrameInfo->timeStamp = (uint32_t)inFrameInfo->timeStamp;
+    outFrameInfo->bitrate = 0;
+}
+
 int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (indata == nullptr || indata->buf == nullptr || param == nullptr) {
@@ -91,7 +104,10 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
                 return SOFTBUS_ERR;
             }
         }
-        stream = IStream::MakeCommonStream(data, {});
+
+        Communication::SoftBus::StreamFrameInfo outFrameInfo;
+        ConvertStreamFrameInfo(param, &outFrameInfo);
+        stream = IStream::MakeCommonStream(data, outFrameInfo);
     } else {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Do not support");
     }
