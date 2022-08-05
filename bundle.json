@@ -37,17 +37,22 @@
       "ram": "28MB",
       "deps": {
         "components": [
-          "libhilog",
-          "libipc_single",
-          "libsystem_ability_fwk",
-          "libsyspara",
-          "samgr_proxy",
-          "c_utils"
+          "ability_base",
+          "ability_runtime",
+          "bluetooth",
+          "drivers_interface_wlan",
+          "hiviewdfx_hilog_native",
+          "ipc",
+          "os_account",
+          "relational_store",
+          "utils_base",
+          "wifi"
         ],
         "third_party": [
+          "bounds_checking_function",
+          "cJSON",
           "libcoap",
-          "libmbedtls",
-          "bounds_checking_function"
+          "thirdparty_mbedtls"
         ]
       },
       "build": {
