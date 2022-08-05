@@ -445,8 +445,7 @@ int32_t LnnInitNetworkManagerDelay(void)
     }
 
     LnnNetIfMgr *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
         for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
             if (g_networkProtocols[i] == NULL) {
                 continue;
@@ -501,8 +500,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
         return SOFTBUS_ERR;
     }
     LnnNetIfMgr *netif = NULL;
-    LIST_FOR_EACH_ENTRY(netif, &g_netIfNameList, LnnNetIfMgr, node)
-    {
+    LIST_FOR_EACH_ENTRY(netif, &g_netIfNameList, LnnNetIfMgr, node) {
         if (strncmp(ifName, netif->ifName, sizeof(netif->ifName)) == 0) {
             *type = netif->type;
             return SOFTBUS_OK;

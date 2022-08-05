@@ -165,7 +165,6 @@ int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr)
     threadAttr->detachState = SOFTBUS_THREAD_JOINABLE;
     threadAttr->stackSize = 0;
     threadAttr->prior = SOFTBUS_PRIORITY_DEFAULT;
-
     threadAttr->taskName = NULL;
 
     return SOFTBUS_OK;
