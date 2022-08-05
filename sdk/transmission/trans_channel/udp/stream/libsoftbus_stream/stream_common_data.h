@@ -78,7 +78,7 @@ public:
         return curStreamId_;
     }
 
-    StreamFrameInfo* GetStreamFrameInfo() const override
+    const StreamFrameInfo* GetStreamFrameInfo() const override
     {
         return &streamFrameInfo_;
     }
