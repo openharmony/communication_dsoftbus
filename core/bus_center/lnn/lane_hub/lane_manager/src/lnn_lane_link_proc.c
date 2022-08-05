@@ -183,7 +183,7 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnLaneSelectProtocol protocol = %lld", req.selectedProtocol);
-    return req.selectedProtocol;
+    return LNN_PROTOCOL_IP;
 }
 
 static void FillWlanLinkInfo(
