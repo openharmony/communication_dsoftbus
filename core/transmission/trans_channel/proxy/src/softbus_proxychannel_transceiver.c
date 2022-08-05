@@ -690,13 +690,6 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         return TransProxyConnExistProc(&conn, appInfo, chanNewId);
     } else {
         ListenerModule module = PROXY;
-        if (connInfo->type == CONNECT_TCP || connInfo->type == CONNECT_P2P) {
-            module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
-        }
-        if (module == UNUSE_BUTT) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
-            return SOFTBUS_INVALID_PARAM;
-        }
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
         return TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
     }
