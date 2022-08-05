@@ -98,6 +98,8 @@ static inline void FillpLogGetNowTime(struct timeval *tv, struct tm *nowTime)
 #define FILLP_LOGMGTMSG(fmt, ...) FILLP_LOG_IN(FILLP_DBG_LVL_INFO, FILLP_DBG_LOG, "F-LOGMGTMSG", fmt, ##__VA_ARGS__)
 #endif
 
+FILLP_INT FillpApiSetMgtMsgLog(FILLP_INT enable);
+
 #ifdef __cplusplus
 }
 #endif
