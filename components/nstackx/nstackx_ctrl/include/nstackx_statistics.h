@@ -51,7 +51,7 @@ typedef enum {
     STATS_MAX
 } StatisticsType;
 
-void InitStatistics(void);
+void ResetStatistics(void);
 void IncStatistics(StatisticsType type);
 const uint64_t *GetStatistics(void);
 #endif

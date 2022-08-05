@@ -404,7 +404,7 @@ int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 #ifndef DFINDER_USE_MINI_NSTACKX
     CoapInitSubscribeModuleInner(); /* initialize subscribe module number */
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
-    InitStatistics();
+
     g_nstackInitState = NSTACKX_INIT_STATE_DONE;
     DFINDER_LOGI(TAG, "DFinder init successfully");
     return NSTACKX_EOK;
@@ -478,7 +478,8 @@ void NSTACKX_Deinit(void)
         CloseEpollDesc(g_epollfd);
         g_epollfd = INVALID_EPOLL_DESC;
     }
-
+    ResetStatistics();
+    ResetEventFunc();
     g_nstackInitState = NSTACKX_INIT_STATE_START;
     DFINDER_LOGI(TAG, "deinit successfully");
 }
@@ -1370,24 +1371,24 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
 
     if (dump == NULL) {
         DFINDER_LOGE(TAG, "dump is null");
-        return NSTACKX_EFAILED;
+        return NSTACKX_EINVAL;
     }
     
     if (argc == 0 || argc > MAX_DUMP_ARGC) {
         DFINDER_LOGE(TAG, "argc is invalid %u", argc);
-        return NSTACKX_EFAILED;
+        return NSTACKX_EINVAL;
     }
     
     if (argv == NULL) {
         DFINDER_LOGE(TAG, "argv is null");
-        return NSTACKX_EFAILED;
+        return NSTACKX_EINVAL;
     }
     
     uint32_t i;
     for (i = 0; i < argc; i++) {
         if (argv[i] == NULL) {
             DFINDER_LOGE(TAG, "argv[%u] is null", i);
-            return NSTACKX_EFAILED;
+            return NSTACKX_EINVAL;
         }
     }
 
@@ -1401,7 +1402,7 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
     (void)softObj;
     (void)dump;
     DFINDER_LOGE(TAG, "Unsupport dfinder dump");
-    return NSTACKX_EFAILED;
+    return NSTACKX_NOTSUPPORT;
 }
 #endif
 
@@ -1414,7 +1415,7 @@ int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
 
     if (func == NULL) {
         DFINDER_LOGE(TAG, "func is null");
-        return NSTACKX_EFAILED;
+        return NSTACKX_EINVAL;
     }
 
     return SetEventFunc(softobj, func);

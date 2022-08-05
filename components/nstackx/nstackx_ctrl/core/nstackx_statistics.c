@@ -18,7 +18,7 @@
 
 static uint64_t g_statistics[STATS_MAX];
 
-void InitStatistics(void)
+void ResetStatistics(void)
 {
     (void)memset_s(&g_statistics[0], sizeof(g_statistics), 0, sizeof(g_statistics));
 }

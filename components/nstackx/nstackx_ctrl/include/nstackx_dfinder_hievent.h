@@ -18,6 +18,7 @@
 #include "nstackx.h"
 
 int SetEventFunc(void *softobj, DFinderEventFunc func);
+void ResetEventFunc(void);
 void NotifyStatisticsEvent(void);
 
 #endif
