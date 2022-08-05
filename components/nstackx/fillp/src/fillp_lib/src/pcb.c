@@ -23,6 +23,7 @@
 #include "res.h"
 #include "fillp_algorithm.h"
 #include "spunge.h"
+#include "fillp_mgt_msg_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +65,9 @@ static FILLP_INT SpungePcbSend(void *arg, FILLP_CONST char *buf,
     if (!OS_SOCK_OPS_FUNC_VALID(osSock, send)) {
         return -1;
     }
+
+    FILLP_PKT_SIMPLE_LOG(((struct FtSocket *)conn->sock)->index,
+        (FILLP_CONST struct FillpPktHead *)buf, FILLP_DIRECTION_TX);
 
     if (size != (FILLP_INT) osSock->ioSock->ops->send(osSock->ioSock,
                                                       buf,
