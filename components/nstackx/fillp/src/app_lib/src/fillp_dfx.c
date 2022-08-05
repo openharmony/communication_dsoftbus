@@ -685,6 +685,10 @@ FILLP_INT FillpDfxDump(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj
             case 'V':
                 FillpDumpShowVer(softObj, dump);
                 break;
+            case 'm':
+                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
+                (void)FillpApiSetMgtMsgLog(ret);
+                break;
             default:
                 goto FAIL;
         }
