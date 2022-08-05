@@ -32,11 +32,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
-    if (module == UNUSE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:no listener module found!", __func__);
-        return SOFTBUS_INVALID_PARAM;
-    }
+    ListenerModule module = DIRECT_CHANNEL_SERVER_WIFI;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
 
     SessionConn *newConn = CreateNewSessinConn(module, false);
