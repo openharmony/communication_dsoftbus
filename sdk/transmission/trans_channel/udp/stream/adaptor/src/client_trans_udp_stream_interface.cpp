@@ -35,7 +35,7 @@ namespace {
     std::mutex g_mutex;
 }
 
-static inline void ConvertStreamFrameInfo(StreamFrameInfo *inFrameInfo, 
+static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
     Communication::SoftBus::StreamFrameInfo *outFrameInfo)
 {
     outFrameInfo->streamId = 0;
@@ -106,7 +106,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
         }
 
         Communication::SoftBus::StreamFrameInfo outFrameInfo;
-        ConvertStreamFrameInfo(param, &outFrameInfo)
+        ConvertStreamFrameInfo(param, outFrameInfo);
         stream = IStream::MakeCommonStream(data, outFrameInfo);
     } else {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Do not support");

@@ -30,7 +30,7 @@ namespace SoftBus {
 class StreamCommonData : public IStream {
 public:
     StreamCommonData() = default;
-    StreamCommonData(uint32_t streamId, uint16_t seq, StreamFrameInfo& frameInfo);
+    StreamCommonData(uint32_t streamId, uint16_t seq, const StreamFrameInfo& frameInfo);
 
     virtual ~StreamCommonData() = default;
 
