@@ -271,6 +271,16 @@ void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
+{
+    if (state < SOFTBUS_SCREEN_ON || state >= SOFTBUS_SCREEN_UNKNOWN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
+        return;
+    }
+    LnnMonitorScreenStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyBtStateChangeEvent(void *state)
 {
     SoftBusBtState *btState = (SoftBusBtState *)state;

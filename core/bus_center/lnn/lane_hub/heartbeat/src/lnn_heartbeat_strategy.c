@@ -148,6 +148,14 @@ static void LnnHeartbeatMasterNodeChangeEventHandler(const LnnEventBasicInfo *in
     }
 }
 
+static void LnnHeartbeatScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_SCREEN_STATE_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB screen state event handler get invalid param");
+        return;
+    }
+}
+
 static void HbOnGroupChanged(void)
 {
     int32_t ret = LnnPostMsgToHbFsm(EVENT_HB_UPDATE_DEVICE_INFO, NULL);
@@ -208,9 +216,14 @@ int32_t LnnInitHeartbeat(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor init fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, LnnHeartbeatScreenStateChangeEventHandler) !=
+        SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor regist screen state event fail!");
+        return SOFTBUS_ERR;
+    }
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, LnnHeartbeatMasterNodeChangeEventHandler) !=
         SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor regist event fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB monitor regist node master event fail!");
         return SOFTBUS_ERR;
     }
     AuthRegCallback(HEARTBEAT_MONITOR, &g_verifyCb);

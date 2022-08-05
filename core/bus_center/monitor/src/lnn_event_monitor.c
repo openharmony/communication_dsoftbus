@@ -31,6 +31,7 @@ typedef enum {
     MONITOR_IMPL_WIFISERVICE_TYPE,
     MONITOR_IMPL_BT_STATE_TYPE,
     MONITOR_IMPL_DRIVER_TYPE,
+    MONITOR_IMPL_SCREENSTATE_TYPE,
     MONITOR_IMPL_MAX_TYPE,
 } MonitorImplType;
 
@@ -41,6 +42,7 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitWifiServiceMonitorImpl,
     LnnInitBtStateMonitorImpl,
     LnnInitDriverMonitorImpl,
+    LnnInitScreenStateMonitorImpl,
 };
 
 static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
