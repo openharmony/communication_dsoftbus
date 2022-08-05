@@ -81,7 +81,7 @@ typedef struct {
     SoftBusBtAddr peerAddr;
 } BleGattcInfo;
 
-static SoftBusGattcCallback g_softbusGattcCb = { 0 };
+static SoftBusGattcCallback g_softbusGattcCb = {0};
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
 static bool g_gattcIsInited = false;

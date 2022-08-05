@@ -25,7 +25,7 @@ static uint32_t g_logLevel = NSTACKX_LOG_LEVEL_INFO;
 #ifdef BUILD_FOR_WINDOWS
 static void DefaultLogImpl(const char *tag, uint32_t level, const char *format, va_list args)
 {
-    SYSTEMTIME st = { 0 };
+    SYSTEMTIME st = {0};
 
     GetLocalTime(&st);
     printf("%02d-%02d %02d:%02d:%02d.%03d %d %d %d %s: ", st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,

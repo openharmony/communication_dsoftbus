@@ -34,7 +34,7 @@ static const char SOFTBUS_APP_UUID[BT_UUID_LEN] = {
 };
 
 SoftBusGattsCallback *g_gattsCallback = NULL;
-static BtGattServerCallbacks g_bleGattsHalCallback = { 0 };
+static BtGattServerCallbacks g_bleGattsHalCallback = {0};
 static int g_halServerId = -1;
 static int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 

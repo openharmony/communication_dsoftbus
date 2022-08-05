@@ -397,7 +397,7 @@ typedef struct FillpTraceDescriptStruct {
 #define FILLP_TRACE_DESC_INIT(dir) \
     { \
         (dir), \
-        { 0 }, \
+        {0}, \
     }
 
 /**
