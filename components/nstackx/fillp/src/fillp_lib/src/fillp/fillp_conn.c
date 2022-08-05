@@ -205,47 +205,70 @@ static FILLP_INT32 FillpDecodeExtParaNameLen(FILLP_CONST FILLP_UCHAR *buf, FILLP
     return len;
 }
 
-static void FillpDecodeExtParaVal(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, FILLP_UCHAR paraLen,
-    FILLP_UCHAR *value, FILLP_UINT32 maxValLen)
+static void FillpDecodeRtt(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
 {
-    FILLP_UINT8 value8 = 0;
-    FILLP_UINT32 value32;
-    FILLP_ULLONG value64;
-    void *copybuf = FILLP_NULL;
-
-    if ((bufLen < paraLen) || (maxValLen < paraLen)) {
-        FILLP_LOGERR("bufLen %d paraLen %u maxValLen %u", bufLen, paraLen, maxValLen);
+    FILLP_ULLONG rtt;
+    if (bufLen != (FILLP_INT)sizeof(rtt)) {
         return;
     }
 
-    if (maxValLen == sizeof(value8)) {
-        copybuf = &value8;
-    } else if (maxValLen == sizeof(value32)) {
-        copybuf = &value32;
-    } else if (maxValLen == sizeof(value64)) {
-        copybuf = &value64;
-    } else {
-        FILLP_LOGERR("maxValLen %u error", maxValLen);
-        return;
-    }
-    errno_t err = memcpy_s(copybuf, maxValLen, buf, paraLen);
+    FILLP_INT err = memcpy_s(&rtt, sizeof(rtt), buf, (FILLP_UINT32)bufLen);
     if (err != EOK) {
-        FILLP_LOGERR("memcpy_s failed:%d ", err);
+        FILLP_LOGERR("memcpy_s failed: %d", err);
         return;
     }
 
-    if (maxValLen == sizeof(value8)) {
-        *(FILLP_UINT16 *)value = value8;
-    } else if (maxValLen == sizeof(value32)) {
-        *(FILLP_UINT32 *)value = FILLP_HTONL(value32);
-    } else {
-        *(FILLP_ULLONG *)value = FILLP_HTONLL(value64);
-    }
+    conn->calcRttDuringConnect = FILLP_NTOHLL(rtt);
 }
 
-struct ExtParaOut {
-    size_t len;
-    void *val;
+static void FillpDecodePktSize(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    FILLP_UINT32 pktSize;
+    if (bufLen != (FILLP_INT)sizeof(pktSize)) {
+        return;
+    }
+
+    FILLP_INT err = memcpy_s(&pktSize, sizeof(pktSize), buf, (FILLP_UINT32)bufLen);
+    if (err != EOK) {
+        FILLP_LOGERR("memcpy_s failed: %d", err);
+        return;
+    }
+
+    conn->peerPktSize = FILLP_NTOHL(pktSize);
+}
+
+static void FillpDecodeCharacters(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    FILLP_UINT32 characters;
+    if (bufLen != (FILLP_INT)sizeof(characters)) {
+        return;
+    }
+
+    FILLP_INT err = memcpy_s(&characters, sizeof(characters), buf, (FILLP_UINT32)bufLen);
+    if (err != EOK) {
+        FILLP_LOGERR("memcpy_s failed: %d", err);
+        return;
+    }
+
+    conn->peerCharacters = FILLP_NTOHL(characters);
+}
+
+static void FillpDecodeFcAlg(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    if (bufLen != (FILLP_INT)sizeof(conn->peerFcAlgs)) {
+        return;
+    }
+
+    conn->peerFcAlgs = *(FILLP_UINT8 *)buf;
+}
+
+typedef void (*FIllpExtParaDecoder)(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen);
+static FIllpExtParaDecoder g_extParaDecoder[FILLP_PKT_EXT_BUTT] = {
+    FILLP_NULL_PTR, /* FILLP_PKT_EXT_START */
+    FillpDecodeRtt, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT */
+    FillpDecodePktSize, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE */
+    FillpDecodeCharacters, /* FILLP_PKT_EXT_CONNECT_CARRY_CHARACTERS */
+    FillpDecodeFcAlg, /* FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG */
 };
 
 static FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, struct FtNetconn *conn)
@@ -254,22 +277,6 @@ static FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bu
     FILLP_UCHAR paraType = 0;
     FILLP_UCHAR paraLen = 0;
     FILLP_INT ret;
-
-    struct ExtParaOut para[] = {
-        {
-            .len = sizeof(FILLP_ULLONG),
-            .val = &conn->calcRttDuringConnect, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT */
-        }, {
-            .len = sizeof(FILLP_UINT32),
-            .val = &conn->peerPktSize, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE */
-        }, {
-            .len = sizeof(FILLP_UINT32),
-            .val = &conn->peerCharacters, /* FILLP_PKT_EXT_CONNECT_CARRY_CHARACTER */
-        }, {
-            .len = sizeof(FILLP_UINT8),
-            .val = &conn->peerFcAlgs, /* FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG */
-        },
-    };
 
     while (len < bufLen) {
         ret = FillpDecodeExtParaNameLen(buf + len, bufLen - len, &paraType, &paraLen);
@@ -280,14 +287,14 @@ static FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bu
 
         len += ret;
 
-        if (paraType < FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT ||
-            paraType > FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG) {
-            len += paraLen;
-            continue;
-        }
         FILLP_LOGERR("paraType:%u ", paraType);
-        FillpDecodeExtParaVal(buf + len, bufLen - len, paraLen, para[paraType - 1].val,
-            (FILLP_UINT32)para[paraType - 1].len);
+
+        if (bufLen - len >= paraLen &&
+            paraType > FILLP_PKT_EXT_START && paraType < FILLP_PKT_EXT_BUTT &&
+            g_extParaDecoder[paraType] != FILLP_NULL_PTR) {
+            g_extParaDecoder[paraType](conn, buf + len, paraLen);
+        }
+
         len += paraLen;
     }
 
