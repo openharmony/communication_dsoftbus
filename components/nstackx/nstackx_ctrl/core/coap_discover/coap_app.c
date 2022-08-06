@@ -32,6 +32,7 @@
 #include "nstackx_error.h"
 #include "nstackx_dfinder_log.h"
 #include "nstackx_event.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
 
@@ -152,6 +153,7 @@ static void CoAPEpollErrorHandle(void *data)
     if (socket == NULL) {
         return;
     }
+    IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     EpollTask *currEpollTask = NULL;
 
@@ -185,6 +187,7 @@ static void CoAPEpollErrorHandle(void *data)
         return;
     }
     coap_socket_t *socket = task->ptr;
+    IncStatistics(STATS_SOCKET_ERROR);
     g_socketEventNum[SOCKET_ERROR_EVENT]++;
     if (socket == NULL) {
         return;
@@ -440,6 +443,7 @@ int32_t CoapSelectWait(TaskListInfo *taskListInfo)
     if (ret < 0) {
         int lastError = WSAGetLastError();
         if (lastError != WSAEINVAL) {
+            IncStatistics(STATS_SOCKET_ERROR);
             DFINDER_LOGE(TAG, "select error ret lastError: %d", lastError);
             return NSTACKX_EFAILED;
         }
@@ -494,6 +498,7 @@ static void *CoapIoMonitorLoop(void *arg)
             break;
         }
         if (CoapSelectWait(&taskListInfo) == NSTACKX_EFAILED) {
+            IncStatistics(STATS_SOCKET_ERROR);
             DFINDER_LOGE(TAG, "Coap select failure");
             break;
         }
@@ -542,7 +547,7 @@ void CoapThreadDestory(void)
 #endif
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF
-int32_t CoapServerInitWithIdx(const struct in_addr *ip, uint32_t idx, const char *networkName)
+static int32_t CoapServerInitWithIdxEx(const struct in_addr *ip, uint32_t idx, const char *networkName)
 {
     DFINDER_LOGI(TAG, "CoapServerInitWithIdx, idx-%u", idx);
 
@@ -569,8 +574,17 @@ int32_t CoapServerInitWithIdx(const struct in_addr *ip, uint32_t idx, const char
 
     return NSTACKX_EOK;
 }
+
+int32_t CoapServerInitWithIdx(const struct in_addr *ip, uint32_t idx, const char *networkName)
+{
+    int32_t ret = CoapServerInitWithIdxEx(ip, idx, networkName);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
+    }
+    return ret;
+}
 #else
-int32_t CoapServerInit(const struct in_addr *ip)
+static int32_t CoapServerInitEx(const struct in_addr *ip)
 {
     DFINDER_LOGD(TAG, "CoapServerInit is called");
 
@@ -600,7 +614,16 @@ int32_t CoapServerInit(const struct in_addr *ip)
     return NSTACKX_EOK;
 }
 
-int32_t CoapP2pServerInit(const struct in_addr *ip)
+int32_t CoapServerInit(const struct in_addr *ip)
+{
+    int32_t ret = CoapServerInitEx(ip);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
+    }
+    return ret;
+}
+
+static int32_t CoapP2pServerInitEx(const struct in_addr *ip)
 {
     DFINDER_LOGD(TAG, "CoapP2pServerInit is called");
 
@@ -635,7 +658,16 @@ int32_t CoapP2pServerInit(const struct in_addr *ip)
     return NSTACKX_EOK;
 }
 
-int32_t CoapUsbServerInit(const struct in_addr *ip)
+int32_t CoapP2pServerInit(const struct in_addr *ip)
+{
+    int32_t ret = CoapP2pServerInitEx(ip);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
+    }
+    return ret;
+}
+
+static int32_t CoapUsbServerInitEx(const struct in_addr *ip)
 {
     DFINDER_LOGD(TAG, "CoapUsbServerInit is called");
 
@@ -668,6 +700,15 @@ int32_t CoapUsbServerInit(const struct in_addr *ip)
     coap_register_response_handler(g_usbCtx, CoapMessageHandler);
 
     return NSTACKX_EOK;
+}
+
+int32_t CoapUsbServerInit(const struct in_addr *ip)
+{
+    int32_t ret = CoapUsbServerInitEx(ip);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_CREATE_SERVER_FAILED);
+    }
+    return ret;
 }
 #endif /* END OF DFINDER_SUPPORT_MULTI_NIF */
 
