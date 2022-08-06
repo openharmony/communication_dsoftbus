@@ -21,10 +21,21 @@
 
 #include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXDFinder"
 
 #define NSTACKX_USEDMAP_ROW_SIZE 32U /* Row size suit for uint32_t */
+
+typedef struct {
+    uint8_t *blk;
+    uint32_t *usedMap;
+    uint32_t mapSize;
+    uint32_t useCount;
+    uint32_t maxCount;
+    size_t recSize;
+    RecCompareCallback cb;
+} DatabaseInfo;
 
 static inline int64_t GetRecordIndex(const DatabaseInfo *db, const void *rec)
 {
@@ -120,7 +131,7 @@ void *DatabaseGetNextRecord(void *dbptr, int64_t *idx)
     return NULL;
 }
 
-void *DatabaseAllocRecord(void *dbptr)
+static void *DatabaseAllocRecordEx(void *dbptr)
 {
     DatabaseInfo *db = dbptr;
     void *rec = NULL;
@@ -156,7 +167,16 @@ void *DatabaseAllocRecord(void *dbptr)
     return NULL;
 }
 
-void DatabaseFreeRecord(void *dbptr, const void *ptr)
+void *DatabaseAllocRecord(void *dbptr)
+{
+    void *record = DatabaseAllocRecordEx(dbptr);
+    if (record == NULL) {
+        IncStatistics(STATS_ALLOC_RECORD_FAILED);
+    }
+    return record;
+}
+
+static int32_t DatabaseFreeRecordEx(void *dbptr, const void *ptr)
 {
     DatabaseInfo *db = dbptr;
     uint32_t i, off;
@@ -164,21 +184,29 @@ void DatabaseFreeRecord(void *dbptr, const void *ptr)
 
     if (dbptr == NULL || ptr == NULL || db->useCount == 0) {
         DFINDER_LOGE(TAG, "Sanity chk failed");
-        return;
+        return -1;
     }
 
     recNum = GetRecordIndex(db, ptr);
     if (recNum < 0 || recNum >= db->maxCount) {
         DFINDER_LOGE(TAG, "Invalid record");
-        return;
+        return -1;
     }
     if (!IsRecordOccupied(db, (uint32_t)recNum, &i, &off)) {
         DFINDER_LOGE(TAG, "Unused record");
-        return;
+        return -1;
     }
 
     db->usedMap[i] &= ~(1U << off);
     db->useCount--;
+    return 0;
+}
+
+void DatabaseFreeRecord(void *dbptr, const void *ptr)
+{
+    if (DatabaseFreeRecordEx(dbptr, ptr) != 0) {
+        IncStatistics(STATS_FREE_RECORD_FAILED);
+    }
 }
 
 void DatabaseClean(void *ptr)
