@@ -16,7 +16,7 @@
 #include "lnn_lane_hub.h"
 
 #include "bus_center_event.h"
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_lane_qos.h"
 #include "lnn_lane_manager.h"
@@ -51,7 +51,7 @@ int32_t LnnInitLaneHub(void)
 
 int32_t LnnInitLaneHubDelay(void)
 {
-    if (LnnStartHeartbeatDelay() != SOFTBUS_OK) {
+    if (LnnStartHeartbeatFrameDelay() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start heartbeat delay fail");
         return SOFTBUS_ERR;
     }

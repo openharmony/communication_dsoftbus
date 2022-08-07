@@ -23,16 +23,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define FSM_CTRL_MSG_START 0
-#define FSM_CTRL_MSG_DATA 1
-#define FSM_CTRL_MSG_STOP 2
-#define FSM_CTRL_MSG_DEINIT 3
-
-typedef struct {
-    FsmStateMachine *fsm;
-    void *obj;
-} FsmCtrlMsgObj;
-
 static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
 {
     struct ListNode *item = NULL;
@@ -227,7 +217,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     if (msg == NULL || para == NULL) {
         return 1;
     }
-    msgType = (int32_t)(uintptr_t)para;
+    msgType = (int32_t)(intptr_t)para;
     if (msg->what == FSM_CTRL_MSG_DATA && (int32_t)msg->arg1 == msgType) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove fsm data message: %d", msgType);
         FreeFsmHandleMsgObj((FsmCtrlMsgObj *)msg->obj);
@@ -236,7 +226,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     return 1;
 }
 
-int32_t LnnFsmInit(FsmStateMachine *fsm, char *name, FsmDinitCallback cb)
+int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmDeinitCallback cb)
 {
     if (fsm == NULL || name == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -244,7 +234,7 @@ int32_t LnnFsmInit(FsmStateMachine *fsm, char *name, FsmDinitCallback cb)
 
     (void)memset_s(fsm, sizeof(*fsm), 0, sizeof(*fsm));
     ListInit(&fsm->stateList);
-    fsm->looper = GetLooper(LOOP_TYPE_DEFAULT);
+    fsm->looper = looper == NULL ? GetLooper(LOOP_TYPE_DEFAULT) : looper;
     if (fsm->looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get looper fail");
         return SOFTBUS_ERR;
@@ -326,7 +316,18 @@ int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
         return SOFTBUS_INVALID_PARAM;
     }
     fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
-        RemoveMessageFunc, (void *)(uintptr_t)msgType);
+        RemoveMessageFunc, (void *)(intptr_t)msgType);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
+    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
+{
+    if (fsm == NULL || fsm->looper == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    fsm->looper->RemoveMessageCustom(fsm->looper, &fsm->handler,
+        customFunc == NULL ? RemoveMessageFunc : customFunc, args);
     return SOFTBUS_OK;
 }
 
