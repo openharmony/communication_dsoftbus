@@ -15,42 +15,59 @@
 
 #include "lnn_ble_heartbeat.h"
 
+#include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback)
+static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
 {
     (void)callback;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl init");
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnceBleHbBegin(void)
+static int32_t BleHeartbeatOnceBegin(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat once");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnOnceBleHbEnd(void)
+static int32_t BleHeartbeatOnceEnd(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat end");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnStopBleHeartbeat(void)
+static int32_t SetBleMediumParam(const LnnHeartbeatMediumParam *param)
+{
+    (void)param;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl set medium param");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+static int32_t StopBleHeartbeat(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat stop");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnDeinitBleHeartbeat(void)
+static void DeinitBleHeartbeat(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl deinit");
-    return SOFTBUS_OK;
+    return;
 }
 
-int32_t LnnOnUpdateLocalDeviceInfo(void)
+static LnnHeartbeatMediumMgr g_bleMgr = {
+    .supportType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1,
+    .init = InitBleHeartbeat,
+    .onSendOneHbBegin = BleHeartbeatOnceBegin,
+    .onSendOneHbEnd = BleHeartbeatOnceEnd,
+    .onSetMediumParam = SetBleMediumParam,
+    .onStopHeartbeat = StopBleHeartbeat,
+    .deinit = DeinitBleHeartbeat,
+};
+
+int32_t LnnRegistBleHeartbeatMediumMgr(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl update local device info");
-    return SOFTBUS_NOT_IMPLEMENT;
+    return LnnRegistHeartbeatMediumMgr(&g_bleMgr);
 }
