@@ -828,16 +828,16 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     if (type != CONNECTION_ADDR_MAX && info->relation[type] > 0) {
         info->relation[type]--;
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnGetDiscoveryType(type) == DISCOVERY_TYPE_BR) {
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BR) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnGetDiscoveryType(type) == DISCOVERY_TYPE_WIFI &&
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI &&
         info->authChannelId[type] != authId) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "authChannelId != authId, not need to report offline.");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
-    LnnClearDiscoveryType(info, LnnGetDiscoveryType(type));
+    LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
             info->discoveryType);
@@ -1187,7 +1187,7 @@ int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
+int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1204,7 +1204,7 @@ int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *tim
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t timestamp)
+int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1221,7 +1221,7 @@ int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDistributedConnCapability(const char *networkId, uint64_t connCapability)
+int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");

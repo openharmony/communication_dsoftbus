@@ -18,7 +18,6 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
@@ -83,16 +82,7 @@ static int32_t EnableBrSubnet(LnnPhysicalSubnet *subnet)
 
 static int32_t EnableBleSubnet(LnnPhysicalSubnet *subnet)
 {
-    int32_t ret;
-
-    if (subnet->status == LNN_SUBNET_RUNNING) {
-        return SOFTBUS_OK;
-    }
-    ret = LnnStartHeartbeatDelay();
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN start ble heartbeat fail, ret=%d", ret);
-        return ret;
-    }
+    (void)subnet;
     return SOFTBUS_OK;
 }
 
@@ -106,7 +96,7 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
     if (subnet->status != LNN_SUBNET_RUNNING) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN start leave br network");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN br subnet is disable, start leave br network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave br network fail, ret=%d", ret);
@@ -125,8 +115,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
     if (subnet->status != LNN_SUBNET_RUNNING) {
         return SOFTBUS_ERR;
     }
-    LnnStopHeartbeatNow();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN start leave ble network");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN ble subnet is disable, start leave ble network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave ble network fail, ret=%d", ret);

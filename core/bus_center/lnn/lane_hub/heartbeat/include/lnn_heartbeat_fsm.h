@@ -16,19 +16,17 @@
 #ifndef LNN_HEARTBEAT_FSM_H
 #define LNN_HEARTBEAT_FSM_H
 
-#include "lnn_heartbeat_manager.h"
+#include "common_list.h"
+#include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_state_machine.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define SHORT_UDID_HASH_LEN 8
-#define SHORT_UDID_HASH_HEX_LEN 16
-#define SHORT_USRID_HASH_HEX_LEN 4
-
 typedef enum {
-    STATE_HB_UNINIT_INDEX = -1,
-    STATE_HB_NONE_INDEX = 0,
+    STATE_HB_INDEX_MIN = 0,
+    STATE_HB_NONE_INDEX = STATE_HB_INDEX_MIN,
     STATE_HB_NORMAL_NODE_INDEX,
     STATE_HB_MASTER_NODE_INDEX,
     STATE_HB_INDEX_MAX,
@@ -36,35 +34,61 @@ typedef enum {
 
 typedef enum {
     EVENT_HB_ENTER = 0,
-    EVENT_HB_START,
-    EVENT_HB_ONCE_BEGIN,
-    EVENT_HB_DEVICE_LOST,
     EVENT_HB_AS_MASTER_NODE,
-    EVENT_HB_AS_NORMAL_NODE = 5,
-    EVENT_HB_CHECK_DEV,
-    EVENT_HB_REPEAT_CYCLE,
-    EVENT_HB_ONCE_END,
+    EVENT_HB_AS_NORMAL_NODE,
+    EVENT_HB_PROCESS_SEND_ONCE,
+    EVENT_HB_SEND_ONE_BEGIN,
+    EVENT_HB_SEND_ONE_END = 5,
+    EVENT_HB_CHECK_DEV_STATUS,
     EVENT_HB_STOP,
-    EVENT_HB_TIMEOUT = 10,
-    EVENT_HB_UPDATE_DEVICE_INFO,
-    EVENT_HB_EXIT,
     EVENT_HB_MAX,
 } LnnHeartbeatEventType;
 
-int32_t LnnPostMsgToHbFsm(int32_t eventType, void *obj);
-int32_t LnnPostDelayMsgToHbFsm(int32_t eventType, void *obj, uint64_t delayMillis);
-int32_t LnnRemoveHbFsmMsg(int32_t eventType, uint64_t para, void *obj);
+typedef struct {
+    ListNode node;
+    uint16_t id;
+    LnnHeartbeatType hbType;
 
-int32_t LnnHbRelayToMaster(ConnectionAddrType type);
-int32_t LnnHbCheckDevStatus(ConnectionAddrType type, uint64_t delayMillis);
-int32_t LnnHbAsNormalNode(void);
-int32_t LnnHbProcessDeviceLost(const char *networkId, ConnectionAddrType addrType, uint64_t delayMillis);
+    char fsmName[HB_FSM_NAME_LEN];
+    FsmStateMachine fsm;
+    LnnHeartbeatState state;
+    LnnHeartbeatStrategyType strategyType;
+} LnnHeartbeatFsm;
 
-int32_t LnnHbFsmStart(int32_t stateIndex, uint64_t delayMillis);
-int32_t LnnHbFsmStop(uint64_t delayMillis);
+typedef struct {
+    LnnHeartbeatType hbType;
+    bool *isRemoved;
+} LnnRemoveSendEndMsgPara;
 
-int32_t LnnHbFsmInit(void);
-void LnnHbFsmDeinit(void);
+typedef struct {
+    LnnHeartbeatType hbType;
+    ConnectionAddrType addrType;
+    const char networkId[NETWORK_ID_BUF_LEN];
+} LnnCheckDevStatusMsgPara;
+
+typedef struct {
+    LnnHeartbeatType hbType;
+    LnnHeartbeatStrategyType strategyType;
+} LnnProcessSendOnceMsgPara;
+
+int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
+int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
+
+int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, void *obj, uint64_t delayMillis);
+int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
+int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, uint64_t delayMillis);
+int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
+int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, bool isMasterNode);
+int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
+    uint64_t delayMillis);
+
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool *isRemoved);
+void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
+void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,
+    LnnHeartbeatStrategyType strategyType);
+
+LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void);
+void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
 
 #ifdef __cplusplus
 }
