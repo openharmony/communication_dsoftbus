@@ -241,10 +241,8 @@ typedef struct {
     char eventName[DFINDER_EVENT_NAME_LEN];
     DFinderEventType type;
     DFinderEventLevel level;
-    char tag[DFINDER_EVENT_TAG_LEN];
-    char desc[DFINDER_EVENT_NAME_LEN];
-    DFinderEventParam *params;
     uint32_t paramNum;
+    DFinderEventParam *params;
 } DFinderEvent;
 
 typedef void (*DFinderEventFunc)(void *softObj, const DFinderEvent *info);
