@@ -796,6 +796,8 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         } else {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "flag error");
         }
+        // update lnn discovery type
+        info->discoveryType |= oldInfo->discoveryType;
         MergeLnnInfo(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
