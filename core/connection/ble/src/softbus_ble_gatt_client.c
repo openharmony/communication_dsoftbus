@@ -584,8 +584,9 @@ static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed");
         return;
     }
-    g_softBusBleConnCb->BleConnectCallback(clientId, bleStrMac, &(infoNode->peerAddr));
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
+    
+    g_softBusBleConnCb->BleConnectCallback(clientId, bleStrMac, &(infoNode->peerAddr));
 }
 
 static void TimeOutMsgHandler(int32_t clientId, int32_t errCode)
@@ -751,11 +752,12 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "data not enough");
         return;
     }
+    (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
+
     (void)g_softBusBleConnCb->BleOnDataReceived(isBleConn, halConnInfo, (uint32_t)len, (char *)value);
     if (index != -1) {
         BleTransCacheFree(halConnInfo, index);
     }
-    (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
 }
 
 static int BleConnClientLooperInit(void)
