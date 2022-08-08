@@ -32,9 +32,9 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
-#include "lnn_ip_network_impl.h"
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
+#include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
@@ -229,6 +229,7 @@ static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create connection fsm failed");
         return NULL;
     }
+    connFsm->statisticData.beginTime = LnnUpTimeMs();
     if (LnnStartConnectionFsm(connFsm) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start connection fsm[id=%u] failed", connFsm->id);
         LnnDestroyConnectionFsm(connFsm);
@@ -603,6 +604,7 @@ static int32_t ProcessAuthKeyGenerated(const void *para)
         connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     }
     connFsm->connInfo.peerVersion = msgPara->peerVersion;
+    connFsm->statisticData.authTime = LnnUpTimeMs();
     if (LnnSendAuthKeyGenMsgToConnFsm(connFsm) != SOFTBUS_OK) {
         if (isCreate) {
             StopConnectionFsm(connFsm);

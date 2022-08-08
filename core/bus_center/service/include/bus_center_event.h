@@ -30,7 +30,9 @@ typedef enum {
     /* event from system monitor */
     LNN_EVENT_IP_ADDR_CHANGED,
     LNN_EVENT_WIFI_STATE_CHANGED,
+    LNN_EVENT_BT_STATE_CHANGED,
     LNN_EVENT_WLAN_PARAM,
+    LNN_EVENT_SCREEN_STATE_CHANGED,
     /* event from internal lnn */
     LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
     LNN_EVENT_RELATION_CHANGED,
@@ -52,13 +54,37 @@ typedef enum {
     SOFTBUS_WIFI_CONNECTED,
     SOFTBUS_WIFI_DISCONNECTED,
     SOFTBUS_WIFI_DISABLED,
-    SOFTBUS_UNKNOWN,
+    SOFTBUS_WIFI_UNKNOWN,
 } SoftBusWifiState;
+
+typedef enum {
+    SOFTBUS_SCREEN_ON,
+    SOFTBUS_SCREEN_OFF,
+    SOFTBUS_SCREEN_UNKNOWN,
+} SoftBusScreenState;
+
+typedef enum {
+    SOFTBUS_BLE_TURN_ON,
+    SOFTBUS_BLE_TURN_OFF,
+    SOFTBUS_BR_TURN_ON,
+    SOFTBUS_BR_TURN_OFF,
+    SOFTBUS_BT_UNKNOWN,
+} SoftBusBtState;
 
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
 } LnnMonitorWlanStateChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint8_t status;
+} LnnMonitorScreenStateChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint8_t status;
+} LnnMonitorBtStateChangedEvent;
 
 typedef struct {
     LnnEventBasicInfo basic;
@@ -103,6 +129,8 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
 
 void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state);
+void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
+void LnnNotifyBtStateChangeEvent(void *state);
 void LnnNotifyAddressChangedEvent(const char* ifName);
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
 

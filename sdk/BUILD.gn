@@ -38,7 +38,7 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type != "liteos_m") {
     common_client_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
-      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
   }
@@ -48,10 +48,8 @@ if (defined(ohos_lite)) {
   } else {
     build_type = "ohos_static_library"
   }
-  common_client_deps += [
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//utils/native/base:utils",
-  ]
+  common_client_deps +=
+      [ "//third_party/bounds_checking_function:libsec_shared" ]
 }
 
 config("dsoftbus_sdk_interface") {
@@ -92,6 +90,7 @@ target(build_type, "softbus_client") {
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
       external_deps = [
+        "c_utils:utils",
         "hiviewdfx_hilog_native:libhilog",
         "ipc:ipc_single",
       ]

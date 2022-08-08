@@ -33,6 +33,7 @@
 #include "nstackx_device.h"
 #include "nstackx_timer.h"
 #include "coap_discover/coap_discover.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXDFinder"
 #ifdef SUPPORT_SMARTGENIUS
@@ -123,6 +124,7 @@ static void SmartGeniusCallback(void *arg)
     socklen = sizeof(struct sockaddr_nl);
     len = recvfrom(task->taskfd, innerBuf, BUFLEN, 0, (struct sockaddr *)&peer, &socklen);
     if (len <= 0) {
+        IncStatistics(STATS_SOCKET_ERROR);
         DFINDER_LOGE(TAG, "recvfrom error %d", errno);
         return;
     }

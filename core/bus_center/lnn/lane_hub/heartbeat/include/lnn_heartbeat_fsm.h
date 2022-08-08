@@ -16,7 +16,7 @@
 #ifndef LNN_HEARTBEAT_FSM_H
 #define LNN_HEARTBEAT_FSM_H
 
-#include "softbus_common.h"
+#include "lnn_heartbeat_manager.h"
 
 #ifdef __cplusplus
 extern "C" {

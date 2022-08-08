@@ -27,7 +27,7 @@ ohos_fuzztest("StopDiscoveryFuzzTest") {
     "//foundation/communication/dsoftbus/interfaces/kits/discovery",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
     "//foundation/communication/dsoftbus/sdk/discovery/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/communication/dsoftbus/sdk/discovery/manager/include",
   ]
   cflags = [
@@ -39,10 +39,9 @@ ohos_fuzztest("StopDiscoveryFuzzTest") {
   ]
   sources = [ "stopdiscovery_fuzzer.cpp" ]
 
-  deps = [
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################

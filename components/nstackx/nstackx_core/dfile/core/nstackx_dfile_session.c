@@ -34,6 +34,7 @@
 #include "nstackx_dfile_mp.h"
 #include "securec.h"
 #include "nstackx_util.h"
+#include "nstackx_dfile_dfx.h"
 
 #define TAG "nStackXDFile"
 
@@ -49,6 +50,7 @@
 
 static void ReadEventHandle(void *arg);
 static void ProcessSessionTrans(const DFileSession *session, uint16_t exceptTransId);
+DFileEventFunc g_dfileEventFunc;
 
 static QueueNode *CreateQueueNode(const uint8_t *frame, size_t length,
     const struct sockaddr_in *peerAddr, uint8_t socketIndex)
@@ -208,10 +210,10 @@ void NoticeSessionProgress(DFileSession *session)
 {
     DFileMsg data;
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
-    if (FileManagerGetTotalBytes(session->fileManager, &data.transferUpdate.totalBytes) == NSTACKX_EOK &&
-        FileManagerGetBytesTransferred(session->fileManager, &data.transferUpdate.bytesTransferred) == NSTACKX_EOK
-        && data.transferUpdate.bytesTransferred <= data.transferUpdate.totalBytes
-        && data.transferUpdate.bytesTransferred > 0) {
+    if ((FileManagerGetTotalBytes(session->fileManager, &data.transferUpdate.totalBytes) == NSTACKX_EOK) &&
+        (FileManagerGetBytesTransferred(session->fileManager, &data.transferUpdate.bytesTransferred) == NSTACKX_EOK) &&
+        (data.transferUpdate.bytesTransferred <= data.transferUpdate.totalBytes) &&
+        (data.transferUpdate.bytesTransferred > 0)) {
         NotifyMsgRecver(session, DFILE_ON_SESSION_IN_PROGRESS, &data);
     }
 }
@@ -303,6 +305,8 @@ static void CalculateSessionTransferRate(DFileSession *session, uint64_t totalBy
     (void)memset_s(&msgData, sizeof(msgData), 0, sizeof(msgData));
     msgData.rate = (uint32_t)rate;
     NotifyMsgRecver(session, DFILE_ON_SESSION_TRANSFER_RATE, &msgData);
+
+    TransferCompleteEvent(rate);
 }
 
 static void CheckTransDone(DFileSession *session, struct DFileTrans *dFileTrans, DFileTransMsgType msgType)
@@ -1532,6 +1536,7 @@ void *DFileSenderHandle(void *arg)
         }
         ret = DFileSessionSendFrame(session, &queueNode, &unsent, &before, socketIndex);
         if (ret < 0 && ret != NSTACKX_EAGAIN) {
+            PeerShuttedEvent();
             PostFatalEvent(session);
             break;
         }
@@ -1781,6 +1786,8 @@ int32_t DFileAcceptSocket(DFileSession *session)
         SetTcpKeepAlive(session->acceptSocket->sockfd);
     }
 
+    AcceptSocketEvent();
+
     return NSTACKX_EOK;
 }
 
@@ -1810,6 +1817,7 @@ void *DFileReceiverHandle(void *arg)
 
         ret = DFileSocketRecv(session);
         if (ret != NSTACKX_EAGAIN && ret != NSTACKX_EOK) {
+            PeerShuttedEvent();
             break;
         }
     }
@@ -2036,3 +2044,15 @@ void DestroyReceiverPipe(DFileSession *session)
     }
 }
 
+void DFileSetEvent(void *softObj, DFileEventFunc func)
+{
+    g_dfileEventFunc = func;
+    (void)softObj;
+}
+
+void NSTACKX_DFileAssembleFunc(void *softObj, const DFileEvent *info)
+{
+    if (g_dfileEventFunc != NULL) {
+        g_dfileEventFunc(softObj, info);
+    }
+}

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef HISYSEVENT_DISC_REPORTER_H
-#define HISYSEVENT_DISC_REPORTER_H
+#ifndef SOFTBUS_HISYSEVT_COMMON_H
+#define SOFTBUS_HISYSEVT_COMMON_H
 #include "softbus_adapter_hisysevent.h"
 
 #ifdef __cplusplus
@@ -22,12 +22,23 @@ extern "C" {
 #endif
 #endif
 
+
 int32_t InitSoftbusSysEvt();
 
 typedef enum {
     SOFTBUS_STATISTIC_EVT_START = 0,
     SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT = SOFTBUS_STATISTIC_EVT_START,
     SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST,
+    SOFTBUS_STATISTIC_EVT_FIRST_DISC_DURATION,
+    SOFTBUS_STATISTIC_EVT_DISC_SCAN_TIMES,
+    SOFTBUS_STATISTIC_EVT_DISC_FAULT,
+    SOFTBUS_STATISTIC_EVT_CONN_DURATION,
+    SOFTBUS_STATISTIC_EVT_CONN_SUCC_RATE,
+
+    SOFTBUS_STATISTIC_EVT_LNN_WLAN_DURATION,
+    SOFTBUS_STATISTIC_EVT_LNN_BLE_DURATION,
+    SOFTBUS_STATISTIC_EVT_LNN_WLAN_RATE_SUCCESS,
+    SOFTBUS_STATISTIC_EVT_LNN_BLE_RATE_SUCCESS,
 
     SOFTBUS_STATISTIC_EVT_BUTT,
 }StatisticEvtType;
@@ -44,4 +55,4 @@ int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc 
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* HISYSEVENT_DISC_REPORTER_H */
+#endif /* SOFTBUS_HISYSEVT_COMMON_H */

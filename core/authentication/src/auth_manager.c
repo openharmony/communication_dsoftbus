@@ -1153,15 +1153,13 @@ static void OnAuthGroupChanged(const char *groupInfo, bool create)
         return;
     }
     cJSON_Delete(msg);
-    if (groupType == IDENTICAL_ACCOUNT_GROUP) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth group account change %d, groupType = %d",
-            create, groupType);
-        for (uint32_t monitor = LNN; monitor < VERIFY_MODULE_NUM; ++monitor) {
-            if (create && g_verifyCallback[monitor].onGroupCreated != NULL) {
-                g_verifyCallback[monitor].onGroupCreated(groupId);
-            } else if (!create && g_verifyCallback[monitor].onGroupDeleted != NULL) {
-                g_verifyCallback[monitor].onGroupDeleted(groupId);
-            }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth group account change %d, groupType = %d",
+        create, groupType);
+    for (uint32_t monitor = LNN; monitor < VERIFY_MODULE_NUM; ++monitor) {
+        if (create && g_verifyCallback[monitor].onGroupCreated != NULL) {
+            g_verifyCallback[monitor].onGroupCreated(groupId);
+        } else if (!create && g_verifyCallback[monitor].onGroupDeleted != NULL) {
+            g_verifyCallback[monitor].onGroupDeleted(groupId);
         }
     }
 }

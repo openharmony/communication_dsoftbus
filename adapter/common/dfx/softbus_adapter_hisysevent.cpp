@@ -16,6 +16,7 @@
 #include <sstream>
 #include <securec.h>
 #include "softbus_error_code.h"
+
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "message_handler.h"
@@ -40,63 +41,58 @@ static const char* g_evtTypeTable[SOFTBUS_EVT_TYPE_BUTT] = {
     "BEHAVIOR"
 };
 
-static void AppendParamValue(std::stringstream& strStream, SoftBusEvtParam& evtParam)
+static void ReportParamValue(SoftBusEvtParam& evtParam)
 {
     switch (evtParam.paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
-            strStream << (unsigned int)evtParam.paramValue.b;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.b);
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT8:
-            strStream << (unsigned int)evtParam.paramValue.u8v;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u8v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT16:
-            strStream << (unsigned int)evtParam.paramValue.u16v;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u16v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_INT32:
-            strStream << (int)evtParam.paramValue.i32v;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}d",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (int)evtParam.paramValue.i32v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT32:
-            strStream << (unsigned long)evtParam.paramValue.u32v;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u32v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT64:
-            strStream << (unsigned long long)evtParam.paramValue.u64v;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}llu",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned long long)evtParam.paramValue.u64v);
             break;
         case SOFTBUS_EVT_PARAMTYPE_FLOAT:
-            strStream << evtParam.paramValue.f;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}f",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.f);
             break;
         case SOFTBUS_EVT_PARAMTYPE_DOUBLE:
-            strStream << evtParam.paramValue.d;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.d);
             break;
         case SOFTBUS_EVT_PARAMTYPE_STRING:
-            strStream << (const char*)evtParam.paramValue.str;
+            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}s",
+                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.str);
             break;
         default:
             break;
     }
 }
 
-static char* ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
+static void ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
 {
-    std::string outStr;
-    std::stringstream strStream(outStr);
-
-    strStream << "EvtName: " << (const char*)reportMsg->evtName <<" And EvtType: ";
-    strStream << (const char*)g_evtTypeTable[reportMsg->evtType];
-    strStream << "  ParamNum: " << (unsigned long)reportMsg->paramNum << "  ";
+    HILOG_INFO(SOFTBUS_HILOG_ID, "EvtName: %{public}s;  EvtType: %{public}s;  ParamNum: %{public}d",
+        reportMsg->evtName, g_evtTypeTable[reportMsg->evtType], reportMsg->paramNum);
 
     for (uint32_t i = 0; i < reportMsg->paramNum; i++) {
-        strStream << "ParamName: " << (const char*)reportMsg->paramArray[i].paramName;
-        strStream << "  ParamType: " << (const char*)g_paramTypeTable[reportMsg->paramArray[i].paramType];
-        AppendParamValue(strStream, reportMsg->paramArray[i]);
+        ReportParamValue(reportMsg->paramArray[i]);
     }
-
-    unsigned int strlen = outStr.length();
-    char* msgStr = (char*)SoftBusMalloc(strlen + 1);
-    if (msgStr != nullptr) {
-        strcpy_s(msgStr, strlen + 1, outStr.c_str());
-    }
-    
-    return msgStr;
 }
 
 #ifdef __cplusplus
@@ -111,13 +107,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         return SOFTBUS_ERR;
     }
     
-    char* reportMsgStr = ConvertReportMsgToStr(reportMsg);
-    if (reportMsgStr == nullptr) {
-        return SOFTBUS_ERR;
-    }
-    
-    HILOG_INFO(SOFTBUS_HILOG_ID, "[COMM]%{public}s", reportMsgStr);
-    SoftBusFree((void*)reportMsgStr);
+    ConvertReportMsgToStr(reportMsg);
 
     return SOFTBUS_OK;
 }

@@ -26,6 +26,9 @@ bus_center_net_mgr_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
 ]
+if (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble) {
+  bus_center_net_mgr_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_bt_network_impl.c" ]
+}
 bus_center_net_mgr_deps = []
 
 native_source_path = rebase_path("$dsoftbus_root_path")

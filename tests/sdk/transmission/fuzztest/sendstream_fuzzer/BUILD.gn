@@ -28,7 +28,7 @@ ohos_fuzztest("SendStreamFuzzTest") {
     "//foundation/communication/dsoftbus/core/common/include",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
     "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
   cflags = [
@@ -40,10 +40,9 @@ ohos_fuzztest("SendStreamFuzzTest") {
   ]
   sources = [ "sendstream_fuzzer.cpp" ]
 
-  deps = [
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################

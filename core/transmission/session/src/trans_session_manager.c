@@ -181,19 +181,20 @@ void TransDelItemByPackageName(const char *pkgName)
             g_sessionServerList->cnt--;
             SoftBusFree(pos);
             pos = NULL;
-            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del package name [%s].", pkgName);
 }
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
     if ((sessionName == NULL) || (pkgName == NULL) || (len == 0)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName param error.");
         return SOFTBUS_ERR;
     }
     if (g_sessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not init");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session server list not init");
         return SOFTBUS_ERR;
     }
 
@@ -216,6 +217,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not found session name [%s].", sessionName);
     return SOFTBUS_ERR;
 }
 

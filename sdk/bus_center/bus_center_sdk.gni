@@ -45,7 +45,7 @@ if (defined(ohos_lite)) {
     ]
     bus_center_manager_sdk_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
-      "//foundation/distributedschedule/samgr_lite/samgr:samgr",
+      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
     ]
   }
 } else {
