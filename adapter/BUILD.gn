@@ -35,10 +35,8 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//utils/native/base/include",
     "//base/startup/init/interfaces/innerkits/include/syspara",
     "//commonlibrary/c_utils/base/include",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
     "//third_party/bounds_checking_function/include",
   ]
 
