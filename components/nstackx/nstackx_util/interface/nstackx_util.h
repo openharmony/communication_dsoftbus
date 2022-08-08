@@ -73,6 +73,8 @@ NSTACKX_EXPORT int32_t PthreadMutexUnlock(pthread_mutex_t *mutex);
 NSTACKX_EXPORT int32_t PthreadCreate(pthread_t *tid, const pthread_attr_t *attr, void *(*entry)(void *), void *arg);
 NSTACKX_EXPORT void PthreadJoin(pthread_t thread, void **retval);
 
+NSTACKX_EXPORT int32_t IpAddrAnonymousFormat(char *buf, size_t len, const struct sockaddr *addr, size_t addrLen);
+
 #ifdef __cplusplus
 }
 #endif
