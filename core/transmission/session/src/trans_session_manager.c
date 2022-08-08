@@ -181,7 +181,6 @@ void TransDelItemByPackageName(const char *pkgName)
             g_sessionServerList->cnt--;
             SoftBusFree(pos);
             pos = NULL;
-            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
