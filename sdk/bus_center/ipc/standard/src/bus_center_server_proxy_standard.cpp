@@ -704,4 +704,52 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
     *infoNum = retInfoNum;
     return SOFTBUS_OK;
 }
+
+int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+
+    bool targetNetworkIdIsNull = targetNetworkId == NULL ? true : false;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write pkg name failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(callerId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write callerId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!targetNetworkIdIsNull && (!data.WriteBool(targetNetworkIdIsNull) || !data.WriteCString(targetNetworkId))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write target networkid failed!");
+        return SOFTBUS_ERR;
+    } else if (targetNetworkIdIsNull && !data.WriteBool(targetNetworkIdIsNull)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write null target networkid failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(mode, sizeof(GearMode))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear write gear node config failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_SHIFT_LNN_GEAR, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear send request failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear read serverRet failed!");
+        return SOFTBUS_ERR;
+    }
+    return serverRet;
+}
 } // namespace OHOS

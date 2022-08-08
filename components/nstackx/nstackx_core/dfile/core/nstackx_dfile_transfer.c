@@ -27,6 +27,7 @@
 #include "nstackx_log.h"
 #include "nstackx_timer.h"
 #include "nstackx_util.h"
+#include "nstackx_dfile_dfx.h"
 #include "securec.h"
 
 #define TAG "nStackXDFile"
@@ -491,6 +492,7 @@ static void WaitForFileHeaderConfirm(DFileTrans *dFileTrans, DFileSendState *nex
         if (dFileTrans->headerRetryCnt > dFileTrans->config.maxCtrlFrameRetryCnt) {
             *nextState = STATE_SEND_FILE_FAIL;
             dFileTrans->errorCode = DFILE_TRANS_FILE_HEADER_CONFIRM_TIMEOUT;
+            WaitFileHeaderTimeoutEvent(dFileTrans->errorCode);
             return;
         }
         dFileTrans->headerRetryCnt++;

@@ -24,16 +24,6 @@ extern "C" {
 
 typedef uint8_t (*RecCompareCallback)(void *, void *);
 
-typedef struct {
-    uint8_t *blk;
-    uint32_t *usedMap;
-    uint32_t mapSize;
-    uint32_t useCount;
-    uint32_t maxCount;
-    size_t recSize;
-    RecCompareCallback cb;
-} DatabaseInfo;
-
 void *DatabaseInit(uint32_t recnum, size_t recsz, RecCompareCallback cb);
 void DatabaseClean(void *ptr);
 uint32_t GetDatabaseUseCount(const void *dbptr);

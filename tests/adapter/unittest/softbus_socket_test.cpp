@@ -76,10 +76,10 @@ static void SocketServiceStart(int localFlag)
     int32_t socketFd = -1;
     int32_t optVal = 1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn cliAddr = { 0 };
+    SoftBusSockAddrIn cliAddr = {0};
     int addrLen = sizeof(SoftBusSockAddrIn);
     int acceptFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
@@ -833,7 +833,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketAccept003, TestSize.Level0)
             .sAddr = SoftBusInetAddr("127.0.0.1")
         }
     };
-    SoftBusSockAddrIn cliAddr = { 0 };
+    SoftBusSockAddrIn cliAddr = {0};
     int addrLen = sizeof(SoftBusSockAddrIn);
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
@@ -951,7 +951,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdZeroTest001, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdZeroTest002, TestSize.Level0)
 {
-    SoftBusFdSet set = { 0 };
+    SoftBusFdSet set = {0};
     set.fdsBits[0] = 1;
     SoftBusSocketFdZero(&set);
     EXPECT_TRUE(set.fdsBits[0] == 0);
@@ -966,7 +966,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdZeroTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdSetTest001, TestSize.Level0)
 {
     int32_t socketFd;
-    SoftBusFdSet set = { 0 };
+    SoftBusFdSet set = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     SoftBusSocketFdSet(socketFd, &set);
@@ -1052,7 +1052,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdIssetTest001, TestSize.Level0)
 */
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketFdIssetTest002, TestSize.Level0)
 {
-    SoftBusFdSet set = { 0 };
+    SoftBusFdSet set = {0};
     SoftBusSocketFdClr(1, &set);
     int ret = SoftBusSocketFdIsset(1, &set);
     EXPECT_TRUE(ret == 0);
@@ -1283,7 +1283,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFcntlTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    char buf[TEST_BUF_SIZE] = { 0 };
+    char buf[TEST_BUF_SIZE] = {0};
 
     int32_t ret = SoftBusSocketSend(socketFd, buf, TEST_BUF_SIZE, 0);
     EXPECT_EQ(-1, ret);
@@ -1313,7 +1313,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
             .sAddr = SoftBusInetAddr("127.0.0.1")
         }
     };
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -1351,7 +1351,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
             .sAddr = SoftBusInetAddr("127.0.0.1")
         }
     };
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
@@ -1384,7 +1384,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendTest004, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
@@ -1407,7 +1407,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest001, TestSize.Level0)
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddr));
     EXPECT_EQ(-1, ret);
 }
@@ -1428,7 +1428,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1458,7 +1458,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1486,7 +1486,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     ClientConnect(&socketFd);
 
     int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, NULL, sizeof(SoftBusSockAddr));
@@ -1511,7 +1511,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest005, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1540,7 +1540,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
@@ -1561,7 +1561,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketRecv(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_EQ(-1, ret);
 }
@@ -1582,7 +1582,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
     ClientConnect(&socketFd);
 
     buf.cmd = CMD_RECV;
@@ -1606,7 +1606,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusSocketRecvFromTest001, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddr fromAddr = { 0 };
+    SoftBusSockAddr fromAddr = {0};
     int32_t fromAddrLen;
     int32_t ret = SoftBusSocketRecvFrom(socketFd, NULL, 0, 0, &fromAddr, &fromAddrLen);
     EXPECT_EQ(-1, ret);
@@ -1703,7 +1703,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketCloseTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest001, TestSize.Level0)
 {
     const char *src = "192.168.0.1";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(0, ret);
     EXPECT_EQ(0x100A8C0, *(unsigned int *)dst);
@@ -1718,7 +1718,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest001, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest002, TestSize.Level0)
 {
     const char *src = "abcde";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
@@ -1732,7 +1732,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest002, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest003, TestSize.Level0)
 {
     const char *src = "1234";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
@@ -1746,7 +1746,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest003, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest004, TestSize.Level0)
 {
     const char *src = "0x1234";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
@@ -1760,7 +1760,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest004, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest005, TestSize.Level0)
 {
     const char *src = "__*0x1234";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(SOFTBUS_AF_INET, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_INVALID_PARAM, ret);
 }
@@ -1774,7 +1774,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest005, TestSize.Level0)
 HWTEST_F(DsoftbusSocketTest, SoftBusInetPtoNTest006, TestSize.Level0)
 {
     const char *src = "192.168.0.1";
-    char dst[TEST_BUF_SIZE] = { 0 };
+    char dst[TEST_BUF_SIZE] = {0};
     int32_t ret = SoftBusInetPtoN(-1, src, dst);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
@@ -1965,7 +1965,7 @@ HWTEST_F(DsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
     sleep(1);
     int32_t ret;
     int32_t socketFd = -1;
-    struct SocketProtocol buf = { 0 };
+    struct SocketProtocol buf = {0};
 
     ClientConnect(&socketFd);
     EXPECT_TRUE(socketFd != -1);

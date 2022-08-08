@@ -35,7 +35,7 @@ ohos_unittest("AuthTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/include/",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
     "//third_party/bounds_checking_function/include",
@@ -46,13 +46,18 @@ ohos_unittest("AuthTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
   } else {
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 }
 

@@ -37,26 +37,36 @@
       "ram": "28MB",
       "deps": {
         "components": [
-          "libhilog",
-          "libipc_single",
-          "libsystem_ability_fwk",
-          "libsyspara",
-          "samgr_proxy",
-          "utils_base"
+          "ability_base",
+          "ability_runtime",
+          "bluetooth",
+          "drivers_interface_wlan",
+          "hiviewdfx_hilog_native",
+          "ipc",
+          "os_account",
+          "relational_store",
+          "utils_base",
+          "wifi"
         ],
         "third_party": [
+          "bounds_checking_function",
+          "cJSON",
           "libcoap",
-          "libmbedtls",
-          "bounds_checking_function"
+          "thirdparty_mbedtls"
         ]
       },
       "build": {
-        "sub_component": [
-          "//foundation/communication/dsoftbus/core:softbus_server",
-          "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
-          "//foundation/communication/dsoftbus/tools:tool"
-        ],
+        "group_type":{
+          "base_group":[],
+          "fwk_group":[
+            "//foundation/communication/dsoftbus/sdk:softbus_client"
+          ],
+          "service_group":[
+            "//foundation/communication/dsoftbus/core:softbus_server",
+            "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
+            "//foundation/communication/dsoftbus/tools:tool"
+          ]
+        },
         "inner_kits": [
           {
             "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
@@ -82,6 +92,7 @@
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
           "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
           "//foundation/communication/dsoftbus/tests/core/common/utils:unittest",
+          "//foundation/communication/dsoftbus/tests/core/common/dfx:unittest",
           "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
           "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",

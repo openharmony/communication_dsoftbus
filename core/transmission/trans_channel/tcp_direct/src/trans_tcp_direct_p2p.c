@@ -370,6 +370,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     }
 
     ret = SendAuthData(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, reply);
+    cJSON_free(reply);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

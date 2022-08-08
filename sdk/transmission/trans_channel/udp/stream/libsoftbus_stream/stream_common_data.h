@@ -30,7 +30,7 @@ namespace SoftBus {
 class StreamCommonData : public IStream {
 public:
     StreamCommonData() = default;
-    StreamCommonData(uint32_t streamId, uint16_t seq);
+    StreamCommonData(uint32_t streamId, uint16_t seq, const StreamFrameInfo& frameInfo);
 
     virtual ~StreamCommonData() = default;
 
@@ -78,6 +78,11 @@ public:
         return curStreamId_;
     }
 
+    const StreamFrameInfo* GetStreamFrameInfo() const override
+    {
+        return &streamFrameInfo_;
+    }
+    
 protected:
     std::unique_ptr<char[]> streamData_ = nullptr;
     ssize_t streamLen_ = 0;
@@ -90,6 +95,8 @@ protected:
 
     uint16_t curSeqNum_ = 0;
     uint32_t curStreamId_ = 0;
+
+    StreamFrameInfo streamFrameInfo_;
 };
 } // namespace SoftBus
 } // namespace Communication

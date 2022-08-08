@@ -29,11 +29,14 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_buscenter.h"
 
 #define SOFTBUS_VERSION "hm.1.0.0"
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
 #define NUM_BUF_SIZE 4
+
+#define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 
 typedef struct {
     NodeInfo localInfo;
@@ -881,6 +884,18 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
 }
 
+int SoftBusDumpBusCenterLocalDeviceInfo(int fd)
+{
+    dprintf(fd, "-----LocalDeviceInfo-----\n");
+    NodeBasicInfo localNodeInfo;
+    if (LnnGetLocalDeviceInfo(&localNodeInfo) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalDeviceInfo failed!");
+        return SOFTBUS_ERR;
+    }
+    SoftBusDumpBusCenterPrintInfo(fd, &localNodeInfo);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
@@ -919,6 +934,11 @@ int32_t LnnInitLocalLedger(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mutex init fail!");
         goto EXIT;
     }
+    if (SoftBusRegBusCenterVarDump(
+        SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump regist fail");
+        return SOFTBUS_ERR;
+    }
     g_localNetLedger.status = LL_INIT_SUCCESS;
     return SOFTBUS_OK;
 EXIT:
@@ -934,7 +954,7 @@ int32_t LnnInitLocalLedgerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_ERR;
     }
-    
+
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local user id hash error!");

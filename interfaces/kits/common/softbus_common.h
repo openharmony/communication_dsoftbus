@@ -354,6 +354,36 @@ typedef struct {
 } SubscribeInfo;
 
 /**
+ * @brief Enumerates single heartbeat cycle parameter.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    /**< Heartbeat interval 30 sec */
+    HIGH_FREQ_CYCLE = 30,
+    /**< Heartbeat interval 60 sec */
+    MID_FREQ_CYCLE = 60,
+    /**< Heartbeat interval 5 * 60 sec */
+    LOW_FREQ_CYCLE = 5 * 60,
+} ModeCycle;
+
+/**
+ * @brief Enumerates duration of heartbeat keeping alive parameter.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    /**< Heartbeat continues for 60 sec */
+    DEFAULT_DURATION = 60,
+    /**< Heartbeat continues for 10 * 60 sec. */
+    NORMAL_DURATION = 10 * 60,
+    /**< Heartbeat continues for 30 * 60 sec. */
+    LONG_DURATION = 30 * 60,
+} ModeDuration;
+
+/**
  * @brief Enumerates device types.
  *
  */

@@ -13,6 +13,7 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+NSTACKX_ROOT = "//foundation/communication/dsoftbus/components/nstackx"
 fillp_source = [
   "src/app_lib/src/api.c",
   "src/app_lib/src/epoll_app.c",
@@ -21,6 +22,7 @@ fillp_source = [
   "src/app_lib/src/socket_app.c",
   "src/app_lib/src/spunge_app.c",
   "src/app_lib/src/socket_opt.c",
+  "src/app_lib/src/fillp_dfx.c",
   "src/fillp_lib/src/fillp_buf_item.c",
   "src/fillp_lib/src/fillp_cookie.c",
   "src/fillp_lib/src/fillp_stack_config.c",
@@ -75,6 +77,7 @@ fillp_cflags = [
   "-DFILLP_LINUX",
   "-DFILLP_POWER_SAVE",
   "-DFILLP_POWER_SAVING_LINUX",
+  "-DFILLP_ENABLE_DFX_HIDUMPER",
 ]
 
 if (defined(ohos_lite)) {
@@ -85,7 +88,10 @@ if (defined(ohos_lite)) {
     include_dirs = fillp_include
     include_dirs += [ "//third_party/bounds_checking_function/include/" ]
     sources = fillp_source
-    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    deps = [
+      "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
 
     if (ohos_kernel_type == "liteos_a") {
       cflags += [ "-DNSTACKX_WITH_LITEOS" ]
@@ -104,11 +110,14 @@ if (defined(ohos_lite)) {
 
     include_dirs = fillp_include
     include_dirs += [
-      "//utils/native/base/include/",
+      "//commonlibrary/c_utils/base/include/",
       "//third_party/bounds_checking_function/include",
     ]
     sources = fillp_source
-    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    deps = [
+      "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
 
     part_name = "dsoftbus"
     subsystem_name = "communication"

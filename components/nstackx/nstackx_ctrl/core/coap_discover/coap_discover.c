@@ -26,6 +26,7 @@
 #include "nstackx_error.h"
 #include "nstackx_device.h"
 #include "json_payload.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
 
@@ -264,7 +265,7 @@ DATA_FREE:
 }
 
 // Caller must make sure that reqeustPara, reqeustPara->serverType/context are all valid.
-static int32_t CoapSendRequest(uint8_t coapType, const char *url, char *data, size_t dataLen,
+static int32_t CoapSendRequestEx(uint8_t coapType, const char *url, char *data, size_t dataLen,
     const CoapRequestPara *reqeustPara)
 {
     CoapContextWrapper wrapper = {
@@ -290,6 +291,16 @@ static int32_t CoapSendRequest(uint8_t coapType, const char *url, char *data, si
     }
 #endif
     return CoapSendRequestInner(coapType, url, data, dataLen, &wrapper);
+}
+
+static int32_t CoapSendRequest(uint8_t coapType, const char *url, char *data, size_t dataLen,
+    const CoapRequestPara *reqeustPara)
+{
+    int32_t ret = CoapSendRequestEx(coapType, url, data, dataLen, reqeustPara);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_SEND_REQUEST_FAILED);
+    }
+    return ret;
 }
 
 static int32_t CoapResponseService(const char *remoteUrl, coap_context_t *context)
@@ -368,22 +379,17 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
     return NSTACKX_EOK;
 }
 
-static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *session,
-    const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
+static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_t *request, coap_pdu_t *response)
 {
-    (void)resource;
-    (void)query;
-    if (request == NULL || response == NULL) {
-        return;
-    }
+    int32_t ret = NSTACKX_EFAILED;
     coap_context_t *currCtx = coap_session_get_context(session);
     if (currCtx == NULL) {
-        return;
+        return ret;
     }
     char *remoteUrl = NULL;
     DeviceInfo *deviceInfo = malloc(sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
-        return;
+        return ret;
     }
     if (HndPostServiceDiscoverInner(request, &remoteUrl, deviceInfo) != NSTACKX_EOK) {
         goto L_ERR;
@@ -418,9 +424,25 @@ static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *se
     } else {
         coap_pdu_set_code(response, COAP_RESPONSE_CODE_CREATED);
     }
+    ret = NSTACKX_EOK;
 L_ERR:
     free(deviceInfo);
     free(remoteUrl);
+    return ret;
+}
+
+static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *session,
+    const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
+{
+    (void)resource;
+    (void)query;
+    if (request == NULL || response == NULL) {
+        return;
+    }
+
+    if (HndPostServiceDiscoverEx(session, request, response) != NSTACKX_EOK) {
+        IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
+    }
 }
 
 static void DeleteOverTimeMsgIdRecord(MsgIdList *msgIdList, struct timespec *curTime)
@@ -442,6 +464,7 @@ static void DeleteOverTimeMsgIdRecord(MsgIdList *msgIdList, struct timespec *cur
         msgIdList->startIdx = (msgIdList->startIdx + 1) % COAP_MAX_MSGID_RESERVE_NUM;
         i = msgIdList->startIdx;
         if (cycleTimes > COAP_MAX_MSGID_RESERVE_NUM) {
+            IncStatistics(STATS_DROP_MSG_ID);
             DFINDER_LOGE(TAG, "cycle too many times, error must occurred and init msgList");
             msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
             msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
@@ -500,6 +523,7 @@ static uint8_t RefreshMsgIdList(coap_mid_t msgId)
         }
         i = (i + 1) % COAP_MAX_MSGID_RESERVE_NUM;
         if (cycleTimes > COAP_MAX_MSGID_RESERVE_NUM) {
+            IncStatistics(STATS_DROP_MSG_ID);
             DFINDER_LOGE(TAG, "cycle too many times, error must occurred and init msgList");
             g_msgIdList->startIdx = COAP_MAX_MSGID_RESERVE_NUM;
             g_msgIdList->endIdx = COAP_MAX_MSGID_RESERVE_NUM;
@@ -601,14 +625,14 @@ static uint16_t ParseServiceMsgFrame(const uint8_t *frame, uint16_t size, char *
     return msgLen;
 }
 
-static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session,
-                              const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
+static int32_t HndPostServiceMsgEx(coap_resource_t *resource, coap_session_t *session,
+    const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
 {
     (void)resource;
     (void)session;
     (void)query;
     if (request == NULL || response == NULL) {
-        return;
+        return NSTACKX_EFAILED;
     }
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
     char moduleName[NSTACKX_MAX_MODULE_NAME_LEN] = {0};
@@ -618,30 +642,38 @@ static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session
     size_t size;
 
     if (coap_get_data(request, &size, &buf) == 0 || size == 0 || size > COAP_RXBUFFER_SIZE) {
-        return;
+        return NSTACKX_EFAILED;
     }
 
     if (!RefreshMsgIdList(coap_pdu_get_mid(request))) {
         DFINDER_LOGE(TAG, "repeated msg id");
-        return;
+        return NSTACKX_EFAILED;
     }
 
     DFINDER_LOGD(TAG, "handling post service msg request");
     msgLen = ParseServiceMsgFrame(buf, size, moduleName, deviceId, &msg);
     if (msgLen == 0) {
         DFINDER_LOGD(TAG, "parse service msg frame error");
-        return;
+        return NSTACKX_EFAILED;
     }
 
     NotifyMsgReceived(moduleName, deviceId, msg, msgLen);
 
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CREATED);
     free(msg);
-    return;
+    return NSTACKX_EOK;
+}
+
+static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session,
+    const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
+{
+    if (HndPostServiceMsgEx(resource, session, request, query, response) != NSTACKX_EOK) {
+        IncStatistics(STATS_HANDLE_SERVICE_MSG_FAILED);
+    }
 }
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF
-static int32_t CoapPostServiceDiscover(void)
+static int32_t CoapPostServiceDiscoverEx(void)
 {
     char ifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
@@ -696,7 +728,7 @@ static int32_t CoapPostServiceDiscover(void)
     return NSTACKX_EOK;
 }
 #else
-static int32_t CoapPostServiceDiscover(void)
+static int32_t CoapPostServiceDiscoverEx(void)
 {
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     char discoverUri[COAP_URI_BUFFER_LENGTH] = {0};
@@ -747,6 +779,15 @@ static int32_t CoapPostServiceDiscover(void)
 }
 #endif /* END OF DFINDER_SUPPORT_MULTI_NIF */
 
+static int32_t CoapPostServiceDiscover(void)
+{
+    int32_t ret = CoapPostServiceDiscoverEx();
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_POST_SD_REQUEST_FAILED);
+    }
+    return ret;
+}
+
 static uint32_t GetDiscoverInterval(uint32_t discoverCount)
 {
     switch (g_coapDiscoverType) {
@@ -782,11 +823,13 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF
     if (g_discoverCount >= g_coapDiscoverTargetCount || !IsApConnected()) {
+        IncStatistics(STATS_ABORT_SD);
         CoapServiceDiscoverStop();
         return;
     }
 #else
     if (g_discoverCount >= g_coapDiscoverTargetCount || !IsWifiApConnected()) {
+        IncStatistics(STATS_ABORT_SD);
         /* Discover done, or wifi AP disconnected. */
         CoapServiceDiscoverStop();
         return;
@@ -810,6 +853,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
     return;
 
 L_ERR_DISCOVER:
+    IncStatistics(STATS_ABORT_SD);
     /* Abort service discover by not starting timer. */
     DFINDER_LOGE(TAG, "abort service discovery, have tried %u request", g_discoverCount);
     /* Reset g_discoverCount to allow new request from user. */
@@ -908,6 +952,7 @@ static uint8_t NetworkIsConnected()
 void CoapServiceDiscoverInner(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery inner");
         return;
     }
@@ -935,6 +980,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
     if (BackupDeviceDB() != NSTACKX_EOK) {
+        IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGE(TAG, "backup device list fail when discovery inner");
         return;
     }
@@ -949,6 +995,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery inner AN");
         return;
     }
@@ -970,6 +1017,7 @@ void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 {
     if (!NetworkIsConnected()) {
+        IncStatistics(STATS_START_SD_FAILED);
         LOGI(TAG, "Network not connected when discovery configurable");
         return;
     }
@@ -996,6 +1044,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
         /* First discover */
 #ifdef DFINDER_SAVE_DEVICE_LIST
         if (BackupDeviceDB() != NSTACKX_EOK) {
+            IncStatistics(STATS_START_SD_FAILED);
             DFINDER_LOGE(TAG, "backup device list fail when discovery configurable");
             return;
         }
@@ -1036,9 +1085,9 @@ static uint8_t *CreateServiceMsgFrame(const char *moduleName, const char *device
 
     frame = (uint8_t *)calloc(1U, bufferLen);
     if (frame == NULL) {
+        IncStatistics(STATS_CREATE_SERVICE_MSG_FAILED);
         return NULL;
     }
-
     if (memcpy_s(frame, bufferLen, &frameLen, sizeof(frameLen)) != EOK) {
         goto L_ERR_SEND_MSG;
     }
@@ -1069,6 +1118,7 @@ static uint8_t *CreateServiceMsgFrame(const char *moduleName, const char *device
     *dataLen = bufferLen;
     return frame;
 L_ERR_SEND_MSG:
+    IncStatistics(STATS_CREATE_SERVICE_MSG_FAILED);
     free(frame);
     return NULL;
 }
@@ -1381,29 +1431,29 @@ void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration)
     }
 }
 
-void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
+static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettings)
 {
     char remoteUrl[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
     char host[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (responseSettings == NULL) {
-        return;
+        return NSTACKX_EFAILED;
     }
     if (responseSettings->businessData == NULL) {
         DFINDER_LOGE(TAG, "businessData is null");
-        return;
+        return NSTACKX_EFAILED;
     }
 
     if (SetLocalDeviceBusinessDataUnicast(responseSettings->businessData, responseSettings->length) != NSTACKX_EOK) {
-        return;
+        return NSTACKX_EFAILED;
     }
 
     if (strncpy_s(host, sizeof(host), responseSettings->remoteIp, strlen(responseSettings->remoteIp)) != EOK) {
         DFINDER_LOGE(TAG, "discoveryRsp remoteIp copy error");
-        return;
+        return NSTACKX_EFAILED;
     }
     if (sprintf_s(remoteUrl, sizeof(remoteUrl), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
         DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
-        return;
+        return NSTACKX_EFAILED;
     }
 #ifdef DFINDER_SUPPORT_MULTI_NIF
     uint32_t i;
@@ -1413,20 +1463,25 @@ void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
         }
         if (strcmp(responseSettings->localNetworkName, g_discoverCtxList[i].networkName) == 0) {
             DFINDER_LOGD(TAG, "find right discover context to call CoapResponseService with idx-%u", i);
-            (void)CoapResponseService(remoteUrl, g_discoverCtxList[i].context);
-            break;
+            return CoapResponseService(remoteUrl, g_discoverCtxList[i].context);
         }
     }
-    if (i == NSTACKX_MAX_LISTENED_NIF_NUM) {
-        DFINDER_LOGE(TAG, "can not find right discover context to call CoapResponseService");
-        return;
-    }
+
+    DFINDER_LOGE(TAG, "can not find right discover context to call CoapResponseService");
+    return NSTACKX_EFAILED;
 #else
     coap_context_t *context = GetContext(SERVER_TYPE_WLANORETH);
     if (context == NULL) {
         DFINDER_LOGE(TAG, "can not find right discover context to call CoapResponseService");
-        return;
+        return NSTACKX_EFAILED;
     }
-    (void)CoapResponseService(remoteUrl, context);
+    return CoapResponseService(remoteUrl, context);
 #endif
+}
+
+void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
+{
+    if (SendDiscoveryRspEx(responseSettings) != NSTACKX_EOK) {
+        IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
+    }
 }

@@ -18,7 +18,10 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 ble_connection_deps = []
 if (dsoftbus_feature_conn_ble == false) {
   ble_connection_src = [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection_virtual.c" ]
-  ble_connection_inc = [ "$dsoftbus_root_path/core/connection/ble/include" ]
+  ble_connection_inc = [
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
   if (dsoftbus_feature_conn_br == true) {
     ble_connection_src += adapter_net_br_src
     ble_connection_inc += adapter_ble_inc
@@ -35,6 +38,7 @@ if (dsoftbus_feature_conn_ble == false) {
   ble_connection_inc = [
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/ble/src",
+    "$dsoftbus_root_path/core/common/include",
   ]
   ble_connection_src += adapter_ble_src
   ble_connection_inc += adapter_ble_inc

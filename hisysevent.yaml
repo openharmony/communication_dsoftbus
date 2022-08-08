@@ -43,7 +43,6 @@ DISC_STARTUP:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: start discovery}
   PACKAGE_NAME: {type: STRING, desc: the appname which call softbus }
 
-
 FIRST_DISC_DURATION:
   __BASE: {type: STATISTIC, level: MINOR, desc: first discovery device duration}
   MEDIUM: {type: UINT8, desc: discovery medium }
@@ -54,13 +53,12 @@ FIRST_DISC_DURATION:
 SCAN_TIMES:
   __BASE: {type: STATISTIC, level: MINOR, desc: stastistic scan times }
   MEDIUM: {type: UINT8, desc: scan medium }
-  SCAN_COUNTER: {type: INT32, desc: scan counter}
+  SCAN_COUNTER: {type: UINT32, desc: scan counter}
 
 DISC_FAULT:
   __BASE: {type: STATISTIC, level: CRITICAL, desc: statistic all the exception in disc process }
   MEDIUM: {type: UINT8, desc: disc medium }
-  ERROR_TYPE: {type: UINT8, desc: error type }
-  ERROR_CODE: {type: UINT8, desc: error code }
+  ERROR_CODE: {type: INT32, desc: error code }
   ERROR_COUNTER: {type: UINT32, desc: error counter }
 
 CONN_DURATION:
@@ -73,17 +71,14 @@ CONN_DURATION:
 CONN_SUCC_RATE:
   __BASE: {type: STATISTIC, level: MINOR, desc: stastistic connect success rate }
   MEDIUM: {type: UINT8, desc: connection medium }
-  SUCC_RATE: {type: INT32, desc: connection success rate}
+  SUCC_TIMES: {type: UINT32, desc: conn success times }
+  FAIL_TIMES: {type: UINT32, desc: conn fail times }
+  SUCC_RATE: {type: FLOAT, desc: connection success rate}
 
 CONN_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: report the fault of connection }
   MEDIUM: {type: UINT8, desc: connection medium }
-  ERROR_CODE: {type: UINT8, desc: error code }
-  DEV_ID: {type: STRING, desc: connection success rate }
-  NIGHT_MODE: {type: UINT8, desc: night mopde }
-  CONN_PARAM_BTSTATUS: {type: UINT8, desc: bluetooth status }
-  CONN_PARAM_WIFISTATUS: {type: UINT8, desc: wifi status }
-  CONN_PARAM_CHNL_QUALITY: {type: FLOAT, desc: channel quality }
+  ERROR_CODE: {type: INT32, desc: error code }
 
 TRANS_OPEN_SESSION_CNT:
   __BASE: {type: STATISTIC, level: MINOR, desc: the success count and the fail count of open session }
@@ -104,3 +99,23 @@ TRANS_OPEN_SESSION_TIME_COST:
 TRANS_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: the transmission fail }
   ERROR_CODE: {type: INT32, desc: error code }
+
+BUS_CENTER_FAULT_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: bus center all the exception}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_STR: {type: STRING, desc: error code string}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_SUCCESS_RATE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn rate of success}
+  TOTAL_COUNT: {type: INT32, desc: lnn total count}
+  SUCCESS_COUNT: {type: INT32, desc: lnn success count}
+  SUCCESS_RATE: {type: FLOAT, desc: lnn rate of success}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn duration}
+  AVG_DURATION: {type: INT32, desc: lnn average duration}
+  MAX_DURATION: {type: INT32, desc: lnn max duration}
+  MIN_DURATION: {type: INT32, desc: lnn min duration}
+  CONN_TYPE: {type: INT32, desc: connection type}

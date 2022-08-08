@@ -13,26 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef LNN_IP_NETWORK_IMPL_H
-#define LNN_IP_NETWORK_IMPL_H
+#include <stdio.h>
 
-#include <stdint.h>
-#include "softbus_common.h"
+#include "softbus_hidumper_buscenter.h"
+#include "softbus_error_code.h"
 
-#define LNN_LOOPBACK_IP "127.0.0.1"
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-void LnnNotifyAllTypeOffline(ConnectionAddrType type);
-
-#ifdef __cplusplus
-#if __cplusplus
+int SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+{
+    (void)dumpVar;
+    (void)cb;
+    return SOFTBUS_OK;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
 
-#endif /* LNN_IP_NETWORK_IMPL_H */
+int SoftBusBusCenterDumpHander(int fd, int argc, const char **argv)
+{
+    (void)fd;
+    (void)argc;
+    (void)argv;
+    return SOFTBUS_OK;
+}
+
+int SoftBusHiDumperBusCenterInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void SoftBusHiDumperBusCenterDeInit(void)
+{
+    return;
+}

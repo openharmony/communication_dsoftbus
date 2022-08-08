@@ -15,15 +15,21 @@
 
 #include "disc_coap.h"
 
+#include <stdio.h>
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
+#include "softbus_hidumper_disc.h"
 
 #define INT32_MAX_BIT_NUM 32
 #define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
 #define MAX_SERVICE_DATA 64
+
+#define COAP_PUBLISH_INFO "coapPublishInfo"
+#define COAP_SUBSCRIBE_INFO "coapSubscribeInfo"
 
 typedef struct {
     uint32_t allCap[CAPABILITY_NUM];
@@ -35,6 +41,8 @@ typedef struct {
 
 static DiscCoapInfo *g_publishMgr = NULL;
 static DiscCoapInfo *g_subscribeMgr = NULL;
+static int CoapPubInfoDump(int fd);
+static int CoapSubInfoDump(int fd);
 
 static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapBitmap[], DiscCoapInfo *info,
     uint32_t count)
@@ -491,6 +499,8 @@ DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
         DiscCoapDeinit();
         return NULL;
     }
+    SoftBusRegDiscVarDump(COAP_PUBLISH_INFO, &CoapPubInfoDump);
+    SoftBusRegDiscVarDump(COAP_SUBSCRIBE_INFO, &CoapSubInfoDump);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "coap discovery init success.");
     return &g_discCoapFuncInterface;
 }
@@ -499,4 +509,24 @@ void DiscCoapDeinit(void)
 {
     DeinitCoapManager();
     DiscNstackxDeinit();
+}
+
+static int CoapPubInfoDump(int fd)
+{
+    dprintf(fd, "\n---------------CoapPublishInfo------------------\n");
+        dprintf(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
+        dprintf(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
+        dprintf(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
+        dprintf(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
+    return SOFTBUS_OK;
+}
+
+static int CoapSubInfoDump(int fd)
+{
+    dprintf(fd, "\n---------------CoapSubscribeInfo------------------\n");
+        dprintf(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
+        dprintf(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
+        dprintf(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
+        dprintf(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
+    return SOFTBUS_OK;
 }

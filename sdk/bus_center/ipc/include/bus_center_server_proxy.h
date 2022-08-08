@@ -42,6 +42,8 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
 int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId);
 int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId);
 int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
+int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode);
 
 #ifdef __cplusplus
 #if __cplusplus

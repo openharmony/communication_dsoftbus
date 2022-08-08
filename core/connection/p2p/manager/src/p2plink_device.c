@@ -14,6 +14,7 @@
  */
 #include "p2plink_device.h"
 
+#include <stdio.h>
 #include "auth_interface.h"
 #include "cJSON.h"
 #include "securec.h"
@@ -30,6 +31,11 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
+#include "softbus_hidumper_conn.h"
+
+#define P2P_LINK_DEVICING "p2pLinkDevicing"
+#define P2P_LINK_DEVICED "p2pLinkDeviced"
 
 static ListNode g_connectingDevices = {0};
 static ListNode g_connectedDevices = {0};
@@ -37,6 +43,9 @@ static int32_t g_connectingCnt = 0;
 static int32_t g_connectedCnt = 0;
 static int32_t g_connectingTimer = 0;
 #define CONNING_TIMER_1S 1000
+
+static int P2pLinkDevicingDump(int fd);
+static int P2pLinkDevicedDump(int fd);
 
 P2pLinkPeerDevStateCb g_devStateCb = {0};
 void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb)
@@ -519,6 +528,8 @@ int32_t P2pLinkDevInit(void)
     ListInit(&g_connectedDevices);
     g_connectedCnt = 0;
     g_connectingCnt = 0;
+    SoftBusRegConnVarDump(P2P_LINK_DEVICING, &P2pLinkDevicingDump);
+    SoftBusRegConnVarDump(P2P_LINK_DEVICED, &P2pLinkDevicedDump);
     return SOFTBUS_OK;
 }
 
@@ -528,4 +539,62 @@ void P2pLinkDevClean(void)
     P2pLinkCleanConningDev();
     P2pLoopProcDelayDel(NULL, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
     P2pLinkSetDisconnectState(false);
+}
+
+static int P2pLinkDevicingDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------P2pLinkDevicing Info-------------------\n");
+    LIST_FOR_EACH(item, &g_connectingDevices) {
+        ConnectingNode *itemNode = LIST_ENTRY(item, ConnectingNode, node);
+        dprintf(fd, "P2pLinkConnectingInfo               : \n");
+        dprintf(fd, "ConnectingInfo connInfo             : \n");
+        dprintf(fd, "connInfo requestId                  : %d\n", itemNode->connInfo.requestId);
+        dprintf(fd, "connInfo authId                     : %ld\n", itemNode->connInfo.authId);
+        char *connInfoPeerMac = DataMasking(itemNode->connInfo.peerMac, P2P_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "connInfo peerMac                    : %s\n", connInfoPeerMac);
+        SoftBusFree(connInfoPeerMac);
+        dprintf(fd, "P2pLinkRole                         : %d\n", itemNode->connInfo.expectedRole);
+        dprintf(fd, "connInfo pid                        : %d\n", itemNode->connInfo.pid);
+        dprintf(fd, "Connecting reTryCnt                 : %d\n", itemNode->reTryCnt);
+        dprintf(fd, "Connecting state                    : %d\n", itemNode->state);
+        dprintf(fd, "Connecting timeOut                  : %d\n", itemNode->timeOut);
+        char *connectingMyIp = DataMasking(itemNode->myIp, P2P_IP_LEN, IP_DELIMITER);
+        dprintf(fd, "Connecting myIp                     : %s\n", connectingMyIp);
+        SoftBusFree(connectingMyIp);
+        char *connectingpeerIp = DataMasking(itemNode->peerIp, P2P_IP_LEN, IP_DELIMITER);
+        dprintf(fd, "Connecting peerIp                   : %s\n", connectingpeerIp);
+        SoftBusFree(connectingpeerIp);
+        char *connectingPeerMac = DataMasking(itemNode->peerMac, P2P_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "Connecting peerMac                  : %s\n", connectingPeerMac);
+        SoftBusFree(connectingPeerMac);
+    }
+    dprintf(fd, "ConnectingCnt                       : %d\n", g_connectingCnt);
+    return SOFTBUS_OK;
+}
+
+static int P2pLinkDevicedDump(int fd)
+{
+    ListNode *item = NULL;
+    dprintf(fd, "\n-----------------P2pLinkDeviced Info-------------------\n");
+    LIST_FOR_EACH(item, &g_connectedDevices) {
+        ConnectedNode *itemNode = LIST_ENTRY(item, ConnectedNode, node);
+        dprintf(fd, "P2pLinkConnectedInfo connInfo       :\n");
+        char *connectiedPeerMac = DataMasking(itemNode->peerMac, P2P_MAC_LEN, MAC_DELIMITER);
+        dprintf(fd, "Connecting peerMac                  : %s\n", connectiedPeerMac);
+        SoftBusFree(connectiedPeerMac);
+        char *connectiedPeerIp = DataMasking(itemNode->peerIp, P2P_IP_LEN, IP_DELIMITER);
+        dprintf(fd, "Connected peerIp                    : %s\n", connectiedPeerIp);
+        SoftBusFree(connectiedPeerIp);
+        char *connectiedlocalIp = DataMasking(itemNode->localIp, P2P_IP_LEN, IP_DELIMITER);
+        dprintf(fd, "Connected localIp                   : %s\n", connectiedlocalIp);
+        SoftBusFree(connectiedPeerIp);
+        dprintf(fd, "Connected P2pLinkAuthId             : \n");
+        dprintf(fd, "P2pLinkAuthId inAuthId              : %ld\n", itemNode->chanId.inAuthId);
+        dprintf(fd, "P2pLinkAuthId p2pAuthId             : %ld\n", itemNode->chanId.p2pAuthId);
+        dprintf(fd, "P2pLinkAuthId authRequestId         : %d\n", itemNode->chanId.authRequestId);
+        dprintf(fd, "P2pLinkAuthId p2pAuthIdState        : %u\n", itemNode->chanId.p2pAuthIdState);
+    }
+    dprintf(fd, "ConnectedCnt                       : %d\n", g_connectedCnt);
+    return SOFTBUS_OK;
 }

@@ -27,7 +27,7 @@
 #define APP_UUID_LEN 2
 #define INVALID_ID (-1)
 
-static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
+static BtGattClientCallbacks g_btGattClientCallbacks = {0};
 static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)

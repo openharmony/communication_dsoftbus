@@ -24,7 +24,7 @@ ohos_fuzztest("GetNodeKeyInfoFuzzTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$dsoftbus_root_path/adapter/common/include",
   ]
   cflags = [
@@ -36,10 +36,10 @@ ohos_fuzztest("GetNodeKeyInfoFuzzTest") {
   ]
   sources = [ "getnodekeyinfo_fuzzer.cpp" ]
 
-  deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 }

@@ -64,6 +64,16 @@ int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type)
     return SOFTBUS_OK;
 }
 
+int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
+{
+    if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->discoveryType = (uint32_t)info->discoveryType & ~(1 << (uint32_t)type);
+    return SOFTBUS_OK;
+}
+
 bool LnnIsNodeOnline(const NodeInfo *info)
 {
     if (info == NULL) {

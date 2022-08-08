@@ -44,6 +44,12 @@
 #define BUF_HEX_LEN 128
 #define OFFSET 1
 
+#define MAC_DELIMITER_SECOND 2
+#define MAC_DELIMITER_FOURTH 4
+#define IP_DELIMITER_FIRST 1
+#define IP_DELIMITER_THIRD 3
+#define GET_ID_HALF_LEN 2
+
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
@@ -319,7 +325,7 @@ bool GetSignalingMsgSwitch(void)
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
 {
     int ret = 0;
-    char signalingMsgBuf[BUF_HEX_LEN] = { 0 };
+    char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
         return;
@@ -343,4 +349,77 @@ void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
                    distinguish, dataLen, signalingMsgBuf);
     }
+}
+
+void MacInstead(char *data, uint32_t length, char delimiter)
+{
+    int delimiterCnt = 0;
+    for (int i = 0; i < length; i++) {
+        if (delimiterCnt == MAC_DELIMITER_FOURTH) {
+            break;
+        }
+        if (data[i] == delimiter) {
+            delimiterCnt++;
+        }
+        if (delimiterCnt >= MAC_DELIMITER_SECOND && data[i] != delimiter) {
+            data[i] = '*';
+        }
+    }
+}
+
+void IpInstead(char *data, uint32_t length, char delimiter)
+{
+    int delimiterCnt = 0;
+    for (int i = 0; i < length; i++) {
+        if (delimiterCnt == IP_DELIMITER_THIRD) {
+            break;
+        }
+        if (data[i] == delimiter) {
+            delimiterCnt++;
+        }
+        if (delimiterCnt >= IP_DELIMITER_FIRST && data[i] != delimiter) {
+            data[i] = '*';
+        }
+    }
+}
+
+void IdInstead(char *data, uint32_t length)
+{
+    uint32_t halfLen = length / GET_ID_HALF_LEN;
+    for (int i = 0; i < length; i++) {
+        if (i > halfLen) {
+            data[i] = '*';
+        }
+    }
+}
+
+char *DataMasking(const char *data, uint32_t length, char delimiter)
+{
+    char* dataStr = (char*)SoftBusMalloc(length + 1);
+
+    if (dataStr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
+        return NULL;
+    }
+    (void)memset_s(dataStr, length + 1, 0, length + 1);
+    if (memcpy_s(dataStr, length, data, length) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DataMasking memcpy_s failed");
+            SoftBusFree(dataStr);
+            return NULL;
+    }
+    switch (delimiter) {
+        case MAC_DELIMITER:
+            MacInstead(dataStr, length, delimiter);
+            break;
+        case IP_DELIMITER:
+            IpInstead(dataStr, length, delimiter);
+            break;
+        case ID_DELIMITER:
+            IdInstead(dataStr, length);
+            break;
+        default:
+            break;
+    }
+
+    return dataStr;
 }
