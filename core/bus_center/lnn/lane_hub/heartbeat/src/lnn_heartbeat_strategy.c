@@ -298,7 +298,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
 
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
-    const LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
+    LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->strategyType != STRATEGY_HB_SEND_SINGLE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send get invaild strategy");
@@ -308,7 +308,7 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send process send once fail");
         return SOFTBUS_ERR;
     }
-    SoftBusFree((void *)msgPara);
+    SoftBusFree(msgPara);
     return SOFTBUS_OK;
 }
 
@@ -674,6 +674,14 @@ int32_t LnnHbStrategyInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init mutex fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble strategy fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist udp/tcp strategy fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -682,5 +690,7 @@ void LnnHbStrategyDeinit(void)
     if (g_hbFsm != NULL) {
         (void)LnnStopHeartbeatFsm(g_hbFsm);
     }
+    LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
+    LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH);
     (void)SoftBusMutexDestroy(&g_hbStrategyMutex);
 }
