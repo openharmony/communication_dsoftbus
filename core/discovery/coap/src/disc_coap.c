@@ -513,20 +513,30 @@ void DiscCoapDeinit(void)
 
 static int CoapPubInfoDump(int fd)
 {
+    if (SoftBusMutexLock(&(g_publishMgr->lock)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "pthread mutex lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
     dprintf(fd, "\n---------------CoapPublishInfo------------------\n");
-        dprintf(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
-        dprintf(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
-        dprintf(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
-        dprintf(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
+    dprintf(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
+    dprintf(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
+    dprintf(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
+    dprintf(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
+    (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
     return SOFTBUS_OK;
 }
 
 static int CoapSubInfoDump(int fd)
 {
+    if (SoftBusMutexLock(&(g_subscribeMgr->lock)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "pthread mutex lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
     dprintf(fd, "\n---------------CoapSubscribeInfo------------------\n");
-        dprintf(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
-        dprintf(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
-        dprintf(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
-        dprintf(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
+    dprintf(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
+    dprintf(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
+    dprintf(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
+    dprintf(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
+    (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
     return SOFTBUS_OK;
 }

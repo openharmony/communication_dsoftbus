@@ -684,6 +684,10 @@ int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
 
 static int BleGattServiceDump(int fd)
 {
+    if (SoftBusMutexLock(&g_serviceStateLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     dprintf(fd, "\n-----------------BLEGattService Info-------------------\n");
     dprintf(fd, "GattService state               : %u\n", g_gattService.state);
     dprintf(fd, "BleGattService svcId            : %d\n", g_gattService.svcId);
@@ -691,5 +695,6 @@ static int BleGattServiceDump(int fd)
     dprintf(fd, "BleGattService bleConnDesId     : %d\n", g_gattService.bleConnDesId);
     dprintf(fd, "BleGattService bleNetCharaId    : %d\n", g_gattService.bleNetCharaId);
     dprintf(fd, "BleGattService bleNetDesId      : %d\n", g_gattService.bleNetDesId);
+    (void)SoftBusMutexUnlock(&g_serviceStateLock);
     return SOFTBUS_OK;
 }

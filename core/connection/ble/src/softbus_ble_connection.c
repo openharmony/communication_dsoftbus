@@ -1056,7 +1056,7 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
 
 static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
-    if (SoftBusMutexLock(&g_connectionLock) != 0) {
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -1249,6 +1249,10 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 
 static int BleConnectionDump(int fd)
 {
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
@@ -1289,5 +1293,6 @@ static int BleConnectionDump(int fd)
             dprintf(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
         }
     }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }
