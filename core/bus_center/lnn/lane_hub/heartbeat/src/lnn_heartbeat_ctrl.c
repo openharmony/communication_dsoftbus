@@ -35,29 +35,6 @@
 #define HB_SCREEN_OFF_BLE_SCAN_INTERVAL 3000
 #define HB_SCREEN_OFF_BLE_SCAN_WINDOW 60
 
-static void HbIpAddrChangeEventHandler(const LnnEventBasicInfo *info)
-{
-    char localIp[IP_LEN] = {0};
-
-    if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ip addr change evt handler get invalid param");
-        return;
-    }
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local ip err");
-        return;
-    }
-    if (strcmp(localIp, HB_LOOPBACK_IP) == 0) {
-        LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get local ip is loopback ip");
-        return;
-    }
-    if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist udp/tcp strategy fail");
-        return;
-    }
-}
-
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     int32_t ret;
@@ -70,11 +47,6 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusBtState btState = (SoftBusBtState)event->status;
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
-            ret = LnnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
-            if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble strategy fail");
-                return;
-            }
             ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start ble heartbeat fail, ret=%d", ret);
@@ -82,7 +54,6 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             }
             break;
         case SOFTBUS_BLE_TURN_OFF:
-            LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
             ret = LnnStopHbByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop ble heartbeat fail, ret=%d", ret);
@@ -220,10 +191,6 @@ int32_t LnnInitHeartbeat(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init fail!");
         return SOFTBUS_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ip addr change evt handler fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist bt state change evt handler fail");
         return SOFTBUS_ERR;
@@ -248,7 +215,6 @@ void LnnDeinitHeartbeat(void)
 {
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
-    LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, HbMasterNodeChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler);
