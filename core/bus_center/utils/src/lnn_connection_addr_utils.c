@@ -120,7 +120,7 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
     return false;
 }
 
-DiscoveryType LnnGetDiscoveryType(ConnectionAddrType type)
+DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
         return DISCOVERY_TYPE_WIFI;

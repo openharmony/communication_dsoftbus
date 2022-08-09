@@ -16,18 +16,13 @@
 #ifndef LNN_BLE_HEARTBEAT_H
 #define LNN_BLE_HEARTBEAT_H
 
-#include "lnn_heartbeat_manager.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t LnnInitBleHeartbeat(LnnHeartbeatImplCallback *callback);
-int32_t LnnOnceBleHbBegin(void);
-int32_t LnnOnceBleHbEnd(void);
-int32_t LnnStopBleHeartbeat(void);
-int32_t LnnDeinitBleHeartbeat(void);
-int32_t LnnOnUpdateLocalDeviceInfo(void);
+int32_t LnnRegistBleHeartbeatMediumMgr(void);
 
 #ifdef __cplusplus
 }
