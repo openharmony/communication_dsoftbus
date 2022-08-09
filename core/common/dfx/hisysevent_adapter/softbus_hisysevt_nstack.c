@@ -203,10 +203,16 @@ static void DFileHiEventCb(void *softObj, const DFileEvent *info)
 static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
 {
     NstackDfxEvent nstackInfo;
-    if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(DFinderEvent)) != EOK) {
+    if (memcpy_s(nstackInfo.eventName, sizeof(nstackInfo.eventName),
+        info->eventName, sizeof(info->eventName)) != EOK) {
         LOG_ERR("change DFinderEvent to NstackDfxEvent failed!");
         return;
     }
+
+    nstackInfo.type = (NstackDfxEvtType)info->type;
+    nstackInfo.level = (NstackDfxEvtLevel)info->level;
+    nstackInfo.paramNum = info->paramNum;
+    nstackInfo.paramArray = (NstackDfxEvtParam *)info->params;
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
