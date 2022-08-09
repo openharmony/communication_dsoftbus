@@ -17,7 +17,6 @@
 
 #include <securec.h>
 
-#include "lnn_heartbeat_strategy.h"
 #include "nativetoken_kit.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"

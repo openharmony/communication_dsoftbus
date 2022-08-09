@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,22 @@
  * limitations under the License.
  */
 
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_heartbeat_ctrl.h"
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+int32_t LnnStartHeartbeatFrameDelay(void)
 {
-    (void)pkgName;
-    (void)callerId;
-    (void)targetNetworkId;
-    (void)mode;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub ShiftLNNGear");
-    return SOFTBUS_NOT_IMPLEMENT;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub process start.");
+    return SOFTBUS_OK;
 }
 
-int32_t LnnGetHeartbeatGearMode(GearMode *mode)
+int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
 {
-    (void)mode;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
+    (void)param;
 
-int32_t LnnGetHeartbeatImplPolicy(LnnHeartbeatImplType type, HeartbeatImplPolicy *implPolicy)
-{
-    (void)type;
-    (void)implPolicy;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub set medium param");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -45,21 +36,24 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 {
     (void)networkId;
     (void)addrType;
+
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnStartHeartbeatDelay(void)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
-    return SOFTBUS_OK;
-}
+    (void)pkgName;
+    (void)callerId;
+    (void)targetNetworkId;
+    (void)mode;
 
-void LnnStopHeartbeatNow(void)
-{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub ShiftLNNGear");
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnInitHeartbeat(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub LnnInitHeartbeat");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub init success");
     return SOFTBUS_OK;
 }
 

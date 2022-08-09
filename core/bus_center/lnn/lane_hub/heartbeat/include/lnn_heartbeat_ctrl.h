@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef LNN_CONNECTION_ADDR_UTILS_H
-#define LNN_CONNECTION_ADDR_UTILS_H
+#ifndef LNN_HEARTBEAT_CTRL_H
+#define LNN_HEARTBEAT_CTRL_H
 
-#include <stdbool.h>
-
-#include "lnn_node_info.h"
+#include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
-bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
-bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
-DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
+int32_t LnnStartHeartbeatFrameDelay(void);
+int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
+int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+
+int32_t LnnInitHeartbeat(void);
+void LnnDeinitHeartbeat(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_CONNECTION_ADDR_UTILS_H */
-
+#endif /* LNN_HEARTBEAT_CTRL_H */
