@@ -46,6 +46,7 @@ fillp_source = [
   "src/fillp_lib/src/fillp/fillp_pcb.c",
   "src/fillp_lib/src/fillp/fillp_timer.c",
   "src/fillp_lib/src/fillp/fillp_frame.c",
+  "src/fillp_lib/src/fillp/fillp_mgt_msg_log.c",
   "src/public/src/callbacks.c",
   "src/public/src/dympool.c",
   "src/public/src/epoll.c",
@@ -78,6 +79,7 @@ fillp_cflags = [
   "-DFILLP_POWER_SAVE",
   "-DFILLP_POWER_SAVING_LINUX",
   "-DFILLP_ENABLE_DFX_HIDUMPER",
+  "-DFILLP_MGT_MSG_LOG",
 ]
 
 if (defined(ohos_lite)) {
