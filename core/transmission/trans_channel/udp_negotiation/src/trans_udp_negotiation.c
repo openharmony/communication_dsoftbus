@@ -127,14 +127,9 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed.");
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = g_channelCb->GetPkgNameBySessionName(info->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail, ret=%d.", ret);
-        return SOFTBUS_ERR;
-    }
-    ret = g_channelCb->OnChannelClosed(pkgName, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed, pkg[%s].", info->myData.pkgName);
+    int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName,
+        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on channel closed failed, ret=%d.", ret);
         return SOFTBUS_ERR;
