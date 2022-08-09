@@ -15,6 +15,7 @@
 
 #include <securec.h>
 #include "fillpinc.h"
+#include "nstackx.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
@@ -199,6 +200,22 @@ static void DFileHiEventCb(void *softObj, const DFileEvent *info)
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
+static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
+{
+    NstackDfxEvent nstackInfo;
+    if (memcpy_s(nstackInfo.eventName, sizeof(nstackInfo.eventName),
+        info->eventName, sizeof(info->eventName)) != EOK) {
+        LOG_ERR("change DFinderEvent to NstackDfxEvent failed!");
+        return;
+    }
+
+    nstackInfo.type = (NstackDfxEvtType)info->type;
+    nstackInfo.level = (NstackDfxEvtLevel)info->level;
+    nstackInfo.paramNum = info->paramNum;
+    nstackInfo.paramArray = (NstackDfxEvtParam *)info->params;
+    NstackHiEventCb(softObj, &nstackInfo);
+}
+
 void NstackInitHiEvent(void)
 {
     if (FtSetDfxEventCb(NULL, DstreamHiEventCb) != 0) {
@@ -206,4 +223,7 @@ void NstackInitHiEvent(void)
     }
 
     NSTACKX_DFileSetEventFunc(NULL, DFileHiEventCb);
+    if (NSTACKX_DFinderSetEventFunc(NULL, DFinderHiEventCb) != 0) {
+        LOG_ERR("NSTACKX_DFinderSetEventFunc failed!");
+    }
 }

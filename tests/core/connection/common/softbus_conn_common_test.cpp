@@ -1069,8 +1069,8 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "127.0.0.1",
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
     };
@@ -1109,8 +1109,8 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "127.0.0.1",
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
     };

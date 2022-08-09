@@ -18,6 +18,7 @@
 #include "softbus_log.h"
 #include "softbus_hidumper.h"
 #include "fillpinc.h"
+#include "nstackx.h"
 #include "nstackx_dfile.h"
 #include "softbus_hidumper_nstack.h"
 
@@ -72,9 +73,14 @@ static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
 static int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NSTACKX_DFinderDump invalid input!");
         return SOFTBUS_ERR;
     }
 
+    if (NSTACKX_DFinderDump(argv, (uint32_t)argc, &fd, SoftBufNstackDumpFunc) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call NSTACKX_DFinderDump failed!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
