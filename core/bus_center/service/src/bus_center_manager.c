@@ -22,7 +22,6 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
-#include "lnn_heartbeat_strategy.h"
 #include "lnn_lane_hub.h"
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"

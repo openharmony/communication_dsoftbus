@@ -143,8 +143,8 @@ static void *LoopTask(void *arg)
             context->msgSize--;
             if (looper->dumpable) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
-                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",msgSize=%u", context->name,
-                    msg->handler->name, msg->what, context->msgSize);
+                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u", context->name,
+                    msg->handler->name, msg->what, context->msgSize, msg->arg1);
             }
         } else {
             SoftBusSysTime tv;
