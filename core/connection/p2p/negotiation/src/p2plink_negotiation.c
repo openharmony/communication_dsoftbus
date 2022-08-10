@@ -31,6 +31,7 @@
 
 #define P2PLINK_VERSION 2
 #define P2PLINK_NEG_TIMEOUT 5000
+#define P2PLINK_NEG_REQUEST_TIMEOUT 8000
 #define P2PLINK_DHCP_CONNECT_TIMEOUT 15000
 #define MAX_CHANNEL_NUM 1
 #define FREQ_STR_LEN 8
@@ -452,7 +453,7 @@ static void IdleStateStartNeo(const P2pLinkNegoConnInfo *info)
         } else if (myRole == ROLE_NONE) {
             P2pLinkFsmTransactState(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_ROLE_NEGOING);
         }
-        P2pLinkFsmMsgProcDelay(g_p2pLinkNegoFsm.fsm, CONN_REQUEST_TIME_OUT, NULL, P2PLINK_NEG_TIMEOUT);
+        P2pLinkFsmMsgProcDelay(g_p2pLinkNegoFsm.fsm, CONN_REQUEST_TIME_OUT, NULL, P2PLINK_NEG_REQUEST_TIMEOUT);
     } while (0);
 
     if (ret != SOFTBUS_OK) {
@@ -1032,7 +1033,7 @@ static void OnGroupCreated(const P2pLinkGroup *group)
             return;
         }
         P2pLinkFsmTransactState(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_GROUP_WAIT_CONNECTING);
-        P2pLinkFsmMsgProcDelay(g_p2pLinkNegoFsm.fsm, CONN_REQUEST_TIME_OUT, NULL, P2PLINK_NEG_TIMEOUT);
+        P2pLinkFsmMsgProcDelay(g_p2pLinkNegoFsm.fsm, CONN_REQUEST_TIME_OUT, NULL, P2PLINK_NEG_REQUEST_TIMEOUT);
     } else {
         ret = PostConnResponse(g_p2pLinkNegoFsm.linkInfo.authId, CONTENT_TYPE_GO_INFO, 0);
         if (ret != SOFTBUS_OK) {
