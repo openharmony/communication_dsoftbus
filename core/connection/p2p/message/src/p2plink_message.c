@@ -200,9 +200,37 @@ int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static void P2pLinkAuthChannelCloseProcess(P2pLoopMsg msgType, void *param)
+{
+    (void)msgType;
+    if (param == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelCloseProcess invalid param");
+        return;
+    }
+    int64_t authId = *(int64_t *)param;
+    P2pLinkonAuthChannelClose(authId);
+    SoftBusFree(param);
+}
+
+static void P2pLinkAuthChannelClose(int64_t authId)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkAuthChannelClose authId: %" PRId64, authId);
+    int64_t *param = SoftBusMalloc(sizeof(int64_t));
+    if (param == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelClose malloc failed");
+        return;
+    }
+    *param = authId;
+    if (P2pLoopProc(P2pLinkAuthChannelCloseProcess, (void *)param, P2PLOOP_AUTH_CHANNEL_CLOSED) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelClose p2p looper post failed");
+        SoftBusFree(param);
+        return;
+    }
+}
+
 static AuthTransCallback g_p2pLinkTransCb = {
     .onTransUdpDataRecv = P2pLinkNegoDataRecv,
-    .onAuthChannelClose = P2pLinkonAuthChannelClose,
+    .onAuthChannelClose = P2pLinkAuthChannelClose,
 };
 
 int32_t P2pLinkMessageInit(void)
