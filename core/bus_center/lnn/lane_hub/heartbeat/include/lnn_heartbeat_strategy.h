@@ -44,7 +44,8 @@ int32_t LnnStopHbByType(LnnHeartbeatType type);
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 
-bool LnnIsMediumParamMgrRegisted(LnnHeartbeatType type);
+bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable);
 
 int32_t LnnRegistParamMgrByType(LnnHeartbeatType type);
 void LnnUnRegistParamMgrByType(LnnHeartbeatType type);
