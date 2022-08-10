@@ -42,6 +42,7 @@ typedef struct {
     LnnHeartbeatType type;
     LnnHeartbeatMediumParam *param;
     ListNode gearModeList;
+    bool isEnable;
 } LnnHeartbeatParamManager;
 
 static SoftBusMutex g_hbStrategyMutex;
@@ -74,18 +75,6 @@ static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
         .onProcess = NULL,
     },
 };
-
-static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
-{
-    int32_t id;
-
-    id = LnnConvertHbTypeToId(type);
-    if (id == HB_INVALID_TYPE_ID) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get param mgr convert type fail");
-        return NULL;
-    }
-    return g_hbParamMgr[id];
-}
 
 static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeList)
 {
@@ -139,6 +128,49 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
     return SOFTBUS_OK;
 }
 
+static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
+{
+    int32_t id;
+
+    id = LnnConvertHbTypeToId(type);
+    if (id == HB_INVALID_TYPE_ID) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get param mgr convert type fail");
+        return NULL;
+    }
+    return g_hbParamMgr[id];
+}
+
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
+{
+    const LnnHeartbeatParamManager *paramMgr = NULL;
+
+    if (mode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode invalid param!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode) != EOK)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode memset_s err");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    paramMgr = GetParamMgrByTypeLocked(type);
+    if (paramMgr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode get NULL paramMgr");
+        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
+        return SOFTBUS_ERR;
+    }
+    if (GetGearModeFromSettingList(mode, &paramMgr->gearModeList) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode from setting list err");
+        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
+        return SOFTBUS_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
+    return SOFTBUS_OK;
+}
+
 static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime, ListNode *list, const GearMode *mode)
 {
     GearModeStorageInfo *info = NULL;
@@ -172,37 +204,6 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
         info->lifetimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
     }
     ListAdd(list, &info->node);
-    return SOFTBUS_OK;
-}
-
-int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
-{
-    const LnnHeartbeatParamManager *paramMgr = NULL;
-
-    if (mode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode invalid param!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode memset_s err");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-    paramMgr = GetParamMgrByTypeLocked(type);
-    if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode get NULL paramMgr");
-        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-        return SOFTBUS_ERR;
-    }
-    if (GetGearModeFromSettingList(mode, &paramMgr->gearModeList) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode from setting list err");
-        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-        return SOFTBUS_ERR;
-    }
-    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
     return SOFTBUS_OK;
 }
 
@@ -250,11 +251,9 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
 static bool VisitClearUnRegistedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
 {
     (void)data;
-    LnnHeartbeatParamManager *paramMgr = NULL;
 
-    paramMgr = GetParamMgrByTypeLocked(eachType);
-    if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB param mgr is unregisted, hbType(%d)", eachType);
+    if (!LnnIsHeartbeatEnable(eachType)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB heartbeat is disabled, hbType(%d)", eachType);
         *typeSet &= ~eachType;
     }
     return true;
@@ -265,14 +264,9 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
     bool isRemoved = true;
     LnnHeartbeatType registedHbType = msgPara->hbType;
 
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
     (void)LnnVisitHbTypeSet(VisitClearUnRegistedHbType, &registedHbType, NULL);
-    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
     if (registedHbType < HEARTBEAT_TYPE_MIN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once hbType(%d) not registed", msgPara->hbType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once get hbType(%d) is not available", msgPara->hbType);
         return SOFTBUS_OK;
     }
     LnnRemoveSendEndMsg(hbFsm, registedHbType, &isRemoved);
@@ -375,6 +369,7 @@ static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
     }
     paramMgr->type = type;
     paramMgr->param = NULL;
+    paramMgr->isEnable = false;
     ListInit(&paramMgr->gearModeList);
 
     if (FirstSetGearModeByCallerId(HB_DEFAULT_CALLER_ID, 0, &paramMgr->gearModeList, &mode) != SOFTBUS_OK) {
@@ -533,26 +528,6 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
     return SOFTBUS_OK;
 }
 
-bool LnnIsMediumParamMgrRegisted(LnnHeartbeatType type)
-{
-    int32_t id;
-    bool ret = false;
-
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get strategy enabled status lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    id = LnnConvertHbTypeToId(type);
-    if (id == HB_INVALID_TYPE_ID) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get strategy enabled status convert type fail");
-        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-        return false;
-    }
-    ret = g_hbParamMgr[id] != NULL ? true : false;
-    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-    return ret;
-}
-
 int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
     LnnHeartbeatStrategyType strategyType)
 {
@@ -661,6 +636,47 @@ int32_t LnnStopHbByType(LnnHeartbeatType type)
 {
     LnnRemoveProcessSendOnceMsg(g_hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     return LnnPostStopMsgToHbFsm(g_hbFsm, type);
+}
+
+static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
+{
+    (void)data;
+    bool *isEnable = (bool *)data;
+    LnnHeartbeatParamManager *paramMgr = NULL;
+
+    paramMgr = GetParamMgrByTypeLocked(eachType);
+    if (paramMgr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB enable hbType(%d) get param mgr is NULL", eachType);
+        return true;
+    }
+    paramMgr->isEnable = *isEnable;
+    return true;
+}
+
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
+{
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB enable hbType lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    (void)LnnVisitHbTypeSet(VisitEnableHbType, &type, &isEnable);
+    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
+    return SOFTBUS_OK;
+}
+
+bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
+{
+    bool ret = false;
+    LnnHeartbeatParamManager *paramMgr = NULL;
+
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get param regist status lock mutex fail");
+        return false;
+    }
+    paramMgr = GetParamMgrByTypeLocked(type);
+    ret = (paramMgr != NULL && paramMgr->isEnable) ? true : false;
+    (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
+    return ret;
 }
 
 int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
