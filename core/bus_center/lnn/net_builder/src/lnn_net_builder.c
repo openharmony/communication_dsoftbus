@@ -676,7 +676,6 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
 static int32_t ProcessDeviceNotTrusted(const void *para)
 {
     const char *peerUdid = (const char *)para;
-    LnnConnectionFsm *connFsm = NULL;
     int32_t rc = SOFTBUS_OK;
 
     if (peerUdid == NULL) {
@@ -701,7 +700,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
             if (udid != NULL && strcmp(peerUdid, udid) == 0) {
                 rc = LnnSendNotTrustedToConnFsm(item);
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                    "[id=%u]send not trusted msg to connection fsm result: %d", connFsm->id, rc);
+                    "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
             }
         }
     } while (false);

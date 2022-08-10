@@ -49,9 +49,10 @@ typedef struct {
 } LnnHeartbeatRecvInfo;
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
-static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type);
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_t masterWeight,
     LnnHeartbeatType hbType);
+static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
+    bool isReElect);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = {0};
 
@@ -289,7 +290,8 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
     return SOFTBUS_NETWORK_NODE_OFFLINE;
 }
 
-static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type)
+static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
+    bool isReElect)
 {
     const NodeInfo *nodeInfo = NULL;
     char masterUdid[UDID_BUF_LEN] = {0};
@@ -307,10 +309,13 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local master udid fail");
         return SOFTBUS_ERR;
     }
-    if (strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) != 0 &&
+    if (isReElect && strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) != 0 &&
         LnnNotifyMasterElect(nodeInfo->networkId, nodeInfo->deviceInfo.deviceUdid, weight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify master elect fail");
         return SOFTBUS_ERR;
+    }
+    if (strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) == 0) {
+        LnnSetHbAsMasterNodeState(false);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidHash:%s, weight:%d", udidHash, weight);
     return SOFTBUS_OK;
@@ -319,12 +324,12 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType)
 {
     if (udidHash == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay to master get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay get invalid param");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB relay to master process, udidhash:%s", udidHash);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB relay process, udidhash:%s", udidHash);
     if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay to master process fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay process fail");
         return;
     }
 }
@@ -465,6 +470,7 @@ static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     ret = g_hbMeidumMgr[id]->onSendOneHbBegin();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin type(%d) fail, ret=%d", eachType, ret);
+        return false;
     }
     return true;
 }
@@ -503,6 +509,7 @@ static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet, LnnHeartbeatType 
     ret = g_hbMeidumMgr[id]->onSendOneHbEnd();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop one cycle type(%d) fail, ret=%d", eachType, ret);
+        return false;
     }
     return true;
 }
@@ -538,6 +545,7 @@ static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eac
     ret = g_hbMeidumMgr[id]->onStopHeartbeat();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat type(%d) fail, ret=%d", eachType, ret);
+        return false;
     }
     return true;
 }
