@@ -64,6 +64,7 @@ static LnnHeartbeatStateHandler g_normalNodeHandler[] = {
     {EVENT_HB_SEND_ONE_BEGIN, OnSendOneHbBegin},
     {EVENT_HB_SEND_ONE_END, OnSendOneHbEnd},
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
+    {EVENT_HB_PROCESS_SEND_ONCE, OnProcessSendOnce},
     {EVENT_HB_AS_MASTER_NODE, OnTransHbFsmState},
     {EVENT_HB_AS_NORMAL_NODE, OnTransHbFsmState},
     {EVENT_HB_STOP, OnStopHeartbeat},
@@ -350,7 +351,6 @@ static void HbMasterNodeStateExit(FsmStateMachine *fsm)
 
 static void HbNormalNodeStateEnter(FsmStateMachine *fsm)
 {
-    GearMode mode = {0};
     LnnHeartbeatFsm *hbFsm = NULL;
 
     LnnDumpHbMgrRecvList();
@@ -362,17 +362,6 @@ static void HbNormalNodeStateEnter(FsmStateMachine *fsm)
     hbFsm->state = STATE_HB_NORMAL_NODE_INDEX;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, STRATEGY_HB_SEND_FIXED_PERIOD);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) fsmId(%d) perform as normal node", hbFsm->id);
-
-    if (LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB perform normal node get gearmode fail");
-        return;
-    }
-    uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
-    if (LnnFsmPostMessageDelay(fsm, EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB perform normal node post msg fail");
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %" PRIu64 " mecs", delayMillis);
 }
 
 static void HbNoneStateEnter(FsmStateMachine *fsm)
@@ -457,6 +446,8 @@ static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
     LnnHeartbeatType *hbType = (LnnHeartbeatType *)para;
     if (LnnHbMediumMgrSendEnd(hbType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end to manager fail");
+        (void)LnnFsmRemoveMessage(fsm, EVENT_HB_SEND_ONE_END);
+        (void)LnnFsmRemoveMessage(fsm, EVENT_HB_CHECK_DEV_STATUS);
         SoftBusFree(hbType);
         return SOFTBUS_ERR;
     }
@@ -483,6 +474,23 @@ static int32_t OnStopHeartbeat(FsmStateMachine *fsm, int32_t msgType, void *para
     return SOFTBUS_OK;
 }
 
+static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
+{
+    uint64_t delayMillis;
+    GearMode mode = {0};
+
+    if (LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node get gearmode fail");
+        return;
+    }
+    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    if (LnnFsmPostMessageDelay(fsm, EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node post msg fail");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %" PRIu64 " mecs", delayMillis);
+}
+
 static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)para;
@@ -492,9 +500,12 @@ static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *pa
     switch (msgType) {
         case EVENT_HB_AS_MASTER_NODE:
             nextState = STATE_HB_MASTER_NODE_INDEX;
+            LnnFsmRemoveMessage(fsm, EVENT_HB_AS_NORMAL_NODE);
             break;
         case EVENT_HB_AS_NORMAL_NODE:
             nextState = STATE_HB_NORMAL_NODE_INDEX;
+            LnnFsmRemoveMessage(fsm, EVENT_HB_AS_MASTER_NODE);
+            TryAsMasterNodeNextLoop(fsm);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process transact state get invalid msgType");
@@ -673,7 +684,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     int32_t i;
 
-    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHeartbeatFsm-%u", hbFsm->id) == -1) {
+    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHbFsm-%u", hbFsm->id) == -1) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB format fsm name fail");
         return SOFTBUS_ERR;
     }
