@@ -72,10 +72,10 @@ static BusCenterFaultError g_errorMap[] = {
     {SOFTBUS_NETWORK_UNPACK_DEV_INFO_FAILED, LNN_UNPACK_DEV_INFO_ERROR},
 };
 
-SoftBusEvtReportMsg g_coapSuccessRate = {0};
-SoftBusEvtReportMsg g_bleSuccessRate = {0};
-SoftBusEvtReportMsg g_coapDuration = {0};
-SoftBusEvtReportMsg g_bleDuration = {0};
+SoftBusEvtReportMsg g_coapSuccessRate;
+SoftBusEvtReportMsg g_bleSuccessRate;
+SoftBusEvtReportMsg g_coapDuration;
+SoftBusEvtReportMsg g_bleDuration;
 
 static int32_t InitSuccessRateStatisticMsg(SoftBusEvtReportMsg *msg)
 {
