@@ -298,7 +298,7 @@ int32_t TcpOnDataEventIn(int32_t fd)
         return SOFTBUS_ERR;
     }
     g_tcpConnCallback->OnDataReceived(connectionId, (ConnModule)(head.module),
-		head.seq, data, (int32_t)(headSize + head.len));
+        head.seq, data, (int32_t)(headSize + head.len));
     SoftBusFree(data);
     return SOFTBUS_OK;
 }
