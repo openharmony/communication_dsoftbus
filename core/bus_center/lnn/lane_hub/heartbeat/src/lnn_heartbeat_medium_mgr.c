@@ -70,12 +70,12 @@ static int32_t HbFirstSaveRecvTime(DeviceInfo *device, int32_t weight, int32_t m
 
     recvMsg = (LnnHeartbeatRecvInfo *)SoftBusMalloc(sizeof(LnnHeartbeatRecvInfo));
     if (recvMsg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB recvMsg malloc err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium mgr malloc recvMsg err");
         return SOFTBUS_MALLOC_ERR;
     }
     recvMsg->device = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     if (recvMsg->device == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB calloc deviceInfo err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium mgr deviceInfo calloc err");
         SoftBusFree(recvMsg);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -100,7 +100,7 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(DeviceInfo *device, int32_t weight, 
     LnnHeartbeatRecvInfo *nextItem = NULL;
 
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB save recv time lock recv info list fail");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
@@ -133,7 +133,7 @@ static bool HbIsRepeatedRecvInfo(const char *udidHash, ConnectionAddrType type, 
     LnnHeartbeatRecvInfo *item = NULL;
 
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check repeat lock recv info list fail");
         return false;
     }
     LIST_FOR_EACH_ENTRY(item, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
@@ -268,7 +268,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB save recv time fail, udidHash:%s", device->devId);
         return SOFTBUS_ERR;
     }
-    if (!HbIsSameAccount(device->accountHash, HB_SHORT_ACCOUNT_ID_HASH_LEN)) {
+    if (!HbIsSameAccount(device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN)) {
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
@@ -295,6 +295,7 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
 {
     const NodeInfo *nodeInfo = NULL;
     char masterUdid[UDID_BUF_LEN] = {0};
+    bool isFromMaster = false;
 
     if (udidHash == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr recv higher weight get invalid param");
@@ -309,12 +310,13 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local master udid fail");
         return SOFTBUS_ERR;
     }
-    if (isReElect && strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) != 0 &&
+    isFromMaster = strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) == 0 ? true : false;
+    if (isReElect && !isFromMaster &&
         LnnNotifyMasterElect(nodeInfo->networkId, nodeInfo->deviceInfo.deviceUdid, weight) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify master elect fail");
         return SOFTBUS_ERR;
     }
-    if (strcmp(masterUdid, nodeInfo->deviceInfo.deviceUdid) == 0) {
+    if (isFromMaster) {
         LnnSetHbAsMasterNodeState(false);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidHash:%s, weight:%d", udidHash, weight);
@@ -323,13 +325,15 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType)
 {
+    (void)type;
+
     if (udidHash == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay get invalid param");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB relay process, udidhash:%s", udidHash);
-    if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB relay process fail");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB mgr relay process, udidhash:%s", udidHash);
+    if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay process fail");
         return;
     }
 }
@@ -350,20 +354,20 @@ static int32_t HbInitRecvList(void)
 
 static void HbDeinitRecvList(void)
 {
-    LnnHeartbeatRecvInfo *reqItem = NULL;
-    LnnHeartbeatRecvInfo *nextreqItem = NULL;
+    LnnHeartbeatRecvInfo *item = NULL;
+    LnnHeartbeatRecvInfo *nextItem = NULL;
 
     if (g_hbRecvList == NULL) {
         return;
     }
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB deinit recv list lock recv info list fail");
         return;
     }
-    LIST_FOR_EACH_ENTRY_SAFE(reqItem, nextreqItem, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
-        ListDelete(&reqItem->node);
-        SoftBusFree(reqItem->device);
-        SoftBusFree(reqItem);
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item->device);
+        SoftBusFree(item);
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     DestroySoftBusList(g_hbRecvList);
@@ -378,7 +382,7 @@ void LnnDumpHbMgrRecvList(void)
     LnnHeartbeatRecvInfo *item = NULL;
 
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB dump recv list lock recv info list fail");
         return;
     }
     if (IsListEmpty(&g_hbRecvList->list)) {
@@ -451,9 +455,14 @@ int32_t LnnHbMediumMgrInit(void)
 static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
 {
     (void)typeSet;
-    (void)data;
     int32_t id, ret;
+    LnnHeartbeatCustSendData *custData = NULL;
 
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once begin get invalid param");
+        return false;
+    }
+    custData = (LnnHeartbeatCustSendData *)data;
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once begin convert type fail");
@@ -467,7 +476,7 @@ static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB manager send once begin cb is NULL, type(%d)", eachType);
         return true;
     }
-    ret = g_hbMeidumMgr[id]->onSendOneHbBegin();
+    ret = g_hbMeidumMgr[id]->onSendOneHbBegin(custData);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin type(%d) fail, ret=%d", eachType, ret);
         return false;
@@ -475,13 +484,13 @@ static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     return true;
 }
 
-int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatType *type)
+int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatCustSendData *custData)
 {
-    if (type == NULL) {
+    if (custData == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!LnnVisitHbTypeSet(VisitHbMediumMgrSendBegin, type, NULL)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send begin hbType(%d) fail", *type);
+    if (!LnnVisitHbTypeSet(VisitHbMediumMgrSendBegin, &custData->hbType, custData)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send begin hbType(%d) fail", custData->hbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -587,6 +596,7 @@ int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
         return SOFTBUS_ERR;
     }
     if (g_hbMeidumMgr[id] == NULL || g_hbMeidumMgr[id]->onSetMediumParam == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", param->type);
         return SOFTBUS_NOT_IMPLEMENT;
     }
     ret = g_hbMeidumMgr[id]->onSetMediumParam(param);
