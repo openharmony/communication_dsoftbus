@@ -809,6 +809,7 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int BleGattcDump(int fd)
 {
+    char addr[UDID_BUF_LEN] = {0};
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
     dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
@@ -816,9 +817,8 @@ static int BleGattcDump(int fd)
         BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
         dprintf(fd, "clientId                  : %d\n", itemNode->clientId);
         dprintf(fd, "state                     : %d\n", itemNode->state);
-        char *addr = DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER);
+        DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER, addr);
         dprintf(fd, "btMac                     : %s\n", addr);
-        SoftBusFree(addr);
     }
     return SOFTBUS_OK;
 }

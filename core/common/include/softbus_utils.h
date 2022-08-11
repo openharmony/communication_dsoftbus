@@ -88,7 +88,7 @@ bool GetSignalingMsgSwitch(void);
  */
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
 
-char *DataMasking(const char *data, uint32_t length, char delimiter);
+void DataMasking(const char *data, uint32_t length, char delimiter, char *container);
 
 #ifdef __cplusplus
 #if __cplusplus

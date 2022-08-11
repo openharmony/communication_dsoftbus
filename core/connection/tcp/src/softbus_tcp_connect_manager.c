@@ -669,6 +669,7 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 
 static int TcpConnectInfoDump(int fd)
 {
+    char addr[MAX_SOCKET_ADDR_LEN] = {0};
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------TcpConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_tcpConnInfoList->list) {
@@ -678,9 +679,8 @@ static int TcpConnectInfoDump(int fd)
         dprintf(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         dprintf(fd, "Connection Info type              : %d\n", itemNode->info.type);
         dprintf(fd, "SocketInfo                        :\n");
-        char *addr = DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER);
+        DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
         dprintf(fd, "SocketInfo addr                   : %s\n", addr);
-        SoftBusFree(addr);
         dprintf(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
         dprintf(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
         dprintf(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);

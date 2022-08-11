@@ -1753,6 +1753,9 @@ static int BleInfoDump(int fd)
 
 static int BleAdvertiserDump(int fd)
 {
+    char bleMac[BT_MAC_LEN] = {0};
+    char hash[UDID_HASH_LEN] = {0};
+    char peerUid[MAX_ACCOUNT_HASH_LEN] = {0};
     dprintf(fd, "\n-----------------BleAdvertiser Info-------------------\n");
     for (int i = 0; i < NUM_ADVERTISER; i++) {
         dprintf(fd, "BleAdvertiser advId                     : %d\n", g_bleAdvertiser[i].advId);
@@ -1765,18 +1768,15 @@ static int BleAdvertiserDump(int fd)
         dprintf(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
         dprintf(fd, "addr type                               : %u\n",
                 g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
-        char *bleMac = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
-                                   BT_MAC_LEN, MAC_DELIMITER);
+        DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
+                    BT_MAC_LEN, MAC_DELIMITER, bleMac);
         dprintf(fd, "Connection bleMac                       : %s\n", bleMac);
-        SoftBusFree(bleMac);
-        char *hash = DataMasking((char *)(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash),
-                                 UDID_HASH_LEN, ID_DELIMITER);
+        DataMasking((char *)(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash),
+                    UDID_HASH_LEN, ID_DELIMITER, hash);
         dprintf(fd, "Connection bleHash                      : %s\n", hash);
-        SoftBusFree(hash);
-        char *peerUid = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid,
-                                    MAX_ACCOUNT_HASH_LEN, ID_DELIMITER);
+        DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid,
+                    MAX_ACCOUNT_HASH_LEN, ID_DELIMITER, peerUid);
         dprintf(fd, "Connection peerUid                      : %s\n", peerUid);
-        SoftBusFree(peerUid);
         dprintf(fd, "capabilityBitmapNum                     : %u\n",
                 g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
         dprintf(fd, "capabilityBitmap                        : %u\n",

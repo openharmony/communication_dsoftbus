@@ -1249,32 +1249,32 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 
 static int BleConnectionDump(int fd)
 {
+    char addr[BT_ADDR_LEN] = {0};
+    char bleMac[BT_MAC_LEN] = {0};
+    char deviceIdHash[UDID_HASH_LEN] = {0};
+    char peerDevId[UDID_BUF_LEN] = {0};
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         dprintf(fd, "halConnId                     : %d\n", itemNode->halConnId);
         dprintf(fd, "connId                        : %d\n", itemNode->connId);
-        char *addr = DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER);
+        DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER, addr);
         dprintf(fd, "btMac                         : %s\n", addr);
-        SoftBusFree(addr);
         dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
         dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
         dprintf(fd, "Connection Info type          : %u\n", itemNode->info.type);
         dprintf(fd, "BleInfo: \n");
-        char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
+        DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER, bleMac);
         dprintf(fd, "BleInfo addr                  : %s\n", bleMac);
-        SoftBusFree(bleMac);
-        char *deviceIdHash = DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER);
+        DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER, deviceIdHash);
         dprintf(fd, "BleInfo deviceIdHash          : %s\n", deviceIdHash);
-        SoftBusFree(deviceIdHash);
         dprintf(fd, "Connection state              : %d\n", itemNode->state);
         dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
         dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
         dprintf(fd, "Connection peerType           : %d\n", itemNode->peerType);
-        char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
+        DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER, peerDevId);
         dprintf(fd, "Connection peerDevId          : %s\n", peerDevId);
-        SoftBusFree(peerDevId);
         dprintf(fd, "request Info: \n");
         LIST_FOR_EACH(item, &itemNode->requestList) {
             BleRequestInfo *requestNode = LIST_ENTRY(item, BleRequestInfo, node);
