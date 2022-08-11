@@ -122,6 +122,12 @@ extern "C" {
 typedef enum {
     NODE_KEY_UDID = 0,  /**< UDID in string format*/
     NODE_KEY_UUID,      /**< UUID in string format */
+    NODE_KEY_MASTER_UDID, /**< UDID of master node in string format */
+    NODE_KEY_BR_MAC,    /**< BR MAC in string format */
+    NODE_KEY_IP_ADDRESS, /**< IP address in string format */
+    NODE_KEY_DEV_NAME,   /**< Device name in string format */
+    NODE_KEY_NETWORK_CAPABILITY,   /**< Network capability in number format */
+    NODE_KEY_NETWORK_TYPE,        /**< Network type in number format */
 } NodeDeviceInfoKey;
 
 /**

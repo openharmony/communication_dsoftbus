@@ -86,3 +86,27 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
             return SOFTBUS_ERR;
     }
 }
+int32_t LnnGetNodeKeyInfoLen(int32_t key)
+{
+    switch (key) {
+        case NODE_KEY_UDID:
+            return UDID_BUF_LEN;
+        case NODE_KEY_UUID:
+            return UUID_BUF_LEN;
+        case NODE_KEY_MASTER_UDID:
+            return UDID_BUF_LEN;
+        case NODE_KEY_BR_MAC:
+            return MAC_LEN;
+        case NODE_KEY_IP_ADDRESS:
+            return IP_LEN;
+        case NODE_KEY_DEV_NAME:
+            return DEVICE_NAME_BUF_LEN;
+        case NODE_KEY_NETWORK_CAPABILITY:
+            return NUM_BUF_SIZE;
+        case NODE_KEY_NETWORK_TYPE:
+            return NUM_BUF_SIZE;
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
+            return SOFTBUS_ERR;
+    }
+}
