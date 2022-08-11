@@ -262,6 +262,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
     }
     SoftBusMessageNode *newNode = (SoftBusMessageNode *)SoftBusMalloc(sizeof(SoftBusMessageNode));
     if (newNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:oom", __func__);
         FreeSoftBusMsg(msgPost);
         return;
     }
@@ -278,8 +279,8 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
         SoftBusFree(newNode);
         FreeSoftBusMsg(msgPost);
         (void)SoftBusMutexUnlock(&context->lock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. running=%d,stop=%d",
-            context->name, context->running, context->stop);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s]PostMessageAtTime. running=%d,stop=1.",
+            context->name, context->running);
         return;
     }
     ListNode *item = NULL;

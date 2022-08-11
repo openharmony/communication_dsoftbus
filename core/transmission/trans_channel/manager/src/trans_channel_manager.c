@@ -189,7 +189,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     LaneConnInfo connInfo;
     uint32_t laneId = 0;
     AppInfo *appInfo = NULL;
-    ConnectOption connOpt = {0};
+    ConnectOption connOpt;
+    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
     appInfo = GetAppInfo(param);
     if (appInfo == NULL) {

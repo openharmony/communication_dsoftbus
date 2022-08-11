@@ -115,18 +115,18 @@ static int32_t CoapCreateUdpClient(const struct sockaddr_in *sockAddr, uint8_t i
     }
 
     int32_t optVal = 1;
+    struct sockaddr_in localAddr;
+    char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)) != 0) {
         DFINDER_LOGE(TAG, "set sock opt failed, errno = %d", errno);
         goto CLOSE_FD;
     }
 
-    char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "get local ip string failed");
         goto CLOSE_FD;
     }
 
-    struct sockaddr_in localAddr;
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_addr.s_addr = inet_addr(ipString);
