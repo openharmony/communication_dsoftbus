@@ -608,6 +608,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
 
 static int BrConnectionInfoDump(int fd)
 {
+    char tempMac[BT_ADDR_LEN] = {0};
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BRConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
@@ -615,9 +616,8 @@ static int BrConnectionInfoDump(int fd)
         dprintf(fd, "connectionId                  : %d\n", itemNode->connectionId);
         dprintf(fd, "socketFd                      : %d\n", itemNode->socketFd);
         dprintf(fd, "sideType                      : %d\n", itemNode->sideType);
-        char *tempMac = DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER);
+        DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER, tempMac);
         dprintf(fd, "btMac                         : %s\n", tempMac);
-        SoftBusFree(tempMac);
         dprintf(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
         dprintf(fd, "br state                      : %d\n", itemNode->state);
         dprintf(fd, "refCount                      : %d\n", itemNode->refCount);

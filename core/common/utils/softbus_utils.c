@@ -386,40 +386,34 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 void IdInstead(char *data, uint32_t length)
 {
     uint32_t halfLen = length / GET_ID_HALF_LEN;
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length - 1; i++) {
         if (i > halfLen) {
             data[i] = '*';
         }
     }
 }
 
-char *DataMasking(const char *data, uint32_t length, char delimiter)
+void DataMasking(const char *data, uint32_t length, char delimiter, char *container)
 {
-    char* dataStr = (char*)SoftBusMalloc(length + 1);
-
-    if (dataStr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
-        return NULL;
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        return;
     }
-    (void)memset_s(dataStr, length + 1, 0, length + 1);
-    if (memcpy_s(dataStr, length, data, length) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DataMasking memcpy_s failed");
-            SoftBusFree(dataStr);
-            return NULL;
+    if (memcpy_s(container, length, data, length) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "container memcpy_s failed");
+        return;
     }
     switch (delimiter) {
         case MAC_DELIMITER:
-            MacInstead(dataStr, length, delimiter);
+            MacInstead(container, length, delimiter);
             break;
         case IP_DELIMITER:
-            IpInstead(dataStr, length, delimiter);
+            IpInstead(container, length, delimiter);
             break;
         case ID_DELIMITER:
-            IdInstead(dataStr, length);
+            IdInstead(container, length);
             break;
         default:
             break;
     }
-
-    return dataStr;
 }
