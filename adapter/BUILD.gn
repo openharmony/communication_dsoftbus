@@ -59,7 +59,15 @@ if (defined(ohos_lite)) {
             [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
         defines = [ "HISPARK_PEGASUS_USE_NETIF_GET_ADDR" ]
       }
-      cflags = [ "-Wall" ]
+      if (board_toolchain_type == "iccarm") {
+        cflags = [
+          "--diag_suppress",
+          "Pe226,Pe513",
+        ]
+        ldflags = [ "-lpthread" ]
+      } else {
+        cflags = [ "-Wall" ]
+      }
       sources = [
         "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
         "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",

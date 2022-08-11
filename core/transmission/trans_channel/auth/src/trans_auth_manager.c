@@ -509,7 +509,9 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, i
         .flag = flag,
     };
     cJSON_Delete(msg);
-    return AuthPostData(&head, (const uint8_t *)data, strlen(data));
+    int32_t ret = AuthPostData(&head, (const uint8_t *)data, strlen(data));
+    cJSON_free(data);
+    return ret;
 }
 
 static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const char *errMsg)
@@ -647,7 +649,8 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
     if (!chanInfo.isConnOptValid) {
         return SOFTBUS_ERR;
     }
-    ConnectionAddr addr = {0};
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
         return SOFTBUS_ERR;
     }

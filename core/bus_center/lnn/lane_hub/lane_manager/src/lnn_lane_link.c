@@ -302,7 +302,7 @@ static void OnConnOpened(uint32_t requestId, int64_t authId)
         SetConnectDeviceResult(requestId, false, NULL, NULL);
         return;
     }
-    info.expectedRole = GetExpectedP2pRole();
+    info.expectedRole = (P2pLinkRole)GetExpectedP2pRole();
     info.cb.onConnected = OnP2pConnected;
     info.cb.onConnectFailed = OnP2pConnectFailed;
     (void)AuthSetP2pMac(authId, info.peerMac);
@@ -364,7 +364,8 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
 
 static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (GetPreferAuthConnInfo(networkId, &connInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no auth conn exist.");
         return SOFTBUS_ERR;
@@ -453,7 +454,8 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer uuid fail.");
         return SOFTBUS_ERR;
     }
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (AuthGetPreferConnInfo(uuid, &connInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get auth conn fail.");
         return SOFTBUS_ERR;
@@ -478,12 +480,13 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
 
 static int32_t CheckP2pRoleConflict(const char *networkId)
 {
-    RoleIsConflictInfo info = {0};
+    RoleIsConflictInfo info;
+    (void)memset_s(&info, sizeof(RoleIsConflictInfo), 0, sizeof(RoleIsConflictInfo));
     if (LnnGetRemoteNumInfo(networkId, NUM_KEY_P2P_ROLE, (int32_t *)&info.peerRole) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p role fail.");
         return SOFTBUS_ERR;
     }
-    info.expectedRole = GetExpectedP2pRole();
+    info.expectedRole = (P2pLinkRole)GetExpectedP2pRole();
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_GO_MAC, info.peerGoMac, sizeof(info.peerGoMac)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p go mac fail.");
         return SOFTBUS_ERR;
@@ -506,7 +509,7 @@ static int32_t CheckP2pRoleConflict(const char *networkId)
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
     if (networkId == NULL || p2pInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_pendingList == NULL) {
@@ -523,7 +526,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInf
 int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
 {
     if (networkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_pendingList == NULL) {

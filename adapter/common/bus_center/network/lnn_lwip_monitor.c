@@ -22,6 +22,7 @@
 
 #define LWIP_NSC_IPSTATUS_CHANGE 0xf0
 
+char* lwip_if_indextoname(unsigned int ifindex, char *ifname);
 static int32_t NetifStatusCallback(
     struct netif *netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t *args)
 {

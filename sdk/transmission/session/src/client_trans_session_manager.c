@@ -785,7 +785,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
         return SOFTBUS_ERR;
     }
     sessionNode->channelId = transInfo->channelId;
-    sessionNode->channelType = transInfo->channelType;
+    sessionNode->channelType = (ChannelType)transInfo->channelType;
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;

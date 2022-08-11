@@ -15,6 +15,7 @@
 
 #include "softbus_proxychannel_control.h"
 
+#include <securec.h>
 #include <string.h>
 
 #include "auth_interface.h"
@@ -52,10 +53,11 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint3
 static int32_t GetChiperParamByConnId(uint32_t connId, uint8_t *chiper)
 {
     ConnectType authType;
-    ConnectOption option = {0};
+    ConnectOption option;
     char uuid[UUID_BUF_LEN] = {0};
     bool isServerSide = false;
 
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (TransProxyGetConnectOption(connId, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connect option fail connId[%d]", connId);
         return SOFTBUS_ERR;

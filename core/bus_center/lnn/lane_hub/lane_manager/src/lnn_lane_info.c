@@ -148,7 +148,7 @@ ConnectionAddrType LnnGetLaneType(int32_t laneId)
     if (laneId == LNN_LINK_TYPE_WLAN_5G || laneId == LNN_LINK_TYPE_WLAN_2P4G) {
         return CONNECTION_ADDR_WLAN;
     }
-    return laneId;
+    return (ConnectionAddrType)laneId;
 }
 
 const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId)
