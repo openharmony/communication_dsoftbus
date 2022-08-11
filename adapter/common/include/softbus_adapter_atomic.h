@@ -24,6 +24,8 @@ static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, int32_t value)
 {
 #ifdef _WIN32
     InterlockedExchangeAdd(ptr, value);
+#elif defined __ICCARM__
+    return;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
     __sync_fetch_and_add(ptr, value);
 #endif
@@ -33,6 +35,8 @@ static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, int32_
 {
 #ifdef _WIN32
     return InterlockedExchangeAdd(ptr, value) + value;
+#elif defined __ICCARM__
+    return -1;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
     return __sync_add_and_fetch(ptr, value);
 #else
@@ -44,6 +48,8 @@ static inline void SoftBusAtomicAdd64(uint64_t* ptr, int64_t value)
 {
 #ifdef _WIN32
     InterlockedExchangeAdd64((volatile long long*)ptr, value);
+#elif defined __ICCARM__
+    return;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
     __sync_fetch_and_add(ptr, value);
 #endif
@@ -54,6 +60,8 @@ static inline bool SoftBusAtomicCmpAndSwap32(volatile uint32_t* ptr, int32_t old
 #ifdef _WIN32
     uint32_t initial = InterlockedCompareExchange(ptr, newValue, oldValue);
     return initial == oldValue;
+#elif defined __ICCARM__
+    return false;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
     return __sync_bool_compare_and_swap(ptr, oldValue, newValue);
 #else

@@ -30,7 +30,7 @@ typedef struct {
 } GetDeviceListMessage;
 #endif
 
-typedef struct DeviceInfo DeviceInfo;
+struct DeviceInfo;
 
 void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
 void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
@@ -42,7 +42,7 @@ EpollDesc GetMainLoopEpollFd(void);
 List *GetMainLoopEvendChain(void);
 uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount);
 int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType);
-int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr);
+int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 
 #ifdef __cplusplus
 };

@@ -174,15 +174,17 @@ static void HandleAuthDisconnectDevice(uint32_t connectionId)
 static void AuthHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth message: what = %d.", msg->what);
     switch (msg->what) {
         case AUTH_TIMEOUT:
-            return HandleAuthTimeout((uint16_t)(msg->arg1));
+            HandleAuthTimeout((uint16_t)(msg->arg1));
+            break;
         case AUTH_DISCONNECT_DEVICE:
-            return HandleAuthDisconnectDevice((uint32_t)(msg->arg1));
+            HandleAuthDisconnectDevice((uint32_t)(msg->arg1));
+            break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown auth message.");
             break;
@@ -549,7 +551,8 @@ int64_t AuthVerifyDevice(AuthVerifyModule moduleId, const ConnectionAddr *addr)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (!LnnConvertAddrToOption(addr, &option)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth LnnConverAddrToOption failed");
         return SOFTBUS_ERR;
@@ -1781,7 +1784,8 @@ static bool IsNeedVerifyAgain(ConnectOption *option, uint32_t requestId,
 
 static int32_t AuthOpenCommonConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (ConvertAuthConnInfoToOption(info, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "convert AuthConnInfo to ConnectOption failed.");
         return SOFTBUS_ERR;
@@ -1820,7 +1824,8 @@ int32_t AuthStartListening(const AuthListennerInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LocalListenerInfo local = {0};
+    LocalListenerInfo local;
+    (void)memset_s(&local, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
@@ -1844,7 +1849,8 @@ int32_t AuthStopListening(const AuthListennerInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    LocalListenerInfo local = {0};
+    LocalListenerInfo local;
+    (void)memset_s(&local, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     switch (info->type) {
         case AUTH_LINK_TYPE_P2P:
             local.type = CONNECT_TCP;
@@ -1978,7 +1984,7 @@ static AuthManager *GetAuthManagerInner(int64_t authId)
 int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_authLock) != 0) {
@@ -2041,7 +2047,7 @@ static bool IsAuthLinkTypeMatched(AuthLinkType type, const AuthManager *auth)
 int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, ConnectOption *option)
 {
     if (mac == NULL || strlen(mac) == 0 || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;
@@ -2073,9 +2079,10 @@ int32_t AuthGetConnectOptionByP2pMac(const char *mac, AuthLinkType type, Connect
 
 int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *connInfo)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (uuid == NULL || strlen(uuid) == 0 || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (AuthGetActiveConnectOption(uuid, type, &option) != SOFTBUS_OK) {
@@ -2089,7 +2096,7 @@ int32_t GetActiveAuthConnInfo(const char *uuid, ConnectType type, AuthConnInfo *
 int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOption *option)
 {
     if (uuid == NULL || strlen(uuid) == 0 || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;
@@ -2126,7 +2133,7 @@ int32_t AuthGetActiveConnectOption(const char *uuid, ConnectType type, ConnectOp
 int32_t AuthGetActiveBleConnectOption(const char *uuid, bool isServerSide, ConnectOption *option)
 {
     if (uuid == NULL || uuid[0] == '\0' || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *item = NULL;

@@ -113,7 +113,7 @@ static void DelTcpConnInfo(uint32_t connectionId)
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->connectionId == connectionId) {
-            (void)DelTrigger(item->info.info.ipInfo.moduleId, item->info.info.ipInfo.fd, RW_TRIGGER);
+            (void)DelTrigger((ListenerModule)(item->info.info.ipInfo.moduleId), item->info.info.ipInfo.fd, RW_TRIGGER);
             TcpShutDown(item->info.info.ipInfo.fd);
             ListDelete(&item->node);
             g_tcpConnInfoList->cnt--;
@@ -255,7 +255,7 @@ int32_t TcpOnDataEventOut(int32_t fd)
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
 
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
-        (void)DelTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, WRITE_TRIGGER);
+        (void)DelTrigger((ListenerModule)(tcpInfo.info.info.ipInfo.moduleId), fd, WRITE_TRIGGER);
         TcpShutDown(fd);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "TcpOnDataEventSocketOut fail %d", fd);
         return SOFTBUS_ERR;
@@ -264,15 +264,15 @@ int32_t TcpOnDataEventOut(int32_t fd)
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%d connect fail %d", fd, ret);
         tcpInfo.result.OnConnectFailed(tcpInfo.requestId, ret);
-        (void)DelTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, WRITE_TRIGGER);
+        (void)DelTrigger((ListenerModule)(tcpInfo.info.info.ipInfo.moduleId), fd, WRITE_TRIGGER);
         TcpShutDown(fd);
         DelTcpConnNode(tcpInfo.connectionId);
         return SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notfiy connect ok req %d", tcpInfo.requestId);
     tcpInfo.result.OnConnectSuccessed(tcpInfo.requestId, tcpInfo.connectionId, &tcpInfo.info);
-    (void)DelTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, WRITE_TRIGGER);
-    (void)AddTrigger(tcpInfo.info.info.ipInfo.moduleId, fd, READ_TRIGGER);
+    (void)DelTrigger((ListenerModule)(tcpInfo.info.info.ipInfo.moduleId), fd, WRITE_TRIGGER);
+    (void)AddTrigger((ListenerModule)(tcpInfo.info.info.ipInfo.moduleId), fd, READ_TRIGGER);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notfiy finish");
     return SOFTBUS_OK;
 }
@@ -297,7 +297,8 @@ int32_t TcpOnDataEventIn(int32_t fd)
         DelTcpConnInfo(connectionId);
         return SOFTBUS_ERR;
     }
-    g_tcpConnCallback->OnDataReceived(connectionId, head.module, head.seq, data, (int32_t)(headSize + head.len));
+    g_tcpConnCallback->OnDataReceived(connectionId, (ConnModule)(head.module),
+		head.seq, data, (int32_t)(headSize + head.len));
     SoftBusFree(data);
     return SOFTBUS_OK;
 }
@@ -354,12 +355,13 @@ uint32_t CalTcpConnectionId(int32_t fd)
 
 int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    if (result == NULL ||
-        result->OnConnectFailed == NULL ||
-        result->OnConnectSuccessed == NULL) {
+    if ((result == NULL) ||
+        (result->OnConnectFailed == NULL) ||
+        (result->OnConnectSuccessed == NULL)) {
         return SOFTBUS_ERR;
     }
-    if (option == NULL || option->type != CONNECT_TCP || CheckTcpListener(option->info.ipOption.moduleId) == NULL) {
+    if ((option == NULL) || (option->type != CONNECT_TCP)
+		|| (CheckTcpListener(option->info.ipOption.moduleId) == NULL)) {
         result->OnConnectFailed(requestId, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }
@@ -427,7 +429,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(option->info.ipOption.moduleId, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger((ListenerModule)(option->info.ipOption.moduleId), fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         TcpShutDown(fd);
         DelTcpConnNode(connectionId);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
@@ -460,7 +462,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (strcmp(option->info.ipOption.ip, item->info.info.ipInfo.ip) == 0) {
-            (void)DelTrigger(item->info.info.ipInfo.moduleId, item->info.info.ipInfo.fd, RW_TRIGGER);
+            (void)DelTrigger((ListenerModule)(item->info.info.ipInfo.moduleId), item->info.info.ipInfo.fd, RW_TRIGGER);
             TcpShutDown(item->info.info.ipInfo.fd);
             ListDelete(&item->node);
             g_tcpConnInfoList->cnt--;

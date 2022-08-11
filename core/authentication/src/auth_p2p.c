@@ -144,7 +144,7 @@ int32_t AuthP2pInit(void)
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -157,7 +157,8 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         return SOFTBUS_OK;
     }
     if (GetActiveAuthConnInfo(uuid, CONNECT_BLE, connInfo) == SOFTBUS_OK) {
-        ConnectOption option = {0};
+        ConnectOption option;
+        (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
         if (ConvertAuthConnInfoToOption(connInfo, &option) == SOFTBUS_OK &&
             CheckActiveConnection(&option)) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "select ble auth.");

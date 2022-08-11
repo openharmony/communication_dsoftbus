@@ -127,7 +127,7 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
         value1 = strtok_r(key, LNN_DELIMITER_INSIDE, &innerPtr);
         value2 = strtok_r(NULL, LNN_DELIMITER_INSIDE, &innerPtr);
 
-        LnnNetIfMgr *netIfMgr = NetifMgrFactory(atoi(value1), value2);
+        LnnNetIfMgr *netIfMgr = NetifMgrFactory((LnnNetIfNameType)atoi(value1), value2);
         if (netIfMgr != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "Create netif mgr [%s],[%s]", value1, value2);
             ListTailInsert(&g_netIfNameList, &netIfMgr->node);

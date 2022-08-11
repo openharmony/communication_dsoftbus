@@ -36,7 +36,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     }
 
     session->channelId = channel->channelId;
-    session->channelType = channel->channelType;
+    session->channelType = (ChannelType)channel->channelType;
     session->peerPid = channel->peerPid;
     session->peerUid = channel->peerUid;
     session->isServer = channel->isServer;
@@ -85,7 +85,7 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, uint32_t flag)
+int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
     if ((sessionName == NULL) || (channel == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");

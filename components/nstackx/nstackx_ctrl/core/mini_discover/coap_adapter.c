@@ -630,17 +630,20 @@ int32_t BuildCoapPkt(const CoapBuildParam *param, const char *pktPayload, CoapRe
     }
 
     CoapOption options[COAP_MAX_OPTION] = {0};
-    CoapPacketParam outParam = {0};
+    CoapPacketParam outParam;
+    (void)memset_s(&outParam, sizeof(CoapPacketParam), 0, sizeof(CoapPacketParam));
     outParam.options = options;
     BuildCoapPktParam(param, &outParam);
 
-    CoapPacket respPkt = {0};
+    CoapPacket respPkt;
+    (void)memset_s(&respPkt, sizeof(CoapPacket), 0, sizeof(CoapPacket));
     if (isAck) {
         if (CoapCreateHeader(&respPkt, &outParam, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
             return DISCOVERY_ERR_BAD_REQ;
         }
     } else {
-        CoapResponseInfo respInfo = {0};
+        CoapResponseInfo respInfo;
+        (void)memset_s(&respInfo, sizeof(CoapResponseInfo), 0, sizeof(CoapResponseInfo));
         respInfo.pkt = &respPkt;
         respInfo.param = &outParam;
         respInfo.payload = (uint8_t *)pktPayload;

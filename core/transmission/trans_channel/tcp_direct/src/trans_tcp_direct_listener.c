@@ -50,8 +50,9 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 
 uint32_t GetCipherFlagByAuthId(int64_t authId)
 {
-    AuthConnInfo info = {0};
+    AuthConnInfo info;
     uint32_t flag = FLAG_WIFI;
+    (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
 
     if (authId == AUTH_INVALID_ID) {
         return flag;

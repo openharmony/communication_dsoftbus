@@ -663,7 +663,7 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
         return SOFTBUS_DECRYPT_ERR;
     }
 
-    if (TransProxySessionDataLenCheck(dataInfo.outLen, dataHead->flags) != SOFTBUS_OK) {
+    if (TransProxySessionDataLenCheck(dataInfo.outLen, (ProxyPacketType)(dataHead->flags)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data len is too large %d type %d",
             dataInfo.outLen, dataHead->flags);
         SoftBusFree(dataInfo.outData);
@@ -852,7 +852,7 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
 static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const SliceHead *head,
     const char *data, uint32_t len)
 {
-    if (data == NULL || len <= 0) {
+    if (data == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_channelSliceProcessorList == NULL) {
@@ -1001,7 +1001,7 @@ int32_t TransSliceManagerInit(void)
     if (g_channelSliceProcessorList == NULL) {
         return SOFTBUS_ERR;
     }
-    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, (void *)TransProxySliceTimerProc) != SOFTBUS_OK) {
+    if (RegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN, TransProxySliceTimerProc) != SOFTBUS_OK) {
         DestroySoftBusList(g_channelSliceProcessorList);
         return SOFTBUS_ERR;
     }
