@@ -112,7 +112,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get BUS_NAME");
         return SOFTBUS_ERR;
     }
-    appInfo->peerData.apiVersion = apiVersion;
+    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
     appInfo->peerData.uid = -1;
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
@@ -199,7 +199,7 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo)
 
     int apiVersion = API_V1;
     (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
-    appInfo->peerData.apiVersion = apiVersion;
+    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
     appInfo->peerData.uid = -1;
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);

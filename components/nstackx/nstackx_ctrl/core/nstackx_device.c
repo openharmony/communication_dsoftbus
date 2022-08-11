@@ -987,6 +987,8 @@ static int32_t SetReservedInfoFromDeviceInfoInner(NSTACKX_DeviceInfo *deviceList
     const DeviceInfo *deviceInfo, const NetChannelInfo *netChannelInfo)
 {
     char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN];
+    char *ver = NULL;
+    char *newData = NULL;
     int32_t ret  = NSTACKX_EFAILED;
     if (deviceList == NULL) {
         DFINDER_LOGE(TAG, "deviceList or deviceInfo is null");
@@ -1012,14 +1014,14 @@ static int32_t SetReservedInfoFromDeviceInfoInner(NSTACKX_DeviceInfo *deviceList
     if (!cJSON_AddStringToObject(item, "hwAccountHashVal", deviceInfo->deviceHash)) {
         goto L_END;
     }
-    const char *ver = (strlen(deviceInfo->version) == 0) ? NSTACKX_DEFAULT_VER : deviceInfo->version;
+    ver = (strlen(deviceInfo->version) == 0) ? NSTACKX_DEFAULT_VER : (char *)deviceInfo->version;
     if (!cJSON_AddStringToObject(item, "version", ver)) {
         goto L_END;
     }
     if (SetServiceDataFromDeviceInfo(item, deviceInfo) != NSTACKX_EOK) {
         goto L_END;
     }
-    char *newData = cJSON_Print(item);
+    newData = cJSON_Print(item);
     if (newData == NULL) {
         goto L_END;
     }

@@ -184,7 +184,8 @@ static int32_t GetP2pAuthOptionByCipherFlag(const char *peerIp, uint32_t cipherF
 {
     int32_t ret;
     char p2pMac[P2P_MAC_LEN] = {0};
-    ConnectOption authOption = {0};
+    ConnectOption authOption;
+    (void)memset_s(&authOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     AuthLinkType linkType;
 
     ret = P2pLinkGetPeerMacByPeerIp(peerIp, p2pMac, sizeof(p2pMac));
@@ -261,7 +262,8 @@ static int32_t GetSessionAuthIdAndSide(int32_t channelId, int64_t *authId)
 
 static int32_t EncryptDataByAuthId(int64_t authId, MsgCryptInfo *cryptInfo, AuthSideFlag *side)
 {
-    OutBuf buf = {0};
+    OutBuf buf;
+    (void)memset_s(&buf, sizeof(OutBuf), 0, sizeof(OutBuf));
     buf.buf = (unsigned char *)cryptInfo->out;
     buf.bufLen = cryptInfo->outLen;
 
@@ -280,13 +282,15 @@ static int32_t EncryptDataByAuthId(int64_t authId, MsgCryptInfo *cryptInfo, Auth
 static int32_t EncryptDataByConnOpt(int32_t channelId,
     MsgCryptInfo *cryptInfo, AuthSideFlag *side, uint32_t cipherFlag)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptDataByConnOpt get conn option fail");
         return SOFTBUS_ERR;
     }
 
-    OutBuf outbuf = {0};
+    OutBuf outbuf;
+    (void)memset_s(&outbuf, sizeof(OutBuf), 0, sizeof(OutBuf));
     outbuf.buf = (unsigned char *)cryptInfo->out;
     outbuf.bufLen = cryptInfo->outLen;
     int32_t ret = AuthEncrypt(&option, side, (unsigned char *)cryptInfo->in, cryptInfo->inLen, &outbuf);
@@ -399,7 +403,8 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
 
 static int32_t DecryptMessage(int32_t channelId, uint32_t cipherFlag, MsgCryptInfo *cryptInfo)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DecryptMessage get conn option fail");
         return SOFTBUS_ERR;
@@ -539,7 +544,8 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
 
 static int32_t GetUuidByChanId(int32_t channelId, char *uuid, uint32_t len, uint32_t cipherFlag)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (GetAuthConnectOption(channelId, cipherFlag, &option) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetUuidByChanId get conn option fail");
         return SOFTBUS_ERR;
@@ -661,7 +667,8 @@ static int32_t ProcessReceivedData(int32_t channelId)
 {
     uint32_t flags;
     uint64_t seq;
-    MsgCryptInfo crypInfo = {0};
+    MsgCryptInfo crypInfo;
+    (void)memset_s(&crypInfo, sizeof(MsgCryptInfo), 0, sizeof(MsgCryptInfo));
 
     SoftBusMutexLock(&g_tcpSrvDataList->lock);
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);

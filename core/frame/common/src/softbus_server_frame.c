@@ -53,6 +53,19 @@ bool GetServerIsInit(void)
     return g_isInit;
 }
 
+static int32_t InitP2pLink(void)
+{
+    int32_t ret = P2pLinkInit();
+    if (ret != SOFTBUS_OK) {
+        if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
+            return ret;
+        }
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
+    }
+    return SOFTBUS_OK;
+}
+
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
@@ -94,14 +107,10 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    int32_t ret = P2pLinkInit();
-    if (ret != SOFTBUS_OK) {
-        if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
+    if (InitP2pLink() != SOFTBUS_OK) {
             goto ERR_EXIT;
-        }
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
     }
+
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;

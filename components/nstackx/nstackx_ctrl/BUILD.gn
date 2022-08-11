@@ -14,11 +14,19 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 cflags = [
-  "-Wall",
   "-DENABLE_USER_LOG",
   "-DDFINDER_SAVE_DEVICE_LIST",
   "-DNSTACKX_EXTEND_BUSINESSDATA",
 ]
+
+if (defined(board_toolchain_type)) {
+  if (board_toolchain_type != "iccarm") {
+    cflags += [ "-Wall" ]
+  }
+} else {
+  cflags += [ "-Wall" ]
+}
+
 include_dirs = []
 
 if (dsoftbus_standard_feature_dfinder_support_multi_nif) {
@@ -59,11 +67,18 @@ if (defined(ohos_lite)) {
       ]
       public_configs = [ ":dfinder_interface" ]
       deps = [ "../nstackx_util:nstackx_util.open" ]
-      cflags += [
-        "-Wall",
-        "-std=c99",
-      ]
-      cflags_cc = cflags
+      if (board_toolchain_type != "iccarm") {
+        cflags += [
+          "-Wall",
+          "-std=c99",
+        ]
+        cflags_cc = cflags
+      } else {
+        cflags += [
+          "--diag_suppress",
+          "Pa181",
+        ]
+      }
     }
   } else {
     import("//build/lite/config/component/lite_component.gni")

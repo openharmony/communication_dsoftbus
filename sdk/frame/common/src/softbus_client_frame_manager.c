@@ -279,7 +279,7 @@ int32_t CheckPackageName(const char *pkgName)
 {
 #ifdef __LITEOS_M__
     return SOFTBUS_OK;
-#endif
+#else
     if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
@@ -295,5 +295,6 @@ int32_t CheckPackageName(const char *pkgName)
     }
     (void)pthread_mutex_unlock(&g_pkgNameLock);
     return SOFTBUS_INVALID_PKGNAME;
+#endif
 }
 
