@@ -241,6 +241,11 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
+int32_t LnnIpcGetNodeKeyInfoLen(int32_t key)
+{
+    return LnnGetNodeKeyInfoLen(key);
+}
+
 int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
     if (pkgName == NULL || targetNetworkId == NULL) {
