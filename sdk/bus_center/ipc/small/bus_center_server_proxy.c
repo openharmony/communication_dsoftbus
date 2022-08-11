@@ -44,6 +44,7 @@ typedef struct {
     int32_t arg1;
     int32_t retCode;
     void* data;
+    int32_t dataLen;
 } Reply;
 
 static IClientProxy *g_serverProxy = NULL;
@@ -62,6 +63,7 @@ static int32_t ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
         case GET_LOCAL_DEVICE_INFO:
         case GET_NODE_KEY_INFO:
             info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+            info->dataLen = infoSize;
             break;
         case ACTIVE_META_NODE:
             info->retCode = IpcIoPopInt32(reply);
@@ -243,7 +245,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(buf, len, reply.data, len) != EOK) {
+    if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo copy node key info failed");
         return SOFTBUS_ERR;
     }
