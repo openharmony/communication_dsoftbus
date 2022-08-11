@@ -35,6 +35,18 @@ FILLP_UINT32 FillpApiConfigLogModules(IN FILLP_ULLONG logModules)
     return ERR_OK;
 }
 
+FILLP_INT FillpApiSetMgtMsgLog(IN FILLP_INT enable)
+{
+#ifdef FILLP_MGT_MSG_LOG
+    g_fillpLmGlobal.mgtMsgLog = !!enable;
+    return ERR_OK;
+#else
+    FILLP_LOGERR("do not support mgt msg log");
+    FILLP_UNUSED_PARA(enable);
+    return ERR_COMM;
+#endif
+}
+
 #ifdef __cplusplus
 }
 #endif

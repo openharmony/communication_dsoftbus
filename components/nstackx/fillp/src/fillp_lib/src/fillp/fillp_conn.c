@@ -14,6 +14,7 @@
  */
 
 #include "fillp_common.h"
+#include "fillp_mgt_msg_log.h"
 #include "fillp_dfx.h"
 
 #ifdef __cplusplus
@@ -114,6 +115,7 @@ void FillpConnReqInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
     flag = tmpHead->flag;
 
     FillpConnReqInputTrace(pcb, sock, req, flag);
+    FILLP_CONN_REQ_LOG(sock->index, req, FILLP_DIRECTION_RX);
     if (FillpConnReqStateCheck(pcb, sock) != ERR_OK) {
         return;
     }
@@ -205,71 +207,90 @@ static FILLP_INT32 FillpDecodeExtParaNameLen(FILLP_CONST FILLP_UCHAR *buf, FILLP
     return len;
 }
 
-static void FillpDecodeExtParaVal(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, FILLP_UCHAR paraLen,
-    FILLP_UCHAR *value, FILLP_UINT32 maxValLen)
+static void FillpDecodeRtt(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
 {
-    FILLP_UINT8 value8 = 0;
-    FILLP_UINT32 value32;
-    FILLP_ULLONG value64;
-    void *copybuf = FILLP_NULL;
-
-    if ((bufLen < paraLen) || (maxValLen < paraLen)) {
-        FILLP_LOGERR("bufLen %d paraLen %u maxValLen %u", bufLen, paraLen, maxValLen);
+    FILLP_ULLONG rtt;
+    if (bufLen != (FILLP_INT)sizeof(rtt)) {
         return;
     }
 
-    if (maxValLen == sizeof(value8)) {
-        copybuf = &value8;
-    } else if (maxValLen == sizeof(value32)) {
-        copybuf = &value32;
-    } else if (maxValLen == sizeof(value64)) {
-        copybuf = &value64;
-    } else {
-        FILLP_LOGERR("maxValLen %u error", maxValLen);
-        return;
-    }
-    errno_t err = memcpy_s(copybuf, maxValLen, buf, paraLen);
+    FILLP_INT err = memcpy_s(&rtt, sizeof(rtt), buf, (FILLP_UINT32)bufLen);
     if (err != EOK) {
-        FILLP_LOGERR("memcpy_s failed:%d ", err);
+        FILLP_LOGERR("memcpy_s failed: %d", err);
         return;
     }
 
-    if (maxValLen == sizeof(value8)) {
-        *(FILLP_UINT16 *)value = value8;
-    } else if (maxValLen == sizeof(value32)) {
-        *(FILLP_UINT32 *)value = FILLP_HTONL(value32);
-    } else {
-        *(FILLP_ULLONG *)value = FILLP_HTONLL(value64);
-    }
+    conn->calcRttDuringConnect = FILLP_NTOHLL(rtt);
+#ifdef FILLP_MGT_MSG_LOG
+    conn->extParameterExisted[FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT] = FILLP_TRUE;
+#endif
 }
 
-struct ExtParaOut {
-    size_t len;
-    void *val;
+static void FillpDecodePktSize(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    FILLP_UINT32 pktSize;
+    if (bufLen != (FILLP_INT)sizeof(pktSize)) {
+        return;
+    }
+
+    FILLP_INT err = memcpy_s(&pktSize, sizeof(pktSize), buf, (FILLP_UINT32)bufLen);
+    if (err != EOK) {
+        FILLP_LOGERR("memcpy_s failed: %d", err);
+        return;
+    }
+
+    conn->peerPktSize = FILLP_NTOHL(pktSize);
+#ifdef FILLP_MGT_MSG_LOG
+    conn->extParameterExisted[FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE] = FILLP_TRUE;
+#endif
+}
+
+static void FillpDecodeCharacters(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    FILLP_UINT32 characters;
+    if (bufLen != (FILLP_INT)sizeof(characters)) {
+        return;
+    }
+
+    FILLP_INT err = memcpy_s(&characters, sizeof(characters), buf, (FILLP_UINT32)bufLen);
+    if (err != EOK) {
+        FILLP_LOGERR("memcpy_s failed: %d", err);
+        return;
+    }
+
+    conn->peerCharacters = FILLP_NTOHL(characters);
+#ifdef FILLP_MGT_MSG_LOG
+    conn->extParameterExisted[FILLP_PKT_EXT_CONNECT_CARRY_CHARACTER] = FILLP_TRUE;
+#endif
+}
+
+static void FillpDecodeFcAlg(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen)
+{
+    if (bufLen != (FILLP_INT)sizeof(conn->peerFcAlgs)) {
+        return;
+    }
+
+    conn->peerFcAlgs = *(FILLP_UINT8 *)buf;
+#ifdef FILLP_MGT_MSG_LOG
+    conn->extParameterExisted[FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG] = FILLP_TRUE;
+#endif
+}
+
+typedef void (*FIllpExtParaDecoder)(struct FtNetconn *conn, FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen);
+static FIllpExtParaDecoder g_extParaDecoder[FILLP_PKT_EXT_BUTT] = {
+    FILLP_NULL_PTR, /* FILLP_PKT_EXT_START */
+    FillpDecodeRtt, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT */
+    FillpDecodePktSize, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE */
+    FillpDecodeCharacters, /* FILLP_PKT_EXT_CONNECT_CARRY_CHARACTER */
+    FillpDecodeFcAlg, /* FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG */
 };
 
-static FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, struct FtNetconn *conn)
+FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bufLen, struct FtNetconn *conn)
 {
     FILLP_INT len = 0;
     FILLP_UCHAR paraType = 0;
     FILLP_UCHAR paraLen = 0;
     FILLP_INT ret;
-
-    struct ExtParaOut para[] = {
-        {
-            .len = sizeof(FILLP_ULLONG),
-            .val = &conn->calcRttDuringConnect, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT */
-        }, {
-            .len = sizeof(FILLP_UINT32),
-            .val = &conn->peerPktSize, /* FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_PKT_SIZE */
-        }, {
-            .len = sizeof(FILLP_UINT32),
-            .val = &conn->peerCharacters, /* FILLP_PKT_EXT_CONNECT_CARRY_CHARACTER */
-        }, {
-            .len = sizeof(FILLP_UINT8),
-            .val = &conn->peerFcAlgs, /* FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG */
-        },
-    };
 
     while (len < bufLen) {
         ret = FillpDecodeExtParaNameLen(buf + len, bufLen - len, &paraType, &paraLen);
@@ -280,14 +301,14 @@ static FILLP_INT32 FillpDecodeExtPara(FILLP_CONST FILLP_UCHAR *buf, FILLP_INT bu
 
         len += ret;
 
-        if (paraType < FILLP_PKT_EXT_CONNECT_CONFIRM_CARRY_RTT ||
-            paraType > FILLP_PKT_EXT_CONNECT_CARRY_FC_ALG) {
-            len += paraLen;
-            continue;
-        }
         FILLP_LOGERR("paraType:%u ", paraType);
-        FillpDecodeExtParaVal(buf + len, bufLen - len, paraLen, para[paraType - 1].val,
-            (FILLP_UINT32)para[paraType - 1].len);
+
+        if (bufLen - len >= paraLen &&
+            paraType > FILLP_PKT_EXT_START && paraType < FILLP_PKT_EXT_BUTT &&
+            g_extParaDecoder[paraType] != FILLP_NULL_PTR) {
+            g_extParaDecoder[paraType](conn, buf + len, paraLen);
+        }
+
         len += paraLen;
     }
 
@@ -369,6 +390,9 @@ static FILLP_INT32 FillpDecodeConnReqAckClientPara(struct FillpPcb *pcb, FILLP_C
         FILLP_LOGERR("FillpDecodeExtPara failed");
         return FILLP_FAILURE;
     }
+
+    FILLP_CONN_REQ_ACK_RX_LOG(FILLP_GET_SOCKET(pcb)->index, (struct FillpPktHead *)p->p, reqAck,
+        (FILLP_UCHAR *)buf, p->len - len);
 
     pcb->characters = conn->peerCharacters & (FILLP_UINT32)FILLP_DEFAULT_SUPPORT_CHARACTERS;
     pcb->fcAlg = FillpConsultFcAlg(pcb->fcAlg, conn->peerFcAlgs);
@@ -743,6 +767,8 @@ void FillpConnConfirmInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, s
 
     struct FillpPktConnConfirm *confirm = (struct FillpPktConnConfirm *)(void *)p->p;
     FillpConnConfirmTrace(sock, confirm);
+    FILLP_CONN_CONFIRM_RX_LOG(sock->index, confirm, (FILLP_UCHAR *)p->p + sizeof(struct FillpPktConnConfirm),
+        (FILLP_INT)(p->len - ((FILLP_INT)sizeof(struct FillpPktConnConfirm) - FILLP_HLEN)));
 
     FILLP_UINT8 connState = NETCONN_GET_STATE(conn);
     if (FillpConfirmCheckState(connState, sock, pcb) == FILLP_FALSE) {
@@ -1026,6 +1052,7 @@ void FillpConnConfirmAckInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p
     struct FillpPktConnConfirmAck *confirmAck = (struct FillpPktConnConfirmAck *)(void *)p->p;
     struct FtSocket *sock = (struct FtSocket *)conn->sock;
     FillpConnConfirmAckTrace(sock, confirmAck);
+    FILLP_CONN_CONFIRM_ACK_LOG(sock->index, confirmAck, FILLP_DIRECTION_RX);
     FILLP_UINT8 connState = FILLP_GET_CONN_STATE(pcb);
     if (connState != CONN_STATE_CONNECTING) {
         FILLP_LOGINF("fillp_sock_id:%d Connection state response is not correct, state = %u", sock->index, connState);
@@ -1293,6 +1320,8 @@ void FillpFinInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, FILLP_BOO
         return;
     }
 
+    FILLP_CONN_FIN_LOG(sock->index, (struct FillpPktFin *)(void *)p->p, FILLP_DIRECTION_RX);
+
     if (sock->isListenSock) {
         return;
     }
@@ -1348,6 +1377,8 @@ static void FillpSendConnReqBuild(struct FillpPcb *pcb, struct FillpPktConnReq *
 
     pktHdr->pktNum = FILLP_HTONL(pktHdr->pktNum);
     pktHdr->seqNum = FILLP_HTONL(pktHdr->seqNum);
+
+    FILLP_CONN_REQ_LOG(FILLP_GET_SOCKET(pcb)->index, req, FILLP_DIRECTION_RX);
 }
 
 FILLP_INT FillpSendConnReq(struct FillpPcb *pcb)
@@ -1406,8 +1437,8 @@ FILLP_INT FillpSendConnReq(struct FillpPcb *pcb)
     return ret;
 }
 
-static FILLP_UINT16 FillpSendConnReqAckBuild(FILLP_CONST FillpCookieContent *stateCookie,
-    FILLP_ULLONG timestamp)
+static FILLP_UINT16 FillpSendConnReqAckBuild(FILLP_CONST struct FillpPcb *pcb,
+    FILLP_CONST FillpCookieContent *stateCookie, FILLP_ULLONG timestamp)
 {
     FILLP_INT ret;
     FILLP_UINT32 localCharacters = (FILLP_UINT32)FILLP_DEFAULT_SUPPORT_CHARACTERS;
@@ -1462,6 +1493,9 @@ static FILLP_UINT16 FillpSendConnReqAckBuild(FILLP_CONST FillpCookieContent *sta
     }
 
     pktHdr->dataLen = FILLP_HTONS(dataLen - (FILLP_UINT16)FILLP_HLEN);
+
+    FILLP_CONN_REQ_ACK_TX_LOG(FILLP_GET_SOCKET(pcb)->index, reqAck, g_rawMsg + sizeof(struct FillpPktConnReqAck),
+        dataLen - sizeof(struct FillpPktConnReqAck));
     return dataLen;
 }
 
@@ -1486,7 +1520,7 @@ void FillpSendConnReqAck(struct FillpPcb *pcb, FILLP_CONST FillpCookieContent *s
     conn = FILLP_GET_CONN(pcb);
     sock = (struct FtSocket *)conn->sock;
 
-    dataLen = FillpSendConnReqAckBuild(stateCookie, timestamp);
+    dataLen = FillpSendConnReqAckBuild(pcb, stateCookie, timestamp);
     if (dataLen == 0) {
         return;
     }
@@ -1639,11 +1673,13 @@ void FillpSendConnConfirm(struct FillpPcb *pcb, FILLP_CONST struct FillpConnReqA
         return;
     }
 
+    FILLP_INT extParaOffset = encMsgLen;
     encMsgLen = ConnConfirmEncodeExtPara(pcb, encMsgLen);
     /* To send the FILLP_CONNECT_CONFIRM_CARRY_RTT */
     pktHdr->dataLen = (FILLP_UINT16)(encMsgLen - FILLP_HLEN);
     pktHdr->dataLen = FILLP_HTONS(pktHdr->dataLen);
 
+    FILLP_CONN_CONFIRM_TX_LOG(ftSock->index, g_rawMsg, encMsgLen, extParaOffset);
 
     ret = pcb->sendFunc(conn, (FILLP_CHAR *)g_rawMsg, encMsgLen, conn->pcb);
     if (ret <= 0) {
@@ -1702,6 +1738,8 @@ void FillpSendConnConfirmAck(struct FillpPcb *pcb)
     pktHdr->dataLen = FILLP_HTONS(pktHdr->dataLen);
     (void)memcpy_s(&confirmAck.remoteAddr, sizeof(confirmAck.remoteAddr), &conn->pcb->remoteAddr,
         sizeof(conn->pcb->remoteAddr));
+
+    FILLP_CONN_CONFIRM_ACK_LOG(ftSock->index, &confirmAck, FILLP_DIRECTION_TX);
 
     ret = pcb->sendFunc(FILLP_GET_CONN(pcb), (char *)&confirmAck, sizeof(struct FillpPktConnConfirmAck), conn->pcb);
     if (ret <= 0) {
@@ -1784,6 +1822,8 @@ static void FillpSendFinInnerImpl(struct FillpPcb *pcb, FILLP_CONST struct Fillp
             remotePcb->addrType = AF_INET6;
         }
     }
+
+    FILLP_CONN_FIN_LOG(FILLP_GET_SOCKET(pcb)->index, &req, FILLP_DIRECTION_TX);
 
     ret = pcb->sendFunc(conn, (char *)&req, sizeof(struct FillpPktFin), remotePcb);
     if (ret <= 0) {

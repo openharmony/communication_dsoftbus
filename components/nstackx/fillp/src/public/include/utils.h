@@ -32,6 +32,8 @@ extern "C" {
 #define UTILS_FLAGS_RESET(_flag) ((_flag) &= 0u)
 #define UTILS_FLAGS_CHECK(_flag, _f) (((_flag) & (_f)) == (_f))
 
+#define UTILS_ARRAY_LEN(_a) (sizeof(_a) / sizeof((_a)[0]))
+
 #define UTILS_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define UTILS_MAX(a, b) ((a) > (b) ? (a) : (b))
 
