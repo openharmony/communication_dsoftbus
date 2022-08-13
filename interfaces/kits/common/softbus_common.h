@@ -436,6 +436,16 @@ typedef struct {
     /** The distance of dicovered device, in centimeters(cm)*/
     int32_t range;
 } DeviceInfo;
+
+/**
+ * @brief Defines device addtional info used by inner
+ *
+ */
+typedef struct {
+    /** medium which describe the device found by. */
+    ExchangeMedium medium;
+} InnerDeviceInfoAddtions;
+
 #ifdef __cplusplus
 }
 #endif

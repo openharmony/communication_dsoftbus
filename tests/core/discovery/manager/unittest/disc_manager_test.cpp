@@ -89,15 +89,19 @@ void Disc_ManagerTest::SetUpTestCase(void)
 void Disc_ManagerTest::TearDownTestCase(void)
 {}
 
-static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device)
+static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
 {
+    (void)addtions;
     g_devieceFoundCount++;
     LOG_INFO("[device found]success!\n");
     return 0;
 }
 
-static void TestInnerDeviceFound(const DeviceInfo *device)
+static void TestInnerDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
+    (void)device;
+    (void)addtions;
     g_devieceFoundCount++;
     LOG_INFO("[inner device found]success!\n");
 }
@@ -4516,7 +4520,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
     DiscMgrInit();
     DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
-    TestInnerDeviceFound(&devInfo);
+    TestInnerDeviceFound(&devInfo, NULL);
     DiscMgrDeinit();
 }
 
@@ -4541,7 +4545,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
-    TestInnerDeviceFound(&devInfo);
+    TestInnerDeviceFound(&devInfo, NULL);
 
     ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
     TEST_ASSERT_TRUE(ret == 0);
@@ -4567,7 +4571,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
-    TestInnerDeviceFound(&devInfo);
+    TestInnerDeviceFound(&devInfo, NULL);
 
     ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
     TEST_ASSERT_TRUE(ret == 0);

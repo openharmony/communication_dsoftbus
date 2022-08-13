@@ -47,7 +47,8 @@ static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 
-static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device);
+static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -138,8 +139,10 @@ static int32_t DiscoveryResultTransfer(int32_t retCode)
     return REFRESH_LNN_INTERNAL;
 }
 
-static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
 {
+    (void)addtions;
     if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
     }
