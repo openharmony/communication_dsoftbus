@@ -204,6 +204,10 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         return;
     }
 
+    InnerDeviceInfoAddtions addtions = {
+        .medium = COAP,
+    };
+
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
 
@@ -220,7 +224,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Disc device found, devName=%s, localNetIfName=%s",
             discDeviceInfo->devName, nstackxDeviceInfo->networkName);
         if ((g_discCoapInnerCb != NULL) && (g_discCoapInnerCb->OnDeviceFound != NULL)) {
-            g_discCoapInnerCb->OnDeviceFound(discDeviceInfo);
+            g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
         }
     }
 
