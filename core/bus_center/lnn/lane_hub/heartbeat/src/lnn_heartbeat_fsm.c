@@ -271,6 +271,7 @@ int32_t LnnRemoveHbFsmMsg(int32_t eventType, uint64_t para, void *obj)
         return SOFTBUS_ERR;
     }
     g_beatHandler.looper->RemoveMessageCustom(g_beatHandler.looper, &g_beatHandler, RemoveHbMsgFunc, msg);
+    SoftBusFree(msg);
     return SOFTBUS_OK;
 }
 
