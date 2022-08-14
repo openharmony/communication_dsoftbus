@@ -20,6 +20,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_access_token_test.h"
 
 using namespace testing::ext;
 
@@ -50,7 +51,9 @@ void TransTcpDirectTest::SetUpTestCase(void)
 {}
 
 void TransTcpDirectTest::TearDownTestCase(void)
-{}
+{
+    selfAceessTokenPermission("dsoftbusTransTest");
+}
 
 static int OnSessionOpened(int sessionId, int result)
 {
