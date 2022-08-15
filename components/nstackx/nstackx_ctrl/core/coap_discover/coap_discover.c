@@ -21,6 +21,7 @@
 #include "coap_app.h"
 #include "coap_client.h"
 #include "nstackx_dfinder_log.h"
+#include "nstackx_dfinder_mgt_msg_log.h"
 #include "nstackx_util.h"
 #include "nstackx_timer.h"
 #include "nstackx_error.h"
@@ -49,16 +50,6 @@ static coap_context_t *g_context = NULL;
 static coap_context_t *g_p2pContext = NULL;
 static coap_context_t *g_usbContext = NULL;
 #endif /* END OF DFINDER_SUPPORT_MULTI_NIF */
-
-typedef struct CoapRequest {
-    uint8_t type;
-    uint8_t code;
-    const char *remoteUrl;
-    uint8_t *token;
-    size_t tokenLength;
-    char *data;
-    size_t dataLength;
-} CoapRequest;
 
 typedef struct {
     coap_mid_t msgId;
@@ -248,7 +239,7 @@ static int32_t CoapSendRequestInner(uint8_t coapType, const char *url, char *dat
     if (pdu == NULL) {
         goto SESSION_RELEASE;
     }
-
+    DFINDER_MGT_REQ_LOG(&coapRequest);
     tid = coap_send(session, pdu);
     if (tid == COAP_INVALID_TID) {
         DFINDER_LOGE(TAG, "coap send failed");

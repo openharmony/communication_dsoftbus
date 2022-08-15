@@ -21,26 +21,12 @@
 #include "coap_client.h"
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
 #include "nstackx_dfinder_log.h"
+#include "nstackx_dfinder_mgt_msg_log.h"
 #include "nstackx_error.h"
 #include "nstackx_device.h"
 #include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
-
-#define JSON_COAP_URI "coapUri"
-#define JSON_CAPABILITY_BITMAP "capabilityBitmap"
-
-#define JSON_DEVICE_ID "deviceId"
-#define JSON_DEVICE_NAME "devicename"
-#define JSON_DEVICE_WLAN_IP "wlanIp"
-#define JSON_DEVICE_TYPE "type"
-#define JSON_HICOM_VERSION "hicomversion"
-#define JSON_REQUEST_MODE "mode"
-#define JSON_DEVICE_HASH "deviceHash"
-#define JSON_SERVICE_DATA "serviceData"
-#define JSON_BUSINESS_TYPE "bType"
-#define JSON_BUSINESS_DATA "bData"
-#define JSON_EXTEND_SERVICE_DATA "extendServiceData"
 
 static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
 {
@@ -551,6 +537,7 @@ static int32_t ParseServiceDiscoverEx(const uint8_t *buf, DeviceInfo *deviceInfo
     deviceInfo->businessData.isBroadcast = isBroadcast;
     *remoteUrlPtr = remoteUrl;
     cJSON_Delete(data);
+    DFINDER_MGT_UNPACK_LOG(deviceInfo);
     return NSTACKX_EOK;
 }
 
