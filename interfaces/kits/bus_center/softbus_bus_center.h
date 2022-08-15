@@ -480,7 +480,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 
 /**
- * @brief Registers a callback for device state changes.
+ * @brief Registers a callback for device state changes, rather than a specified ability, gets online.
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
