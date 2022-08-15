@@ -328,7 +328,7 @@ typedef struct {
      */
     uint32_t events;
     /**
-     * @brief Called when a specified device gets online.This interface is only goes online at the device level.
+     * @brief Called when a specified device, rather than a specified ability, gets online.
      *
      * @param info Indicates the pointer to the basic information about the device.
      * For details, see {@link NodeBasicInfo}.
@@ -338,7 +338,7 @@ typedef struct {
      */
     void (*onNodeOnline)(NodeBasicInfo *info);
     /**
-     * @brief Called when a specified device gets offline.This interface is only goes offline at the device level.
+     * @brief Called when a specified device, rather than a specified ability, gets offline.
      *
      * @param info Indicates the pointer to the basic information about the device.
      * For details, see {@link NodeBasicInfo}.
