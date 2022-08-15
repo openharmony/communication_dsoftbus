@@ -214,7 +214,8 @@ static void ReleaseInfoNodeMem(DiscInfo *info, const ServiceType type)
     return;
 }
 
-static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
+static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
 {
     uint32_t tmp;
     bool isInnerInfo = false;
@@ -225,7 +226,7 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
         isInnerInfo = true;
     }
     if (isInnerInfo == false) {
-        (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device);
+        (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, addtions);
         return;
     }
     if (infoNode->item->callback.innerCb.OnDeviceFound == NULL) {
@@ -234,16 +235,16 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
     }
     bool isCallLnn = GetCallLnnStatus();
     if (isCallLnn) {
-        infoNode->item->callback.innerCb.OnDeviceFound(device);
+        infoNode->item->callback.innerCb.OnDeviceFound(device, addtions);
     }
 }
 
-static void DiscOnDeviceFound(const DeviceInfo *device)
+static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     uint32_t tmp;
     DiscInfo *infoNode = NULL;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d",
-        device->capabilityBitmap[0]);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d, medium: %d",
+        device->capabilityBitmap[0], addtions->medium);
     for (tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
@@ -254,7 +255,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
         }
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "find callback:id = %d", infoNode->id);
-            InnerDeviceFound(infoNode, device);
+            InnerDeviceFound(infoNode, device, addtions);
         }
         (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
     }
