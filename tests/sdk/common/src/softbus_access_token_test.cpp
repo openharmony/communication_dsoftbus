@@ -34,7 +34,6 @@ void SetAceessTokenPermission(const char* processName)
         .aplStr = "system_basic",
     };
     tokenId = GetAccessTokenId(&infoInstance);
-    printf("tokenId is %llu\n", tokenId);
     SetSelfTokenID(tokenId);
 }
 
