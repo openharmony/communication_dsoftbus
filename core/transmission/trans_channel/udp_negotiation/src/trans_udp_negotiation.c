@@ -347,6 +347,14 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack request udp info failed.");
         return SOFTBUS_ERR;
     }
+
+    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
+        appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetPkgNameBySessionName Failed, ret = %d", ret);
+        return SOFTBUS_ERR;
+    }
+
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
     }
