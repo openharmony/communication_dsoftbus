@@ -58,7 +58,8 @@ typedef struct {
 } DiscoveryFuncInterface;
 
 typedef struct {
-    int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device);
+    int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device,
+        const InnerDeviceInfoAddtions *addtions);
 } IServerDiscInnerCallback;
 
 /**

@@ -29,9 +29,10 @@ extern "C" {
  * @see {@link ClientIpcOnDiscoverFailed} or {@link ClientIpcDiscoverySuccess}
  * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
  * @param[in] device Indicates a pointer to device information. For details, see {@link DeviceInfo}.
+ * @param[in] addtions Indicates a pointer to device addtional information.
  * @return <b>SOFTBUS_OK</b> Client IPC found on device.
  */
-int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device);
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
 
 /**
  * @brief The discovery failure callback notifies the local end of failure to discover other devices.
