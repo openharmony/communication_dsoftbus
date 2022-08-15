@@ -50,9 +50,15 @@ typedef struct {
 } LnnHeartbeatMediumMgrCb;
 
 typedef struct {
+    LnnHeartbeatType hbType;
+    bool wakeupFlag;
+    bool isRelay;
+} LnnHeartbeatCustSendData;
+
+typedef struct {
     LnnHeartbeatType supportType;
     int32_t (*init)(const LnnHeartbeatMediumMgrCb *callback);
-    int32_t (*onSendOneHbBegin)(void);
+    int32_t (*onSendOneHbBegin)(const LnnHeartbeatCustSendData *custData);
     int32_t (*onSendOneHbEnd)(void);
     int32_t (*onSetMediumParam)(const LnnHeartbeatMediumParam *param);
     int32_t (*onStopHeartbeat)(void);
@@ -60,7 +66,7 @@ typedef struct {
 } LnnHeartbeatMediumMgr;
 
 int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param);
-int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatType *type);
+int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatCustSendData *custData);
 int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatType *type);
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type);
 

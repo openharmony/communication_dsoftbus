@@ -74,7 +74,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl enable ble heartbeat fail");
                 return;
             }
-            ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
+            ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start ble heartbeat fail, ret=%d", ret);
                 return;
@@ -115,7 +115,6 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB screen state evt handler get invalid param");
         return;
     }
-
     LnnHeartbeatMediumParam param = {
         .type = HEARTBEAT_TYPE_BLE_V1,
     };
@@ -131,7 +130,8 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
             param.info.ble.scanWindow = HB_SCREEN_OFF_BLE_SCAN_WINDOW;
             break;
         default:
-            break;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl reset ble scan medium param get invalid state");
+            return;
     }
     if (!LnnIsHeartbeatEnable(param.type)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB this hbType is not enabled yet", param.type);
@@ -176,7 +176,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     if (pkgName == NULL || mode == NULL || callerId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift gear get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift lnn gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
@@ -187,7 +187,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl reset medium mode fail");
         return SOFTBUS_ERR;
     }
-    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) != SOFTBUS_OK) {
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_ERR;
     }
@@ -199,7 +199,7 @@ static void HbOnAuthGroupChanged(const char *groupId)
     (void)groupId;
     int32_t ret;
 
-    ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
+    ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB account group changed send ble heartbeat fail, ret=%d", ret);
         return;
