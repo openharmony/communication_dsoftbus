@@ -191,6 +191,8 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     if (resNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "there is none linkResource can be used");
         *listNum = 0;
+        *recommendList = NULL;
+        return SOFTBUS_ERR;
     }
     *recommendList = (LaneLinkType *)SoftBusCalloc(sizeof(LaneLinkType) * resNum);
     if (*recommendList == NULL) {
