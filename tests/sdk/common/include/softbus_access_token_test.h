@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-void selfAceessTokenPermission(const char* processName);
+void SetAceessTokenPermission(const char* processName);
 
 #ifdef __cplusplus
 }

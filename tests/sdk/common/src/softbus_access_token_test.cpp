@@ -17,7 +17,7 @@
 #include "token_setproc.h"
 #include "softbus_access_token_test.h"
 
-void selfAceessTokenPermission(const char* processName)
+void SetAceessTokenPermission(const char* processName)
 {
     uint64_t tokenId;
     const char** perms = new const char *[2];

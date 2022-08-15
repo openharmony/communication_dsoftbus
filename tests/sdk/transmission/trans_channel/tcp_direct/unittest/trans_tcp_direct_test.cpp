@@ -52,7 +52,7 @@ void TransTcpDirectTest::SetUpTestCase(void)
 
 void TransTcpDirectTest::TearDownTestCase(void)
 {
-    selfAceessTokenPermission("dsoftbusTransTest");
+    SetAceessTokenPermission("dsoftbusTransTest");
 }
 
 static int OnSessionOpened(int sessionId, int result)
