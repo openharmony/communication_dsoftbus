@@ -1120,39 +1120,36 @@ static void DestoryIdContainer(IdContainer* container)
     SoftBusFree(container);
 }
 
-static void CleanupPublishDiscovery(IdContainer *idList, ServiceType type, const char *pkgName)
+static void CleanupPublishDiscovery(IdContainer *ids, ServiceType type)
 {
-    IdContainer *iterator = NULL;
-    IdContainer *iteratorNext = NULL;
+    IdContainer *it = NULL;
     int32_t ret;
-    LIST_FOR_EACH_ENTRY_SAFE(iterator, iteratorNext, &idList->node, IdContainer, node) {
+    LIST_FOR_EACH_ENTRY(it, &ids->node, IdContainer, node) {
         switch (type) {
             case PUBLISH_SERVICE:
-                ret = DiscUnPublishService(pkgName, iterator->id);
+                ret = DiscUnPublishService(it->pkgName, it->id);
                 if (ret != SOFTBUS_OK) {
                     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "clean up %s %d publish info failed, ret: %d",
-                        pkgName, iterator->id, ret);
+                        it->pkgName, it->id, ret);
                 } else {
                     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "clean up %s %d publish info successfully",
-                        pkgName, iterator->id);
+                        it->pkgName, it->id);
                 }
                 break;
             case SUBSCRIBE_SERVICE:
-                ret = DiscStopDiscovery(pkgName, iterator->id);
+                ret = DiscStopDiscovery(it->pkgName, it->id);
                 if (ret != SOFTBUS_OK) {
                     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "clean up %s %d discovery info failed, ret: %d",
-                        pkgName, iterator->id, ret);
+                        it->pkgName, it->id, ret);
                 } else {
                     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "clean up %s %d discovery info successfully",
-                        pkgName, iterator->id);
+                        it->pkgName, it->id);
                 }
                 break;
             default:
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unsupport type: %d", type);
                 break;
         }
-        ListDelete(&iterator->node);
-        DestoryIdContainer(iterator);
     }
 }
 
@@ -1162,14 +1159,16 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
     DiscItem *itemNodeNext = NULL;
     DiscInfo *infoNode = NULL;
     DiscInfo *infoNodeNext = NULL;
+    IdContainer *container = NULL;
+    IdContainer *containerNext = NULL;
 
     if (SoftBusMutexLock(&itemList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
 
-    IdContainer *idList = CreateIdContainer(0, NULL);
-    if (idList == NULL) {
+    IdContainer *ids = CreateIdContainer(0, NULL);
+    if (ids == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
         return;
     }
@@ -1181,13 +1180,18 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
             IdContainer *container = CreateIdContainer(infoNode->id, itemNode->packageName);
             if (container == NULL) {
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
-                return;
+                goto CLEANUP;
             }
-            ListTailInsert(&idList->node, &container->node);
+            ListTailInsert(&ids->node, &container->node);
         }
-        CleanupPublishDiscovery(idList, type, pkgName);
     }
-    DestoryIdContainer(idList);
+    CleanupPublishDiscovery(ids, type);
+CLEANUP:
+    LIST_FOR_EACH_ENTRY_SAFE(container, containerNext, &ids->node, IdContainer, node) {
+        ListDelete(&container->node);
+        DestoryIdContainer(container);
+    }
+    DestoryIdContainer(ids);
     (void)SoftBusMutexUnlock(&itemList->lock);
 }
 
