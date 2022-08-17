@@ -17,6 +17,15 @@
 #define NSTACKX_DFINDER_HIDUMP_H
 #include "nstackx.h"
 
+#define DUMP_MSG_ADD_CHECK(ret, data, index, size, fmt, ...) do { \
+    ret = sprintf_s(data + index, size - index, fmt, ##__VA_ARGS__); \
+    if (ret < 0) { \
+        DFINDER_LOGE(TAG, "dumper buffer over %u bytes", size); \
+        return NSTACKX_EFAILED; \
+    } \
+    index += ret; \
+} while (0)
+
 #ifdef NSTACKX_DFINDER_HIDUMP
 int DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump);
 #endif
