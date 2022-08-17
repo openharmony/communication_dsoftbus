@@ -106,7 +106,6 @@ int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetAllOnlineNodeInfo no permission.");
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
-    
     }
     int32_t ret = LnnIpcGetAllOnlineNodeInfo(pkgName, &nodeInfo, infoTypeLen, &infoNum);
     if (ret != SOFTBUS_OK) {
