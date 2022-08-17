@@ -676,36 +676,22 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
 static int32_t ProcessDeviceNotTrusted(const void *para)
 {
     const char *peerUdid = (const char *)para;
-    int32_t rc = SOFTBUS_OK;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = SOFTBUS_OK;
 
     if (peerUdid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    ret = LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info network fail");
+        return SOFTBUS_ERR;
+    }
 
-    do {
-        NodeInfo *info = LnnGetNodeInfoById(peerUdid, CATEGORY_UDID);
-        if (info != NULL) {
-            LnnRequestLeaveSpecific(info->networkId, CONNECTION_ADDR_MAX);
-            break;
-        }
-
-        LnnConnectionFsm *item = NULL;
-        const char *udid = NULL;
-        LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-            if (item->connInfo.nodeInfo == NULL) {
-                continue;
-            }
-            udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
-            if (udid != NULL && strcmp(peerUdid, udid) == 0) {
-                rc = LnnSendNotTrustedToConnFsm(item);
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                    "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
-            }
-        }
-    } while (false);
+    ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
     SoftBusFree((void *)peerUdid);
-    return rc;
+    return ret;
 }
 
 static int32_t ProcessAuthDisconnect(const void *para)
@@ -1214,7 +1200,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");
         return;
     }
-    if (strncpy_s(udid, udidLen, peerUdid, udidLen) != EOK) {
+    if (strcpy_s(udid, udidLen, peerUdid) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid fail");
         SoftBusFree(udid);
         return;
