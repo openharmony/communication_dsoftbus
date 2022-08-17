@@ -499,8 +499,8 @@ static void FileInfoWriteInit(FileInfo *fileInfo, const char *path, uint8_t isTr
 #endif
     free(fullPath);
     if (fileInfo->fd == NSTACKX_INVALID_FD) {
-        LOGE(TAG, "can't open file, error(%d)", errno);
         fileInfo->errCode = ConvertErrCode(errno);
+        LOGE(TAG, "can't open file, error(%d)", errno);
         return;
     }
     fileInfo->fileOffset = 0;

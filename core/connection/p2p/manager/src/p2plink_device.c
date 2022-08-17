@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 #include "p2plink_device.h"
-
 #include <stdio.h>
 #include "auth_interface.h"
 #include "cJSON.h"
 #include "securec.h"
 #include "string.h"
-
 #include "p2plink_adapter.h"
 #include "p2plink_common.h"
 #include "p2plink_control_message.h"
 #include "p2plink_loop.h"
 #include "p2plink_negotiation.h"
 #include "p2plink_reference.h"
-
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"

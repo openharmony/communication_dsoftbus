@@ -328,7 +328,7 @@ typedef struct {
      */
     uint32_t events;
     /**
-     * @brief Called when a specified device gets online.
+     * @brief Called when a specified device, rather than a specified ability, gets online.
      *
      * @param info Indicates the pointer to the basic information about the device.
      * For details, see {@link NodeBasicInfo}.
@@ -338,7 +338,7 @@ typedef struct {
      */
     void (*onNodeOnline)(NodeBasicInfo *info);
     /**
-     * @brief Called when a specified device gets offline.
+     * @brief Called when a specified device, rather than a specified ability, gets offline.
      *
      * @param info Indicates the pointer to the basic information about the device.
      * For details, see {@link NodeBasicInfo}.
@@ -480,7 +480,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 
 /**
- * @brief Registers a callback for device state changes.
+ * @brief Registers a callback for device state changes, rather than a specified ability, gets online.
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.

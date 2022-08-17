@@ -21,6 +21,7 @@
 #include "net.h"
 #include "fillp_common.h"
 #include "fillp_output.h"
+#include "fillp_mgt_msg_log.h"
 #include "fillp_dfx.h"
 
 #ifdef __cplusplus
@@ -926,6 +927,8 @@ void FillpDoInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf, struct S
     head->dataLen = FILLP_NTOHS(head->dataLen);
     head->pktNum = FILLP_NTOHL(head->pktNum);
     head->seqNum = FILLP_NTOHL(head->seqNum);
+
+    FILLP_PKT_SIMPLE_LOG(ftSock->index, head, FILLP_DIRECTION_RX);
 
     if (buf->len > (FILLP_INT)pcb->pktSize) {
         /* format specifier %zu is used for size_t variable */
