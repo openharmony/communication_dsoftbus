@@ -1780,6 +1780,7 @@ static int32_t ProcessFileRecvResult(int32_t sessionId, uint32_t seq, int32_t re
 
 static int32_t ProcessFileSendResult(int32_t sessionId, uint32_t seq, int32_t result)
 {
+    (void)seq;
     if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process send result lock fail");
         return SOFTBUS_LOCK_ERR;
