@@ -100,7 +100,8 @@ static void CloseSessionPort(void)
 
 static void OpenProxyPort(void)
 {
-    LocalListenerInfo listenerInfo = {0};
+    LocalListenerInfo listenerInfo;
+    (void)memset_s(&listenerInfo, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     char ipAddr[IP_LEN] = {0};
     int32_t port;
 
@@ -125,7 +126,8 @@ static void OpenProxyPort(void)
 
 static void CloseProxyPort(void)
 {
-    LocalListenerInfo listenerInfo = {0};
+    LocalListenerInfo listenerInfo;
+    (void)memset_s(&listenerInfo, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     listenerInfo.type = CONNECT_TCP;
     listenerInfo.info.ipListenerInfo.moduleId = PROXY;
     if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
