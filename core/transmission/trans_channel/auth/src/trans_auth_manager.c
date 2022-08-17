@@ -29,6 +29,8 @@
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_session_manager.h"
+#include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_transceiver.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1
@@ -642,18 +644,32 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)
 {
     AuthChannelInfo chanInfo;
-    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (!chanInfo.isConnOptValid) {
-        return SOFTBUS_ERR;
-    }
+    ProxyChannelInfo info;
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) == SOFTBUS_OK) {
+        if (!chanInfo.isConnOptValid) {
+            return SOFTBUS_ERR;
+        }
+        if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+            return SOFTBUS_ERR;
+        }
+        return LnnNotifyDiscoveryDevice(&addr);
+    } else if (TransProxyGetSendMsgChanInfo(channelId, &info) == SOFTBUS_OK) {
+        ConnectOption connOpt;
+        if(TransProxyGetConnectOption(info.connId, &connOpt) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        if (connOpt.type == CONNECT_BLE && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BLE)) {
+            return SOFTBUS_ERR;
+        }
+        if (connOpt.type == CONNECT_BR && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BR)) {
+            return SOFTBUS_ERR;
+        }
+        return LnnNotifyDiscoveryDevice(&addr);
+    } else {
         return SOFTBUS_ERR;
     }
-    return LnnNotifyDiscoveryDevice(&addr);
 }
 
 int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
