@@ -104,15 +104,19 @@ int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid();
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetAllOnlineNodeInfo no permission.");
+        WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
+    
     }
     int32_t ret = LnnIpcGetAllOnlineNodeInfo(pkgName, &nodeInfo, infoTypeLen, &infoNum);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetAllOnlineNodeInfo get info failed.");
+        WriteInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == NULL)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetAllOnlineNodeInfo node info is invalid");
+        WriteInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     WriteInt32(reply, infoNum);
