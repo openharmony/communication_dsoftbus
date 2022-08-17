@@ -361,7 +361,7 @@ int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId
         return SOFTBUS_ERR;
     }
     if ((option == NULL) || (option->type != CONNECT_TCP)
-		|| (CheckTcpListener(option->info.ipOption.moduleId) == NULL)) {
+        || (CheckTcpListener((ListenerModule)option->info.ipOption.moduleId) == NULL)) {
         result->OnConnectFailed(requestId, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }
@@ -376,7 +376,7 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc TcpConnInfoNode failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    
+
     if (strcpy_s(tcpConnInfoNode->info.info.ipInfo.ip, IP_LEN, option->info.ipOption.ip) != EOK ||
         memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
         SoftBusFree(tcpConnInfoNode);
@@ -595,7 +595,7 @@ int32_t TcpStartListening(const LocalListenerInfo *info)
     if (info == NULL || info->type != CONNECT_TCP) {
         return SOFTBUS_INVALID_PARAM;
     }
-    ListenerModule moduleId = info->info.ipListenerInfo.moduleId;
+    ListenerModule moduleId = (ListenerModule)info->info.ipListenerInfo.moduleId;
     SoftbusBaseListener *listener = CheckTcpListener(moduleId);
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -614,7 +614,7 @@ int32_t TcpStopListening(const LocalListenerInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ListenerModule moduleId = info->info.ipListenerInfo.moduleId;
+    ListenerModule moduleId = (ListenerModule)info->info.ipListenerInfo.moduleId;
     if (CheckTcpListener(moduleId) == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
