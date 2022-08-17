@@ -501,6 +501,7 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
     NodeStateCallbackItem *item = NULL;
     int32_t rc = SOFTBUS_ERR;
 
+    (void)pkgName;
     if (!g_busCenterClient.isInit) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: reg node state cb not init");
         return SOFTBUS_NO_INIT;

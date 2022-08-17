@@ -445,13 +445,17 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "convert ble address failed");
         return;
     }
+
+    InnerDeviceInfoAddtions addtions = {
+        .medium = BLE,
+    };
     
     unsigned int tempCap = 0;
     if (ProcessHwHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         foundInfo->capabilityBitmap[0] = tempCap;
-        g_discBleInnerCb->OnDeviceFound(foundInfo);
+        g_discBleInnerCb->OnDeviceFound(foundInfo, &addtions);
     }
 }
 

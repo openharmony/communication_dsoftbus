@@ -29,8 +29,9 @@ static sptr<DiscClientProxy> GetClientProxy(const char *pkgName)
     return clientProxy;
 }
 
-int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device)
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
+    (void)addtions;
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!\n");

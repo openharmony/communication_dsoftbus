@@ -375,7 +375,7 @@ void TransFuncTest006(void)
         ret = CreateSessionServer(g_pkgName, sessionNames[i], &g_sessionlistener);
         TEST_ASSERT_TRUE(ret == 0);
     }
-    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]; i++) {
+    for (int i = 0; i < sizeof(sessionNames) / sizeof(sessionNames[0]); i++) {
         ret = RemoveSessionServer(g_pkgName, sessionNames[i]);
         TEST_ASSERT_TRUE(ret == 0);
     }

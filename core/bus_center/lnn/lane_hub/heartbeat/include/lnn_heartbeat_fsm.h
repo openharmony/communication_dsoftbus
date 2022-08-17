@@ -40,6 +40,7 @@ typedef enum {
     EVENT_HB_SEND_ONE_BEGIN,
     EVENT_HB_SEND_ONE_END = 5,
     EVENT_HB_CHECK_DEV_STATUS,
+    EVENT_HB_SET_MEDIUM_PARAM,
     EVENT_HB_STOP,
     EVENT_HB_MAX,
 } LnnHeartbeatEventType;
@@ -63,22 +64,25 @@ typedef struct {
 typedef struct {
     LnnHeartbeatType hbType;
     ConnectionAddrType addrType;
+    bool hasNetworkId;
     const char networkId[NETWORK_ID_BUF_LEN];
 } LnnCheckDevStatusMsgPara;
 
 typedef struct {
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
+    bool isRelay;
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
 int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
 
 int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, void *obj, uint64_t delayMillis);
-int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
+int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay);
 int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, uint64_t delayMillis);
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
 int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, bool isMasterNode);
+int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbeatMediumParam *para);
 int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
     uint64_t delayMillis);
 

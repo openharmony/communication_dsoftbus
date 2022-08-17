@@ -49,17 +49,17 @@ const char *AnonyDevId(char **outName, const char *inName);
 
 const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength);
 
-inline const char *AnonymizesUUID(const char *input)
+static inline const char *AnonymizesUUID(const char *input)
 {
     return Anonymizes(input, UUID_ANONYMIZED_LENGTH);
 }
 
-inline const char *AnonymizesNetworkID(const char *input)
+static inline const char *AnonymizesNetworkID(const char *input)
 {
     return Anonymizes(input, NETWORKID_ANONYMIZED_LENGTH);
 }
 
-inline const char *AnonymizesUDID(const char *input)
+static inline const char *AnonymizesUDID(const char *input)
 {
     return Anonymizes(input, UDID_ANONYMIZED_LENGTH);
 }

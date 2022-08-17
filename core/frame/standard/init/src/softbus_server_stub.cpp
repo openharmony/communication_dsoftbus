@@ -376,8 +376,8 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int32_t retReply;
     SessionParam param;
     TransSerializer transSerializer;
-    uint64_t timeStart = 0;
-    uint64_t timediff = 0;
+    int64_t timeStart = 0;
+    int64_t timediff = 0;
     SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
     param.sessionName = data.ReadCString();
     param.peerSessionName = data.ReadCString();

@@ -173,3 +173,25 @@ int32_t TestAndCreateDirectory(const char *path)
     free(tmp);
     return NSTACKX_EOK;
 }
+
+#define UCHAR2_TO_UINT16(_buf) (((uint16_t)((_buf)[0]) << 8u) | (uint16_t)((_buf)[1]))
+
+int32_t IpAddrAnonymousFormat(char *buf, size_t len, const struct sockaddr *addr, size_t addrLen)
+{
+    if (buf == NULL || len == 0 || addr == NULL) {
+        return NSTACKX_EFAILED;
+    }
+
+    int32_t ret = NSTACKX_EFAILED;
+    if (addr->sa_family == AF_INET && addrLen >= sizeof(struct sockaddr_in)) {
+        uint32_t ip4 = ((const struct sockaddr_in *)addr)->sin_addr.s_addr;
+        ret = snprintf_s(buf, len, len - 1, "%hhu.%hhu.%hhu.*",
+            ((uint8_t *)&ip4)[0], ((uint8_t *)&ip4)[1], ((uint8_t *)&ip4)[2]); /* print the first 3 bytes */
+    } else if (addr->sa_family == AF_INET6 && addrLen >= sizeof(struct sockaddr_in6)) {
+        const uint8_t *ip6 = ((const struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
+        ret = snprintf_s(buf, len, len - 1, "%x:%x:%x*:*:*:*:*:*",
+            UCHAR2_TO_UINT16(ip6), UCHAR2_TO_UINT16(ip6 + 2), ip6[4]); /* print the first 5 bytes */
+    }
+
+    return ret;
+}
