@@ -764,8 +764,7 @@ static int32_t UpdateDeviceDbEx(const DeviceInfo *deviceInfo, uint8_t forceUpdat
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE &&
-        deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_SOFTBUS) {
+    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
         if (UpdateWhenDiscoverActive(deviceInfo, 0) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "update when receive unicast fail");
             return NSTACKX_EFAILED;
@@ -815,8 +814,7 @@ int32_t UpdateDeviceDbWithIdx(const DeviceInfo *deviceInfo, uint8_t forceUpdate,
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE &&
-        deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_SOFTBUS) {
+    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
         if (UpdateWhenDiscoverActive(deviceInfo, idx) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "update when receive unicast fail with multi nif");
             return NSTACKX_EFAILED;
