@@ -353,7 +353,7 @@ static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
         SoftBusFree((void *)para);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync complete result(offset=%.6lf, retCode=%d)",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync complete result(offset=%.6lf, retCode=%d)",
         para->offset, para->retCode);
     NotifyTimeSyncResult(info, para->offset, para->retCode);
     if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_ERR) {
