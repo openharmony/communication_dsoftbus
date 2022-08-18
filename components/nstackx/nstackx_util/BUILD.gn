@@ -115,6 +115,7 @@ if (defined(ohos_lite)) {
         ]
         deps = [
           "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+          "//third_party/bounds_checking_function:libsec_shared",
           "//third_party/mbedtls",
         ]
       } else if (ohos_kernel_type == "linux") {
