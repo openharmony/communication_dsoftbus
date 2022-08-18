@@ -679,11 +679,13 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         return;
     }
 
+    TransCreateConnByConnId(msg->connId);
     int16_t newChanId = TransProxyGetNewMyId();
     int32_t ret = OnProxyChannelOpened(newChanId, &(chan->appInfo), 1);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
         SoftBusFree(chan);
+        (void)TransProxyCloseConnChannel(msg->connId);
         return;
     }
 
@@ -707,7 +709,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TransProxyDelChanByChanId(newChanId);
         return;
     }
-    TransCreateConnByConnId(msg->connId);
 }
 
 void TransProxyProcessResetMsg(const ProxyMessage *msg)

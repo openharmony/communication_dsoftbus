@@ -23,7 +23,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
 #include "softbus_adapter_mem.h"
@@ -487,13 +487,10 @@ static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
 
 static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
 {
-    SoftBusSysTime times;
-    SoftBusGetTime(&times);
-    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
-        (uint64_t)times.usec / HB_TIME_FACTOR;
-    connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnGetDiscoveryType(connInfo->addr.type);
+    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)LnnUpTimeMs();
+    connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     connInfo->nodeInfo->authSeqNum = connInfo->authId;
-    connInfo->nodeInfo->authChannelId = (int32_t)connInfo->authId;
+    connInfo->nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
     connInfo->nodeInfo->relation[connInfo->addr.type]++;
 }
 
@@ -898,7 +895,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "format lnn connection fsm name failed");
         return SOFTBUS_ERR;
     }
-    if (LnnFsmInit(&connFsm->fsm, connFsm->fsmName, ConnectionFsmDinitCallback) != SOFTBUS_OK) {
+    if (LnnFsmInit(&connFsm->fsm, NULL, connFsm->fsmName, ConnectionFsmDinitCallback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init fsm failed");
         return SOFTBUS_ERR;
     }

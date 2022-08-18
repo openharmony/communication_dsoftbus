@@ -72,10 +72,10 @@ static BusCenterFaultError g_errorMap[] = {
     {SOFTBUS_NETWORK_UNPACK_DEV_INFO_FAILED, LNN_UNPACK_DEV_INFO_ERROR},
 };
 
-SoftBusEvtReportMsg g_coapSuccessRate = {0};
-SoftBusEvtReportMsg g_bleSuccessRate = {0};
-SoftBusEvtReportMsg g_coapDuration = {0};
-SoftBusEvtReportMsg g_bleDuration = {0};
+SoftBusEvtReportMsg g_coapSuccessRate;
+SoftBusEvtReportMsg g_bleSuccessRate;
+SoftBusEvtReportMsg g_coapDuration;
+SoftBusEvtReportMsg g_bleDuration;
 
 static int32_t InitSuccessRateStatisticMsg(SoftBusEvtReportMsg *msg)
 {
@@ -83,7 +83,7 @@ static int32_t InitSuccessRateStatisticMsg(SoftBusEvtReportMsg *msg)
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
-    msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
+    msg->paramNum = SOFTBUS_EVT_PARAM_ZERO;
     msg->paramArray = NULL;
     return SOFTBUS_OK;
 }
@@ -94,7 +94,7 @@ static int32_t InitDurationStatisticMsg(SoftBusEvtReportMsg *msg)
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
-    msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
+    msg->paramNum = SOFTBUS_EVT_PARAM_ZERO;
     msg->paramArray = NULL;
     return SOFTBUS_OK;
 }
@@ -158,6 +158,7 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
     }
 
     if (msg->paramArray == NULL) {
+        msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
         msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * msg->paramNum);
         if (msg->paramArray == NULL) {
             return NULL;
@@ -186,6 +187,7 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
             return msg;
         } while (false);
         SoftBusFree(msg->paramArray);
+        msg->paramNum = SOFTBUS_EVT_PARAM_ZERO;
         msg->paramArray = NULL;
         return NULL;
     }
@@ -223,6 +225,7 @@ static SoftBusEvtReportMsg *GetDurationMsg(LnnStatisticData *data)
     }
 
     if (msg->paramArray == NULL) {
+        msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
         msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * msg->paramNum);
         if (msg->paramArray == NULL) {
             return NULL;
@@ -251,6 +254,7 @@ static SoftBusEvtReportMsg *GetDurationMsg(LnnStatisticData *data)
             return msg;
         } while (false);
         SoftBusFree(msg->paramArray);
+        msg->paramNum = SOFTBUS_EVT_PARAM_ZERO;
         msg->paramArray = NULL;
         return NULL;
     }

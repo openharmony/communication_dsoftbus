@@ -29,7 +29,9 @@ typedef enum {
     MONITOR_IMPL_PRODUCT_TYPE,
     MONITOR_IMPL_LWIP_TYPE,
     MONITOR_IMPL_WIFISERVICE_TYPE,
+    MONITOR_IMPL_BT_STATE_TYPE,
     MONITOR_IMPL_DRIVER_TYPE,
+    MONITOR_IMPL_SCREENSTATE_TYPE,
     MONITOR_IMPL_MAX_TYPE,
 } MonitorImplType;
 
@@ -38,7 +40,13 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitProductMonitorImpl,
     LnnInitLwipMonitorImpl,
     LnnInitWifiServiceMonitorImpl,
+    LnnInitBtStateMonitorImpl,
     LnnInitDriverMonitorImpl,
+    LnnInitScreenStateMonitorImpl,
+};
+
+static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
+    LnnDeinitBtStateMonitorImpl,
 };
 
 int32_t LnnInitEventMonitor(void)
@@ -53,4 +61,16 @@ int32_t LnnInitEventMonitor(void)
         }
     }
     return SOFTBUS_OK;
+}
+
+void LnnDeinitEventMonitor(void)
+{
+    uint32_t i;
+
+    for (i = 0; i < MONITOR_IMPL_MAX_TYPE; ++i) {
+        if (g_monitorImplDeinit[i] == NULL) {
+            continue;
+        }
+        g_monitorImplDeinit[i]();
+    }
 }

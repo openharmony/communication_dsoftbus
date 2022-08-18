@@ -21,6 +21,7 @@
 
 #include <securec.h>
 
+#include "lnn_connection_addr_utils.h"
 #include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
@@ -743,13 +744,14 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     return (*ptr);
 }
 
-static void MergeLnnRelation(const NodeInfo *oldInfo, NodeInfo *info)
+static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
 {
     int32_t i;
 
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
+        info->authChannelId[i] = oldInfo->authChannelId[i];
     }
 }
 
@@ -794,7 +796,9 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         } else {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "flag error");
         }
-        MergeLnnRelation(oldInfo, info);
+        // update lnn discovery type
+        info->discoveryType |= oldInfo->discoveryType;
+        MergeLnnInfo(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
@@ -826,16 +830,21 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     if (type != CONNECTION_ADDR_MAX && info->relation[type] > 0) {
         info->relation[type]--;
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BR) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
-
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
-        if (info->authChannelId != authId) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "not need to report offline.");
-            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-            return REPORT_NONE;
-        }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI &&
+        info->authChannelId[type] != authId) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "authChannelId != authId, not need to report offline.");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return REPORT_NONE;
+    }
+    LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
+    if (info->discoveryType != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
+            info->discoveryType);
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return REPORT_NONE;
     }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1180,7 +1189,7 @@ int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
+int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1197,7 +1206,7 @@ int32_t LnnGetDistributedHeartbeatTimestamp(const char *networkId, uint64_t *tim
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_t timestamp)
+int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1214,7 +1223,7 @@ int32_t LnnSetDistributedHeartbeatTimestamp(const char *networkId, const uint64_
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDistributedConnCapability(const char *networkId, uint64_t connCapability)
+int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1262,7 +1271,7 @@ int SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
     }
     dprintf(fd, "remote device num = %d\n", infoNum);
     for (int i = 0; i < infoNum; i++) {
-        dprintf(fd, "\n[NO.%d]\n", i+1);
+        dprintf(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
     return SOFTBUS_OK;

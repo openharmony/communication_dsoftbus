@@ -29,6 +29,8 @@
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_session_manager.h"
+#include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_transceiver.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1
@@ -508,7 +510,9 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, i
         .flag = flag,
     };
     cJSON_Delete(msg);
-    return AuthPostData(&head, (const uint8_t *)data, strlen(data));
+    int32_t ret = AuthPostData(&head, (const uint8_t *)data, strlen(data));
+    cJSON_free(data);
+    return ret;
 }
 
 static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const char *errMsg)
@@ -640,15 +644,34 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)
 {
     AuthChannelInfo chanInfo;
-    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (!chanInfo.isConnOptValid) {
-        return SOFTBUS_ERR;
-    }
+    ProxyChannelInfo info;
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) == SOFTBUS_OK) {
+        if (!chanInfo.isConnOptValid) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connOpt invalid");
+            return SOFTBUS_ERR;
+        }
+        if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "br OptionToAddr failed");
+            return SOFTBUS_ERR;
+        }
+    } else if (TransProxyGetSendMsgChanInfo(channelId, &info) == SOFTBUS_OK) {
+        ConnectOption connOpt;
+        if (TransProxyGetConnectOption(info.connId, &connOpt) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyGetConnectOption failed");
+            return SOFTBUS_ERR;
+        }
+        if (connOpt.type == CONNECT_BLE && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BLE)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ble OptionToAddr failed");
+            return SOFTBUS_ERR;
+        }
+        if (connOpt.type == CONNECT_BR && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BR)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "br OptionToAddr failed");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransNotifyAuthDataSuccess failed");
         return SOFTBUS_ERR;
     }
     return LnnNotifyDiscoveryDevice(&addr);

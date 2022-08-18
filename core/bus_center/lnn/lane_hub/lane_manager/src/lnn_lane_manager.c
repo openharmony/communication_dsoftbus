@@ -191,6 +191,6 @@ int32_t LnnInitLaneManager(void)
         g_laneQosObserver = NULL;
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitLaneManager success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "InitLaneManager success");
     return SOFTBUS_OK;
 }

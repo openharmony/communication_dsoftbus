@@ -121,7 +121,7 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
         DelClientPkgName(pkgName);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService success");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ClientRegisterService success");
     return SOFTBUS_OK;
 }
 

@@ -325,7 +325,7 @@ bool GetSignalingMsgSwitch(void)
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
 {
     int ret = 0;
-    char signalingMsgBuf[BUF_HEX_LEN] = { 0 };
+    char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
         return;
@@ -354,7 +354,7 @@ void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned
 void MacInstead(char *data, uint32_t length, char delimiter)
 {
     int delimiterCnt = 0;
-    for (int i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == MAC_DELIMITER_FOURTH) {
             break;
         }
@@ -370,7 +370,7 @@ void MacInstead(char *data, uint32_t length, char delimiter)
 void IpInstead(char *data, uint32_t length, char delimiter)
 {
     int delimiterCnt = 0;
-    for (int i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == IP_DELIMITER_THIRD) {
             break;
         }
@@ -386,7 +386,7 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 void IdInstead(char *data, uint32_t length)
 {
     uint32_t halfLen = length / GET_ID_HALF_LEN;
-    for (int i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         if (i > halfLen) {
             data[i] = '*';
         }

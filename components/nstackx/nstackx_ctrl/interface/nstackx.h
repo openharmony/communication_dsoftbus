@@ -17,6 +17,7 @@
 #define NSTACKX_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -192,6 +193,64 @@ enum {
     DFINDER_LOG_LEVEL_DEBUG   = 5,
     DFINDER_LOG_LEVEL_END,
 };
+
+typedef enum {
+    DFINDER_EVENT_TYPE_FAULT,
+    DFINDER_EVENT_TYPE_STATISTIC,
+    DFINDER_EVENT_TYPE_SECURITY,
+    DFINDER_EVENT_TYPE_BEHAVIOR,
+} DFinderEventType;
+
+typedef enum {
+    DFINDER_EVENT_LEVEL_CRITICAL,
+    DFINDER_EVENT_LEVEL_MINOR,
+} DFinderEventLevel;
+
+typedef enum {
+    DFINDER_PARAM_TYPE_BOOL,
+    DFINDER_PARAM_TYPE_UINT8,
+    DFINDER_PARAM_TYPE_UINT16,
+    DFINDER_PARAM_TYPE_INT32,
+    DFINDER_PARAM_TYPE_UINT32,
+    DFINDER_PARAM_TYPE_UINT64,
+    DFINDER_PARAM_TYPE_FLOAT,
+    DFINDER_PARAM_TYPE_DOUBLE,
+    DFINDER_PARAM_TYPE_STRING,
+} DFinderEventParamType;
+
+#define DFINDER_EVENT_NAME_LEN 32
+#define DFINDER_EVENT_TAG_LEN 16
+
+typedef struct {
+    DFinderEventParamType type;
+    char name[DFINDER_EVENT_NAME_LEN];
+    union {
+        bool b;
+        uint8_t u8v;
+        uint16_t u16v;
+        int32_t i32v;
+        uint32_t u32v;
+        uint64_t u64v;
+        float f;
+        double d;
+        char str[DFINDER_EVENT_NAME_LEN];
+    } value;
+} DFinderEventParam;
+
+typedef struct {
+    char eventName[DFINDER_EVENT_NAME_LEN];
+    DFinderEventType type;
+    DFinderEventLevel level;
+    uint32_t paramNum;
+    DFinderEventParam *params;
+} DFinderEvent;
+
+typedef void (*DFinderEventFunc)(void *softObj, const DFinderEvent *info);
+
+DFINDER_EXPORT int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func);
+
+typedef void (*DFinderDumpFunc)(void *softObj, const char *data, uint32_t len);
+DFINDER_EXPORT int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump);
 
 /*
  * NSTACKX Initialization

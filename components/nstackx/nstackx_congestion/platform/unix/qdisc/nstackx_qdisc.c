@@ -30,7 +30,7 @@
 
 static int32_t ProcessQdiscInfoInner(struct rtattr *tb[], int32_t parent)
 {
-    struct rtattr *tbs[TCA_STATS_MAX + 1] = { 0 };
+    struct rtattr *tbs[TCA_STATS_MAX + 1] = {0};
     (void)parent;
 
     struct rtattr *rta = RTA_DATA(tb[TCA_STATS2]); // tb is trusted
@@ -69,7 +69,7 @@ static void ProcessQdiscInfo(struct nlmsghdr *h, void *arg, void *value)
         return;
     }
     struct tcmsg *tcMsgRecv = NLMSG_DATA(h); // h is trusted
-    struct rtattr *tb[TCA_MAX + 1] = { 0 };
+    struct rtattr *tb[TCA_MAX + 1] = {0};
     int32_t len = (int32_t)(h->nlmsg_len);
     len -= NLMSG_LENGTH(sizeof(*tcMsgRecv));
     if (len < 0) {
@@ -101,7 +101,7 @@ static int32_t GetQdiscUsedLength(const char *devName, int32_t protocol, int32_t
     int32_t sendNetlinkRequestCount = SEND_NETLINK_REQUEST_COUNT;
     struct NlmsgCallback nlcb;
     QdiscArg qdiscArg;
-    QdiscValue qdiscValue = { 0 };
+    QdiscValue qdiscValue = {0};
     qdiscArg.ifIndex = (int32_t)if_nametoindex(devName);
     qdiscArg.protocol = protocol;
 
@@ -145,7 +145,7 @@ static inline int32_t CheckQdiscAllLen(int32_t qdiscAllLen)
 
 static int32_t GetQdiscAllLengthFromFile(const char *devName)
 {
-    char qdiscFileName[QDISC_FILE_NAME_NAX_LENGTH] = { 0 };
+    char qdiscFileName[QDISC_FILE_NAME_NAX_LENGTH] = {0};
     int32_t ret = sprintf_s(
         qdiscFileName, QDISC_FILE_NAME_NAX_LENGTH, "/sys/devices/virtual/net/%s/tx_queue_len", devName);
     if (ret <= 0) {
@@ -154,7 +154,7 @@ static int32_t GetQdiscAllLengthFromFile(const char *devName)
     }
 
     char *fileName = qdiscFileName;
-    char absolutePath[PATH_MAX + 1] = { 0 }; // +1 is avoiding array out of bound
+    char absolutePath[PATH_MAX + 1] = {0}; // +1 is avoiding array out of bound
     if (realpath(qdiscFileName, absolutePath) == NULL) {
         LOGE(TAG, "realpath failed");
     } else {

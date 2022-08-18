@@ -53,7 +53,7 @@ typedef enum {
  *
  */
 typedef struct {
-    void (*OnDeviceFound)(const DeviceInfo *device);
+    void (*OnDeviceFound)(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
 } DiscInnerCallback;
 
 /**

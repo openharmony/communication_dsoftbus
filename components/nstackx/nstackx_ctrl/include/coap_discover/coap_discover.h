@@ -47,6 +47,16 @@ typedef struct {
     sem_t wait;
 } MsgCtx;
 
+typedef struct CoapRequest {
+    uint8_t type;
+    uint8_t code;
+    const char *remoteUrl;
+    uint8_t *token;
+    size_t tokenLength;
+    char *data;
+    size_t dataLength;
+} CoapRequest;
+
 typedef enum {
     COAP_BROADCAST_TYPE_DEFAULT = 0,
     COAP_BROADCAST_TYPE_USER = 1
@@ -68,7 +78,6 @@ void CoapDiscoverDeinit(void);
 #ifdef DFINDER_SUPPORT_MULTI_NIF
 void CoapInitResourcesWithIdx(coap_context_t *ctx, uint32_t idx, const char *networkName);
 void CoapDestroyCtxWithIdx(uint32_t ctxIdx);
-coap_context_t *GetContextWithIdx(uint8_t serverType, uint32_t idx);
 #else
 void CoapDestroyCtx(uint8_t serverType);
 #endif

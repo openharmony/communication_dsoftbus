@@ -69,6 +69,7 @@ if (defined(ohos_lite)) {
         "platform/liteos/sys_epoll.c",
         "platform/liteos/sys_event.c",
         "platform/liteos/sys_log.c",
+        "platform/liteos/sys_socket.c",
         "platform/liteos/sys_timer.c",
         "platform/liteos/sys_util.c",
       ]

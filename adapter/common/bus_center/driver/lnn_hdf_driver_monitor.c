@@ -67,7 +67,7 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
     }
     const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)eventData;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive lwip monitor event(%d) for %s", info->event, info->ifName);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "receive lwip monitor event(%d) for %s", info->event, info->ifName);
     if (LnnGetNetIfTypeByName(info->ifName, &type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessLwipEvent LnnGetNetIfTypeByName error");
         return;
@@ -80,7 +80,7 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
 
 static void ProcessWlanEvent(struct HdfSBuf *data)
 {
-    LnnNotifyWlanStateChangeEvent(SOFTBUS_UNKNOWN);
+    LnnNotifyWlanStateChangeEvent(SOFTBUS_WIFI_UNKNOWN);
 }
 
 static int32_t OnReceiveDriverEvent(
@@ -88,7 +88,7 @@ static int32_t OnReceiveDriverEvent(
 {
     (void)listener;
     (void)service;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "receive hdf moudle(%d) event", moduleId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "receive hdf moudle(%d) event", moduleId);
     if (moduleId >= LNN_DRIVER_MODULE_MAX_INDEX) {
         return SOFTBUS_OK;
     }
@@ -121,7 +121,7 @@ static void DelayInitFunction(void *para)
         return;
     }
     rc = HdfDeviceRegisterEventListener(g_driverCtrl.softbusService, &g_driverCtrl.eventListener);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init hdf driver monitor(%d) result: %d", retry, rc);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init hdf driver monitor(%d) result: %d", retry, rc);
     if (rc != SOFTBUS_OK) {
         HdfIoServiceRecycle(g_driverCtrl.softbusService);
         g_driverCtrl.softbusService = NULL;
@@ -132,7 +132,7 @@ static void DelayInitFunction(void *para)
 
 int32_t LnnInitDriverMonitorImpl(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hdf driver monitor init enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "hdf driver monitor init enter");
     g_driverCtrl.eventListener.onReceive = OnReceiveDriverEvent;
     return LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayInitFunction, NULL, BIND_HDF_DELAY);
 }

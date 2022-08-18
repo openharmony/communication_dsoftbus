@@ -105,7 +105,6 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
 {
     int err = 0;
     socklen_t errSize = sizeof(err);
-
     int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "getsockopt fd=%{public}d, ret=%{public}d", socketFd, ret);
@@ -362,7 +361,8 @@ int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag)
 
 int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags)
 {
-    int32_t ret = send(socketFd, buf, len, flags);
+    int32_t wrapperFlag = flags | MSG_NOSIGNAL;
+    int32_t ret = send(socketFd, buf, len, wrapperFlag);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "send : %{public}s", strerror(errno));
         return GetErrorCode();

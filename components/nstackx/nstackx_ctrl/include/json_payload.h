@@ -24,6 +24,21 @@ extern "C" {
 #endif
 
 #define NSTACKX_MAX_URI_BUFFER_LENGTH 64
+
+#define JSON_COAP_URI "coapUri"
+#define JSON_CAPABILITY_BITMAP "capabilityBitmap"
+#define JSON_DEVICE_ID "deviceId"
+#define JSON_DEVICE_NAME "devicename"
+#define JSON_DEVICE_WLAN_IP "wlanIp"
+#define JSON_DEVICE_TYPE "type"
+#define JSON_HICOM_VERSION "hicomversion"
+#define JSON_REQUEST_MODE "mode"
+#define JSON_DEVICE_HASH "deviceHash"
+#define JSON_SERVICE_DATA "serviceData"
+#define JSON_BUSINESS_TYPE "bType"
+#define JSON_BUSINESS_DATA "bData"
+#define JSON_EXTEND_SERVICE_DATA "extendServiceData"
+
 #ifdef DFINDER_USE_MINI_NSTACKX
 #define COAP_DEVICE_DISCOVER_URI "device_discover"
 #endif

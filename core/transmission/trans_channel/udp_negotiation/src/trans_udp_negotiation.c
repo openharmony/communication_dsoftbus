@@ -127,16 +127,11 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed.");
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = g_channelCb->GetPkgNameBySessionName(info->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed, pkg[%s].", info->myData.pkgName);
+    int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName,
+        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
-        return SOFTBUS_ERR;
-    }
-    ret = g_channelCb->OnChannelClosed(pkgName, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on channel closed failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on channel closed failed, ret=%d.", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -352,6 +347,14 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack request udp info failed.");
         return SOFTBUS_ERR;
     }
+
+    int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
+        appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetPkgNameBySessionName Failed, ret = %d", ret);
+        return SOFTBUS_ERR;
+    }
+
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
         return SOFTBUS_OK;
     }

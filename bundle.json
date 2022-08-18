@@ -37,17 +37,22 @@
       "ram": "28MB",
       "deps": {
         "components": [
-          "libhilog",
-          "libipc_single",
-          "libsystem_ability_fwk",
-          "libsyspara",
-          "samgr_proxy",
-          "c_utils"
+          "ability_base",
+          "ability_runtime",
+          "bluetooth",
+          "drivers_interface_wlan",
+          "hiviewdfx_hilog_native",
+          "ipc",
+          "os_account",
+          "relational_store",
+          "utils_base",
+          "wifi"
         ],
         "third_party": [
+          "bounds_checking_function",
+          "cJSON",
           "libcoap",
-          "libmbedtls",
-          "bounds_checking_function"
+          "thirdparty_mbedtls"
         ]
       },
       "build": {
@@ -59,7 +64,7 @@
           "service_group":[
             "//foundation/communication/dsoftbus/core:softbus_server",
             "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
-            "//foundation/communication/dsoftbus/tools:tool"            
+            "//foundation/communication/dsoftbus/tools:tool"
           ]
         },
         "inner_kits": [
@@ -102,6 +107,7 @@
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/regnodedevicestatecb_fuzzer:RegNodeDeviceStateCbFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/joinlnn_fuzzer:JoinLNNFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/leavelnn_fuzzer:LeaveLNNFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/shiftlnngear_fuzzer:ShiftLnnGearFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/activemetanode_fuzzer:ActiveMetaNodeFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getallnodedeviceinfo_fuzzer:GetAllNodeDeviceInfoFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/deactivemetanode_fuzzer:DeactiveMetaNodeFuzzTest",

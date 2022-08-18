@@ -41,6 +41,7 @@
 #include "coap_app.h"
 #include "coap_discover.h"
 #include "json_payload.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXDFinder"
 
@@ -731,6 +732,7 @@ static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t i
         internalDevice = CreateNewDevice(g_deviceList, deviceInfo);
 #endif
         if (internalDevice == NULL) {
+            IncStatistics(STATS_OVER_DEVICE_LIMIT);
             return NSTACKX_ENOMEM;
         }
         updated = NSTACKX_TRUE;
@@ -757,13 +759,12 @@ static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t i
     return NSTACKX_EOK;
 }
 
-int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
+static int32_t UpdateDeviceDbEx(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
 {
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE &&
-        deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_SOFTBUS) {
+    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
         if (UpdateWhenDiscoverActive(deviceInfo, 0) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "update when receive unicast fail");
             return NSTACKX_EFAILED;
@@ -775,6 +776,15 @@ int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
         }
     }
     return NSTACKX_EOK;
+}
+
+int32_t UpdateDeviceDb(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
+{
+    int32_t ret = UpdateDeviceDbEx(deviceInfo, forceUpdate);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_UPDATE_DEVICE_DB_FAILED);
+    }
+    return ret;
 }
 #else
 int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo, uint8_t forceUpdate)
@@ -804,8 +814,7 @@ int32_t UpdateDeviceDbWithIdx(const DeviceInfo *deviceInfo, uint8_t forceUpdate,
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE &&
-        deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_SOFTBUS) {
+    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
         if (UpdateWhenDiscoverActive(deviceInfo, idx) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "update when receive unicast fail with multi nif");
             return NSTACKX_EFAILED;
@@ -2195,7 +2204,7 @@ L_ERR_DEVICE_DB_BACKUP_LIST:
 }
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-int32_t BackupDeviceDB(void)
+static int32_t BackupDeviceDBEx(void)
 {
     void *db = g_deviceList;
     void *backupDB = g_deviceListBackup;
@@ -2227,6 +2236,15 @@ int32_t BackupDeviceDB(void)
         }
     }
     return NSTACKX_EOK;
+}
+
+int32_t BackupDeviceDB(void)
+{
+    int32_t ret = BackupDeviceDBEx();
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_BACKUP_DEVICE_DB_FAILED);
+    }
+    return ret;
 }
 
 void *GetDeviceDB(void)

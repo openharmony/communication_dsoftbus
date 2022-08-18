@@ -21,14 +21,15 @@
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_heartbeat_strategy.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device);
+static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -55,9 +56,11 @@ static int32_t DiscoveryResultTransfer(int32_t retCode)
     return REFRESH_LNN_INTERNAL;
 }
 
-static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device)
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
 {
     (void)pkgName;
+    (void)addtions;
     if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
     }

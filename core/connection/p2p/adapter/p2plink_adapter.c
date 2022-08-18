@@ -202,7 +202,7 @@ void P2pLinkEnableStub(void)
     WifiErrorCode ret;
 
     ret = EnableP2p();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wdf EnableP2p ret %d.", ret);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wdf EnableP2p ret %d.", ret);
 }
 
 int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
@@ -316,7 +316,7 @@ int32_t P2pLinkGetP2pIpAddress(char *ip, int32_t len)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkGetP2pIpAddress GetCurrentGroup fail[%d].", ret);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "interface name %s.", groupInfo->interface);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "interface name %s.", groupInfo->interface);
 
     if (!GetIpAddr(groupInfo->interface, ipAddr, sizeof(ipAddr))) {
         SoftBusFree(groupInfo);

@@ -143,8 +143,8 @@ static void *LoopTask(void *arg)
             context->msgSize--;
             if (looper->dumpable) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
-                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",msgSize=%u", context->name,
-                    msg->handler->name, msg->what, context->msgSize);
+                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u", context->name,
+                    msg->handler->name, msg->what, msg->arg1, context->msgSize);
             }
         } else {
             SoftBusSysTime tv;
@@ -170,8 +170,8 @@ static void *LoopTask(void *arg)
         }
         if (looper->dumpable) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-                "LoopTask[%s], after HandleMessage message. handle=%s,what=%" PRId32,
-                context->name, msg->handler->name, msg->what);
+                "LoopTask[%s], after HandleMessage message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64,
+                context->name, msg->handler->name, msg->what, msg->arg1);
         }
         (void)SoftBusMutexLock(&context->lock);
         FreeSoftBusMsg(msg);
@@ -346,8 +346,8 @@ static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHa
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
         if (msg->handler == handler && customFunc(msg, args) == 0) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]LooperRemoveMessage. handler=%s, what =%d",
-                context->name, handler->name, msg->what);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64,
+                context->name, handler->name, msg->what, msg->arg1);
             FreeSoftBusMsg(msg);
             ListDelete(&itemNode->node);
             SoftBusFree(itemNode);
