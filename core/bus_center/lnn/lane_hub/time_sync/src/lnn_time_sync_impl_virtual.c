@@ -20,13 +20,13 @@
 
 int32_t LnnTimeSyncImplInit(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync impl stub init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync impl stub init success");
     return SOFTBUS_OK;
 }
 
 void LnnTimeSyncImplDeinit(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync impl stub deinit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync impl stub deinit");
 }
 
 int32_t LnnStartTimeSyncImpl(const char *targetNetworkId, TimeSyncAccuracy accuracy,

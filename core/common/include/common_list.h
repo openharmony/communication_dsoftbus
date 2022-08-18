@@ -87,8 +87,10 @@ __attribute__((always_inline)) static inline bool IsListEmpty(const ListNode *no
  */
 #define OFF_SET_OF(type, member) ((size_t)&(((type *)0)->member))
 
+#ifndef CONTAINER_OF
 #define CONTAINER_OF(ptr, type, member) \
     (type *)((char *)(ptr) - (char *) &((type *)0)->member)
+#endif
 
 /*
  * @brief Obtain the pointer to a structure that contains a list.

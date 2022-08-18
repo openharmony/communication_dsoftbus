@@ -106,7 +106,7 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_STOP_DISCOVERY, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery send request ret = %d!", err);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StopDiscovery send request ret = %d!", err);
     if (err != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery send request failed!");
         return SOFTBUS_ERR;

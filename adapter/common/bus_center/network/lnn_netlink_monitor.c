@@ -185,7 +185,7 @@ static void *NetlinkMonitorThread(void *para)
         }
     }
     close(sockFd);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink monitor thread exit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread exit");
     return NULL;
 }
 

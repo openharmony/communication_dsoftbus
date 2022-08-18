@@ -49,6 +49,7 @@ static int BrConnectionInfoDump(int fd);
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {
+    SoftBusRegConnVarDump(BR_CONNECTION_INFO, &BrConnectionInfoDump);
     g_brBuffSize = brBuffSize + sizeof(ConnPktHead);
 }
 
@@ -427,7 +428,6 @@ static int32_t InitConnectionInfo(ConnectionInfo *connectionInfo, const BrConnec
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitConnInfo scpy error");
         return SOFTBUS_BRCONNECTION_STRNCPY_ERROR;
     }
-    SoftBusRegConnVarDump(BR_CONNECTION_INFO, &BrConnectionInfoDump);
     return SOFTBUS_OK;
 }
 
@@ -609,6 +609,10 @@ bool BrCheckActiveConnection(const ConnectOption *option)
 static int BrConnectionInfoDump(int fd)
 {
     char tempMac[BT_ADDR_LEN] = {0};
+    if (pthread_mutex_lock(&g_connectionLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BRConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
@@ -637,5 +641,6 @@ static int BrConnectionInfoDump(int fd)
         dprintf(fd, "windows                       : %u\n", itemNode->windows);
         dprintf(fd, "ackTimeoutCount               : %u\n", itemNode->ackTimeoutCount);
     }
+    (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;
 }

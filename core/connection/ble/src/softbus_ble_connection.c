@@ -337,7 +337,7 @@ static int32_t BleConnectDeviceFristTime(const ConnectOption *option, uint32_t r
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "BleConnectDevice, requestId=%d", requestId);
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -508,7 +508,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage:%s", data);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendRefMessage:%s", data);
     uint32_t headSize = sizeof(ConnPktHead);
     uint32_t dataLen = strlen(data) + 1 + headSize;
     char *buf = (char *)SoftBusCalloc(dataLen);
@@ -1056,7 +1056,7 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
 
 static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
-    if (SoftBusMutexLock(&g_connectionLock) != 0) {
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -1253,6 +1253,10 @@ static int BleConnectionDump(int fd)
     char bleMac[BT_MAC_LEN] = {0};
     char deviceIdHash[UDID_HASH_LEN] = {0};
     char peerDevId[UDID_BUF_LEN] = {0};
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
@@ -1289,5 +1293,6 @@ static int BleConnectionDump(int fd)
             dprintf(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
         }
     }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }

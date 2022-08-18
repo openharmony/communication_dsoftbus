@@ -16,6 +16,7 @@
 #include "nstackx_dfinder_hidump.h"
 #include <inttypes.h>
 #include "nstackx_dfinder_log.h"
+#include "nstackx_dfinder_mgt_msg_log.h"
 #include "nstackx_util.h"
 #include "nstackx_getopt.h"
 #include "nstackx_statistics.h"
@@ -30,15 +31,6 @@
 #define CRLF "\r\n"
 
 #define DUMP_BUF_LEN (2048U)
-
-#define DUMP_MSG_ADD_CHECK(ret, data, index, size, fmt, ...) do { \
-    ret = sprintf_s(data + index, size - index, fmt, ##__VA_ARGS__); \
-    if (ret < 0) { \
-        DFINDER_LOGE(TAG, "dumper buffer over %u bytes", size); \
-        return NSTACKX_EFAILED; \
-    } \
-    index += ret; \
-} while (0)
 
 typedef struct {
     char *buf;
@@ -209,8 +201,8 @@ int DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc
                 ret = Dump(softObj, dump, DumpStatistics);
                 break;
             case 'm':
-#ifdef DFINDER_SET_CTRL_MSG_LOG
-                (void)SetMgtMsgLog((int32_t)strtol(NstackGetOptArgs(&optMsg), NULL, DFINDER_DUMP_STRTOL_BASE));
+#ifdef DFINDER_MGT_MSG_LOG
+                (void)DFinderSetMgtMsgLog((int32_t)strtol(NstackGetOptArgs(&optMsg), NULL, DFINDER_DUMP_STRTOL_BASE));
 #endif
                 break;
             default:
