@@ -183,6 +183,9 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB target networkId:%s is offline",
             AnonymizesNetworkID(targetNetworkId));
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ShiftLnnGear >> [callerId:%s] networkId:%s, cycle:%d, "
+        "duration:%d, wakeupFlag:%d", callerId, targetNetworkId != NULL ? AnonymizesNetworkID(targetNetworkId) : "",
+        mode->cycle, mode->duration, mode->wakeupFlag);
     if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl reset medium mode fail");
         return SOFTBUS_ERR;
