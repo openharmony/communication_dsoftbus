@@ -313,7 +313,9 @@ void FillpConnFinLog(FILLP_INT sockIndex, FILLP_CONST struct FillpPktFin *fin, F
         return;
     }
 
-    FILLP_MGT_MSG_PRINT(sockIndex, (FILLP_CONST struct FillpPktHead *)fin->head, direction,
-        "flags: %s", tmpBuf);
+    struct FillpPktHead hdr = {0};
+    FillpHeaderNtoH(&hdr, (FILLP_CONST struct FillpPktHead *)fin->head, direction);
+
+    FILLP_MGT_MSG_PRINT(sockIndex, &hdr, direction, "flags: %s", tmpBuf);
 }
 #endif
