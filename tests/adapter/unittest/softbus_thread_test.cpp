@@ -411,7 +411,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest001, TestSize.Level0)
 */
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, TestSize.Level0)
 {
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -424,7 +424,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadAttrInitTest002, TestSize.Level0)
 */
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest001, TestSize.Level0)
 {
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -456,7 +456,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest002, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -475,7 +475,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest003, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -495,7 +495,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -514,7 +514,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest005, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -533,7 +533,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest006, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -552,7 +552,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest007, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -571,7 +571,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest008, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -591,7 +591,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest009, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -608,7 +608,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -632,7 +632,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest002, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnopqrstuvwxyz";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -656,7 +656,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest003, TestSize.Level0)
 {
     const char *name = "abcdefghijklmnop";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -680,7 +680,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
 {
     const char *name = "a中文p";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -702,7 +702,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
 {
     const char *name = "testThread";
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -981,7 +981,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusCondDestroyTest003, TestSize.Level0)
 HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1002,7 +1002,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
 {
     char *value = nullptr;
     SoftBusThread thread = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1030,7 +1030,7 @@ HWTEST_F(DsoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 
     SoftBusThread threadWait = 0;
     SoftBusThread threadSignal = 0;
-    SoftBusThreadAttr threadAttr = { 0 };
+    SoftBusThreadAttr threadAttr = {0};
     ret = SoftBusThreadAttrInit(&threadAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

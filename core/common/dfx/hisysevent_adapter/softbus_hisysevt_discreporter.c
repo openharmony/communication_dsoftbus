@@ -245,7 +245,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_ERROR_CODE) != EOK) {
         return SOFTBUS_ERR;
     }
-    param->paramValue.i32v = errorCode;
+    param->paramValue.i32v = (int)errorCode;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;

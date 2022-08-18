@@ -27,7 +27,7 @@
 #define APP_UUID_LEN 2
 #define INVALID_ID (-1)
 
-static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
+static BtGattClientCallbacks g_btGattClientCallbacks = {0};
 static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
@@ -125,7 +125,7 @@ int32_t SoftbusGattcRegister(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcRegister error");
         return INVALID_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcRegister %d", clientId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcRegister %d", clientId);
     return clientId;
 }
 
@@ -176,7 +176,7 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId)
 
 int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcSearchServices %d", clientId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcSearchServices %d", clientId);
     if (clientId <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcSearchServices invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -242,7 +242,7 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcWriteCharacteristic invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcRegisterNotification clientId = %d", clientId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcRegisterNotification clientId = %d", clientId);
     BtGattCharacteristic characteristic;
     characteristic.serviceUuid.uuid = clientData->serviceUuid.uuid;
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;

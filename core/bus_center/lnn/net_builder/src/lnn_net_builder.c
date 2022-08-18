@@ -28,13 +28,12 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_exchange_device_info.h"
-#include "lnn_heartbeat_strategy.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
-#include "lnn_ip_network_impl.h"
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
+#include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
@@ -677,7 +676,6 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
 static int32_t ProcessDeviceNotTrusted(const void *para)
 {
     const char *peerUdid = (const char *)para;
-    LnnConnectionFsm *connFsm = NULL;
     int32_t rc = SOFTBUS_OK;
 
     if (peerUdid == NULL) {
@@ -702,7 +700,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
             if (udid != NULL && strcmp(peerUdid, udid) == 0) {
                 rc = LnnSendNotTrustedToConnFsm(item);
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                    "[id=%u]send not trusted msg to connection fsm result: %d", connFsm->id, rc);
+                    "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
             }
         }
     } while (false);
@@ -1365,7 +1363,7 @@ static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *network
         return;
     }
     uint64_t connCap = *((uint64_t *)msg);
-    if (LnnSetDistributedConnCapability(networkId, connCap)) {
+    if (LnnSetDLConnCapability(networkId, connCap)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
         return;
     }

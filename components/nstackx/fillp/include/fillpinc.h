@@ -397,7 +397,7 @@ typedef struct FillpTraceDescriptStruct {
 #define FILLP_TRACE_DESC_INIT(dir) \
     { \
         (dir), \
-        { 0 }, \
+        {0}, \
     }
 
 /**
@@ -1374,6 +1374,33 @@ struct FillpCurrentSendCacheInf {
  * On Failure : returns -1
  */
 FILLP_INT DLL_API FtApiEventInfoGet(IN FILLP_INT fd, IO FtEventCbkInfo *info);
+
+/**
+ * @ingroup fillpevt
+ * @brief  register dfx event callback function
+ *
+ * @param[in] softObj   any usefull message to evtCb
+ * @param[in]    func   event callback function
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+extern FILLP_INT DLL_API FtSetDfxEventCb(void *softObj, FillpDfxEventCb evtCb);
+
+/**
+ * @ingroup fillpevt
+ * @brief   deal with HiDumper cmd
+ *
+ * @param[in]    argc   arg number
+ * @param[in]    argv   arg value
+ * @param[in] softObj   any usefull message to dump
+ * @param[in]    dump   function to printf data
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+extern FILLP_INT DLL_API FtDfxHiDumper(FILLP_UINT32 argc, const FILLP_CHAR **argv,
+    void *softObj, FillpDfxDumpFunc dump);
 
 #pragma pack(pop)
 

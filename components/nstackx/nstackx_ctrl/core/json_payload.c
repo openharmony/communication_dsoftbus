@@ -21,25 +21,12 @@
 #include "coap_client.h"
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
 #include "nstackx_dfinder_log.h"
+#include "nstackx_dfinder_mgt_msg_log.h"
 #include "nstackx_error.h"
 #include "nstackx_device.h"
+#include "nstackx_statistics.h"
 
 #define TAG "nStackXCoAP"
-
-#define JSON_COAP_URI "coapUri"
-#define JSON_CAPABILITY_BITMAP "capabilityBitmap"
-
-#define JSON_DEVICE_ID "deviceId"
-#define JSON_DEVICE_NAME "devicename"
-#define JSON_DEVICE_WLAN_IP "wlanIp"
-#define JSON_DEVICE_TYPE "type"
-#define JSON_HICOM_VERSION "hicomversion"
-#define JSON_REQUEST_MODE "mode"
-#define JSON_DEVICE_HASH "deviceHash"
-#define JSON_SERVICE_DATA "serviceData"
-#define JSON_BUSINESS_TYPE "bType"
-#define JSON_BUSINESS_DATA "bData"
-#define JSON_EXTEND_SERVICE_DATA "extendServiceData"
 
 static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
 {
@@ -421,9 +408,9 @@ static void ParseBusinessDataJsonData(const cJSON *data, DeviceInfo *dev, uint8_
  * }
  */
 #ifdef DFINDER_SUPPORT_MULTI_NIF
-char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx)
+static char *PrepareServiceDiscoverWithIdxEx(uint8_t isBroadcast, uint32_t idx)
 #else
-char *PrepareServiceDiscover(uint8_t isBroadcast)
+static char *PrepareServiceDiscoverEx(uint8_t isBroadcast)
 #endif /* #ifdef DFINDER_SUPPORT_MULTI_NIF */
 {
     char coapUriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
@@ -482,7 +469,27 @@ L_END_JSON:
     return formatString;
 }
 
-int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **remoteUrlPtr)
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx)
+{
+    char *str = PrepareServiceDiscoverWithIdxEx(isBroadcast, idx);
+    if (str == NULL) {
+        IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
+    }
+    return str;
+}
+#else
+char *PrepareServiceDiscover(uint8_t isBroadcast)
+{
+    char *str = PrepareServiceDiscoverEx(isBroadcast);
+    if (str == NULL) {
+        IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
+    }
+    return str;
+}
+#endif
+
+static int32_t ParseServiceDiscoverEx(const uint8_t *buf, DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
     char *remoteUrl = NULL;
     cJSON *data = NULL;
@@ -530,5 +537,15 @@ int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **
     deviceInfo->businessData.isBroadcast = isBroadcast;
     *remoteUrlPtr = remoteUrl;
     cJSON_Delete(data);
+    DFINDER_MGT_UNPACK_LOG(deviceInfo);
     return NSTACKX_EOK;
+}
+
+int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **remoteUrlPtr)
+{
+    int32_t ret = ParseServiceDiscoverEx(buf, deviceInfo, remoteUrlPtr);
+    if (ret != NSTACKX_EOK) {
+        IncStatistics(STATS_PARSE_SD_MSG_FAILED);
+    }
+    return ret;
 }

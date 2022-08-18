@@ -144,7 +144,11 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
 
 static void OnUdpChannelOpened(int32_t channelId)
 {
-    UdpChannel channel = {0};
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        return;
+    }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         return;
     }
@@ -274,7 +278,11 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
 
 static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
 {
-    UdpChannel channel = {0};
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        return SOFTBUS_ERR;
+    }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -314,7 +322,11 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
 
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
-    UdpChannel channel = {0};
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        return SOFTBUS_ERR;
+    }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -332,7 +344,11 @@ int32_t ClientTransCloseUdpChannel(int32_t channelId)
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const StreamFrameInfo *param)
 {
-    UdpChannel channel = {0};
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        return SOFTBUS_ERR;
+    }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
@@ -437,7 +453,11 @@ void ClientTransUdpMgrDeinit(void)
 
 int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
-    UdpChannel channel = {0};
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        return SOFTBUS_ERR;
+    }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }

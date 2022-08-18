@@ -669,6 +669,10 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 
 static int TcpConnectInfoDump(int fd)
 {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------TcpConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_tcpConnInfoList->list) {
@@ -687,5 +691,6 @@ static int TcpConnectInfoDump(int fd)
         dprintf(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);
         dprintf(fd, "Connection Info requestId         : %d\n", itemNode->requestId);
     }
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     return SOFTBUS_OK;
 }

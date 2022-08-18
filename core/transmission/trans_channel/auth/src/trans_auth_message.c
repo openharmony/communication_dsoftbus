@@ -97,8 +97,10 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
     }
     if (memcpy_s(cJsonStr, ERR_MSG_MAX_LEN, data, strlen(data)) != EOK) {
         cJSON_Delete(obj);
+        cJSON_free(data);
         return SOFTBUS_MEM_ERR;
     }
     cJSON_Delete(obj);
+    cJSON_free(data);
     return SOFTBUS_OK;
 }

@@ -27,6 +27,11 @@ extern "C" {
 
 #define FSM_FLAG_RUNNING 0x1
 
+#define FSM_CTRL_MSG_START 0
+#define FSM_CTRL_MSG_DATA 1
+#define FSM_CTRL_MSG_STOP 2
+#define FSM_CTRL_MSG_DEINIT 3
+
 struct tagFsmStateMachine;
 
 typedef void (*StateEnterFunc)(struct tagFsmStateMachine *fsm);
@@ -40,7 +45,7 @@ typedef struct {
     StateExitFunc exit;
 } FsmState;
 
-typedef void (*FsmDinitCallback)(struct tagFsmStateMachine *fsm);
+typedef void (*FsmDeinitCallback)(struct tagFsmStateMachine *fsm);
 
 typedef struct tagFsmStateMachine {
     FsmState *curState;
@@ -50,10 +55,15 @@ typedef struct tagFsmStateMachine {
     SoftBusLooper *looper;
     SoftBusHandler handler;
 
-    FsmDinitCallback deinitCallback;
+    FsmDeinitCallback deinitCallback;
 } FsmStateMachine;
 
-int32_t LnnFsmInit(FsmStateMachine *fsm, char *name, FsmDinitCallback cb);
+typedef struct {
+    FsmStateMachine *fsm;
+    void *obj;
+} FsmCtrlMsgObj;
+
+int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmDeinitCallback cb);
 int32_t LnnFsmDeinit(FsmStateMachine *fsm);
 
 int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state);
@@ -62,9 +72,10 @@ int32_t LnnFsmStart(FsmStateMachine *fsm, FsmState *initialState);
 int32_t LnnFsmStop(FsmStateMachine *fsm);
 
 int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data);
-int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
-    void *data, uint64_t delayMillis);
+int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType, void *data, uint64_t delayMillis);
 int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType);
+int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
+    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args);
 
 int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state);
 

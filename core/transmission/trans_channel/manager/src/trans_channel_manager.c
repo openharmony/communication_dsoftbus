@@ -335,6 +335,7 @@ static void ConvertStreamStats(const StreamSendStats *src, FrameSendStats *dest)
 
 int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
 {
+    (void)channelType;
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamStats data is null");
         return SOFTBUS_INVALID_PARAM;

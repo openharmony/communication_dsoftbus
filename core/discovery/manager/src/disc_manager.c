@@ -214,7 +214,8 @@ static void ReleaseInfoNodeMem(DiscInfo *info, const ServiceType type)
     return;
 }
 
-static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
+static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
 {
     uint32_t tmp;
     bool isInnerInfo = false;
@@ -225,7 +226,7 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
         isInnerInfo = true;
     }
     if (isInnerInfo == false) {
-        (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device);
+        (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, addtions);
         return;
     }
     if (infoNode->item->callback.innerCb.OnDeviceFound == NULL) {
@@ -234,16 +235,16 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device)
     }
     bool isCallLnn = GetCallLnnStatus();
     if (isCallLnn) {
-        infoNode->item->callback.innerCb.OnDeviceFound(device);
+        infoNode->item->callback.innerCb.OnDeviceFound(device, addtions);
     }
 }
 
-static void DiscOnDeviceFound(const DeviceInfo *device)
+static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     uint32_t tmp;
     DiscInfo *infoNode = NULL;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d",
-        device->capabilityBitmap[0]);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Server OnDeviceFound capabilityBitmap = %d, medium: %d",
+        device->capabilityBitmap[0], addtions->medium);
     for (tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet((uint32_t *)&(device->capabilityBitmap[0]), tmp) == false) {
             continue;
@@ -254,7 +255,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device)
         }
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "find callback:id = %d", infoNode->id);
-            InnerDeviceFound(infoNode, device);
+            InnerDeviceFound(infoNode, device, addtions);
         }
         (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
     }
@@ -1084,32 +1085,114 @@ int32_t DiscMgrInit(void)
     return SOFTBUS_OK;
 }
 
+typedef struct {
+    ListNode node;
+    int32_t id;
+    char *pkgName;
+} IdContainer;
+
+static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
+{
+    IdContainer *container = SoftBusCalloc(sizeof(IdContainer));
+    if (container == NULL) {
+        return NULL;
+    }
+    ListInit(&container->node);
+    container->id = id;
+    if (pkgName == NULL) {
+        return container;
+    }
+    int len = strlen(pkgName);
+    container->pkgName = SoftBusCalloc(len + 1);
+    if (container->pkgName == NULL) {
+        SoftBusFree(container);
+        return NULL;
+    }
+    (void)memcpy_s(container->pkgName, len, pkgName, len);
+    return container;
+}
+
+static void DestoryIdContainer(IdContainer* container)
+{
+    if (container->pkgName != NULL) {
+        SoftBusFree(container->pkgName);
+    }
+    SoftBusFree(container);
+}
+
+static void CleanupPublishDiscovery(IdContainer *ids, ServiceType type)
+{
+    IdContainer *it = NULL;
+    int32_t ret;
+    LIST_FOR_EACH_ENTRY(it, &ids->node, IdContainer, node) {
+        switch (type) {
+            case PUBLISH_SERVICE:
+                ret = DiscUnPublishService(it->pkgName, it->id);
+                if (ret != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "clean up %s %d publish info failed, ret: %d",
+                        it->pkgName, it->id, ret);
+                } else {
+                    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "clean up %s %d publish info successfully",
+                        it->pkgName, it->id);
+                }
+                break;
+            case SUBSCRIBE_SERVICE:
+                ret = DiscStopDiscovery(it->pkgName, it->id);
+                if (ret != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "clean up %s %d discovery info failed, ret: %d",
+                        it->pkgName, it->id, ret);
+                } else {
+                    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "clean up %s %d discovery info successfully",
+                        it->pkgName, it->id);
+                }
+                break;
+            default:
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unsupport type: %d", type);
+                break;
+        }
+    }
+}
+
 static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type, const char *pkgName)
 {
     DiscItem *itemNode = NULL;
     DiscItem *itemNodeNext = NULL;
     DiscInfo *infoNode = NULL;
     DiscInfo *infoNodeNext = NULL;
+    IdContainer *container = NULL;
+    IdContainer *containerNext = NULL;
 
-    if (SoftBusMutexLock(&(itemList->lock)) != 0) {
+    if (SoftBusMutexLock(&itemList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
 
-    LIST_FOR_EACH_ENTRY_SAFE(itemNode, itemNodeNext, &(itemList->list), DiscItem, node) {
+    IdContainer *ids = CreateIdContainer(0, NULL);
+    if (ids == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(itemNode, itemNodeNext, &itemList->list, DiscItem, node) {
         if ((pkgName != NULL) && (strcmp(itemNode->packageName, pkgName) != 0)) {
             continue;
         }
-        LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(itemNode->InfoList), DiscInfo, node) {
-            ListDelete(&(infoNode->node));
-            DeleteInfoFromCapability(infoNode, type);
-            ReleaseInfoNodeMem(infoNode, type);
+        LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &itemNode->InfoList, DiscInfo, node) {
+            IdContainer *container = CreateIdContainer(infoNode->id, itemNode->packageName);
+            if (container == NULL) {
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
+                goto CLEANUP;
+            }
+            ListTailInsert(&ids->node, &container->node);
         }
-        itemList->cnt--;
-        ListDelete(&(itemNode->node));
-        SoftBusFree(itemNode);
     }
-    (void)SoftBusMutexUnlock(&(itemList->lock));
+    CleanupPublishDiscovery(ids, type);
+CLEANUP:
+    LIST_FOR_EACH_ENTRY_SAFE(container, containerNext, &ids->node, IdContainer, node) {
+        ListDelete(&container->node);
+        DestoryIdContainer(container);
+    }
+    DestoryIdContainer(ids);
+    (void)SoftBusMutexUnlock(&itemList->lock);
 }
 
 void DiscMgrDeinit(void)
@@ -1135,6 +1218,7 @@ void DiscMgrDeathCallback(const char *pkgName)
     if (pkgName == NULL || g_isInited == false) {
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "receive %s death callback, start cleanup...", pkgName);
     DiscMgrInfoListDeinit(g_publishInfoList, PUBLISH_SERVICE, pkgName);
     DiscMgrInfoListDeinit(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName);
 }

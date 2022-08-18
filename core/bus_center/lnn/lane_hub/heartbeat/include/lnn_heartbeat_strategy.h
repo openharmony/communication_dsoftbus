@@ -16,47 +16,42 @@
 #ifndef LNN_HEARTBEAT_STRATEGY_H
 #define LNN_HEARTBEAT_STRATEGY_H
 
-#include <stdbool.h>
-
-#include "lnn_heartbeat_manager.h"
+#include "lnn_heartbeat_fsm.h"
+#include "softbus_bus_center.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define HB_TIME_FACTOR (1000LL)
-#define HB_ONE_CYCLE_LEN (10 * HB_TIME_FACTOR)
-#define HB_ONE_CYCLE_TIMEOUT_LEN (5 * HB_TIME_FACTOR + HB_ONE_CYCLE_LEN)
-#define HB_CHECK_DELAY_LEN (10 * HB_TIME_FACTOR + HB_ONE_CYCLE_LEN)
-#define HB_ENABLE_DELAY_LEN (20 * HB_TIME_FACTOR)
-#define HB_UPDATE_INTERVAL_LEN (HB_ENABLE_DELAY_LEN - HB_ONE_CYCLE_LEN)
 typedef struct {
-    LnnHeartbeatImplType type;
-    union {
-        struct BleParam {
-            uint16_t advMinInterval;
-            uint16_t advMaxInterval;
-            uint16_t scanInterval;
-            uint16_t scanWindow;
-        } ble;
-    } info;
-} HeartbeatImplPolicy;
+    LnnHeartbeatType supportType;
+    int32_t (*onProcess)(LnnHeartbeatFsm *hbFsm, void *obj);
+} LnnHeartbeatStrategyManager;
 
-typedef struct {
-    HeartbeatImplPolicy *implPolicy;
-} HeartbeatPolicy;
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type);
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type);
+int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param);
+int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type);
 
-int32_t LnnGetHeartbeatGearMode(GearMode *mode);
-int32_t LnnGetHeartbeatImplPolicy(LnnHeartbeatImplType type, HeartbeatImplPolicy *implPolicy);
-int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+int32_t LnnSetHbAsMasterNodeState(bool isMasterNode);
+int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
+    LnnHeartbeatStrategyType strategyType);
 
-int32_t LnnStartHeartbeatDelay(void);
-void LnnStopHeartbeatNow(void);
+int32_t LnnStartNewHbStrategyFsm(void);
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
+int32_t LnnStopHbByType(LnnHeartbeatType type);
+int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
+int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 
-int32_t LnnInitHeartbeat(void);
-void LnnDeinitHeartbeat(void);
+bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable);
+
+int32_t LnnRegistParamMgrByType(LnnHeartbeatType type);
+void LnnUnRegistParamMgrByType(LnnHeartbeatType type);
+
+int32_t LnnHbStrategyInit(void);
+void LnnHbStrategyDeinit(void);
 
 #ifdef __cplusplus
 }

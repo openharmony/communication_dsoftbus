@@ -29,7 +29,7 @@ extern "C" {
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
 bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
-DiscoveryType LnnGetDiscoveryType(ConnectionAddrType type);
+DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
 
 #ifdef __cplusplus
 }

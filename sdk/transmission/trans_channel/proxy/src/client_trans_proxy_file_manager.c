@@ -1013,7 +1013,7 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
         }
         (void)memset_s(fileFrame.data, PROXY_MAX_PACKET_SIZE, 0, PROXY_MAX_PACKET_SIZE);
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send crc check sum");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send crc check sum");
     if (SendFileCrcCheckSum(sendInfo) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -1068,7 +1068,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo *sendInfo, const char *so
     sendInfo->frameNum = frameNum;
     int32_t ret = FileToFrame(sendInfo, frameNum, destFile, fileSize);
     SoftBusFree(absSrcPath);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "chanId: %d send file ret: %d", sendInfo->channelId, ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "chanId: %d send file ret: %d", sendInfo->channelId, ret);
     return ret;
 }
 
@@ -1780,6 +1780,7 @@ static int32_t ProcessFileRecvResult(int32_t sessionId, uint32_t seq, int32_t re
 
 static int32_t ProcessFileSendResult(int32_t sessionId, uint32_t seq, int32_t result)
 {
+    (void)seq;
     if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process send result lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -1826,7 +1827,7 @@ static int32_t ProcessCrcCheckSumData(int32_t sessionId, const FileFrame *frame)
         return SOFTBUS_NOT_FIND;
     }
     int32_t result = UnpackFileCrcCheckSum(recipient, (FileFrame *)frame);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "verification crc check sum, ret: %d", result);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "verification crc check sum, ret: %d", result);
     int32_t ret = SendFileTransResult(recipient->channelId, frame->seq, result, IS_RECV_RESULT);
     ReleaseRecipientRef(recipient);
     if (result != SOFTBUS_OK || ret != SOFTBUS_OK) {
@@ -1867,7 +1868,7 @@ static int32_t ProcessFileAckRequest(int32_t sessionId, const FileFrame *frame)
     file->seqResult = (file->seqResult >> FILE_SEND_ACK_INTERVAL);
     int32_t ret = SendFileAckReqAndResData(recipient->channelId, startSeq, value,
         TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send file ack response, ret: %d", ret);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send file ack response, ret: %d", ret);
     ReleaseRecipientRef(recipient);
     return ret;
 }

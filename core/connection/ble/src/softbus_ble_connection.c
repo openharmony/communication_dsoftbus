@@ -85,7 +85,7 @@ static const int BLE_ROLE_SERVER = 2;
 
 static LIST_HEAD(g_connection_list);
 static ConnectCallback *g_connectCallback = NULL;
-static ConnectFuncInterface g_bleInterface = { 0 };
+static ConnectFuncInterface g_bleInterface = {0};
 static SoftBusMutex g_connectionLock;
 
 static void PackRequest(int32_t delta, uint32_t connectionId);
@@ -337,7 +337,7 @@ static int32_t BleConnectDeviceFristTime(const ConnectOption *option, uint32_t r
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "BleConnectDevice, requestId=%d", requestId);
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -508,7 +508,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage:%s", data);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendRefMessage:%s", data);
     uint32_t headSize = sizeof(ConnPktHead);
     uint32_t dataLen = strlen(data) + 1 + headSize;
     char *buf = (char *)SoftBusCalloc(dataLen);
@@ -1056,7 +1056,7 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
 
 static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
-    if (SoftBusMutexLock(&g_connectionLock) != 0) {
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
@@ -1249,6 +1249,10 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 
 static int BleConnectionDump(int fd)
 {
+    if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
@@ -1260,7 +1264,7 @@ static int BleConnectionDump(int fd)
         SoftBusFree(addr);
         dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
         dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
-        dprintf(fd, "Connection Info type          : %s\n", itemNode->info.type);
+        dprintf(fd, "Connection Info type          : %u\n", itemNode->info.type);
         dprintf(fd, "BleInfo: \n");
         char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
         dprintf(fd, "BleInfo addr                  : %s\n", bleMac);
@@ -1271,7 +1275,7 @@ static int BleConnectionDump(int fd)
         dprintf(fd, "Connection state              : %d\n", itemNode->state);
         dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
         dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
-        dprintf(fd, "Connection peerType           : %s\n", itemNode->peerType);
+        dprintf(fd, "Connection peerType           : %d\n", itemNode->peerType);
         char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
         dprintf(fd, "Connection peerDevId          : %s\n", peerDevId);
         SoftBusFree(peerDevId);
@@ -1289,5 +1293,6 @@ static int BleConnectionDump(int fd)
             dprintf(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
         }
     }
+    (void)SoftBusMutexUnlock(&g_connectionLock);
     return SOFTBUS_OK;
 }

@@ -70,6 +70,11 @@ private:
         return 0;
     }
 
+    const StreamFrameInfo* GetStreamFrameInfo() const override
+    {
+        return nullptr;
+    }
+
     std::unique_ptr<char[]> streamData_ = nullptr;
     ssize_t streamLen_ = 0;
 };

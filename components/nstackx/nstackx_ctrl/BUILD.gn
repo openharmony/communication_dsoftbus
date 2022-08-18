@@ -17,6 +17,7 @@ cflags = [
   "-DENABLE_USER_LOG",
   "-DDFINDER_SAVE_DEVICE_LIST",
   "-DNSTACKX_EXTEND_BUSINESSDATA",
+  "-DNSTACKX_DFINDER_HIDUMP",
 ]
 
 if (defined(board_toolchain_type)) {
@@ -48,7 +49,10 @@ if (defined(ohos_lite)) {
         "core/nstackx_common.c",
         "core/nstackx_database.c",
         "core/nstackx_device.c",
+        "core/nstackx_dfinder_hidump.c",
+        "core/nstackx_dfinder_hievent.c",
         "core/nstackx_dfinder_log.c",
+        "core/nstackx_statistics.c",
       ]
       include_dirs = [
         "include",
@@ -94,8 +98,12 @@ if (defined(ohos_lite)) {
         "core/nstackx_common.c",
         "core/nstackx_database.c",
         "core/nstackx_device.c",
+        "core/nstackx_dfinder_hidump.c",
+        "core/nstackx_dfinder_hievent.c",
         "core/nstackx_dfinder_log.c",
+        "core/nstackx_dfinder_mgt_msg_log.c",
         "core/nstackx_smartgenius.c",
+        "core/nstackx_statistics.c",
       ]
       ctrl_include = [
         "../nstackx_util/interface",
@@ -125,6 +133,7 @@ if (defined(ohos_lite)) {
       cflags += [
         "-fPIC",
         "-std=c99",
+        "-DDFINDER_MGT_MSG_LOG",
       ]
       cflags_cc = cflags
       ldflags = [
@@ -141,6 +150,7 @@ if (defined(ohos_lite)) {
     include_dirs = [ "interface" ]
   }
   ohos_shared_library("nstackx_ctrl") {
+    cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
     cflags_cc = cflags
     sources = [
       "core/coap_discover/coap_app.c",
@@ -150,8 +160,12 @@ if (defined(ohos_lite)) {
       "core/nstackx_common.c",
       "core/nstackx_database.c",
       "core/nstackx_device.c",
+      "core/nstackx_dfinder_hidump.c",
+      "core/nstackx_dfinder_hievent.c",
       "core/nstackx_dfinder_log.c",
+      "core/nstackx_dfinder_mgt_msg_log.c",
       "core/nstackx_smartgenius.c",
+      "core/nstackx_statistics.c",
     ]
     include_dirs += [
       "//third_party/bounds_checking_function/include",

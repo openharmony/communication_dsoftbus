@@ -23,10 +23,12 @@ trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/interfaces/inner_kits/transport",
   "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/tests/sdk/common/include",
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/sdk:softbus_client",
+  "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
 ]
 
 if (defined(ohos_lite)) {
