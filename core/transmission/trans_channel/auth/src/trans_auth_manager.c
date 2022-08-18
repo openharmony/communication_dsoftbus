@@ -657,7 +657,7 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId)
         return LnnNotifyDiscoveryDevice(&addr);
     } else if (TransProxyGetSendMsgChanInfo(channelId, &info) == SOFTBUS_OK) {
         ConnectOption connOpt;
-        if(TransProxyGetConnectOption(info.connId, &connOpt) != SOFTBUS_OK) {
+        if (TransProxyGetConnectOption(info.connId, &connOpt) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
         if (connOpt.type == CONNECT_BLE && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BLE)) {
