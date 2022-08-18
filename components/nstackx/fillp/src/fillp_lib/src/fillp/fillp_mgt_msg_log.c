@@ -102,11 +102,11 @@ static FILLP_INT FillpBitmapFormat(FILLP_CHAR *buf, size_t len, FILLP_UINT32 bit
     size_t formatLen = 0;
     size_t i;
     for (i = 0; i < bitmapStrSize; i++) {
-        if (!UTILS_FLAGS_CHECK(bitmap, 1 << i)) {
+        if (!UTILS_FLAGS_CHECK(bitmap, 1u << i)) {
             continue;
         }
 
-        FILLP_INT ret = snprintf_s(buf + formatLen, len - formatLen, len - formatLen - 1, " %s", bitmapStr[i]);
+        FILLP_INT ret = snprintf_s(buf + formatLen, len - formatLen, (len - formatLen) - 1, " %s", bitmapStr[i]);
         if (ret < 0) {
             FILLP_LOGERR("snprintf_s failed");
             return ret;
@@ -119,13 +119,11 @@ static FILLP_INT FillpBitmapFormat(FILLP_CHAR *buf, size_t len, FILLP_UINT32 bit
 
 static FILLP_INT FillpExtParaCharacterFormat(FILLP_CONST struct FtNetconn *conn, FILLP_CHAR *buf, size_t len)
 {
-    size_t formatLen = 0;
-    FILLP_INT ret = snprintf_s(buf + formatLen, len - formatLen, len - formatLen - 1,
-        "    characters: 0x%08X", conn->peerCharacters);
+    FILLP_INT ret = snprintf_s(buf, len, len - 1, "    characters: 0x%08X", conn->peerCharacters);
     if (ret < 0) {
         return ret;
     }
-    formatLen += (FILLP_UINT32)ret;
+    size_t formatLen = (FILLP_UINT32)ret;
 
     FILLP_CONST FILLP_CHAR *characterStr[] = { "HRBB", "PKT_IVAR" };
     ret = FillpBitmapFormat(buf + formatLen, len - formatLen, conn->peerCharacters,
@@ -140,13 +138,11 @@ static FILLP_INT FillpExtParaCharacterFormat(FILLP_CONST struct FtNetconn *conn,
 
 static FILLP_INT FillpExtParaFcAlgFormat(FILLP_CONST struct FtNetconn *conn, FILLP_CHAR *buf, size_t len)
 {
-    size_t formatLen = 0;
-    FILLP_INT ret = snprintf_s(buf + formatLen, len - formatLen, len - formatLen - 1,
-        "    FC ALG: 0x%02X", conn->peerFcAlgs);
+    FILLP_INT ret = snprintf_s(buf, len, len - 1, "    FC ALG: 0x%02X", conn->peerFcAlgs);
     if (ret < 0) {
         return ret;
     }
-    formatLen += (FILLP_UINT32)ret;
+    size_t formatLen = (FILLP_UINT32)ret;
 
     FILLP_CONST FILLP_CHAR *fcAlgStr[] = { "ALG_1", "ALG_2", "ALG_3", "ALG_MSG" };
     ret = FillpBitmapFormat(buf + formatLen, len - formatLen, conn->peerFcAlgs,
@@ -188,7 +184,7 @@ static FILLP_INT FillpExtParaFormat(FILLP_CONST FILLP_UCHAR *extPara, FILLP_INT 
             return -1;
         }
 
-        formatLen += (size_t)ret;
+        formatLen += (FILLP_UINT32)ret;
     }
 
     return (FILLP_INT)formatLen;
