@@ -240,7 +240,7 @@ static AuthSideFlag GetAuthSideFlag(uint64_t seq, uint32_t flags)
     if (flags & FLAG_REPLY) {
         side = ((seq & AUTH_CONN_SERVER_SEQ_MASK) != 0) ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "GetAuthSideFlag: flags=%d, side=%d, seq=%" PRId64, flags, side, seq);
     return side;
 }

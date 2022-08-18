@@ -169,7 +169,7 @@ static int32_t AddGattcInfoToList(BleGattcInfo *info)
 
 static char *GetBleAttrUuid(int32_t module)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid %d", module);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBleAttrUuid %d", module);
     if (module == MODULE_BLE_NET) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid1");
         return SOFTBUS_CHARA_BLENET_UUID;
@@ -399,7 +399,7 @@ static void SearchedMsgHandler(int32_t clientId, int status)
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
         &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%d  %d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%d  %d", clientId, status);
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
@@ -809,6 +809,10 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int BleGattcDump(int fd)
 {
+    if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
     dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
@@ -820,6 +824,7 @@ static int BleGattcDump(int fd)
         dprintf(fd, "btMac                     : %s\n", addr);
         SoftBusFree(addr);
     }
+    (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     return SOFTBUS_OK;
 }
 

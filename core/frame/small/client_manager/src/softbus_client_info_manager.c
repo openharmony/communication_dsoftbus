@@ -44,13 +44,6 @@ int SERVER_InitClient(void)
         return SOFTBUS_MALLOC_ERR;
     }
 
-    if (SoftBusMutexInit(&g_clientInfoList->lock, NULL) != SOFTBUS_OK) {
-        SoftBusFree(g_clientInfoList);
-        g_clientInfoList = NULL;
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    ListInit(&g_clientInfoList->list);
     return SOFTBUS_OK;
 }
 

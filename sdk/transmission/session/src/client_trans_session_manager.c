@@ -1131,7 +1131,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_clientSessionServerList == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransOnLinkDown: routeType=%d", routeType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientTransOnLinkDown: routeType=%d", routeType);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");

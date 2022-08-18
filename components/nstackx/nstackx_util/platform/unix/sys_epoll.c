@@ -78,12 +78,12 @@ int32_t EpollLoop(EpollDesc epollfd, int32_t timeout)
 
     nfds = epoll_wait(epollfd, events, MAX_EPOLL_SIZE, timeout);
     if (nfds < 0) {
-        LOGE(TAG, "epoll_wait returned n=%d, error: %d", nfds, errno);
-        if (errno != EINTR) {
-            return NSTACKX_EFAILED;
-        } else {
+        if (errno == EINTR) {
+            LOGD(TAG, "epoll_wait EINTR");
             return NSTACKX_EINTR;
         }
+        LOGE(TAG, "epoll_wait returned n=%d, error: %d", nfds, errno);
+        return NSTACKX_EFAILED;
     }
 
     for (i = 0; i < nfds; i++) {
