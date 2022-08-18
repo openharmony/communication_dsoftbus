@@ -98,6 +98,7 @@ extern "C" {
  *
  */
 #define MAX_ACCOUNT_HASH_LEN 96
+#define NUM_BUF_SIZE 4
 
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.

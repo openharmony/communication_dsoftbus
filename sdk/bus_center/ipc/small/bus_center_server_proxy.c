@@ -39,6 +39,7 @@ typedef struct {
     FunID id;
     int ret;
     void* data;
+    int32_t dataLen;
 } Reply;
 
 static IClientProxy *g_serverProxy = NULL;
@@ -57,6 +58,7 @@ static int ClientBusCenterResultCb(IOwner owner, int code, IpcIo *reply)
         case GET_LOCAL_DEVICE_INFO:
         case GET_NODE_KEY_INFO:
             info->data = (void *)IpcIoPopFlatObj(reply, &infoSize);
+            info->dataLen = infoSize;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unknown funid");
@@ -210,7 +212,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(buf, len, reply.data, len) != EOK) {
+    if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo copy node key info failed");
         return SOFTBUS_ERR;
     }

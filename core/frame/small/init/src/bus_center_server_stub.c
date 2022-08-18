@@ -174,8 +174,16 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
         return SOFTBUS_ERR;
     }
     int32_t key = IpcIoPopInt32(req);
+    int32_t infoLen  = LnnIpcGetNodeKeyInfoLen(key);
+    if (infoLen == SOFTBUS_ERR) {
+        return SOFTBUS_ERR;
+    }
     int32_t len = IpcIoPopInt32(req);
-    void *buf = SoftBusMalloc(len);
+    if (len < infoLen) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len is invalid param!");
+        return SOFTBUS_ERR;
+    }
+    void *buf = SoftBusCalloc(infoLen);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo malloc buffer failed!");
         return SOFTBUS_ERR;
@@ -186,14 +194,13 @@ int32_t ServerGetNodeKeyInfo(void *origin, IpcIo *req, IpcIo *reply)
         SoftBusFree(buf);
         return SOFTBUS_PERMISSION_DENIED;
     }
-
-    int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, len);
+    int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, infoLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo get local info failed.");
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
-    IpcIoPushFlatObj(reply, buf, len);
+    IpcIoPushFlatObj(reply, buf, infoLen);
     SoftBusFree(buf);
     return SOFTBUS_OK;
 }
