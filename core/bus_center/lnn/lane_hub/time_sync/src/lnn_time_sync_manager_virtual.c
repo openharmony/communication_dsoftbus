@@ -37,7 +37,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
 
 int32_t LnnInitTimeSync(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync virtual init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync virtual init success");
     return SOFTBUS_OK;
 }
 

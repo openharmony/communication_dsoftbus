@@ -78,7 +78,7 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[BT_SPP_INVALID_ID]");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SppConnect ok clientId: %d", ret);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SppConnect ok clientId: %d", ret);
     return ret;
 }
 

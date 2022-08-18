@@ -494,7 +494,7 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner type %d", type);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnNodeBasicInfoChangedInner type %d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read info type length failed!");

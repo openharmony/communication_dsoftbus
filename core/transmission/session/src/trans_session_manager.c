@@ -262,7 +262,7 @@ void TransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown: routeType=%d", routeType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown: routeType=%d", routeType);
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
@@ -276,6 +276,6 @@ void TransOnLinkDown(const char *networkId, int32_t routeType)
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown end");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown end");
     return;
 }

@@ -82,7 +82,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 
 int32_t __attribute__ ((weak)) RegistNewIpSocket(void)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: newip not deployed", __func__);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s: newip not deployed", __func__);
     return SOFTBUS_OK;
 }
 
@@ -102,7 +102,7 @@ int32_t ConnInitSockets(void)
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: tcp registed!", __func__);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s: tcp registed!", __func__);
 
     ret = RegistNewIpSocket();
     if (ret != SOFTBUS_OK) {
