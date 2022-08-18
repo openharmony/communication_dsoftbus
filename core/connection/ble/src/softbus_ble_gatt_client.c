@@ -809,6 +809,10 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int BleGattcDump(int fd)
 {
+    if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
     dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
@@ -820,6 +824,7 @@ static int BleGattcDump(int fd)
         dprintf(fd, "btMac                     : %s\n", addr);
         SoftBusFree(addr);
     }
+    (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     return SOFTBUS_OK;
 }
 

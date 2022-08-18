@@ -1740,6 +1740,10 @@ void DiscBleDeinit(void)
 
 static int BleInfoDump(int fd)
 {
+    if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
     dprintf(fd, "-----------------BleInfoManager Info-------------------\n");
     for (int i = 0; i < BLE_INFO_COUNT; i++) {
         dprintf(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
@@ -1752,6 +1756,7 @@ static int BleInfoDump(int fd)
         dprintf(fd, "BleInfo freq                            : %d\n", *(g_bleInfoManager[i].freq));
         dprintf(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
     }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
 
@@ -1793,6 +1798,10 @@ static int BleAdvertiserDump(int fd)
 
 static int RecvMessageInfoDump(int fd)
 {
+    if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------RecvMessage Info-------------------\n");
     dprintf(fd, "RecvMessageInfo numNeedBrMac           : %u\n", g_recvMessageInfo.numNeedBrMac);
@@ -1804,5 +1813,6 @@ static int RecvMessageInfoDump(int fd)
         dprintf(fd, "RecvMessage key                        : %s\n", recvNode->key);
         dprintf(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
     }
+    (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     return SOFTBUS_OK;
 }
