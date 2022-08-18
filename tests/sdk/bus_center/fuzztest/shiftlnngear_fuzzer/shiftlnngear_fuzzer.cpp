@@ -14,9 +14,12 @@
  */
 
 #include "shiftlnngear_fuzzer.h"
+
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
+
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -27,7 +30,7 @@ namespace OHOS {
     static const int32_t GEARMODE_MODE_TYPE_1 = 1;
     static const int32_t GEARMODE_MODE_TYPE_2 = 2;
     static char *callerId = nullptr;
-    static constexpr char networkId[NETWORK_ID_BUF_LEN] = "";
+    static constexpr char *networkId = nullptr;
     static constexpr char TEST_PKG_NAME1[] = "com.softbus.test";
     static GearMode g_mode;
 
@@ -84,6 +87,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
+    SetAceessTokenPermission("shiftLnnGearFuzzTest");
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
