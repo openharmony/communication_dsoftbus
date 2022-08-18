@@ -176,7 +176,7 @@ static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, uint32_t l
 
 static int64_t GetPreferenceAuthId(const P2pLinkAuthId *chan)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth status %d p2pid %" PRId64 ", authid %" PRId64,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "auth status %d p2pid %" PRId64 ", authid %" PRId64,
         chan->p2pAuthIdState, chan->p2pAuthId, chan->inAuthId);
     if (chan->p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
         return chan->p2pAuthId;
@@ -282,7 +282,7 @@ void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
     ConnectedNode *connedDev = NULL;
     int32_t ret;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv handshake authid %" PRId64 ", seq %d", authId, seq);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv handshake authid %" PRId64 ", seq %d", authId, seq);
     if (P2pLinkUnPackHandshake(root, mac, sizeof(mac), ip, sizeof(ip)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack handshake fail");
         return;
@@ -308,7 +308,7 @@ void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
     ConnectingNode *conningItem = NULL;
     ConnectedNode *connedDev = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv ReuseResponse authid %" PRIu64 ", seq %d", authId, seq);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ReuseResponse authid %" PRIu64 ", seq %d", authId, seq);
     if (P2pLinkUnPackReuseResponse(root, peerMac, sizeof(peerMac), &respRet) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack ReuseResponse fail");
         return;
@@ -360,7 +360,7 @@ void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
     P2pLinkAuthId linkAuthId = {0};
     linkAuthId.inAuthId = authId;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv ReuseRequest authid %" PRIu64 ", seq %d", authId, seq);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ReuseRequest authid %" PRIu64 ", seq %d", authId, seq);
     if (P2pLinkUnPackReuseRequest(root, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack ReuseResponse fail");
         return;

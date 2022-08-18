@@ -188,7 +188,7 @@ static FILLP_INT FillpExtParaFormat(FILLP_CONST FILLP_UCHAR *extPara, FILLP_INT 
             return -1;
         }
 
-        formatLen += ret;
+        formatLen += (size_t)ret;
     }
 
     return (FILLP_INT)formatLen;

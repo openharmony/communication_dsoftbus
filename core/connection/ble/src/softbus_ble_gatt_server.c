@@ -398,7 +398,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
 
 static void BleServiceStartCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
@@ -493,7 +493,7 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
         .valueLen = strlen("not support!") + 1,
         .value = "not support!"
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRequestReadCallback sendresponse");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleRequestReadCallback sendresponse");
     SoftBusGattsSendResponse(&response);
 }
 
@@ -684,6 +684,10 @@ int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
 
 static int BleGattServiceDump(int fd)
 {
+    if (SoftBusMutexLock(&g_serviceStateLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     dprintf(fd, "\n-----------------BLEGattService Info-------------------\n");
     dprintf(fd, "GattService state               : %u\n", g_gattService.state);
     dprintf(fd, "BleGattService svcId            : %d\n", g_gattService.svcId);
@@ -691,5 +695,6 @@ static int BleGattServiceDump(int fd)
     dprintf(fd, "BleGattService bleConnDesId     : %d\n", g_gattService.bleConnDesId);
     dprintf(fd, "BleGattService bleNetCharaId    : %d\n", g_gattService.bleNetCharaId);
     dprintf(fd, "BleGattService bleNetDesId      : %d\n", g_gattService.bleNetDesId);
+    (void)SoftBusMutexUnlock(&g_serviceStateLock);
     return SOFTBUS_OK;
 }

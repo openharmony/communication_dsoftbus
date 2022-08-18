@@ -246,7 +246,7 @@ static int32_t CopyValue(void *dst, uint32_t dstLen, void *src, uint32_t srcLen,
 /* A helper function for convert br mac bin address to string address */
 static int32_t CopyBrAddrValue(DeviceWrapper *device, const unsigned char *src, uint32_t srcLen)
 {
-    int i = device->info->addrNum;
+    uint32_t i = device->info->addrNum;
     int32_t ret = ConvertBtMacToStr(device->info->addr[i].info.br.brMac, BT_MAC_LEN,
         (uint8_t *)src, srcLen);
     if (ret == SOFTBUS_OK) {

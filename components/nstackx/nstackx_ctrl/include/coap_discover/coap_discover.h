@@ -47,6 +47,16 @@ typedef struct {
     sem_t wait;
 } MsgCtx;
 
+typedef struct CoapRequest {
+    uint8_t type;
+    uint8_t code;
+    const char *remoteUrl;
+    uint8_t *token;
+    size_t tokenLength;
+    char *data;
+    size_t dataLength;
+} CoapRequest;
+
 typedef enum {
     COAP_BROADCAST_TYPE_DEFAULT = 0,
     COAP_BROADCAST_TYPE_USER = 1
