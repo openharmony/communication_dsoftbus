@@ -337,7 +337,7 @@ static int32_t BleConnectDeviceFristTime(const ConnectOption *option, uint32_t r
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "BleConnectDevice, requestId=%d", requestId);
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -508,7 +508,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendRefMessage:%s", data);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendRefMessage:%s", data);
     uint32_t headSize = sizeof(ConnPktHead);
     uint32_t dataLen = strlen(data) + 1 + headSize;
     char *buf = (char *)SoftBusCalloc(dataLen);
