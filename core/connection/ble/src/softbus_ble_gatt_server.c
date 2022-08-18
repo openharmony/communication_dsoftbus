@@ -398,7 +398,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
 
 static void BleServiceStartCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
@@ -493,7 +493,7 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
         .valueLen = strlen("not support!") + 1,
         .value = "not support!"
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRequestReadCallback sendresponse");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleRequestReadCallback sendresponse");
     SoftBusGattsSendResponse(&response);
 }
 

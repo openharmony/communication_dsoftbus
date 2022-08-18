@@ -565,7 +565,7 @@ static int32_t CreateGroup(const GcInfo *gc)
     if (P2pLinkIsWideBandwidthSupported() && gc->isWideBandSupported) {
         isWideBandSupport = true;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "final freq string = %d, support wide band = %d.",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "final freq string = %d, support wide band = %d.",
         finalFreq, isWideBandSupport);
     ret = P2pLinkCreateGroup(finalFreq, isWideBandSupport);
     if (ret != SOFTBUS_OK) {

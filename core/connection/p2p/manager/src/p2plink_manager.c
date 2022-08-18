@@ -240,7 +240,7 @@ static void LoopOpenP2pAuthSuccess(P2pLoopMsg msgType, void *arg)
     }
     item->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
     item->chanId.p2pAuthId = p2pAuthId;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
                "p2plink handshake success id %d authId %" PRIu64, authRequestId, p2pAuthId);
 }
 
@@ -249,7 +249,7 @@ static void OpenP2pAuthSuccess(uint32_t requestId, int64_t authId)
     int32_t ret;
     P2pAuthSuccessInfo *arg = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth success id %d authId %" PRIu64, requestId, authId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "auth success id %d authId %" PRIu64, requestId, authId);
     arg = (P2pAuthSuccessInfo *)SoftBusCalloc(sizeof(P2pAuthSuccessInfo));
     if (arg == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnResult Failed to malloc");
@@ -266,7 +266,7 @@ static void OpenP2pAuthSuccess(uint32_t requestId, int64_t authId)
 
 static void OpenP2pAuthFail(uint32_t requestId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth request id %d fail %d", requestId, reason);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "auth request id %d fail %d", requestId, reason);
 }
 
 static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
