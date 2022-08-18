@@ -19,6 +19,7 @@ bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/tests/sdk/common/include",
   "//third_party/bounds_checking_function/include",
 ]
 bus_center_sdk_test_deps = [
@@ -67,8 +68,7 @@ if (defined(ohos_lite)) {
     ]
     deps = bus_center_sdk_test_deps
     deps += [
-      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-      "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
       "//third_party/googletest:gtest_main",
       "//utils/native/base:utils",
     ]
