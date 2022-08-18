@@ -397,7 +397,7 @@ static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnL
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p connect fail, requestId = %d.", requestId);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p connect succ, requestId = %d.", requestId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "p2p connect succ, requestId = %d.", requestId);
     return SOFTBUS_OK;
 }
 

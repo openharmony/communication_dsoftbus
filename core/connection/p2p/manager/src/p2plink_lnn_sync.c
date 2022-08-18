@@ -37,6 +37,7 @@ static int32_t g_lnnRole = 0;
 static char g_lnnMyP2pMac[P2P_MAC_LEN] = {0};
 static char g_lnnGoMac[P2P_MAC_LEN] = {0};
 static int P2pLnnDump(int fd);
+static bool g_p2pDumpFlag = false;
 static int32_t P2pLinkLnnSyncSetGoMac()
 {
     if (LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, P2pLinkGetGoMac()) == SOFTBUS_OK) {
@@ -95,7 +96,13 @@ void P2pLinkLnnSync(void)
             }
         }
     }
-    SoftBusRegConnVarDump(LNN_MAC_INFO, &P2pLnnDump);
+
+    if (g_p2pDumpFlag == false) {
+        SoftBusRegConnVarDump(LNN_MAC_INFO, &P2pLnnDump);
+        g_p2pDumpFlag = true;
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLnnDump registration success");
+    }
+
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "lnn sync flag %d", change);
     if (change == 1) {
         LnnSyncP2pInfo();
