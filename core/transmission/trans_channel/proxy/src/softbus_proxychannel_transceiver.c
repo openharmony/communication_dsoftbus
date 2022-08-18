@@ -618,7 +618,6 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         chan->reqId = (int32_t)conn->requestId;
         chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
-        chan->type = conn->connInfo.type;
         if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyCreateChanInfo err");
             SoftBusFree(chan);
@@ -627,7 +626,6 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
     } else {
         chan->connId = conn->connId;
         chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
-        chan->type = conn->connInfo.type;
         if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyCreateChanInfo err");
             SoftBusFree(chan);
