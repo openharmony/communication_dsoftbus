@@ -378,7 +378,7 @@ static AuthManager *GetAuthByPeerUdid(const char *peerUdid)
     }
     LIST_FOR_EACH(item, &g_authClientHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
-        if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0) {
+        if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0 && auth->isAuthP2p != true) {
             (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
@@ -386,7 +386,7 @@ static AuthManager *GetAuthByPeerUdid(const char *peerUdid)
 
     LIST_FOR_EACH(item, &g_authServerHead) {
         auth = LIST_ENTRY(item, AuthManager, node);
-        if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0) {
+        if (strncmp(auth->peerUdid, peerUdid, strlen(peerUdid)) == 0 && auth->isAuthP2p != true) {
             (void)SoftBusMutexUnlock(&g_authLock);
             return auth;
         }
