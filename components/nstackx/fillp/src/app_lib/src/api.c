@@ -1536,6 +1536,52 @@ FILLP_ULLONG DLL_API FtGetStackTime(FILLP_INT instInx)
 }
 
 /*******************************************************************************
+    Function    : FtApiRegEventCallbackFunc
+
+    Description : Register the event callback function on the socket.
+
+    Input       : fd          -  Indicates a socket created by the FtSocket API.
+                  evtCbkFunc  -  Pointer to event callback function FillpEvtCbkFunc.
+
+    Output      : None.
+
+    Return      :
+                  0 : Success
+                 -1 : Failure
+*******************************************************************************/
+FILLP_INT DLL_API FtApiRegEventCallbackFunc(IN FILLP_INT fd, IN FillpEvtCbkFunc evtCbkFunc)
+{
+    FILLP_UNUSED_PARA(fd);
+    FILLP_UNUSED_PARA(evtCbkFunc);
+    FILLP_LOGERR("regist evt callback not support yet");
+    SET_ERRNO(FILLP_EOPNOTSUPP);
+    return -1;
+}
+
+/*******************************************************************************
+    Function    : FtApiUnregEventCallbackFunc
+
+    Description : unregister the event callback function on the socket.
+
+    Input       : fd          -  Indicates a socket created by the FtSocket API.
+                  evtCbkFunc  -  Pointer to event callback function FillpEvtCbkFunc.
+
+    Output      : None.
+
+    Return      :
+                  0 : Success
+                 -1 : Failure
+*******************************************************************************/
+FILLP_INT DLL_API FtApiUnregEventCallbackFunc(IN FILLP_INT fd, IN FillpEvtCbkFunc evtCbkFunc)
+{
+    FILLP_UNUSED_PARA(fd);
+    FILLP_UNUSED_PARA(evtCbkFunc);
+    FILLP_LOGERR("unregist evt callback not support yet");
+    SET_ERRNO(FILLP_EOPNOTSUPP);
+    return -1;
+}
+
+/*******************************************************************************
     Function    : FtApiEventInfoGet
 
     Description : Get the event info on the socket.

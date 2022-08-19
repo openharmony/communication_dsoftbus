@@ -618,6 +618,19 @@ typedef struct {
     } info;
 } FtEventCbkInfo;
 
+/**
+ * @ingroup fillpevt
+ * @brief  This callback is used to info APP when some events occur.
+ *
+ * @param[in] fd    Indicates a socket created by the FtSocket API.
+ * @param[in] info  Pointer to event callback information FtEventCbkInfo.
+ *
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+typedef FILLP_INT (*FillpEvtCbkFunc)(IN FILLP_INT fd, IN FILLP_CONST FtEventCbkInfo *info);
+
 #define FILLP_DFX_EVENT_NAME_LEN 128
 
 typedef enum {
