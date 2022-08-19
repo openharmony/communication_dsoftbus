@@ -117,10 +117,9 @@ static IPublishCallback g_publishCb = {
 BENCHMARK_F(DiscoveryTest, PublishServiceTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         g_pInfo.publishId = GetPublishId();
         state.ResumeTiming();
-        ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
             state.SkipWithError("PublishServiceTestCase failed.");
         }
@@ -139,10 +138,9 @@ BENCHMARK_REGISTER_F(DiscoveryTest, PublishServiceTestCase);
 BENCHMARK_F(DiscoveryTest, UnPublishServiceTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         g_pInfo.publishId = GetPublishId();
         state.PauseTiming();
-        ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
             state.SkipWithError("UnPublishServiceTestCase failed.");
         }
@@ -164,10 +162,9 @@ BENCHMARK_REGISTER_F(DiscoveryTest, UnPublishServiceTestCase);
 BENCHMARK_F(DiscoveryTest, StartDiscoveryTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         g_sInfo.subscribeId = GetSubscribeId();
         state.ResumeTiming();
-        ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
         if (ret != 0) {
             state.SkipWithError("StartDiscoveryTestCase failed.");
         }
@@ -186,10 +183,9 @@ BENCHMARK_REGISTER_F(DiscoveryTest, StartDiscoveryTestCase);
 BENCHMARK_F(DiscoveryTest, StoptDiscoveryTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         g_sInfo.subscribeId = GetSubscribeId();
         state.PauseTiming();
-        ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
         if (ret != 0) {
             state.SkipWithError("StoptDiscoveryTestCase failed.");
         }
