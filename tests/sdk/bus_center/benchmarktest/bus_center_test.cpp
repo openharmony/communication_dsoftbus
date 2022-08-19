@@ -15,15 +15,15 @@
 
 #include <benchmark/benchmark.h>
 #include <securec.h>
-#include "softbus_bus_center.h"
 #include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "softbus_bus_center.h"
 #include "softbus_common.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
-static int g_subscribeId = 0;
-static int g_publishId = 0;
+static int32_t g_subscribeId = 0;
+static int32_t g_publishId = 0;
 static bool flag = true;
 void AddPermission()
 {
@@ -147,9 +147,8 @@ static IRefreshCallback g_refreshCb = {
 BENCHMARK_F(BusCenterTest, RegNodeDeviceStateCbTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         state.ResumeTiming();
-        ret = RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
+        int ret = RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
         if (ret != 0) {
             state.SkipWithError("RegNodeDeviceStateCbTestCase failed.");
         }
@@ -168,11 +167,10 @@ BENCHMARK_REGISTER_F(BusCenterTest, RegNodeDeviceStateCbTestCase);
 BENCHMARK_F (BusCenterTest, UnregNodeDeviceStateCbTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         state.PauseTiming();
         RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb);
         state.ResumeTiming();
-        ret = UnregNodeDeviceStateCb(&g_nodeStateCb);
+        int ret = UnregNodeDeviceStateCb(&g_nodeStateCb);
         if (ret != 0) {
             state.SkipWithError("UnregNodeDeviceStateCbTestCase failed.");
         }
@@ -189,11 +187,10 @@ BENCHMARK_REGISTER_F(BusCenterTest, UnregNodeDeviceStateCbTestCase);
 BENCHMARK_F(BusCenterTest, GetAllNodeDeviceInfoTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         NodeBasicInfo *info = nullptr;
         int infoNum;
 
-        ret = GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum);
+        int ret = GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum);
         if (ret != 0) {
             state.SkipWithError("GetAllNodeDeviceInfoTestCase failed.");
         }

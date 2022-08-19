@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 #include <benchmark/benchmark.h>
-#include <unordered_set>
 #include <cstring>
+#include <ctime>
 #include <securec.h>
 #include <string>
-#include <ctime>
+#include <unordered_set>
 #include <unistd.h>
-#include "session.h"
 #include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "session.h"
 #include "softbus_common.h"
+#include "token_setproc.h"
 
 
 namespace OHOS {
@@ -152,8 +152,7 @@ static ISessionListener g_sessionlistener = {
 BENCHMARK_F(TransTest, CreateSessionServerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
-        ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         if (ret != 0) {
             state.SkipWithError("CreateSessionServerTestCase failed.");
         }
@@ -173,9 +172,8 @@ BENCHMARK_REGISTER_F(TransTest, CreateSessionServerTestCase);
 BENCHMARK_F(TransTest, RemoveSessionServerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         state.PauseTiming();
-        CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = RemoveSessionServer(g_pkgName, g_sessionName);
         if (ret != 0) {
@@ -194,9 +192,8 @@ BENCHMARK_REGISTER_F(TransTest, RemoveSessionServerTestCase);
 BENCHMARK_F(TransTest, SetFileReceiveListenerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         state.PauseTiming();
-        CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = SetFileReceiveListener(g_pkgName, g_sessionName,  &g_fileRecvListener, RECV_ROOT_PATH);
         if (ret != 0) {
@@ -217,9 +214,8 @@ BENCHMARK_REGISTER_F(TransTest, SetFileReceiveListenerTestCase);
 BENCHMARK_F(TransTest, SetFileSendListenerTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
-        int ret;
         state.PauseTiming();
-        CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
+        int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
         state.ResumeTiming();
         ret = SetFileSendListener(g_pkgName, g_sessionName,  &g_fileSendListener);
         if (ret != 0) {
