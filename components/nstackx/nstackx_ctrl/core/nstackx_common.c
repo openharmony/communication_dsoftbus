@@ -699,6 +699,70 @@ static void ConfigureLocalDeviceInfoInner(void *argument)
     free(localDeviceInfo);
 }
 
+#ifndef _WIN32
+static int32_t VerifyNifNameIp(const char *networkName, const char *networkIp, uint32_t *matchCnt)
+{
+    if (networkName == NULL || networkIp == NULL || matchCnt == NULL) {
+        DFINDER_LOGE(TAG, "invalid nif info passed in");
+        return NSTACKX_EINVAL;
+    }
+    struct in_addr ipAddr;
+    if (inet_pton(AF_INET, networkIp, &ipAddr) != 1) {
+        return NSTACKX_EINVAL;
+    }
+    ++(*matchCnt);
+    return NSTACKX_EOK;
+}
+
+static int32_t CheckNifInfoPassedIn(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
+{
+    uint32_t matchCnt = 0;
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+    for (uint32_t i = 0; i < localDeviceInfo->ifNums; ++i) {
+        if (VerifyNifNameIp(localDeviceInfo->localIfInfo[i].networkName,
+            localDeviceInfo->localIfInfo[i].networkIpAddr, &matchCnt) != NSTACKX_EOK) {
+            return NSTACKX_EFAILED;
+        }
+    }
+    return (matchCnt == localDeviceInfo->ifNums) ? NSTACKX_EOK : NSTACKX_EFAILED;
+#else
+    int32_t verifyResult;
+    if (localDeviceInfo->ifNums == 0) {
+        verifyResult = VerifyNifNameIp(localDeviceInfo->networkName, localDeviceInfo->networkIpAddr, &matchCnt);
+        return verifyResult;
+    } else {
+        verifyResult = VerifyNifNameIp(localDeviceInfo->localIfInfo[0].networkName,
+            localDeviceInfo->localIfInfo[0].networkIpAddr, &matchCnt);
+        if ((verifyResult == NSTACKX_EOK) && (matchCnt == localDeviceInfo->ifNums)) {
+            return NSTACKX_EOK;
+        }
+        return NSTACKX_EFAILED;
+    }
+#endif
+}
+#endif
+
+#ifndef DFINDER_SUPPORT_MULTI_NIF
+static int32_t CopyNifNameAndIp(NSTACKX_LocalDeviceInfo *destDev, const NSTACKX_LocalDeviceInfo *srcDev)
+{
+    if (destDev == NULL || srcDev == NULL) {
+        DFINDER_LOGE(TAG, "invalid device info passed in");
+        return NSTACKX_EINVAL;
+    }
+    if (srcDev->ifNums != 0) {
+        if (strcpy_s(destDev->networkName, NSTACKX_MAX_INTERFACE_NAME_LEN, srcDev->localIfInfo[0].networkName) != EOK) {
+            DFINDER_LOGE(TAG, "network name strcpy failed");
+            return NSTACKX_EFAILED;
+        }
+        if (strcpy_s(destDev->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, srcDev->localIfInfo[0].networkIpAddr) != EOK) {
+            DFINDER_LOGE(TAG, "network ip strcpy failed");
+            return NSTACKX_EFAILED;
+        }
+    }
+    return NSTACKX_EOK;
+}
+#endif
+
 int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
 {
     DFINDER_LOGI(TAG, "begin to NSTACKX_RegisterDevice!");
@@ -720,7 +784,12 @@ int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
         DFINDER_LOGE(TAG, "Invalid ifNums %hhu", localDeviceInfo->ifNums);
         return NSTACKX_EINVAL;
     }
-
+#ifndef _WIN32
+    if (CheckNifInfoPassedIn(localDeviceInfo) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "check nif info passed in return fail");
+        return NSTACKX_EFAILED;
+    }
+#endif
     NSTACKX_LocalDeviceInfo *dupLocalDeviceInfo = malloc(sizeof(NSTACKX_LocalDeviceInfo));
     if (dupLocalDeviceInfo == NULL) {
         return NSTACKX_ENOMEM;
@@ -732,17 +801,8 @@ int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
         goto L_ERROR;
     }
 #ifndef DFINDER_SUPPORT_MULTI_NIF
-    if (localDeviceInfo->ifNums != 0) {
-        if (strcpy_s(dupLocalDeviceInfo->networkName, NSTACKX_MAX_INTERFACE_NAME_LEN,
-            localDeviceInfo->localIfInfo[0].networkName) != EOK) {
-            DFINDER_LOGE(TAG, "network name strcpy failed");
-            goto L_ERROR;
-        }
-        if (strcpy_s(dupLocalDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN,
-            localDeviceInfo->localIfInfo[0].networkIpAddr) != EOK) {
-            DFINDER_LOGE(TAG, "network ip strcpy failed");
-            goto L_ERROR;
-        }
+    if (CopyNifNameAndIp(dupLocalDeviceInfo, localDeviceInfo) != NSTACKX_EOK) {
+        goto L_ERROR;
     }
 #endif
     if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceInfoInner, dupLocalDeviceInfo) != NSTACKX_EOK) {
