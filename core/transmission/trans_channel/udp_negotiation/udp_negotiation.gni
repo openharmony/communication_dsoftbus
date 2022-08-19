@@ -22,6 +22,9 @@ if (dsoftbus_feature_trans_udp == true) {
     "$udp_channel_path/src/trans_udp_negotiation_exchange.c",
   ]
 } else {
-  trans_udp_channel_src = [ "$udp_channel_path/src/trans_udp_virtual.c" ]
+  trans_udp_channel_src = [
+    "$udp_channel_path/src/trans_udp_virtual.c",
+    "$udp_channel_path/src/trans_udp_channel_manager_virtual.c",
+  ]
 }
 trans_udp_channel_inc = [ "$udp_channel_path/include" ]
