@@ -81,6 +81,10 @@ typedef struct {
     SoftBusBtAddr peerAddr;
 } BleGattcInfo;
 
+typedef struct {
+    int32_t errCode;
+} BleCilentErrCode;
+
 static SoftBusGattcCallback g_softbusGattcCb = {0};
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
@@ -89,11 +93,31 @@ static bool UpdateBleGattcInfoStateInner(BleGattcInfo *infoNode, int32_t newStat
 static int BleGattcDump(int fd);
 static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, const char *data);
 
+static void FreeBleClientMessage(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+        msg->obj = NULL;
+    }
+    SoftBusFree(msg);
+}
+
 static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode, int32_t time)
 {
-    SoftBusMessage *msg = BleClientConnCreateLoopMsg(msgWhat, clientId, errCode, NULL);
+    BleCilentErrCode *bleErrCode = SoftBusCalloc(sizeof(BleCilentErrCode));
+    if (bleErrCode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleClientPostMsgDelay SoftBusCalloc failed");
+        return SOFTBUS_ERR;
+    }
+    bleErrCode->errCode = errCode;
+    SoftBusMessage *msg = BleClientConnCreateLoopMsg(msgWhat, clientId, 0, (char *)bleErrCode);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "creat msg err, msg->what:%d", msgWhat);
+        SoftBusFree(bleErrCode);
+        bleErrCode = NULL;
         return SOFTBUS_ERR;
     }
     g_bleClientAsyncHandler.looper->PostMessageDelay(g_bleClientAsyncHandler.looper, msg, time);
@@ -316,7 +340,7 @@ static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, u
     msg->arg1 = arg1;
     msg->arg2 = arg2;
     msg->handler = &g_bleClientAsyncHandler;
-    msg->FreeMessage = NULL;
+    msg->FreeMessage = FreeBleClientMessage;
     msg->obj = (void *)data;
     return msg;
 }
@@ -638,9 +662,15 @@ static void BleGattcMsgHandler(SoftBusMessage *msg)
         case CLIENT_MTU_SETTED:
             MtuSettedMsgHandler((int32_t)msg->arg1, (int32_t)msg->arg2);
             break;
-        case CLIENT_TIME_OUT:
-            TimeOutMsgHandler((int32_t)msg->arg1, (int32_t)msg->arg2);
+        case CLIENT_TIME_OUT: {
+            BleCilentErrCode *info = (BleCilentErrCode *)msg->obj;
+            if (info == NULL) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "msg what is CLIENT_TIME_OUT and obj is NULL");
+                return;
+            }
+            TimeOutMsgHandler((int32_t)msg->arg1, (int32_t)info->errCode);
             break;
+        }
         default:
             break;
     }
