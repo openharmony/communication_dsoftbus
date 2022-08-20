@@ -56,9 +56,9 @@ typedef union {
         FILLP_UINT32 sockIdx;
         FILLP_UINT32 rtt;
         FILLP_UINT32 recvPktLoss; /* 0.01% */
-        FILLP_ULLONG recvRateBps; /* bps */
+        FILLP_LLONG recvRateBps; /* bps */
         FILLP_UINT32 sendPktLoss; /* 0.01% */
-        FILLP_ULLONG sendRateBps; /* bps */
+        FILLP_LLONG sendRateBps; /* bps */
         FILLP_LLONG jitter; /* ms */
     } sockQos;
 } FillpDfxEvtArgs;
@@ -153,9 +153,9 @@ static const FillpDfxEventParam g_fillpDfxEvtParam[FILLP_DFX_EVT_DFX_MAX][FILLP_
     },
 };
 
-static void DfxEvtGetParamAddr(const FillpDfxEvtArgs *args, FillpDfxEvt evt, const void *paramVal[])
+static void DfxEvtGetParamAddr(FillpDfxEvtArgs *args, FillpDfxEvt evt, void *paramVal[])
 {
-    const void *paramValTmp[FILLP_DFX_EVT_DFX_MAX][FILLP_EVT_MAX_PARA_NUM] = {
+    void *paramValTmp[FILLP_DFX_EVT_DFX_MAX][FILLP_EVT_MAX_PARA_NUM] = {
         [FILLP_DFX_EVT_LINK_EXCEPTION] = {
             &args->linkEvt.sockIdx,
             &args->linkEvt.linkEvtType,
@@ -189,7 +189,7 @@ void FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
     g_fillpDfxSoftObj = softObj;
 }
 
-static void DfxEvtParamValCpy(void *dstVal, const void *srcVal, FillpDfxEventParamType type)
+static void DfxEvtParamValCpy(void *dstVal, void * srcVal, FillpDfxEventParamType type)
 {
     switch (type) {
         case FILLP_DFX_PARAM_TYPE_BOOL:
@@ -219,10 +219,10 @@ static void DfxEvtParamValCpy(void *dstVal, const void *srcVal, FillpDfxEventPar
     }
 }
 
-static FillpDfxEventParam *FillpCreateDfxEvtParam(const FillpDfxEvtArgs *args, FillpDfxEvt evt, FILLP_UINT32 paramNum)
+static FillpDfxEventParam *FillpCreateDfxEvtParam(FillpDfxEvtArgs *args, FillpDfxEvt evt, FILLP_UINT32 paramNum)
 {
     FILLP_UINT8 i;
-    const void *paramVal[FILLP_EVT_MAX_PARA_NUM];
+    void *paramVal[FILLP_EVT_MAX_PARA_NUM];
     (void)memset_s(paramVal, sizeof(paramVal), 0, sizeof(paramVal));
     DfxEvtGetParamAddr(args, evt, &paramVal[0]);
     FillpDfxEventParam *param = (FillpDfxEventParam *)calloc(paramNum, sizeof(FillpDfxEventParam));
@@ -238,7 +238,7 @@ static FillpDfxEventParam *FillpCreateDfxEvtParam(const FillpDfxEvtArgs *args, F
     return param;
 }
 
-static void FillpDfxEvtNotify(const FillpDfxEvtArgs *args, FillpDfxEvt evt)
+static void FillpDfxEvtNotify(FillpDfxEvtArgs *args, FillpDfxEvt evt)
 {
     if (g_fillpDfxEvtCb == FILLP_NULL_PTR) {
         return;
@@ -258,7 +258,7 @@ static void FillpDfxSockQosNotify(FILLP_INT sockIdx)
 {
     FillpDfxEvtArgs args;
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.sockQos.sockIdx = (FILLP_UINT32)sockIdx;
+    args.sockQos.sockIdx = sockIdx;
     struct FtSocket *sock = SockApiGetAndCheck(sockIdx);
     if (sock == FILLP_NULL_PTR) {
         return;
@@ -299,7 +299,7 @@ void FillpDfxSockLinkAndQosNotify(FILLP_INT sockIdx, FillpDfxLinkEvtType evtType
 {
     FillpDfxEvtArgs args;
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.linkEvt.sockIdx = (FILLP_UINT32)sockIdx;
+    args.linkEvt.sockIdx = sockIdx;
     args.linkEvt.linkEvtType = evtType;
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_LINK_EXCEPTION);
 
@@ -319,7 +319,7 @@ void FillpDfxSockLinkAndQosNotify(FILLP_INT sockIdx, FillpDfxLinkEvtType evtType
         return;
     }
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.pktEvt.sockIdx = (FILLP_UINT32)sockIdx;
+    args.pktEvt.sockIdx = sockIdx;
     args.pktEvt.pktEvtType = FILLP_DFX_PKT_PARSE_FAIL;
     args.pktEvt.dropCnt = node->dropCnt;
     HlistDelNode(&node->node);
@@ -373,7 +373,7 @@ void FillpDfxPktNotify(FILLP_INT sockIdx, FillpDfxPktEvtType evtType, FILLP_UINT
         FILLP_LOGERR("dumper buffer over %u bytes", FILLP_DFX_DUMP_BUF_LEN); \
         return FILLP_FAILURE; \
     } \
-    len += (FILLP_UINT32)ret; \
+    len += ret; \
 } while (0)
 
 static FILLP_INT DoShowHelp(FILLP_CHAR *data, FILLP_UINT32 *len)
@@ -622,7 +622,7 @@ static void FillpDumpShowFrameStats(FILLP_INT sockIndex, void *softObj, FillpDfx
     dump(softObj, data, len);
 }
 
-static const FILLP_CHAR *g_optString = "hlns:q:f:m:V";
+static const FILLP_CHAR *g_optString = "hlmns:q:f:V";
 
 static FILLP_INT FillpDfxCheckArg(FILLP_UINT32 argc, const FILLP_CHAR **argv, FillpDfxDumpFunc dump)
 {
@@ -652,8 +652,9 @@ FILLP_INT FillpDfxDump(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj
 {
     FILLP_INT opt = 0;
     FILLP_INT ret = 0;
+    const FILLP_CHAR *errMsg = "Parse option fail, please check your option!";
     if (FillpDfxCheckArg(argc, argv, dump) != FILLP_SUCCESS) {
-        return -1;
+        goto FAIL;
     }
 
     NstackGetOptMsg optMsg;
@@ -689,10 +690,16 @@ FILLP_INT FillpDfxDump(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj
                 (void)FillpApiSetMgtMsgLog(ret);
                 break;
             default:
-                return -1;
+                goto FAIL;
         }
     }
     return 0;
+FAIL:
+    if (dump != NULL) {
+        dump(softObj, errMsg, strlen(errMsg) + 1);
+        FillpDumpShowHelp(softObj, dump);
+    }
+    return -1;
 }
 
 #endif /* FILLP_ENABLE_DFX_HIDUMPER */
