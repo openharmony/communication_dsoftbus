@@ -37,6 +37,7 @@ public:
 
 void BusCenterMetaNodeSdkTest::SetUpTestCase()
 {
+    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterMetaNodeSdkTest::TearDownTestCase()
@@ -45,7 +46,6 @@ void BusCenterMetaNodeSdkTest::TearDownTestCase()
 
 void BusCenterMetaNodeSdkTest::SetUp()
 {
-    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterMetaNodeSdkTest::TearDown()

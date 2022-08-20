@@ -38,6 +38,7 @@ public:
 
 void BusCenterHeartbeatSdkTest::SetUpTestCase()
 {
+    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterHeartbeatSdkTest::TearDownTestCase()
@@ -46,7 +47,6 @@ void BusCenterHeartbeatSdkTest::TearDownTestCase()
 
 void BusCenterHeartbeatSdkTest::SetUp()
 {
-    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterHeartbeatSdkTest::TearDown()
