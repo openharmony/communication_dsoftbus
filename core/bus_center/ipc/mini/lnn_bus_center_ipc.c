@@ -46,16 +46,6 @@ static int32_t PublishResultTransfer(int32_t retCode)
     }
 }
 
-static int32_t DiscoveryResultTransfer(int32_t retCode)
-{
-    if (retCode == SOFTBUS_OK) {
-        return REFRESH_LNN_SUCCESS;
-    } else if (retCode == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
-        return REFRESH_LNN_NOT_SUPPORT_MEDIUM;
-    }
-    return REFRESH_LNN_INTERNAL;
-}
-
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
@@ -141,8 +131,7 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTyp
         .serverCb = g_discInnerCb,
     };
     int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
-    LnnOnRefreshLNNResult(subInfo.subscribeId, DiscoveryResultTransfer(ret));
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
