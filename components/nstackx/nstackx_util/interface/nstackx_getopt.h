@@ -32,7 +32,7 @@ typedef struct {
 
 NSTACKX_EXPORT int32_t NstackInitGetOptMsg(NstackGetOptMsg *optMsg);
 NSTACKX_EXPORT int32_t NstackGetOpt(NstackGetOptMsg *optMsg, int32_t argc, const char *const *argv, const char *opts);
-NSTACKX_EXPORT const char *NstackGetOptArgs(NstackGetOptMsg *optMsg);
+NSTACKX_EXPORT const char *NstackGetOptArgs(const NstackGetOptMsg *optMsg);
 
 #ifdef __cplusplus
 }
