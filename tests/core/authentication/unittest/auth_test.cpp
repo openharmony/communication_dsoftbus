@@ -276,7 +276,6 @@ HWTEST_F(AuthTest, AUTH_PACK_AND_UNPACK_Test_001, TestSize.Level0)
 */
 HWTEST_F(AuthTest, AUTH_DEINIT_Test_001, TestSize.Level0)
 {
-    ConnServerDeinit();
     AuthDeinit();
     LooperDeinit();
 }
