@@ -15,14 +15,14 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_conn.h"
 
-int SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int32_t SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     (void)dumpVar;
     (void)cb;
     return SOFTBUS_OK;
 }
 
-int SoftBusConnHiDumperInit(void)
+int32_t SoftBusConnHiDumperInit(void)
 {
     return SOFTBUS_OK;
 }
