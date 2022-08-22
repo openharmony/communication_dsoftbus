@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "softbus_access_token_test.h"
 #include "nativetoken_kit.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
@@ -39,6 +40,7 @@ public:
 
 void BusCenterHeartbeatSdkTest::SetUpTestCase()
 {
+    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterHeartbeatSdkTest::TearDownTestCase()
