@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdint.h>
 #include "softbus_errcode.h"
 
-int SoftBusDumpProcess(int fd, int argc, const char **argv)
+int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {
     (void)fd;
     (void)argc;
@@ -23,7 +24,7 @@ int SoftBusDumpProcess(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-int SoftBusHiDumperInit(void)
+int32_t SoftBusHiDumperInit(void)
 {
     return SOFTBUS_OK;
 }
