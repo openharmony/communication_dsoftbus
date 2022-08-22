@@ -38,6 +38,7 @@ typedef enum {
     DEACTIVE_META_NODE,
     GET_ALL_META_NODE,
     SHIFT_LNN_GEAR,
+    START_REFRESH_LNN,
 } FunID;
 
 typedef struct {
@@ -95,6 +96,9 @@ static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
             }
             break;
         case SHIFT_LNN_GEAR:
+            ReadInt32(reply, &(info->retCode));
+            break;
+        case START_REFRESH_LNN:
             ReadInt32(reply, &(info->retCode));
             break;
         default:
@@ -436,14 +440,16 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
     }
     uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIo request = {0};
+    Reply reply = {0};
+    reply.id = START_REFRESH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
     WriteUint32(&request, infoTypeLen);
     WriteBuffer(&request, info, infoTypeLen);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, NULL, NULL);
-    if (ans != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh Lnn invoke failed[%d].", ans);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, &reply, ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh Lnn invoke failed[%d, %d].", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -472,6 +478,7 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
+
     return SOFTBUS_OK;
 }
 
