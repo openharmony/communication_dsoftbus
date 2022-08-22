@@ -84,7 +84,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     
     g_openSessionCnt.failCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
     g_openSessionCnt.successCnt += (isSucc == SOFTBUS_EVT_OPEN_SESSION_SUCC);
-    int totalCnt = g_openSessionCnt.failCnt + g_openSessionCnt.successCnt;
+    uint32_t totalCnt = g_openSessionCnt.failCnt + g_openSessionCnt.successCnt;
     g_openSessionCnt.successRate = (float)(g_openSessionCnt.successCnt)/(float)(totalCnt);
 
     (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);

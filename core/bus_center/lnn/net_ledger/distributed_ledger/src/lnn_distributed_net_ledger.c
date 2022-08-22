@@ -1271,7 +1271,7 @@ int SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
     }
     dprintf(fd, "remote device num = %d\n", infoNum);
     for (int i = 0; i < infoNum; i++) {
-        dprintf(fd, "\n[NO.%d]\n", i+1);
+        dprintf(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
     return SOFTBUS_OK;
