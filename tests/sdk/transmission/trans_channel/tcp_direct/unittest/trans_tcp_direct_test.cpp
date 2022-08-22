@@ -92,7 +92,8 @@ static ISessionListener g_sessionlistener = {
  * @tc.name: CreateSessionServerTest001
  * @tc.desc: extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
+ 
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
 {
@@ -117,7 +118,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
  * @tc.name: CreateSessionServerTest002
  * @tc.desc: extern module active publish, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level0)
 {
@@ -133,7 +134,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level0)
  * @tc.name: CreateSessionServerTest003
  * @tc.desc: extern module active publish, use the same normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level0)
 {
@@ -152,7 +153,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level0)
  * @tc.name: CreateSessionServerTest004
  * @tc.desc: extern module active publish, create 9 sessionServer, succ 8, failed at 9th.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
 {
@@ -202,7 +203,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level0)
  * @tc.name: RemoveSessionServerTest002
  * @tc.desc: extern module active publish, use the same parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
  */
 HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level0)
 {
@@ -221,7 +222,7 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level0)
  * @tc.name: OpenSessionTest001
  * @tc.desc: extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require:I5LBBB
  */
 HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level0)
 {
