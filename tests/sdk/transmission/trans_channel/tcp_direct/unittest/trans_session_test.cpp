@@ -54,7 +54,7 @@ void TransSessionTest::TearDownTestCase(void)
  * @tc.name: GetSessionKeyTest001
  * @tc.desc: use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
 {
@@ -80,7 +80,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level0)
  * @tc.name: GetSessionKeyTest002
  * @tc.desc: use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
 {
@@ -97,7 +97,7 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level0)
  * @tc.name: GetSessionHandleTest001
  * @tc.desc: use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
 {
@@ -116,7 +116,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level0)
  * @tc.name: GetSessionHandleTest002
  * @tc.desc: use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level0)
 {
@@ -132,7 +132,7 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level0)
  * @tc.name: DisableSessionListenerTest001
  * @tc.desc: use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level0)
 {
@@ -146,7 +146,7 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level0)
  * @tc.name: DisableSessionListenerTest002
  * @tc.desc: use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level0)
 {
@@ -161,7 +161,7 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level0)
  * @tc.name: OpenAuthSessionTest001
  * @tc.desc: use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5HZ6N
  */
 HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level0)
 {
