@@ -49,7 +49,7 @@ void LnnDfxTest::TearDown(void) {}
  * @tc.name: CreateBusCenterFaultEvtTest001
  * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:EXPECT_EQ
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest001, TestSize.Level0)
 {
@@ -67,7 +67,7 @@ HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest001, TestSize.Level0)
  * @tc.name: CreateBusCenterFaultEvtTest002
  * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:EXPECT_EQ
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest002, TestSize.Level0)
 {
@@ -85,7 +85,7 @@ HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest002, TestSize.Level0)
  * @tc.name: ReportBusCenterFaultEvtTest001
  * @tc.desc: Verify ReportBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
 {
@@ -106,7 +106,7 @@ HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
  * @tc.name: InitBusCenterDfxTest001
  * @tc.desc: Verify InitBusCenterDfx function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, InitBusCenterDfxTest001, TestSize.Level0)
 {
@@ -118,7 +118,7 @@ HWTEST_F(LnnDfxTest, InitBusCenterDfxTest001, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest001
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest001, TestSize.Level0)
 {
@@ -131,7 +131,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest001, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest002
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest002, TestSize.Level0)
 {
@@ -146,7 +146,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest002, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest003
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest003, TestSize.Level0)
 {
@@ -160,7 +160,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest003, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest001
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest001, TestSize.Level0)
 {
@@ -173,7 +173,7 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest001, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest002
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest002, TestSize.Level0)
 {
@@ -187,7 +187,7 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest002, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest003
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest003, TestSize.Level0)
 {

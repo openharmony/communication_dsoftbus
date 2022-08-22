@@ -1365,6 +1365,30 @@ struct FillpCurrentSendCacheInf {
 
 /**
  * @ingroup fillpevt
+ * @brief  Register the event callback function on the socket.
+ *
+ * @param[in] fd          Indicates a socket created by the FtSocket API.
+ * @param[in] evtCbkFunc  Pointer to event callback function FillpEvtCbkFunc.
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+FILLP_INT DLL_API FtApiRegEventCallbackFunc(IN FILLP_INT fd, IN FillpEvtCbkFunc evtCbkFunc);
+
+/**
+ * @ingroup fillpevt
+ * @brief  unregister the event callback function on the socket.
+ *
+ * @param[in] fd          Indicates a socket created by the FtSocket API.
+ * @param[in] evtCbkFunc  Pointer to event callback function FillpEvtCbkFunc.
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+FILLP_INT DLL_API FtApiUnregEventCallbackFunc(IN FILLP_INT fd, IN FillpEvtCbkFunc evtCbkFunc);
+
+/**
+ * @ingroup fillpevt
  * @brief  Get the event info on the socket.
  *
  * @param[in]     fd    Indicates a socket created by the FtSocket API.

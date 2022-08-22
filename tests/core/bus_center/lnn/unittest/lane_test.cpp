@@ -203,6 +203,7 @@ static void OnLaneStateChange(uint32_t laneId, LaneState state)
 * @tc.name: LANE_ID_APPLY_Test_001
 * @tc.desc: apply laneId test
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_ID_APPLY_Test_001, TestSize.Level1)
 {
@@ -217,6 +218,7 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_001, TestSize.Level1)
 * @tc.name: LANE_ID_APPLY_Test_002
 * @tc.desc: apply laneId test
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
 {
@@ -244,6 +246,7 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
 * @tc.name: LANE_SELECT_Test_001
 * @tc.desc: lane select fileTransLane by LNN
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 {
@@ -268,6 +271,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 * @tc.name: LANE_SELECT_Test_002
 * @tc.desc: lane select by preferredLinkList
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 {
@@ -294,6 +298,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 * @tc.name: LANE_LINK_Test_001
 * @tc.desc: LaneLink of wlan5G
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 {
@@ -318,6 +323,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 * @tc.name: LANE_LINK_Test_002
 * @tc.desc: LaneLink of BR
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 {
@@ -342,6 +348,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 * @tc.name: TRANS_LANE_ALLOC_Test_001
 * @tc.desc: TransLaneRequest test
 * @tc.type: FUNC
+* @tc.require: I5FBFG
 */
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {

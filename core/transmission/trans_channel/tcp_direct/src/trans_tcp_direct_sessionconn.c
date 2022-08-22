@@ -32,8 +32,16 @@ static int32_t g_tdcChannelId = 0;
 
 uint64_t TransTdcGetNewSeqId(void)
 {
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcGetNewSeqId GetLock fail");
+        return INVALID_SEQ_ID;
+    }
+
     static uint64_t seq = 0;
     seq += TRANS_SEQ_STEP;
+
+    ReleaseSessonConnLock();
+
     return seq;
 }
 
