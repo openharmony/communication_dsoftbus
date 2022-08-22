@@ -105,7 +105,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener001, TestSize.Level1)
 * @tc.name: testBaseListener002
 * @tc.desc: test GetSoftbusBaseListener and set
 * @tc.type: FUNC
-* @tc.require:
+* @tc.require: I5HSOL
 */
 HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
 {
