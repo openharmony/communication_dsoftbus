@@ -183,8 +183,7 @@ static int32_t TransGetLaneInfo(const SessionParam *param, int32_t pid,
 
 static int32_t SetP2pConnInfo(const LnnLaneP2pInfo *laneP2pInfo, ConnectOption *connOpt)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetP2pConnInfo localIp=%s, peerIp=%s",
-        laneP2pInfo->localIp, laneP2pInfo->peerIp);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetP2pConnInfo localIp, peerIp");
 
     connOpt->type = CONNECT_P2P;
     if (strcpy_s(connOpt->info.ipOption.ip, IP_LEN, laneP2pInfo->peerIp) != EOK) {

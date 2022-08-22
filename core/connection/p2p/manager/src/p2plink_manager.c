@@ -303,7 +303,7 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "gc start listen %s %d ", info.info.ipInfo.ip, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "gc start listen ip ret=%d ", ret);
         int32_t gcPort  = AuthStartListening(&info);
         if (gcPort <= 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gc start listen fail %d", gcPort);
@@ -313,12 +313,12 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
         P2pLinkSetGcPort(gcPort);
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open auth chan info %s %d",
-        authInfo->info.ipInfo.ip, authInfo->info.ipInfo.port);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open auth chan info ip , port=%d",
+        authInfo->info.ipInfo.port);
     connedItem->chanId.authRequestId = AuthGenRequestId();
     if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan fail %s %d",
-            authInfo->info.ipInfo.ip, authInfo->info.ipInfo.port);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan fail ip , port=%d",
+            authInfo->info.ipInfo.port);
     }
     SoftBusFree(arg);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open p2p auth chan %d", connedItem->chanId.authRequestId);
