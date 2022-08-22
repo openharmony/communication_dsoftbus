@@ -110,14 +110,14 @@ int32_t SoftBusNStackHiDumperInit(void)
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
-            &SoftBusNStackDumpDfinderHander);
+        &SoftBusNStackDumpDfinderHander);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
-            &SoftBusNStackDmsgDumpHander);
+        &SoftBusNStackDmsgDumpHander);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
