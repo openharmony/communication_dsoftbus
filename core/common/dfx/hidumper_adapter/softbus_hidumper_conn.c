@@ -25,17 +25,17 @@
 
 static LIST_HEAD(g_conn_var_list);
 
-int SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int32_t SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
         return SOFTBUS_ERR;
     }
-    int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
+    int32_t nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
     return nRet;
 }
 
-static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
+static int32_t SoftBusConnDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;
@@ -50,8 +50,8 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_CONN_MODULE_NAME, &g_conn_var_list);
         return SOFTBUS_OK;
     }
-    int nRet = SOFTBUS_OK;
-    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    int32_t nRet = SOFTBUS_OK;
+    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
     if (strcmp(argv[0], "-l") == 0) {
         ListNode *item = NULL;
         LIST_FOR_EACH(item, &g_conn_var_list) {
@@ -70,13 +70,12 @@ static int SoftBusConnDumpHander(int fd, int argc, const char **argv)
     return nRet;
 }
 
-int SoftBusConnHiDumperInit(void)
+int32_t SoftBusConnHiDumperInit(void)
 {
-    int nRet = SOFTBUS_OK;
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_CONN_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP, &SoftBusConnDumpHander);
-    if (nRet == SOFTBUS_ERR) {
+    int32_t nRet = SoftBusRegHiDumperHandler(SOFTBUS_CONN_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP,
+        &SoftBusConnDumpHander);
+    if (nRet != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusConnDumpHander regist fail");
-        return nRet;
     }
     return nRet;
 }

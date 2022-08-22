@@ -18,22 +18,14 @@
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_error_code.h"
 
-int SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     (void)dumpVar;
     (void)cb;
     return SOFTBUS_OK;
 }
 
-int SoftBusBusCenterDumpHander(int fd, int argc, const char **argv)
-{
-    (void)fd;
-    (void)argc;
-    (void)argv;
-    return SOFTBUS_OK;
-}
-
-int SoftBusHiDumperBusCenterInit(void)
+int32_t SoftBusHiDumperBusCenterInit(void)
 {
     return SOFTBUS_OK;
 }

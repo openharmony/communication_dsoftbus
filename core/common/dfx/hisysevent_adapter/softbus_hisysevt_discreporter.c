@@ -149,7 +149,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt()
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
     }
@@ -202,10 +202,10 @@ static int32_t SoftBusReportScanTimesEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateScanTimesMsg(msg, i) == SOFTBUS_ERR) {
+        if (SoftBusCreateScanTimesMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
