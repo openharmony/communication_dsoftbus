@@ -137,10 +137,10 @@ static int32_t SoftBusReportConnTimeDurEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateConnDurMsg(msg, i) == SOFTBUS_ERR) {
+        if (SoftBusCreateConnDurMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
@@ -207,10 +207,10 @@ static int32_t SoftBusReportConnSuccRateEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateConnSuccRateMsg(msg, i) == SOFTBUS_ERR) {
+        if (SoftBusCreateConnSuccRateMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) == SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
