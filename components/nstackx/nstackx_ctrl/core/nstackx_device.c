@@ -1612,63 +1612,31 @@ void SetDeviceHash(uint64_t deviceHash)
 }
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF
-static void CheckAndUpdateMultiNifLoop(const NSTACKX_LocalDeviceInfo *devInfo, uint32_t i, struct in_addr ipAddr)
-{
-    uint32_t j;
-    uint32_t toUpdate = NSTACKX_FALSE;
-    for (j = 0 ; j < g_localDeviceInfo.ifNums; ++j) {
-        if (strcmp(devInfo->localIfInfo[i].networkName,
-            g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkName) != 0) {
-            continue;
-        }
-        // found matched interface
-        if (strcmp(devInfo->localIfInfo[i].networkIpAddr,
-            g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkIpAddr) != 0) {
-            // interface info got update
-            toUpdate = NSTACKX_TRUE;
-        } else if (ipAddr.s_addr != 0) {
-            // interface keep unchanged, but remain up.
-            g_localDeviceInfo.ifState[j] = IF_STATE_REMAIN_UP;
-        }
-        break;
-    }
-    if ((toUpdate == NSTACKX_TRUE || j == g_localDeviceInfo.ifNums) && j < NSTACKX_MAX_LISTENED_NIF_NUM) {
-        if (j == g_localDeviceInfo.ifNums) {
-            // new interface, need to copy its info
-            g_localDeviceInfo.ifNums++;
-            if (strcpy_s(g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkName,
-                sizeof(g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkName),
-                devInfo->localIfInfo[i].networkName) != EOK) {
-                DFINDER_LOGE(TAG, "Failed to copy network name for index %u", j);
-                return;
-            }
-        }
-        // copy ip address for new interface, or ip interface got update
-        if (strcpy_s(g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkIpAddr,
-            sizeof(g_localDeviceInfo.localIfInfoAll[j].localIfInfo.networkIpAddr),
-            devInfo->localIfInfo[i].networkIpAddr) != EOK) {
-                DFINDER_LOGE(TAG, "Failed to copy network address for index %u", j);
-                return;
-            }
-        g_localDeviceInfo.ifState[j] = IF_STATE_UPDATED;
-    }
-}
-
-static void CheckAndUpdateMultiNif(const NSTACKX_LocalDeviceInfo *devInfo)
+static void UpdateLocalMultiNifState(const NSTACKX_LocalDeviceInfo *devInfo)
 {
     struct in_addr ipAddr;
     uint32_t i;
-
-    // Reset interface state
     for (i = 0; i < NSTACKX_MAX_LISTENED_NIF_NUM; ++i) {
+        CoapServerDestroyWithIdx(i);
         g_localDeviceInfo.ifState[i] = IF_STATE_INIT;
     }
     for (i = 0; i < devInfo->ifNums && i < NSTACKX_MAX_LISTENED_NIF_NUM; ++i) {
-        if (inet_pton(AF_INET, devInfo->localIfInfo[i].networkIpAddr, &ipAddr) != 1) {
-            continue;
+        (void)inet_pton(AF_INET, devInfo->localIfInfo[i].networkIpAddr, &ipAddr);
+        if (strcpy_s(g_localDeviceInfo.localIfInfoAll[i].localIfInfo.networkName,
+            sizeof(g_localDeviceInfo.localIfInfoAll[i].localIfInfo.networkName),
+            devInfo->localIfInfo[i].networkName) != EOK) {
+            DFINDER_LOGE(TAG, "Failed to copy network name for index %u", i);
+            return;
         }
-        CheckAndUpdateMultiNifLoop(devInfo, i, ipAddr);
+        if (strcpy_s(g_localDeviceInfo.localIfInfoAll[i].localIfInfo.networkIpAddr,
+            sizeof(g_localDeviceInfo.localIfInfoAll[i].localIfInfo.networkIpAddr),
+            devInfo->localIfInfo[i].networkIpAddr) != EOK) {
+            DFINDER_LOGE(TAG, "Failed to copy network address for index %u", i);
+            return;
+        }
+        g_localDeviceInfo.ifState[i] = IF_STATE_UPDATED;
     }
+    g_localDeviceInfo.ifNums = devInfo->ifNums;
 }
 #endif
 
@@ -1691,7 +1659,7 @@ int32_t ConfigureLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *devInfo)
         return NSTACKX_EINVAL;
     }
 #ifdef DFINDER_SUPPORT_MULTI_NIF
-    CheckAndUpdateMultiNif(devInfo);
+    UpdateLocalMultiNifState(devInfo);
     UpdateLocalNetworkInterface();
     (void)ipAddr;
 #else
