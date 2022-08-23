@@ -243,23 +243,9 @@ static bool CheckAuthChannelOfPkgInfoIsValid(const AppInfo *appInfo)
         return false;
     }
     size_t len = 0;
-    int32_t ret = SOFTBUS_OK;
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
     for (uint16_t index = 0; index < AUTH_SESSION_WHITE_LIST_NUM; ++index) {
         len = strnlen(g_sessionWhiteList[index], SESSION_NAME_SIZE_MAX);
-        if (strncmp(appInfo->myData.sessionName, g_sessionWhiteList[index], len) != 0) {
-            continue;
-        }
-        (void)memset_s(pkgName, PKG_NAME_SIZE_MAX, 0, PKG_NAME_SIZE_MAX);
-        ret = g_cb->GetPkgNameBySessionName(g_sessionWhiteList[index], pkgName, PKG_NAME_SIZE_MAX);
-        if (ret != SOFTBUS_OK) {
-            continue;
-        }
-        len = strnlen(pkgName, PKG_NAME_SIZE_MAX);
-        if (len <= 0) {
-            continue;
-        }
-        if (strncmp(pkgName, appInfo->myData.pkgName, len) == 0) {
+        if (strncmp(appInfo->myData.sessionName, g_sessionWhiteList[index], len) == 0) {
             return true;
         }
     }
