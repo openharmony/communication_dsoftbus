@@ -46,7 +46,7 @@
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static char *g_capabilityData = NULL;
-static int NstackxLocalDevInfoDump(int fd);
+static int32_t NstackxLocalDevInfoDump(int fd);
 
 static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
@@ -519,7 +519,7 @@ void DiscNstackxDeinit(void)
     DeinitLocalInfo();
 }
 
-static int NstackxLocalDevInfoDump(int fd)
+static int32_t NstackxLocalDevInfoDump(int fd)
 {
     dprintf(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
     dprintf(fd, "name                                : %s\n", g_localDeviceInfo->name);

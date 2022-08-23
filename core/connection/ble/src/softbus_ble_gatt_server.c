@@ -74,7 +74,7 @@ static SoftBusHandler g_bleAsyncHandler = {
 static SoftBusGattsCallback g_bleGattsCallback = {0};
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusMutex g_serviceStateLock;
-static int BleGattServiceDump(int fd);
+static int32_t BleGattServiceDump(int fd);
 static SoftBusGattService g_gattService = {
     .state = BLE_GATT_SERVICE_INITIAL,
     .svcId = -1,
@@ -682,7 +682,7 @@ int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
     return ret;
 }
 
-static int BleGattServiceDump(int fd)
+static int32_t BleGattServiceDump(int fd)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
