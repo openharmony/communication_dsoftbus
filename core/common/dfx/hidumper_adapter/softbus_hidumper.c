@@ -89,7 +89,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDum
     return varNode;
 }
 
-int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
+int32_t SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
@@ -157,7 +157,7 @@ void SoftBusHiDumperReleaseHandler(void)
     SoftBusFree(&g_hidumperhander_list);
 }
 
-int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
+int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
     if (strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN ||
         handler == NULL) {
@@ -174,26 +174,61 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
     return SOFTBUS_OK;
 }
 
-ListNode *SoftBusGetHiDumpHandler(void)
+int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
-    return &g_hidumperhander_list;
+    if (fd < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
+        return SOFTBUS_ERR;
+    }
+
+    if (argc <= 1 || strcmp(argv[0], "-h") == 0) {
+        SoftBusDumpShowHelp(fd);
+        return SOFTBUS_OK;
+    }
+
+    ListNode *item = NULL;
+    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    LIST_FOR_EACH(item, &g_hidumperhander_list) {
+        HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
+        if (strcmp(itemNode->moduleName, argv[0]) == 0) {
+            if (strcmp(argv[0], "dstream") == 0 || strcmp(argv[0], "dfinder") == 0 ||
+                strcmp(argv[0], "dfile") == 0 || strcmp(argv[0], "dmsg") == 0) {
+                itemNode->dumpHandler(fd, argc, argv);
+            } else {
+                itemNode->dumpHandler(fd, argc - 1, &argv[1]);
+            }
+            isModuleExist = SOFTBUS_DUMP_EXIST;
+            break;
+        }
+    }
+
+    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+        SoftBusDumpErrInfo(fd, argv[1]);
+        SoftBusDumpShowHelp(fd);
+    }
+    
+    return SOFTBUS_OK;
 }
 
-int SoftBusHiDumperModuleInit(void)
+int32_t SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Disc HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Conn HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init NStack HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init BusCenter HiDumper fail!");
         return SOFTBUS_ERR;
     }
 

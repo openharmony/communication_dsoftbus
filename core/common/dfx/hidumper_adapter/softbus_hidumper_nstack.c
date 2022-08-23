@@ -46,7 +46,7 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
     SOFTBUS_NSTACK_PRINT(fd, "%s", data);
 }
 
-static int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
+static int32_t SoftBusNStackDstreamDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackDstreamDumpHander invalid input");
@@ -58,7 +58,7 @@ static int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)
     }
     return SOFTBUS_OK;
 }
-static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
+static int32_t SoftBusNStackDfileDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackDfileDumpHander invalid input");
@@ -70,7 +70,7 @@ static int SoftBusNStackDfileDumpHander(int fd, int argc, const char **argv)
     }
     return SOFTBUS_OK;
 }
-static int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
+static int32_t SoftBusNStackDumpDfinderHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NSTACKX_DFinderDump invalid input!");
@@ -84,7 +84,7 @@ static int SoftBusNStackDumpDfinderHander(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-static int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
+static int32_t SoftBusNStackDmsgDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;
@@ -93,35 +93,34 @@ static int SoftBusNStackDmsgDumpHander(int fd, int argc, const char **argv)
     return SOFTBUS_OK;
 }
 
-int SoftBusNStackHiDumperInit(void)
+int32_t SoftBusNStackHiDumperInit(void)
 {
-    int nRet = SOFTBUS_OK;
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP,
-                                     &SoftBusNStackDstreamDumpHander);
-    if (nRet == SOFTBUS_ERR) {
+    int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP,
+        &SoftBusNStackDstreamDumpHander);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
-        return nRet;
+        return ret;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
-                                     &SoftBusNStackDfileDumpHander);
-    if (nRet == SOFTBUS_ERR) {
+    ret = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
+        &SoftBusNStackDfileDumpHander);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
-        return nRet;
+        return ret;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
-                                     &SoftBusNStackDumpDfinderHander);
-    if (nRet == SOFTBUS_ERR) {
+    ret = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
+        &SoftBusNStackDumpDfinderHander);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
-        return nRet;
+        return ret;
     }
 
-    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
-                                     &SoftBusNStackDmsgDumpHander);
-    if (nRet == SOFTBUS_ERR) {
+    ret = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
+        &SoftBusNStackDmsgDumpHander);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
-        return nRet;
+        return ret;
     }
-    return nRet;
+    return ret;
 }
