@@ -14,7 +14,6 @@
  */
 #ifndef SOFTBUS_HIDUMPER_INTERFACE_H
 #define SOFTBUS_HIDUMPER_INTERFACE_H
-#include <stdint.h>
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

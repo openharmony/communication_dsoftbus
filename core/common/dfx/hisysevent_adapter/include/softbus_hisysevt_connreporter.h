@@ -37,7 +37,7 @@ typedef enum {
 } SoftBusConnMedium;
 
 int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode);
-int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time);
+void SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time);
 int32_t InitConnStatisticSysEvt(void);
 
 #ifdef __cplusplus

@@ -26,16 +26,17 @@
 
 static LIST_HEAD(g_busCenter_var_list);
 
-int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
         return SOFTBUS_ERR;
     }
-    return SoftBusAddDumpVarToList(dumpVar, cb, &g_busCenter_var_list);
+    int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_busCenter_var_list);
+    return nRet;
 }
 
-static int32_t SoftBusBusCenterDumpHander(int fd, int32_t argc, const char **argv)
+int SoftBusBusCenterDumpHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;
@@ -50,14 +51,14 @@ static int32_t SoftBusBusCenterDumpHander(int fd, int32_t argc, const char **arg
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_BUSCENTER_MODULE_NAME, &g_busCenter_var_list);
         return SOFTBUS_OK;
     }
-    int32_t ret = SOFTBUS_OK;
-    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    int nRet = SOFTBUS_OK;
+    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
     if (strcmp(argv[0], "-l") == 0) {
         ListNode *item = NULL;
         LIST_FOR_EACH(item, &g_busCenter_var_list) {
             SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
             if (strcmp(itemNode->varName, argv[1]) == 0) {
-                ret = itemNode->dumpCallback(fd);
+                nRet = itemNode->dumpCallback(fd);
                 isModuleExist = SOFTBUS_DUMP_EXIST;
                 break;
             }
@@ -68,17 +69,18 @@ static int32_t SoftBusBusCenterDumpHander(int fd, int32_t argc, const char **arg
         SoftBusDumpErrInfo(fd, argv[0]);
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_BUSCENTER_MODULE_NAME, &g_busCenter_var_list);
     }
-    return ret;
+    return nRet;
 }
 
-int32_t SoftBusHiDumperBusCenterInit(void)
+int SoftBusHiDumperBusCenterInit(void)
 {
-    int32_t ret = SoftBusRegHiDumperHandler(
+    int nRet = SOFTBUS_OK;
+    nRet = SoftBusRegHiDumperHandler(
         SOFTBUS_BUSCENTER_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP, &SoftBusBusCenterDumpHander);
-    if (ret != SOFTBUS_OK) {
+    if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusBusCenterDumpHander regist fail");
     }
-    return ret;
+    return nRet;
 }
 
 void SoftBusHiDumperBusCenterDeInit(void)

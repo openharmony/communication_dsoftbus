@@ -149,7 +149,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt()
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) != SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
     }
@@ -202,10 +202,10 @@ static int32_t SoftBusReportScanTimesEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateScanTimesMsg(msg, i) != SOFTBUS_OK) {
+        if (SoftBusCreateScanTimesMsg(msg, i) == SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
+        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
     }
@@ -227,9 +227,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISC_FAULT) != EOK) {
-        return SOFTBUS_ERR;
-    }
+
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
 

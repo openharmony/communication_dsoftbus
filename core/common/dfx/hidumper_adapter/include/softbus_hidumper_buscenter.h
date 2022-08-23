@@ -17,7 +17,8 @@
 #define SOFTBUS_HIDUMPER_BUSCENTER_H
 
 #include "softbus_hidumper.h"
-int32_t SoftBusHiDumperBusCenterInit(void);
-int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
+int SoftBusHiDumperBusCenterInit(void);
+int SoftBusBusCenterDumpHander(int fd, int argc, const char **argv);
+int SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperBusCenterDeInit(void);
 #endif /* SOFTBUS_HIDUMPER_BUSCENTER_H */

@@ -25,16 +25,17 @@
 
 static LIST_HEAD(g_disc_var_list);
 
-int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
     }
-    return SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
+    int nRet = SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
+    return nRet;
 }
 
-int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
+int SoftBusDiscDumpHander(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDiscDumpHander invalid param");
@@ -50,14 +51,14 @@ int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
         SoftBusDumpSubModuleHelp(fd, SOFTBUS_DISC_MODULE_NAME, &g_disc_var_list);
         return SOFTBUS_OK;
     }
-    int32_t ret = SOFTBUS_OK;
-    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    int nRet = SOFTBUS_OK;
+    int isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
     if (strcmp(argv[0], "-l") == 0) {
         ListNode *item = NULL;
         LIST_FOR_EACH(item, &g_disc_var_list) {
             SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
             if (strcmp(itemNode->varName, argv[1]) == 0) {
-                ret = itemNode->dumpCallback(fd);
+                nRet = itemNode->dumpCallback(fd);
                 isModuleExist = SOFTBUS_DUMP_EXIST;
                 break;
             }
@@ -68,17 +69,18 @@ int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
         }
     }
 
-    return ret;
+    return nRet;
 }
 
-int32_t SoftBusDiscHiDumperInit(void)
+int SoftBusDiscHiDumperInit(void)
 {
-    int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_DISC_MODULE_NAME, SOFTBUS_DISC_MODULE_HELP,
-        &SoftBusDiscDumpHander);
-    if (ret != SOFTBUS_OK) {
+    int nRet = SOFTBUS_OK;
+    nRet = SoftBusRegHiDumperHandler(SOFTBUS_DISC_MODULE_NAME, SOFTBUS_DISC_MODULE_HELP, &SoftBusDiscDumpHander);
+    if (nRet == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb registe fail");
+        return nRet;
     }
-    return ret;
+    return nRet;
 }
 
 void SoftBusHiDumperDiscDeInit(void)
