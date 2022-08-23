@@ -315,8 +315,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
-    int32_t ret = data.WriteCString(pkgName);
-    if (!ret) {
+    if (!data.WriteCString(pkgName)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo write client name failed!");
         return SOFTBUS_ERR;
     }
@@ -338,12 +337,16 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo send request failed!");
         return SOFTBUS_ERR;
     }
-    void *retBuf = (void *)reply.ReadRawData(len);
+    int32_t infoLen;
+    if (!reply.ReadInt32(infoLen)) {
+        return SOFTBUS_ERR;
+    }
+    void *retBuf = (void *)reply.ReadRawData(infoLen);
     if (retBuf == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(buf, len, retBuf, len) != EOK) {
+    if (memcpy_s(buf, len, retBuf, infoLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo copy node key info failed");
         return SOFTBUS_ERR;
     }
