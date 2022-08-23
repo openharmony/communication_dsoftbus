@@ -45,7 +45,7 @@ static pthread_mutex_t g_connectionLock = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(g_connection_list);
 static int32_t g_brBuffSize;
 static uint16_t g_nextConnectionId = 0;
-static int BrConnectionInfoDump(int fd);
+static int32_t BrConnectionInfoDump(int fd);
 
 void InitBrConnectionManager(int32_t brBuffSize)
 {
@@ -606,7 +606,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
     return false;
 }
 
-static int BrConnectionInfoDump(int fd)
+static int32_t BrConnectionInfoDump(int fd)
 {
     if (pthread_mutex_lock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
