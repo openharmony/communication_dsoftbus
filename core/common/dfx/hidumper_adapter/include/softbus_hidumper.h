@@ -16,7 +16,6 @@
 #ifndef SOFTBUS_HIDUMPER_H
 #define SOFTBUS_HIDUMPER_H
 
-#include <stdint.h>
 #include "common_list.h"
 
 #define SOFTBUS_MODULE_NAME_LEN 32
@@ -25,7 +24,7 @@
 #define SOFTBUS_DUMP_EXIST 1
 #define SOFTBUS_DUMP_NOT_EXIST 0
 
-typedef int32_t (*SoftBusVarDumpCb)(int fd);
+typedef int (*SoftBusVarDumpCb)(int fd);
 
 typedef struct {
     ListNode node;
@@ -33,7 +32,7 @@ typedef struct {
     SoftBusVarDumpCb dumpCallback;
 } SoftBusDumpVarNode;
 
-typedef int32_t (*DumpHandlerFunc)(int fd, int32_t argc, const char **argv);
+typedef int (*DumpHandlerFunc)(int fd, int argc, const char **argv);
 
 typedef struct {
     ListNode node;
@@ -45,10 +44,10 @@ typedef struct {
 void SoftBusDumpShowHelp(int fd);
 void SoftBusDumpErrInfo(int fd, const char *argv);
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList);
-int32_t SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *subModoleVarList);
+int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *subModoleVarList);
 void SoftBusReleaseDumpVar(ListNode *varList);
-int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
-int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv);
-int32_t SoftBusHiDumperModuleInit(void);
+int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
+ListNode *SoftBusGetHiDumpHandler(void);
+int SoftBusHiDumperModuleInit(void);
 void SoftBusHiDumperModuleDeInit(void);
 #endif

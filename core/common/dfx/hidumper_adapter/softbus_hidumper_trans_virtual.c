@@ -36,7 +36,7 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     return;
 }
 
-void SoftBusTransDumpHander(int fd, int32_t argc, const char **argv)
+void SoftBusTransDumpHander(int fd, int argc, const char **argv)
 {
     return;
 }

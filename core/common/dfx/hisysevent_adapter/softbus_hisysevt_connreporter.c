@@ -137,10 +137,10 @@ static int32_t SoftBusReportConnTimeDurEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateConnDurMsg(msg, i) != SOFTBUS_OK) {
+        if (SoftBusCreateConnDurMsg(msg, i) == SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
+        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
     }
@@ -207,10 +207,10 @@ static int32_t SoftBusReportConnSuccRateEvt()
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateConnSuccRateMsg(msg, i) != SOFTBUS_OK) {
+        if (SoftBusCreateConnSuccRateMsg(msg, i) == SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
+        if (SoftbusWriteHisEvt(msg) == SOFTBUS_ERR) {
             return SOFTBUS_ERR;
         }
     }
@@ -265,10 +265,10 @@ int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode)
     return ret;
 }
 
-int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time)
+void SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time)
 {
     if (SoftBusMutexLock(&g_connSuccRate[medium].lock) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return;
     }
     
     g_connSuccRate[medium].failTime += (isSucc != SOFTBUS_EVT_CONN_SUCC);
@@ -280,11 +280,11 @@ int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t
     (void)SoftBusMutexUnlock(&g_connSuccRate[medium].lock);
 
     if (isSucc != SOFTBUS_EVT_CONN_SUCC) {
-        return SOFTBUS_OK;
+        return;
     }
 
     if (SoftBusMutexLock(&g_connTimeDur[medium].lock) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return;
     }
     
     if (time > g_connTimeDur[medium].maxConnDur) {
@@ -298,7 +298,6 @@ int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t
         g_connSuccRate[medium].succTime);
 
     (void)SoftBusMutexUnlock(&g_connTimeDur[medium].lock);
-    return SOFTBUS_OK;
 }
 
 int32_t InitConnStatisticSysEvt(void)
