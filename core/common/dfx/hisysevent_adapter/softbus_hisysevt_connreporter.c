@@ -130,7 +130,7 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportConnTimeDurEvt()
+static int32_t SoftBusReportConnTimeDurEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
@@ -200,7 +200,7 @@ static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t me
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportConnSuccRateEvt()
+static int32_t SoftBusReportConnSuccRateEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
