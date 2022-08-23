@@ -185,9 +185,9 @@ static int32_t ReplyPassiveNonBroadcast(void);
 static void ClearRecvMessage(void);
 static int32_t StopScaner(void);
 static void AssembleNonOptionalTlv(DeviceInfo *info, BoardcastData *boardcastData);
-static int BleInfoDump(int fd);
-static int BleAdvertiserDump(int fd);
-static int RecvMessageInfoDump(int fd);
+static int32_t BleInfoDump(int fd);
+static int32_t BleAdvertiserDump(int fd);
+static int32_t RecvMessageInfoDump(int fd);
 
 /* This function is used to compatibled with mobile phone, will remove later */
 static int ConvertCapBitMap(int oldCap)
@@ -1738,7 +1738,7 @@ void DiscBleDeinit(void)
     AdvertiserDeinit();
 }
 
-static int BleInfoDump(int fd)
+static int32_t BleInfoDump(int fd)
 {
     if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
@@ -1760,7 +1760,7 @@ static int BleInfoDump(int fd)
     return SOFTBUS_OK;
 }
 
-static int BleAdvertiserDump(int fd)
+static int32_t BleAdvertiserDump(int fd)
 {
     dprintf(fd, "\n-----------------BleAdvertiser Info-------------------\n");
     for (int i = 0; i < NUM_ADVERTISER; i++) {
@@ -1796,7 +1796,7 @@ static int BleAdvertiserDump(int fd)
     return SOFTBUS_OK;
 }
 
-static int RecvMessageInfoDump(int fd)
+static int32_t RecvMessageInfoDump(int fd)
 {
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");

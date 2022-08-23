@@ -884,7 +884,7 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
 }
 
-int SoftBusDumpBusCenterLocalDeviceInfo(int fd)
+int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
 {
     dprintf(fd, "-----LocalDeviceInfo-----\n");
     NodeBasicInfo localNodeInfo;
@@ -936,7 +936,7 @@ int32_t LnnInitLocalLedger(void)
     }
     if (SoftBusRegBusCenterVarDump(
         SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump regist fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
     }
     g_localNetLedger.status = LL_INIT_SUCCESS;
