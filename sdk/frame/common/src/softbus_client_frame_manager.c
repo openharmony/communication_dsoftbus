@@ -157,7 +157,7 @@ static void ClientModuleDeinit(void)
     DiscClientDeinit();
 }
 
-static int32_t ConnClientInit()
+static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {

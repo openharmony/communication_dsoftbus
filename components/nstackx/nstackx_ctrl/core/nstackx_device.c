@@ -2090,7 +2090,7 @@ void DeviceModuleClean(void)
 }
 
 #ifndef DFINDER_SUPPORT_MULTI_NIF
-static void GlobalInterfaceListInit()
+static void GlobalInterfaceListInit(void)
 {
     (void)memset_s(g_interfaceList, sizeof(g_interfaceList), 0, sizeof(g_interfaceList));
     (void)strcpy_s(g_interfaceList[NSTACKX_WLAN_INDEX].name,

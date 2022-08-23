@@ -22,8 +22,7 @@ extern "C" {
 #endif
 #endif
 
-
-int32_t InitSoftbusSysEvt();
+int32_t InitSoftbusSysEvt(void);
 
 typedef enum {
     SOFTBUS_STATISTIC_EVT_START = 0,
