@@ -36,7 +36,7 @@
 static int32_t g_lnnRole = 0;
 static char g_lnnMyP2pMac[P2P_MAC_LEN] = {0};
 static char g_lnnGoMac[P2P_MAC_LEN] = {0};
-static int P2pLnnDump(int fd);
+static int32_t P2pLnnDump(int fd);
 static bool g_p2pDumpFlag = false;
 static int32_t P2pLinkLnnSyncSetGoMac()
 {
@@ -109,7 +109,7 @@ void P2pLinkLnnSync(void)
     }
 }
 
-static int P2pLnnDump(int fd)
+static int32_t P2pLnnDump(int fd)
 {
     dprintf(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
     char *lnnMyP2pMac = DataMasking(g_lnnMyP2pMac, P2P_MAC_LEN, MAC_DELIMITER);

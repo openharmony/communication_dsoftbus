@@ -149,7 +149,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt()
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) != SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }

@@ -90,7 +90,7 @@ static SoftBusMutex g_connectionLock;
 
 static void PackRequest(int32_t delta, uint32_t connectionId);
 static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType);
-static int BleConnectionDump(int fd);
+static int32_t BleConnectionDump(int fd);
 
 static uint32_t AllocBleConnectionIdLocked()
 {
@@ -1247,7 +1247,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
     return &g_bleInterface;
 }
 
-static int BleConnectionDump(int fd)
+static int32_t BleConnectionDump(int fd)
 {
     if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");

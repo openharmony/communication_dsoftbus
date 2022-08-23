@@ -90,7 +90,7 @@ static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
 static bool g_gattcIsInited = false;
 static bool UpdateBleGattcInfoStateInner(BleGattcInfo *infoNode, int32_t newState);
-static int BleGattcDump(int fd);
+static int32_t BleGattcDump(int fd);
 static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, const char *data);
 
 static void FreeBleClientMessage(SoftBusMessage *msg)
@@ -837,7 +837,7 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
     return SOFTBUS_OK;
 }
 
-static int BleGattcDump(int fd)
+static int32_t BleGattcDump(int fd)
 {
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);

@@ -29,7 +29,7 @@ static LIST_HEAD(g_busCenter_var_list);
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump invalid param");
         return SOFTBUS_ERR;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_busCenter_var_list);

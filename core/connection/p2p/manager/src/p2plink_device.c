@@ -41,8 +41,8 @@ static int32_t g_connectedCnt = 0;
 static int32_t g_connectingTimer = 0;
 #define CONNING_TIMER_1S 1000
 
-static int P2pLinkDevicingDump(int fd);
-static int P2pLinkDevicedDump(int fd);
+static int32_t P2pLinkDevicingDump(int fd);
+static int32_t P2pLinkDevicedDump(int fd);
 
 P2pLinkPeerDevStateCb g_devStateCb = {0};
 void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb)
@@ -538,7 +538,7 @@ void P2pLinkDevClean(void)
     P2pLinkSetDisconnectState(false);
 }
 
-static int P2pLinkDevicingDump(int fd)
+static int32_t P2pLinkDevicingDump(int fd)
 {
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------P2pLinkDevicing Info-------------------\n");
@@ -570,7 +570,7 @@ static int P2pLinkDevicingDump(int fd)
     return SOFTBUS_OK;
 }
 
-static int P2pLinkDevicedDump(int fd)
+static int32_t P2pLinkDevicedDump(int fd)
 {
     ListNode *item = NULL;
     dprintf(fd, "\n-----------------P2pLinkDeviced Info-------------------\n");
