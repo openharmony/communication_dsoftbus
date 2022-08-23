@@ -33,6 +33,12 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     }
 
     (void)memset_s(accountHash, len, 0, len);
+    if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+        (unsigned char *)accountHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetOhosAccountInfo generate default ohos account hash fail");
+        return SOFTBUS_ERR;
+    }
+
     std::vector<int32_t> ids;
     OHOS::ErrCode ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
     if (ret != OHOS::ERR_OK || ids.size() == 0) {
@@ -56,4 +62,19 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 
     return ConvertHexStringToBytes((unsigned char *)accountHash, len,
         accountInfo.second.uid_.c_str(), accountInfo.second.uid_.length());
+}
+
+bool LnnIsDefaultOhosAccount(const uint8_t *accountHash, uint32_t len)
+{
+    uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};
+
+    if (accountHash == nullptr || len > SHA_256_HASH_LEN) {
+        return false;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+        (unsigned char *)defaultAccountHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate default ohos account hash fail");
+        return false;
+    }
+    return memcmp(accountHash, defaultAccountHash, len) == 0;
 }

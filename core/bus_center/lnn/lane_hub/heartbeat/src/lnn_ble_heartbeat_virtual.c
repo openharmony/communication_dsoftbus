@@ -67,7 +67,7 @@ static LnnHeartbeatMediumMgr g_bleMgr = {
     .onSendOneHbBegin = BleHeartbeatOnceBegin,
     .onSendOneHbEnd = BleHeartbeatOnceEnd,
     .onSetMediumParam = SetBleMediumParam,
-    .onStopHeartbeat = StopBleHeartbeat,
+    .onStopHbByType = StopBleHeartbeat,
     .deinit = DeinitBleHeartbeat,
 };
 

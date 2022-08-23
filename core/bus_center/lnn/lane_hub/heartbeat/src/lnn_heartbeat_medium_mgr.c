@@ -29,6 +29,7 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
+#include "lnn_ohos_account.h"
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -239,12 +240,16 @@ static bool HbIsSameAccount(const char *accountHash, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB IsSameAccount get local accountHash fail");
         return true;
     }
+    if (LnnIsDefaultOhosAccount(localAccountHash, SHA_256_HASH_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB no login account, ignore this receive data");
+        return false;
+    }
     if (memcmp(accountHash, localAccountHash, len) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsNotSameAccount. [my %x %x : peer %x %x]",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsNotSameAccount. [my %02x %02x : peer %02x %02x]",
             localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
         return false;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsSameAccount. [my %x %x : peer %x %x]",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsSameAccount. [my %02x %02x : peer %02x %02x]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     return true;
 }
@@ -272,7 +277,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X,"
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X, "
         "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, masterWeight:%d, nowTime:%" PRIu64 "]",
         device->devId, device->devType, devTypeStr != NULL ? devTypeStr : "", device->addr[0].type, weight,
         masterWeight, nowTime);
@@ -435,7 +440,7 @@ void LnnDumpHbOnlineNodeList(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, nodeInfo i=%d", i);
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpOnlineNodeList count:%d [i:%d, deviceName:%s,"
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpOnlineNodeList count:%d [i:%d, deviceName:%s, "
             "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%" PRIu64 "]", infoNum, i + 1,
             nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId, nodeInfo->masterWeight,
             nodeInfo->discoveryType, oldTimeStamp);
@@ -547,11 +552,11 @@ static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eac
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", eachType);
         return true;
     }
-    if (g_hbMeidumMgr[id]->onStopHeartbeat == NULL) {
+    if (g_hbMeidumMgr[id]->onStopHbByType == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB manager stop cb is NULL, type(%d)", eachType);
         return true;
     }
-    ret = g_hbMeidumMgr[id]->onStopHeartbeat();
+    ret = g_hbMeidumMgr[id]->onStopHbByType();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat type(%d) fail, ret=%d", eachType, ret);
         return false;
