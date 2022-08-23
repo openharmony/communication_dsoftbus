@@ -54,7 +54,7 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerStub::CheckCloseChannelPermission(int32_t channelId, int32_t channelType)
+int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t channelType)
 {
     char pkgName[PKG_NAME_SIZE_MAX];
     char sessionName[SESSION_NAME_SIZE_MAX];
@@ -429,6 +429,10 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
     if (!data.ReadInt32(msgType)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage message type failed!");
         return SOFTBUS_ERR;
+    }
+    if (CheckChannelPermission(channelId, channelType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SendMessage permission check failed!");
+        return SOFTBUS_PERMISSION_DENIED;
     }
 
     int32_t retReply = SendMessage(channelId, channelType, dataInfo, len, msgType);
