@@ -251,7 +251,7 @@ static bool CheckAuthChannelOfPkgInfoIsValid(const AppInfo *appInfo)
             continue;
         }
         (void)memset_s(pkgName, PKG_NAME_SIZE_MAX, 0, PKG_NAME_SIZE_MAX);
-        ret = g_cb->TransGetPkgNameBySessionName(g_sessionWhiteList[index], pkgName, PKG_NAME_SIZE_MAX);
+        ret = g_cb->GetPkgNameBySessionName(g_sessionWhiteList[index], pkgName, PKG_NAME_SIZE_MAX);
         if (ret != SOFTBUS_OK) {
             continue;
         }
