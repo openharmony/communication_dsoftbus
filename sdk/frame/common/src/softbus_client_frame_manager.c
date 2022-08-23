@@ -308,6 +308,7 @@ EXIT:
 
 int32_t CheckPackageName(const char *pkgName)
 {
+    (void)pkgName;
 #ifdef __LITEOS_M__
     return SOFTBUS_OK;
 #else
