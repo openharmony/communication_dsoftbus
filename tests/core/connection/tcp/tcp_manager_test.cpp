@@ -53,6 +53,7 @@ static ConnectFuncInterface *g_interface = nullptr;
 static ConnectResult g_result;
 static ConnectCallback g_cb;
 static int g_receivedDatalength = 0;
+static int g_ConnServerInit = 0;
 
 void TcpOnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
@@ -109,11 +110,13 @@ void SoftbusTcpManagerTest::SetUp(void)
     g_result.OnConnectFailed = TcpOnConnectionFailed;
     g_connectionId = 0;
     g_receivedDatalength = 0;
+    g_ConnServerInit = ConnServerInit();
 }
 
 void SoftbusTcpManagerTest::TearDown(void)
 {
     g_interface = nullptr;
+    g_ConnServerInit = 0;
 }
 
 void CreateServer(void *arg)
@@ -245,11 +248,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_LOCK_ERR, TcpStopListening(&info));
-    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -630,10 +632,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -658,11 +660,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_LOCK_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -687,10 +689,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -715,10 +717,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -743,10 +745,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -771,11 +773,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -800,10 +802,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -828,11 +830,11 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -859,11 +861,6 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
     };
     int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
     int ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ConnCloseSocket(clientfd);
-
-    clientfd = tcp->OpenClientSocket(&option, nullptr, false);
-    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ConnCloseSocket(clientfd);
 
@@ -1154,10 +1151,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1182,10 +1179,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1210,10 +1207,10 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1234,15 +1231,15 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1263,14 +1260,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1291,15 +1288,15 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_ERR, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1320,14 +1317,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1348,14 +1345,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
@@ -1376,14 +1373,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(&info));
-    EXPECT_TRUE(SOFTBUS_OK != TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
 };
 
 /*
