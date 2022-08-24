@@ -131,8 +131,9 @@ FAIL_SOCKET:
 static int32_t ConnectUdpServerWithTargetDev(Socket *clientSocket, const struct sockaddr_in *sockAddr,
                                              const char *localInterface)
 {
+    int32_t ret = 0;
     struct sockaddr_in tmpAddr;
-
+    socklen_t srcAddrLen = sizeof(struct sockaddr_in);
     clientSocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (clientSocket->sockfd == INVALID_SOCKET) {
         LOGE(TAG, "socket create failed, error :%d", GetErrno());
@@ -152,13 +153,12 @@ static int32_t ConnectUdpServerWithTargetDev(Socket *clientSocket, const struct 
             LOGI(TAG, "bind to target interface %s successfully", localInterface);
         }
     }
-    int32_t ret = connect(clientSocket->sockfd, (struct sockaddr *)sockAddr, sizeof(struct sockaddr));
+    ret = connect(clientSocket->sockfd, (struct sockaddr *)sockAddr, sizeof(struct sockaddr));
     if (ret != 0) {
         LOGE(TAG, "connect to udp server failed %d", GetErrno());
         goto FAIL_SOCKET;
     }
 
-    socklen_t srcAddrLen = sizeof(struct sockaddr_in);
     (void)memset_s(&tmpAddr, sizeof(tmpAddr), 0, sizeof(tmpAddr));
     ret = getsockname(clientSocket->sockfd, (struct sockaddr *)&tmpAddr, &srcAddrLen);
     if (ret != 0) {
