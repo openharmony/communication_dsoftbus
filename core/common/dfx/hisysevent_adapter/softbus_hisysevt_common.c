@@ -130,7 +130,7 @@ static void ReportStatisticEvtPeriod(SoftBusMessage* msg)
     CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }
 
-int32_t InitSoftbusSysEvt()
+int32_t InitSoftbusSysEvt(void)
 {
     InitStatisticEvtReportFunc();
     
