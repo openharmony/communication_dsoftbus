@@ -560,7 +560,12 @@ int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const void *info, 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN send request failed!");
         return SOFTBUS_IPC_ERR;
     }
-    return SOFTBUS_OK;
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN send error ret = %d!", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    return ret;
 }
 
 int32_t BusCenterServerProxy::StopRefreshLNN(const char *pkgName, int32_t refreshId)

@@ -347,6 +347,7 @@ int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStopRefreshLNN(pkgName, refreshId);
+    WriteInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopRefreshLNN failed.");
         return SOFTBUS_ERR;
