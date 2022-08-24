@@ -113,7 +113,8 @@ int32_t SoftBusTimerInit(void)
     if (g_timerId != NULL) {
         return SOFTBUS_OK;
     }
-    g_timerId = SoftBusCreateTimer(&g_timerId, (void *)HandleTimeoutFun, TIMER_TYPE_PERIOD);
+    SetTimerFunc(HandleTimeoutFun);
+    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
