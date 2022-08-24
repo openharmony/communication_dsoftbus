@@ -139,7 +139,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportFirstDiscDurationEvt()
+static int32_t SoftBusReportFirstDiscDurationEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
@@ -195,7 +195,7 @@ static int32_t SoftBusCreateScanTimesMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportScanTimesEvt()
+static int32_t SoftBusReportScanTimesEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_TWO);
     if (msg == NULL) {
@@ -257,7 +257,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportDiscFaultEvt()
+static int32_t SoftBusReportDiscFaultEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
