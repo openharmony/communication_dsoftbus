@@ -66,6 +66,15 @@ if (defined(ohos_lite)) {
           "-std=c99",
         ]
         cflags_cc = cflags
+      } else {
+        include_dirs += [
+          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
+          "//third_party/lwip/src/include",
+        ]
+        cflags = [
+          "--diag_suppress",
+          "Pe301",
+        ]
       }
       deps = dsoftbus_server_common_deps
       deps += [
