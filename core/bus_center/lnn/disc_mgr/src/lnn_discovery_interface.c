@@ -19,6 +19,9 @@
 
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_distributed_net_ledger.h"
+#include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
@@ -88,4 +91,43 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+void LnnRefreshDeviceInfo(DeviceInfo *device)
+{
+    int32_t i, infoNum;
+    NodeBasicInfo *info = NULL;
+    char udid[UDID_BUF_LEN] = {0};
+    char udidHash[UDID_HASH_LEN + 1] = {0};
+    device->isOnLine = false;
+    
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn get all online node info fail");
+        return;
+    }
+    if (info == NULL || infoNum == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "lnn none online node");
+        return;
+    }
+    for (i = 0; i < infoNum; ++i) {
+        (void)memset_s(udid, UDID_BUF_LEN, 0, UDID_BUF_LEN);
+        if (LnnConvertDlId(info[i].networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            continue;
+        }
+        if (GenerateHexStringOfHash(udid, SHORT_UDID_HASH_LEN, udidHash) != SOFTBUS_OK) {
+            continue;
+        }
+        if (strncmp(udidHash, device->devId, UDID_HASH_LEN) == 0) {
+            if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, udid, UDID_BUF_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn memcpy deviceUdid fail");
+                SoftBusFree(info);
+                return;
+            }
+            device->isOnline = true;
+            SoftBusFree(info);
+            return;
+        }
+    }
+    SoftBusFree(info);
+    return;
 }

@@ -46,16 +46,24 @@ static int32_t PublishResultTransfer(int32_t retCode)
     }
 }
 
-static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
+static int32_t OnRefreshDeviceFoundInner(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
     (void)pkgName;
-    (void)addtions;
-    if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
+    if (addtions->medium == COAP) {
+        device->isOnline = LnnGetOnlineStateById(device->devId, CATEGORY_UDID);
+    }
+    if (addtions->medium == BLE) {
+        LnnRefreshDeviceInfo(device);
     }
     LnnOnRefreshDeviceFound(device);
     return SOFTBUS_OK;
+}
+
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions)
+{
+    return OnRefreshDeviceFoundInner(pkgName, (DeviceInfo *)device, addtions);
 }
 
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)

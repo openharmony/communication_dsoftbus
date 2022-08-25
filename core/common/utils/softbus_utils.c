@@ -424,3 +424,25 @@ char *DataMasking(const char *data, uint32_t length, char delimiter)
 
     return dataStr;
 }
+
+int32_t GenerateHexStringOfHash(char *str, uint32_t len, char *hashStr)
+{
+    int32_t ret;
+    unsigned char hashResult[UDID_HASH_LEN] = {0};
+
+    if (str == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = SoftBusGenerateStrHash((const unsigned char*)str, strlen(str) + 1, hashResult);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
+        return ret;
+    }
+    ret = ConvertBytesToHexString(hashStr, len + 1, hashResult, len / HEXIFY_UNIT_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bytes to str hash fail, ret=%d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
