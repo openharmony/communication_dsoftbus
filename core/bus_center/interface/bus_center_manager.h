@@ -83,7 +83,7 @@ int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
 
 int32_t LnnSyncP2pInfo(void);
-
+void LnnRefreshDeviceInfo(DeviceInfo *device);
 #ifdef __cplusplus
 }
 #endif

@@ -94,6 +94,14 @@ extern "C" {
  */
 #define UDID_HASH_LEN 32
 
+/** 
+ * @brief Indicates the length of the short UDID hash value.
+ * 
+ * @since 1.0
+ * @version 1.0
+ */
+#define SHORT_UDID_HASH_LEN 8
+
 /**
  * @brief Indicates the length of the UUID string, including the terminating null character <b>\0</b>.
  *
@@ -435,6 +443,8 @@ typedef struct {
     char custData[DISC_MAX_CUST_DATA_LEN];
     /** The distance of dicovered device, in centimeters(cm)*/
     int32_t range;
+    /** Device Online Status **/
+    bool isOnline;
 } DeviceInfo;
 
 /**

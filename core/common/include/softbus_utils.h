@@ -78,7 +78,7 @@ int32_t Strnicmp(const char *src1, const char *src2, uint32_t len);
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);
-
+int32_t GenerateHexStringOfHash(char *str, uint32_t len, char *hashStr);
 /**
  * @brief Intercept signaling messages of specified length and print.
  * @param[in] distinguish Distinguish the sending and receiving of ble, COAP and P2P signaling messages.
