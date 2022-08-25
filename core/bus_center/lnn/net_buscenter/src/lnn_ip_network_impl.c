@@ -563,6 +563,7 @@ static ListenerModule LnnGetIpListenerModule(ListenerMode mode)
 
 void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
 {
+    (void)self;
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler);
     LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_IP);
