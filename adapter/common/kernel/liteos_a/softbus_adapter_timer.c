@@ -35,7 +35,22 @@
 
 static unsigned int g_timerType;
 
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
+static TimerFunc g_timerfunc = NULL;
+
+static void HandleTimeoutAdapterFun(union sigval para)
+{
+    (void)para;
+    if (g_timerfunc != NULL) {
+        g_timerfunc();
+    }
+}
+
+void SetTimerFunc(TimerFunc func)
+{
+    g_timerfunc = func;
+}
+
+void *SoftBusCreateTimer(void **timerId, unsigned int type)
 {
     if (timerId == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
@@ -43,9 +58,9 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
     }
     struct sigevent envent;
     (void)memset_s(&envent, sizeof(envent), 0, sizeof(envent));
-    envent.sigev_notify = SIGEV_SIGNAL;
-    envent.sigev_signo = SIGUSR1;
-    signal(SIGUSR1, timerFunc);
+    envent.sigev_notify = SIGEV_THREAD;
+    envent.sigev_notify_function = HandleTimeoutAdapterFun;
+    envent.sigev_notify_attributes = NULL;
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {

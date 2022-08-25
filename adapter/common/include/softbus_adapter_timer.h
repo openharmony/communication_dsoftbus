@@ -27,8 +27,11 @@ typedef struct {
     int64_t usec;
 } SoftBusSysTime;
 
+typedef void (*TimerFunc)(void);
+void SetTimerFunc(TimerFunc func);
+
 /* Timer */
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type);
+void *SoftBusCreateTimer(void **timerId, unsigned int type);
 int SoftBusStartTimer(void *timerId, unsigned int tickets);
 int SoftBusDeleteTimer(void *timerId);
 
