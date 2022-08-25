@@ -99,7 +99,7 @@ void LnnRefreshDeviceInfo(DeviceInfo *device)
     NodeBasicInfo *info = NULL;
     char udid[UDID_BUF_LEN] = {0};
     char udidHash[UDID_HASH_LEN + 1] = {0};
-    device->isOnLine = false;
+    device->isOnline = false;
     
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn get all online node info fail");
