@@ -1372,6 +1372,7 @@ static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *network
 
 static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size)
 {
+    (void)type;
     size_t addrLen = strnlen((const char *)msg, size);
     if (addrLen != size - 1 || addrLen == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad addr received!networkId=%s", __func__,
