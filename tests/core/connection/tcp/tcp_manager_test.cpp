@@ -839,55 +839,13 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
 
 /*
 * @tc.name: testTcpManager022
-* @tc.desc: Test OpenTcpClientSocket with invalid param.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: NonZero
-* @tc.type: FUNC
-* @tc.require: The OpenTcpClientSocket operates normally.
-*/
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
-{
-    const SocketInterface *tcp = GetTcpProtocol();
-    ASSERT_NE(tcp, nullptr);
-
-    ConnectOption option = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = 6666,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    int clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
-    int ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ConnCloseSocket(clientfd);
-
-    (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
-    option.socketOption.port = -1;
-
-    clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", false);
-    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ConnCloseSocket(clientfd);
-
-    option.socketOption.port = 6666;
-    clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    ret = (clientfd < 0) ? SOFTBUS_ERR : SOFTBUS_OK;
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ConnCloseSocket(clientfd);
-};
-
-/*
-* @tc.name: testTcpManager023
 * @tc.desc: Test GetTcpSockPort invalid fd.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The GetTcpSockPort operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -915,14 +873,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager024
+* @tc.name: testTcpManager023
 * @tc.desc: Test SetIpTos invalid fd.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The SetIpTos operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -948,16 +906,15 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
     ConnCloseSocket(fd);
 };
 
-
 /*
-* @tc.name: testTcpManager025
+* @tc.name: testTcpManager024
 * @tc.desc: Test ConnToggleNonBlockMode invalid fd.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The ConnToggleNonBlockMode operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -981,14 +938,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager026
+* @tc.name: testTcpManager025
 * @tc.desc: Test ConnSendSocketData invalid fd.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1017,14 +974,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager027
+* @tc.name: testTcpManager026
 * @tc.desc: Test ConnSendSocketData invalid buf len.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The OpenTcpClientSocket and ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1057,54 +1014,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager028
-* @tc.desc: Test ConnRecvSocketData invalid param.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: NonZero
-* @tc.type: FUNC
-* @tc.require: The ConnRecvSocketData operates normally.
-*/
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
-{
-    ConnPktHead head = {0};
-    head.len = strlen(g_data);
-    char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
-    if (data == nullptr) {
-        printf("Failed to assign memory to data.");
-        return;
-    }
-    int fd = -1;
-    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, sizeof(ConnPktHead) + head.len, 0));
-
-    const SocketInterface *tcp = GetTcpProtocol();
-    ASSERT_NE(tcp, nullptr);
-
-    ConnectOption option = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = 6666,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-
-    fd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
-    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, nullptr, sizeof(ConnPktHead) + head.len, 0));
-    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, 0, 0));
-    EXPECT_EQ(SOFTBUS_ERR, ConnRecvSocketData(fd, data, sizeof(ConnPktHead) + head.len, 0));
-    ConnCloseSocket(fd);
-};
-
-/*
-* @tc.name: testTcpManager029
+* @tc.name: testTcpManager027
 * @tc.desc: Test ConnGetSocketError invalid param.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The ConnGetSocketError and operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1128,16 +1045,15 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
     ConnCloseSocket(clientfd);
 };
 
-
 /*
-* @tc.name: testTcpManager030
+* @tc.name: testTcpManager028
 * @tc.desc: Test the BLE and TCP start and stop listeners multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1158,14 +1074,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager031
+* @tc.name: testTcpManager029
 * @tc.desc: Test BLE and TCP start and stop listeners under DIRECT_CHANNEL_CLIENT multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1186,14 +1102,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager032
+* @tc.name: testTcpManager030
 * @tc.desc: Test BLE and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_WIFI multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1214,14 +1130,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager033
+* @tc.name: testTcpManager031
 * @tc.desc: Test P2P and TCP start and stop listeners under PROXY multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1243,14 +1159,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager034
+* @tc.name: testTcpManager032
 * @tc.desc: Test P2P and TCP start and stop listeners under AUTH multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1271,14 +1187,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager035
+* @tc.name: testTcpManager033
 * @tc.desc: Test P2P and TCP start and stop listeners under AUTH_P2P multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1300,14 +1216,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager036
+* @tc.name: testTcpManager034
 * @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_P2P multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1328,14 +1244,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager037
+* @tc.name: testTcpManager035
 * @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_CLIENT multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1356,14 +1272,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager038
+* @tc.name: testTcpManager036
 * @tc.desc: Test P2P and TCP start and stop listeners under DIRECT_CHANNEL_SERVER_WIFI multiple times.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1384,14 +1300,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager039
+* @tc.name: testTcpManager037
 * @tc.desc: Test SetIpTos return yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The SetIpTos operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1410,14 +1326,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager040
+* @tc.name: testTcpManager038
 * @tc.desc: Test OpenTcpServerSocket Open succeed yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The OpenTcpServerSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1433,14 +1349,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
 }
 
 /*
-* @tc.name: testTcpManager041
+* @tc.name: testTcpManager039
 * @tc.desc: Test OpenTcpClientSocket Open succeed yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The SetIpTos and OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1473,14 +1389,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager042
+* @tc.name: testTcpManager040
 * @tc.desc: Test ConnToggleNonBlockMode param is invalid yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The SetIpTos and ConnToggleNonBlockMode operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1499,14 +1415,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager043
+* @tc.name: testTcpManager041
 * @tc.desc: Test GetTcpSockPort param is invalid yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The GetTcpSockPort operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1523,14 +1439,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager044
+* @tc.name: testTcpManager042
 * @tc.desc: test ConnSendSocketData SendData successful yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1552,14 +1468,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager045
+* @tc.name: testTcpManager043
 * @tc.desc: Test whether the CloseTcpFd function runs successfully.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1577,14 +1493,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager046
+* @tc.name: testTcpManager044
 * @tc.desc: Test ConnSendSocketData param is invalid yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Nonzero
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1606,14 +1522,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager047
+* @tc.name: testTcpManager045
 * @tc.desc: Test ConnCloseSocket function successful yes or no.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The ConnShutdownSocket and OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1631,14 +1547,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager048
+* @tc.name: testTcpManager046
 * @tc.desc: Test ConnSetTcpKeepAlive fd param invalid.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Nonzero
 * @tc.type: FUNC
 * @tc.require: The ConnSetTcpKeepAlive operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager048, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
 {
     int port = 6666;
     LocalListenerInfo info = {};
@@ -1651,14 +1567,14 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager048, TestSize.Level1)
 };
 
 /*
-* @tc.name: testTcpManager049
+* @tc.name: testTcpManager047
 * @tc.desc: Test ConnSetTcpKeepAlive second param invalid.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The ConnSetTcpKeepAlive operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager049, TestSize.Level1)
+HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
