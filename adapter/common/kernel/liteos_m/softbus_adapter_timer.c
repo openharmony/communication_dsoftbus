@@ -22,11 +22,25 @@
 
 #define MS_PER_SECOND 1000
 
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
+static TimerFunc g_timerfunc = NULL;
+
+static void HandleTimeoutAdapterFun(void)
+{
+    if (g_timerfunc != NULL) {
+        g_timerfunc();
+    }
+}
+
+void SetTimerFunc(TimerFunc func)
+{
+    g_timerfunc = func;
+}
+
+void *SoftBusCreateTimer(void **timerId, unsigned int type)
 {
     (void)timerId;
 
-    void *id = osTimerNew((osTimerFunc_t)timerFunc, (osTimerType_t)type, NULL, NULL);
+    void *id = osTimerNew((osTimerFunc_t)HandleTimeoutAdapterFun, (osTimerType_t)type, NULL, NULL);
     if (id != NULL) {
         HILOG_INFO(SOFTBUS_HILOG_ID, "create timer success");
         return id;
