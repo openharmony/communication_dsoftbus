@@ -552,8 +552,13 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 
         ret = FtSend(streamFd_, data.get(), len, 0);
     } else if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
-        StreamPacketizer packet(streamType_, std::move(stream));
+        const Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
+        if (streamFrameInfo == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamFrameInfo == nullptr");
+            return false;
+        }
 
+        StreamPacketizer packet(streamType_, std::move(stream));
         auto plainData = packet.PacketizeStream();
         if (plainData == nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PacketizeStream failed");
@@ -572,7 +577,6 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
         len += FRAME_HEADER_LEN;
 
-        const Communication::SoftBus::StreamFrameInfo *streamFrameInfo = stream->GetStreamFrameInfo();
         FrameInfo frameInfo;
         ConvertStreamFrameInfo2FrameInfo(&frameInfo, streamFrameInfo);
         ret = FtSendFrame(streamFd_, data.get(), len, 0, &frameInfo);
