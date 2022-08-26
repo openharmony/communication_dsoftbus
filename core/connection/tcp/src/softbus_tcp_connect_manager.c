@@ -674,22 +674,22 @@ static int TcpConnectInfoDump(int fd)
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------TcpConnect Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "\n-----------------TcpConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_tcpConnInfoList->list) {
         TcpConnInfoNode *itemNode = LIST_ENTRY(item, TcpConnInfoNode, node);
-        dprintf(fd, "Tcp Connect connectionId          : %u\n", itemNode->connectionId);
-        dprintf(fd, "Connection Info isAvailable       : %d\n", itemNode->info.isAvailable);
-        dprintf(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
-        dprintf(fd, "Connection Info type              : %d\n", itemNode->info.type);
-        dprintf(fd, "SocketInfo                        :\n");
+        SOFTBUS_DPRINTF(fd, "Tcp Connect connectionId          : %u\n", itemNode->connectionId);
+        SOFTBUS_DPRINTF(fd, "Connection Info isAvailable       : %d\n", itemNode->info.isAvailable);
+        SOFTBUS_DPRINTF(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
+        SOFTBUS_DPRINTF(fd, "Connection Info type              : %d\n", itemNode->info.type);
+        SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
         char *addr = DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER);
-        dprintf(fd, "SocketInfo addr                   : %s\n", addr);
+        SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
         SoftBusFree(addr);
-        dprintf(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
-        dprintf(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
-        dprintf(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
-        dprintf(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);
-        dprintf(fd, "Connection Info requestId         : %d\n", itemNode->requestId);
+        SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
+        SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
+        SOFTBUS_DPRINTF(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
+        SOFTBUS_DPRINTF(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);
+        SOFTBUS_DPRINTF(fd, "Connection Info requestId         : %d\n", itemNode->requestId);
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     return SOFTBUS_OK;
