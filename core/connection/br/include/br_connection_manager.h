@@ -115,7 +115,7 @@ uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState
 
 int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo);
 
-int32_t AddPengingRequestByConnId(uint32_t connId, RequestInfo *requestInfo);
+int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo);
 
 int32_t AddConnectionList(BrConnectionInfo *newConnInfo);
 
