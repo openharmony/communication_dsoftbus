@@ -154,6 +154,11 @@ void ReleaseBrconnectionNode(BrConnectionInfo *conn)
         ListDelete(&requestInfo->node);
         SoftBusFree(requestInfo);
     }
+    LIST_FOR_EACH_SAFE(item, nextItem, &conn->pendingRequestList) {
+        requestInfo = LIST_ENTRY(item, RequestInfo, node);
+        ListDelete(&requestInfo->node);
+        SoftBusFree(requestInfo);
+    }
     pthread_cond_destroy(&conn->congestCond);
     pthread_mutex_destroy(&conn->lock);
     SoftBusFree(conn->recvBuf);
@@ -242,6 +247,7 @@ BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
     }
     ListInit(&newConnInfo->node);
     ListInit(&newConnInfo->requestList);
+    ListInit(&newConnInfo->pendingRequestList);
     newConnInfo->connectionId = AllocNewConnectionIdLocked();
     newConnInfo->recvPos = 0;
     newConnInfo->seq = 0;
@@ -296,6 +302,9 @@ int32_t SetRefCountByConnId(int32_t delta, int32_t *refCount, uint32_t connectio
         if (itemNode->connectionId == connectionId) {
             itemNode->refCount += delta;
             (*refCount) = itemNode->refCount;
+            if (itemNode->state == BR_CONNECTION_STATE_CONNECTED && itemNode->refCount <= 0) {
+                itemNode->state = BR_CONNECTION_STATE_CLOSING;
+            }
             state = itemNode->state;
             break;
         }
@@ -381,6 +390,32 @@ int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
     return SOFTBUS_OK;
 }
 
+int32_t AddPengingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+
+    BrConnectionInfo *target = NULL;
+    ListNode *item = NULL;
+    LIST_FOR_EACH(item, &g_connection_list) {
+        BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
+        if (itemNode->connectionId == connId) {
+            target = itemNode;
+            break;
+        }
+    }
+    if (target == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "penging request failed, there is no connection %d", connId);
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        return SOFTBUS_ERR;
+    }
+    ListAdd(&target->pendingRequestList, &requestInfo->node);
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    return SOFTBUS_OK;
+}
+
 int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
@@ -459,6 +494,74 @@ int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *notifyList,
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
     return packRequestFlag;
+}
+
+int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, ListNode *pendings)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");
+        return 0;
+    }
+    BrConnectionInfo *target = NULL;
+    ListNode *brItem = NULL;
+    LIST_FOR_EACH(brItem, &g_connection_list) {
+        BrConnectionInfo *itemNode = LIST_ENTRY(brItem, BrConnectionInfo, node);
+        if (itemNode->connectionId == connId) {
+            target = itemNode;
+            break;
+        }
+    }
+
+    if (target == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "get pending request failed, there is no %d conneciton", connId);
+        return 0;
+    }
+
+    int32_t pendingCnt = 0;
+    ListNode *item = NULL;
+    ListNode *itemNext = NULL;
+    LIST_FOR_EACH_SAFE(item, itemNext, &target->pendingRequestList) {
+        RequestInfo *requestInfo = LIST_ENTRY(item, RequestInfo, node);
+        ListDelete(&requestInfo->node);
+        ListAdd(pendings, &requestInfo->node);
+        pendingCnt++;
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    return pendingCnt;
+}
+
+int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+
+    BrConnectionInfo *target = NULL;
+    ListNode *brItem = NULL;
+    LIST_FOR_EACH(brItem, &g_connection_list) {
+        BrConnectionInfo *itemNode = LIST_ENTRY(brItem, BrConnectionInfo, node);
+        if (itemNode->connectionId == connId) {
+            target = itemNode;
+            break;
+        }
+    }
+
+    if (target == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "resume connection failed, there is no %d conneciton", connId);
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        return SOFTBUS_ERR;
+    }
+    target->state = BR_CONNECTION_STATE_CONNECTED;
+    ListNode *item = NULL;
+    ListNode *itemNext = NULL;
+    LIST_FOR_EACH_SAFE(item, itemNext, &target->pendingRequestList) {
+        RequestInfo *requestInfo = LIST_ENTRY(item, RequestInfo, node);
+        ListDelete(&requestInfo->node);
+        ListAdd(pendings, &requestInfo->node);
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    return SOFTBUS_OK;
 }
 
 bool HasDiffMacDeviceExit(const ConnectOption *option)
@@ -613,33 +716,38 @@ static int32_t BrConnectionInfoDump(int fd)
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------BRConnect Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "\n-----------------BRConnect Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        dprintf(fd, "connectionId                  : %d\n", itemNode->connectionId);
-        dprintf(fd, "socketFd                      : %d\n", itemNode->socketFd);
-        dprintf(fd, "sideType                      : %d\n", itemNode->sideType);
+        SOFTBUS_DPRINTF(fd, "connectionId                  : %d\n", itemNode->connectionId);
+        SOFTBUS_DPRINTF(fd, "socketFd                      : %d\n", itemNode->socketFd);
+        SOFTBUS_DPRINTF(fd, "sideType                      : %d\n", itemNode->sideType);
         char *tempMac = DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER);
-        dprintf(fd, "btMac                         : %s\n", tempMac);
+        SOFTBUS_DPRINTF(fd, "btMac                         : %s\n", tempMac);
         SoftBusFree(tempMac);
-        dprintf(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
-        dprintf(fd, "br state                      : %d\n", itemNode->state);
-        dprintf(fd, "refCount                      : %d\n", itemNode->refCount);
-        dprintf(fd, "refCountRemote                : %d\n", itemNode->refCountRemote);
-        dprintf(fd, "infoObjRefCount               : %d\n", itemNode->infoObjRefCount);
-        dprintf(fd, "recvBuf                       : %s\n", itemNode->recvBuf);
-        dprintf(fd, "recvSize                      : %d\n", itemNode->recvSize);
-        dprintf(fd, "recvPos                       : %d\n", itemNode->recvPos);
-        dprintf(fd, "conGestState                  : %d\n", itemNode->conGestState);
-        dprintf(fd, "request Info: \n");
+        SOFTBUS_DPRINTF(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
+        SOFTBUS_DPRINTF(fd, "br state                      : %d\n", itemNode->state);
+        SOFTBUS_DPRINTF(fd, "refCount                      : %d\n", itemNode->refCount);
+        SOFTBUS_DPRINTF(fd, "refCountRemote                : %d\n", itemNode->refCountRemote);
+        SOFTBUS_DPRINTF(fd, "infoObjRefCount               : %d\n", itemNode->infoObjRefCount);
+        SOFTBUS_DPRINTF(fd, "recvBuf                       : %s\n", itemNode->recvBuf);
+        SOFTBUS_DPRINTF(fd, "recvSize                      : %d\n", itemNode->recvSize);
+        SOFTBUS_DPRINTF(fd, "recvPos                       : %d\n", itemNode->recvPos);
+        SOFTBUS_DPRINTF(fd, "conGestState                  : %d\n", itemNode->conGestState);
+        SOFTBUS_DPRINTF(fd, "request Info: \n");
         LIST_FOR_EACH(item, &(itemNode->requestList)) {
             RequestInfo *requestNode = LIST_ENTRY(item, RequestInfo, node);
-            dprintf(fd, "requestId                 : %u\n", requestNode->requestId);
+            SOFTBUS_DPRINTF(fd, "requestId                 : %u\n", requestNode->requestId);
         }
-        dprintf(fd, "seq                           : %lu\n", itemNode->seq);
-        dprintf(fd, "waitSeq                       : %lu\n", itemNode->waitSeq);
-        dprintf(fd, "windows                       : %u\n", itemNode->windows);
-        dprintf(fd, "ackTimeoutCount               : %u\n", itemNode->ackTimeoutCount);
+        SOFTBUS_DPRINTF(fd, "seq                           : %lu\n", itemNode->seq);
+        SOFTBUS_DPRINTF(fd, "waitSeq                       : %lu\n", itemNode->waitSeq);
+        SOFTBUS_DPRINTF(fd, "windows                       : %u\n", itemNode->windows);
+        SOFTBUS_DPRINTF(fd, "ackTimeoutCount               : %u\n", itemNode->ackTimeoutCount);
+        SOFTBUS_DPRINTF(fd, "pending request Info: \n");
+        LIST_FOR_EACH(item, &(itemNode->pendingRequestList)) {
+            RequestInfo *requestNode = LIST_ENTRY(item, RequestInfo, node);
+            SOFTBUS_DPRINTF(fd, "requestId                 : %u\n", requestNode->requestId);
+        }
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
     return SOFTBUS_OK;

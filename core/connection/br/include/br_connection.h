@@ -30,7 +30,7 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif/* __clpusplus */
-#endif/* __clpusplus */
+#endif /* __clpusplus */
+#endif /* __clpusplus */
 #endif
 

@@ -1299,43 +1299,43 @@ static int32_t BleConnectionDump(int fd)
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------BLEConnectList Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "\n-----------------BLEConnectList Info-------------------\n");
     LIST_FOR_EACH(item, &g_connection_list) {
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
-        dprintf(fd, "halConnId                     : %d\n", itemNode->halConnId);
-        dprintf(fd, "connId                        : %d\n", itemNode->connId);
+        SOFTBUS_DPRINTF(fd, "halConnId                     : %d\n", itemNode->halConnId);
+        SOFTBUS_DPRINTF(fd, "connId                        : %d\n", itemNode->connId);
         char *addr = DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER);
-        dprintf(fd, "btMac                         : %s\n", addr);
+        SOFTBUS_DPRINTF(fd, "btMac                         : %s\n", addr);
         SoftBusFree(addr);
-        dprintf(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
-        dprintf(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
-        dprintf(fd, "Connection Info type          : %u\n", itemNode->info.type);
-        dprintf(fd, "BleInfo: \n");
+        SOFTBUS_DPRINTF(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
+        SOFTBUS_DPRINTF(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
+        SOFTBUS_DPRINTF(fd, "Connection Info type          : %u\n", itemNode->info.type);
+        SOFTBUS_DPRINTF(fd, "BleInfo: \n");
         char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
-        dprintf(fd, "BleInfo addr                  : %s\n", bleMac);
+        SOFTBUS_DPRINTF(fd, "BleInfo addr                  : %s\n", bleMac);
         SoftBusFree(bleMac);
         char *deviceIdHash = DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER);
-        dprintf(fd, "BleInfo deviceIdHash          : %s\n", deviceIdHash);
+        SOFTBUS_DPRINTF(fd, "BleInfo deviceIdHash          : %s\n", deviceIdHash);
         SoftBusFree(deviceIdHash);
-        dprintf(fd, "Connection state              : %d\n", itemNode->state);
-        dprintf(fd, "Connection refCount           : %d\n", itemNode->refCount);
-        dprintf(fd, "Connection mtu                : %d\n", itemNode->mtu);
-        dprintf(fd, "Connection peerType           : %d\n", itemNode->peerType);
+        SOFTBUS_DPRINTF(fd, "Connection state              : %d\n", itemNode->state);
+        SOFTBUS_DPRINTF(fd, "Connection refCount           : %d\n", itemNode->refCount);
+        SOFTBUS_DPRINTF(fd, "Connection mtu                : %d\n", itemNode->mtu);
+        SOFTBUS_DPRINTF(fd, "Connection peerType           : %d\n", itemNode->peerType);
         char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
-        dprintf(fd, "Connection peerDevId          : %s\n", peerDevId);
+        SOFTBUS_DPRINTF(fd, "Connection peerDevId          : %s\n", peerDevId);
         SoftBusFree(peerDevId);
-        dprintf(fd, "request Info: \n");
+        SOFTBUS_DPRINTF(fd, "request Info: \n");
         LIST_FOR_EACH(item, &itemNode->requestList) {
             BleRequestInfo *requestNode = LIST_ENTRY(item, BleRequestInfo, node);
-            dprintf(fd, "request isUsed                : %u\n", requestNode->requestId);
+            SOFTBUS_DPRINTF(fd, "request isUsed                : %u\n", requestNode->requestId);
         }
-        dprintf(fd, "Connection recvCache          : \n");
+        SOFTBUS_DPRINTF(fd, "Connection recvCache          : \n");
         for (int i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
-            dprintf(fd, "recvCache isUsed              : %d\n", itemNode->recvCache[i].isUsed);
-            dprintf(fd, "recvCache timeStamp           : %d\n", itemNode->recvCache[i].timeStamp);
-            dprintf(fd, "recvCache seq                 : %d\n", itemNode->recvCache[i].seq);
-            dprintf(fd, "recvCache currentSize         : %d\n", itemNode->recvCache[i].currentSize);
-            dprintf(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
+            SOFTBUS_DPRINTF(fd, "recvCache isUsed              : %d\n", itemNode->recvCache[i].isUsed);
+            SOFTBUS_DPRINTF(fd, "recvCache timeStamp           : %d\n", itemNode->recvCache[i].timeStamp);
+            SOFTBUS_DPRINTF(fd, "recvCache seq                 : %d\n", itemNode->recvCache[i].seq);
+            SOFTBUS_DPRINTF(fd, "recvCache currentSize         : %d\n", itemNode->recvCache[i].currentSize);
+            SOFTBUS_DPRINTF(fd, "recvCache cache               : %s\n", itemNode->recvCache[i].cache);
         }
     }
     (void)SoftBusMutexUnlock(&g_connectionLock);

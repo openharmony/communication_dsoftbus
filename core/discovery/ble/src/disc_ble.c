@@ -1744,17 +1744,17 @@ static int32_t BleInfoDump(int fd)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    dprintf(fd, "-----------------BleInfoManager Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "-----------------BleInfoManager Info-------------------\n");
     for (int i = 0; i < BLE_INFO_COUNT; i++) {
-        dprintf(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
-        dprintf(fd, "BleInfo capBitMap                       : %u\n", *(g_bleInfoManager[i].capBitMap));
-        dprintf(fd, "BleInfo capCount                        : %d\n", *(g_bleInfoManager[i].capCount));
-        dprintf(fd, "BleInfo capabilityData                  : %s\n", *(g_bleInfoManager[i].capabilityData));
-        dprintf(fd, "BleInfo capDataLen                      : %u\n", *(g_bleInfoManager[i].capDataLen));
-        dprintf(fd, "BleInfo isSameAccount                   : %d\n", *(g_bleInfoManager[i].isSameAccount));
-        dprintf(fd, "BleInfo isWakeRemote                    : %d\n", *(g_bleInfoManager[i].isWakeRemote));
-        dprintf(fd, "BleInfo freq                            : %d\n", *(g_bleInfoManager[i].freq));
-        dprintf(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
+        SOFTBUS_DPRINTF(fd, "BleInfo needUpdate                      : %d\n", g_bleInfoManager[i].needUpdate);
+        SOFTBUS_DPRINTF(fd, "BleInfo capBitMap                       : %u\n", *(g_bleInfoManager[i].capBitMap));
+        SOFTBUS_DPRINTF(fd, "BleInfo capCount                        : %d\n", *(g_bleInfoManager[i].capCount));
+        SOFTBUS_DPRINTF(fd, "BleInfo capabilityData                  : %s\n", *(g_bleInfoManager[i].capabilityData));
+        SOFTBUS_DPRINTF(fd, "BleInfo capDataLen                      : %u\n", *(g_bleInfoManager[i].capDataLen));
+        SOFTBUS_DPRINTF(fd, "BleInfo isSameAccount                   : %d\n", *(g_bleInfoManager[i].isSameAccount));
+        SOFTBUS_DPRINTF(fd, "BleInfo isWakeRemote                    : %d\n", *(g_bleInfoManager[i].isWakeRemote));
+        SOFTBUS_DPRINTF(fd, "BleInfo freq                            : %d\n", *(g_bleInfoManager[i].freq));
+        SOFTBUS_DPRINTF(fd, "BleInfo rangingRefCnt                   : %d\n", g_bleInfoManager[i].rangingRefCnt);
     }
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
@@ -1762,36 +1762,37 @@ static int32_t BleInfoDump(int fd)
 
 static int32_t BleAdvertiserDump(int fd)
 {
-    dprintf(fd, "\n-----------------BleAdvertiser Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "\n-----------------BleAdvertiser Info-------------------\n");
     for (int i = 0; i < NUM_ADVERTISER; i++) {
-        dprintf(fd, "BleAdvertiser advId                     : %d\n", g_bleAdvertiser[i].advId);
-        dprintf(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
-        dprintf(fd, "DeviceInfo                              : \n");
-        dprintf(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
-        dprintf(fd, "accountHash                             : %s\n", g_bleAdvertiser[i].deviceInfo.accountHash);
-        dprintf(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        dprintf(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
-        dprintf(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
-        dprintf(fd, "addr type                               : %u\n",
-                g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
+        SOFTBUS_DPRINTF(fd, "BleAdvertiser advId                     : %d\n", g_bleAdvertiser[i].advId);
+        SOFTBUS_DPRINTF(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
+        SOFTBUS_DPRINTF(fd, "DeviceInfo                              : \n");
+        SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
+        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
+            g_bleAdvertiser[i].deviceInfo.accountHash);
+        SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
+        SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
+        SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
+        SOFTBUS_DPRINTF(fd, "addr type                               : %u\n",
+            g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].type);
         char *bleMac = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.bleMac,
                                    BT_MAC_LEN, MAC_DELIMITER);
-        dprintf(fd, "Connection bleMac                       : %s\n", bleMac);
+        SOFTBUS_DPRINTF(fd, "Connection bleMac                       : %s\n", bleMac);
         SoftBusFree(bleMac);
         char *hash = DataMasking((char *)(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].info.ble.udidHash),
                                  UDID_HASH_LEN, ID_DELIMITER);
-        dprintf(fd, "Connection bleHash                      : %s\n", hash);
+        SOFTBUS_DPRINTF(fd, "Connection bleHash                      : %s\n", hash);
         SoftBusFree(hash);
         char *peerUid = DataMasking(g_bleAdvertiser[i].deviceInfo.addr[CONNECTION_ADDR_BLE].peerUid,
                                     MAX_ACCOUNT_HASH_LEN, ID_DELIMITER);
-        dprintf(fd, "Connection peerUid                      : %s\n", peerUid);
+        SOFTBUS_DPRINTF(fd, "Connection peerUid                      : %s\n", peerUid);
         SoftBusFree(peerUid);
-        dprintf(fd, "capabilityBitmapNum                     : %u\n",
-                g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
-        dprintf(fd, "capabilityBitmap                        : %u\n",
-                *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
-        dprintf(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
-        dprintf(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
+        SOFTBUS_DPRINTF(fd, "capabilityBitmapNum                     : %u\n",
+            g_bleAdvertiser[i].deviceInfo.capabilityBitmapNum);
+        SOFTBUS_DPRINTF(fd, "capabilityBitmap                        : %u\n",
+            *(g_bleAdvertiser[i].deviceInfo.capabilityBitmap));
+        SOFTBUS_DPRINTF(fd, "custData                                : %s\n", g_bleAdvertiser[i].deviceInfo.custData);
+        SOFTBUS_DPRINTF(fd, "range                                   : %d\n", g_bleAdvertiser[i].deviceInfo.range);
     }
     return SOFTBUS_OK;
 }
@@ -1803,15 +1804,15 @@ static int32_t RecvMessageInfoDump(int fd)
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------RecvMessage Info-------------------\n");
-    dprintf(fd, "RecvMessageInfo numNeedBrMac           : %u\n", g_recvMessageInfo.numNeedBrMac);
-    dprintf(fd, "RecvMessageInfo numNeedResp            : %u\n", g_recvMessageInfo.numNeedResp);
+    SOFTBUS_DPRINTF(fd, "\n-----------------RecvMessage Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "RecvMessageInfo numNeedBrMac           : %u\n", g_recvMessageInfo.numNeedBrMac);
+    SOFTBUS_DPRINTF(fd, "RecvMessageInfo numNeedResp            : %u\n", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH(item, &g_recvMessageInfo.node)
     {
         RecvMessage *recvNode = LIST_ENTRY(item, RecvMessage, node);
-        dprintf(fd, "RecvMessage capBitMap                  : %u\n", recvNode->capBitMap[0]);
-        dprintf(fd, "RecvMessage key                        : %s\n", recvNode->key);
-        dprintf(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
+        SOFTBUS_DPRINTF(fd, "RecvMessage capBitMap                  : %u\n", recvNode->capBitMap[0]);
+        SOFTBUS_DPRINTF(fd, "RecvMessage key                        : %s\n", recvNode->key);
+        SOFTBUS_DPRINTF(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     return SOFTBUS_OK;
