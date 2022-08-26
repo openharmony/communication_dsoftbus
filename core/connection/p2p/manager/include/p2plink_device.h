@@ -21,6 +21,12 @@
 #include "p2plink_adapter.h"
 #include "softbus_def.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef enum {
     P2PLINK_MANAGER_STATE_NONE,
     P2PLINK_MANAGER_STATE_REUSE,
@@ -83,4 +89,10 @@ ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp);
 void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole);
 void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId);
 void P2pLinkDevEnterDiscState(void);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

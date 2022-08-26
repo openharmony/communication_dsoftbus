@@ -19,7 +19,18 @@
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif/* __clpusplus */
+#endif/* __clpusplus */
 #endif
 

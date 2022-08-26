@@ -18,6 +18,12 @@
 
 #include "stdint.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 void P2pLinkInitRef(void);
 
 int32_t P2pLinkGetMyP2pRef(void);
@@ -34,4 +40,9 @@ int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac);
 void P2pLinkDumpRef(void);
 void P2pLinkMyP2pRefClean(void);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

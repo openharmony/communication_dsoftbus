@@ -18,6 +18,12 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t InitBrPendingPacket(void);
 void DestroyBrPendingPacket(void);
 int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq);
@@ -26,5 +32,10 @@ void DelBrPendingPacket(uint32_t id, uint64_t seq);
 int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void **data);
 int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *data);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif
 

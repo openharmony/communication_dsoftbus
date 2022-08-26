@@ -21,6 +21,12 @@
 #include "p2plink_adapter.h"
 #include "p2plink_type.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList);
 
 int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString, int32_t len);
@@ -28,4 +34,10 @@ int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *chann
 int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList);
 
 void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list[], int32_t num, int32_t *outNum);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

@@ -21,6 +21,12 @@
 #include "common_list.h"
 #include "p2plink_loop.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef void (*StateEnter)(void);
 typedef void (*StateExit)(void);
 typedef void (*StateProcess)(P2pLoopMsg msgType, void *para);
@@ -49,4 +55,9 @@ void P2pLinkFsmMsgProcDelayDel(int32_t msgType);
 
 void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

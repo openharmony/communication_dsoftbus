@@ -16,6 +16,12 @@
 #ifndef SOFTBUS_DATAHEAD_TRANSFORM_H
 #define SOFTBUS_DATAHEAD_TRANSFORM_H
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "softbus_conn_manager.h"
@@ -26,4 +32,9 @@ void UnpackConnPktHead(ConnPktHead *data);
 void UnpackProxyMessageHead(ProxyMessageHead *msg);
 void PackProxyMessageHead(ProxyMessageHead *msg);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_DATAHEAD_CONVER_H */
