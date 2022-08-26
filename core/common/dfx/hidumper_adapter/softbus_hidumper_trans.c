@@ -14,12 +14,14 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include "securec.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_trans.h"
+#include "softbus_log.h"
+#include "softbus_utils.h"
 
 #define MAX_HELP_INFO_LEN (100)
 #define MAX_ID_LEN (10)
@@ -65,7 +67,7 @@ void InitTranHelpInfo(void)
 
 void ShowTransDumpHelperInfo(int fd)
 {
-    dprintf(fd, "%s", g_transHelpInfo);
+    SOFTBUS_DPRINTF(fd, "%s", g_transHelpInfo);
 }
 
 ShowDumpInfosFunc g_ShowRegisterSessionInfosFunc = NULL;
@@ -92,10 +94,10 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
     char *uidStr = DataMasking(uidArr, sizeof(uidArr), ID_DELIMITER);
     char *pidStr = DataMasking(pidArr, sizeof(pidArr), ID_DELIMITER);
 
-    dprintf(fd, "PkgName               : %s\n", pkgName);
-    dprintf(fd, "SessionName           : %s\n", sessionName);
-    dprintf(fd, "PID                   : %s\n", uidStr);
-    dprintf(fd, "UID                   : %s\n", pidStr);
+    SOFTBUS_DPRINTF(fd, "PkgName               : %s\n", pkgName);
+    SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", sessionName);
+    SOFTBUS_DPRINTF(fd, "PID                   : %s\n", uidStr);
+    SOFTBUS_DPRINTF(fd, "UID                   : %s\n", pidStr);
 
     SoftBusFree(uidStr);
     SoftBusFree(pidStr);
@@ -107,13 +109,13 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     char *srcAddr = DataMasking(appInfo->myData.addr, sizeof(appInfo->myData.addr), IP_DELIMITER);
     char *dstAddr = DataMasking(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), IP_DELIMITER);
 
-    dprintf(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
-    dprintf(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
-    dprintf(fd, "PeerDeviceId          : %s\n", deviceId);
-    dprintf(fd, "LinkType              : %s\n", g_linkTypeList[type]);
-    dprintf(fd, "SourceAddress         : %s\n", srcAddr);
-    dprintf(fd, "DestAddress           : %s\n", dstAddr);
-    dprintf(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
+    SOFTBUS_DPRINTF(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
+    SOFTBUS_DPRINTF(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
+    SOFTBUS_DPRINTF(fd, "PeerDeviceId          : %s\n", deviceId);
+    SOFTBUS_DPRINTF(fd, "LinkType              : %s\n", g_linkTypeList[type]);
+    SOFTBUS_DPRINTF(fd, "SourceAddress         : %s\n", srcAddr);
+    SOFTBUS_DPRINTF(fd, "DestAddress           : %s\n", dstAddr);
+    SOFTBUS_DPRINTF(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
 
     SoftBusFree(deviceId);
     SoftBusFree(srcAddr);
