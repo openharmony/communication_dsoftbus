@@ -49,6 +49,7 @@ typedef enum {
     ADD_CONN_BR_SERVICE_DISCONNECTED_MSG,
     ADD_CONN_BR_CONGEST_MSG,
     ADD_CONN_BR_RECV_MSG,
+    ADD_CONN_BR_CLOSING_TIMEOUT_MSG,
     ADD_CONN_BR_MAX
 } BrConnLoopMsgType;
 
@@ -81,6 +82,7 @@ typedef struct BrConnectionInfo {
     uint64_t waitSeq;
     uint32_t windows;
     uint32_t ackTimeoutCount;
+    ListNode pendingRequestList;
 } BrConnectionInfo;
 
 void InitBrConnectionManager(int32_t brBuffSize);
@@ -113,12 +115,16 @@ uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState
 
 int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo);
 
+int32_t AddPengingRequestByConnId(uint32_t connId, RequestInfo *requestInfo);
+
 int32_t AddConnectionList(BrConnectionInfo *newConnInfo);
 
 void RfcomCongestEvent(int32_t socketFd, int32_t value);
 
 int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *notifyList,
     ConnectionInfo *connectionInfo, int32_t *sideType);
+
+int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, ListNode *pendings);
 
 bool HasDiffMacDeviceExit(const ConnectOption *option);
 
@@ -129,6 +135,8 @@ bool IsBrDeviceReady(uint32_t connId);
 int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType);
 
 bool BrCheckActiveConnection(const ConnectOption *option);
+
+int32_t ResumeConnection(uint32_t connId, ListNode *pendings);
 
 #endif
 
