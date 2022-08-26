@@ -1262,16 +1262,16 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
 
 int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
 {
-    dprintf(fd, "-----RemoteDeviceInfo-----\n");
+    SOFTBUS_DPRINTF(fd, "-----RemoteDeviceInfo-----\n");
     NodeBasicInfo *remoteNodeInfo = NULL;
     int32_t infoNum = 0;
     if (LnnGetAllOnlineNodeInfo(&remoteNodeInfo, &infoNum) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllOnlineNodeInfo failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "remote device num = %d\n", infoNum);
+    SOFTBUS_DPRINTF(fd, "remote device num = %d\n", infoNum);
     for (int i = 0; i < infoNum; i++) {
-        dprintf(fd, "\n[NO.%d]\n", i + 1);
+        SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
     return SOFTBUS_OK;
