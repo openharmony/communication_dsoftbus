@@ -886,7 +886,7 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 
 int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
 {
-    dprintf(fd, "-----LocalDeviceInfo-----\n");
+    SOFTBUS_DPRINTF(fd, "-----LocalDeviceInfo-----\n");
     NodeBasicInfo localNodeInfo;
     if (LnnGetLocalDeviceInfo(&localNodeInfo) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalDeviceInfo failed!");
