@@ -1763,7 +1763,8 @@ static int BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "BleAdvertiser isAdvertising             : %d\n", g_bleAdvertiser[i].isAdvertising);
         SOFTBUS_DPRINTF(fd, "DeviceInfo                              : \n");
         SOFTBUS_DPRINTF(fd, "devId                                   : %s\n", g_bleAdvertiser[i].deviceInfo.devId);
-        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n", g_bleAdvertiser[i].deviceInfo.accountHash);
+        SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n",
+            g_bleAdvertiser[i].deviceInfo.accountHash);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
         SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", g_bleAdvertiser[i].deviceInfo.devName);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);
