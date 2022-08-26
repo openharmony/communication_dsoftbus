@@ -17,6 +17,7 @@
 #define SOFTBUS_LOG_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <inttypes.h>
 #include "softbus_adapter_log.h"
 
@@ -24,6 +25,12 @@
 #if __cplusplus
 extern "C" {
 #endif
+#endif
+
+#ifndef __ICCARM__
+#define SOFTBUS_DPRINTF(fd, fmt, ...) dprintf(fd, fmt, ##__VA_ARGS__)
+#else
+#define SOFTBUS_DPRINTF(fd, fmt, ...)
 #endif
 
 typedef enum {

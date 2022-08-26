@@ -513,20 +513,20 @@ void DiscCoapDeinit(void)
 
 static int CoapPubInfoDump(int fd)
 {
-    dprintf(fd, "\n---------------CoapPublishInfo------------------\n");
-        dprintf(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
-        dprintf(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
-        dprintf(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
-        dprintf(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
+    SOFTBUS_DPRINTF(fd, "\n---------------CoapPublishInfo------------------\n");
+    SOFTBUS_DPRINTF(fd, "publish allCap              : %u\n", *(g_publishMgr->allCap));
+    SOFTBUS_DPRINTF(fd, "publish capCount            : %hd\n", *(g_publishMgr->capCount));
+    SOFTBUS_DPRINTF(fd, "publish isUpdate            : %d\n", g_publishMgr->isUpdate);
+    SOFTBUS_DPRINTF(fd, "publish isEmpty             : %d\n", g_publishMgr->isEmpty);
     return SOFTBUS_OK;
 }
 
 static int CoapSubInfoDump(int fd)
 {
-    dprintf(fd, "\n---------------CoapSubscribeInfo------------------\n");
-        dprintf(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
-        dprintf(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
-        dprintf(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
-        dprintf(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
+    SOFTBUS_DPRINTF(fd, "\n---------------CoapSubscribeInfo------------------\n");
+    SOFTBUS_DPRINTF(fd, "subscribe allCap            : %u\n", *(g_subscribeMgr->allCap));
+    SOFTBUS_DPRINTF(fd, "subscribe capCount          : %hd\n", *(g_subscribeMgr->capCount));
+    SOFTBUS_DPRINTF(fd, "subscribe isUpdate          : %d\n", g_subscribeMgr->isUpdate);
+    SOFTBUS_DPRINTF(fd, "subscribe isEmpty           : %d\n", g_subscribeMgr->isEmpty);
     return SOFTBUS_OK;
 }

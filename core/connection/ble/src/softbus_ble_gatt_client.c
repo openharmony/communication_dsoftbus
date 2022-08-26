@@ -169,7 +169,7 @@ static int32_t AddGattcInfoToList(BleGattcInfo *info)
 
 static char *GetBleAttrUuid(int32_t module)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid %d", module);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBleAttrUuid %d", module);
     if (module == MODULE_BLE_NET) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid1");
         return SOFTBUS_CHARA_BLENET_UUID;
@@ -399,7 +399,7 @@ static void SearchedMsgHandler(int32_t clientId, int status)
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
         &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%d  %d", clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%d  %d", clientId, status);
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
     }
@@ -810,14 +810,14 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 static int BleGattcDump(int fd)
 {
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
-    dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
+    SOFTBUS_DPRINTF(fd, "\n-----------------BLEGattc Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
     LIST_FOR_EACH(item, &(g_gattcInfoList->list)) {
         BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
-        dprintf(fd, "clientId                  : %d\n", itemNode->clientId);
-        dprintf(fd, "state                     : %d\n", itemNode->state);
+        SOFTBUS_DPRINTF(fd, "clientId                  : %d\n", itemNode->clientId);
+        SOFTBUS_DPRINTF(fd, "state                     : %d\n", itemNode->state);
         char *addr = DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER);
-        dprintf(fd, "btMac                     : %s\n", addr);
+        SOFTBUS_DPRINTF(fd, "btMac                     : %s\n", addr);
         SoftBusFree(addr);
     }
     return SOFTBUS_OK;
