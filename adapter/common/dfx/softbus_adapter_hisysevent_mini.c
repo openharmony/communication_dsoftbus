@@ -18,6 +18,7 @@
 
 int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
 {
+    (void)reportMsg;
     return 0;
 }
 
