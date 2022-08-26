@@ -75,6 +75,8 @@ void SetThreadName(const char *name)
 
 void BindThreadToTargetMask(pid_t tid, uint32_t cpuMask)
 {
+    (void)tid;
+    (void)cpuMask;
 }
 
 void SetMaximumPriorityForThread(void)
