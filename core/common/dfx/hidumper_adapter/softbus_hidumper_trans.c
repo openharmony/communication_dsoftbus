@@ -19,9 +19,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_hidumper.h"
-#include "softbus_hidumper_trans.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_hidumper_trans.h"
 
 #define MAX_HELP_INFO_LEN (100)
 #define MAX_ID_LEN (10)
