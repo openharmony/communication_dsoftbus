@@ -30,45 +30,45 @@ static LIST_HEAD(g_hidumperhander_list);
 
 void SoftBusDumpShowHelp(int fd)
 {
-    dprintf(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
-    dprintf(fd, "  Option: [-h] ");
+    SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
+    SOFTBUS_DPRINTF(fd, "  Option: [-h] ");
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
-        dprintf(fd, "| [");
-        dprintf(fd, "%s", itemNode->moduleName);
-        dprintf(fd, "]");
+        SOFTBUS_DPRINTF(fd, "| [");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
+        SOFTBUS_DPRINTF(fd, "]");
     }
-    dprintf(fd, "\n");
+    SOFTBUS_DPRINTF(fd, "\n");
 
     item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
-        dprintf(fd, "\t\t");
-        dprintf(fd, "%s", itemNode->moduleName);
-        dprintf(fd, "\t\t");
-        dprintf(fd, "%s", itemNode->helpInfo);
-        dprintf(fd, "\n");
+        SOFTBUS_DPRINTF(fd, "\t\t");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
+        SOFTBUS_DPRINTF(fd, "\t\t");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->helpInfo);
+        SOFTBUS_DPRINTF(fd, "\n");
     }
 }
 
 void SoftBusDumpErrInfo(int fd, const char *argv)
 {
-    dprintf(fd, "the command %s is invalid, please input again!\n", argv);
+    SOFTBUS_DPRINTF(fd, "the command %s is invalid, please input again!\n", argv);
 }
 
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
 {
-    dprintf(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
-    dprintf(fd, "  Option: [-h]  | [-l <");
+    SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
+    SOFTBUS_DPRINTF(fd, "  Option: [-h]  | [-l <");
     ListNode *item = NULL;
     LIST_FOR_EACH(item, varList) {
         SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
-        dprintf(fd, "%s |", itemNode->varName);
+        SOFTBUS_DPRINTF(fd, "%s |", itemNode->varName);
     }
-    dprintf(fd, ">]\n");
-    dprintf(fd, "   -h         List all the dump item in %s module\n", moduleName);
-    dprintf(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
+    SOFTBUS_DPRINTF(fd, ">]\n");
+    SOFTBUS_DPRINTF(fd, "   -h         List all the dump item in %s module\n", moduleName);
+    SOFTBUS_DPRINTF(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
 }
 
 static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)

@@ -398,7 +398,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
 
 static void BleServiceStartCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
@@ -493,7 +493,7 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
         .valueLen = strlen("not support!") + 1,
         .value = "not support!"
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRequestReadCallback sendresponse");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleRequestReadCallback sendresponse");
     SoftBusGattsSendResponse(&response);
 }
 
@@ -684,12 +684,12 @@ int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
 
 static int BleGattServiceDump(int fd)
 {
-    dprintf(fd, "\n-----------------BLEGattService Info-------------------\n");
-    dprintf(fd, "GattService state               : %u\n", g_gattService.state);
-    dprintf(fd, "BleGattService svcId            : %d\n", g_gattService.svcId);
-    dprintf(fd, "BleGattService bleConnChardId   : %d\n", g_gattService.bleConnCharaId);
-    dprintf(fd, "BleGattService bleConnDesId     : %d\n", g_gattService.bleConnDesId);
-    dprintf(fd, "BleGattService bleNetCharaId    : %d\n", g_gattService.bleNetCharaId);
-    dprintf(fd, "BleGattService bleNetDesId      : %d\n", g_gattService.bleNetDesId);
+    SOFTBUS_DPRINTF(fd, "\n-----------------BLEGattService Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "GattService state               : %u\n", g_gattService.state);
+    SOFTBUS_DPRINTF(fd, "BleGattService svcId            : %d\n", g_gattService.svcId);
+    SOFTBUS_DPRINTF(fd, "BleGattService bleConnChardId   : %d\n", g_gattService.bleConnCharaId);
+    SOFTBUS_DPRINTF(fd, "BleGattService bleConnDesId     : %d\n", g_gattService.bleConnDesId);
+    SOFTBUS_DPRINTF(fd, "BleGattService bleNetCharaId    : %d\n", g_gattService.bleNetCharaId);
+    SOFTBUS_DPRINTF(fd, "BleGattService bleNetDesId      : %d\n", g_gattService.bleNetDesId);
     return SOFTBUS_OK;
 }

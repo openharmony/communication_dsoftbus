@@ -104,12 +104,12 @@ void P2pLinkLnnSync(void)
 
 static int P2pLnnDump(int fd)
 {
-    dprintf(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
+    SOFTBUS_DPRINTF(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
     char *lnnMyP2pMac = DataMasking(g_lnnMyP2pMac, P2P_MAC_LEN, MAC_DELIMITER);
-    dprintf(fd, "lnnMyP2pMac               :%s\n", lnnMyP2pMac);
+    SOFTBUS_DPRINTF(fd, "lnnMyP2pMac               :%s\n", lnnMyP2pMac);
     SoftBusFree(lnnMyP2pMac);
     char *lnnGoP2pMac = DataMasking(g_lnnGoMac, P2P_MAC_LEN, MAC_DELIMITER);
-    dprintf(fd, "lnnGoP2pMac               :%s\n", lnnGoP2pMac);
+    SOFTBUS_DPRINTF(fd, "lnnGoP2pMac               :%s\n", lnnGoP2pMac);
     SoftBusFree(lnnGoP2pMac);
 
     return SOFTBUS_OK;
