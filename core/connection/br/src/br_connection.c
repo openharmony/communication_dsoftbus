@@ -171,7 +171,8 @@ static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
 {
     SoftBusMessage *msg = BrConnCreateLoopMsg(ADD_CONN_BR_CLOSING_TIMEOUT_MSG, (uint64_t)connectionId, 0, NULL);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[PostClosingTimeoutEvent] BrConnCreateLoopMsg failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[PostClosingTimeoutEvent] BrConnCreateLoopMsg failed, "
+        "connection id: %u", connectionId);
         return SOFTBUS_ERR;
     }
     g_brAsyncHandler.looper->PostMessageDelay(g_brAsyncHandler.looper, msg, BR_CLOSE_TIMEOUT);
@@ -184,13 +185,13 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
     int32_t refCount = -1;
     int32_t state = SetRefCountByConnId(delta, &refCount, connectionId);
     if (state != BR_CONNECTION_STATE_CONNECTED && state != BR_CONNECTION_STATE_CLOSING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection %d not connected ever!", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection %u not connected ever!", connectionId);
         return;
     }
 
     if (state == BR_CONNECTION_STATE_CLOSING) {
         int32_t ret = PostClosingTimeoutEvent(connectionId);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "post close %d connection timeout event, ret: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "post close %u connection timeout event, ret: %d",
             connectionId, ret);
     }
 
@@ -375,7 +376,7 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
         option.brOption.sideType = CONN_SIDE_CLIENT;
         if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, connectionInfo.brInfo.brMac) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "restore connection failed, strcpy_s failed, "
-                "connectionId: %d", connectionId);
+                "connectionId: %u", connectionId);
             return;
         }
 
@@ -459,7 +460,7 @@ static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, co
 {
     RequestInfo *requestInfo = (RequestInfo *)SoftBusCalloc(sizeof(RequestInfo));
     if (requestInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "add penging request %d failed, malloc failed, connection: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "add pending request %u failed, malloc failed, connection: %u",
             requestId, connId);
         return SOFTBUS_ERR;
     }
@@ -467,8 +468,8 @@ static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, co
     ListInit(&requestInfo->node);
     requestInfo->requestId = requestId;
     requestInfo->callback = *result;
-    if (AddPengingRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "add pending request %d failed, connection: %d",
+    if (AddPendingRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "add pending request %u failed, connection: %u",
             requestId, connId);
         SoftBusFree(requestInfo);
         return SOFTBUS_ERR;
@@ -531,12 +532,12 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
     if (connState == BR_CONNECTION_STATE_CONNECTED) {
         ConnectDeviceExist(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CONNECTING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%d, current:%d, connecting:%d", connId,
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%u, current:%u, connecting:%u", connId,
             requestId, connectingReqId);
         ret = ConnectDeviceStateConnecting(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CLOSING) {
         ret = ConnectDeviceStateClosing(connId, requestId, result);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is closing:%d, current:%d, try pending request, ret: %d",
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is closing:%u, current:%u, try pending request, ret: %d",
             connId, requestId, ret);
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
         int32_t connCount = GetBrConnectionCount();
@@ -1020,7 +1021,7 @@ static void Resume(uint32_t connectionId)
     ListInit(&pendings);
 
     if (ResumeConnection(connectionId, &pendings) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume pending connection %d failed", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume pending connection %u failed", connectionId);
         return;
     }
 

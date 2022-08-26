@@ -389,7 +389,7 @@ int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
     return SOFTBUS_OK;
 }
 
-int32_t AddPengingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
+int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -406,7 +406,7 @@ int32_t AddPengingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
         }
     }
     if (target == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "penging request failed, there is no connection %d", connId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pending request failed, there is no connection %u", connId);
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -513,7 +513,7 @@ int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, ListNode *pendings)
     }
 
     if (target == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "get pending request failed, there is no %d conneciton", connId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "get pending request failed, there is no %u conneciton", connId);
         return 0;
     }
 
@@ -548,7 +548,7 @@ int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
     }
 
     if (target == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "resume connection failed, there is no %d conneciton", connId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "resume connection failed, there is no %u conneciton", connId);
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
