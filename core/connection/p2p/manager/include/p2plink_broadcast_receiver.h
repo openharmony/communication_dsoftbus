@@ -16,6 +16,18 @@
 #ifndef P2PLINK_BROADCAST_RECEIVER_H
 #define P2PLINK_BROADCAST_RECEIVER_H
 #include <stdint.h>
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t P2pLinkBroadCastInit(void);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

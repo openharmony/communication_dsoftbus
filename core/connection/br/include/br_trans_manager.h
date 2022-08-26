@@ -19,6 +19,12 @@
 #include "cJSON.h"
 #include "wrapper_br_interface.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define KEY_METHOD "KEY_METHOD"
 #define KEY_DELTA "KEY_DELTA"
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
@@ -30,5 +36,9 @@ int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *s
     int32_t brSendPeerLen, const char *data, uint32_t len);
 
 char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t count, int32_t *outLen);
-
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

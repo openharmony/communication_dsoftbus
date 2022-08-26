@@ -16,6 +16,12 @@
 #ifndef P2PLINK_LOOP_H
 #define P2PLINK_LOOP_H
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #include <stdint.h>
 typedef enum {
     P2PLOOP_MSG_PROC,
@@ -53,5 +59,10 @@ int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
 int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delayMillis, P2pLoopMsg msgType);
 int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif
 

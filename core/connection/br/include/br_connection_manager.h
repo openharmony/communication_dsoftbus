@@ -19,6 +19,12 @@
 #include "common_list.h"
 #include "softbus_conn_interface.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     ListNode node;
     uint32_t requestId;
@@ -49,6 +55,7 @@ typedef enum {
     ADD_CONN_BR_SERVICE_DISCONNECTED_MSG,
     ADD_CONN_BR_CONGEST_MSG,
     ADD_CONN_BR_RECV_MSG,
+    ADD_CONN_BR_CLOSING_TIMEOUT_MSG,
     ADD_CONN_BR_MAX
 } BrConnLoopMsgType;
 
@@ -130,5 +137,12 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
 
 bool BrCheckActiveConnection(const ConnectOption *option);
 
+int32_t ResumeConnection(uint32_t connId, ListNode *pendings);#ifdef __cplusplus
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif/* __cplusplus */
+#endif/* __cplusplus */
 #endif
 
