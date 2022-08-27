@@ -54,6 +54,8 @@
 #define BR_SERVER_NAME_LEN 24
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
 
+#define BR_CLOSE_TIMEOUT (5 * 1000)
+
 static pthread_mutex_t g_brConnLock;
 static int32_t g_brMaxConnCount;
 
@@ -165,15 +167,34 @@ static int32_t PostBytesInner(uint32_t connectionId, int32_t module, const char 
     return SOFTBUS_OK;
 }
 
+static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
+{
+    SoftBusMessage *msg = BrConnCreateLoopMsg(ADD_CONN_BR_CLOSING_TIMEOUT_MSG, (uint64_t)connectionId, 0, NULL);
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[PostClosingTimeoutEvent] BrConnCreateLoopMsg failed, "
+        "connection id: %u", connectionId);
+        return SOFTBUS_ERR;
+    }
+    g_brAsyncHandler.looper->PostMessageDelay(g_brAsyncHandler.looper, msg, BR_CLOSE_TIMEOUT);
+    return SOFTBUS_OK;
+}
+
 static void PackRequest(int32_t delta, uint32_t connectionId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[PackRequest: delta=%d, connectionId=%u]", delta, connectionId);
     int32_t refCount = -1;
     int32_t state = SetRefCountByConnId(delta, &refCount, connectionId);
-    if (state != BR_CONNECTION_STATE_CONNECTED) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Br Not Connected!");
+    if (state != BR_CONNECTION_STATE_CONNECTED && state != BR_CONNECTION_STATE_CLOSING) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection %u not connected ever!", connectionId);
         return;
     }
+
+    if (state == BR_CONNECTION_STATE_CLOSING) {
+        int32_t ret = PostClosingTimeoutEvent(connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "post close %u connection timeout event, ret: %d",
+            connectionId, ret);
+    }
+
     int32_t dataLen = 0;
     char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_REQUEST, delta, refCount, &dataLen);
     if (buf != NULL) {
@@ -336,15 +357,36 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
 {
     ListNode notifyList;
     ListInit(&notifyList);
+    ListNode pendingList;
+    ListInit(&pendingList);
     ConnectionInfo connectionInfo;
     int32_t sideType = BR_CLIENT_TYPE;
     int32_t perState = BR_CONNECTION_STATE_CLOSED;
     uint32_t connectionId = SetBrConnStateBySocket(socketFd, BR_CONNECTION_STATE_CLOSED, &perState);
     if (connectionId != 0) {
         (void)GetBrRequestListByConnId(connectionId, &notifyList, &connectionInfo, &sideType);
+        (void)GetAndRemovePendingRequestByConnId(connectionId, &pendingList);
         if (perState != BR_CONNECTION_STATE_CLOSED) {
             NotifyDisconnect(&notifyList, connectionId, connectionInfo, value, sideType);
             ReleaseConnectionRefByConnId(connectionId);
+        }
+
+        ConnectOption option = {0};
+        option.type = CONNECT_BR;
+        option.brOption.sideType = CONN_SIDE_CLIENT;
+        if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, connectionInfo.brInfo.brMac) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "restore connection failed, strcpy_s failed, "
+                "connectionId: %u", connectionId);
+            return;
+        }
+
+        ListNode *it = NULL;
+        ListNode *itNext = NULL;
+        LIST_FOR_EACH_SAFE(it, itNext, &pendingList) {
+            RequestInfo *request = LIST_ENTRY(it, RequestInfo, node);
+            ConnConnectDevice(&option, request->requestId, &request->callback);
+            ListDelete(&request->node);
+            SoftBusFree(request);
         }
     }
 }
@@ -370,7 +412,7 @@ int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketFd, int32_t value)
     return SOFTBUS_OK;
 }
 
-static void ConnectDeviceExit(uint32_t connId, uint32_t requestId, const ConnectResult *result)
+static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceExit]");
     BrConnectionInfo *connInfo = GetConnectionRef(connId);
@@ -408,6 +450,27 @@ static int32_t ConnectDeviceStateConnecting(uint32_t connId, uint32_t requestId,
     (void)memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result));
     if (AddRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "AddRequestByConnId failed");
+        SoftBusFree(requestInfo);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, const ConnectResult *result)
+{
+    RequestInfo *requestInfo = (RequestInfo *)SoftBusCalloc(sizeof(RequestInfo));
+    if (requestInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "add pending request %u failed, malloc failed, connection: %u",
+            requestId, connId);
+        return SOFTBUS_ERR;
+    }
+
+    ListInit(&requestInfo->node);
+    requestInfo->requestId = requestId;
+    requestInfo->callback = *result;
+    if (AddPendingRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "add pending request %u failed, connection: %u",
+            requestId, connId);
         SoftBusFree(requestInfo);
         return SOFTBUS_ERR;
     }
@@ -467,15 +530,15 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
     }
     int32_t connState = GetBrConnStateByConnOption(option, &connId, &connectingReqId);
     if (connState == BR_CONNECTION_STATE_CONNECTED) {
-        ConnectDeviceExit(connId, requestId, result);
+        ConnectDeviceExist(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CONNECTING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%d, current:%d, connecting:%d", connId,
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%u, current:%u, connecting:%u", connId,
             requestId, connectingReqId);
         ret = ConnectDeviceStateConnecting(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CLOSING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BR_CONNECTION_STATE_CLOSING]");
-        result->OnConnectFailed(requestId, 0);
-        ret = SOFTBUS_ERR;
+        ret = ConnectDeviceStateClosing(connId, requestId, result);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is closing:%u, current:%u, try pending request, ret: %d",
+            connId, requestId, ret);
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
         int32_t connCount = GetBrConnectionCount();
         if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
@@ -952,6 +1015,26 @@ EXIT:
     return;
 }
 
+static void Resume(uint32_t connectionId)
+{
+    ListNode pendings;
+    ListInit(&pendings);
+
+    if (ResumeConnection(connectionId, &pendings) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume pending connection %u failed", connectionId);
+        return;
+    }
+
+    ListNode *it = NULL;
+    ListNode *itNext = NULL;
+    LIST_FOR_EACH_SAFE(it, itNext, &pendings) {
+        RequestInfo *request = LIST_ENTRY(it, RequestInfo, node);
+        ConnectDeviceExist(connectionId, request->requestId, &request->callback);
+        ListDelete(&request->node);
+        SoftBusFree(request);
+    }
+}
+
 static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
@@ -970,6 +1053,8 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
     if (peerRef > 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[remote device Ref is > 0, do not reply]");
+        // resume connection when peer reference is larger than 0
+        Resume(connectionId);
         return;
     }
     if (myRefCount <= 0) {
@@ -1099,6 +1184,10 @@ static void BrConnMsgHandler(SoftBusMessage *msg)
             msg->obj = NULL;
             break;
         }
+        case ADD_CONN_BR_CLOSING_TIMEOUT_MSG:
+            // resume connection when close timeout
+            Resume((uint32_t)msg->arg1);
+            break;
         default:
             break;
     }
