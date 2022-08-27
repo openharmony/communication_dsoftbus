@@ -148,6 +148,8 @@ int32_t InitSoftbusSysEvt()
     if (InitConnStatisticSysEvt() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+#ifdef FILLP_ENHANCED
     NstackInitHiEvent();
+#endif
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }

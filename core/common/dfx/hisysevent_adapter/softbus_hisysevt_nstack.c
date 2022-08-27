@@ -22,6 +22,7 @@
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_hisysevt_nstack.h"
 
+#ifdef FILLP_ENHANCED
 /* below define must keep the same with DStream DFinder DMsg DFile */
 #define NSTACK_DFX_EVENT_NAME_LEN 128
 
@@ -227,3 +228,4 @@ void NstackInitHiEvent(void)
         LOG_ERR("NSTACKX_DFinderSetEventFunc failed!");
     }
 }
+#endif /* FILLP_ENHANCED */
