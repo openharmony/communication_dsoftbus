@@ -95,4 +95,4 @@ void P2pLinkDevEnterDiscState(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* __P2PLINK_DEVICE_H */

@@ -40,4 +40,4 @@ void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_CHANNEL_FREQ_H */

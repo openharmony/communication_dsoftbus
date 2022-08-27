@@ -78,4 +78,4 @@ int32_t P2pLinkQueryDevIsOnline(const char *peerMac);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_INTERFACE_H */

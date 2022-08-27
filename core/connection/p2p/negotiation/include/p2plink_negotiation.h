@@ -114,5 +114,4 @@ char *P2pLinkNegoGetCurrentPeerMac(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif
+#endif /* P2PLINK_NEGOTIATION_H */

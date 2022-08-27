@@ -60,4 +60,4 @@ void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_STATE_MACHINE_H */

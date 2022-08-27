@@ -36,4 +36,4 @@ void P2pLinkonAuthChannelClose(int64_t authId);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_CONTROL_MESSAGE_H */

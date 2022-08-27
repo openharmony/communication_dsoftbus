@@ -64,5 +64,5 @@ int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_LOOP_H */
 
