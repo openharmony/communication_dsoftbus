@@ -37,5 +37,5 @@ int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *data);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* BR_PENDING_PACKET_H */
 

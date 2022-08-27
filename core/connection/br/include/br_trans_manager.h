@@ -41,4 +41,4 @@ char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* BR_TRANS_MANAGER_H */

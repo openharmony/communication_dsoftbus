@@ -89,4 +89,4 @@ void P2pLinkEnableStub(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_ADAPTER_H */

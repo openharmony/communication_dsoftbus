@@ -38,4 +38,4 @@ int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pResp
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_JSON_PAYLOAD_H */

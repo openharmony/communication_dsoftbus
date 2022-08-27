@@ -34,4 +34,4 @@ int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_MESSAGE_H */

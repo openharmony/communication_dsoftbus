@@ -149,5 +149,4 @@ int32_t ResumeConnection(uint32_t connId, ListNode *pendings);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
-
+#endif /* BR_CONNECTION_MANAGER_H */

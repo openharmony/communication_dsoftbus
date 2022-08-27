@@ -32,5 +32,5 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
 }
 #endif /* __clpusplus */
 #endif /* __clpusplus */
-#endif
+#endif /* BR_CONNECTION_H */
 
