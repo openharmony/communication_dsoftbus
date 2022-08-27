@@ -237,7 +237,7 @@ static int32_t CopyValue(void *dst, uint32_t dstLen, void *src, uint32_t srcLen,
 {
     if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse tlv memcpy failed, "
-            "tlvType: %s, tlvLen: %d, dstLen: %d,", hint, srcLen, dstLen);
+            "tlvType: %s, tlvLen: %u, dstLen: %u", hint, srcLen, dstLen);
             return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -255,7 +255,7 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const unsigned char *src, 
         return SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse tlv convert br failed, "
-        "tlvType: TLV_TYPE_BR_MAC, tlvLen: %d, dstLen: %d", srcLen, BT_MAC_LEN);
+        "tlvType: TLV_TYPE_BR_MAC, tlvLen: %u, dstLen: %d", srcLen, BT_MAC_LEN);
     return ret;
 }
 
@@ -270,7 +270,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, u
         len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
         if (curLen + TL_LEN + len > dataLen) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unexperted advData: out of range, "
-                "tlvType: %d, tlvLen: %d, current pos: %d, total pos: %d", type, len, curLen, dataLen);
+                "tlvType: %d, tlvLen: %u, current pos: %u, total pos: %u", type, len, curLen, dataLen);
             return SOFTBUS_ERR;
         }
         switch (type) {
@@ -297,7 +297,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, u
                 ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, &data[curLen + 1], len, "TLV_TYPE_RANGE_POWER");
                 break;
             default:
-                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "Unknown TLV, tlvType: %d, tlvLen: %d, just skip",
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "Unknown TLV, tlvType: %d, tlvLen: %u, just skip",
                     type, len);
                 break;
         }
@@ -328,9 +328,9 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
     // More info about ADStructure, please ref Generic Access Profile Specification
     // We only use Flag(0x01) + ServiceData(0x16) + Manufacture(0xff) in order, so we should join them together
     // before parse
-    int32_t scanRspPtr = 0;
-    int32_t scanRspTlvLen = 0;
-    int32_t nextAdsPtr = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
+    uint32_t scanRspPtr = 0;
+    uint32_t scanRspTlvLen = 0;
+    uint32_t nextAdsPtr = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
     while (nextAdsPtr < dataLen) {
         if (data[nextAdsPtr + 1] == RSP_TYPE) {
             scanRspPtr = nextAdsPtr;
@@ -340,21 +340,21 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
         nextAdsPtr += data[nextAdsPtr] + 1;
     }
 
-    int32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
+    uint32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
     unsigned char *copyData = SoftBusCalloc(advLen + scanRspTlvLen);
     if (copyData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed.");
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(copyData, advLen, data, advLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s adv failed, advLen: %d", advLen);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s adv failed, advLen: %u", advLen);
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
     if (scanRspTlvLen != 0) {
         if (memcpy_s(copyData + advLen, scanRspTlvLen, data + scanRspPtr + RSP_HEAD_LEN, scanRspTlvLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s scan resp failed, advLen: %d, "
-                "scanRspTlvLen: %d.", advLen, scanRspTlvLen);
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy_s scan resp failed, advLen: %u, "
+                "scanRspTlvLen: %u.", advLen, scanRspTlvLen);
             SoftBusFree(copyData);
             return SOFTBUS_MEM_ERR;
         }
