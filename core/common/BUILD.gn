@@ -106,6 +106,15 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
 } else {
+  dstream_native_source_path = rebase_path("$dsoftbus_root_path")
+  dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
+  enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                         [
+                           "$dstream_native_source_path",
+                           "$dstream_dep_file",
+                         ],
+                         "value")
+
   cflags = [ "-DFILLP_LINUX" ]
   config("dsoftbus_utils_interface_L2") {
     include_dirs = [
@@ -152,13 +161,18 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
-      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
-      "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-      "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson_static",
     ]
+    if (!enhanced) {
+      cflags += [ "-DFILLP_ENHANCED" ]
+      public_deps += [
+        "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
+        "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
+        "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+        "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
+      ]
+    }
     if (is_standard_system) {
       external_deps = [
         "c_utils:utils",
