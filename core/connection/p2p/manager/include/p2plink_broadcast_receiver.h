@@ -30,4 +30,4 @@ int32_t P2pLinkBroadCastInit(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* P2PLINK_BROADCAST_RECEIVER_H */

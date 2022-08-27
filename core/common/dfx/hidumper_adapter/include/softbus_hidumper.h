@@ -63,4 +63,4 @@ void SoftBusHiDumperModuleDeInit(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* SOFTBUS_HIDUMPER_H */
