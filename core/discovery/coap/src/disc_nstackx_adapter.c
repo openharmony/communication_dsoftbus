@@ -521,32 +521,32 @@ void DiscNstackxDeinit(void)
 
 static int NstackxLocalDevInfoDump(int fd)
 {
-    dprintf(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
-    dprintf(fd, "name                                : %s\n", g_localDeviceInfo->name);
+    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
+    SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
     char *deviceId = DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER);
-    dprintf(fd, "deviceId                            : %s\n", deviceId);
+    SOFTBUS_DPRINTF(fd, "deviceId                            : %s\n", deviceId);
     SoftBusFree(deviceId);
     char *btMacAddr = DataMasking(g_localDeviceInfo->btMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER);
-    dprintf(fd, "btMacAddr                           : %s\n", btMacAddr);
+    SOFTBUS_DPRINTF(fd, "btMacAddr                           : %s\n", btMacAddr);
     SoftBusFree(btMacAddr);
     char *wifiMacAddr = DataMasking(g_localDeviceInfo->wifiMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER);
-    dprintf(fd, "wifiMacAddr                         : %s\n", wifiMacAddr);
+    SOFTBUS_DPRINTF(fd, "wifiMacAddr                         : %s\n", wifiMacAddr);
     SoftBusFree(wifiMacAddr);
-    dprintf(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
+    SOFTBUS_DPRINTF(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
     char *ip = DataMasking(g_localDeviceInfo->localIfInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER);
-    dprintf(fd, "localIfInfo networkIpAddr           : %s\n", ip);
+    SOFTBUS_DPRINTF(fd, "localIfInfo networkIpAddr           : %s\n", ip);
     SoftBusFree(ip);
-    dprintf(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
+    SOFTBUS_DPRINTF(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
     char *networkIpAddr = DataMasking(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER);
-    dprintf(fd, "networkIpAddr                       : %s\n", networkIpAddr);
+    SOFTBUS_DPRINTF(fd, "networkIpAddr                       : %s\n", networkIpAddr);
     SoftBusFree(networkIpAddr);
-    dprintf(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
-    dprintf(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
-    dprintf(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
-    dprintf(fd, "version                             : %s\n", g_localDeviceInfo->version);
-    dprintf(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
-    dprintf(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
-    dprintf(fd, "capabilityData                      : %s\n", g_capabilityData);
+    SOFTBUS_DPRINTF(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
+    SOFTBUS_DPRINTF(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
+    SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
+    SOFTBUS_DPRINTF(fd, "version                             : %s\n", g_localDeviceInfo->version);
+    SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
+    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
+    SOFTBUS_DPRINTF(fd, "capabilityData                      : %s\n", g_capabilityData);
 
     return SOFTBUS_OK;
 }
