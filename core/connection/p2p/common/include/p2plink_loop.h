@@ -16,13 +16,14 @@
 #ifndef P2PLINK_LOOP_H
 #define P2PLINK_LOOP_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
-#include <stdint.h>
 typedef enum {
     P2PLOOP_MSG_PROC,
     P2PLOOP_MSG_TEST,

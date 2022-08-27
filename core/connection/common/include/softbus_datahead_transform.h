@@ -16,16 +16,16 @@
 #ifndef SOFTBUS_DATAHEAD_TRANSFORM_H
 #define SOFTBUS_DATAHEAD_TRANSFORM_H
 
+#include <stdbool.h>
+#include <stdint.h>
+#include "softbus_conn_manager.h"
+#include "softbus_proxychannel_message.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#include <stdbool.h>
-#include <stdint.h>
-#include "softbus_conn_manager.h"
-#include "softbus_proxychannel_message.h"
 
 void PackConnPktHead(ConnPktHead *data);
 void UnpackConnPktHead(ConnPktHead *data);

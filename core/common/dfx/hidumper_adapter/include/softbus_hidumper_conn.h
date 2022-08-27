@@ -16,6 +16,7 @@
 #define SOFTBUS_HIDUMPER_CONN_H
 
 #include "softbus_hidumper.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C"{
