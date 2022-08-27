@@ -31,7 +31,6 @@
 #define SOFTBUS_DMSG_MODULE_NAME "dmsg"
 #define SOFTBUS_DMSG_MODULE_HELP "List all the dump item of dmsg"
 
-#define SOFTBUS_NSTACK_PRINT dprintf
 #define SOFTBUF_NSTACK_DUMP_BUF_LEN (2048)
 
 void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
@@ -43,7 +42,7 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
             "SoftBufNstackDumpFunc len error, data strlen %d, len %d.", dataLen, len);
         return;
     }
-    SOFTBUS_NSTACK_PRINT(fd, "%s", data);
+    SOFTBUS_DPRINTF(fd, "%s", data);
 }
 
 static int SoftBusNStackDstreamDumpHander(int fd, int argc, const char **argv)

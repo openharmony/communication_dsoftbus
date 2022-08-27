@@ -169,7 +169,7 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     }
 
     char *anonyOut = DataMasking((char *)udid, strlen(udid), ID_DELIMITER);
-    dprintf(fd, "Udid = %s\n", anonyOut);
+    SOFTBUS_DPRINTF(fd, "Udid = %s\n", anonyOut);
     SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
@@ -185,7 +185,7 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     }
 
     char *anonyOut = DataMasking((char *)uuid, strlen(uuid), ID_DELIMITER);
-    dprintf(fd, "Uuid = %s\n", anonyOut);
+    SOFTBUS_DPRINTF(fd, "Uuid = %s\n", anonyOut);
     SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
@@ -201,7 +201,7 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     }
 
     char *anonyOut = DataMasking((char *)brMac, strlen(brMac), MAC_DELIMITER);
-    dprintf(fd, "BrMac = %s\n", anonyOut);
+    SOFTBUS_DPRINTF(fd, "BrMac = %s\n", anonyOut);
     SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
@@ -217,7 +217,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     }
 
     char *anonyOut = DataMasking((char *)ipAddr, strlen(ipAddr), IP_DELIMITER);
-    dprintf(fd, "IpAddr = %s\n", anonyOut);
+    SOFTBUS_DPRINTF(fd, "IpAddr = %s\n", anonyOut);
     SoftBusFree(anonyOut);
     return SOFTBUS_OK;
 }
@@ -231,7 +231,7 @@ int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netCapacity failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "NetCapacity = %d\n", netCapacity);
+    SOFTBUS_DPRINTF(fd, "NetCapacity = %d\n", netCapacity);
     return SOFTBUS_OK;
 }
 
@@ -244,7 +244,7 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netType failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "NetType = %d\n", netType);
+    SOFTBUS_DPRINTF(fd, "NetType = %d\n", netType);
     return SOFTBUS_OK;
 }
 
@@ -254,9 +254,9 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param is null");
         return;
     }
-    dprintf(fd, "DeviceName = %s\n", nodeInfo->deviceName);
+    SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", nodeInfo->deviceName);
     char *anonyOut = DataMasking(nodeInfo->networkId, strlen(nodeInfo->networkId), ID_DELIMITER);
-    dprintf(fd, "NetworkId = %s\n", anonyOut);
+    SOFTBUS_DPRINTF(fd, "NetworkId = %s\n", anonyOut);
     SoftBusFree(anonyOut);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUdid failed!");

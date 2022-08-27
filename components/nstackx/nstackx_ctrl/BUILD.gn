@@ -78,6 +78,10 @@ if (defined(ohos_lite)) {
         ]
         cflags_cc = cflags
       } else {
+        include_dirs += [
+          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
+          "//third_party/lwip/src/include",
+        ]
         cflags += [
           "--diag_suppress",
           "Pa181",
