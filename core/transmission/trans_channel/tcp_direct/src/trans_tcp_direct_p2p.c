@@ -75,30 +75,49 @@ void StopP2pSessionListener(void)
     return;
 }
 
+static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
+{
+    if (sessionConnList == NULL) {
+        return;
+    }
+
+    SessionConn *item = NULL;
+    SessionConn *nextItem = NULL;
+    
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, sessionConnList, SessionConn, node) {
+        (void)NotifyChannelOpenFailed(item->channelId);
+        TransSrvDelDataBufNode(item->channelId);
+
+        SoftBusFree(item);
+    }
+}
+
 static void ClearP2pSessionConn(void)
 {
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
+    
+    SoftBusList *sessionList = GetSessionConnList();
+    if (sessionList == NULL) {
+        return;
+    }
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    SoftBusList *sessionList = GetSessionConnList();
-    if (sessionList == NULL) {
-        ReleaseSessonConnLock();
-        return;
-    }
+    
+    ListNode tempSessionConnList;
+    ListInit(&tempSessionConnList);
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED && item->appInfo.routeType == WIFI_P2P) {
-            NotifyChannelOpenFailed(item->channelId);
-            TransSrvDelDataBufNode(item->channelId);
-
             ListDelete(&item->node);
             sessionList->cnt--;
-            SoftBusFree(item);
+        
+            ListAdd(&tempSessionConnList, &item->node);
         }
     }
     ReleaseSessonConnLock();
-    return;
+
+    NotifyP2pSessionConnClear(&tempSessionConnList);
 }
 
 static int32_t StartP2pListener(const char *ip, int32_t *port)
