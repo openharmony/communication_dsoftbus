@@ -17,27 +17,45 @@
 
 void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func)
 {
+    (void)func;
+
     return;
 }
 
 void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
 {
+    (void)func;
+
     return;
 }
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
+    (void)fd;
+    (void)pkgName;
+    (void)sessionName;
+    (void)uid;
+    (void)pid;
+
     return;
 }
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
+    (void)fd;
+    (void)type;
+    (void)appInfo;
+
     return;
 }
 
 void SoftBusTransDumpHander(int fd, int32_t argc, const char **argv)
 {
+    (void)fd;
+    (void)argc;
+    (void)argv;
+
     return;
 }
 
