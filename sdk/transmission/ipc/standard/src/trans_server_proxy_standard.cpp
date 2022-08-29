@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -441,6 +441,44 @@ int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, co
     }
     if (!reply.ReadInt32(ret)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats read serverRet failed");
+        return SOFTBUS_ERR;
+    }
+    return ret;
+}
+
+int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats channelId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats channelType failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData((void *)statsData, sizeof(TrafficStats))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write RippleStats failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_RIPPLE_STATS, data, reply, option);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats send request failed, ret:%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats read serverRet failed");
         return SOFTBUS_ERR;
     }
     return ret;

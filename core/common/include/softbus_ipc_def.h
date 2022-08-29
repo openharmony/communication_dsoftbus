@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ enum SoftBusFuncId {
     SERVER_DEACTIVE_META_NODE,
     SERVER_GET_ALL_META_NODE_INFO,
     SERVER_SHIFT_LNN_GEAR,
+    SERVER_RIPPLE_STATS,
 
     CLIENT_ON_CHANNEL_OPENED = 256,
     CLIENT_ON_CHANNEL_OPENFAILED,

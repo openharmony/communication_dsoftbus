@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -170,20 +170,24 @@ private:
 
     static void AddStreamSocketLock(int fd, std::mutex &streamsocketlock);
 
-    static void AddStreamSocketListener(int fd, std::shared_ptr<IStreamSocketListener> streamreceiver);
+    static void AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamSocket> streamreceiver);
 
     static void RemoveStreamSocketLock(int fd);
 
     static void RemoveStreamSocketListener(int fd);
 
-    static int HandleFrameStats(int fd, const FtEventCbkInfo *info);
+    static int HandleFillpFrameStats(int fd, const FtEventCbkInfo *info);
 
-    static int FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info);
+    static int HandleRipplePolicy(int fd, const FtEventCbkInfo *info);
+
+    static int FillpStatistics(int fd, const FtEventCbkInfo *info);
 
     void FillpAppStatistics();
 
+    void FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv metricList);
+
     static std::map<int, std::mutex &> g_streamSocketLockMap;
-    static std::map<int, std::shared_ptr<IStreamSocketListener>> g_streamReceiverMap;
+    static std::map<int, std::shared_ptr<VtpStreamSocket>> g_streamSocketMap;
 
     std::map<int, OptionFunc> optFuncMap_ {};
     static std::shared_ptr<VtpInstance> vtpInstance_;

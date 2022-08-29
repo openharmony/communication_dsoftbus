@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,14 @@ int32_t ServerIpcRemovePermission(const char *sessionName)
 }
 
 int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+{
+    (void)channelId;
+    (void)channelType;
+    (void)data;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
 {
     (void)channelId;
     (void)channelType;

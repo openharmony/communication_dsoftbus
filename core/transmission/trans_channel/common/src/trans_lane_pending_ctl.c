@@ -228,8 +228,28 @@ static void TransOnLaneStateChange(uint32_t laneId, LaneState state)
     return;
 }
 
-LaneTransType TransGetLaneTransTypeBySession(SessionType type)
+static LaneTransType GetStreamLaneType(int32_t streamType)
 {
+    switch (streamType) {
+        case RAW_STREAM:
+            return LANE_T_RAW_STREAM;
+        case COMMON_VIDEO_STREAM:
+            return LANE_T_COMMON_VIDEO;
+        case COMMON_AUDIO_STREAM:
+            return LANE_T_COMMON_VOICE;
+        default:
+            break;
+    }
+    return LANE_T_BUTT;
+}
+
+LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param)
+{
+    if (param == NULL) {
+        return LANE_T_BUTT;
+    }
+    int32_t type = param->attr->dataType;
+    int32_t streamType;
     switch (type) {
         case TYPE_MESSAGE:
             return LANE_T_MSG;
@@ -238,7 +258,8 @@ LaneTransType TransGetLaneTransTypeBySession(SessionType type)
         case TYPE_FILE:
             return LANE_T_FILE;
         case TYPE_STREAM:
-            return LANE_T_STREAM;
+            streamType = param->attr->attr.streamAttr.streamType;
+            return GetStreamLaneType(streamType);
         default:
             break;
     }
@@ -297,7 +318,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         return SOFTBUS_ERR;
         }
 
-    LaneTransType transType = TransGetLaneTransTypeBySession((SessionType)param->attr->dataType);
+    LaneTransType transType = TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
         return SOFTBUS_ERR;
     }
