@@ -119,3 +119,26 @@ BUS_CENTER_DURATION:
   MAX_DURATION: {type: INT32, desc: lnn max duration}
   MIN_DURATION: {type: INT32, desc: lnn min duration}
   CONN_TYPE: {type: INT32, desc: connection type}
+
+DFILE_WAIT_HEADER_TIMEOUT_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: wait file header time out}
+  errorCode: {type: STRING, desc: error code}
+
+DFILE_SERVER_CREATE_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: server created}
+
+DFILE_CLIENT_CREATE_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: client created}
+
+DFILE_SEND_BEGIN_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send begin}
+
+DFILE_PEER_SHUTTED_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: peer shutted}
+
+DFILE_TRANS_COMPLETE_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: transfer complete}
+  transRate: {type: STRING, desc: transmission speed}
+
+DFILE_ACCEPT_SOCKET_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: accept socket}
