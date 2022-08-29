@@ -45,7 +45,7 @@ void TransSdkStreamTest::TearDownTestCase(void)
  * @tc.name: SendStreamTest001
  * @tc.desc: extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5FG70
  */
 HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
 {

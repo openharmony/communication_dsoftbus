@@ -1004,7 +1004,7 @@ int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *liste
     } while (false);
     (void)SoftBusMutexUnlock(&node->lock);
     (void)ReleaseListenerNode(node);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener *listener)

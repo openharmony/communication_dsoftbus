@@ -29,6 +29,7 @@ extern "C" {
 
 #define INVALID_SESSION_ID (-1)
 #define INVALID_CHANNEL_ID (-1)
+#define INVALID_SEQ_ID (0x7fffffff)
 
 #define PKG_NAME_SIZE_MAX 65
 #define SESSION_NAME_SIZE_MAX 256

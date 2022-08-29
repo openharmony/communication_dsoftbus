@@ -17,12 +17,11 @@
 
 #include <securec.h>
 
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -46,6 +45,7 @@ public:
 
 void BusCenterSdkTest::SetUpTestCase()
 {
+    SetAceessTokenPermission("busCenterTest");
 }
 
 void BusCenterSdkTest::TearDownTestCase()
@@ -54,31 +54,10 @@ void BusCenterSdkTest::TearDownTestCase()
 
 void BusCenterSdkTest::SetUp()
 {
-    AddPermission();
 }
 
 void BusCenterSdkTest::TearDown()
 {
-}
-
-void BusCenterSdkTest::AddPermission()
-{
-    uint64_t tokenId;
-    const char *perms[2];
-    perms[0] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    perms[1] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .aclsNum = 0,
-        .dcaps = NULL,
-        .perms = perms,
-        .acls = NULL,
-        .processName = "dsoftbus_service",
-        .aplStr = "system_core",
-    };
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
 }
 
 static int32_t GetSubscribeId(void)
@@ -198,7 +177,7 @@ static IPublishCb g_publishCb = {
 * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
 * @tc.desc: bus center JoinLNN interface exception test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Join_Lnn_Test_001, TestSize.Level0)
 {
@@ -213,7 +192,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Join_Lnn_Test_001, TestSize.Level0)
 * @tc.name: BUS_CENTER_SDK_Leave_Lnn_Test_001
 * @tc.desc: bus center LeaveLNN interface exception test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Leave_Lnn_Test_001, TestSize.Level0)
 {
@@ -230,7 +209,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Leave_Lnn_Test_001, TestSize.Level0)
 * @tc.name: BUS_CENTER_SDK_STATE_CB_Test_001
 * @tc.desc: bus center node state callback reg and unreg interface test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_001, TestSize.Level0)
 {
@@ -242,7 +221,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_001, TestSize.Level0)
 * @tc.name: BUS_CENTER_SDK_STATE_CB_Test_002
 * @tc.desc: bus center node state callback reg and unreg upper limit interface test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 {
@@ -260,7 +239,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 * @tc.name: BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001
 * @tc.desc: get all node info interface test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.Level0)
 {
@@ -279,7 +258,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.L
 * @tc.name: BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001
 * @tc.desc: get local info interface test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize.Level0)
 {
@@ -294,7 +273,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
 * @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001
 * @tc.desc: get node key info interface test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.Level0)
 {
@@ -348,7 +327,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
 * @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_001
 * @tc.desc: start time sync interface test
 * @tc.type: FUNC
-* @tc.require: AR000FN60G
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_001, TestSize.Level0)
 {
@@ -364,7 +343,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_001, TestSize.Lev
 * @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_002
 * @tc.desc: start time sync interface test
 * @tc.type: FUNC
-* @tc.require: AR000FN60G
+* @tc.require: I5I7B9
 */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Level0)
 {
@@ -379,7 +358,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
  * @tc.name: PublishLNNTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5I7B9
  */
 HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
 {
@@ -422,7 +401,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
  * @tc.name: PublishLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5I7B9
  */
 HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
 {
@@ -452,7 +431,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5I7B9
  */
 HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
 {
@@ -497,7 +476,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
  * @tc.name: RefreshLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5I7B9
  */
 HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
 {

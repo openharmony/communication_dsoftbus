@@ -531,6 +531,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
     conn->requestId = requestId;
     uint64_t seq = TransTdcGetNewSeqId();
+    if (seq == INVALID_SEQ_ID) {
+        SoftBusFree(conn);
+        return SOFTBUS_ERR;
+    }
+    
     conn->req = (int64_t)seq;
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {

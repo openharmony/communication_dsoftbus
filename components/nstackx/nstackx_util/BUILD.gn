@@ -61,11 +61,13 @@ if (defined(ohos_lite)) {
       sources = [
         "core/nstackx_event.c",
         "core/nstackx_log.c",
+        "core/nstackx_socket.c",
         "core/nstackx_timer.c",
       ]
 
       sources += [
         "core/nstackx_getopt.c",
+        "platform/liteos/sys_dev.c",
         "platform/liteos/sys_epoll.c",
         "platform/liteos/sys_event.c",
         "platform/liteos/sys_log.c",
@@ -115,6 +117,7 @@ if (defined(ohos_lite)) {
         ]
         deps = [
           "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+          "//third_party/bounds_checking_function:libsec_shared",
           "//third_party/mbedtls",
         ]
       } else if (ohos_kernel_type == "linux") {

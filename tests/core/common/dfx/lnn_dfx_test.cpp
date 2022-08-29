@@ -22,6 +22,8 @@
 #include "softbus_common.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "securec.h"
+#include "softbus_hisysevt_discreporter.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_hisysevt_common.h"
 
@@ -49,7 +51,7 @@ void LnnDfxTest::TearDown(void) {}
  * @tc.name: CreateBusCenterFaultEvtTest001
  * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:EXPECT_EQ
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest001, TestSize.Level0)
 {
@@ -67,7 +69,7 @@ HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest001, TestSize.Level0)
  * @tc.name: CreateBusCenterFaultEvtTest002
  * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:EXPECT_EQ
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest002, TestSize.Level0)
 {
@@ -85,7 +87,7 @@ HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest002, TestSize.Level0)
  * @tc.name: ReportBusCenterFaultEvtTest001
  * @tc.desc: Verify ReportBusCenterFaultEvt function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
 {
@@ -106,7 +108,7 @@ HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
  * @tc.name: InitBusCenterDfxTest001
  * @tc.desc: Verify InitBusCenterDfx function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, InitBusCenterDfxTest001, TestSize.Level0)
 {
@@ -118,7 +120,7 @@ HWTEST_F(LnnDfxTest, InitBusCenterDfxTest001, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest001
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest001, TestSize.Level0)
 {
@@ -131,7 +133,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest001, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest002
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest002, TestSize.Level0)
 {
@@ -146,7 +148,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest002, TestSize.Level0)
  * @tc.name: AddStatisticDurationTest003
  * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticDurationTest003, TestSize.Level0)
 {
@@ -160,7 +162,7 @@ HWTEST_F(LnnDfxTest, AddStatisticDurationTest003, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest001
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest001, TestSize.Level0)
 {
@@ -173,7 +175,7 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest001, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest002
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest002, TestSize.Level0)
 {
@@ -187,7 +189,7 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest002, TestSize.Level0)
  * @tc.name: AddStatisticRateOfSuccessTest003
  * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: I5JQ1E
  */
 HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest003, TestSize.Level0)
 {
@@ -199,5 +201,112 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest003, TestSize.Level0)
     data.type = CONNECTION_ADDR_WLAN;
     int32_t ret = AddStatisticRateOfSuccess(&data);
     ASSERT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftBusReportConnFaultEvt_001
+ * @tc.desc: Connection failure report error.
+ * @tc.type: FUNC
+ * @tc.require: SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportConnFaultEvt_001, TestSize.Level1)
+{
+    int ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_P2P, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftbusRecordConnInfo_001
+ * @tc.desc: send behavior msg to hiview system, we can see the result in log.
+ * @tc.type: FUNC
+ * @tc.require: SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordConnInfo_001, TestSize.Level1)
+{
+    int ret = InitSoftbusSysEvt();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t time = 10;
+    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    time = 15;
+    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    time = 5;
+    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    time = 12;
+    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftBusReportDiscStartupEvt_001
+ * @tc.desc: Error register timeout callback test.
+ * @tc.type: FUNC
+ * @tc.require: SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_001, TestSize.Level1)
+{
+    int ret = InitSoftbusSysEvt();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    char pkgName[] = "testPackage";
+    ret = SoftBusReportDiscStartupEvt(pkgName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftbusRecordDiscScanTimes_001
+ * @tc.desc: Error register timeout callback test.
+ * @tc.type: FUNC
+ * @tc.require: SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscScanTimes_001, TestSize.Level1)
+{
+    int ret = InitSoftbusSysEvt();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftbusRecordDiscScanTimes(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftbusRecordFirstDiscTime_001
+ * @tc.desc: Error register timeout callback test.
+ * @tc.type: FUNC
+ * @tc.require: SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordFirstDiscTime_001, TestSize.Level1)
+{
+    int ret = InitSoftbusSysEvt();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    uint32_t time = 4;
+    ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: LnnDfxTest_SoftbusRecordDiscFault_001
+ * @tc.desc: Error register timeout callback test.
+ * @tc.type: FUNC
+ * @tc.require:SR000H04L1
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_001, TestSize.Level1)
+{
+    int ret = InitSoftbusSysEvt();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    uint32_t errCode = SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT;
+    ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }; // namespace OHOS

@@ -157,7 +157,7 @@ static void ClientModuleDeinit(void)
     DiscClientDeinit();
 }
 
-static int32_t ConnClientInit()
+static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
@@ -308,6 +308,7 @@ EXIT:
 
 int32_t CheckPackageName(const char *pkgName)
 {
+    (void)pkgName;
 #ifdef __LITEOS_M__
     return SOFTBUS_OK;
 #else

@@ -41,7 +41,11 @@ static void EventProcessHandle(void *arg)
     EpollTask *task = arg;
     EventNode *node = container_of(task, EventNode, task);
 
+#ifdef NSTACKX_WITH_LITEOS_M
+    ret = (int32_t)recvfrom(node->pipeFd[PIPE_OUT], &event, sizeof(event), 0, NULL, NULL);
+#else
     ret = (int32_t)read(node->pipeFd[PIPE_OUT], &event, sizeof(event));
+#endif
     if (ret != (int32_t)sizeof(event)) {
         LOGE(TAG, "failed to read from pipe: %d", GetErrno());
         return;
@@ -70,8 +74,11 @@ int32_t PostEvent(const List *eventNodeChain, EpollDesc epollfd, EventHandle han
         LOGE(TAG, "Cannot find event node for %d", epollfd->recvFd);
         return NSTACKX_EFAILED;
     }
-
+#ifdef NSTACKX_WITH_LITEOS_M
+    ret = (int32_t)sendto(node->pipeFd[PIPE_IN], &event, sizeof(event), 0, NULL, 0);
+#else
     ret = (int32_t)write(node->pipeFd[PIPE_IN], &event, sizeof(event));
+#endif
     if (ret != (int32_t)sizeof(event)) {
         LOGE(TAG, "failed to write to pipe: %d", errno);
         return NSTACKX_EFAILED;
@@ -97,7 +104,11 @@ void ClearEvent(const List *eventNodeChain, EpollDesc epollfd)
 
     int32_t ret = eventLen;
     while (ret == eventLen) {
+#ifdef NSTACKX_WITH_LITEOS_M
+        ret = (int32_t)recvfrom(node->pipeFd[PIPE_OUT], &event, sizeof(event), 0, NULL, NULL);
+#else
         ret = (int32_t)read(node->pipeFd[PIPE_OUT], &event, sizeof(event));
+#endif
         if (ret != eventLen) {
             break;
         }

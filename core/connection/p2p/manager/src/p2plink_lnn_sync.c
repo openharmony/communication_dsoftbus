@@ -36,7 +36,7 @@
 static int32_t g_lnnRole = 0;
 static char g_lnnMyP2pMac[P2P_MAC_LEN] = {0};
 static char g_lnnGoMac[P2P_MAC_LEN] = {0};
-static int P2pLnnDump(int fd);
+static int32_t P2pLnnDump(int fd);
 static bool g_p2pDumpFlag = false;
 static int32_t P2pLinkLnnSyncSetGoMac()
 {
@@ -109,15 +109,17 @@ void P2pLinkLnnSync(void)
     }
 }
 
-static int P2pLnnDump(int fd)
+static int32_t P2pLnnDump(int fd)
 {
-    char lnnMyP2pMac[P2P_MAC_LEN] = {0};
-    char lnnGoP2pMac[P2P_MAC_LEN] = {0};
-    dprintf(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
+    char lnnMyP2pMac[P2P_MAC_LEN];
+    char lnnGoP2pMac[P2P_MAC_LEN];
+    (void)memset_s(lnnMyP2pMac, sizeof(lnnMyP2pMac), 0, sizeof(lnnMyP2pMac));
+    (void)memset_s(lnnGoP2pMac, sizeof(lnnGoP2pMac), 0, sizeof(lnnGoP2pMac));
+    SOFTBUS_DPRINTF(fd, "\n-----------------P2pLnnMacInfo-------------------\n");
     DataMasking(g_lnnMyP2pMac, P2P_MAC_LEN, MAC_DELIMITER, lnnMyP2pMac);
-    dprintf(fd, "lnnMyP2pMac               :%s\n", lnnMyP2pMac);
+    SOFTBUS_DPRINTF(fd, "lnnMyP2pMac               :%s\n", lnnMyP2pMac);
     DataMasking(g_lnnGoMac, P2P_MAC_LEN, MAC_DELIMITER, lnnGoP2pMac);
-    dprintf(fd, "lnnGoP2pMac               :%s\n", lnnGoP2pMac);
+    SOFTBUS_DPRINTF(fd, "lnnGoP2pMac               :%s\n", lnnGoP2pMac);
 
     return SOFTBUS_OK;
 }

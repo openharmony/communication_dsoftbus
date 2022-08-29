@@ -46,7 +46,7 @@
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static char *g_capabilityData = NULL;
-static int NstackxLocalDevInfoDump(int fd);
+static int32_t NstackxLocalDevInfoDump(int fd);
 
 static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
@@ -519,34 +519,40 @@ void DiscNstackxDeinit(void)
     DeinitLocalInfo();
 }
 
-static int NstackxLocalDevInfoDump(int fd)
+static int32_t NstackxLocalDevInfoDump(int fd)
 {
-    char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
-    char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
-    char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
-    char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    dprintf(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
-    dprintf(fd, "name                                : %s\n", g_localDeviceInfo->name);
+    char deviceId[NSTACKX_MAX_DEVICE_ID_LEN];
+    char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
+    char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
+    char ip[NSTACKX_MAX_IP_STRING_LEN];
+    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
+    (void)memset_s(deviceId, sizeof(deviceId), 0, sizeof(deviceId));
+    (void)memset_s(btMacAddr, sizeof(btMacAddr), 0, sizeof(btMacAddr));
+    (void)memset_s(wifiMacAddr, sizeof(wifiMacAddr), 0, sizeof(wifiMacAddr));
+    (void)memset_s(ip, sizeof(ip), 0, sizeof(ip));
+    (void)memset_s(networkIpAddr, sizeof(networkIpAddr), 0, sizeof(networkIpAddr));
+
+    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
+    SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
     DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER, deviceId);
-    dprintf(fd, "deviceId                            : %s\n", deviceId);
+    SOFTBUS_DPRINTF(fd, "deviceId                            : %s\n", deviceId);
     DataMasking(g_localDeviceInfo->btMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER, btMacAddr);
-    dprintf(fd, "btMacAddr                           : %s\n", btMacAddr);
+    SOFTBUS_DPRINTF(fd, "btMacAddr                           : %s\n", btMacAddr);
     DataMasking(g_localDeviceInfo->wifiMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER, wifiMacAddr);
-    dprintf(fd, "wifiMacAddr                         : %s\n", wifiMacAddr);
-    dprintf(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
+    SOFTBUS_DPRINTF(fd, "wifiMacAddr                         : %s\n", wifiMacAddr);
+    SOFTBUS_DPRINTF(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
     DataMasking(g_localDeviceInfo->localIfInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER, ip);
-    dprintf(fd, "localIfInfo networkIpAddr           : %s\n", ip);
-    dprintf(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
+    SOFTBUS_DPRINTF(fd, "localIfInfo networkIpAddr           : %s\n", ip);
+    SOFTBUS_DPRINTF(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
     DataMasking(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER, networkIpAddr);
-    dprintf(fd, "networkIpAddr                       : %s\n", networkIpAddr);
-    dprintf(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
-    dprintf(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
-    dprintf(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
-    dprintf(fd, "version                             : %s\n", g_localDeviceInfo->version);
-    dprintf(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
-    dprintf(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
-    dprintf(fd, "capabilityData                      : %s\n", g_capabilityData);
+    SOFTBUS_DPRINTF(fd, "networkIpAddr                       : %s\n", networkIpAddr);
+    SOFTBUS_DPRINTF(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
+    SOFTBUS_DPRINTF(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
+    SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
+    SOFTBUS_DPRINTF(fd, "version                             : %s\n", g_localDeviceInfo->version);
+    SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
+    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
+    SOFTBUS_DPRINTF(fd, "capabilityData                      : %s\n", g_capabilityData);
 
     return SOFTBUS_OK;
 }

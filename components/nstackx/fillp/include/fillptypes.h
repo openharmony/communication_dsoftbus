@@ -168,6 +168,7 @@ typedef unsigned long DWORD;
 #define FILLP_SOCK_CQE_PARAMS 0x8
 #define FILLP_SOCK_MIRACAST_VIDEO_PARAMS 0x9
 #define FILLP_SEMI_RELIABLE 0xa
+#define FILLP_SOCK_TRAFFIC 0x10
 
 #define FILLP_IPV6_ADDR_LEN 4
 
@@ -617,6 +618,19 @@ typedef struct {
         FILLP_UINT32 reserved;
     } info;
 } FtEventCbkInfo;
+
+/**
+ * @ingroup fillpevt
+ * @brief  This callback is used to info APP when some events occur.
+ *
+ * @param[in] fd    Indicates a socket created by the FtSocket API.
+ * @param[in] info  Pointer to event callback information FtEventCbkInfo.
+ *
+ * @return
+ * On Success : returns 0
+ * On Failure : returns -1
+ */
+typedef FILLP_INT (*FillpEvtCbkFunc)(IN FILLP_INT fd, IN FILLP_CONST FtEventCbkInfo *info);
 
 #define FILLP_DFX_EVENT_NAME_LEN 128
 

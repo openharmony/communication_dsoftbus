@@ -81,19 +81,43 @@ typedef struct {
     SoftBusBtAddr peerAddr;
 } BleGattcInfo;
 
+typedef struct {
+    int32_t errCode;
+} BleCilentErrCode;
+
 static SoftBusGattcCallback g_softbusGattcCb = {0};
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
 static bool g_gattcIsInited = false;
 static bool UpdateBleGattcInfoStateInner(BleGattcInfo *infoNode, int32_t newState);
-static int BleGattcDump(int fd);
+static int32_t BleGattcDump(int fd);
 static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, const char *data);
+
+static void FreeBleClientMessage(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+        msg->obj = NULL;
+    }
+    SoftBusFree(msg);
+}
 
 static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode, int32_t time)
 {
-    SoftBusMessage *msg = BleClientConnCreateLoopMsg(msgWhat, clientId, errCode, NULL);
+    BleCilentErrCode *bleErrCode = SoftBusCalloc(sizeof(BleCilentErrCode));
+    if (bleErrCode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleClientPostMsgDelay SoftBusCalloc failed");
+        return SOFTBUS_ERR;
+    }
+    bleErrCode->errCode = errCode;
+    SoftBusMessage *msg = BleClientConnCreateLoopMsg(msgWhat, clientId, 0, (char *)bleErrCode);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "creat msg err, msg->what:%d", msgWhat);
+        SoftBusFree(bleErrCode);
+        bleErrCode = NULL;
         return SOFTBUS_ERR;
     }
     g_bleClientAsyncHandler.looper->PostMessageDelay(g_bleClientAsyncHandler.looper, msg, time);
@@ -316,7 +340,7 @@ static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, u
     msg->arg1 = arg1;
     msg->arg2 = arg2;
     msg->handler = &g_bleClientAsyncHandler;
-    msg->FreeMessage = NULL;
+    msg->FreeMessage = FreeBleClientMessage;
     msg->obj = (void *)data;
     return msg;
 }
@@ -638,9 +662,15 @@ static void BleGattcMsgHandler(SoftBusMessage *msg)
         case CLIENT_MTU_SETTED:
             MtuSettedMsgHandler((int32_t)msg->arg1, (int32_t)msg->arg2);
             break;
-        case CLIENT_TIME_OUT:
-            TimeOutMsgHandler((int32_t)msg->arg1, (int32_t)msg->arg2);
+        case CLIENT_TIME_OUT: {
+            BleCilentErrCode *info = (BleCilentErrCode *)msg->obj;
+            if (info == NULL) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "msg what is CLIENT_TIME_OUT and obj is NULL");
+                return;
+            }
+            TimeOutMsgHandler((int32_t)msg->arg1, (int32_t)info->errCode);
             break;
+        }
         default:
             break;
     }
@@ -807,22 +837,23 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
     return SOFTBUS_OK;
 }
 
-static int BleGattcDump(int fd)
+static int32_t BleGattcDump(int fd)
 {
-    char addr[UDID_BUF_LEN] = {0};
+    char addr[UDID_BUF_LEN];
+    (void)memset_s(addr, sizeof(addr), 0, sizeof(addr));
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;
-    dprintf(fd, "\n-----------------BLEGattc Info-------------------\n");
-    dprintf(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
+    SOFTBUS_DPRINTF(fd, "\n-----------------BLEGattc Info-------------------\n");
+    SOFTBUS_DPRINTF(fd, "g_gattcIsInited               : %d\n", g_gattcIsInited);
     LIST_FOR_EACH(item, &(g_gattcInfoList->list)) {
         BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
-        dprintf(fd, "clientId                  : %d\n", itemNode->clientId);
-        dprintf(fd, "state                     : %d\n", itemNode->state);
+        SOFTBUS_DPRINTF(fd, "clientId                  : %d\n", itemNode->clientId);
+        SOFTBUS_DPRINTF(fd, "state                     : %d\n", itemNode->state);
         DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER, addr);
-        dprintf(fd, "btMac                     : %s\n", addr);
+        SOFTBUS_DPRINTF(fd, "btMac                     : %s\n", addr);
     }
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     return SOFTBUS_OK;
