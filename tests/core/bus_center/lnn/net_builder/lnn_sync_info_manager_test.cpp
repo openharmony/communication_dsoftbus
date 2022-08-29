@@ -66,7 +66,7 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 
 /*
 * @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
-* @tc.desc: invalid parameter and 
+* @tc.desc: invalid parameter
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
