@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define TRAFFIC_DATA_LEN 32
+
 typedef enum {
     FRAME_COST_TIME_SMALL = 0, /* less than 10ms */
     FRAME_COST_TIME_MEDIUM, /* [10ms, 100ms) */
@@ -78,12 +80,17 @@ typedef enum {
     OPT_RESULT_CANNOT_OPTIMIZE,
 } QosOptResult;
 
+typedef struct {
+    unsigned char stats[TRAFFIC_DATA_LEN];
+} LnnRippleData;
+
 typedef void (*OnStatsPeriodAdjustment)(uint32_t ms);
 
 int32_t LnnInitQos(void);
 void LnnDeinitQos(void);
 int32_t LnnRegPeriodAdjustmentCallback(OnStatsPeriodAdjustment callback);
 void LnnReportLaneIdStatsInfo(const LaneIdStatsInfo *statsList, uint32_t listSize);
+void LnnReportRippleData(uint32_t laneId, const LnnRippleData *data);
 int32_t LnnRequestQosOptimization(const uint32_t *laneIdList,
     uint32_t listSize, int32_t *result, uint32_t resultSize);
 void LnnCancelQosOptimization(const uint32_t *laneIdList, uint32_t listSize);

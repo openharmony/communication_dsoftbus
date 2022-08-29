@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ public:
     virtual int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
     virtual int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) = 0;
     virtual int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) = 0;
+    virtual int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data) = 0;
     virtual int32_t GrantPermission(int uid, int pid, const char *sessionName);
     virtual int32_t RemovePermission(const char *sessionName);
     virtual int32_t PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);

@@ -579,6 +579,7 @@ struct FrameInfo {
  */
 typedef enum {
     FT_EVT_FRAME_STATS,
+    FT_EVT_TRAFFIC_DATA,
     FT_EVT_MAX,
 } FtEnumEventType;
 
@@ -608,6 +609,11 @@ typedef struct {
     FILLP_UINT32 sendBitRateStatsCnt[FILLP_FRAME_BIT_RATE_MAX];
 } FillpFrameSendStats;
 
+#define FILLP_TRAFFIC_LEN 32
+typedef struct {
+    FILLP_UCHAR stats[FILLP_TRAFFIC_LEN];
+} FillpTrafficInfo;
+
 /**
  * Structure of event callback information.
  */
@@ -615,6 +621,7 @@ typedef struct {
     FtEnumEventType evt;
     union {
         FillpFrameSendStats frameSendStats;
+        FillpTrafficInfo trafficData;
         FILLP_UINT32 reserved;
     } info;
 } FtEventCbkInfo;

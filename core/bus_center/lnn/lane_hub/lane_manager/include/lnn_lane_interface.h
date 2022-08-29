@@ -42,9 +42,9 @@ typedef enum {
     LANE_T_BYTE,
     LANE_T_MSG,
     LANE_T_FILE,
-    LANE_T_STREAM,
-    LANE_T_VOICE,
-    LANE_T_VIDEO,
+    LANE_T_RAW_STREAM,
+    LANE_T_COMMON_VIDEO,
+    LANE_T_COMMON_VOICE,
     LANE_T_BUTT,
 } LaneTransType;
 

@@ -360,7 +360,7 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     TransOption *trans = &request.requestInfo.trans;
     int32_t ret = memcpy_s(trans->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, sizeof(NODE_NETWORK_ID));
     EXPECT_TRUE(ret == EOK);
-    trans->transType = LANE_T_STREAM;
+    trans->transType = LANE_T_RAW_STREAM;
     trans->pid = DEFAULT_PID;
     trans->expectedLink.linkTypeNum = LANE_LINK_NUM;
     trans->expectedLink.linkType[0] = LANE_P2P;
