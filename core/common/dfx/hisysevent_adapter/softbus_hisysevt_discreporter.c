@@ -139,7 +139,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportFirstDiscDurationEvt()
+static int32_t SoftBusReportFirstDiscDurationEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
@@ -149,7 +149,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt()
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
@@ -195,17 +195,17 @@ static int32_t SoftBusCreateScanTimesMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportScanTimesEvt()
+static int32_t SoftBusReportScanTimesEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_TWO);
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
-        if (SoftBusCreateScanTimesMsg(msg, i) == SOFTBUS_ERR) {
+        if (SoftBusCreateScanTimesMsg(msg, i) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        if (SoftbusWriteHisEvt(msg) ==SOFTBUS_ERR) {
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
     }
@@ -227,7 +227,9 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISC_FAULT) != EOK) {
+        return SOFTBUS_ERR;
+    }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
 
@@ -255,7 +257,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     return SOFTBUS_OK;
 }
 
-static int32_t SoftBusReportDiscFaultEvt()
+static int32_t SoftBusReportDiscFaultEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {

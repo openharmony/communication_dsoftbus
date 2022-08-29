@@ -180,7 +180,7 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 }
 
 
-static int32_t SoftbusReportOpenSessionCntEvt()
+static int32_t SoftbusReportOpenSessionCntEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
@@ -251,7 +251,7 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
     (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
 
-static int32_t SoftbusReportOpenSessionTimeEvt()
+static int32_t SoftbusReportOpenSessionTimeEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_SEVEN);
     if (msg == NULL) {

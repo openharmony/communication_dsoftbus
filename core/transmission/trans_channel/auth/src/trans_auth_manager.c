@@ -29,14 +29,19 @@
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_session_manager.h"
-#include "softbus_proxychannel_manager.h"
-#include "softbus_proxychannel_transceiver.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1
 
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
+
+#define AUTH_SESSION_WHITE_LIST_NUM (2)
+
+static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MAX] = {
+    "ohos.distributedhardware.devicemanager.resident",
+    "com.huawei.devicegroupmanage"
+};
 
 typedef struct {
     ListNode node;
@@ -232,6 +237,22 @@ static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static bool CheckAuthChannelOfPkgInfoIsValid(const AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        return false;
+    }
+    size_t len = 0;
+    for (uint16_t index = 0; index < AUTH_SESSION_WHITE_LIST_NUM; ++index) {
+        len = strnlen(g_sessionWhiteList[index], SESSION_NAME_SIZE_MAX);
+        if (strncmp(appInfo->myData.sessionName, g_sessionWhiteList[index], len) == 0) {
+            return true;
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+        "auth channel sessionname[%s] pkgName[%s] invalid.", appInfo->myData.sessionName, appInfo->myData.pkgName);
+    return false;
+}
 
 static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t len)
 {
@@ -246,9 +267,14 @@ static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t l
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
         goto EXIT_ERR;
     }
+    if (!CheckAuthChannelOfPkgInfoIsValid(&appInfo)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "check auth channel pkginfo invalid.");
+        TransPostAuthChannelErrMsg(authId, ret, "check msginfo failed");
+        goto EXIT_ERR;
+    }
     ret = OnRequsetUpdateAuthChannel(authId, &appInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpackRequest failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update auth channel failed");
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
         goto EXIT_ERR;
     }
@@ -644,34 +670,15 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)
 {
     AuthChannelInfo chanInfo;
-    ProxyChannelInfo info;
+    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (!chanInfo.isConnOptValid) {
+        return SOFTBUS_ERR;
+    }
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (GetAuthChannelInfoByChanId(channelId, &chanInfo) == SOFTBUS_OK) {
-        if (!chanInfo.isConnOptValid) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connOpt invalid");
-            return SOFTBUS_ERR;
-        }
-        if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "br OptionToAddr failed");
-            return SOFTBUS_ERR;
-        }
-    } else if (TransProxyGetSendMsgChanInfo(channelId, &info) == SOFTBUS_OK) {
-        ConnectOption connOpt;
-        if (TransProxyGetConnectOption(info.connId, &connOpt) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyGetConnectOption failed");
-            return SOFTBUS_ERR;
-        }
-        if (connOpt.type == CONNECT_BLE && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BLE)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ble OptionToAddr failed");
-            return SOFTBUS_ERR;
-        }
-        if (connOpt.type == CONNECT_BR && !LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_BR)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "br OptionToAddr failed");
-            return SOFTBUS_ERR;
-        }
-    } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransNotifyAuthDataSuccess failed");
+    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
         return SOFTBUS_ERR;
     }
     return LnnNotifyDiscoveryDevice(&addr);

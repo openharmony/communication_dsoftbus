@@ -1260,18 +1260,18 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
-int SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
+int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
 {
-    dprintf(fd, "-----RemoteDeviceInfo-----\n");
+    SOFTBUS_DPRINTF(fd, "-----RemoteDeviceInfo-----\n");
     NodeBasicInfo *remoteNodeInfo = NULL;
     int32_t infoNum = 0;
     if (LnnGetAllOnlineNodeInfo(&remoteNodeInfo, &infoNum) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllOnlineNodeInfo failed!");
         return SOFTBUS_ERR;
     }
-    dprintf(fd, "remote device num = %d\n", infoNum);
+    SOFTBUS_DPRINTF(fd, "remote device num = %d\n", infoNum);
     for (int i = 0; i < infoNum; i++) {
-        dprintf(fd, "\n[NO.%d]\n", i + 1);
+        SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }
     return SOFTBUS_OK;
@@ -1301,7 +1301,7 @@ int32_t LnnInitDistributedLedger(void)
     }
     if (SoftBusRegBusCenterVarDump(SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
         &SoftBusDumpBusCenterRemoteDeviceInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump regist fail");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
     }
     InitLaneStatus();

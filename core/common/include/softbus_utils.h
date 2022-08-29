@@ -74,7 +74,8 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
-int32_t Strnicmp(const char *src1, const char *src2, uint32_t len);
+int32_t StrCmpIgnoreCase(const char *str1, const char *str2);
+
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);
 bool GetSignalingMsgSwitch(void);
@@ -89,7 +90,8 @@ bool GetSignalingMsgSwitch(void);
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
 
 void DataMasking(const char *data, uint32_t length, char delimiter, char *container);
-
+int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,
+    uint32_t hashStrLen);
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -18,6 +18,7 @@
 void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
 {
 #ifdef SOFTBUS_PRINTF
+    (void)level;
     printf("%s\n", buf);
     return;
 #else

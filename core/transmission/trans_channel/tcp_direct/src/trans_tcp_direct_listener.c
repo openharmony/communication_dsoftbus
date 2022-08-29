@@ -68,6 +68,9 @@ static int32_t StartVerifySession(SessionConn *conn)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartVerifySession");
     uint64_t seq = TransTdcGetNewSeqId();
+    if (seq == INVALID_SEQ_ID) {
+        return SOFTBUS_ERR;
+    }
     if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Generate SessionKey failed");
         return SOFTBUS_ERR;

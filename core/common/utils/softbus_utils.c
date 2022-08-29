@@ -49,6 +49,9 @@
 #define IP_DELIMITER_FIRST 1
 #define IP_DELIMITER_THIRD 3
 #define GET_ID_HALF_LEN 2
+#define MAX_ID_LEN 65
+#define MAX_IP_LEN 48
+#define MAX_MAC_LEN 46
 
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
@@ -113,7 +116,8 @@ int32_t SoftBusTimerInit(void)
     if (g_timerId != NULL) {
         return SOFTBUS_OK;
     }
-    g_timerId = SoftBusCreateTimer(&g_timerId, (void *)HandleTimeoutFun, TIMER_TYPE_PERIOD);
+    SetTimerFunc(HandleTimeoutFun);
+    g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
@@ -286,25 +290,21 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
-int32_t Strnicmp(const char *src1, const char *src2, uint32_t len)
+int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
-    if (src1 == NULL || src2 == NULL ||
-        strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
+    if (str1 == NULL || str2 == NULL) {
         return SOFTBUS_ERR;
     }
-    char *tmpSrc1 = (char *)src1;
-    char *tmpSrc2 = (char *)src2;
-    int32_t ca;
-    int32_t cb;
-    uint32_t i = len;
-    do {
-        ca = (int32_t)(*tmpSrc1++);
-        cb = (int32_t)(*tmpSrc2++);
-        ca = toupper(ca);
-        cb = toupper(cb);
-        i--;
-    } while (ca == cb && i > 0);
-    return ca - cb;
+    int32_t i;
+    for (i = 0; str1[i] != '\0' && str2[i] != '\0'; i++) {
+        if (ToUpperCase(str1[i]) != ToUpperCase(str2[i])) {
+            return SOFTBUS_ERR;
+        }
+    }
+    if (str1[i] != '\0' || str2[i] != '\0') {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 void SetSignalingMsgSwitchOn(void)
@@ -353,7 +353,12 @@ void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned
 
 void MacInstead(char *data, uint32_t length, char delimiter)
 {
+    if (length > MAX_MAC_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "MacInstead len is invalid");
+        return;
+    }
     int delimiterCnt = 0;
+    
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == MAC_DELIMITER_FOURTH) {
             break;
@@ -369,6 +374,10 @@ void MacInstead(char *data, uint32_t length, char delimiter)
 
 void IpInstead(char *data, uint32_t length, char delimiter)
 {
+    if (length > MAX_IP_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IpInstead len is invalid");
+        return;
+    }
     int delimiterCnt = 0;
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == IP_DELIMITER_THIRD) {
@@ -385,6 +394,10 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 
 void IdInstead(char *data, uint32_t length)
 {
+    if (length > MAX_ID_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IdInstead len is invalid");
+        return;
+    }
     uint32_t halfLen = length / GET_ID_HALF_LEN;
     for (int i = 0; i < length - 1; i++) {
         if (i > halfLen) {
@@ -416,4 +429,30 @@ void DataMasking(const char *data, uint32_t length, char delimiter, char *contai
         default:
             break;
     }
+}
+
+int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,
+    uint32_t hashStrLen)
+{
+    int32_t ret;
+    unsigned char hashResult[SHA_256_HASH_LEN] = {0};
+    if (hashStrLen < HEXIFY_LEN(len / HEXIFY_UNIT_LEN)) {
+       SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid hashStrLen"); 
+       return SOFTBUS_INVALID_PARAM;
+    }
+    if (str == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = SoftBusGenerateStrHash(str, strlen((char *)str) + 1, hashResult);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
+        return ret;
+    }
+    ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult, len / HEXIFY_UNIT_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bytes to str hash fail, ret=%d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }

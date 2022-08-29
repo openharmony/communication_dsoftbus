@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("connectionTest") {
+group("unittest") {
   testonly = true
   deps = [
     "ble:softbus_conn_ble_test",

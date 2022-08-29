@@ -30,45 +30,45 @@ static LIST_HEAD(g_hidumperhander_list);
 
 void SoftBusDumpShowHelp(int fd)
 {
-    dprintf(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
-    dprintf(fd, "  Option: [-h] ");
+    SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
+    SOFTBUS_DPRINTF(fd, "  Option: [-h] ");
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
-        dprintf(fd, "| [");
-        dprintf(fd, "%s", itemNode->moduleName);
-        dprintf(fd, "]");
+        SOFTBUS_DPRINTF(fd, "| [");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
+        SOFTBUS_DPRINTF(fd, "]");
     }
-    dprintf(fd, "\n");
+    SOFTBUS_DPRINTF(fd, "\n");
 
     item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
-        dprintf(fd, "\t\t");
-        dprintf(fd, "%s", itemNode->moduleName);
-        dprintf(fd, "\t\t");
-        dprintf(fd, "%s", itemNode->helpInfo);
-        dprintf(fd, "\n");
+        SOFTBUS_DPRINTF(fd, "\t\t");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
+        SOFTBUS_DPRINTF(fd, "\t\t");
+        SOFTBUS_DPRINTF(fd, "%s", itemNode->helpInfo);
+        SOFTBUS_DPRINTF(fd, "\n");
     }
 }
 
 void SoftBusDumpErrInfo(int fd, const char *argv)
 {
-    dprintf(fd, "the command %s is invalid, please input again!\n", argv);
+    SOFTBUS_DPRINTF(fd, "the command %s is invalid, please input again!\n", argv);
 }
 
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
 {
-    dprintf(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
-    dprintf(fd, "  Option: [-h]  | [-l <");
+    SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
+    SOFTBUS_DPRINTF(fd, "  Option: [-h]  | [-l <");
     ListNode *item = NULL;
     LIST_FOR_EACH(item, varList) {
         SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
-        dprintf(fd, "%s |", itemNode->varName);
+        SOFTBUS_DPRINTF(fd, "%s |", itemNode->varName);
     }
-    dprintf(fd, ">]\n");
-    dprintf(fd, "   -h         List all the dump item in %s module\n", moduleName);
-    dprintf(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
+    SOFTBUS_DPRINTF(fd, ">]\n");
+    SOFTBUS_DPRINTF(fd, "   -h         List all the dump item in %s module\n", moduleName);
+    SOFTBUS_DPRINTF(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
 }
 
 static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)
@@ -89,7 +89,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDum
     return varNode;
 }
 
-int SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
+int32_t SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
@@ -157,7 +157,7 @@ void SoftBusHiDumperReleaseHandler(void)
     SoftBusFree(&g_hidumperhander_list);
 }
 
-int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
+int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
     if (strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN ||
         handler == NULL) {
@@ -174,26 +174,61 @@ int SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc 
     return SOFTBUS_OK;
 }
 
-ListNode *SoftBusGetHiDumpHandler(void)
+int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
-    return &g_hidumperhander_list;
+    if (fd < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
+        return SOFTBUS_ERR;
+    }
+
+    if (argc <= 1 || strcmp(argv[0], "-h") == 0) {
+        SoftBusDumpShowHelp(fd);
+        return SOFTBUS_OK;
+    }
+
+    ListNode *item = NULL;
+    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    LIST_FOR_EACH(item, &g_hidumperhander_list) {
+        HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
+        if (strcmp(itemNode->moduleName, argv[0]) == 0) {
+            if (strcmp(argv[0], "dstream") == 0 || strcmp(argv[0], "dfinder") == 0 ||
+                strcmp(argv[0], "dfile") == 0 || strcmp(argv[0], "dmsg") == 0) {
+                itemNode->dumpHandler(fd, argc, argv);
+            } else {
+                itemNode->dumpHandler(fd, argc - 1, &argv[1]);
+            }
+            isModuleExist = SOFTBUS_DUMP_EXIST;
+            break;
+        }
+    }
+
+    if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+        SoftBusDumpErrInfo(fd, argv[1]);
+        SoftBusDumpShowHelp(fd);
+    }
+    
+    return SOFTBUS_OK;
 }
 
-int SoftBusHiDumperModuleInit(void)
+int32_t SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Disc HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Conn HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init NStack HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init BusCenter HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
