@@ -19,13 +19,13 @@ module_output_path = "dsoftbus/LNN"
 ohos_unittest("LNNTest") {
   module_out_path = module_output_path
   sources = [
+    "net_builder/lnn_exchange_device_info_test.cpp",
+    "net_builder/lnn_node_weight_test.cpp",
+    "net_builder/lnn_sync_info_manager_test.cpp",
+    "net_builder/lnn_topo_manager_test.cpp",
     "unittest/lane_test.cpp",
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/net_builder_test.cpp",
-    "net_builder/lnn_topo_manager_test.cpp",
-    "net_builder/lnn_node_weight_test.cpp",
-    "net_builder/lnn_exchange_device_info_test.cpp",
-    "net_builder/lnn_sync_info_manager_test.cpp",
   ]
 
   include_dirs = [

@@ -42,7 +42,6 @@ void LnnTopoManagerTest::SetUpTestCase()
 
 void LnnTopoManagerTest::TearDownTestCase()
 {
-    
 }
 
 void LnnTopoManagerTest::SetUp()

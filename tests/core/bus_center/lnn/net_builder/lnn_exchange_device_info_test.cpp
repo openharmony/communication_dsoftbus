@@ -27,7 +27,7 @@ using namespace testing::ext;
 
 constexpr int32_t SEQ = 1;
 
-class LnExchangeDeviceInfoTest : public testing::Test {
+class LnnExchangeDeviceInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -35,19 +35,19 @@ public:
     void TearDown();
 };
 
-void LnExchangeDeviceInfoTest::SetUpTestCase()
+void LnnExchangeDeviceInfoTest::SetUpTestCase()
 {
 }
 
-void LnExchangeDeviceInfoTest::TearDownTestCase()
+void LnnExchangeDeviceInfoTest::TearDownTestCase()
 {
 }
 
-void LnExchangeDeviceInfoTest::SetUp()
+void LnnExchangeDeviceInfoTest::SetUp()
 {
 }
 
-void LnExchangeDeviceInfoTest::TearDown()
+void LnnExchangeDeviceInfoTest::TearDown()
 {
 }
 
@@ -57,7 +57,7 @@ void LnExchangeDeviceInfoTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnExchangeDeviceInfoTest, LNN_PARSE_PEER_NODE_INFO_TEST_001, TestSize.Level0)
+HWTEST_F(LnnExchangeDeviceInfoTest, LNN_PARSE_PEER_NODE_INFO_TEST_001, TestSize.Level0)
 {
     ConnectOption option;
     NodeInfo info;
@@ -82,7 +82,7 @@ HWTEST_F(LnExchangeDeviceInfoTest, LNN_PARSE_PEER_NODE_INFO_TEST_001, TestSize.L
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnExchangeDeviceInfoTest, LNN_GET_EXCHANGE_NODE_INFO_TEST_001, TestSize.Level0)
+HWTEST_F(LnnExchangeDeviceInfoTest, LNN_GET_EXCHANGE_NODE_INFO_TEST_001, TestSize.Level0)
 {
     uint32_t *outSize = nullptr;
     int32_t *side = nullptr;
