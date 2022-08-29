@@ -68,7 +68,7 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 * @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
 * @tc.desc: invalid parameter and 
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level0)
 {
@@ -82,7 +82,7 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Le
 * @tc.name: LNN_UNREG_SYNC_INFO_HANDLER_TEST_001
 * @tc.desc: invalid parameter
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level0)
 {
@@ -96,7 +96,7 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 * @tc.name: LNN_SEND_SYNC_INFO_MSG_TEST_001
 * @tc.desc: invalid parameter
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level0)
 {

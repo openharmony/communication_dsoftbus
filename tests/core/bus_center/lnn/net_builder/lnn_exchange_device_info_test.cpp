@@ -53,9 +53,9 @@ void LnExchangeDeviceInfoTest::TearDown()
 
 /*
 * @tc.name: LNN_PARSE_PEER_NODE_INFO_TEST_001
-* @tc.desc: test LnnParsePeerNodeInfo false
+* @tc.desc: test LnnParsePeerNodeInfo return failure
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnExchangeDeviceInfoTest, LNN_PARSE_PEER_NODE_INFO_TEST_001, TestSize.Level0)
 {
@@ -78,9 +78,9 @@ HWTEST_F(LnExchangeDeviceInfoTest, LNN_PARSE_PEER_NODE_INFO_TEST_001, TestSize.L
 
 /*
 * @tc.name: LNN_GET_EXCHANGE_NODE_INFO_TEST_001
-* @tc.desc: test LnnCompareNodeWeight false
+* @tc.desc: test LnnCompareNodeWeight return failure
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnExchangeDeviceInfoTest, LNN_GET_EXCHANGE_NODE_INFO_TEST_001, TestSize.Level0)
 {

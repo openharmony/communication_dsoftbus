@@ -59,7 +59,7 @@ void LnnTopoManagerTest::TearDown()
 * @tc.name: LNN_GET_RELATION_TEST_001
 * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level0)
 {
@@ -72,7 +72,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level0)
 * @tc.name: LNN_GET_RELATION_TEST_002
 * @tc.desc: Udid and PeerUdid not find return SOFTBUS_NOT_FIND
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level0)
 {
@@ -85,7 +85,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level0)
 * @tc.name: LNN_GET_ALL_RELATION_TEST_001
 * @tc.desc: relationNum is NULL return SOFTBUS_INVALID_PARAM
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level0)
 {
@@ -97,9 +97,9 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level0)
 
 /*
 * @tc.name: LNN_GET_RELATION_TEST_002
-* @tc.desc: *relationNum == 0 return SOFTBUS_INVALID_PARAM
+* @tc.desc: *invalid parameter
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require: I5OMIK
 */
 HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level0)
 {
