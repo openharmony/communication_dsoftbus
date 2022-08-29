@@ -46,7 +46,7 @@ void DsoftbusCryptoTest::TearDown()
 * @tc.name: SoftBusBase64Encode001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, TestSize.Level0)
 {
@@ -61,7 +61,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, TestSize.Level0)
 * @tc.name: SoftBusBase64Encode002
 * @tc.desc: parameter is nullptr
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, TestSize.Level0)
 {
@@ -82,7 +82,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode002, TestSize.Level0)
 * @tc.name: SoftBusBase64Encode003
 * @tc.desc: dlen and slen is illegal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
 {
@@ -103,7 +103,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
 * @tc.name: SoftBusBase64Decode001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, TestSize.Level0)
 {
@@ -121,7 +121,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, TestSize.Level0)
 * @tc.name: SoftBusBase64Decode002
 * @tc.desc: parameters is nullptr
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, TestSize.Level0)
 {
@@ -145,7 +145,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode002, TestSize.Level0)
 * @tc.name: SoftBusBase64Decode003
 * @tc.desc: dlen and slen is illegal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode003, TestSize.Level0)
 {
@@ -167,7 +167,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode003, TestSize.Level0)
 * @tc.name: SoftBusGenerateSessionKey001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey001, TestSize.Level0)
 {
@@ -180,7 +180,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey001, TestSize.Level0)
 * @tc.name: SoftBusGenerateSessionKey002
 * @tc.desc: key is nullptr
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey002, TestSize.Level0)
 {
@@ -193,7 +193,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey002, TestSize.Level0)
 * @tc.name: SoftBusGenerateSessionKey003
 * @tc.desc: len is illegal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey003, TestSize.Level0)
 {
@@ -207,7 +207,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateSessionKey003, TestSize.Level0)
 * @tc.name: SoftBusGenerateStrHash001
 * @tc.desc: parameters is Legal
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash001, TestSize.Level0)
 {
@@ -221,7 +221,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash001, TestSize.Level0)
 * @tc.name: SoftBusGenerateStrHash002
 * @tc.desc: str and hash is nullptr
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash002, TestSize.Level0)
 {
@@ -242,7 +242,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateStrHash002, TestSize.Level0)
 * @tc.name: SoftBusGenerateRandomArrayTest001
 * @tc.desc: randStr and len is valid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest001, TestSize.Level0)
 {
@@ -255,7 +255,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest001, TestSize.Level0)
 * @tc.name: SoftBusGenerateRandomArrayTest002
 * @tc.desc: randStr and len is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
 {
@@ -273,7 +273,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
 * @tc.name: SoftBusEncryptData001
 * @tc.desc: all valid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, TestSize.Level0)
 {
@@ -293,7 +293,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, TestSize.Level0)
 * @tc.name: SoftBusEncryptData002
 * @tc.desc: cipherKey、input and inLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData002, TestSize.Level0)
 {
@@ -316,7 +316,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData002, TestSize.Level0)
 * @tc.name: SoftBusEncryptData003
 * @tc.desc: encryptData and encryptLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
 {
@@ -337,7 +337,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
 * @tc.name: SoftBusEncryptDataWithSeq001
 * @tc.desc: all valid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, TestSize.Level0)
 {
@@ -358,7 +358,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, TestSize.Level0)
 * @tc.name: SoftBusEncryptDataWithSeq002
 * @tc.desc: cipherKey and input is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq002, TestSize.Level0)
 {
@@ -380,7 +380,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq002, TestSize.Level0)
 * @tc.name: SoftBusEncryptDataWithSeq003
 * @tc.desc: inLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq003, TestSize.Level0)
 {
@@ -400,7 +400,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq003, TestSize.Level0)
 * @tc.name: SoftBusEncryptDataWithSeq004
 * @tc.desc: encryptData and encryptLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
 {
@@ -424,7 +424,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
 * @tc.name: SoftBusDecryptData001
 * @tc.desc: all valid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, TestSize.Level0)
 {
@@ -448,7 +448,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, TestSize.Level0)
 * @tc.name: SoftBusDecryptData002
 * @tc.desc: cipherKey、input and inLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, TestSize.Level0)
 {
@@ -479,7 +479,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, TestSize.Level0)
 * @tc.name: SoftBusDecryptData003
 * @tc.desc: decryptData and decryptLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, TestSize.Level0)
 {
@@ -506,7 +506,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, TestSize.Level0)
 * @tc.name: SoftBusDecryptDataWithSeq001
 * @tc.desc: all valid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, TestSize.Level0)
 {
@@ -531,7 +531,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, TestSize.Level0)
 * @tc.name: SoftBusDecryptDataWithSeq002
 * @tc.desc: cipherKey and input is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, TestSize.Level0)
 {
@@ -559,7 +559,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, TestSize.Level0)
 * @tc.name: SoftBusDecryptDataWithSeq003
 * @tc.desc: inLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, TestSize.Level0)
 {
@@ -585,7 +585,7 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, TestSize.Level0)
 * @tc.name: SoftBusDecryptDataWithSeq004
 * @tc.desc: encryptData and encryptLen is invalid param
 * @tc.type: FUNC
-* @tc.require: 1
+* @tc.require: I5OHDE
 */
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, TestSize.Level0)
 {
