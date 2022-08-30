@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ public:
     virtual int OnStreamHdrReceived(std::unique_ptr<char[]> header, int size) = 0;
     virtual void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const = 0;
     virtual void OnFrameStats(const StreamSendStats *data) = 0;
+    virtual void OnRippleStats(const TrafficStats *data) = 0;
 };
 
 class IStreamSocket {
