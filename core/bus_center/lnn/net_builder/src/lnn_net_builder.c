@@ -676,22 +676,36 @@ static int32_t ProcessSyncDeviceInfoDone(const void *para)
 static int32_t ProcessDeviceNotTrusted(const void *para)
 {
     const char *peerUdid = (const char *)para;
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = SOFTBUS_OK;
+    int32_t rc = SOFTBUS_OK;
 
     if (peerUdid == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    ret = LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info network fail");
-        return SOFTBUS_ERR;
-    }
 
-    ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+    do {
+        NodeInfo *info = LnnGetNodeInfoById(peerUdid, CATEGORY_UDID);
+        if (info != NULL) {
+            LnnRequestLeaveSpecific(info->networkId, CONNECTION_ADDR_MAX);
+            break;
+        }
+
+        LnnConnectionFsm *item = NULL;
+        const char *udid = NULL;
+        LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+            if (item->connInfo.nodeInfo == NULL) {
+                continue;
+            }
+            udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
+            if (udid != NULL && strcmp(peerUdid, udid) == 0) {
+                rc = LnnSendNotTrustedToConnFsm(item);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                    "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
+            }
+        }
+    } while (false);
     SoftBusFree((void *)peerUdid);
-    return ret;
+    return rc;
 }
 
 static int32_t ProcessAuthDisconnect(const void *para)
