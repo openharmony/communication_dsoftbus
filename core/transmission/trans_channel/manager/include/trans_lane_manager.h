@@ -37,6 +37,8 @@ void TransLaneMgrDeathCallback(const char *pkgName);
 
 int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId);
 
+int32_t TransGetChannelInfoByLaneId(uint32_t laneId, int32_t *channelId, int32_t *channelType);
+
 #ifdef __cplusplus
 }
 #endif
