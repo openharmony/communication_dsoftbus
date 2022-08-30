@@ -35,6 +35,7 @@ ohos_unittest("AuthTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/tests/sdk/common/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
@@ -44,6 +45,7 @@ ohos_unittest("AuthTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
