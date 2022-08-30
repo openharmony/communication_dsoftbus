@@ -241,7 +241,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportConnFaultEvt_001, TestSize.Level1)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordConnInfo_001, TestSize.Level1)
 {
-    int ret;
+    int ret = SOFTBUS_ERR;
     int32_t time = 10;
     ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -267,7 +267,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordConnInfo_001, TestSize.Level1)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_001, TestSize.Level1)
 {
-    int ret;
+    int ret = SOFTBUS_ERR;
     char pkgName[] = "testPackage";
     ret = SoftBusReportDiscStartupEvt(pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -281,7 +281,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_001, TestSize.Level1
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscScanTimes_001, TestSize.Level1)
 {
-    int ret;
+    int ret = SOFTBUS_ERR;
     ret = SoftbusRecordDiscScanTimes(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -294,7 +294,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscScanTimes_001, TestSize.Level1)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordFirstDiscTime_001, TestSize.Level1)
 {
-    int ret;
+    int ret = SOFTBUS_ERR;
     uint32_t time = 4;
     ret = SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, time);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -308,7 +308,7 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordFirstDiscTime_001, TestSize.Level1)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_001, TestSize.Level1)
 {
-    int ret;
+    int ret = SOFTBUS_ERR;
     uint32_t errCode = SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT;
     ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
