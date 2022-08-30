@@ -21,9 +21,20 @@
 #include "softbus_conn_manager.h"
 #include "softbus_proxychannel_message.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 void PackConnPktHead(ConnPktHead *data);
 void UnpackConnPktHead(ConnPktHead *data);
 void UnpackProxyMessageHead(ProxyMessageHead *msg);
 void PackProxyMessageHead(ProxyMessageHead *msg);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_DATAHEAD_CONVER_H */

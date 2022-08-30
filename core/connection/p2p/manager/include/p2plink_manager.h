@@ -18,10 +18,21 @@
 
 #include "p2plink_loop.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg);
 void P2pLinkLoopDisconnectDev(P2pLoopMsg msgType, void *arg);
 int32_t P2pLinkManagerInit(void);
 void P2pLinkClean(void);
 
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_MANAGER_H */
 
