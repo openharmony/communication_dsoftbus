@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "lnn_topo_manager.h"
+#include "softbus_apapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -105,6 +106,10 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level0)
     uint32_t num = 0;
     LnnRelation *relation = nullptr;
     int ret = LnnGetAllRelation(&relation, &num);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    num = 1;
+    ret = LnnGetAllRelation(&relation, &num);
+    SoftBusFree(*relation);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
