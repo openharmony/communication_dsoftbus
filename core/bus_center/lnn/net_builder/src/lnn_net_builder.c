@@ -1214,7 +1214,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");
         return;
     }
-    if (strncpy_s(udid, udidLen, peerUdid, udidLen) != EOK) {
+    if (strcpy_s(udid, udidLen, peerUdid) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid fail");
         SoftBusFree(udid);
         return;
