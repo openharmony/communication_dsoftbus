@@ -54,18 +54,6 @@ void LnnNodeWeightTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
-* @tc.desc: test LnnGetLocalWeight
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LnnNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level0)
-{
-    int32_t ret = LnnGetLocalWeight();
-    EXPECT_TRUE(ret != 0);
-}
-
-/*
 * @tc.name: LNN_COMPARE_NODE_WEIGHT_TEST_001
 * @tc.desc: test LnnCompareNodeWeight
 * @tc.type: FUNC
