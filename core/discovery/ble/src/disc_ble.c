@@ -357,16 +357,12 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
         if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] == false) {
             return true;
         }
-        unsigned char accountHash[SHORT_USER_ID_HASH_LEN] = {0};
-        if (DiscBleGetShortUserIdHash(accountHash, SHORT_USER_ID_HASH_LEN) != SOFTBUS_OK) {
+        unsigned char accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
+        if (DiscBleGetShortUserIdHash(accountIdHash, SHORT_USER_ID_HASH_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash error");
             return false;
         }
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "my account %x %x",
-            accountHash[0], accountHash[1]);
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "peer account %x %x",
-            foundInfo->accountHash[0], foundInfo->accountHash[1]);
-        if (memcmp(accountHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == EOK) {
+        if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
         return false;
