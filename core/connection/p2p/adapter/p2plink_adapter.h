@@ -21,6 +21,12 @@
 
 #include "p2plink_type.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     char mac[P2P_MAC_LEN];
 } P2pLinkPeerMacList;
@@ -78,4 +84,9 @@ void P2pLinkRemoveGcGroup(void);
 
 void P2pLinkEnableStub(void);
 
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_ADAPTER_H */

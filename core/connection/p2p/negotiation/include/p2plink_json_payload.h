@@ -21,10 +21,21 @@
 #include "cJSON.h"
 #include "p2plink_negotiation.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data);
 int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data);
 
 int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pRequestMsg *request);
 int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pRespMsg *response);
 
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_JSON_PAYLOAD_H */

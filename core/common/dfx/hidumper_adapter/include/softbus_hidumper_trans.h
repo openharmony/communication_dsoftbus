@@ -18,6 +18,12 @@
 
 #include "softbus_app_info.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef enum {
     DUMPER_LANE_BR = 0x0,
     DUMPER_LANE_BLE,
@@ -40,4 +46,9 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
 
 void SoftBusTransDumpHandlerInit(void);
 
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_HIDUMPER_TRANS_H */

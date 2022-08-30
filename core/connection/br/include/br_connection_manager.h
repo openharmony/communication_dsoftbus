@@ -19,6 +19,12 @@
 #include "common_list.h"
 #include "softbus_conn_interface.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     ListNode node;
     uint32_t requestId;
@@ -138,5 +144,9 @@ bool BrCheckActiveConnection(const ConnectOption *option);
 
 int32_t ResumeConnection(uint32_t connId, ListNode *pendings);
 
-#endif
-
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* BR_CONNECTION_MANAGER_H */

@@ -17,7 +17,19 @@
 
 #include "softbus_hidumper.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t SoftBusConnHiDumperInit(void);
 int32_t SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperConnDeInit(void);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_HIDUMPER_CONN_H */
