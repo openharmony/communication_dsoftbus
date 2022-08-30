@@ -882,6 +882,10 @@ static void ConnectionFsmDinitCallback(FsmStateMachine *fsm)
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
+    if (connFsm == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connFsm is NULL!");
+        return;
+    }
     if (connFsm->stopCallback) {
         connFsm->stopCallback(connFsm);
     }
