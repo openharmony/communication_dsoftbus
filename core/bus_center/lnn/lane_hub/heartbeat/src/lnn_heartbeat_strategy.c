@@ -324,8 +324,6 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send process send once fail");
         return SOFTBUS_ERR;
     }
-    SoftBusFree(msgPara);
-    msgPara = NULL;
     return SOFTBUS_OK;
 }
 
@@ -364,8 +362,6 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     ret = LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V0);
     if (ret == SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB adjustable period strategy is end");
-        SoftBusFree(msgPara);
-        msgPara = NULL;
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {

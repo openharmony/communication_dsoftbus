@@ -432,8 +432,7 @@ static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *pa
                 "ret=%d", msgPara->hbType, msgPara->strategyType, ret);
             break;
         }
-        /* in this case, free the memory of msgPara in strategyMgr.onProcess FUNC */
-        return SOFTBUS_OK;
+        ret = SOFTBUS_OK;
     } while (false);
     SoftBusFree(msgPara);
     return ret;
