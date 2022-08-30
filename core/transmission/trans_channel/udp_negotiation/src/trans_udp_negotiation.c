@@ -518,10 +518,13 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     }
     if (TransGetUdpChannelByRequestId(requestId, channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOnAuthConnOpened get channel fail");
+        SoftBusFree(channel);
         goto EXIT_ERR;
     }
     if (StartExchangeUdpInfo(channel, authId, channel->seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOnAuthConnOpened neg fail");
+        ProcessAbnormalUdpChannelState(&channel->info, true);
+        SoftBusFree(channel);
         goto EXIT_ERR;
     }
 
@@ -530,10 +533,6 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     return;
 EXIT_ERR:
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOnAuthConnOpened proc fail");
-    if (channel != NULL) {
-        ProcessAbnormalUdpChannelState(&channel->info, true);
-        SoftBusFree(channel);
-    }
     AuthCloseConn(authId);
 }
 

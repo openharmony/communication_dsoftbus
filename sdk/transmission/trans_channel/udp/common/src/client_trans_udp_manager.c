@@ -258,10 +258,42 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
     return ret;
 }
 
+static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
+{
+    switch (channel->businessType) {
+        case BUSINESS_TYPE_STREAM:
+            if (TransCloseStreamChannel(channel->channelId) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close udp channel failed.");
+                return SOFTBUS_ERR;
+            }
+            break;
+        case BUSINESS_TYPE_FILE:
+            TransCloseFileChannel(channel->dfileId);
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type.");
+            return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransOnUdpChannelOpenFailed(int32_t channelId)
 {
+    UdpChannel channel;
+    bool isFind = true;
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed get udp channel failed.");
+        isFind = false;
+    }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "tans delete udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed delete udp channel failed.");
+    }
+    if ((isFind) && (channel.isEnable)) {
+        if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "TransOnUdpChannelOpenFailed delete business channel failed.");
+            return SOFTBUS_ERR;
+        }
     }
     if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionOpenFailed == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client trans udp manager seesion callback is null");
@@ -294,21 +326,12 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
     if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close peer udp channel failed.");
     }
-    switch (channel.businessType) {
-        case BUSINESS_TYPE_STREAM:
-            if (TransCloseStreamChannel(channelId) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close udp channel failed.");
-                return SOFTBUS_ERR;
-            }
-            break;
-        case BUSINESS_TYPE_FILE:
-            TransCloseFileChannel(channel.dfileId);
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type.");
-            return SOFTBUS_ERR;
-    }
 
+    if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel delete business channel failed.");
+        return SOFTBUS_ERR;
+    }
+    
     if (!isActive && (g_sessionCb != NULL) && (g_sessionCb->OnSessionClosed != NULL)) {
         g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
     }
