@@ -326,6 +326,7 @@ static DeviceInfo *CreateNewDevice(void *deviceList, const DeviceInfo *deviceInf
         DatabaseFreeRecord(deviceList, (void*)internalDevice);
         return NULL;
     }
+    internalDevice->updateState = DFINDER_UPDATE_STATE_NULL;
     return internalDevice;
 }
 #endif
@@ -361,6 +362,7 @@ static DeviceInfo *CreateNewDeviceWithIdx(void *deviceList, const DeviceInfo *de
     internalDevice->localIfInfoAll[0].deviceRemoteChannelInfo[0].remoteChannelInfo = deviceInfo->netChannelInfo;
     ClockGetTime(CLOCK_MONOTONIC, &internalDevice->localIfInfoAll[0].deviceRemoteChannelInfo[0].lastRecvTime);
     internalDevice->localIfInfoAll[0].nextRemoteIdx = 1;
+    internalDevice->localIfInfoAll[0].deviceRemoteChannelInfo[0].updateState = DFINDER_UPDATE_STATE_NULL;
 
     if (CheckAndUpdateBusinessAll(&internalDevice->localIfInfoAll[0].deviceRemoteChannelInfo[0].businessDataAll,
         &internalDevice->businessData, &updated) != NSTACKX_EOK) {
@@ -550,6 +552,78 @@ static int32_t UpdateDeviceInfoBusinessData(DeviceInfo *internalDevice, const De
     return NSTACKX_EOK;
 }
 
+static void UpdateDeviceListChangeStateWhenActive(UpdateState *curState, uint8_t *updated)
+{
+    switch (*curState) {
+        case DFINDER_UPDATE_STATE_NULL:
+            *curState = DFINDER_UPDATE_STATE_UNICAST;
+            *updated = NSTACKX_TRUE;
+            break;
+        case DFINDER_UPDATE_STATE_BROADCAST:
+            if (*updated == NSTACKX_TRUE) {
+                *curState = DFINDER_UPDATE_STATE_UNICAST;
+            } else {
+                *curState = DFINDER_UPDATE_STATE_ALL;
+                *updated = NSTACKX_TRUE;
+            }
+            break;
+        case DFINDER_UPDATE_STATE_UNICAST:
+            break;
+        case DFINDER_UPDATE_STATE_ALL:
+            if (*updated == NSTACKX_TRUE) {
+                *curState = DFINDER_UPDATE_STATE_UNICAST;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+static void UpdateDeviceListChangeStateWhenPassive(UpdateState *curState, uint8_t *updated)
+{
+    switch (*curState) {
+        case DFINDER_UPDATE_STATE_NULL:
+            *curState = DFINDER_UPDATE_STATE_BROADCAST;
+            *updated = NSTACKX_TRUE;
+            break;
+        case DFINDER_UPDATE_STATE_BROADCAST:
+            break;
+        case DFINDER_UPDATE_STATE_UNICAST:
+            if (*updated == NSTACKX_TRUE) {
+                *curState = DFINDER_UPDATE_STATE_BROADCAST;
+            } else {
+                *curState = DFINDER_UPDATE_STATE_ALL;
+                *updated = NSTACKX_TRUE;
+            }
+            break;
+        case DFINDER_UPDATE_STATE_ALL:
+            if (*updated == NSTACKX_TRUE) {
+                *curState = DFINDER_UPDATE_STATE_BROADCAST;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+static void CheckAndUpdateDeviceListChangeState(DeviceInfo *internalDevice,
+    const DeviceInfo *deviceInfo, uint8_t *updated)
+{
+#ifdef DFINDER_SUPPORT_MULTI_NIF
+    uint8_t curNifIdx = internalDevice->nextNifIdx - 1;
+    uint8_t curChannelIdx = internalDevice->localIfInfoAll[curNifIdx].nextRemoteIdx - 1;
+    UpdateState *curState = &(internalDevice->localIfInfoAll[curNifIdx].
+        deviceRemoteChannelInfo[curChannelIdx].updateState);
+#else
+    UpdateState *curState = &(internalDevice->updateState);
+#endif
+    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_PASSIVE) {
+        UpdateDeviceListChangeStateWhenPassive(curState, updated);
+    } else {
+        UpdateDeviceListChangeStateWhenActive(curState, updated);
+    }
+}
+
 static int32_t UpdateDeviceInfo(DeviceInfo *internalDevice, const DeviceInfo *deviceInfo, uint8_t *updatedPtr)
 {
     uint8_t updated = NSTACKX_FALSE;
@@ -676,50 +750,7 @@ static void DeviceListChangeHandle(void)
     free(deviceList);
 }
 
-static int32_t UpdateWhenDiscoverActive(const DeviceInfo *deviceInfo, uint8_t idx)
-{
-    DeviceInfo *internalDevice = NULL;
-    void *dbList = DatabaseInit(1, sizeof(DeviceInfo), IsSameDevice);
-    if (dbList == NULL) {
-        DFINDER_LOGE(TAG, "device db init failed");
-        return NSTACKX_ENOMEM;
-    }
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    internalDevice = CreateNewDeviceWithIdx(dbList, deviceInfo, idx);
-#else
-    (void)idx;
-    internalDevice = CreateNewDevice(dbList, deviceInfo);
-#endif
-    if (internalDevice == NULL) {
-        DatabaseClean(dbList);
-        return NSTACKX_ENOMEM;
-    }
-    internalDevice->update = NSTACKX_TRUE;
-    uint32_t count = 1;
-    size_t listLen = sizeof(NSTACKX_DeviceInfo);
-    NSTACKX_DeviceInfo *deviceList = (NSTACKX_DeviceInfo *)malloc(listLen);
-    if (deviceList == NULL) {
-        DFINDER_LOGE(TAG, "malloc for device list failed");
-        DatabaseClean(dbList);
-        return NSTACKX_ENOMEM;
-    }
-    (void)memset_s(deviceList, listLen, 0, listLen);
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    GetDeviceListWithReportIdx(dbList, deviceList, &count, true);
-#else
-    GetDeviceList(dbList, deviceList, &count, true);
-#endif
-    NotifyDeviceListChanged(deviceList, count);
-    if (CoapDiscoverRequestOngoing()) {
-        NotifyDeviceFound(deviceList, count);
-    }
-    free(deviceList);
-    DatabaseClean(dbList);
-
-    return NSTACKX_EOK;
-}
-
-static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t idx, uint8_t forceUpdate)
+static int32_t UpdateDeviceDbInDeviceList(const DeviceInfo *deviceInfo, uint8_t idx, uint8_t forceUpdate)
 {
     DeviceInfo *internalDevice = NULL;
     uint8_t updated = NSTACKX_FALSE;
@@ -747,6 +778,7 @@ static int32_t UpdateWhenDiscoverPassive(const DeviceInfo *deviceInfo, uint8_t i
             return NSTACKX_EFAILED;
         }
     }
+    CheckAndUpdateDeviceListChangeState(internalDevice, deviceInfo, &updated);
     internalDevice->update = updated;
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);
@@ -764,16 +796,9 @@ static int32_t UpdateDeviceDbEx(const DeviceInfo *deviceInfo, uint8_t forceUpdat
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
-        if (UpdateWhenDiscoverActive(deviceInfo, 0) != NSTACKX_EOK) {
-            DFINDER_LOGE(TAG, "update when receive unicast fail");
-            return NSTACKX_EFAILED;
-        }
-    } else {
-        if (UpdateWhenDiscoverPassive(deviceInfo, 0, forceUpdate) != NSTACKX_EOK) {
-            DFINDER_LOGE(TAG, "update when receive broadcast fail");
-            return NSTACKX_EFAILED;
-        }
+    if (UpdateDeviceDbInDeviceList(deviceInfo, 0, forceUpdate) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "update when receive broadcast fail");
+        return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
 }
@@ -814,16 +839,9 @@ int32_t UpdateDeviceDbWithIdx(const DeviceInfo *deviceInfo, uint8_t forceUpdate,
     if (deviceInfo == NULL) {
         return NSTACKX_EINVAL;
     }
-    if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
-        if (UpdateWhenDiscoverActive(deviceInfo, idx) != NSTACKX_EOK) {
-            DFINDER_LOGE(TAG, "update when receive unicast fail with multi nif");
-            return NSTACKX_EFAILED;
-        }
-    } else {
-        if (UpdateWhenDiscoverPassive(deviceInfo, idx, forceUpdate) != NSTACKX_EOK) {
-            DFINDER_LOGE(TAG, "update when receive broadcast fail with multi nif");
-            return NSTACKX_EFAILED;
-        }
+    if (UpdateDeviceDbInDeviceList(deviceInfo, idx, forceUpdate) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "update when receive broadcast fail with multi nif");
+        return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
 }
