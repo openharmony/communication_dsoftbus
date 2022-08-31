@@ -15,6 +15,7 @@
 
 #include "client_trans_file.h"
 
+#include <securec.h>
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
@@ -32,7 +33,8 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
     }
-    UdpChannel udpChannel = {0};
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
         return;
     }
@@ -45,7 +47,8 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
-    FileListener fileListener = {0};
+    FileListener fileListener;
+    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
         return;
     }
@@ -78,14 +81,23 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
 }
 
+static int32_t GetUdpChannel(int32_t dfileId, UdpChannel *udpChannel)
+{
+    (void)memset_s(udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    if (TransGetUdpChannelByFileId(dfileId, udpChannel) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
     }
-    UdpChannel udpChannel = {0};
-    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
+    UdpChannel udpChannel;
+    if (GetUdpChannel(dfileId, &udpChannel) != SOFTBUS_OK) {
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
@@ -93,7 +105,8 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
-    FileListener fileListener = {0};
+    FileListener fileListener;
+    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
         return;
     }
@@ -140,7 +153,8 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
     int32_t fileSession;
     (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, NSTACKX_WLAN_CAT_TCP);
     if (channel->isServer) {
-        FileListener fileListener = {0};
+        FileListener fileListener;
+        (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
         if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
             return SOFTBUS_ERR;
