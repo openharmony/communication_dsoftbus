@@ -142,3 +142,24 @@ DFILE_TRANS_COMPLETE_EVT:
 
 DFILE_ACCEPT_SOCKET_EVT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: accept socket}
+
+FILLP_LINK_EVT:
+  __BASE: {type: FAULT, level: MINOR, desc: fillp link disconnect}
+  sockIdx: {type: UINT32, desc: fillp socket index}
+  linkEvtType: {type: UINT8, desc: fillp link event type}
+
+FILLP_PKT_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: fillp data package event}
+  sockIdx: {type: UINT32, desc: fillp socket index}
+  pktEvtType: {type: UINT8, desc: fillp package event type}
+  dropCnt: {type: UINT32, desc: fillp package dropcnt}
+
+FILLP_SOCK_QOS_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: fillp socket Qos event}
+  sockIdx: {type: UINT32, desc: fillp socket index}
+  rtt: {type: UINT32, desc: fillp socket rtt}
+  recvPktLoss: {type: UINT32, desc: fillp socket recv package loss}
+  recvRateBps: {type: UINT64, desc: fillp socket recv rate}
+  sendPktLoss: {type: UINT32, desc: fillp socket send package loss}
+  sendRateBps: {type: UINT64, desc: fillp socket send rate}
+  jitter: {type: UINT64, desc: fillp socket jitter}
