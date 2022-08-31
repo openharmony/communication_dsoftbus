@@ -63,6 +63,14 @@ enum NetChannelState {
     NET_CHANNEL_STATE_END,
 };
 
+typedef enum  {
+    DFINDER_UPDATE_STATE_NULL,
+    DFINDER_UPDATE_STATE_BROADCAST,
+    DFINDER_UPDATE_STATE_UNICAST,
+    DFINDER_UPDATE_STATE_ALL,
+    DFINDER_UPDATE_STATE_END,
+} UpdateState;
+
 typedef struct {
     char name[NSTACKX_MAX_INTERFACE_NAME_LEN];
     char alias[NSTACKX_MAX_INTERFACE_NAME_LEN];
@@ -93,6 +101,7 @@ typedef struct DeviceRemoteChannelInfo {
     BusinessDataAll businessDataAll;
     NetChannelInfo remoteChannelInfo;
     struct timespec lastRecvTime;
+    UpdateState updateState;
 } DeviceRemoteChannelInfo;
 
 typedef struct LocalIfInfoAll {
@@ -107,6 +116,9 @@ typedef struct DeviceInfo {
 #ifdef DFINDER_SAVE_DEVICE_LIST
     uint8_t update : 1;
     uint8_t reserved : 7;
+#ifndef DFINDER_SUPPORT_MULTI_NIF
+    UpdateState updateState;
+#endif
 #endif
     uint8_t deviceType;
     uint16_t portNumber;
