@@ -552,6 +552,7 @@ int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume connection %u to 'BR_CONNECTION_STATE_CONNECTED'", connId);
     target->state = BR_CONNECTION_STATE_CONNECTED;
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
@@ -633,26 +634,24 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCon
     return BR_CONNECTION_STATE_CLOSED;
 }
 
-bool IsBrDeviceReady(uint32_t connId)
+int32_t GetBrConnStateByConnectionId(uint32_t connId)
 {
     (void)pthread_mutex_lock(&g_connectionLock);
+    int32_t state = -1;
+    BrConnectionInfo *target = NULL;
     ListNode *item = NULL;
-    BrConnectionInfo *itemNode = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
-        itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (itemNode->connectionId != connId) {
-            continue;
+        BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
+        if (itemNode->connectionId == connId) {
+            target = itemNode;
+            break;
         }
-        if (itemNode->state != BR_CONNECTION_STATE_CONNECTED) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br state not connected, state: %d", itemNode->state);
-            (void)pthread_mutex_unlock(&g_connectionLock);
-            return false;
-        }
-        (void)pthread_mutex_unlock(&g_connectionLock);
-        return true;
+    }
+    if (target != NULL) {
+        state = target->state;
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    return false;
+    return state;
 }
 
 int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType)
