@@ -109,7 +109,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     num = 1;
     ret = LnnGetAllRelation(&relation, &num);
-    SoftBusFree(*relation);
+    SoftBusFree(relation);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
