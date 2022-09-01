@@ -27,10 +27,10 @@ extern "C" {
 #endif
 #endif
 
-#ifndef __ICCARM__
-#define SOFTBUS_DPRINTF(fd, fmt, ...) dprintf(fd, fmt, ##__VA_ARGS__)
-#else
+#if defined(__ICCARM__) || defined(__LITEOS_M__)
 #define SOFTBUS_DPRINTF(fd, fmt, ...)
+#else
+#define SOFTBUS_DPRINTF(fd, fmt, ...) dprintf(fd, fmt, ##__VA_ARGS__)
 #endif
 
 typedef enum {
