@@ -309,7 +309,9 @@ void FillpDfxSockLinkAndQosNotify(const struct FtSocket *sock, FillpDfxLinkEvtTy
     args.linkEvt.linkEvtType = evtType;
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_LINK_EXCEPTION);
 
-    FillpDfxSockQosNotify(sock);
+    if (sock->netconn->state < CONN_STATE_CLOSING) {
+        FillpDfxSockQosNotify(sock);
+    }
 
     FillpDfxPktParseFailNode *node = DfxGetPktPraseFailNode(sock->index);
     if (node == FILLP_NULL_PTR) {
@@ -525,7 +527,7 @@ static FILLP_INT32 DoShowSockList(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
         return FILLP_FAILURE;
     }
 
-    if (sock->netconn->state != CONN_STATE_LISTENING) {
+    if (sock->netconn->state > CONN_STATE_LISTENING) {
         ipLen = IpAddrAnonymousFormat(peerAddr, sizeof(peerAddr),
             (const struct sockaddr *)peer, sizeof(struct sockaddr_in6));
         if (ipLen == NSTACKX_EFAILED) {
@@ -537,7 +539,7 @@ static FILLP_INT32 DoShowSockList(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
     }
 
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%5d\t %6u\t %6u\t %6u\t %6u\t %30s\t %5hu\t %30s\t %5hu\t %12s"CRLF,
-        sock->index, sendPcb->unSendList.size, sendPcb->unackList.size, sendPcb->redunList.nodeNum,
+        sock->index, sendPcb->unSendList.size, sendPcb->unackList.count, sendPcb->redunList.nodeNum,
         sendPcb->unrecvList.nodeNum, localAddr, FILLP_NTOHS(local->sin_port), peerAddr, FILLP_NTOHS(peer->sin_port),
         g_sockStateStr[sock->netconn->state]);
     return FILLP_SUCCESS;
