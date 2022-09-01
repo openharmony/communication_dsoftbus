@@ -100,55 +100,55 @@ static const FillpDfxEventParam g_fillpDfxEvtParam[FILLP_DFX_EVT_DFX_MAX][FILLP_
     [FILLP_DFX_EVT_LINK_EXCEPTION] = {
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "sockIdx",
+            .paramName = "SOCK_IDX",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT8,
-            .paramName = "linkEvtType",
+            .paramName = "LINK_EVT_TYPE",
         },
     },
     [FILLP_DFX_EVT_PKT_EXCEPTION] = {
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "sockIdx",
+            .paramName = "SOCK_IDX",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT8,
-            .paramName = "pktEvtType",
+            .paramName = "PKT_EVT_TYPE",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "dropCnt",
+            .paramName = "DROP_CNT",
         },
     },
     [FILLP_DFX_EVT_SOCK_QOS_STATUS] = {
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "sockIdx",
+            .paramName = "SOCK_IDX",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "rtt",
+            .paramName = "RTT",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "recvPktLoss",
+            .paramName = "RECV_PKT_LOSS",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT64,
-            .paramName = "recvRateBps",
+            .paramName = "RECV_RATE_BPS",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "sendPktLoss",
+            .paramName = "SEND_PKT_LOSS",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT64,
-            .paramName = "sendRateBps",
+            .paramName = "SEND_RATE_BPS",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT64,
-            .paramName = "jitter",
+            .paramName = "JITTER",
         },
     },
 };
