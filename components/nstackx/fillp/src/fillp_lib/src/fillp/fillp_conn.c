@@ -838,6 +838,8 @@ void FillpHandleConnConfirmAckInput(struct FtSocket *sock, struct FtNetconn *con
     sock->coreErrType[MSG_TYPE_DO_CONNECT] = ERR_OK;
 
     FILLP_UNUSED_PARA(p);
+
+    pcb->connTimestamp = SYS_ARCH_GET_CUR_TIME_LONGLONG();
 }
 
 static FILLP_BOOL FillpCheckConfirmAckInfoIsValid(struct FillpPcb *pcb, struct FtSocket *sock,
@@ -1752,6 +1754,7 @@ void FillpSendConnConfirmAck(struct FillpPcb *pcb)
             (FILLP_CHAR *)(&confirmAck));
 
         pcb->statistics.debugPcb.connConfirmAckSend++;
+        pcb->connTimestamp = SYS_ARCH_GET_CUR_TIME_LONGLONG();
     }
 
     return;
