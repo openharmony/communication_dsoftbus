@@ -681,8 +681,8 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     advData->advData[POS_FLAG_AD_TYPE] = FLAG_AD_TYPE;
     advData->advData[POS_FLAG_AD_DATA] = FLAG_AD_DATA;
     advData->advData[POS_AD_TYPE] = AD_TYPE;
-    advData->advData[POS_UUID] = BLE_UUID & BYTE_MASK;
-    advData->advData[POS_UUID + 1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
+    advData->advData[POS_UUID] = (char)(BLE_UUID & BYTE_MASK);
+    advData->advData[POS_UUID + 1] = (char)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK);
     advData->advData[POS_PACKET_LENGTH] = advData->advLength - POS_PACKET_LENGTH - 1;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advData->advLength:%d advLength:%d", advData->advLength, advLength);
     if (memcpy_s(&advData->advData[ADV_HEAD_LEN], advLength, boardcastData->data.advData, advLength) != EOK) {
