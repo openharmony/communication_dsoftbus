@@ -61,19 +61,15 @@ typedef union {
         FILLP_UINT32 rtt;
         FILLP_UINT32 totalReceivedPkt;
         FILLP_UINT32 totalReceivedBytes;
-        FILLP_UINT32 recvPktLoss; /* 0.01% */
-        FILLP_UINT32 recvBytesRate; /* bytes per second */
         FILLP_UINT32 totalSendPkt;
         FILLP_UINT32 totalSendBytes;
-        FILLP_UINT32 sendPktLoss; /* 0.01% */
-        FILLP_UINT32 sendBytesRate; /* bytes per second */
         FILLP_UINT32 jitter; /* ms */
     } sockQos;
 } FillpDfxEvtArgs;
 
 #define FILLP_DFX_LINK_EVT_PARA_NUM 2
 #define FILLP_DFX_PKT_EVT_PARA_NUM 3
-#define FILLP_DFX_SOCK_QOS_EVT_PARA_NUM 11
+#define FILLP_DFX_SOCK_QOS_EVT_PARA_NUM 7
 #define FILLP_EVT_MAX_PARA_NUM FILLP_DFX_SOCK_QOS_EVT_PARA_NUM
 
 typedef enum {
@@ -148,27 +144,11 @@ static const FillpDfxEventParam g_fillpDfxEvtParam[FILLP_DFX_EVT_DFX_MAX][FILLP_
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "recvPktLoss",
-        },
-        {
-            .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "recvBytesRate",
-        },
-        {
-            .type = FILLP_DFX_PARAM_TYPE_UINT32,
             .paramName = "totalSendPkt",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
             .paramName = "totalSendBytes",
-        },
-        {
-            .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "SEND_PKT_LOSS",
-        },
-        {
-            .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "sendBytesRate",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
@@ -194,12 +174,8 @@ static void DfxEvtGetParamAddr(const FillpDfxEvtArgs *args, FillpDfxEvt evt, con
             &args->sockQos.rtt,
             &args->sockQos.totalReceivedPkt,
             &args->sockQos.totalReceivedBytes,
-            &args->sockQos.recvPktLoss,
-            &args->sockQos.recvBytesRate,
             &args->sockQos.totalSendPkt,
             &args->sockQos.totalSendBytes,
-            &args->sockQos.sendPktLoss,
-            &args->sockQos.sendBytesRate,
             &args->sockQos.jitter,
         },
     };
@@ -303,21 +279,13 @@ static void FillpDfxSockQosNotify(const struct FtSocket *sock)
     const struct FillpPcb *pcb = &sock->netconn->pcb->fpcb;
     const struct FillpStatisticsTraffic *traffic = &(pcb->statistics.traffic);
     const struct FillAppFcStastics *appFcStastics = &(pcb->statistics.appFcStastics);
-    FILLP_UINT32 trafficLiveTime = FILLP_UTILS_US2S(SYS_ARCH_GET_CUR_TIME_LONGLONG() - pcb->connTimestamp);
-    trafficLiveTime = (trafficLiveTime == 0) ? 1 : trafficLiveTime;
 
     args.sockQos.rtt = appFcStastics->periodRtt;
     args.sockQos.totalReceivedPkt = traffic->totalRecved;
     args.sockQos.totalReceivedBytes = traffic->totalRecvedBytes;
-    args.sockQos.recvPktLoss = (traffic->totalRecved == 0) ? 0 :
-        traffic->totalRecvLost * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalRecved;
-    args.sockQos.recvBytesRate = traffic->totalRecvedBytes / trafficLiveTime;
 
     args.sockQos.totalSendPkt = traffic->totalSend;
     args.sockQos.totalSendBytes = traffic->totalSendBytes;
-    args.sockQos.sendPktLoss = (traffic->totalSend == 0) ? 0 :
-        traffic->totalRetryed * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalSend;
-    args.sockQos.sendBytesRate = traffic->totalSendBytes / trafficLiveTime;
     args.sockQos.jitter = (FILLP_UINT32)FILLP_UTILS_US2MS(sock->jitter);
 
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_SOCK_QOS_STATUS);
@@ -634,13 +602,13 @@ static FILLP_INT DoShowSockQos(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *da
         traffic->totalRecved,
         traffic->totalRecvedBytes,
         (traffic->totalRecved == 0) ? 0 :
-        traffic->totalRecvLost * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalRecved,
+        (traffic->totalRecvLost * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalRecved),
         traffic->totalRecvedBytes / trafficLiveTime,
 
         traffic->totalSend,
         traffic->totalSendBytes,
         (traffic->totalSend == 0) ? 0 :
-        traffic->totalRetryed * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalSend,
+        (traffic->totalRetryed * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalSend),
         traffic->totalSendBytes / trafficLiveTime,
         sock->jitter);
     return FILLP_SUCCESS;
