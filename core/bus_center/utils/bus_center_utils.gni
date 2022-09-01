@@ -33,10 +33,3 @@ if (dsoftbus_feature_lnn_net || dsoftbus_feature_lnn_meta_node) {
 }
 bus_center_utils_inc = [ "$core_bus_center_utils_path/include" ]
 bus_center_utils_deps = []
-
-if (defined(ohos_lite)) {
-} else {
-  bus_center_utils_src +=
-      [ "$core_bus_center_utils_path/src/lnn_sqlite3_utils.c" ]
-  bus_center_utils_deps += [ "//third_party/sqlite:sqlite" ]
-}
