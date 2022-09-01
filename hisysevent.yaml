@@ -92,8 +92,8 @@ TRANS_OPEN_SESSION_TIME_COST:
   MIN_TIME_COST: {type: UINT32, desc: the min time comsuming of open session }
   AVE_TIME_COST: {type: UINT32, desc: the average time comsuming of open session }
   TIMES_UNDER_500MS: {type: UINT32, desc: the times unders 500ms of open session }
-  TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms~1s of open session }
-  TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s~2s of open session }
+  TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms to 1s of open session }
+  TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s to 2s of open session }
   TIMES_ABOVE_2S: {type: UINT32, desc: the times above 2s of open session }
 
 TRANS_FAULT:
@@ -122,7 +122,7 @@ BUS_CENTER_DURATION:
 
 DFILE_WAIT_HEADER_TIMEOUT_EVT:
   __BASE: {type: FAULT, level: CRITICAL, desc: wait file header time out}
-  errorCode: {type: STRING, desc: error code}
+  ERROR_CODE: {type: STRING, desc: error code}
 
 DFILE_SERVER_CREATE_EVT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: server created}
@@ -138,7 +138,7 @@ DFILE_PEER_SHUTTED_EVT:
 
 DFILE_TRANS_COMPLETE_EVT:
   __BASE: {type: STATISTIC, level: MINOR, desc: transfer complete}
-  transRate: {type: STRING, desc: transmission speed}
+  TRANSRATE: {type: STRING, desc: transmission speed}
 
 DFILE_ACCEPT_SOCKET_EVT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: accept socket}
