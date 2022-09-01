@@ -620,15 +620,28 @@ static FILLP_INT FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
 
 static FILLP_INT DoShowSockQos(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len)
 {
-    struct FillAppFcStastics *appFcStastics = &(sock->netconn->pcb->fpcb.statistics.appFcStastics);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%8s\t %18s\t %18s\t %16s\t %16s\t %10s"CRLF,
-        "Rtt(ms)", "RecvPktLoss(0.01%)", "SendPktLoss(0.01%)", "RecvRateBps(bps)", "SendRateBps(bps)", "Jetter(us)");
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%8u\t %18u\t %18u\t %16llu\t %16llu\t %10lld"CRLF,
+    const struct FillpPcb *pcb = &sock->netconn->pcb->fpcb;
+    const struct FillpStatisticsTraffic *traffic = &(pcb->statistics.traffic);
+    const struct FillAppFcStastics *appFcStastics = &(pcb->statistics.appFcStastics);
+    FILLP_UINT32 trafficLiveTime = FILLP_UTILS_US2S(SYS_ARCH_GET_CUR_TIME_LONGLONG() - pcb->connTimestamp);
+    trafficLiveTime = (trafficLiveTime == 0) ? 1 : trafficLiveTime;
+
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%8s\t %12s\t %13s\t %19s\t %18s\t %10s\t %10s\t %19s\t %19s\t %10s"CRLF,
+        "Rtt(ms)", "ReceivedPkt", "ReceivedBytes", "RecvPktLoss(0.01%)", "RecvBytesRate(Bps)",
+        "SendPkt", "SendBytes", "SendPktLoss(0.01%)", "SendBytesRate(Bps)", "Jetter(us)");
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%8u\t %12u\t %13u\t %19u\t %18u\t %10u\t %10u\t %19u\t %19u\t %10u\t"CRLF,
         appFcStastics->periodRtt,
-        appFcStastics->periodRecvPktLossHighPrecision,
-        appFcStastics->periodSendPktLossHighPrecision,
-        appFcStastics->periodRecvRateBps,
-        appFcStastics->periodSendRateBps,
+        traffic->totalRecved,
+        traffic->totalRecvedBytes,
+        (traffic->totalRecved == 0) ? 0 :
+        traffic->totalRecvLost * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalRecved,
+        traffic->totalRecvedBytes / trafficLiveTime,
+
+        traffic->totalSend,
+        traffic->totalSendBytes,
+        (traffic->totalSend == 0) ? 0 :
+        traffic->totalRetryed * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalSend,
+        traffic->totalSendBytes / trafficLiveTime,
         sock->jitter);
     return FILLP_SUCCESS;
 }
