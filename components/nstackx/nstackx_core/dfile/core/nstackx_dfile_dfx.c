@@ -236,7 +236,7 @@ void WaitFileHeaderTimeoutEvent(DFileTransErrorCode errorCode)
     (void)sprintf_s(valueStr, DFile_EVENT_NAME_LEN, "Errorcode: %u", errorCode);
     transParam->type = DFile_PARAM_TYPE_STRING;
 
-    if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "Errorcode") != NSTACKX_EOK) {
+    if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "ERROR_CODE") != NSTACKX_EOK) {
         LOGE(TAG, "string copy failed");
         return;
     }
@@ -345,7 +345,7 @@ void TransferCompleteEvent(const double rate)
     (void)sprintf_s(valueStr, DFile_EVENT_NAME_LEN, "rate: %.2f MB/s", rate);
     transParam->type = DFile_PARAM_TYPE_STRING;
 
-    if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "transrate") != NSTACKX_EOK) {
+    if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "TRANSRATE") != NSTACKX_EOK) {
         LOGE(TAG, "string copy failed", 0);
         return;
     }
