@@ -1711,6 +1711,30 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
     return SOFTBUS_OK;
 }
 
+/* Note: must called in connection fsm. */
+int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
+{
+    LnnConnectionFsm *item = NULL;
+
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (item->isDead) {
+            continue;
+        }
+        if (item->connInfo.authId == authId) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "[id=%u]connection fsm already use authId: %" PRId64, item->id, authId);
+            return SOFTBUS_OK;
+        }
+    }
+    AuthHandleLeaveLNN(authId);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
     bool *para = NULL;

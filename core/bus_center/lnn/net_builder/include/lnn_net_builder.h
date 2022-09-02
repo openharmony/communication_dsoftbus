@@ -42,7 +42,7 @@ int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType 
 int32_t LnnRequestCleanConnFsm(uint16_t connFsmId);
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);
-
+int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
 
 #ifdef __cplusplus

@@ -132,3 +132,74 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
         return DISCOVERY_TYPE_COUNT;
     }
 }
+
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+{
+    if (addr == NULL || connInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
+        return false;
+    }
+    if (addr->type == CONNECTION_ADDR_BR) {
+        connInfo->type = AUTH_LINK_TYPE_BR;
+        if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, addr->info.br.brMac) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to connInfo fail");
+            return false;
+        }
+        return true;
+    }
+    if (addr->type == CONNECTION_ADDR_BLE) {
+        connInfo->type = AUTH_LINK_TYPE_BLE;
+        if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, addr->info.ble.bleMac) != EOK ||
+            memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash, UDID_HASH_LEN)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to connInfo fail");
+            return false;
+        }
+        return true;
+    }
+    if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
+        connInfo->type = AUTH_LINK_TYPE_WIFI;
+        if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr->info.ip.ip) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to connInfo fail");
+            return false;
+        }
+        connInfo->info.ipInfo.port = addr->info.ip.port;
+        return true;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", addr->type);
+    return false;
+}
+
+bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType)
+{
+    if (addr == NULL || connInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
+        return false;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_BR) {
+        addr->type = CONNECTION_ADDR_BR;
+        if (strcpy_s(addr->info.br.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
+            return false;
+        }
+        return true;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_BLE) {
+        addr->type = CONNECTION_ADDR_BLE;
+        if (strcpy_s(addr->info.ble.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
+            return false;
+        }
+        return true;
+    }
+    if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
+        addr->type = hintType;
+        if (strcpy_s(addr->info.ip.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to addr fail");
+            return false;
+        }
+        addr->info.ip.port = (uint16_t)connInfo->info.ipInfo.port;
+        return true;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", connInfo->type);
+    return false;
+}

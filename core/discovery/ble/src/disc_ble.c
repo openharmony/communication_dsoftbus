@@ -556,7 +556,8 @@ static SoftBusScanListener g_scanListener = {
 };
 
 static SoftBusBtStateListener g_stateChangedListener = {
-    .OnBtStateChanged = BleOnStateChanged
+    .OnBtStateChanged = BleOnStateChanged,
+    .OnBtAclStateChanged = NULL,
 };
 
 static int32_t GetMaxExchangeFreq(void)

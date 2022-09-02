@@ -180,6 +180,7 @@ typedef struct {
         } brInfo;
         struct {
             char bleMac[BT_MAC_LEN];
+            uint8_t deviceIdHash[UDID_HASH_LEN];
         } bleInfo;
         struct {
             char ip[IP_LEN];

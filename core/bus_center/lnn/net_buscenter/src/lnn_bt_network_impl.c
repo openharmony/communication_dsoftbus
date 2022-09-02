@@ -221,11 +221,51 @@ static void LnnBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     (void)LnnVisitPhysicalSubnet(NotifyBtStatusChanged, &event->status);
 }
 
+static void LnnLeaveSpecificBrNetwork(const char *btMac)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByBtMac(btMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "networkId not found by btMac.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "LNN start leave specific br network: %s.", AnonymizesNetworkID(networkId));
+    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave br network fail(=%d).", ret);
+    }
+}
+
+static void LnnBtAclStateChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_BT_ACL_STATE_CHANGED) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bt acl state event handler get invalid param");
+        return;
+    }
+
+    const LnnMonitorBtAclStateChangedEvent *event = (const LnnMonitorBtAclStateChangedEvent *)info;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BtAclStateChange: %d", event->status);
+    switch (event->status) {
+        case SOFTBUS_BR_ACL_CONNECTED:
+            /* do nothing */
+            break;
+        case SOFTBUS_BR_ACL_DISCONNECTED:
+            LnnLeaveSpecificBrNetwork(event->btMac);
+            break;
+        default:
+            break;
+    }
+}
+
 int32_t LnnInitBtProtocol(struct LnnProtocolManager *self)
 {
     (void)self;
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, LnnBtStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register bt state change event handler failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_BT_ACL_STATE_CHANGED, LnnBtAclStateChangeEventHandler) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register bt acl state change event handler failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -263,6 +303,7 @@ void LnnDeinitBtNetwork(struct LnnProtocolManager *self)
 {
     (void)self;
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, LnnBtStateChangeEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_BT_ACL_STATE_CHANGED, LnnBtAclStateChangeEventHandler);
     LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "%s:bt network deinited", __func__);
 }
