@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,370 +16,372 @@
 #include "auth_common.h"
 
 #include <securec.h>
-#include <sys/time.h>
 
 #include "bus_center_manager.h"
-#include "softbus_adapter_mem.h"
+#include "message_handler.h"
 #include "softbus_base_listener.h"
-#include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
-#include "softbus_utils.h"
 
-#define DEFAULT_AUTH_ABILITY_COLLECTION 0
-#define AUTH_SUPPORT_SERVER_SIDE_MASK 0x01
-#define INTERVAL_VALUE 2
-#define OFFSET_BITS 24
-#define INT_MAX_VALUE 0xFFFFFEL
-#define LOW_24_BITS 0xFFFFFFL
-#define MAX_BYTE_RECORD 230
-#define ANONYMOUS_INTEVER_LEN 60
-#define ANONYMOUS_CHAR '*'
+#define TIME_SEC_TO_MSEC 1000L
+#define TIME_MSEC_TO_USEC 1000L
+
+#define SEQ_NETWORK_ID_BITS 32
+#define SEQ_TIME_STAMP_BITS 8
+#define SEQ_TIME_STAMP_MASK 0xFFL
+#define SEQ_INTEGER_BITS 24
+#define SEQ_INTEGER_MAX 0xFFFFFF
+
+#define AUTH_SUPPORT_AS_SERVER_MASK 0x01
+
+typedef struct {
+    EventType event;
+    RemoveCompareFunc cmpFunc;
+    void *param;
+} EventRemoveInfo;
 
 static uint64_t g_uniqueId = 0;
-static uint32_t g_authAbility = 0;
+static SoftBusMutex g_authLock;
+static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
 
-int64_t GetSeq(AuthSideFlag flag)
+/* auth handler */
+static bool IsAuthHandlerInit(void)
 {
-    static uint64_t integer = 0;
-    if (integer == INT_MAX_VALUE) {
+    if (g_authHandler.looper == NULL ||
+        g_authHandler.looper->PostMessage == NULL ||
+        g_authHandler.looper->PostMessageDelay == NULL ||
+        g_authHandler.looper->RemoveMessageCustom == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth handler not init.");
+        return false;
+    }
+    return true;
+}
+
+static void DelAuthMessage(SoftBusMessage *msg)
+{
+    CHECK_NULL_PTR_RETURN_VOID(msg);
+    if (msg->obj != NULL) {
+        SoftBusFree(msg->obj);
+        msg->obj = NULL;
+    }
+    SoftBusFree(msg);
+}
+
+static SoftBusMessage *NewAuthMessage(const uint8_t *obj, uint32_t size)
+{
+    SoftBusMessage *msg = MallocMessage();
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc message fail.");
+        return NULL;
+    }
+    msg->obj = NULL;
+    if (obj != NULL && size > 0) {
+        msg->obj = DupMemBuffer(obj, size);
+        if (msg->obj == NULL) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "dup data fail.");
+            SoftBusFree(msg);
+            return NULL;
+        }
+    }
+    msg->handler = &g_authHandler;
+    msg->FreeMessage = DelAuthMessage;
+    return msg;
+}
+
+static void HandleAuthMessage(SoftBusMessage *msg)
+{
+    CHECK_NULL_PTR_RETURN_VOID(msg);
+    EventHandler handler = (EventHandler)msg->arg1;
+    if (handler == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "invalid event handler, event: %d", msg->what);
+        return;
+    }
+    handler(msg->obj);
+}
+
+int32_t PostAuthEvent(EventType event, EventHandler handler,
+    const void *obj, uint32_t size, uint64_t delayMs)
+{
+    if (!IsAuthHandlerInit()) {
+        return SOFTBUS_NO_INIT;
+    }
+    SoftBusMessage *msg = NewAuthMessage(obj, size);
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc fail, event: %d", event);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = (int32_t)event;
+    msg->arg1 = (uint64_t)handler;
+    if (delayMs == 0) {
+        g_authHandler.looper->PostMessage(g_authHandler.looper, msg);
+    } else {
+        g_authHandler.looper->PostMessageDelay(g_authHandler.looper, msg, delayMs);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(msg, SOFTBUS_ERR);
+    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
+    EventRemoveInfo *info = (EventRemoveInfo *)param;
+    if (msg->what != (int32_t)info->event) {
+        return SOFTBUS_ERR;
+    }
+    if (info->cmpFunc == NULL) {
+        return SOFTBUS_ERR;
+    }
+    return info->cmpFunc(msg->obj, info->param);
+}
+
+int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
+{
+    if (!IsAuthHandlerInit()) {
+        return SOFTBUS_NO_INIT;
+    }
+    EventRemoveInfo info = {
+        .event = event,
+        .cmpFunc = func,
+        .param = param,
+    };
+    g_authHandler.looper->RemoveMessageCustom(g_authHandler.looper, &g_authHandler, CustomFunc, &info);
+    return SOFTBUS_OK;
+}
+
+/* auth lock */
+bool RequireAuthLock(void)
+{
+    if (SoftBusMutexLock(&g_authLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth lock fail.");
+        return false;
+    }
+    return true;
+}
+
+void ReleaseAuthLock(void)
+{
+    if (SoftBusMutexUnlock(&g_authLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth unlock fail.");
+    }
+}
+
+/* auth config */
+bool GetConfigSupportAsServer(void)
+{
+    uint32_t ability = 0;
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
+        (uint8_t *)(&ability), sizeof(ability)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth ability from config file fail.");
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ability: %u", ability);
+    return ((ability & AUTH_SUPPORT_AS_SERVER_MASK) != 0);
+}
+
+/* auth common function */
+uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
+{
+    if (buf == NULL || size == 0) {
+        return NULL;
+    }
+    uint8_t *dup = (uint8_t *)SoftBusMalloc(size);
+    if (dup == NULL) {
+        return NULL;
+    }
+    if (memcpy_s(dup, size, buf, size) != EOK) {
+        SoftBusFree(dup);
+        return NULL;
+    }
+    return dup;
+}
+
+static void UpdateUniqueId(void)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get local networkId fail.");
+        return;
+    }
+    uint8_t hashId[SHA_256_HASH_LEN] = {0};
+    if (SoftBusGenerateStrHash((uint8_t *)networkId, strlen(networkId), hashId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash fail.");
+        return;
+    }
+    for (uint32_t i = 0; i < SEQ_NETWORK_ID_BITS / BYTES_BIT_NUM; i++) {
+        g_uniqueId = (g_uniqueId << BYTES_BIT_NUM) | hashId[i];
+    }
+    uint64_t timeStamp = GetCurrentTimeMs();
+    g_uniqueId = (g_uniqueId << SEQ_TIME_STAMP_BITS) | (SEQ_TIME_STAMP_MASK & timeStamp);
+}
+
+int64_t GenSeq(bool isServer)
+{
+    static uint32_t integer = 0;
+    if (integer >= SEQ_INTEGER_MAX) {
         integer = 0;
     }
-    integer += INTERVAL_VALUE;
-    uint64_t temp = integer;
-    if (flag == SERVER_SIDE_FLAG) {
-        temp += 1;
+    if (integer == 0) {
+        UpdateUniqueId();
     }
-    temp = ((g_uniqueId << OFFSET_BITS) | (temp & LOW_24_BITS));
-    int64_t seq = 0;
-    if (memcpy_s(&seq, sizeof(int64_t), &temp, sizeof(uint64_t)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "memcpy_s seq error");
-    }
-    return seq;
+    integer += SEQ_INTERVAL;
+    uint64_t seq = isServer ? (integer + 1) : integer;
+    /* |----NetworkIdHash(32)----|-----timeStamp(8)----|----AtomicInteger(24)----| */
+    seq = (g_uniqueId << SEQ_INTEGER_BITS) | (seq & SEQ_INTEGER_MAX);
+    return (int64_t)seq;
 }
 
-uint16_t AuthGetNextConnectionId(void)
+uint64_t GetCurrentTimeMs(void)
 {
-    static uint16_t authConnId = 0;
-    return ++authConnId;
+    SoftBusSysTime now = {0};
+    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusGetTime fail.");
+        return 0;
+    }
+    return (uint64_t)now.sec * TIME_SEC_TO_MSEC + (uint64_t)now.usec / TIME_MSEC_TO_USEC;
 }
 
-AuthSideFlag AuthGetSideByRemoteSeq(int64_t seq)
+const char *GetAuthSideStr(bool isServer)
 {
-    /* even odd check */
-    return (seq % 2) == 0 ? SERVER_SIDE_FLAG : CLIENT_SIDE_FLAG;
+    return isServer ? "server" : "client";
 }
 
-void AuthGetAbility(void)
+bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
 {
-    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
-        (unsigned char*)&g_authAbility, sizeof(g_authAbility)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Cannot get auth ability from config file");
-        g_authAbility = DEFAULT_AUTH_ABILITY_COLLECTION;
-    }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ability is %u", g_authAbility);
-}
-
-bool AuthIsSupportServerSide(void)
-{
-    return (g_authAbility & AUTH_SUPPORT_SERVER_SIDE_MASK) ? true : false;
-}
-
-void UniqueIdInit(void)
-{
-    struct timeval time = {0};
-    gettimeofday(&time, NULL);
-    g_uniqueId = (uint64_t)(time.tv_usec);
-}
-
-static int32_t GetRemoteIpByNodeAddr(char *ip, uint32_t size, const char *addr)
-{
-    NodeBasicInfo *info = NULL;
-    int32_t num = 0;
-
-    if (LnnGetAllOnlineNodeInfo(&info, &num) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
-        return SOFTBUS_ERR;
-    }
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "no online node");
-        return SOFTBUS_NOT_FIND;
-    }
-    if (num == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "num is 0");
-        SoftBusFree(info);
-        return SOFTBUS_NOT_FIND;
-    }
-    for (int32_t i = 0; i < num; i++) {
-        char *tmpNetworkId = info[i].networkId;
-        char nodeAddr[SHORT_ADDRESS_MAX_LEN] = {0};
-        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_NODE_ADDR, nodeAddr, sizeof(nodeAddr)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: get node addr failed!", __func__);
-            continue;
-        }
-        if (strcmp(nodeAddr, addr) == 0) {
-            if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_WLAN_IP, ip, size) == SOFTBUS_OK) {
-                SoftBusFree(info);
-                return SOFTBUS_OK;
-            } else {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: get ip failed!", __func__);
-                break;
-            }
-        }
-    }
-
-    SoftBusFree(info);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s: no find", __func__);
-    return SOFTBUS_NOT_FIND;
-}
-
-int32_t AuthGetDeviceKey(char *key, uint32_t size, uint32_t *len, const ConnectOption *option)
-{
-    if (key == NULL || len == NULL || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
-        return SOFTBUS_ERR;
-    }
-    switch (option->type) {
-        case CONNECT_BR:
-            if (strcpy_s(key, size, option->brOption.brMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                return SOFTBUS_ERR;
-            }
-            *len = BT_MAC_LEN;
-            break;
-        case CONNECT_BLE:
-            if (strcpy_s(key, size, option->bleOption.bleMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                return SOFTBUS_ERR;
-            }
-            *len = BT_MAC_LEN;
-            break;
-        case CONNECT_TCP:
-            if (option->socketOption.protocol == LNN_PROTOCOL_IP) {
-                if (strcpy_s(key, size, option->socketOption.addr) != EOK) {
-                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                    return SOFTBUS_ERR;
-                }
-            } else {
-                if (GetRemoteIpByNodeAddr(key, size, option->socketOption.addr) != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetRemoteIpByNodeAddr failed");
-                    return SOFTBUS_ERR;
-                }
-            }
-            *len = IP_LEN;
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type");
-            return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t AuthConvertConnInfo(ConnectOption *option, const ConnectionInfo *connInfo)
-{
-    if (option == NULL || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
-        return SOFTBUS_ERR;
-    }
-    option->type = connInfo->type;
-    switch (connInfo->type) {
-        case CONNECT_BR: {
-            if (strcpy_s(option->brOption.brMac, BT_MAC_LEN, connInfo->brInfo.brMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                return SOFTBUS_ERR;
-            }
-            break;
-        }
-        case CONNECT_BLE:
-            if (strcpy_s(option->bleOption.bleMac, BT_MAC_LEN, connInfo->bleInfo.bleMac) != EOK ||
-                memcpy_s(option->bleOption.deviceIdHash, UDID_HASH_LEN,
-                connInfo->bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac or deviceIdHash failed");
-                return SOFTBUS_ERR;
-            }
-            break;
-        case CONNECT_TCP: {
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->socketInfo.addr) !=
-                EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s failed");
-                return SOFTBUS_ERR;
-            }
-            option->socketOption.port = connInfo->socketInfo.port;
-            option->socketOption.protocol = connInfo->socketInfo.protocol;
-            break;
-        }
-        default: {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t ConvertAuthConnInfoToOption(const AuthConnInfo *info, ConnectOption *option)
-{
-    if (info == NULL || option == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    switch (info->type) {
+    CHECK_NULL_PTR_RETURN_VALUE(info1, false);
+    CHECK_NULL_PTR_RETURN_VALUE(info2, false);
+    switch (info1->type) {
         case AUTH_LINK_TYPE_WIFI:
-            option->type = CONNECT_TCP;
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), info->info.ipInfo.ip) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
-                return SOFTBUS_MEM_ERR;
+            if (info2->type == AUTH_LINK_TYPE_WIFI &&
+                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+                return true;
             }
-            option->socketOption.port = info->info.ipInfo.port;
-            option->socketOption.protocol = LNN_PROTOCOL_IP;
-            option->socketOption.keepAlive = 1;
             break;
         case AUTH_LINK_TYPE_BR:
+            if (info2->type == AUTH_LINK_TYPE_BR &&
+                StrCmpIgnoreCase(info1->info.brInfo.brMac, info2->info.brInfo.brMac) == 0) {
+                return true;
+            }
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            if (info2->type == AUTH_LINK_TYPE_BLE &&
+                memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash, UDID_HASH_LEN) == 0) {
+                return true;
+            }
+            break;
+        case AUTH_LINK_TYPE_P2P:
+            if (info2->type == AUTH_LINK_TYPE_P2P &&
+                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+                return true;
+            }
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected connInfo, type = %d.", info1->type);
+            return false;
+    }
+    return false;
+}
+
+int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(option, SOFTBUS_INVALID_PARAM);
+    switch (connInfo->type) {
+        case AUTH_LINK_TYPE_BR:
             option->type = CONNECT_BR;
-            if (strcpy_s(option->brOption.brMac, sizeof(option->brOption.brMac),
-                info->info.brInfo.brMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac failed.");
+            if (strcpy_s(option->brOption.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
             break;
         case AUTH_LINK_TYPE_BLE:
             option->type = CONNECT_BLE;
-            if (strcpy_s(option->bleOption.bleMac, sizeof(option->bleOption.bleMac),
-                info->info.bleInfo.bleMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac failed.");
+            if (strcpy_s(option->bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
+                memcpy_s(option->bleOption.deviceIdHash, UDID_HASH_LEN,
+                    connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
             break;
         case AUTH_LINK_TYPE_P2P:
             option->type = CONNECT_TCP;
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), info->info.ipInfo.ip) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
+            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr),
+                connInfo->info.ipInfo.ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip fail.");
                 return SOFTBUS_MEM_ERR;
             }
-            option->socketOption.port = info->info.ipInfo.port;
-            option->socketOption.protocol = LNN_PROTOCOL_IP;
+            option->socketOption.port = connInfo->info.ipInfo.port;
             option->socketOption.moduleId = AUTH_P2P;
+            option->socketOption.protocol = LNN_PROTOCOL_IP;
             option->socketOption.keepAlive = 1;
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport link type, type = %d.", info->type);
-            return SOFTBUS_INVALID_PARAM;
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected connType=%d.", connInfo->type);
+            return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t ConvertOptionToAuthConnInfo(const ConnectOption *option, bool isAuthP2p, AuthConnInfo *info)
+int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
 {
-    if (option == NULL || info == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    switch (option->type) {
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    switch (info->type) {
         case CONNECT_TCP:
-            info->type = isAuthP2p ? AUTH_LINK_TYPE_P2P : AUTH_LINK_TYPE_WIFI;
-            if (strcpy_s(info->info.ipInfo.ip, sizeof(info->info.ipInfo.ip), option->socketOption.addr) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip failed.");
+            if (info->socketInfo.protocol != LNN_PROTOCOL_IP) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "only support LNN_PROTOCOL_IP.");
+                return SOFTBUS_ERR;
+            }
+            connInfo->type = AUTH_LINK_TYPE_P2P;
+            connInfo->info.ipInfo.port = info->socketInfo.port;
+            if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info->socketInfo.addr) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip fail.");
                 return SOFTBUS_MEM_ERR;
             }
-            info->info.ipInfo.port = option->socketOption.port;
             break;
         case CONNECT_BR:
-            info->type = AUTH_LINK_TYPE_BR;
-            if (strcpy_s(info->info.brInfo.brMac, sizeof(info->info.brInfo.brMac),
-                option->brOption.brMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac failed.");
+            connInfo->type = AUTH_LINK_TYPE_BR;
+            if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, info->brInfo.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
             break;
         case CONNECT_BLE:
-            info->type = AUTH_LINK_TYPE_BLE;
-            if (strcpy_s(info->info.bleInfo.bleMac, sizeof(info->info.bleInfo.bleMac),
-                option->bleOption.bleMac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac failed.");
+            connInfo->type = AUTH_LINK_TYPE_BLE;
+            if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info->bleInfo.bleMac) != EOK ||
+                memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
+                    info->bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown type, type = %d.", option->type);
-            return SOFTBUS_INVALID_PARAM;
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected connectionInfo, type=%d.", info->type);
+            return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-bool CompareConnectOption(const ConnectOption *option1, const ConnectOption *option2)
+int32_t AuthCommonInit(void)
 {
-    if (option1 == NULL || option2 == NULL) {
-        return false;
+    g_authHandler.name = "AuthHandler";
+    g_authHandler.HandleMessage = HandleAuthMessage;
+    g_authHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
+
+    if (SoftBusMutexInit(&g_authLock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth mutex init fail.");
+        return SOFTBUS_ERR;
     }
-    switch (option1->type) {
-        case CONNECT_TCP:
-            if (option2->type == CONNECT_TCP && option2->socketOption.protocol == option1->socketOption.protocol &&
-                strcmp(option1->socketOption.addr, option2->socketOption.addr) == 0) {
-                return true;
-            }
-            if (option2->type == CONNECT_TCP && option2->socketOption.protocol != LNN_PROTOCOL_IP) {
-                char remoteIp[IP_LEN] = {0};
-                if (GetRemoteIpByNodeAddr(remoteIp, sizeof(remoteIp), option2->socketOption.addr) != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: get remote ip failed", __func__);
-                    break;
-                }
-                if (strcmp(option1->socketOption.addr, remoteIp) == 0) {
-                    return true;
-                }
-            }
-            break;
-        case CONNECT_BR:
-            if (option2->type == CONNECT_BR &&
-                strcmp(option1->brOption.brMac, option2->brOption.brMac) == 0) {
-                return true;
-            }
-            break;
-        case CONNECT_BLE:
-            if (option2->type == CONNECT_BLE &&
-                strcmp(option1->bleOption.bleMac, option2->bleOption.bleMac) == 0) {
-                return true;
-            }
-            break;
-        default:
-            break;
-    }
-    return false;
+    return SOFTBUS_OK;
 }
 
-void AnoonymousDid(char *outBuf, uint32_t len)
+void AuthCommonDeinit(void)
 {
-    if (outBuf == NULL || len == 0) {
-        return;
-    }
-    uint32_t size = len > MAX_BYTE_RECORD ? MAX_BYTE_RECORD : len;
-    uint32_t internal = 1;
-    while ((internal * ANONYMOUS_INTEVER_LEN) < size) {
-        uint32_t pos = internal * ANONYMOUS_INTEVER_LEN;
-        outBuf[pos] = ANONYMOUS_CHAR;
-        outBuf[--pos] = ANONYMOUS_CHAR;
-        outBuf[--pos] = ANONYMOUS_CHAR;
-        outBuf[--pos] = ANONYMOUS_CHAR;
-        ++internal;
-    }
-}
+    g_authHandler.looper = NULL;
+    g_authHandler.HandleMessage = NULL;
 
-void AuthPrintDfxMsg(uint32_t module, char *data, int len)
-{
-    if (!GetSignalingMsgSwitch()) {
-        return;
-    }
-    if (data == NULL || len <= 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid parameter");
-        return;
-    }
-    if (!(module == MODULE_TRUST_ENGINE ||
-        module == MODULE_AUTH_CONNECTION ||
-        module == DATA_TYPE_DEVICE_ID ||
-        module == DATA_TYPE_SYNC)) {
-        return;
-    }
-    int32_t size = (len > MAX_BYTE_RECORD) ? (MAX_BYTE_RECORD - 1) : len;
-    char outBuf[MAX_BYTE_RECORD + 1] = {0};
-    if (ConvertBytesToHexString(outBuf, MAX_BYTE_RECORD, (const unsigned char *)data, size / 2) == SOFTBUS_OK) {
-        AnoonymousDid(outBuf, strlen(outBuf));
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "[signaling]:%s", outBuf);
+    if (SoftBusMutexDestroy(&g_authLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth mutex destroy fail.");
     }
 }
