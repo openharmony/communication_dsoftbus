@@ -63,16 +63,9 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 
 static int32_t OpenAuthPort(void)
 {
-    int32_t port;
-    char localIp[MAX_ADDR_LEN] = {0};
-
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed");
-        return SOFTBUS_ERR;
-    }
-    port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, 0);
+    int32_t port = OpenAuthServer();
     if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AuthStartListening failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth server failed");
         return SOFTBUS_ERR;
     }
     return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
@@ -80,7 +73,7 @@ static int32_t OpenAuthPort(void)
 
 static void CloseAuthPort(void)
 {
-    AuthStopListening(AUTH_LINK_TYPE_WIFI);
+    CloseAuthServer();
     (void)LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, IP_DEFAULT_PORT);
 }
 

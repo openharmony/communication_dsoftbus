@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,52 +16,32 @@
 #ifndef AUTH_CONNECTION_H
 #define AUTH_CONNECTION_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "auth_interface.h"
-#include "softbus_conn_interface.h"
+#include "auth_manager.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif
 
-typedef struct {
-    uint32_t dataType;
-    int32_t module;
-    int64_t seq;
-    int32_t flag;
-    uint32_t len;
-} AuthDataHead;
+#define TAG "MsgGetDeviceId"
+#define CMD_TAG "TECmd"
+#define DATA_TAG "TEData"
+#define TE_DEVICE_ID_TAG "TEDeviceId"
+#define DATA_BUF_SIZE_TAG "DataBufSize"
+#define CMD_GET_AUTH_INFO "getAuthInfo"
+#define CMD_RET_AUTH_INFO "retAuthInfo"
+#define SOFTBUS_VERSION_INFO "softbusVersion"
 
-typedef struct {
-    void (*onConnectResult)(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);
-    void (*onDisconnected)(uint64_t connId, const AuthConnInfo *connInfo);
-    void (*onDataReceived)(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-        const AuthDataHead *head, const uint8_t *data);
-} AuthConnListener;
+#define CMD_TAG_LEN 30
+#define PACKET_SIZE (64 * 1024)
 
-int32_t AuthConnInit(const AuthConnListener *listener);
-void AuthConnDeinit(void);
-
-int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType);
-void DisconnectAuthDevice(uint64_t connId);
-int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data);
-
-ConnSideType GetConnSideType(uint64_t connId);
-bool CheckActiveAuthConnection(const AuthConnInfo *connInfo);
-
-const char *GetConnTypeStr(uint64_t connId);
-uint32_t GetConnId(uint64_t connId);
-
-#define CONN_INFO "conn[%s:%u]"
-#define CONN_DATA(connId) GetConnTypeStr(connId), GetConnId(connId)
+int32_t AuthSyncDeviceUuid(AuthManager *auth);
+int32_t AuthUnpackDeviceInfo(AuthManager *auth, uint8_t *data);
+char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient);
+void AuthTryCloseConnection(uint32_t connectionId);
+bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len);
+void AuthSendCloseAck(uint32_t connectionId);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif
 #endif
 #endif /* AUTH_CONNECTION_H */

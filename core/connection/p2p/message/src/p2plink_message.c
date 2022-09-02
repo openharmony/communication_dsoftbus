@@ -80,13 +80,33 @@ static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg
 static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
 {
     (void)msgType;
-    P2pLinkNeoData *info = (P2pLinkNeoData *)param;
-    if (info == NULL) {
+    if (param == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "recv msg = %s.", info->data);
-    cJSON *json = cJSON_Parse((char *)info->data);
+
+    P2pLinkNeoData *info = (P2pLinkNeoData *)param;
+    cJSON *json = NULL;
+    uint8_t *decryptData = NULL;
+    OutBuf buf = {0};
+    decryptData = (uint8_t *)SoftBusCalloc(info->len - AuthGetEncryptHeadLen() + 1);
+    if (decryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "decrypt p2p negotiation data failed.");
+        return;
+    }
+    buf.buf = decryptData;
+    buf.bufLen = info->len - AuthGetEncryptHeadLen();
+
+    if (AuthDecrypt(&(info->option), CLIENT_SIDE_FLAG, (uint8_t *)info->data, info->len, &buf) != SOFTBUS_OK) {
+        SoftBusFree(decryptData);
+        SoftBusFree(info);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "decrypt p2p negotiation info failed.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "recv msg = %s.", decryptData);
+    json = cJSON_Parse((char *)decryptData);
+    SoftBusFree(decryptData);
+    decryptData = NULL;
     if (json == NULL) {
         SoftBusFree(info);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cjson parse failed!");
@@ -98,27 +118,30 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
     SoftBusFree(info);
 }
 
-static void P2pLinkNegoDataRecv(int64_t authId, const AuthTransData *data)
+static void P2pLinkNegoDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    if (data == NULL || data->data == NULL || data->len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+    unsigned char distinguish[] = "p2p rcv";
+    if (option == NULL || info == NULL || info->module != MODULE_P2P_LINK || info->data == NULL || info->len == 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "p2pLink negotiation data recv: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
-    P2pLinkNeoData *param = (P2pLinkNeoData *)SoftBusCalloc(sizeof(P2pLinkNeoData) + (data->len));
+    SignalingMsgPrint(distinguish, (unsigned char *)info->data, (unsigned char)info->len, SOFTBUS_LOG_CONN);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink negotiation data recv enter.");
+    P2pLinkNeoData *param = (P2pLinkNeoData *)SoftBusCalloc(sizeof(P2pLinkNeoData) + (info->len));
     if (param == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc failed.");
         return;
     }
-    if (memcpy_s(&param->data[0], data->len, data->data, data->len) != EOK) {
+    char *data = param->data;
+    if (memcpy_s(data, info->len, info->data, info->len) != EOK ||
+        memcpy_s(&(param->option), sizeof(ConnectOption), option, sizeof(ConnectOption)) != EOK) {
         SoftBusFree(param);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
         return;
     }
     param->authId = authId;
-    param->seq = data->seq;
-    param->len = data->len;
+    param->len = info->len;
+    param->seq = info->seq;
     if (P2pLoopProc(P2pLinkNeoDataProcess, (void *)param, P2PLOOP_MSG_PROC) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p loop post message failed.");
         SoftBusFree(param);
@@ -126,19 +149,54 @@ static void P2pLinkNegoDataRecv(int64_t authId, const AuthTransData *data)
     }
 }
 
+static uint8_t *GetEncryptData(int64_t authId, const char *data, uint32_t size, uint32_t *outSize)
+{
+    uint8_t *encryptData = NULL;
+    OutBuf buf = {0};
+    uint32_t len = size + AuthGetEncryptHeadLen();
+    encryptData = (uint8_t *)SoftBusCalloc(len);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc error!");
+        return NULL;
+    }
+    buf.buf = encryptData;
+    buf.bufLen = len;
+    AuthSideFlag side = AUTH_SIDE_ANY;
+    if (AuthEncryptBySeq((int32_t)authId, &side, (uint8_t *)data, size, &buf) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthEncrypt error.");
+        SoftBusFree(encryptData);
+        return NULL;
+    }
+    if (buf.outLen != len) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "outLen not right.");
+    }
+    *outSize = buf.outLen;
+    return encryptData;
+}
+
 int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
 {
-    AuthTransData dataInfo = {
+    uint32_t size;
+    unsigned char distinguish[] = "p2p send";
+    uint8_t *encryptData = GetEncryptData(authId, data, len, &size);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "encrypt data failed.");
+        return SOFTBUS_ERR;
+    }
+    SignalingMsgPrint(distinguish, encryptData, (unsigned char)size, SOFTBUS_LOG_CONN);
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
+        .authId = authId,
         .module = MODULE_P2P_LINK,
         .flag = 0,
         .seq = GetSeq(),
-        .len = len,
-        .data = (const uint8_t *)data,
     };
-    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
+    if (AuthPostData(&head, encryptData, size) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth post message failed.");
+        SoftBusFree(encryptData);
         return SOFTBUS_ERR;
     }
+    SoftBusFree(encryptData);
     return SOFTBUS_OK;
 }
 
@@ -170,17 +228,18 @@ static void P2pLinkAuthChannelClose(int64_t authId)
     }
 }
 
-static AuthTransListener g_p2pLinkTransCb = {
-    .onDataReceived = P2pLinkNegoDataRecv,
-    .onDisconnected = P2pLinkAuthChannelClose,
+static AuthTransCallback g_p2pLinkTransCb = {
+    .onTransUdpDataRecv = P2pLinkNegoDataRecv,
+    .onAuthChannelClose = P2pLinkAuthChannelClose,
 };
 
 int32_t P2pLinkMessageInit(void)
 {
-    if (RegAuthTransListener(MODULE_P2P_LINK, &g_p2pLinkTransCb) != SOFTBUS_OK) {
+    if (AuthTransDataRegCallback(TRANS_P2P_MODULE, &g_p2pLinkTransCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth register p2plink callback failed.");
         return SOFTBUS_ERR;
     }
+
     return SOFTBUS_OK;
 }
 

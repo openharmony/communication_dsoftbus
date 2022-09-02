@@ -17,7 +17,6 @@
 #include <securec.h>
 #include <string.h>
 
-#include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -528,29 +527,52 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
     return seq;
 }
 
-int64_t TransProxyGetAuthId(int32_t channelId)
+int32_t TransProxySetChiper(int32_t channelId, uint8_t chiper)
 {
-    int64_t authId;
     ProxyChannelInfo *item = NULL;
 
     if (g_proxyChannelList == NULL) {
-        return AUTH_INVALID_ID;
+        return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return AUTH_INVALID_ID;
+        return SOFTBUS_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            authId = item->authId;
+            item->chiper = chiper;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return authId;
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return AUTH_INVALID_ID;
+    return SOFTBUS_ERR;
+}
+
+int32_t TransProxyGetChiper(int32_t channelId, uint8_t *chiper)
+{
+    ProxyChannelInfo *item = NULL;
+
+    if (g_proxyChannelList == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            *chiper = item->chiper;
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_ERR;
 }
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
@@ -673,7 +695,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     chan->myId = newChanId;
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
-    chan->authId = msg->authId;
+    chan->chiper = msg->chiper;
     chan->type = info.type;
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");
@@ -836,12 +858,6 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
 {
     chan->myId = channelId;
     chan->channelId = channelId;
-    chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, chan->type == CONNECT_TCP);
-    if (chan->authId == AUTH_INVALID_ID) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authId for cipher err");
-        return SOFTBUS_ERR;
-    }
-
     if (GenerateRandomStr(chan->identity, sizeof(chan->identity)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GenerateRandomStr err");
         return SOFTBUS_ERR;

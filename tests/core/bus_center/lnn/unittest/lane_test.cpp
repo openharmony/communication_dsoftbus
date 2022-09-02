@@ -19,6 +19,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_exchange_device_info.h"
 #include "lnn_lane.h"
 #include "lnn_lane_info.h"
 #include "lnn_lane_link_proc.h"

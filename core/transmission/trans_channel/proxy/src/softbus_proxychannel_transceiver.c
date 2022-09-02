@@ -322,6 +322,45 @@ static int32_t TransProxyLoopInit(void)
     g_transLoophandler.HandleMessage = TransProxyLoopMsgHandler;
     return SOFTBUS_OK;
 }
+int32_t TransProxyGetConnectOption(uint32_t connectionId, ConnectOption *info)
+{
+    ConnectionInfo connInfo = {0};
+
+    if (info == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (ConnGetConnectionInfo(connectionId, &connInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CONN_GetConnectionInfo fail connectionId %u", connectionId);
+        return SOFTBUS_ERR;
+    }
+    info->type = connInfo.type;
+    switch (info->type) {
+        case CONNECT_BR: {
+            (void)memcpy_s(info->brOption.brMac, sizeof(info->brOption.brMac),
+                connInfo.brInfo.brMac, sizeof(connInfo.brInfo.brMac));
+            break;
+        }
+        case CONNECT_BLE: {
+            (void)memcpy_s(info->bleOption.bleMac, sizeof(info->bleOption.bleMac),
+                connInfo.bleInfo.bleMac, sizeof(connInfo.bleInfo.bleMac));
+            (void)memcpy_s(info->bleOption.deviceIdHash, sizeof(info->bleOption.deviceIdHash),
+                connInfo.bleInfo.deviceIdHash, sizeof(connInfo.bleInfo.deviceIdHash));
+            break;
+        }
+        case CONNECT_TCP: {
+            (void)memcpy_s(info->socketOption.addr, sizeof(info->socketOption.addr),
+                connInfo.socketInfo.addr, sizeof(connInfo.socketInfo.addr));
+            info->socketOption.port = connInfo.socketInfo.port;
+            info->socketOption.protocol = connInfo.socketInfo.protocol;
+            break;
+        }
+        default: {
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
 
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid)
 {
@@ -680,7 +719,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "TransProxyonMessageReceived, msg->data: ", msg.data, msg.dateLen);
     }
     TransProxyonMessageReceived(&msg);
-    if (msg.msgHead.cipher & ENCRYPTED) {
+    if (msg.msgHead.chiper & ENCRYPTED) {
         SoftBusFree(msg.data);
     }
 }
