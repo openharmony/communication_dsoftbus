@@ -268,7 +268,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-static void HbOnAuthGroupCreated(const char *groupId)
+void LnnHbOnAuthGroupCreated(const char *groupId)
 {
     (void)groupId;
     int32_t ret;
@@ -288,7 +288,7 @@ static void HbOnAuthGroupCreated(const char *groupId)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group created.");
 }
 
-static void HbOnAuthGroupDeleted(const char *groupId)
+void LnnHbOnAuthGroupDeleted(const char *groupId)
 {
     (void)groupId;
     int32_t ret;
@@ -308,11 +308,6 @@ static void HbOnAuthGroupDeleted(const char *groupId)
     }
 #endif
 }
-
-static VerifyCallback g_authVerifyCb = {
-    .onGroupCreated = HbOnAuthGroupCreated,
-    .onGroupDeleted = HbOnAuthGroupDeleted,
-};
 
 int32_t LnnInitHeartbeat(void)
 {
@@ -338,10 +333,6 @@ int32_t LnnInitHeartbeat(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist screen state change evt handler fail!");
-        return SOFTBUS_ERR;
-    }
-    if (AuthRegCallback(HEARTBEAT_MONITOR, &g_authVerifyCb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist account group change callback fail");
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) init success");

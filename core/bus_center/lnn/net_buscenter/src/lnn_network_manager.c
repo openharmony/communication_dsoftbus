@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_discovery_manager.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_ohos_account.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
@@ -345,15 +346,15 @@ static void OnAccountChanged(void)
 
 static void OnGroupCreated(const char *groupId)
 {
-    (void)groupId;
     RestartCoapDiscovery();
     OnAccountChanged();
+    LnnHbOnAuthGroupCreated(groupId);
 }
 
 static void OnGroupDeleted(const char *groupId)
 {
-    (void)groupId;
     OnAccountChanged();
+    LnnHbOnAuthGroupDeleted(groupId);
 }
 
 static VerifyCallback g_verifyCb = {

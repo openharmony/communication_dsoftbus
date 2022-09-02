@@ -23,12 +23,15 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 static int32_t g_btStateListenerId = -1;
 static void LnnOnBtStateChanged(int32_t listenerId, int32_t state);
+static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState);
 
 static SoftBusBtStateListener g_btStateListener = {
-    .OnBtStateChanged = LnnOnBtStateChanged
+    .OnBtStateChanged = LnnOnBtStateChanged,
+    .OnBtAclStateChanged = LnnOnBtAclStateChanged,
 };
 
 static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
@@ -74,6 +77,30 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn async notify bt state err, ret:%d", ret);
         SoftBusFree(notifyState);
         return;
+    }
+}
+
+static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState)
+{
+    if (listenerId < 0 || addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bt monitor get invalid param");
+        return;
+    }
+    char btMac[BT_MAC_LEN] = {0};
+    if (ConvertBtMacToStr(btMac, sizeof(btMac), addr->addr, sizeof(addr->addr)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bt mac to str fail.");
+        return;
+    }
+    switch (aclState) {
+        case SOFTBUS_ACL_STATE_CONNECTED:
+            LnnNotifyBtAclStateChangeEvent(btMac, SOFTBUS_BR_ACL_CONNECTED);
+            break;
+        case SOFTBUS_ACL_STATE_DISCONNECTED:
+            LnnNotifyBtAclStateChangeEvent(btMac, SOFTBUS_BR_ACL_DISCONNECTED);
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "not support acl state: %d", aclState);
+            break;
     }
 }
 

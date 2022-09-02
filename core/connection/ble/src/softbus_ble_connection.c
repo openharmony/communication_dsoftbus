@@ -1233,7 +1233,8 @@ void BleConnOnBtStateChanged(int listenerId, int state)
 }
 
 static SoftBusBtStateListener g_bleConnStateListener = {
-    .OnBtStateChanged = BleConnOnBtStateChanged
+    .OnBtStateChanged = BleConnOnBtStateChanged,
+    .OnBtAclStateChanged = NULL,
 };
 
 static SoftBusBleConnCalback g_bleClientConnCalback = {

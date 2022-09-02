@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 
+#include "auth_interface.h"
 #include "lnn_node_info.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
@@ -30,6 +31,8 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
 bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
+bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
 
 #ifdef __cplusplus
 }

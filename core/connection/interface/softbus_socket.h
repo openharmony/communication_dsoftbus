@@ -49,6 +49,11 @@ enum {
     SOFTBUS_SOCKET_EXCEPTION, // exception
 };
 
+typedef struct {
+    char addr[MAX_SOCKET_ADDR_LEN];
+    int32_t port;
+} SocketAddr;
+
 typedef struct SocketInterface {
     const char* name;
     const ProtocolType type;
@@ -74,7 +79,9 @@ void ConnShutdownSocket(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
 
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
-int32_t ConnGetSocketErr(int32_t fd);
+int32_t ConnGetSocketError(int32_t fd);
+int32_t ConnGetLocalSocketPort(int32_t fd);
+int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr);
 
 #ifdef __cplusplus
 #if __cplusplus

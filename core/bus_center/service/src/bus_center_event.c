@@ -286,11 +286,28 @@ void LnnNotifyBtStateChangeEvent(void *state)
     SoftBusBtState *btState = (SoftBusBtState *)state;
     if (*btState < SOFTBUS_BLE_TURN_ON || *btState >= SOFTBUS_BT_UNKNOWN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad btState %d", *btState);
+        SoftBusFree(btState);
         return;
     }
     LnnMonitorBtStateChangedEvent event = {.basic.event = LNN_EVENT_BT_STATE_CHANGED, .status = (uint8_t)(*btState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(btState);
+}
+
+void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
+{
+    if (btMac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid btMac, state = %d", state);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "notify bt acl state changed: state=%d, btMac=%s.", state, AnonymizesMac(btMac));
+    LnnMonitorBtAclStateChangedEvent event = {.basic.event = LNN_EVENT_BT_ACL_STATE_CHANGED, .status = state};
+    if (strcpy_s(event.btMac, sizeof(event.btMac), btMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy bt mac fail");
+        return;
+    }
+    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 void LnnNotifyAddressChangedEvent(const char *ifName)
