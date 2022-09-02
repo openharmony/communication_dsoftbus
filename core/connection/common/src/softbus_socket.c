@@ -293,8 +293,39 @@ void ConnShutdownSocket(int32_t fd)
         SoftBusSocketClose(fd);
     }
 }
+
 int32_t ConnGetSocketError(int32_t fd)
 {
     return SoftBusSocketGetError(fd);
 }
 
+int32_t ConnGetLocalSocketPort(int32_t fd)
+{
+    const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
+    if (socketInterface == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "LNN_PROTOCOL_IP not supported!");
+        return SOFTBUS_ERR;
+    }
+    return socketInterface->GetSockPort(fd);
+}
+
+int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
+{
+    SoftBusSockAddrIn addr;
+    int32_t addrLen = (int32_t)sizeof(addr);
+    if (socketAddr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr, &addrLen);
+    if (rc != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d, GetPeerName rc=%d", fd, rc);
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d, InetNtoP fail", fd);
+        return SOFTBUS_ERR;
+    }
+    socketAddr->port = SoftBusNtoHs(addr.sinPort);
+    return SOFTBUS_OK;
+}

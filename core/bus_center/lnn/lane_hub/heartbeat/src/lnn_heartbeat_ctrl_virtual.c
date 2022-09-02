@@ -51,6 +51,16 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+void LnnHbOnAuthGroupCreated(const char *groupId)
+{
+    (void)groupId;
+}
+
+void LnnHbOnAuthGroupDeleted(const char *groupId)
+{
+    (void)groupId;
+}
+
 int32_t LnnInitHeartbeat(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub init success");

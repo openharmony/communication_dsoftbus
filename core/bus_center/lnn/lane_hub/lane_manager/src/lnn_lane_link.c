@@ -409,10 +409,14 @@ static void OnConnOpenedForDisconnect(uint32_t requestId, int64_t authId)
     info.authId = authId;
     if (GetP2pMacAndPid(requestId, info.peerMac, sizeof(info.peerMac), &info.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");
+        AuthCloseConn(authId);
+        DelConnRequestItem(requestId);
         return;
     }
+    (void)AuthSetP2pMac(authId, info.peerMac);
     if (P2pLinkDisconnectDevice(&info) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "disconnect p2p device err.");
+        AuthCloseConn(authId);
     }
     DelConnRequestItem(requestId);
 }
@@ -425,6 +429,7 @@ static void OnConnOpenFailedForDisconnect(uint32_t requestId, int32_t reason)
     info.authId = -1;
     if (GetP2pMacAndPid(requestId, info.peerMac, sizeof(info.peerMac), &info.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");
+        DelConnRequestItem(requestId);
         return;
     }
     if (P2pLinkDisconnectDevice(&info) != SOFTBUS_OK) {
@@ -469,8 +474,7 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
         .onConnOpened = OnConnOpenedForDisconnect,
         .onConnOpenFailed = OnConnOpenFailedForDisconnect
     };
-    int64_t authId = AuthOpenConn(&connInfo, requestId, &cb);
-    if (authId < 0) {
+    if (AuthOpenConn(&connInfo, requestId, &cb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth conn fail.");
         DelConnRequestItem(requestId);
         return SOFTBUS_ERR;
