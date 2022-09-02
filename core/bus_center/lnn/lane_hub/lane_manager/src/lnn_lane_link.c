@@ -320,6 +320,34 @@ static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
     SetConnectDeviceResult(requestId, false, NULL, NULL);
 }
 
+static int32_t GetBrConnectionInfo(const char *networkId, AuthConnInfo *connInfo)
+{
+    int32_t ret;
+    int32_t local, remote;
+    ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, &local);
+    if (ret != SOFTBUS_OK || local < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local netCap err. ret = %d, local = %d", ret, local);
+        return SOFTBUS_ERR;
+    }
+    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, &remote);
+    if (ret != SOFTBUS_OK || remote < 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote netCap err. ret = %d, remote = %d", ret, remote);
+        return SOFTBUS_ERR;
+    }
+    if (((local & (1 << BIT_BR)) == 0) || ((remote & (1 << BIT_BR)) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "can't support BR.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, connInfo->info.brInfo.brMac, BT_MAC_LEN) != SOFTBUS_OK ||
+        strlen(connInfo->info.brInfo.brMac) == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
+        return SOFTBUS_ERR;
+    }
+    connInfo->type = AUTH_LINK_TYPE_BR;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "select br connection to p2p connect.");
+    return SOFTBUS_OK;
+}
+
 static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connInfo)
 {
     char uuid[UDID_BUF_LEN] = {0};
@@ -327,7 +355,11 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer uuid fail.");
         return SOFTBUS_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo);
+    if (AuthGetPreferConnInfo(uuid, connInfo) == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "no active auth conn, check br connection.");
+    return GetBrConnectionInfo(networkId, connInfo);
 }
 
 static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
@@ -429,8 +461,8 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (GetPreferAuthConnInfo(networkId, &connInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no auth conn exist.");
+    if (AuthGetPreferConnInfo(uuid, &connInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get auth conn fail.");
         return SOFTBUS_ERR;
     }
     int32_t requestId = P2pLinkGetRequestId();

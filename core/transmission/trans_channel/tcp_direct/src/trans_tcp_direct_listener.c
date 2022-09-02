@@ -46,54 +46,52 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
     }
 }
 
-int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
+uint32_t GetCipherFlagByAuthId(int64_t authId)
 {
-    AuthConnInfo info = {0};
-    if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth server side fail %" PRId64, authId);
-        return SOFTBUS_ERR;
+    AuthConnInfo info;
+    uint32_t flag = FLAG_WIFI;
+    (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+
+    if (authId == AUTH_INVALID_ID) {
+        return flag;
     }
     if (AuthGetConnInfo(authId, &info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authinfo fail %" PRId64, authId);
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get authinfo fail %" PRId64, authId);
+        return flag;
     }
-    *flag = SwitchAuthLinkTypeToFlagType(info.type);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth link type %d flag 0x%x", info.type, *flag);
-    return SOFTBUS_OK;
+    flag = SwitchAuthLinkTypeToFlagType(info.type);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth link type %d flag 0x%x", info.type, flag);
+    return flag;
 }
 
 static int32_t StartVerifySession(SessionConn *conn)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartVerifySession");
+    uint64_t seq = TransTdcGetNewSeqId();
+    if (seq == INVALID_SEQ_ID) {
+        return SOFTBUS_ERR;
+    }
     if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Generate SessionKey failed");
         return SOFTBUS_ERR;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-
-    bool isAuthServer = false;
-    uint32_t cipherFlag = FLAG_WIFI;
-    if (GetCipherFlagByAuthId(conn->authId, &cipherFlag, &isAuthServer)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get cipher flag failed");
-        return SOFTBUS_ERR;
-    }
-    uint64_t seq = TransTdcGetNewSeqId();
-    if (isAuthServer) {
-        seq |= AUTH_CONN_SERVER_SIDE;
-    }
-
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Pack Request failed");
         return SOFTBUS_ERR;
     }
+
+    uint32_t dataLen = strlen(bytes) + OVERHEAD_LEN + MESSAGE_INDEX_SIZE;
+    uint32_t cipherFlag = GetCipherFlagByAuthId(conn->authId);
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
         .seq = seq,
         .flags = (FLAG_REQUEST | cipherFlag),
-        .dataLen = strlen(bytes), /* reset after encrypt */
+        .dataLen = dataLen,
     };
+
     if (TransTdcPostBytes(conn->channelId, &packetHead, bytes) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdc post bytes failed");
         cJSON_free(bytes);

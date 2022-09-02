@@ -54,7 +54,7 @@ typedef enum {
 
 typedef struct {
     uint8_t type; // MsgType
-    uint8_t cipher;
+    uint8_t chiper;
     int16_t myId;
     int16_t peerId;
     int16_t reserved;
@@ -65,7 +65,7 @@ typedef struct {
     int32_t dateLen;
     char *data;
     uint32_t connId;
-    int64_t authId; /* for cipher */
+    uint8_t chiper;
 } ProxyMessage;
 
 #define VERSION 1
@@ -109,7 +109,7 @@ typedef struct {
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
-    int64_t authId; /* for cipher */
+    uint8_t chiper;
 } ProxyChannelInfo;
 
 typedef struct {
@@ -136,10 +136,11 @@ typedef struct {
     uint32_t outLen;
 } ProxyDataInfo;
 
+int32_t GetRemoteUuidByBtMac(const char *peerMac, char *uuid, int32_t len);
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo);
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
 char* TransProxyPackIdentity(const char *identity);

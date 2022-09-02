@@ -42,7 +42,8 @@ void TransProxyDelChanByReqId(int32_t reqId);
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);
 void TransProxyDelChanByChanId(int32_t chanlId);
-int64_t TransProxyGetAuthId(int32_t channelId);
+int32_t TransProxySetChiper(int32_t channelId, uint8_t chiper);
+int32_t TransProxyGetChiper(int32_t channelId, uint8_t *chiper);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
 void TransProxyDeathCallback(const char *pkgName);

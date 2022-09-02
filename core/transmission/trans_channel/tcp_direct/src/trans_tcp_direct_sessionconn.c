@@ -222,59 +222,6 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
-int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
-{
-    SessionConn *conn = NULL;
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
-        if (conn->channelId == channelId) {
-            (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-            ReleaseSessonConnLock();
-            return SOFTBUS_OK;
-        }
-    }
-    ReleaseSessonConnLock();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
-    return SOFTBUS_ERR;
-}
-
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
-{
-    SessionConn *conn = NULL;
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
-        if (conn->channelId == channelId) {
-            conn->authId = authId;
-            ReleaseSessonConnLock();
-            return SOFTBUS_OK;
-        }
-    }
-    ReleaseSessonConnLock();
-    return SOFTBUS_ERR;
-}
-
-int64_t GetAuthIdByChanId(int32_t channelId)
-{
-    int64_t authId;
-    SessionConn *conn = NULL;
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return AUTH_INVALID_ID;
-    }
-    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
-        if (conn->channelId == channelId) {
-            authId = conn->authId;
-            ReleaseSessonConnLock();
-            return authId;
-        }
-    }
-    ReleaseSessonConnLock();
-    return AUTH_INVALID_ID;
-}
-
 void TransDelSessionConnById(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransDelSessionConnById: channelId=%d", channelId);
@@ -285,7 +232,8 @@ void TransDelSessionConnById(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
-            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID) {
+            if (item->authId > 0) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close auth conn: authId=%" PRId64, item->authId);
                 AuthCloseConn(item->authId);
             }
             ListDelete(&item->node);
