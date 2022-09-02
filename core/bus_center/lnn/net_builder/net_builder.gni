@@ -16,7 +16,6 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 if (dsoftbus_feature_lnn_net) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_exchange_device_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
