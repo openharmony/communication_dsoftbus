@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -41,6 +42,13 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
+
+    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, true);
+    if (newConn->authId == AUTH_INVALID_ID) {
+        SoftBusFree(newConn);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel get authId fail");
+        return SOFTBUS_ERR;
+    }
 
     int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, false);
     if (fd < 0) {
