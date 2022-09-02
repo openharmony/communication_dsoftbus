@@ -255,6 +255,31 @@ static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
     return SOFTBUS_OK;
 }
 
+static uint8_t *GetEncryptData(const char *data, int64_t authId, uint32_t *outSize)
+{
+    uint8_t *encryptData = NULL;
+    OutBuf buf = {0};
+    uint32_t len = strlen(data) + 1 + AuthGetEncryptHeadLen();
+    encryptData = (uint8_t *)SoftBusCalloc(len);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc error!");
+        return NULL;
+    }
+    buf.buf = encryptData;
+    buf.bufLen = len;
+    AuthSideFlag side = AUTH_SIDE_ANY;
+    if (AuthEncryptBySeq((int32_t)authId, &side, (uint8_t *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthEncrypt error.");
+        SoftBusFree(encryptData);
+        return NULL;
+    }
+    if (buf.outLen != len) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "outLen not right.");
+    }
+    *outSize = buf.outLen;
+    return encryptData;
+}
+
 static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info in.");
@@ -274,19 +299,26 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
     if (msgStr == NULL) {
         return SOFTBUS_ERR;
     }
-    AuthTransData dataInfo = {
-        .module = MODULE_UDP_INFO,
-        .flag = FLAG_REPLY,
-        .seq = seq,
-        .len = strlen(msgStr) + 1,
-        .data = (const uint8_t *)msgStr,
-    };
-    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
-        cJSON_free(msgStr);
+    uint32_t size;
+    uint8_t *encryptData = GetEncryptData(msgStr, authId, &size);
+    cJSON_free(msgStr);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypt data failed.");
         return SOFTBUS_ERR;
     }
-    cJSON_free(msgStr);
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
+        .authId = authId,
+        .module = MODULE_UDP_INFO,
+        .flag = FLAG_REPLY,
+        .seq = seq
+    };
+    if (AuthPostData(&head, encryptData, size) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post message failed.");
+        SoftBusFree(encryptData);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(encryptData);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info out.");
     return SOFTBUS_OK;
 }
@@ -449,22 +481,30 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
         return SOFTBUS_ERR;
     }
     AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpStartExchangeUdpInfo, msgStr: ", msgStr, strlen(msgStr));
-    AuthTransData dataInfo = {
-        .module = MODULE_UDP_INFO,
-        .flag = FLAG_REQUEST,
-        .seq = seq,
-        .len = strlen(msgStr) + 1,
-        .data = (const uint8_t *)msgStr,
-    };
-    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
-        cJSON_free(msgStr);
+    uint32_t size;
+    uint8_t *encryptData = GetEncryptData(msgStr, authId, &size);
+    cJSON_free(msgStr);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypt data failed.");
         return SOFTBUS_ERR;
     }
-    cJSON_free(msgStr);
+
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CONNECTION,
+        .authId = authId,
+        .module = MODULE_UDP_INFO,
+        .flag = FLAG_REQUEST,
+        .seq = seq
+    };
+    if (AuthPostData(&head, encryptData, size) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post message failed.");
+        SoftBusFree(encryptData);
+        return SOFTBUS_ERR;
+    }
     if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel negotiation status neging failed.");
     }
+    SoftBusFree(encryptData);
     return SOFTBUS_OK;
 }
 
@@ -675,24 +715,43 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static void UdpModuleCb(int64_t authId, const AuthTransData *data)
+static void UdpModuleCb(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    if (data == NULL || data->data == NULL || data->len == 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+    if (option == NULL || info == NULL || info->module != MODULE_UDP_INFO) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "udp module callback enter: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
-    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpModuleCb TransOnExchangeUdpInfo: ", (char *)data->data, data->len);
-    cJSON *json = cJSON_Parse((char *)data->data);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp module callback enter.");
+
+    cJSON *json = NULL;
+    uint8_t *decryptData = NULL;
+    OutBuf buf = {0};
+    decryptData = (uint8_t *)SoftBusCalloc(info->len - AuthGetEncryptHeadLen() + 1);
+    if (decryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt udp negotiation data failed.");
+        return;
+    }
+    buf.buf = decryptData;
+    buf.bufLen = info->len - AuthGetEncryptHeadLen();
+
+    if (AuthDecrypt(option, CLIENT_SIDE_FLAG, (uint8_t *)info->data, info->len, &buf) != SOFTBUS_OK) {
+        SoftBusFree(decryptData);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt udp negotiation info failed.");
+        return;
+    }
+    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpModuleCb TransOnExchangeUdpInfo: ", (char *)buf.buf, buf.bufLen);
+    json = cJSON_Parse((char *)decryptData);
+    SoftBusFree(decryptData);
+    decryptData = NULL;
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cjson parse failed!");
         return;
     }
-    TransOnExchangeUdpInfo(authId, data->flag, data->seq, json);
+
+    TransOnExchangeUdpInfo(authId, info->flags, info->seq, json);
     cJSON_Delete(json);
 
-    if (data->flag) {
+    if (info->flags) {
         AuthCloseConn(authId);
     }
 }
@@ -709,11 +768,10 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans udp channel manager init failed.");
         return SOFTBUS_ERR;
     }
-    AuthTransListener transUdpCb = {
-        .onDataReceived = UdpModuleCb,
-        .onDisconnected = NULL,
+    AuthTransCallback transUdpCb = {
+        .onTransUdpDataRecv = UdpModuleCb
     };
-    if (RegAuthTransListener(MODULE_UDP_INFO, &transUdpCb) != SOFTBUS_OK) {
+    if (AuthTransDataRegCallback(TRANS_UDP_DATA, &transUdpCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register udp callback to auth failed.");
         return SOFTBUS_ERR;
     }
@@ -724,7 +782,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 void TransUdpChannelDeinit(void)
 {
     TransUdpChannelMgrDeinit();
-    UnregAuthTransListener(MODULE_UDP_INFO);
+    AuthTransDataUnRegCallback(TRANS_UDP_DATA);
     g_channelCb = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
 }

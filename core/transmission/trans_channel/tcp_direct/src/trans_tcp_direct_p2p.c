@@ -155,20 +155,62 @@ static void OnChannelOpenFail(int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFail end");
 }
 
+static char *EncryptVerifyP2pData(int64_t authId, const char *data, uint32_t *encryptDataLen)
+{
+    char *encryptData = NULL;
+    uint32_t len;
+    OutBuf buf = {0};
+    AuthSideFlag side;
+
+    len = strlen(data) + 1 + AuthGetEncryptHeadLen();
+    encryptData = (char *)SoftBusCalloc(len);
+    if (encryptData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail");
+        return NULL;
+    }
+
+    buf.buf = (unsigned char *)encryptData;
+    buf.bufLen = len;
+    if (AuthEncryptBySeq((int32_t)authId, &side, (unsigned char *)data, strlen(data) + 1, &buf) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "EncryptVerifyP2pData encrypt fail");
+        SoftBusFree(encryptData);
+        return NULL;
+    }
+    if (buf.outLen != len) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "outLen not right");
+        SoftBusFree(encryptData);
+        return NULL;
+    }
+
+    *encryptDataLen = len;
+    return encryptData;
+}
+
 static int32_t SendAuthData(int64_t authId, int32_t module, int32_t flag, int64_t seq, const char *data)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SendAuthData: [%" PRId64 ", %d, %d, %" PRId64 "]",
         authId, module, flag, seq);
-    AuthTransData dataInfo = {
-        .module = module,
-        .flag = flag,
-        .seq = seq,
-        .len = strlen(data) + 1,
-        .data = (const uint8_t *)data,
-    };
-    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
-        return SOFTBUS_ERR;
+    uint32_t encryptDataLen;
+    char *encryptData = NULL;
+    int32_t ret;
+
+    encryptData = EncryptVerifyP2pData(authId, data, &encryptDataLen);
+    if (encryptData == NULL || encryptDataLen == 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendAuthData encrypt fail");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+
+    AuthDataHead head = {0};
+    head.dataType = DATA_TYPE_CONNECTION;
+    head.module = module;
+    head.authId = authId;
+    head.flag = flag;
+    head.seq = seq;
+    ret = AuthPostData(&head, (unsigned char *)encryptData, encryptDataLen);
+    SoftBusFree(encryptData);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendAuthData fail: ret=%d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -267,6 +309,35 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId)
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn end");
     return SOFTBUS_OK;
+}
+
+static char *DecryptVerifyP2pData(int64_t authId, const ConnectOption *option,
+    const AuthTransDataInfo *info)
+{
+    if (info->len <= AuthGetEncryptHeadLen()) {
+        return NULL;
+    }
+    int32_t ret;
+    uint32_t len;
+    char *data = NULL;
+    OutBuf buf = {0};
+
+    len = info->len - AuthGetEncryptHeadLen() + 1;
+    data = (char *)SoftBusCalloc(len);
+    if (data == NULL) {
+        return NULL;
+    }
+
+    buf.buf = (unsigned char *)data;
+    buf.bufLen = info->len - AuthGetEncryptHeadLen();
+    ret = AuthDecrypt(option, AUTH_SIDE_ANY, (unsigned char *)info->data, info->len, &buf);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DecryptVerifyP2pData decrypt fail: ret=%d", ret);
+        SoftBusFree(data);
+        return NULL;
+    }
+
+    return data;
 }
 
 static void SendVerifyP2pFailRsp(int64_t authId, int64_t seq,
@@ -415,23 +486,31 @@ static void OnAuthMsgProc(int64_t authId, int32_t flags, int64_t seq, const cJSO
     return;
 }
 
-static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
+static void OnAuthDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    if (data == NULL || data->data == NULL || data->len == 0) {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv: authId=%" PRId64, authId);
+    if (option == NULL || info == NULL || info->data == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "OnAuthDataRecv: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
-    if (data->module != MODULE_P2P_LISTEN) {
+    if (info->module != MODULE_P2P_LISTEN) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnAuthDataRecv: info->module=%d", info->module);
         return;
     }
-    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "OnAuthDataRecv data: ", (const char *)data->data, data->len);
 
-    cJSON *json = cJSON_Parse((const char *)(data->data));
+    char *data = DecryptVerifyP2pData(authId, option, info);
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthConnOpened decrypt fail");
+        return;
+    }
+    AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "OnAuthDataRecv data: ", data, strlen(data));
+
+    cJSON *json = cJSON_Parse(data);
+    SoftBusFree(data);
     if (json == NULL) {
         return;
     }
-    OnAuthMsgProc(authId, data->flag, data->seq, json);
+
+    OnAuthMsgProc(authId, info->flags, info->seq, json);
     cJSON_Delete(json);
     return;
 }
@@ -498,11 +577,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 int32_t P2pDirectChannelInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit");
-    AuthTransListener p2pTransCb = {
-        .onDataReceived = OnAuthDataRecv,
-        .onDisconnected = OnAuthChannelClose,
-    };
-    if (RegAuthTransListener(MODULE_P2P_LISTEN, &p2pTransCb) != SOFTBUS_OK) {
+    AuthTransCallback cb;
+    cb.onTransUdpDataRecv = OnAuthDataRecv;
+    cb.onAuthChannelClose = OnAuthChannelClose;
+
+    if (AuthTransDataRegCallback(TRANS_P2P_LISTEN, &cb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "P2pDirectChannelInit set cb fail");
         return SOFTBUS_ERR;
     }
