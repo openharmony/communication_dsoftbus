@@ -39,7 +39,6 @@ extern "C" {
 #define FLAG_BR 2
 #define FLAG_BLE 4
 #define FLAG_P2P 8
-#define AUTH_CONN_SERVER_SIDE 0x01
 
 typedef struct {
     uint32_t magicNumber;

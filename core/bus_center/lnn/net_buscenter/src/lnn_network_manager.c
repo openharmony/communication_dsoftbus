@@ -357,7 +357,7 @@ static void OnGroupDeleted(const char *groupId)
     LnnHbOnAuthGroupDeleted(groupId);
 }
 
-static GroupChangeListener g_groupChangeListener = {
+static VerifyCallback g_verifyCb = {
     .onGroupCreated = OnGroupCreated,
     .onGroupDeleted = OnGroupDeleted,
 };
@@ -407,9 +407,9 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
 
-    ret = RegGroupChangeListener(&g_groupChangeListener);
+    ret = AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register group change listener fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
         return ret;
     }
 
