@@ -33,7 +33,6 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
     char p2pIp[P2P_IP_LEN] = {0};
     int32_t ret;
     int32_t port;
-    AuthListennerInfo listenInfo = {0};
 
     P2pLinkUpdateDeviceByMagicGroups(group);
     if (P2pLinkGetGoPort() <= 0) {
@@ -41,12 +40,7 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my ip %s, ret %d", p2pIp, ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
-            listenInfo.type = AUTH_LINK_TYPE_P2P;
-            if (strcpy_s(listenInfo.info.ipInfo.ip, sizeof(listenInfo.info.ipInfo.ip), p2pIp) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
-                return;
-            }
-            port = AuthStartListening(&listenInfo);
+            port = AuthStartListening(AUTH_LINK_TYPE_P2P, p2pIp, 0);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p auth chan port %d", port);
             P2pLinkSetGoPort(port);
         }
