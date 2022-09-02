@@ -287,25 +287,29 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
-int32_t Strnicmp(const char *src1, const char *src2, uint32_t len)
+static char ToUpperCase(char ch)
 {
-    if (src1 == NULL || src2 == NULL ||
-        strlen(src1) + 1 < len || strlen(src2) + 1 < len) {
+    if (ch >= 'a' && ch <= 'z') {
+        return ch - 'a' + 'A';
+    }
+    return ch;
+}
+
+int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
+{
+    if (str1 == NULL || str2 == NULL) {
         return SOFTBUS_ERR;
     }
-    char *tmpSrc1 = (char *)src1;
-    char *tmpSrc2 = (char *)src2;
-    int32_t ca;
-    int32_t cb;
-    uint32_t i = len;
-    do {
-        ca = (int32_t)(*tmpSrc1++);
-        cb = (int32_t)(*tmpSrc2++);
-        ca = toupper(ca);
-        cb = toupper(cb);
-        i--;
-    } while (ca == cb && i > 0);
-    return ca - cb;
+    int32_t i;
+    for (i = 0; str1[i] != '\0' && str2[i] != '\0'; i++) {
+        if (ToUpperCase(str1[i]) != ToUpperCase(str2[i])) {
+            return SOFTBUS_ERR;
+        }
+    }
+    if (str1[i] != '\0' || str2[i] != '\0') {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 void SetSignalingMsgSwitchOn(void)

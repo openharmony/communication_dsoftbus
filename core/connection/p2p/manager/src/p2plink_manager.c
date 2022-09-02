@@ -137,55 +137,38 @@ void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
     return;
 }
 
-static int32_t GetDisConnectInfo(P2pLinkDisconnectInfo *info, void *arg)
-{
-    int32_t ret;
-
-    if (arg == NULL) {
-        return SOFTBUS_ERR;
-    }
-
-    ret = memcpy_s(info, sizeof(P2pLinkDisconnectInfo), arg, sizeof(P2pLinkDisconnectInfo));
-    if (ret != SOFTBUS_OK) {
-        SoftBusFree(arg);
-        return SOFTBUS_ERR;
-    }
-    SoftBusFree(arg);
-    return SOFTBUS_OK;
-}
-
 void P2pLinkLoopDisconnectDev(P2pLoopMsg msgType, void *arg)
 {
-    P2pLinkDisconnectInfo info = {0};
     int32_t ret;
     ConnectedNode *item = NULL;
+    P2pLinkDisconnectInfo *info = (P2pLinkDisconnectInfo *)arg;
 
-    if (GetDisConnectInfo(&info, arg) == SOFTBUS_ERR) {
+    if (info == NULL) {
         return;
     }
 
     if (P2pLinkIsEnable() == false) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in disconn dev p2p state is closed");
-        return;
+        goto END;
     }
 
     if (P2pLinkIsDisconnectState() == true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2plink is disconnecting");
-        return;
+        goto END;
     }
 
     (void)msgType;
-    if (strlen(info.peerMac) != 0) {
-        P2pLinkUpdateInAuthId(info.peerMac, info.authId);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info.pid);
-        if (P2pLinGetMacRefCnt(info.pid, info.peerMac) == 0) {
+    if (strlen(info->peerMac) != 0) {
+        P2pLinkUpdateInAuthId(info->peerMac, info->authId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info->pid);
+        if (P2pLinGetMacRefCnt(info->pid, info->peerMac) == 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer mac not ref");
-            return;
+            goto END;
         }
-        item = P2pLinkGetConnedDevByMac(info.peerMac);
+        item = P2pLinkGetConnedDevByMac(info->peerMac);
         if (item == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer mac not online");
-            return;
+            goto END;
         }
         ret = P2pLinkSendDisConnect(&item->chanId, P2pLinkGetMyMac());
         if (ret != SOFTBUS_OK) {
@@ -194,15 +177,19 @@ void P2pLinkLoopDisconnectDev(P2pLoopMsg msgType, void *arg)
         ret = P2pLinkSharelinkRemoveGroup();
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "remove group fail");
-            return;
+            goto END;
         }
-        P2pLinkDelPidMacRef(info.pid, info.peerMac);
+        P2pLinkDelPidMacRef(info->pid, info->peerMac);
         P2pLinkDelMyP2pRef();
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info.pid);
-        DisConnectByPid(info.pid);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del pid %d", info->pid);
+        DisConnectByPid(info->pid);
     }
     P2pLinkDumpRef();
+
+END:
+    AuthCloseConn(info->authId);
+    SoftBusFree(info);
 }
 
 static void LoopOpenP2pAuthSuccess(P2pLoopMsg msgType, void *arg)

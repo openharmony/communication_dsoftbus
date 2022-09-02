@@ -78,7 +78,7 @@ int32_t GetRemoteUuidByBtMac(const char *peerMac, char *uuid, int32_t len)
         if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_BT_MAC, btMac, BT_MAC_LEN) != SOFTBUS_OK) {
             continue;
         }
-        if (Strnicmp(peerMac, btMac, BT_MAC_LEN) == 0) {
+        if (StrCmpIgnoreCase(peerMac, btMac) == 0) {
             if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_UUID, uuid, len) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get remote uuid fail");
                 SoftBusFree(info);

@@ -580,7 +580,7 @@ bool HasDiffMacDeviceExit(const ConnectOption *option)
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (itemNode->sideType == BR_CLIENT_TYPE) {
-            if (Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) != 0) {
+            if (StrCmpIgnoreCase(itemNode->mac, option->brOption.brMac) != 0) {
                 res = true;
                 break;
             }
@@ -617,7 +617,7 @@ int32_t GetBrConnStateByConnOption(const ConnectOption *option, uint32_t *outCon
     LIST_FOR_EACH(item, &g_connection_list) {
         BrConnectionInfo *itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if (IsTargetSideType(option->brOption.sideType, itemNode->sideType) &&
-            Strnicmp(itemNode->mac, option->brOption.brMac, BT_MAC_LEN) == 0) {
+            StrCmpIgnoreCase(itemNode->mac, option->brOption.brMac) == 0) {
             if (outConnId != NULL) {
                 *outConnId = itemNode->connectionId;
             }
@@ -666,7 +666,7 @@ int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, in
     BrConnectionInfo *itemNode = NULL;
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if (Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) == 0) {
+        if (StrCmpIgnoreCase(itemNode->mac, option->brOption.brMac) == 0) {
             *socketFd = itemNode->socketFd;
             *sideType = itemNode->sideType;
             itemNode->state = BR_CONNECTION_STATE_CLOSING;
@@ -696,7 +696,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
-        if ((Strnicmp(itemNode->mac, option->brOption.brMac, sizeof(itemNode->mac)) == 0) &&
+        if ((StrCmpIgnoreCase(itemNode->mac, option->brOption.brMac) == 0) &&
             (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection true");
             (void)pthread_mutex_unlock(&g_connectionLock);

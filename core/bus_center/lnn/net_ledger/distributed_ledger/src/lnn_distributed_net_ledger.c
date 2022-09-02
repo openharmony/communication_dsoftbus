@@ -1135,6 +1135,44 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return ret;
 }
 
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+{
+    if (btMac == NULL || btMac[0] == '\0' || buf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "btMac is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    MapIterator *it = LnnMapInitIterator(&g_distributedNetLedger.distributedInfo.udidMap);
+    if (it == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "it is null");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    while (LnnMapHasNext(it)) {
+        it = LnnMapNext(it);
+        if (it == NULL) {
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_ERR;
+        }
+        NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
+        if (LnnIsNodeOnline(nodeInfo) &&
+            StrCmpIgnoreCase(nodeInfo->connectInfo.macAddr, btMac) == 0) {
+            if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s networkId fail!");
+            }
+            LnnMapDeinitIterator(it);
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_OK;
+        }
+    }
+    LnnMapDeinitIterator(it);
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_ERR;
+}
+
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     if (!IsValidString(uuid, ID_MAX_LEN)) {
@@ -1147,6 +1185,32 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(uuid, CATEGORY_UUID);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, nodeInfo->networkId, strlen(nodeInfo->networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    if (!IsValidString(udid, ID_MAX_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "udid is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(udid, CATEGORY_UDID);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);

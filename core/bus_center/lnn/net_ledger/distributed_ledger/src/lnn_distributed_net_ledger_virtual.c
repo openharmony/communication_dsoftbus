@@ -59,9 +59,25 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return NULL;
 }
 
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+{
+    (void)btMac;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     (void)uuid;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    (void)udid;
     (void)buf;
     (void)len;
     return SOFTBUS_NOT_IMPLEMENT;
