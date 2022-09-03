@@ -56,7 +56,7 @@ static int32_t SetCipherOfHandshakeMsg(uint32_t channelId, uint8_t *cipher)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authId fail");
         return SOFTBUS_ERR;
     }
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
     if (AuthGetConnInfo(authId, &connInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth connInfo fail");
         return SOFTBUS_ERR;

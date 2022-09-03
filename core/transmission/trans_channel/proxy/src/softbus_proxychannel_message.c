@@ -119,7 +119,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
 
 static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
 {
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
     if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connInfo fail connId[%d]", connId);
         return AUTH_INVALID_ID;
