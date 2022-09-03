@@ -1154,7 +1154,7 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 
 static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
 {
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
     DeviceVerifyPassMsgPara *para = NULL;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "verify passed passively, authId=%" PRId64, authId);
     if (AuthGetConnInfo(authId, &connInfo) != SOFTBUS_OK) {

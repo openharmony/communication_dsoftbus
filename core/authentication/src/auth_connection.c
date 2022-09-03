@@ -300,7 +300,8 @@ static void OnWiFiConnected(int32_t fd, bool isClient)
 static void OnWiFiDisconnected(int32_t fd)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "OnWiFiDisconnected: fd=%d.", fd);
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
 }
@@ -310,7 +311,8 @@ static void OnWiFiDataReceived(int32_t fd, const AuthDataHead *head, const uint8
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
     bool fromServer = false;
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get connInfo fail, fd=%d.", fd);
         return;
@@ -338,7 +340,8 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "OnCommDisconnected: connectionId=%u.", connectionId);
     CHECK_NULL_PTR_RETURN_VOID(info);
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)ConvertToAuthConnInfo(info, &connInfo);
     NotifyDisconnected(GenConnId(connInfo.type, connectionId), &connInfo);
 }
@@ -364,7 +367,8 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     bool fromServer = ((seq % SEQ_INTERVAL) != 0);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "RecvCommData: connectionId=%u, module=%d, seq=%" PRId64
         ", len=%d, from=%s.", connectionId, moduleId, seq, len, GetAuthSideStr(fromServer));
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (GetConnInfoByConnectionId(connectionId, &connInfo) != SOFTBUS_OK) {
         return;
     }
@@ -389,10 +393,11 @@ static int32_t InitCommConn(void)
 
 static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
 {
-    AuthConnInfo connInfo = {0};
+    AuthConnInfo connInfo;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "OnCommConnectSucc: requestId=%u, connectionId=%u.", requestId, connectionId);
     CHECK_NULL_PTR_RETURN_VOID(info);
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)ConvertToAuthConnInfo(info, &connInfo);
     RemoveConnConnectTimeout(requestId);
     NotifyClientConnected(requestId, GenConnId(connInfo.type, connectionId), SOFTBUS_OK, &connInfo);
@@ -408,7 +413,8 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
 
 static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, ConnSideType sideType)
 {
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = ConvertToConnectOption(info, &option);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConvertToConnectOption fail(=%d).", ret);
@@ -487,17 +493,19 @@ void AuthConnDeinit(void)
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
     int32_t ret;
-    ConnCmdInfo info = {0};
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "ConnectDevice: requestId=%u, connType=%d, sideType=%d.", requestId, connInfo->type, sideType);
     PostConnConnectTimeout(requestId);
     switch (connInfo->type) {
-        case AUTH_LINK_TYPE_WIFI:
-            info.requestId = requestId,
-            info.connInfo = *connInfo,
+        case AUTH_LINK_TYPE_WIFI: {
+            ConnCmdInfo info = {
+                .requestId = requestId,
+                .connInfo = *connInfo
+            };
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
+        }
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_P2P:
@@ -558,7 +566,8 @@ ConnSideType GetConnSideType(uint64_t connId)
             "WiFi not supported, " CONN_INFO, CONN_DATA(connId));
         return CONN_SIDE_ANY;
     }
-    ConnectionInfo info = {0};
+    ConnectionInfo info;
+    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
     if (ConnGetConnectionInfo(GetConnId(connId), &info)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "ConnGetConnectionInfo fail, " CONN_INFO, CONN_DATA(connId));
@@ -573,8 +582,9 @@ ConnSideType GetConnSideType(uint64_t connId)
 
 bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
 {
+    ConnectOption connOpt;
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, false);
-    ConnectOption connOpt = {0};
+    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (ConvertToConnectOption(connInfo, &connOpt) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "convert to connect option fail, connType=%d.", connInfo->type);

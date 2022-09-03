@@ -355,7 +355,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnOpenClientSocket fail.");
         return AUTH_INVALID_FD;
     }
-    int32_t triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
+    TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
         ConnShutdownSocket(fd);

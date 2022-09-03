@@ -481,7 +481,7 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char p2pMac[P2P_MAC_LEN] = {0};
     if (P2pLinkGetPeerMacByPeerIp(appInfo.peerData.addr, p2pMac, sizeof(p2pMac)) != SOFTBUS_OK) {
-        AuthConnInfo connInfo = {0};
+        AuthConnInfo connInfo;
         connInfo.type = AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip addr fail");
