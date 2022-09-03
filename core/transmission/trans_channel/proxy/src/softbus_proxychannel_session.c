@@ -496,7 +496,7 @@ int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelI
         .outData = NULL,
         .outLen = 0,
     };
-    if (TransProxyPackMessage(msghead, info->connId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(msghead, info->authId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }

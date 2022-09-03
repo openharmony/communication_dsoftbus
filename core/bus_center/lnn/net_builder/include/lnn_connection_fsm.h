@@ -61,7 +61,7 @@ typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     LnnInvalidCleanInfo *cleanInfo;
     int64_t authId;
-    SoftBusVersion peerVersion;
+    uint32_t requestId;
     uint32_t flag;
 } LnnConntionInfo;
 
@@ -81,14 +81,6 @@ typedef struct tagLnnConnectionFsm {
     LnnStatisticData statisticData;
 } LnnConnectionFsm;
 
-typedef struct {
-    int64_t authId;
-    AuthSideFlag side;
-    char uuid[UUID_BUF_LEN];
-    uint8_t *data;
-    uint32_t len;
-} LnnRecvDeviceInfoMsgPara;
-
 LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target);
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
 
@@ -96,9 +88,7 @@ int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
 int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback);
 
 int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
-int32_t LnnSendAuthKeyGenMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode);
-int32_t LnnSendPeerDevInfoToConnFsm(LnnConnectionFsm *connFsm, const LnnRecvDeviceInfoMsgPara *para);
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);

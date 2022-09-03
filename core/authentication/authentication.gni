@@ -22,21 +22,23 @@ if (dsoftbus_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
+    "$authentication_path/src/auth_hichain.c",
     "$authentication_path/src/auth_manager.c",
-    "$authentication_path/src/auth_p2p.c",
-    "$authentication_path/src/auth_sessionkey.c",
+    "$authentication_path/src/auth_request.c",
+    "$authentication_path/src/auth_session_fsm.c",
+    "$authentication_path/src/auth_session_key.c",
+    "$authentication_path/src/auth_session_message.c",
   ]
   if (dsoftbus_feature_ip_auth) {
     auth_server_src +=
-        [ "$dsoftbus_root_path/core/authentication/src/auth_socket.c" ]
+        [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c" ]
   } else {
-    auth_server_src +=
-        [ "$dsoftbus_root_path/core/authentication/src/auth_socket_virtual.c" ]
+    auth_server_src += [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection_virtual.c" ]
   }
 } else {
   auth_server_src = [
-    "$authentication_path/src/auth_manager_virtual.c",
-    "$authentication_path/src/auth_socket_virtual.c",
+    "$authentication_path/src/auth_interface_virtual.c",
+    "$authentication_path/src/auth_tcp_connection_virtual.c",
   ]
 }
 auth_server_inc = [

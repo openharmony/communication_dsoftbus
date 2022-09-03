@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "auth_interface.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
 
@@ -44,6 +45,7 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);
 int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
+AuthVerifyCallback *LnnGetVerifyCallback(void);
 
 #ifdef __cplusplus
 }
