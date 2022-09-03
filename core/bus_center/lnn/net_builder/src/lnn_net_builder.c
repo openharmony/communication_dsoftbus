@@ -27,7 +27,6 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_exchange_device_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_manager.h"
@@ -56,15 +55,14 @@ typedef enum {
     MSG_TYPE_JOIN_LNN = 0,
     MSG_TYPE_DISCOVERY_DEVICE,
     MSG_TYPE_CLEAN_CONN_FSM,
-    MSG_TYPE_AUTH_KEY_GENERATED,
-    MSG_TYPE_AUTH_DONE,
-    MSG_TYPE_SYNC_DEVICE_INFO_DONE = 5,
-    MSG_TYPE_NOT_TRUSTED,
-    MSG_TYPE_DISCONNECT,
+    MSG_TYPE_VERIFY_RESULT,
+    MSG_TYPE_DEVICE_VERIFY_PASS,
+    MSG_TYPE_DEVICE_DISCONNECT = 5,
+    MSG_TYPE_DEVICE_NOT_TRUSTED,
     MSG_TYPE_LEAVE_LNN,
     MSG_TYPE_SYNC_OFFLINE_FINISH,
-    MSG_TYPE_NODE_STATE_CHANGED = 10,
-    MSG_TYPE_MASTER_ELECT,
+    MSG_TYPE_NODE_STATE_CHANGED,
+    MSG_TYPE_MASTER_ELECT = 10,
     MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
@@ -97,15 +95,17 @@ typedef struct {
 } NetBuilder;
 
 typedef struct {
-    ConnectionAddr addr;
-    int64_t authId;
-    SoftBusVersion peerVersion;
-} AuthKeyGeneratedMsgPara;
-
-typedef struct {
+    uint32_t requestId;
     int32_t retCode;
     int64_t authId;
-} AuthResultMsgPara;
+    NodeInfo *nodeInfo;
+} VerifyResultMsgPara;
+
+typedef struct {
+    ConnectionAddr addr;
+    int64_t authId;
+    NodeInfo *nodeInfo;
+} DeviceVerifyPassMsgPara;
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
@@ -172,6 +172,18 @@ static LnnConnectionFsm *FindConnectionFsmByAddr(const ConnectionAddr *addr)
 
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         if (LnnIsSameConnectionAddr(addr, &item->connInfo.addr)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId)
+{
+    LnnConnectionFsm *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (item->connInfo.requestId == requestId) {
             return item;
         }
     }
@@ -577,142 +589,110 @@ static int32_t ProcessCleanConnectionFsm(const void *para)
     return rc;
 }
 
-static int32_t ProcessAuthKeyGenerated(const void *para)
+static int32_t ProcessVerifyResult(const void *para)
 {
-    const AuthKeyGeneratedMsgPara *msgPara = (const AuthKeyGeneratedMsgPara *)para;
+    int32_t rc;
     LnnConnectionFsm *connFsm = NULL;
-    int32_t rc = SOFTBUS_OK;
-    bool isCreate = false;
+    const VerifyResultMsgPara *msgPara = (const VerifyResultMsgPara *)para;
 
     if (msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    connFsm = FindConnectionFsmByAuthId(msgPara->authId);
-    if (connFsm == NULL || connFsm->isDead) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create and start a new connection fsm as server side");
-        connFsm = StartNewConnectionFsm(&msgPara->addr);
-        if (connFsm == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start server new connection failed: %" PRIu64,
-                msgPara->authId);
-            SoftBusFree((void *)msgPara);
-            return SOFTBUS_ERR;
-        }
-        isCreate = true;
-        connFsm->connInfo.authId = msgPara->authId;
-        connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
-    }
-    connFsm->connInfo.peerVersion = msgPara->peerVersion;
-    connFsm->statisticData.authTime = LnnUpTimeMs();
-    if (LnnSendAuthKeyGenMsgToConnFsm(connFsm) != SOFTBUS_OK) {
-        if (isCreate) {
-            StopConnectionFsm(connFsm);
-        }
-        rc = SOFTBUS_ERR;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-        "[id=%u]connection fsm auth key generated process done: %" PRIu64 ", %d", connFsm->id, msgPara->authId, rc);
-    SoftBusFree((void *)msgPara);
-    return rc;
-}
 
-static int32_t ProcessAuthDone(const void *para)
-{
-    const AuthResultMsgPara *msgPara = (const AuthResultMsgPara *)para;
-    LnnConnectionFsm *connFsm = NULL;
-    int32_t rc = SOFTBUS_ERR;
-
-    if (msgPara == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
     do {
-        connFsm = FindConnectionFsmByAuthId(msgPara->authId);
+        connFsm = FindConnectionFsmByRequestId(msgPara->requestId);
         if (connFsm == NULL || connFsm->isDead) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64,
-                msgPara->authId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+                "can not find connection fsm by requestId: %u", msgPara->requestId);
+            rc = SOFTBUS_ERR;
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth done: %" PRIu64,
-            connFsm->id, msgPara->authId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]connection fsm auth done: retCode=%d",
+            connFsm->id, msgPara->retCode);
+        if (msgPara->retCode == SOFTBUS_OK) {
+            connFsm->connInfo.authId = msgPara->authId;
+            connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
+        }
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send auth result to connection fsm[id=%u] failed",
                 connFsm->id);
+            rc = SOFTBUS_ERR;
             break;
         }
         rc = SOFTBUS_OK;
     } while (false);
+
+    if (rc != SOFTBUS_OK && msgPara->nodeInfo != NULL) {
+        SoftBusFree((void *)msgPara->nodeInfo);
+    }
     SoftBusFree((void *)msgPara);
     return rc;
 }
 
-static int32_t ProcessSyncDeviceInfoDone(const void *para)
+static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara)
 {
-    const LnnRecvDeviceInfoMsgPara *msgPara = (const LnnRecvDeviceInfoMsgPara *)para;
     LnnConnectionFsm *connFsm = NULL;
-    int32_t rc;
-
-    if (msgPara == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv device info msg para is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    connFsm = FindConnectionFsmByAuthId(msgPara->authId);
-    if (connFsm == NULL || connFsm->isDead) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64,
-            msgPara->authId);
-        SoftBusFree((void *)msgPara);
+    connFsm = StartNewConnectionFsm(&msgPara->addr);
+    if (connFsm == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+            "start new connection fsm fail: %" PRId64, msgPara->authId);
         return SOFTBUS_ERR;
     }
-    // if send success, the memory of para will be freed by connection fsm
-    rc = LnnSendPeerDevInfoToConnFsm(connFsm, msgPara);
-    if (rc != SOFTBUS_OK) {
-        SoftBusFree((void *)msgPara);
+    connFsm->connInfo.authId = msgPara->authId;
+    connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
+    connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "[id=%u]start a passive connection fsm, authId=%" PRId64, connFsm->id, msgPara->authId);
+    if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+        StopConnectionFsm(connFsm);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+            "[id=%u]post auth result to connection fsm fail: %" PRId64, connFsm->id, msgPara->authId);
+        return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send peer device info to connection fsm[id=%u] result=%d",
-        connFsm->id, rc);
-    return rc;
+    return SOFTBUS_OK;
 }
 
-static int32_t ProcessDeviceNotTrusted(const void *para)
+static int32_t ProcessDeviceVerifyPass(const void *para)
 {
-    const char *peerUdid = (const char *)para;
-    int32_t rc = SOFTBUS_OK;
+    int32_t rc;
+    LnnConnectionFsm *connFsm = NULL;
+    const DeviceVerifyPassMsgPara *msgPara = (const DeviceVerifyPassMsgPara *)para;
 
-    if (peerUdid == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is null");
+    if (msgPara == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     do {
-        NodeInfo *info = LnnGetNodeInfoById(peerUdid, CATEGORY_UDID);
-        if (info != NULL) {
-            LnnRequestLeaveSpecific(info->networkId, CONNECTION_ADDR_MAX);
+        connFsm = FindConnectionFsmByAuthId(msgPara->authId);
+        if (connFsm == NULL || connFsm->isDead) {
+            rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
-
-        LnnConnectionFsm *item = NULL;
-        const char *udid = NULL;
-        LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-            if (item->connInfo.nodeInfo == NULL) {
-                continue;
-            }
-            udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
-            if (udid != NULL && strcmp(peerUdid, udid) == 0) {
-                rc = LnnSendNotTrustedToConnFsm(item);
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                    "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
-            }
+        if (strcmp(connFsm->connInfo.peerNetworkId, msgPara->nodeInfo->networkId) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "[id=%u]networkId changed: %" PRId64, connFsm->id, msgPara->authId);
+            rc = CreatePassiveConnectionFsm(msgPara);
+            break;
         }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]connection fsm exist, ignore VerifyPass event: %" PRId64, connFsm->id, msgPara->authId);
+        rc = SOFTBUS_ERR;
     } while (false);
-    SoftBusFree((void *)peerUdid);
+
+    if (rc != SOFTBUS_OK && msgPara->nodeInfo != NULL) {
+        SoftBusFree((void *)msgPara->nodeInfo);
+    }
+    SoftBusFree((void *)msgPara);
     return rc;
 }
 
-static int32_t ProcessAuthDisconnect(const void *para)
+static int32_t ProcessDeviceDisconnect(const void *para)
 {
-    const int64_t *authId = (const int64_t *)para;
+    int32_t rc;
     LnnConnectionFsm *connFsm = NULL;
-    int rc = SOFTBUS_OK;
+    const int64_t *authId = (const int64_t *)para;
 
     if (authId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "authId is null");
@@ -722,19 +702,55 @@ static int32_t ProcessAuthDisconnect(const void *para)
     do {
         connFsm = FindConnectionFsmByAuthId(*authId);
         if (connFsm == NULL || connFsm->isDead) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find connection fsm by authId: %" PRId64, *authId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+                "can not find connection fsm by authId: %" PRId64, *authId);
+            rc = SOFTBUS_ERR;
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth disconnect, authId: %" PRId64, connFsm->id, *authId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]device disconnect, authId: %" PRId64, connFsm->id, *authId);
         if (LnnSendDisconnectMsgToConnFsm(connFsm) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send disconnect to connection fsm[id=%u] failed",
-                connFsm->id);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+                "send disconnect to connection fsm[id=%u] failed", connFsm->id);
+            rc = SOFTBUS_ERR;
             break;
         }
         rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)authId);
     return rc;
+}
+
+static int32_t ProcessDeviceNotTrusted(const void *para)
+{
+    int32_t rc;
+    const char *udid = NULL;
+    LnnConnectionFsm *item = NULL;
+    const char *peerUdid = (const char *)para;
+
+    if (peerUdid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    do {
+        char networkId[NETWORK_ID_BUF_LEN] = {0};
+        if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) == SOFTBUS_OK) {
+            LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+            break;
+        }
+        LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+            udid = LnnGetDeviceUdid(item->connInfo.nodeInfo);
+            if (udid == NULL || strcmp(peerUdid, udid) != 0) {
+                continue;
+            }
+            rc = LnnSendNotTrustedToConnFsm(item);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "[id=%u]send not trusted msg to connection fsm result: %d", item->id, rc);
+        }
+    } while (false);
+    SoftBusFree((void *)peerUdid);
+    return SOFTBUS_OK;
 }
 
 static int32_t ProcessLeaveLNNRequest(const void *para)
@@ -919,6 +935,16 @@ static int32_t TryElectMasterNodeOffline(const LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
+static bool IsSupportMasterNodeElect(int64_t authId)
+{
+    SoftBusVersion version = SOFTBUS_NEW_V1;
+    if (AuthGetVersion(authId, &version) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get softbus version fail");
+        return false;
+    }
+    return version >= SOFTBUS_NEW_V1;
+}
+
 static int32_t ProcessNodeStateChanged(const void *para)
 {
     const ConnectionAddr *addr = (const ConnectionAddr *)para;
@@ -938,7 +964,7 @@ static int32_t ProcessNodeStateChanged(const void *para)
             break;
         }
         isOnline = IsNodeOnline(connFsm->connInfo.peerNetworkId);
-        if (connFsm->connInfo.peerVersion < SOFT_BUS_NEW_V1) {
+        if (!IsSupportMasterNodeElect(connFsm->connInfo.authId)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer not support master node elect", connFsm->id);
             rc = SOFTBUS_OK;
             break;
@@ -1066,11 +1092,10 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
     ProcessCleanConnectionFsm,
-    ProcessAuthKeyGenerated,
-    ProcessAuthDone,
-    ProcessSyncDeviceInfoDone,
+    ProcessVerifyResult,
+    ProcessDeviceVerifyPass,
+    ProcessDeviceDisconnect,
     ProcessDeviceNotTrusted,
-    ProcessAuthDisconnect,
     ProcessLeaveLNNRequest,
     ProcessSyncOfflineFinish,
     ProcessNodeStateChanged,
@@ -1112,86 +1137,66 @@ static ConnectionAddrType GetCurrentConnectType(void)
     return type;
 }
 
-static void OnAuthKeyGenerated(int64_t authId, ConnectOption *option, SoftBusVersion peerVersion)
+static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 {
-    AuthKeyGeneratedMsgPara *para = NULL;
+    NodeInfo *new = SoftBusMalloc(sizeof(NodeInfo));
+    if (new == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc NodeInfo fail");
+        return NULL;
+    }
+    if (memcpy_s(new, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy NodeInfo fail");
+        SoftBusFree(new);
+        return NULL;
+    }
+    return new;
+}
 
-    para = SoftBusMalloc(sizeof(AuthKeyGeneratedMsgPara));
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth key generated msg para fail");
+static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
+{
+    AuthConnInfo connInfo = {0};
+    DeviceVerifyPassMsgPara *para = NULL;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "verify passed passively, authId=%" PRId64, authId);
+    if (AuthGetConnInfo(authId, &connInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get AuthConnInfo fail, authId: %" PRId64, authId);
         return;
     }
-    if (!LnnConvertOptionToAddr(&para->addr, option, GetCurrentConnectType())) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert option to addr failed");
+    para = SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc DeviceVerifyPassMsgPara fail");
+        return;
+    }
+    if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert connInfo to addr fail");
         SoftBusFree(para);
         return;
     }
     para->authId = authId;
-    para->peerVersion = peerVersion;
-    if (PostMessageToHandler(MSG_TYPE_AUTH_KEY_GENERATED, para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth key generated message failed");
+    para->nodeInfo = DupNodeInfo(info);
+    if (para->nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dup NodeInfo fail");
+        SoftBusFree(para);
+        return;
+    }
+    if (PostMessageToHandler(MSG_TYPE_DEVICE_VERIFY_PASS, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post DEVICE_VERIFY_PASS msg fail");
+        SoftBusFree(para->nodeInfo);
         SoftBusFree(para);
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth key generated: %" PRId64, authId);
 }
 
-static void OnAuthDone(int64_t authId, int32_t retCode)
+static void OnDeviceDisconnect(int64_t authId)
 {
-    AuthResultMsgPara *para = SoftBusMalloc(sizeof(AuthResultMsgPara));
+    int64_t *para = NULL;
+    para = (int64_t *)SoftBusMalloc(sizeof(int64_t));
     if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc auth result fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc DeviceDisconnect para fail");
         return;
     }
-    para->retCode = retCode;
-    para->authId = authId;
-    if (PostMessageToHandler(MSG_TYPE_AUTH_DONE, para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth fail message failed");
-        SoftBusFree(para);
-    }
-}
-
-static void OnAuthFailed(int64_t authId, int32_t reason)
-{
-    OnAuthDone(authId, reason);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth failed: %"PRId64", reason:%d.", authId, reason);
-}
-
-static void OnAuthPassed(int64_t authId)
-{
-    OnAuthDone(authId, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth passed: %"PRId64".", authId);
-}
-
-static void OnRecvPeerDeviceInfo(int64_t authId, AuthSideFlag side,
-    const char *peerUuid, uint8_t *data, uint32_t len)
-{
-    LnnRecvDeviceInfoMsgPara *para = NULL;
-
-    if (peerUuid == NULL || data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid peer device info para");
-        return;
-    }
-    para = SoftBusCalloc(sizeof(*para) + len);
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc recv device info msg para fail");
-        return;
-    }
-    para->authId = authId;
-    para->side = side;
-    if (strncpy_s(para->uuid, UUID_BUF_LEN, peerUuid, strlen(peerUuid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy uuid fail");
-        SoftBusFree(para);
-        return;
-    }
-    para->data = (uint8_t *)para + sizeof(*para);
-    if (memcpy_s(para->data, len, data, len) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy data buffer fail");
-        SoftBusFree(para);
-        return;
-    }
-    para->len = len;
-    if (PostMessageToHandler(MSG_TYPE_SYNC_DEVICE_INFO_DONE, para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post sync device info done message failed");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth device disconnect, authId: %" PRId64, authId);
+    *para = authId;
+    if (PostMessageToHandler(MSG_TYPE_DEVICE_DISCONNECT, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post DEVICE_DISCONNECT msg fail");
         SoftBusFree(para);
     }
 }
@@ -1219,35 +1224,71 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusFree(udid);
         return;
     }
-    if (PostMessageToHandler(MSG_TYPE_NOT_TRUSTED, udid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post device not trusted message failed");
+    if (PostMessageToHandler(MSG_TYPE_DEVICE_NOT_TRUSTED, udid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post DEVICE_NOT_TRUSTED MSG fail");
         SoftBusFree(udid);
     }
 }
 
-static void OnDisconnect(int64_t authId)
+static AuthVerifyListener g_verifyListener = {
+    .onDeviceVerifyPass = OnDeviceVerifyPass,
+    .onDeviceDisconnect = OnDeviceDisconnect,
+    .onDeviceNotTrusted = OnDeviceNotTrusted,
+};
+
+static void PostVerifyResult(uint32_t requestId, int32_t retCode, int64_t authId, const NodeInfo *info)
 {
-    int64_t *para = (int64_t *)SoftBusMalloc(sizeof(int64_t));
+    VerifyResultMsgPara *para = NULL;
+    para = SoftBusCalloc(sizeof(VerifyResultMsgPara));
     if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc authId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc verify result msg para fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auth channel disconnect, authId is %" PRId64, authId);
-    *para = authId;
-    if (PostMessageToHandler(MSG_TYPE_DISCONNECT, (void *)para) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post auth disconnect message failed");
+    para->requestId = requestId;
+    para->retCode = retCode;
+    if (retCode == SOFTBUS_OK) {
+        para->nodeInfo = DupNodeInfo(info);
+        if (para->nodeInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dup NodeInfo fail");
+            SoftBusFree(para);
+            return;
+        }
+        para->authId = authId;
+    }
+    if (PostMessageToHandler(MSG_TYPE_VERIFY_RESULT, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post verify result message failed");
+        SoftBusFree(para->nodeInfo);
         SoftBusFree(para);
     }
 }
 
-static VerifyCallback g_verifyCb = {
-    .onKeyGenerated = OnAuthKeyGenerated,
-    .onDeviceVerifyPass = OnAuthPassed,
-    .onDeviceVerifyFail = OnAuthFailed,
-    .onRecvSyncDeviceInfo = OnRecvPeerDeviceInfo,
-    .onDeviceNotTrusted = OnDeviceNotTrusted,
-    .onDisconnect = OnDisconnect,
+static void OnVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "verify passed: requestId=%u, authId=%" PRId64, requestId, authId);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post verify result message failed");
+        return;
+    }
+    PostVerifyResult(requestId, SOFTBUS_OK, authId, info);
+}
+
+static void OnVerifyFailed(uint32_t requestId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "verify failed: requestId=%u, reason=%d", requestId, reason);
+    PostVerifyResult(requestId, reason, AUTH_INVALID_ID, NULL);
+}
+
+static AuthVerifyCallback g_verifyCallback = {
+    .onVerifyPassed = OnVerifyPassed,
+    .onVerifyFailed = OnVerifyFailed,
 };
+
+AuthVerifyCallback *LnnGetVerifyCallback(void)
+{
+    return &g_verifyCallback;
+}
 
 static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
 {
@@ -1300,15 +1341,6 @@ static int32_t ConifgLocalLedger(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
-    return SOFTBUS_OK;
-}
-
-static int32_t RegisterAuthCallback(void)
-{
-    if (AuthRegCallback(LNN, &g_verifyCb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
-        return SOFTBUS_ERR;
-    }
     return SOFTBUS_OK;
 }
 
@@ -1453,8 +1485,8 @@ int32_t LnnInitNetBuilder(void)
         return SOFTBUS_ERR;
     }
     NetBuilderConfigInit();
-    if (RegisterAuthCallback() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
+    if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth verify listener fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveConnCapabilityMsg) != SOFTBUS_OK) {
@@ -1514,6 +1546,7 @@ void LnnDeinitNetBuilder(void)
         StopConnectionFsm(item);
     }
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
+    UnregAuthVerifyListener();
     LnnDeinitTopoManager();
     LnnDeinitP2p();
     LnnDeinitSyncInfoManager();

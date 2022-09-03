@@ -15,7 +15,7 @@
 
 #include "trans_auth_manager.h"
 
-#include "auth_interface.h"
+#include "auth_channel.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_connection_addr_utils.h"
@@ -46,7 +46,7 @@ static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MA
 typedef struct {
     ListNode node;
     AppInfo appInfo;
-    int64_t authId;
+    int32_t authId;
     ConnectOption connOpt;
     bool isConnOptValid;
 } AuthChannelInfo;
@@ -55,12 +55,12 @@ static SoftBusList *g_authChannelList = NULL;
 static int32_t g_channelId = 0;
 static IServerChannelCallBack *g_cb = NULL;
 
-static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const char *errMsg);
-static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, int32_t flag);
+static void TransPostAuthChannelErrMsg(int32_t authId, int32_t errcode, const char *errMsg);
+static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int32_t authId, int32_t flag);
 static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName);
 static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
-static void DelAuthChannelInfoByAuthId(int64_t authId);
+static void DelAuthChannelInfoByAuthId(int32_t authId);
 
 static int32_t GenerateAuthChannelId(void)
 {
@@ -92,7 +92,7 @@ static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *ds
     return SOFTBUS_ERR;
 }
 
-static int64_t GetAuthIdByChannelId(int32_t channelId)
+static int32_t GetAuthIdByChannelId(int32_t channelId)
 {
     if (g_authChannelList == NULL) {
         return SOFTBUS_ERR;
@@ -101,7 +101,7 @@ static int64_t GetAuthIdByChannelId(int32_t channelId)
     if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    int64_t authId = -1;
+    int32_t authId = -1;
     AuthChannelInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
         if (info->appInfo.myData.channelId == channelId) {
@@ -114,7 +114,7 @@ static int64_t GetAuthIdByChannelId(int32_t channelId)
     return authId;
 }
 
-static int32_t GetChannelInfoByAuthId(int64_t authId, AuthChannelInfo *dstInfo)
+static int32_t GetChannelInfoByAuthId(int32_t authId, AuthChannelInfo *dstInfo)
 {
     if (dstInfo == NULL || g_authChannelList == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -163,15 +163,14 @@ static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t channelId)
     return g_cb->OnChannelClosed(pkgName, channelId, CHANNEL_TYPE_AUTH);
 }
 
-static int32_t NotifyOnDataReceived(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
+static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
 {
-    (void)option;
     AuthChannelInfo channel;
     if (GetChannelInfoByAuthId(authId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     return g_cb->OnDataReceived(channel.appInfo.myData.pkgName, channel.appInfo.myData.channelId, CHANNEL_TYPE_AUTH,
-                                info->data, info->len, TRANS_SESSION_BYTES);
+        data, len, TRANS_SESSION_BYTES);
 }
 
 static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
@@ -194,7 +193,7 @@ static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t OnRequsetUpdateAuthChannel(int64_t authId, AppInfo *appInfo)
+static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -254,7 +253,7 @@ static bool CheckAuthChannelOfPkgInfoIsValid(const AppInfo *appInfo)
     return false;
 }
 
-static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t len)
+static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t len)
 {
     if (data == NULL || len <= 0) {
         return;
@@ -297,7 +296,7 @@ EXIT_ERR:
     return;
 }
 
-static void OnRecvAuthChannelReply(int64_t authId, const char *data, int32_t len)
+static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len)
 {
     if (data == NULL || len <= 0) {
         return;
@@ -325,48 +324,42 @@ EXIT_ERR:
     return;
 }
 
-static void AuthOnTransDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
+static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
 {
-    if (option == NULL || info == NULL) {
+    if (data == NULL || data->data == NULL) {
         return;
     }
-    switch (info->module) {
-        case MODULE_AUTH_MSG:
-            if (NotifyOnDataReceived(authId, option, info) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv MODULE_AUTH_MSG err");
-            }
-            break;
-        case MODULE_AUTH_CHANNEL:
-            if (info->flags == AUTH_CHANNEL_REQ) {
-                OnRecvAuthChannelRequest(authId, info->data, info->len);
-            } else if (info->flags == AUTH_CHANNEL_REPLY) {
-                OnRecvAuthChannelReply(authId, info->data, info->len);
-            } else {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel flags err");
-            }
-            break;
-        default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel recv err module data");
-            return;
+
+    if (data->flag == AUTH_CHANNEL_REQ) {
+        OnRecvAuthChannelRequest(authId, (const char *)data->data, data->len);
+    } else if (data->flag == AUTH_CHANNEL_REPLY) {
+        OnRecvAuthChannelReply(authId, (const char *)data->data, data->len);
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel flags err, authId=%d", authId);
     }
 }
 
-static void AuthOnCloseChannel(int64_t authId)
+static void OnAuthMsgDataRecv(int32_t authId, const AuthChannelData *data)
+{
+    if (data == NULL || data->data == NULL) {
+        return;
+    }
+    if (NotifyOnDataReceived(authId, data->data, data->len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv MODULE_AUTH_MSG err");
+    }
+}
+
+static void OnDisconnect(int32_t authId)
 {
     AuthChannelInfo dstInfo;
     if (GetChannelInfoByAuthId(authId, &dstInfo) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel already removed");
         return;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv auth channel disconnect event.");
     DelAuthChannelInfoByChanId(dstInfo.appInfo.myData.channelId);
-    AuthCloseChannel(authId);
     (void)NofifyCloseAuthChannel(dstInfo.appInfo.myData.pkgName, dstInfo.appInfo.myData.channelId);
 }
-
-static AuthTransCallback g_authTransCb = {
-    .onTransUdpDataRecv = AuthOnTransDataRecv,
-    .onAuthChannelClose = AuthOnCloseChannel,
-};
 
 static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo)
 {
@@ -442,7 +435,7 @@ static void DelAuthChannelInfoByChanId(int32_t channelId)
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
 }
 
-static void DelAuthChannelInfoByAuthId(int64_t authId)
+static void DelAuthChannelInfoByAuthId(int32_t authId)
 {
     if (g_authChannelList == NULL) {
         return;
@@ -486,7 +479,18 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
     if (cb == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (AuthTransDataRegCallback(TRANS_AUTH_CHANNEL, &g_authTransCb) != SOFTBUS_OK) {
+    AuthChannelListener channelListener = {
+        .onDataReceived = OnAuthChannelDataRecv,
+        .onDisconnected = OnDisconnect,
+    };
+    AuthChannelListener msgListener = {
+        .onDataReceived = OnAuthMsgDataRecv,
+        .onDisconnected = OnDisconnect,
+    };
+    if (RegAuthChannelListener(MODULE_AUTH_CHANNEL, &channelListener) != SOFTBUS_OK ||
+        RegAuthChannelListener(MODULE_AUTH_MSG, &msgListener) != SOFTBUS_OK) {
+        UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
+        UnregAuthChannelListener(MODULE_AUTH_MSG);
         return SOFTBUS_ERR;
     }
     if (g_authChannelList == NULL) {
@@ -503,12 +507,13 @@ int32_t TransAuthInit(IServerChannelCallBack *cb)
 
 void TransAuthDeinit(void)
 {
-    AuthTransDataUnRegCallback(TRANS_AUTH_CHANNEL);
+    UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
+    UnregAuthChannelListener(MODULE_AUTH_MSG);
     g_channelId = 1;
     g_cb = NULL;
 }
 
-static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, int32_t flag)
+static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int32_t authId, int32_t flag)
 {
     if (appInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransPostAuthChannelMsg invalid param");
@@ -529,19 +534,25 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int64_t authId, i
         cJSON_Delete(msg);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    AuthDataHead head = {
-        .dataType = DATA_TYPE_CONNECTION,
-        .authId = authId,
+    cJSON_Delete(msg);
+
+    AuthChannelData channelData = {
         .module = MODULE_AUTH_CHANNEL,
         .flag = flag,
+        .seq = 0,
+        .len = strlen(data) + 1,
+        .data = (const uint8_t *)data,
     };
-    cJSON_Delete(msg);
-    int32_t ret = AuthPostData(&head, (const uint8_t *)data, strlen(data));
+    if (AuthPostChannelData(authId, &channelData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post channel data fail");
+        cJSON_free(data);
+        return SOFTBUS_ERR;
+    }
     cJSON_free(data);
-    return ret;
+    return SOFTBUS_OK;
 }
 
-static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const char *errMsg)
+static void TransPostAuthChannelErrMsg(int32_t authId, int32_t errcode, const char *errMsg)
 {
     if (errMsg == NULL) {
         return;
@@ -552,13 +563,16 @@ static void TransPostAuthChannelErrMsg(int64_t authId, int32_t errcode, const ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAuthChannelErrorPack failed");
         return;
     }
-    AuthDataHead head = {
-        .dataType = DATA_TYPE_CONNECTION,
-        .authId = authId,
+    AuthChannelData channelData = {
         .module = MODULE_AUTH_CHANNEL,
         .flag = AUTH_CHANNEL_REPLY,
+        .seq = 0,
+        .len = strlen(cJsonStr) + 1,
+        .data = (const uint8_t *)cJsonStr,
     };
-    AuthPostData(&head, (const uint8_t *)cJsonStr, strlen(cJsonStr));
+    if (AuthPostChannelData(authId, &channelData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post channel data fail");
+    }
 }
 
 static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
@@ -585,7 +599,7 @@ EXIT_ERR:
 
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt, int32_t *channelId)
 {
-    if (connOpt == NULL || channelId == NULL) {
+    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP) {
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName);
@@ -598,7 +612,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     }
     *channelId = channel->appInfo.myData.channelId;
     channel->isConnOptValid = true;
-    int64_t authId = AuthOpenChannel(connOpt);
+    int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthOpenChannel failed");
         SoftBusFree(channel);
@@ -631,17 +645,13 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         if (channel->appInfo.myData.channelId != channelId) {
             continue;
         }
-        int32_t ret = AuthCloseChannel(channel->authId);
-        if (ret != SOFTBUS_OK) {
-            SoftBusMutexUnlock(&g_authChannelList->lock);
-            return ret;
-        }
+        AuthCloseChannel(channel->authId);
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);
-        return ret;
+        return SOFTBUS_OK;
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_ERR;
@@ -653,18 +663,24 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int64_t authId = GetAuthIdByChannelId(channelId);
+    int32_t authId = GetAuthIdByChannelId(channelId);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get AuthId failed");
         return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
     }
 
-    AuthDataHead head = {
-        .dataType = DATA_TYPE_CONNECTION,
-        .authId = authId,
+    AuthChannelData channelData = {
         .module = MODULE_AUTH_MSG,
+        .flag = 0,
+        .seq = 0,
+        .len = (uint32_t)len,
+        .data = (const uint8_t *)data,
     };
-    return AuthPostData(&head, (const uint8_t *)data, (uint32_t)len);
+    if (AuthPostChannelData(authId, &channelData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post channel data fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t TransNotifyAuthDataSuccess(int32_t channelId)
