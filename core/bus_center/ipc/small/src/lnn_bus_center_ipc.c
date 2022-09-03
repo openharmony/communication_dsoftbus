@@ -179,7 +179,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     DeviceInfo newDevice;
     (void)memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo));
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
-    return ClientOnRefreshDeviceFound(pkgName, (const)&newDevice, sizeof(DeviceInfo));
+    return ClientOnRefreshDeviceFound(pkgName, &newDevice, sizeof(DeviceInfo));
 }
 
 static int32_t PublishResultTransfer(int32_t retCode)

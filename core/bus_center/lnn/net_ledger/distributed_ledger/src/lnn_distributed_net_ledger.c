@@ -1311,7 +1311,8 @@ int32_t LnnInitDistributedLedger(void)
 
 const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryType discType)
 {
-    int32_t i, infoNum;
+    int32_t i;
+    int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     unsigned char shortUdidHash[SHORT_UDID_HASH_LEN + 1] = {0};
 
@@ -1320,21 +1321,24 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryTy
         return NULL;
     }
     if (info == NULL || infoNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "none online node");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "none online node");
+        if (info != NULL) {
+            SoftBusFree(info);
+        }
         return NULL;
     }
     for (i = 0; i < infoNum; ++i) {
         const NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
         if (nodeInfo == NULL || !LnnHasDiscoveryType(nodeInfo, discType)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "node online not have discType:%d", discType);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node online not have discType:%d", discType);
             continue;
         }
-        if (GenerateHexStringOfHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
+        if (GenerateStrHashAndConvertToHexString((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
             SHORT_UDID_HASH_LEN, shortUdidHash, SHORT_UDID_HASH_LEN + 1) != SOFTBUS_OK) {
             continue;
         }
         if (memcmp(shortUdidHash, recvUdidHash, SHORT_UDID_HASH_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "node shortUdidHash:%s is online", shortUdidHash);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node shortUdidHash:%s is online", shortUdidHash);
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -1343,32 +1347,30 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryTy
     return NULL;
 }
 
-static void RefreshDeviceDevIdInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void RefreshDeviceInfoDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    if (addtions->medium == BLE) {
-        const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash((const char*)device->devId, DISCOVERY_TYPE_BLE);
-        if (nodeInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "device udidhash:%s is not online", device->devId);
-            return;
-        }
-        if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy deviceUdid fail");
-            return;
-        }
+    if (addtions->medium != BLE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshDeviceInfoDevId parameter error");
+        return;
     }
-    return;
+    const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
+        return;
+    }
+    if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy deviceUdid fail");
+    }
 }
 
 static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     if (addtions->medium == COAP) {
-        device->isOnline = LnnGetOnlineStateById((const char*)device->devId, CATEGORY_UDID);
+        device->isOnline = LnnGetOnlineStateById(device->devId, CATEGORY_UDID);
     }
     if (addtions->medium == BLE) {
-        device->isOnline = ((LnnGetOnlineNodeByUdidHash((const char*)device->devId, DISCOVERY_TYPE_BLE)) != NULL) ? 
-            true : false;
+        device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE)) != NULL) ? true : false;
     }
-    return;
 }
 
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
@@ -1376,6 +1378,5 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    RefreshDeviceDevIdInfo(device, addtions);
-    return;
+    RefreshDeviceInfoDevId(device, addtions);
 }

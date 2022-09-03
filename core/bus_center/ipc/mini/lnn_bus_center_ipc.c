@@ -52,7 +52,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     DeviceInfo newDevice;
     (void)memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo));
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
-    LnnOnRefreshDeviceFound((const)&newDevice);
+    LnnOnRefreshDeviceFound(&newDevice);
     return SOFTBUS_OK;
 }
 
