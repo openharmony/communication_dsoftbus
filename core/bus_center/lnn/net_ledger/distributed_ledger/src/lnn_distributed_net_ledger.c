@@ -1347,12 +1347,13 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryTy
     return NULL;
 }
 
-static void RefreshDeviceInfoDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     if (addtions->medium != BLE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshDeviceInfoDevId parameter error");
         return;
     }
+
     const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
@@ -1378,5 +1379,6 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    RefreshDeviceInfoDevId(device, addtions);
+    RefreshDeviceInfoByDevId(device, addtions);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, online status=%d",addtions->medium, device->isOnline);
 }

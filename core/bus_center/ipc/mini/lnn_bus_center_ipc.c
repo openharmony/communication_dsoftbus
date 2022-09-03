@@ -50,7 +50,10 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     const InnerDeviceInfoAddtions *addtions)
 {
     DeviceInfo newDevice;
-    (void)memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo));
+    if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy new device info error");
+        return SOFTBUS_ERR;
+    }
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
     LnnOnRefreshDeviceFound(&newDevice);
     return SOFTBUS_OK;
