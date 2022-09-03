@@ -437,7 +437,7 @@ int32_t GenerateHexStringOfHash(const unsigned char *str, uint32_t len, unsigned
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    ret = SoftBusGenerateStrHash(str, strlen(str) + 1, hashResult);
+    ret = SoftBusGenerateStrHash(str, strlen((char *)str) + 1, hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
         return ret;
