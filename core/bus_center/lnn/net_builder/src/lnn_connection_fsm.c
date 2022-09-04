@@ -324,7 +324,7 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
-    AuthConnInfo authConn = {0};
+    AuthConnInfo authConn;
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
     if (CheckDeadFlag(connFsm, true)) {

@@ -48,7 +48,7 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 
 int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
 {
-    AuthConnInfo info = {0};
+    AuthConnInfo info;
     if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth server side fail %" PRId64, authId);
         return SOFTBUS_ERR;

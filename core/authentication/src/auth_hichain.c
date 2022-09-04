@@ -156,11 +156,13 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectNumberItem(msg, FIELD_GROUP_TYPE, &groupInfo->groupType)) {
+    int32_t groupType = 0;
+    if (!GetJsonObjectNumberItem(msg, FIELD_GROUP_TYPE, &groupType)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get FIELD_GROUP_TYPE fail.");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
+    groupInfo->groupType = (GroupType)groupType;
     cJSON_Delete(msg);
     return SOFTBUS_OK;
 }
