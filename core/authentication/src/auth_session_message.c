@@ -62,6 +62,7 @@
 #define P2P_MAC_ADDR "P2P_MAC_ADDR"
 #define P2P_ROLE "P2P_ROLE"
 #define TRANSPORT_PROTOCOL "TRANSPORT_PROTOCOL"
+#define BLE_OFFLINE_CODE "OFFLINE_CODE"
 #define BUS_V1 1
 #define BUS_V2 2
 
@@ -171,6 +172,13 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         }
     }
 
+    char offlineCodeResult[OFFLINE_CODE_LEN] = {0};
+    int32_t ret = ConvertBytesToHexString(offlineCodeResult, OFFLINE_CODE_LEN,
+        (const unsigned char *)info->offlineCode, OFFLINE_CODE_BYTE_SIZE);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bytes to str offline fail, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
     if (!AddStringToJsonObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !AddStringToJsonObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
         !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
@@ -180,7 +188,8 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
         !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
         !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
-        !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))) {
+        !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))  ||
+        !AddStringToJsonObject(json, BLE_OFFLINE_CODE, offlineCodeResult)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject fail.");
         return SOFTBUS_ERR;
     }
@@ -214,9 +223,16 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     (void)GetJsonObjectNumberItem(json, CONN_CAP, (int *)&info->netCapacity);
 
     info->isBleP2p = false;
+    char getOfflineCodeResult[OFFLINE_CODE_LEN] = {0};
     (void)GetJsonObjectBoolItem(json, BLE_P2P, &info->isBleP2p);
     (void)GetJsonObjectNumberItem(json, P2P_ROLE, &info->p2pInfo.p2pRole);
     (void)GetJsonObjectStringItem(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN);
+    (void)GetJsonObjectStringItem(json, BLE_OFFLINE_CODE, getOfflineCodeResult, OFFLINE_CODE_LEN);
+    int32_t ret = ConvertHexStringToBytes(info->offlineCode, OFFLINE_CODE_BYTE_SIZE,
+        (const char *)getOfflineCodeResult, OFFLINE_CODE_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert str to bytes offline fail, ret=%d", ret);
+    }
 }
 
 static int32_t PackBt(cJSON *json, const NodeInfo *info, SoftBusVersion version)

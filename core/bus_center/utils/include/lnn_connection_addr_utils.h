@@ -31,6 +31,7 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
 bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
+ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type);
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
 bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
 

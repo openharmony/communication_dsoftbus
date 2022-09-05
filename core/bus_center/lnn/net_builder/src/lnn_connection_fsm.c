@@ -360,6 +360,7 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
         (uint64_t)times.usec / HB_TIME_FACTOR;
     nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     nodeInfo->authSeqNum = connInfo->authId;
+    connInfo->nodeInfo->authSeq[LnnConvAddrTypeToDiscType(connInfo->addr.type)] = connInfo->authId;
     nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
     nodeInfo->relation[connInfo->addr.type]++;
     if (AuthGetDeviceUuid(connInfo->authId, nodeInfo->uuid, sizeof(nodeInfo->uuid)) != SOFTBUS_OK ||
