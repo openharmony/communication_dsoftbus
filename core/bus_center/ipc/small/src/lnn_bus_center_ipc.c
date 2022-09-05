@@ -176,11 +176,13 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
-    (void)addtions;
-    if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
+    DeviceInfo newDevice;
+    if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy new device info error");
+        return SOFTBUS_ERR;
     }
-    return ClientOnRefreshDeviceFound(pkgName, device, sizeof(DeviceInfo));
+    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
+    return ClientOnRefreshDeviceFound(pkgName, &newDevice, sizeof(DeviceInfo));
 }
 
 static int32_t PublishResultTransfer(int32_t retCode)

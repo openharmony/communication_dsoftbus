@@ -421,6 +421,8 @@ typedef struct {
     DeviceType devType;
     /** Device name. Its maximum length is specified by {@link DISC_MAX_DEVICE_NAME_LEN}. */
     char devName[DISC_MAX_DEVICE_NAME_LEN];
+    /** Device Online Status **/
+    bool isOnline;
     /** Number of available connections */
     unsigned int addrNum;
     /** Connection information. For details, see {@link ConnectAddr}. */
