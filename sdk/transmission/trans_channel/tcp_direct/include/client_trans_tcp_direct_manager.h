@@ -43,7 +43,7 @@ typedef struct {
 } TcpDirectChannelInfo;
 
 int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
-int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId);
+int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 int32_t TransTdcCheckSeq(int32_t fd, int32_t seq);
 void TransTdcCloseChannel(int32_t channelId);

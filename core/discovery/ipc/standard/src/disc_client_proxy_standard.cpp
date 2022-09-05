@@ -28,7 +28,7 @@ int32_t DiscClientProxy::OnChannelOpened(const char *sessionName, const ChannelI
     return SOFTBUS_OK;
 }
 
-int32_t DiscClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType)
+int32_t DiscClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     return SOFTBUS_OK;
 }
