@@ -13,6 +13,15 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+lnn_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/net_builder"
+enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                       [
+                         "$native_source_path",
+                         "$lnn_dep_dir",
+                       ],
+                       "value")
+
 if (dsoftbus_feature_lnn_net) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
@@ -22,6 +31,9 @@ if (dsoftbus_feature_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_topo_manager.c",
   ]
+  if (!enhanced) {
+    bus_center_builder_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c" ]
+  }
 } else {
   bus_center_builder_src = [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c" ]
 }
@@ -31,3 +43,7 @@ bus_center_builder_inc = [
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 bus_center_builder_deps = []
+
+if (dsoftbus_feature_lnn_net && enhanced) {
+  bus_center_builder_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_offline:fast_offline" ]
+}

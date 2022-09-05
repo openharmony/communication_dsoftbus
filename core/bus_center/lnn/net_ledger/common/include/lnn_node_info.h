@@ -28,6 +28,8 @@ extern "C" {
 #endif
 #define WIFI_SSID_LEN 32
 #define WIFI_MAC_LEN 6
+#define OFFLINE_CODE_LEN 32
+#define OFFLINE_CODE_BYTE_SIZE 4
 
 #define LNN_RELATION_MASK 0x03
 
@@ -87,6 +89,8 @@ typedef struct {
     P2pInfo p2pInfo;
     uint64_t supportedProtocols;
     char accountHash[SHA_256_HASH_LEN];
+    unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
+    int64_t authSeq[DISCOVERY_TYPE_COUNT];
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

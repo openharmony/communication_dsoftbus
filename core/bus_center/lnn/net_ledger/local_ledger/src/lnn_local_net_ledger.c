@@ -25,6 +25,7 @@
 #include "bus_center_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -90,6 +91,20 @@ static int32_t LlGetNetworkId(void *buf, uint32_t len)
     }
     if (strncpy_s(buf, len, info->networkId, strlen(info->networkId)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetOffLineCode(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "buf of offlinecode is null!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(buf, len, info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s offlinecode ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -462,6 +477,23 @@ static int32_t InitLocalVersionType(NodeInfo *info)
     return SOFTBUS_OK;
 }
 
+static int32_t InitOfflineCode(NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info of offlinecode is null!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memset_s(info->offlineCode, OFFLINE_CODE_BYTE_SIZE, 0, OFFLINE_CODE_BYTE_SIZE) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "offlineCode memset_s failed");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateRandomArray(info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "generate offlinecode error.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t InitConnectInfo(ConnectInfo *info)
 {
     if (info == NULL) {
@@ -498,6 +530,11 @@ static int32_t UpdateLocalDeviceName(const void *name)
 static int32_t UpdateLocalNetworkId(const void *id)
 {
     return ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id);
+}
+
+static int32_t LlUpdateLocalOffLineCode(const void *id)
+{
+    return ModifyId((char *)g_localNetLedger.localInfo.offlineCode, OFFLINE_CODE_BYTE_SIZE, (char *)id);
 }
 
 static int32_t UpdateLocalUuid(const void *id)
@@ -685,6 +722,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_NODE_ADDR, SHORT_ADDRESS_MAX_LEN, LlGetNodeAddr, LlUpdateNodeAddr},
     {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
+    {STRING_KEY_OFFLINE_CODE, OFFLINE_CODE_LEN, LlGetOffLineCode, LlUpdateLocalOffLineCode},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
@@ -913,6 +951,9 @@ int32_t LnnInitLocalLedger(void)
     }
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
+    if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
+        goto EXIT;
+    }
     if (InitLocalDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local device info error!");
         goto EXIT;

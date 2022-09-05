@@ -133,6 +133,21 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
     }
 }
 
+ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
+{
+    switch (type) {
+        case DISCOVERY_TYPE_WIFI:
+            return CONNECTION_ADDR_WLAN;
+        case DISCOVERY_TYPE_BLE:
+            return CONNECTION_ADDR_BLE;
+        case DISCOVERY_TYPE_BR:
+            return CONNECTION_ADDR_BR;
+        default:
+            break;
+    }
+    return CONNECTION_ADDR_MAX;
+}
+
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     if (addr == NULL || connInfo == NULL) {

@@ -136,6 +136,7 @@ typedef enum {
     NODE_KEY_DEV_NAME,   /**< Device name in string format */
     NODE_KEY_NETWORK_CAPABILITY,   /**< Network capability in number format */
     NODE_KEY_NETWORK_TYPE,        /**< Network type in number format */
+    NODE_KEY_BLE_OFFLINE_CODE,   /**< Ble offlinecode in string format */
 } NodeDeviceInfoKey;
 
 /**
