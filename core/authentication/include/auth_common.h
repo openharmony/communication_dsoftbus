@@ -75,8 +75,8 @@ if (expression) { \
 #define MASK_UINT64_L32 0x00000000FFFFFFFF
 #define MASK_UINT64_H32 0xFFFFFFFF00000000
 
-#define TO_INT32(value) ((int32_t)((value) & INT32_MASK))
-#define TO_UINT32(value) ((uint32_t)((value) & INT32_MASK))
+#define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
+#define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
 
 /* Auth handler */
 typedef enum {
