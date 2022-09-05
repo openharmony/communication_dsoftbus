@@ -15,6 +15,7 @@
 
 #include "trans_udp_negotiation_exchange.h"
 
+#include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -25,6 +26,18 @@
 typedef enum {
     CODE_EXCHANGE_UDP_INFO = 6,
 } CodeType;
+
+int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
+{
+    if ((msg == NULL) && (errCode == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_ERR;
+    }
+    if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
@@ -172,6 +185,21 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "UID", appInfo->myData.uid);
     (void)AddNumberToJsonObject(msg, "PID", appInfo->myData.pid);
     (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", appInfo->businessType);
+
+    return SOFTBUS_OK;
+}
+
+int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply error info in negotiation.");
+    if (msg == NULL || errDesc == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_ERR;
+    }
+
+    (void)AddNumberToJsonObject(msg, CODE, CODE_EXCHANGE_UDP_INFO);
+    (void)AddStringToJsonObject(msg, ERR_DESC, errDesc);
+    (void)AddNumberToJsonObject(msg, ERR_CODE, errCode);
 
     return SOFTBUS_OK;
 }
