@@ -124,7 +124,7 @@ static void NotifyDisconnected(int32_t fd)
     NotifyChannelDisconnected(fd);
 }
 
-static int32_t ModuleToDataType(int32_t module)
+static uint32_t ModuleToDataType(int32_t module)
 {
     switch (module) {
         case MODULE_TRUST_ENGINE:
@@ -188,7 +188,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
             SoftBusFree(data);
             return NULL;
         }
-        offset += recvLen;
+        offset += (uint32_t)recvLen;
     }
     return data;
 }
