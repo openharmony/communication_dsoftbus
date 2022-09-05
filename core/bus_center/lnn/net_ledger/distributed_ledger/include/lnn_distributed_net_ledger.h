@@ -28,7 +28,7 @@ extern "C" {
 
 #define INT_TO_STR_SIZE 12
 #define INVALID_CONNECTION_CODE_VALUE -1
-
+#define SHORT_UDID_HASH_LEN 8
 typedef struct {
     InfoKey key;
     int32_t (*getInfo)(const char *netWorkId, void *info, uint32_t len);
@@ -69,7 +69,9 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
-
+const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryType discType);
+void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
+    const InnerDeviceInfoAddtions *addtions);
 #ifdef __cplusplus
 }
 #endif
