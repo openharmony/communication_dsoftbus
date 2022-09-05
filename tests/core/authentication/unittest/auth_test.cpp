@@ -57,7 +57,7 @@ void AuthTest::TearDown()
 * @tc.name: AUTH_COMMON_Test_001
 * @tc.desc: auth commone test
 * @tc.type: FUNC
-* @tc.require: AR000FK6J4
+* @tc.require: I5OAEP
 */
 HWTEST_F(AuthTest, AUTH_COMMON_Test_001, TestSize.Level0)
 {
