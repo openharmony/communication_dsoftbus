@@ -39,20 +39,20 @@ public:
 
 void LnnTopoManagerTest::SetUpTestCase()
 {
+    LnnInitTopoManager();
 }
 
 void LnnTopoManagerTest::TearDownTestCase()
 {
+    LnnDeinitTopoManager();
 }
 
 void LnnTopoManagerTest::SetUp()
 {
-    LnnInitTopoManager();
 }
 
 void LnnTopoManagerTest::TearDown()
 {
-    LnnDeinitTopoManager();
 }
 
 /*

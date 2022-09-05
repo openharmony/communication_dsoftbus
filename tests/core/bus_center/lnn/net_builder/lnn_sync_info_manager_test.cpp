@@ -38,21 +38,21 @@ public:
 
 void LnnSyncInfoManagerTest::SetUpTestCase()
 {
-}
-
-void LnnSyncInfoManagerTest::TearDownTestCase()
-{
-}
-
-void LnnSyncInfoManagerTest::SetUp()
-{
     int32_t ret = LnnInitSyncInfoManager();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-void LnnSyncInfoManagerTest::TearDown()
+void LnnSyncInfoManagerTest::TearDownTestCase()
 {
     LnnDeinitSyncInfoManager();
+}
+
+void LnnSyncInfoManagerTest::SetUp()
+{
+}
+
+void LnnSyncInfoManagerTest::TearDown()
+{
 }
 
 void Handler(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
@@ -88,8 +88,10 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 {
     int32_t ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
+    ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
