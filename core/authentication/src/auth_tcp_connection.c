@@ -327,7 +327,6 @@ void StopSocketListening(void)
     if (StopBaseListener(AUTH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "StopBaseListener fail.");
     }
-    DestroyBaseListener(AUTH);
 }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
