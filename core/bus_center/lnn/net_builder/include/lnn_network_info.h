@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_SETTINGDATA_EVENT_MONITOR_H
-#define LNN_SETTINGDATA_EVENT_MONITOR_H
+#ifndef LNN_NETWORK_INFO_H
+#define LNN_NETWORK_INFO_H
 
 #include <stdint.h>
 
@@ -22,12 +22,11 @@
 extern "C" {
 #endif
 
-typedef void (*LnnDeviceNameHandler)(void);
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len);
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
-int32_t LnnInitDeviceNameMonitorImpl(void);
+void LnnDeinitNetworkInfo(void);
+int32_t LnnInitNetworkInfo(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_SETTINGDATA_EVENT_MONITOR_H */
+
+#endif /* LNN_NETWORK_INFO_H */

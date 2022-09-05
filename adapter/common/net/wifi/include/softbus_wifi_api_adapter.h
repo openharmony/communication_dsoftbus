@@ -28,6 +28,12 @@ extern "C" {
 #define WIFI_MAX_SCAN_HOTSPOT_LIMIT 128
 #define MAX_CALLBACK_NUM 5
 
+typedef enum {
+    BAND_UNKNOWN,
+    BAND_24G,
+    BAND_5G,
+} SoftBusBand;
+
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
     unsigned char bssid[WIFI_MAC_LEN];
@@ -64,6 +70,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb);
 int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size);
 int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb);
 int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num);
+SoftBusBand SoftBusGetLinkBand(void);
 
 #ifdef __cplusplus
 }

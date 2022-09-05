@@ -21,6 +21,8 @@ if (dsoftbus_feature_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_topo_manager.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
   ]
 } else {
   bus_center_builder_src = [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c" ]
@@ -28,6 +30,7 @@ if (dsoftbus_feature_lnn_net) {
 bus_center_builder_inc = [
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 bus_center_builder_deps = []
