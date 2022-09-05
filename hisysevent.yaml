@@ -92,8 +92,8 @@ TRANS_OPEN_SESSION_TIME_COST:
   MIN_TIME_COST: {type: UINT32, desc: the min time comsuming of open session }
   AVE_TIME_COST: {type: UINT32, desc: the average time comsuming of open session }
   TIMES_UNDER_500MS: {type: UINT32, desc: the times unders 500ms of open session }
-  TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms~1s of open session }
-  TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s~2s of open session }
+  TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms to 1s of open session }
+  TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s to 2s of open session }
   TIMES_ABOVE_2S: {type: UINT32, desc: the times above 2s of open session }
 
 TRANS_FAULT:
@@ -145,21 +145,21 @@ DFILE_ACCEPT_SOCKET_EVT:
 
 FILLP_LINK_EVT:
   __BASE: {type: FAULT, level: MINOR, desc: fillp link disconnect}
-  sockIdx: {type: UINT32, desc: fillp socket index}
-  linkEvtType: {type: UINT8, desc: fillp link event type}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  LINK_EVT_TYPE: {type: UINT8, desc: fillp link event type}
 
 FILLP_PKT_EVT:
   __BASE: {type: STATISTIC, level: MINOR, desc: fillp data package event}
-  sockIdx: {type: UINT32, desc: fillp socket index}
-  pktEvtType: {type: UINT8, desc: fillp package event type}
-  dropCnt: {type: UINT32, desc: fillp package dropcnt}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  PKT_EVT_TYPE: {type: UINT8, desc: fillp package event type}
+  DROP_CNT: {type: UINT32, desc: fillp package dropcnt}
 
 FILLP_SOCK_QOS_EVT:
   __BASE: {type: STATISTIC, level: MINOR, desc: fillp socket Qos event}
-  sockIdx: {type: UINT32, desc: fillp socket index}
-  rtt: {type: UINT32, desc: fillp socket rtt}
-  recvPktLoss: {type: UINT32, desc: fillp socket recv package loss}
-  recvRateBps: {type: UINT64, desc: fillp socket recv rate}
-  sendPktLoss: {type: UINT32, desc: fillp socket send package loss}
-  sendRateBps: {type: UINT64, desc: fillp socket send rate}
-  jitter: {type: UINT64, desc: fillp socket jitter}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  RTT: {type: UINT32, desc: fillp socket rtt}
+  RECV_PKT_LOSS: {type: UINT32, desc: fillp socket recv package loss}
+  RECV_RATE_BPS: {type: UINT64, desc: fillp socket recv rate}
+  SEND_PKT_LOSS: {type: UINT32, desc: fillp socket send package loss}
+  SEND_RATE_BPS: {type: UINT64, desc: fillp socket send rate}
+  JITTER: {type: UINT64, desc: fillp socket jitter}
