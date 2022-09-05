@@ -1353,7 +1353,6 @@ static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAd
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshDeviceInfoDevId parameter error");
         return;
     }
-
     const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
