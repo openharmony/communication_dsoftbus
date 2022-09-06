@@ -13,6 +13,34 @@
  * limitations under the License.
  */
 
+/**
+ * @addtogroup Softbus
+ * @{
+ *
+ * @brief Provides high-speed, secure communication between devices.
+ *
+ * This module implements unified distributed communication capability management between nearby devices, and provides
+ * link-independent device discovery and transmission interfaces to support service publishing and data transmission.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+
+/**
+ * @file discovery_service.h
+ *
+ * @brief Declares functions and constants for the discovery service of the Intelligent Soft Bus.
+ *
+ * The functions are used to perform
+ * the following operations: \n
+ * <ul>
+ * <li>Publishing service and stop publishing service functions</li>
+ * <li>Start the discovery function and stop the discover function</li>
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+
 #ifndef DISCOVERY_SERVICE_H
 #define DISCOVERY_SERVICE_H
 
@@ -101,6 +129,7 @@ typedef struct {
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service is successfully published.
+ * @deprecated This interface is switchced to interface PublishLNN, for details, see {@link PublishLNN}.
  */
 int PublishService(const char *pkgName, const PublishInfo *info, const IPublishCallback *cb);
 
@@ -113,6 +142,7 @@ int PublishService(const char *pkgName, const PublishInfo *info, const IPublishC
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service is successfully unpublished.
+ * @deprecated This interface is switchced to interface StopPublishLNN, for details, see {@link StopPublishLNN}.
  */
 int UnPublishService(const char *pkgName, int publishId);
 
@@ -130,6 +160,7 @@ int UnPublishService(const char *pkgName, int publishId);
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service subscription is successful.
+ * @deprecated This interface is switchced to interface RefreshLNN, for details, see {@link RefreshLNN}.
  */
 int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscoveryCallback *cb);
 
@@ -141,6 +172,7 @@ int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscov
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service unsubscription is successful.
+ * @deprecated This interface is switchced to interface StopRefreshLNN, for details, see {@link StopRefreshLNN}.
  */
 int StopDiscovery(const char *pkgName, int subscribeId);
 
