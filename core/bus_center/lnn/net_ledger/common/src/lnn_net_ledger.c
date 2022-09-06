@@ -74,6 +74,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)info, infoLen);
         case NODE_KEY_DEV_NAME:
             return LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, (char *)info, infoLen);
+        case NODE_KEY_BLE_OFFLINE_CODE:
+            return LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
             return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
@@ -101,6 +103,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, (char *)info, infoLen);
         case NODE_KEY_DEV_NAME:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_NAME, (char *)info, infoLen);
+        case NODE_KEY_BLE_OFFLINE_CODE:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
         case NODE_KEY_NETWORK_TYPE:

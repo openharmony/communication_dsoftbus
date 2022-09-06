@@ -23,11 +23,13 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_fast_offline.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_info.h"
@@ -47,6 +49,7 @@
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 #define JSON_KEY_MASTER_UDID "MasterUdid"
 #define JSON_KEY_MASTER_WEIGHT "MasterWeight"
+#define NOT_TRUSTED_DEVICE_MSG_DELAY 5000
 
 typedef enum {
     LNN_MSG_ID_ELECT,
@@ -1203,32 +1206,75 @@ static void OnDeviceDisconnect(int64_t authId)
     }
 }
 
-static void OnDeviceNotTrusted(const char *peerUdid)
+static void OnLnnProcessNotTrustedMsgDelay(void *para)
 {
-    char *udid = NULL;
-    uint32_t udidLen;
-
-    if (peerUdid == NULL) {
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid info para");
         return;
     }
-    udidLen = strlen(peerUdid) + 1;
+    int64_t authSeq[DISCOVERY_TYPE_COUNT] = {0};
+    NotTrustedDelayInfo *info = (NotTrustedDelayInfo *)para;
+    if (LnnGetAllAuthSeq(info->udid, authSeq, DISCOVERY_TYPE_COUNT) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]LnnGetAllAuthSeq fail");
+        SoftBusFree(info);
+        return;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnConvertDlId(info->udid, CATEGORY_UDID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline] convert networkId fail");
+        SoftBusFree(info);
+        return;
+    }
+    DiscoveryType type;
+    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "OnLnnProcessNotTrustedMsgDelay: authSeq %" PRId64 "-> %" PRId64,  info->authSeq[type], authSeq[type]);
+    
+        if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[offline] LnnRequestLeaveSpecific type:%d", type);
+            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(type));
+            continue;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "after 5s authSeq=%" PRId64, authSeq[type]);
+    }
+    SoftBusFree(info);
+}
+
+static void OnDeviceNotTrusted(const char *peerUdid)
+{
+    if (peerUdid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer udid is NULL");
+        return;
+    }
+    uint32_t udidLen = strlen(peerUdid) + 1;
     if (udidLen > UDID_BUF_LEN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not trusted udid is too long");
         return;
     }
-    udid = (char *)SoftBusMalloc(udidLen);
-    if (udid == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc udid fail");
+    NotTrustedDelayInfo *info  = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc NotTrustedDelayInfo fail");
         return;
     }
-    if (strcpy_s(udid, udidLen, peerUdid) != EOK) {
+    if (LnnGetAllAuthSeq(peerUdid, info->authSeq, DISCOVERY_TYPE_COUNT) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]LnnGetAllAuthSeq fail");
+        SoftBusFree(info);
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, peerUdid) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy udid fail");
-        SoftBusFree(udid);
+        SoftBusFree(info);
         return;
     }
-    if (PostMessageToHandler(MSG_TYPE_DEVICE_NOT_TRUSTED, udid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post DEVICE_NOT_TRUSTED MSG fail");
-        SoftBusFree(udid);
+    if (LnnSendNotTrustedInfo(info, DISCOVERY_TYPE_COUNT) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]LnnSendNotTrustedInfo fail");
+        SoftBusFree(info);
+        return;
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnProcessNotTrustedMsgDelay,
+        info, NOT_TRUSTED_DEVICE_MSG_DELAY) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async not trusted msg delay fail");
+        SoftBusFree(info);
     }
 }
 

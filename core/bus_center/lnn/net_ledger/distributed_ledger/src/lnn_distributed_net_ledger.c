@@ -22,6 +22,7 @@
 #include <securec.h>
 
 #include "lnn_connection_addr_utils.h"
+#include "lnn_fast_offline.h"
 #include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
@@ -385,6 +386,17 @@ static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetDeviceOfflineCode(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s offlinecode ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetDeviceUdid(const char *networkId, void *buf, uint32_t len)
 {
     const char *udid = NULL;
@@ -657,6 +669,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_P2P_MAC, DlGetP2pMac},
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
+    {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
     {NUM_KEY_PROXY_PORT, DlGetProxyPort},
@@ -755,6 +768,21 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
     }
 }
 
+static void UpdateAuthSeq(const NodeInfo *oldInfo, NodeInfo *info)
+{
+    DiscoveryType type;
+    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+        if (LnnHasDiscoveryType(info, type)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "UpdateAuthSeq: authSeq=%" PRId64 ", type=%d.", info->authSeq[type], type);
+            continue;
+        }
+        info->authSeq[type] = oldInfo->authSeq[type];
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "UpdateAuthSeq: authSeq=%" PRId64 ", type=%d.", info->authSeq[type], type);
+    }
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -784,6 +812,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "addOnlineNode find online node");
+        UpdateAuthSeq(oldInfo, info);
         isOffline = false;
         isChanged = IsNetworkIdChanged(info, oldInfo);
         oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
@@ -840,6 +869,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         return REPORT_NONE;
     }
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
+    if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && (type == CONNECTION_ADDR_WLAN ||
+        type == CONNECTION_ADDR_ETH)) {
+        LnnBleFastOfflineOnceBegin();
+    }
     if (info->discoveryType != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
             info->discoveryType);
@@ -1220,6 +1253,36 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num)
+{
+    if (!IsValidString(udid, ID_MAX_LEN) || authSeq == NULL || num != DISCOVERY_TYPE_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]udid is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(udid, CATEGORY_UDID);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline] get node info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(authSeq, sizeof(int64_t) * num, nodeInfo->authSeq, sizeof(nodeInfo->authSeq)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[offline]memcpy_s authSeq fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    DiscoveryType type;
+    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[offline]LnnGetAllAuthSeq: authSeq=%" PRId64 ", type=%d.", authSeq[type], type);
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
