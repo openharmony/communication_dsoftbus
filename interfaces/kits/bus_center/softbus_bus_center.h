@@ -14,7 +14,7 @@
  */
 
 /**
- * @addtogroup Softbus
+ * @addtogroup SoftBus
  * @{
  *
  * @brief Provides high-speed, secure communication between devices.
@@ -25,6 +25,7 @@
  * @since 1.0
  * @version 1.0
  */
+/** @} */
 
 /**
  * @file softbus_bus_center.h
