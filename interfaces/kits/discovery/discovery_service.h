@@ -130,7 +130,7 @@ typedef struct {
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service is successfully published.
- * @deprecated This interface is switchced to interface PublishLNN, for details, see {@link PublishLNN}.
+ * @deprecated Please use PublishLNN instead, for details, see {@link PublishLNN}.
  */
 int PublishService(const char *pkgName, const PublishInfo *info, const IPublishCallback *cb);
 
@@ -143,7 +143,7 @@ int PublishService(const char *pkgName, const PublishInfo *info, const IPublishC
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service is successfully unpublished.
- * @deprecated This interface is switchced to interface StopPublishLNN, for details, see {@link StopPublishLNN}.
+ * @deprecated Please use StopPublishLNN instead, for details, see {@link StopPublishLNN}.
  */
 int UnPublishService(const char *pkgName, int publishId);
 
@@ -161,7 +161,7 @@ int UnPublishService(const char *pkgName, int publishId);
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service subscription is successful.
- * @deprecated This interface is switchced to interface RefreshLNN, for details, see {@link RefreshLNN}.
+ * @deprecated Please use RefreshLNN instead, for details, see {@link RefreshLNN}.
  */
 int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscoveryCallback *cb);
 
@@ -173,7 +173,7 @@ int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscov
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service unsubscription is successful.
- * @deprecated This interface is switchced to interface StopRefreshLNN, for details, see {@link StopRefreshLNN}.
+ * @deprecated Please use StopRefreshLNN instead, for details, see {@link StopRefreshLNN}.
  */
 int StopDiscovery(const char *pkgName, int subscribeId);
 
