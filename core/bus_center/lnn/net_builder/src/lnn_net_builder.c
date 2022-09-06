@@ -25,10 +25,12 @@
 #include "common_list.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
+#include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_weight.h"
 #include "lnn_p2p_info.h"
@@ -1387,21 +1389,6 @@ static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId,
     }
 }
 
-static void OnReceiveConnCapabilityMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
-{
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv conn capability msg, type:%d, len:%u", type, len);
-    if (type != LNN_INFO_TYPE_CAPABILITY || len != LNN_CONN_CAPABILITY_MSG_LEN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid conn capability msg.");
-        return;
-    }
-    uint64_t connCap = *((uint64_t *)msg);
-    if (LnnSetDLConnCapability(networkId, connCap)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update conn capability succ.");
-}
-
 static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size)
 {
     (void)type;
@@ -1484,13 +1471,17 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitNetworkInfo() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitNetworkInfo fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitDevicename() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitDeviceName fail");
+        return SOFTBUS_ERR;
+    }
     NetBuilderConfigInit();
     if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth verify listener fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveConnCapabilityMsg) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register conn capability msg fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg) != SOFTBUS_OK) {
