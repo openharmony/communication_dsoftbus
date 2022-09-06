@@ -16,6 +16,17 @@
 #ifndef P2PLINK_LNN_SYNC_H
 #define P2PLINK_LNN_SYNC_H
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 void P2pLinkLnnSync(void);
 
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_LNN_SYNC_H */

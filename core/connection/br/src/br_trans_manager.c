@@ -130,7 +130,7 @@ int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *s
     if (brConnInfo == NULL) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrTransSend");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrTransSend, %d", brConnInfo->connectionId);
     int32_t socketFd = brConnInfo->socketFd;
     if (socketFd == -1) {
         return SOFTBUS_ERR;
@@ -142,10 +142,10 @@ int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *s
     while (tempLen > 0) {
         (void)pthread_mutex_lock(&brConnInfo->lock);
         while (brConnInfo->conGestState == BT_RFCOM_CONGEST_ON &&
-            brConnInfo->state == BR_CONNECTION_STATE_CONNECTED) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait congest");
+            (brConnInfo->state == BR_CONNECTION_STATE_CONNECTED || brConnInfo->state == BR_CONNECTION_STATE_CLOSING)) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait congest condition, %d", brConnInfo->connectionId);
             pthread_cond_wait(&brConnInfo->congestCond, &brConnInfo->lock);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "free congest");
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "free congest condition, %d", brConnInfo->connectionId);
             break;
         }
         (void)pthread_mutex_unlock(&brConnInfo->lock);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ void PrintOptionInfo(int type, const StreamAttr &value)
 std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtpInstance();
 
 std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
-std::map<int, std::shared_ptr<IStreamSocketListener>> VtpStreamSocket::g_streamReceiverMap;
+std::map<int, std::shared_ptr<VtpStreamSocket>> VtpStreamSocket::g_streamSocketMap;
 
 static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
     const Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
@@ -92,14 +92,14 @@ void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
     g_streamSocketLockMap.emplace(std::pair<int, std::mutex &>(fd, streamsocketlock));
 }
 
-void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<IStreamSocketListener> streamreceiver)
+void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamSocket> streamreceiver)
 {
-    if (!g_streamReceiverMap.empty() && g_streamReceiverMap.find(fd) != g_streamReceiverMap.end()) {
+    if (!g_streamSocketMap.empty() && g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamreceiver for fd = %d already exists", fd);
         return;
     }
 
-    g_streamReceiverMap.emplace(std::pair<int, std::shared_ptr<IStreamSocketListener>>(fd, streamreceiver));
+    g_streamSocketMap.emplace(std::pair<int, std::shared_ptr<VtpStreamSocket>>(fd, streamreceiver));
 }
 
 void VtpStreamSocket::RemoveStreamSocketLock(int fd)
@@ -116,8 +116,8 @@ void VtpStreamSocket::RemoveStreamSocketLock(int fd)
 
 void VtpStreamSocket::RemoveStreamSocketListener(int fd)
 {
-    if (g_streamReceiverMap.find(fd) != g_streamReceiverMap.end()) {
-        g_streamReceiverMap.erase(fd);
+    if (g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
+        g_streamSocketMap.erase(fd);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Remove streamreceiver for fd = %d success", fd);
     } else {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Streamreceiver for fd = %d not exist in the map", fd);
@@ -189,7 +189,7 @@ std::shared_ptr<VtpStreamSocket> VtpStreamSocket::GetSelf()
     return shared_from_this();
 }
 
-int VtpStreamSocket::HandleFrameStats(int fd, const FtEventCbkInfo *info)
+int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
 {
     StreamSendStats stats = {};
     if (memcpy_s(&stats, sizeof(StreamSendStats), &info->info.frameSendStats,
@@ -197,68 +197,105 @@ int VtpStreamSocket::HandleFrameStats(int fd, const FtEventCbkInfo *info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamStats info memcpy fail");
         return -1;
     }
-    auto itLock = g_streamSocketLockMap.find(fd);
-    if (itLock != g_streamSocketLockMap.end()) {
-        auto itListener = g_streamReceiverMap.find(fd);
-        if (itListener != g_streamReceiverMap.end()) {
-            std::thread([itListener, stats, &itLock]() {
-                std::lock_guard<std::mutex> guard(itLock->second);
-                itListener->second->OnFrameStats(&stats);
-            }).detach();
+
+    auto itListener = g_streamSocketMap.find(fd);
+    if (itListener != g_streamSocketMap.end()) {
+        if (itListener->second->streamReceiver_ != nullptr) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnFrameStats enter");
+            itListener->second->streamReceiver_->OnFrameStats(&stats);
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamReceiver for fd = %d is empty in the map", fd);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamReceiver_ is nullptr");
         }
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamSocketLock for fd = %d is empty in the map", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamReceiver for fd = %d is empty in the map", fd);
     }
     return 0;
 }
 
+int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
+{
+    TrafficStats stats;
+    (void)memset_s(&stats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
+    if (memcpy_s(&stats.stats, sizeof(stats.stats), info->info.trafficData.stats,
+        sizeof(info->info.trafficData.stats)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RipplePolicy info memcpy fail");
+        return -1;
+    }
+    auto itListener = g_streamSocketMap.find(fd);
+    if (itListener != g_streamSocketMap.end()) {
+        if (itListener->second->streamReceiver_ != nullptr) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnRippleStats enter");
+            itListener->second->streamReceiver_->OnRippleStats(&stats);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnRippleStats streamReceiver_ is nullptr");
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "OnRippleStats streamReceiver for fd = %d is empty in the map", fd);
+    }
+    return 0;
+}
+
+#ifdef FILLP_SUPPORT_BW_DET
+void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *metricList)
+{
+    if (info == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stats info is nullptr");
+        return;
+    }
+    if (info->evt == FT_EVT_BW_DET) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Fillp bandwidth information of socket(%d) is returned", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Changed amount of current available bandwidth is: %d", info->info.bwInfo.bwStat);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Current bandwidth for receiving data is: %d kbps", info->info.bwInfo.rate);
+        metricList->type = BANDWIDTH_ESTIMATE_VALUE;
+        metricList->info.bandwidthInfo.trend = info->info.bwInfo.bwStat;
+        metricList->info.bandwidthInfo.rate = info->info.bwInfo.rate;
+    }
+    if (info->evt == FT_EVT_JITTER_DET) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Fillp connection quality information of socket(%d) is returned", fd);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Predeicted network condition is: %d", info->info.jitterInfo.jitterLevel);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "[Metric Return]: Current available receiving buffer is: %d ms", info->info.jitterInfo.bufferTime);
+        metricList->type = JITTER_DETECTION_VALUE;
+        metricList->info.jitterInfo.jitterLevel = info->info.jitterInfo.jitterLevel;
+        metricList->info.jitterInfo.bufferTime = info->info.jitterInfo.bufferTime;
+    }
+}
+#endif
+
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
-int VtpStreamSocket::FillpBwAndJitterStatistics(int fd, const FtEventCbkInfo *info)
+int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stats info is nullptr");
         return -1;
     }
     if (info->evt == FT_EVT_FRAME_STATS) {
-        return HandleFrameStats(fd, info);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv fillp frame stats");
+        return HandleFillpFrameStats(fd, info);
+    } else if (info->evt == FT_EVT_TRAFFIC_DATA) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv fillp traffic data");
+        return HandleRipplePolicy(fd, info);
     }
-#if (defined(FILLP_SUPPORT_BW_DET) && defined(FILLP_SUPPORT_BW_DET))
+#ifdef FILLP_SUPPORT_BW_DET
     if (info->evt == FT_EVT_BW_DET || info->evt == FT_EVT_JITTER_DET) {
         int32_t eventId = TRANS_STREAM_QUALITY_EVENT;
         int32_t tvCount = 1;
         QosTv metricList = {};
 
-        if (info->evt == FT_EVT_BW_DET) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Fillp bandwidth information of socket(%d) is returned", fd);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Changed amount of current available bandwidth is: %d", info->info.bwInfo.bwStat);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Current bandwidth for receiving data is: %d kbps", info->info.bwInfo.rate);
-            metricList.type = BANDWIDTH_ESTIMATE_VALUE;
-            metricList.info.bandwidthInfo.trend = info->info.bwInfo.bwStat;
-            metricList.info.bandwidthInfo.rate = info->info.bwInfo.rate;
-        }
-        if (info->evt == FT_EVT_JITTER_DET) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Fillp connection quality information of socket(%d) is returned", fd);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Predeicted network condition is: %d", info->info.jitterInfo.jitterLevel);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "[Metric Return]: Current available receiving buffer is: %d ms", info->info.jitterInfo.bufferTime);
-            metricList.type = JITTER_DETECTION_VALUE;
-            metricList.info.jitterInfo.jitterLevel = info->info.jitterInfo.jitterLevel;
-            metricList.info.jitterInfo.bufferTime = info->info.jitterInfo.bufferTime;
-        }
+        FillSupportDet(fd, info, &metricList);
         metricList.info.wifiChannelInfo = {};
         metricList.info.frameStatusInfo = {};
 
         auto itLock = g_streamSocketLockMap.find(fd);
         if (itLock != g_streamSocketLockMap.end()) {
-            auto itListener = g_streamReceiverMap.find(fd);
-            if (itListener != g_streamReceiverMap.end()) {
+            auto itListener = g_streamSocketMap.find(fd);
+            if (itListener != g_streamSocketMap.end()) {
                 std::thread([itListener, eventId, tvCount, metricList, &itLock]() {
                     std::lock_guard<std::mutex> guard(itLock->second);
                     itListener->second->OnQosEvent(eventId, tvCount, &metricList);
@@ -587,7 +624,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         return false;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "send out..., streamType:%d, data size:%zd", streamType_, len);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send out..., streamType:%d, data size:%zd", streamType_, len);
     return true;
 }
 
@@ -772,16 +809,24 @@ bool VtpStreamSocket::EnableJitterDetectionAlgo(int streamFd) const
 void VtpStreamSocket::RegisterMetricCallback(bool isServer)
 {
     VtpStreamSocket::AddStreamSocketLock(streamFd_, streamSocketLock_);
-    VtpStreamSocket::AddStreamSocketListener(streamFd_, streamReceiver_);
-#if (defined(FILLP_SUPPORT_BW_DET))
-    int regStatisticsRet = FtApiRegEventCallbackFunc(streamFd_, FillpBwAndJitterStatistics);
+    auto self = this->GetSelf();
+    VtpStreamSocket::AddStreamSocketListener(streamFd_, self);
+    int regStatisticsRet = FtApiRegEventCallbackFunc(FILLP_CONFIG_ALL_SOCKET, FillpStatistics);
+    int value = 1;
+    auto err = FtSetSockOpt(streamFd_, IPPROTO_FILLP, FILLP_SOCK_TRAFFIC, &value, sizeof(value));
+    if (err < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to set socket binding to device");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "FtSetSockOpt start success");
     if (isServer) {
         if (regStatisticsRet == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
                 "Success to register the stream callback function at server side with Fd = %d", streamFd_);
         } else {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "Fail to register the stream callback function at server side with Fd = %d", streamFd_);
+                "Fail to register the stream callback function at server side with Fd = %d, errcode:%d",
+                streamFd_, regStatisticsRet);
         }
     } else {
         if (regStatisticsRet == 0) {
@@ -789,10 +834,10 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
                 "Success to register the stream callback function at client side with Fd = %d", streamFd_);
         } else {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "Fail to register the stream callback function at client side with Fd = %d", streamFd_);
+                "Fail to register the stream callback function at client side with Fd = %d, errcode:%d",
+                streamFd_, regStatisticsRet);
         }
     }
-#endif
 }
 
 bool VtpStreamSocket::Accept()

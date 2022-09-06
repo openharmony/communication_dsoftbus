@@ -30,17 +30,5 @@ disc_coap_inc = [
   "$dsoftbus_root_path/core/common/include",
   "//third_party/cJSON",
 ]
-disc_coap_deps = []
-
-if (defined(ohos_lite)) {
-  if (ohos_kernel_type == "liteos_m") {
-    disc_coap_deps +=
-        [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]
-  } else {
-    disc_coap_deps +=
-        [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]
-  }
-} else {
-  disc_coap_deps +=
-      [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]
-}
+disc_coap_deps =
+    [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]

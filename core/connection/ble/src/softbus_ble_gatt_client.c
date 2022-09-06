@@ -839,8 +839,7 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int32_t BleGattcDump(int fd)
 {
-    char addr[UDID_BUF_LEN];
-    (void)memset_s(addr, sizeof(addr), 0, sizeof(addr));
+    char addr[UDID_BUF_LEN] = {0};
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;

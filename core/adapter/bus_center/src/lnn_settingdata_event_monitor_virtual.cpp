@@ -36,3 +36,15 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     (void)len;
     return SOFTBUS_OK;
 }
+
+bool LnnIsDefaultOhosAccount(const uint8_t *accountHash, uint32_t len)
+{
+    (void)accountHash;
+    (void)len;
+    return true;
+}
+
+int32_t LnnInitDeviceNameMonitorImpl(void)
+{
+    return SOFTBUS_OK;
+}

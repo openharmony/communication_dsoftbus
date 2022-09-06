@@ -28,6 +28,9 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 
+void LnnHbOnAuthGroupCreated(const char *groupId);
+void LnnHbOnAuthGroupDeleted(const char *groupId);
+
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
 

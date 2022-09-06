@@ -25,6 +25,7 @@ extern "C" {
 typedef void (*LnnDeviceNameHandler)(void);
 int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len);
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler);
+int32_t LnnInitDeviceNameMonitorImpl(void);
 
 #ifdef __cplusplus
 }

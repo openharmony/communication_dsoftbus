@@ -52,6 +52,23 @@ void ReleaseUdpChannelLock(void)
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
 }
 
+static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
+{
+    UdpChannelInfo *udpChannel = NULL;
+    UdpChannelInfo *nextUdpChannel = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, udpChannelList, UdpChannelInfo, node) {
+        if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel time out, notify open failed.");
+            (void)NotifyUdpChannelOpenFailed(&(udpChannel->info));
+        } else if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close udp channel time out, notify close.");
+            (void)NotifyUdpChannelClosed(&(udpChannel->info));
+        }
+        ListDelete(&(udpChannel->node));
+        SoftBusFree(udpChannel);
+    }
+}
+
 static void TransUdpTimerProc(void)
 {
     if (g_udpChannelMgr == NULL) {
@@ -61,6 +78,10 @@ static void TransUdpTimerProc(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
+    
+    ListNode udpTmpChannelList;
+    ListInit(&udpTmpChannelList);
+    
     UdpChannelInfo *udpChannel = NULL;
     UdpChannelInfo *nextUdpChannel = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, &g_udpChannelMgr->list, UdpChannelInfo, node) {
@@ -69,20 +90,16 @@ static void TransUdpTimerProc(void)
             if (udpChannel->timeOut < MAX_WAIT_CONNECT_TIME) {
                 continue;
             }
-            if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel time out, notify open failed.");
-                (void)NotifyUdpChannelOpenFailed(&(udpChannel->info));
-            } else if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close udp channel time out, notify close.");
-                (void)NotifyUdpChannelClosed(&(udpChannel->info));
-            }
             ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
             ListDelete(&(udpChannel->node));
-            SoftBusFree(udpChannel);
             g_udpChannelMgr->cnt--;
+
+            ListAdd(&udpTmpChannelList, &(udpChannel->node));
         }
     }
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
+
+    NotifyTimeOutUdpChannel(&udpTmpChannelList);
 }
 
 int32_t TransUdpChannelMgrInit(void)

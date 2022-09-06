@@ -16,6 +16,18 @@
 #define SOFTBUS_HIDUMPER_NSTACK_H
 #include "softbus_hidumper.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t SoftBusNStackHiDumperInit(void);
 void SoftBusNStackHiDumperDeInit(void);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_HIDUMPER_NSTACK_H */

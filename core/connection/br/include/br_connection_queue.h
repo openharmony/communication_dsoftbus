@@ -47,4 +47,4 @@ bool IsBrQueueEmpty(void);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* BR_CONNECTION_QUEUE_H */

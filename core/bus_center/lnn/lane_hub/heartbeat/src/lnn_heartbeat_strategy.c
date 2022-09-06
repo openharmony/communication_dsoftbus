@@ -324,8 +324,6 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send process send once fail");
         return SOFTBUS_ERR;
     }
-    SoftBusFree(msgPara);
-    msgPara = NULL;
     return SOFTBUS_OK;
 }
 
@@ -343,7 +341,7 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         return SOFTBUS_ERR;
     }
     loopDelayMillis = (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR;
-    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, obj, loopDelayMillis) != SOFTBUS_OK) {
+    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, loopDelayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send loop msg fail");
         return SOFTBUS_ERR;
     }
@@ -364,8 +362,6 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     ret = LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V0);
     if (ret == SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB adjustable period strategy is end");
-        SoftBusFree(msgPara);
-        msgPara = NULL;
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {
@@ -377,7 +373,7 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         return SOFTBUS_ERR;
     }
     uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR;
-    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, obj, delayMillis) != SOFTBUS_OK) {
+    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, (const LnnProcessSendOnceMsgPara *)obj, delayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB adjustable send loop msg fail");
         return SOFTBUS_ERR;
     }
@@ -642,29 +638,38 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
 
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
-    LnnProcessSendOnceMsgPara *msgPara = NULL;
-    
-    msgPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
-    if (msgPara == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat malloc msgPara fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    msgPara->hbType = hbType;
-    msgPara->isRelay = isRelay;
-    msgPara->strategyType = strategyType;
-    if (g_hbFsm->state == STATE_HB_NONE_INDEX) {
-        LnnPostTransStateMsgToHbFsm(g_hbFsm, true);
-    }
-    if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, msgPara, 0) != SOFTBUS_OK) {
+    LnnProcessSendOnceMsgPara msgPara = {
+        .hbType = hbType,
+        .isRelay = isRelay,
+        .strategyType = strategyType,
+    };
+    if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, &msgPara, 0) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat fail, type:%d", hbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t LnnStopHbByType(LnnHeartbeatType type)
+int32_t LnnStartHeartbeat(void)
 {
-    return LnnPostStopMsgToHbFsm(g_hbFsm, type);
+    if (g_hbFsm->state != STATE_HB_NONE_INDEX) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB heartbeat process has started!");
+        return SOFTBUS_OK;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
+    return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_AS_MASTER_NODE);
+}
+
+int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
+{
+    if (LnnPostStopMsgToHbFsm(g_hbFsm, type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat by type post msg fail");
+        return SOFTBUS_ERR;
+    }
+    if (type == (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_TCP_FLUSH)) {
+        return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_IN_NONE_STATE);
+    }
+    return SOFTBUS_OK;
 }
 
 static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
@@ -710,7 +715,7 @@ bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
 
 int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
 {
-    return LnnPostTransStateMsgToHbFsm(g_hbFsm, isMasterNode);
+    return LnnPostTransStateMsgToHbFsm(g_hbFsm, isMasterNode ? EVENT_HB_AS_MASTER_NODE : EVENT_HB_AS_NORMAL_NODE);
 }
 
 int32_t LnnHbStrategyInit(void)

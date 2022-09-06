@@ -66,3 +66,8 @@ int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
     (void)num;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return BAND_UNKNOWN;
+}

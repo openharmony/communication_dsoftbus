@@ -27,7 +27,7 @@
 
 #define SOFTBUS_SCAN_CLIENT_ID 0
 #define ADV_MAX_NUM 4
-#define SCAN_MAX_NUM 2
+#define SCAN_MAX_NUM 3
 
 typedef struct {
     int advId;

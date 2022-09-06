@@ -21,6 +21,12 @@
 
 #include "p2plink_type.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 typedef struct {
     void (*onConnected)(int32_t requestId, const char *myIp, const char *peerIp);
     void (*onConnectFailed)(int32_t requestId, int32_t reason);
@@ -66,4 +72,10 @@ int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info);
 
 int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char *peerMac, int32_t macLen);
 int32_t P2pLinkQueryDevIsOnline(const char *peerMac);
-#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_INTERFACE_H */

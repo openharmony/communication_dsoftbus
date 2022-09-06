@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,6 +144,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
+    memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -179,6 +180,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -791,6 +793,31 @@ int32_t SoftBusServerStub::StreamStatsInner(MessageParcel &data, MessageParcel &
     int32_t retReply = StreamStats(channelId, channelType, stats);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StreamStatsInner write reply fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RippleStatsInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "rippleStatsInner read channelId fail");
+        return SOFTBUS_ERR;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "rippleStatsInner read channelType fail");
+        return SOFTBUS_ERR;
+    }
+    TrafficStats *stats = (TrafficStats *)data.ReadRawData(sizeof(TrafficStats));
+    if (stats == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read rippleStats fail, stats is nullptr");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = RippleStats(channelId, channelType, stats);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "rippleStatsInner write reply fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

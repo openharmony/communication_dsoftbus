@@ -521,17 +521,11 @@ void DiscNstackxDeinit(void)
 
 static int32_t NstackxLocalDevInfoDump(int fd)
 {
-    char deviceId[NSTACKX_MAX_DEVICE_ID_LEN];
-    char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
-    char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN];
-    char ip[NSTACKX_MAX_IP_STRING_LEN];
-    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
-    (void)memset_s(deviceId, sizeof(deviceId), 0, sizeof(deviceId));
-    (void)memset_s(btMacAddr, sizeof(btMacAddr), 0, sizeof(btMacAddr));
-    (void)memset_s(wifiMacAddr, sizeof(wifiMacAddr), 0, sizeof(wifiMacAddr));
-    (void)memset_s(ip, sizeof(ip), 0, sizeof(ip));
-    (void)memset_s(networkIpAddr, sizeof(networkIpAddr), 0, sizeof(networkIpAddr));
-
+    char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
+    char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
+    char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
+    char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
     SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
     SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
     DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER, deviceId);

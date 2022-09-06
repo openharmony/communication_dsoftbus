@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,11 +106,22 @@ static void OnFrameStats(int32_t channelId, const StreamSendStats *data)
     }
 }
 
+static void OnRippleStats(int32_t channelId, const TrafficStats *data)
+{
+    int32_t ret = ServerIpcRippleStats(channelId, CHANNEL_TYPE_UDP, data);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify ripple stats to server, channelId:%d", channelId);
+    if ((ret != SOFTBUS_OK) && (ret != SOFTBUS_NOT_IMPLEMENT)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ipc to server fail, reason:%d", ret);
+        return;
+    }
+}
+
 static IStreamListener g_streamCallcb = {
     .OnStatusChange = SetStreamChannelStatus,
     .OnStreamReceived = OnStreamReceived,
     .OnQosEvent = OnQosEvent,
     .OnFrameStats = OnFrameStats,
+    .OnRippleStats = OnRippleStats,
 };
 
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)

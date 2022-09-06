@@ -138,8 +138,11 @@ static int32_t PostBytesInner(uint32_t connectionId, int32_t module, const char 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "PostBytesInner connectionId=%u,len=%u,module=%d", connectionId, len, module);
 
-    if (!IsBrDeviceReady(connectionId)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready", connectionId);
+    // control message need be sent when closing
+    int32_t state = GetBrConnStateByConnectionId(connectionId);
+    if (state != BR_CONNECTION_STATE_CLOSING && state != BR_CONNECTION_STATE_CONNECTED) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready, state: %d",
+            connectionId, state);
         SoftBusFree((void *)data);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
     }
@@ -384,6 +387,8 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
         ListNode *itNext = NULL;
         LIST_FOR_EACH_SAFE(it, itNext, &pendingList) {
             RequestInfo *request = LIST_ENTRY(it, RequestInfo, node);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connection %u closed, restore connect request: %u",
+                connectionId, request->requestId);
             ConnConnectDevice(&option, request->requestId, &request->callback);
             ListDelete(&request->node);
             SoftBusFree(request);
@@ -611,8 +616,10 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
 
-    if (!IsBrDeviceReady(connectionId)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready", connectionId);
+    int32_t state = GetBrConnStateByConnectionId(connectionId);
+    if (state != BR_CONNECTION_STATE_CONNECTED) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready, state: %d",
+            connectionId, state);
         SoftBusFree((void *)data);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
     }

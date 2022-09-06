@@ -96,6 +96,20 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
     return true;
 }
 
+bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const string, int64_t *target)
+{
+    if (json == NULL || string == NULL || target == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsNumber(item)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
+        return false;
+    }
+    *target = (int64_t)item->valuedouble;
+    return true;
+}
+
 bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {

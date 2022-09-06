@@ -86,19 +86,17 @@ void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
-    char uidArr[MAX_ID_LEN];
-    char pidArr[MAX_ID_LEN];
-    char uidStr[MAX_ID_LEN];
-    char pidStr[MAX_ID_LEN];
-    (void)memset_s(uidArr, sizeof(uidArr), 0, sizeof(uidArr));
-    (void)memset_s(pidArr, sizeof(pidArr), 0, sizeof(pidArr));
-    (void)memset_s(uidStr, sizeof(uidStr), 0, sizeof(uidStr));
-    (void)memset_s(pidStr, sizeof(pidStr), 0, sizeof(pidStr));
-    (void)sprintf_s(uidArr, sizeof(uidArr), "%d", uid);
-    (void)sprintf_s(pidArr, sizeof(pidArr), "%d", pid);
+    char uidArr[MAX_ID_LEN] = {0};
+    char pidArr[MAX_ID_LEN] = {0};
+    char uidStr[MAX_ID_LEN] = {0};
+    char pidStr[MAX_ID_LEN] = {0};
+    if (sprintf_s(uidArr, MAX_ID_LEN, "%d", uid) < 0 || sprintf_s(pidArr, MAX_ID_LEN, "%d", pid) < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set uidArr or pidArr failed");
+        return;
+    }
 
-    DataMasking(uidArr, sizeof(uidArr), ID_DELIMITER, uidStr);
-    DataMasking(pidArr, sizeof(pidArr), ID_DELIMITER, pidStr);
+    DataMasking(uidArr, MAX_ID_LEN, ID_DELIMITER, uidStr);
+    DataMasking(pidArr, MAX_ID_LEN, ID_DELIMITER, pidStr);
     SOFTBUS_DPRINTF(fd, "PkgName               : %s\n", pkgName);
     SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", sessionName);
     SOFTBUS_DPRINTF(fd, "PID                   : %s\n", uidStr);
@@ -107,12 +105,9 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
-    char deviceId[DEVICE_ID_SIZE_MAX];
-    char srcAddr[MAX_SOCKET_ADDR_LEN];
-    char dstAddr[MAX_SOCKET_ADDR_LEN];
-    (void)memset_s(deviceId, sizeof(deviceId), 0, sizeof(deviceId));
-    (void)memset_s(srcAddr, sizeof(srcAddr), 0, sizeof(srcAddr));
-    (void)memset_s(dstAddr, sizeof(dstAddr), 0, sizeof(dstAddr));
+    char deviceId[DEVICE_ID_SIZE_MAX] = {0};
+    char srcAddr[MAX_SOCKET_ADDR_LEN] = {0};
+    char dstAddr[MAX_SOCKET_ADDR_LEN] = {0};
 
     DataMasking(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, ID_DELIMITER, deviceId);
     DataMasking(appInfo->myData.addr, MAX_SOCKET_ADDR_LEN, IP_DELIMITER, srcAddr);

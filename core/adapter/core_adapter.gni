@@ -29,8 +29,10 @@ declare_args() {
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
-  bus_center_core_adapter_inc =
-      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+  bus_center_core_adapter_inc = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+  ]
 
   bus_center_core_adapter_deps = []
 } else {
@@ -49,6 +51,7 @@ if (defined(ohos_lite)) {
 
     bus_center_core_adapter_inc = [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
+      "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb/include",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability/include",

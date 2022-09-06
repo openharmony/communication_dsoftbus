@@ -1233,7 +1233,8 @@ void BleConnOnBtStateChanged(int listenerId, int state)
 }
 
 static SoftBusBtStateListener g_bleConnStateListener = {
-    .OnBtStateChanged = BleConnOnBtStateChanged
+    .OnBtStateChanged = BleConnOnBtStateChanged,
+    .OnBtAclStateChanged = NULL,
 };
 
 static SoftBusBleConnCalback g_bleClientConnCalback = {
@@ -1294,14 +1295,10 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 
 static int32_t BleConnectionDump(int fd)
 {
-    char addr[BT_ADDR_LEN];
-    char bleMac[BT_MAC_LEN];
-    char deviceIdHash[UDID_HASH_LEN];
-    char peerDevId[UDID_BUF_LEN];
-    (void)memset_s(addr, sizeof(addr), 0, sizeof(addr));
-    (void)memset_s(bleMac, sizeof(bleMac), 0, sizeof(bleMac));
-    (void)memset_s(deviceIdHash, sizeof(deviceIdHash), 0, sizeof(deviceIdHash));
-    (void)memset_s(peerDevId, sizeof(peerDevId), 0, sizeof(peerDevId));
+    char addr[BT_ADDR_LEN] = {0};
+    char bleMac[BT_MAC_LEN] = {0};
+    char deviceIdHash[UDID_HASH_LEN] = {0};
+    char peerDevId[UDID_BUF_LEN] = {0};
     if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;

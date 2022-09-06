@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,43 +13,31 @@
  * limitations under the License.
  */
 
-#include "auth_socket.h"
+#include "lnn_fast_offline.h"
 
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
-int32_t AuthOpenTcpChannel(const ConnectOption *option, bool isNonBlock)
+int32_t LnnInitFastOffline(void)
 {
-    (void)option;
-    (void)isNonBlock;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn fast offline");
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitFastOffline(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Deinit virtual lnn fast offline");
+}
+
+int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num)
+{
+    (void)info;
+    (void)num;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t HandleIpVerifyDevice(AuthManager *auth, const ConnectOption *option)
+int32_t LnnBleFastOfflineOnceBegin(void)
 {
-    (void)auth;
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-void AuthCloseTcpFd(int32_t fd)
-{
-    (void)fd;
-}
-
-int32_t  OpenAuthServer(void)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-void CloseAuthServer(void)
-{
-}
-
-int32_t AuthSocketSendData(AuthManager *auth, const AuthDataHead *head, const uint8_t *data, uint32_t len)
-{
-    (void)auth;
-    (void)head;
-    (void)data;
-    (void)len;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnBleFastOfflineOnceBegin virtual ok!");
     return SOFTBUS_NOT_IMPLEMENT;
 }

@@ -35,7 +35,7 @@
 
 #define HANDSHAKE_TIMEOUT 19
 
-static void OnSesssionOpenFailProc(const SessionConn *node)
+static void OnSessionOpenFailProc(const SessionConn *node)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
         node->channelId, node->serverSide, node->status);
@@ -53,55 +53,101 @@ static void OnSesssionOpenFailProc(const SessionConn *node)
     }
 }
 
+static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
+{
+    if (tdcChannelList == NULL) {
+        return;
+    }
+
+    SessionConn *item = NULL;
+    SessionConn *nextItem = NULL;
+    
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
+        OnSessionOpenFailProc(item);
+        TransSrvDelDataBufNode(item->channelId);
+
+        SoftBusFree(item);
+    }
+}
+
 static void TransTdcTimerProc(void)
 {
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
+    SoftBusList *sessionList = GetSessionConnList();
+    if (sessionList == NULL) {
+        return;
+    }
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    SoftBusList *sessionList = GetSessionConnList();
-    if (sessionList == NULL) {
-        ReleaseSessonConnLock();
-        return;
-    }
+
+    ListNode tempTdcChannelList;
+    ListInit(&tempTdcChannelList);
+    
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         item->timeout++;
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
             if (item->timeout >= HANDSHAKE_TIMEOUT) {
-                OnSesssionOpenFailProc(item);
                 ListDelete(&item->node);
                 sessionList->cnt--;
-                SoftBusFree(item);
+
+                ListAdd(&tempTdcChannelList, &item->node);
             }
         }
     }
     ReleaseSessonConnLock();
+
+    NotifyTdcChannelTimeOut(&tempTdcChannelList);
 }
+
+static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
+{
+    if (tdcChannelList == NULL) {
+        return;
+    }
+
+    SessionConn *item = NULL;
+    SessionConn *nextItem = NULL;
+    
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
+        OnSessionOpenFailProc(item);
+        TransSrvDelDataBufNode(item->channelId);
+        
+        SoftBusFree(item);
+    }
+}
+
 
 void TransTdcStopSessionProc(ListenerModule listenMod)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc");
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
+
+    SoftBusList *sessionList = GetSessionConnList();
+    if (sessionList == NULL) {
+        return;
+    }
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    SoftBusList *sessionList = GetSessionConnList();
-    if (sessionList == NULL) {
-        ReleaseSessonConnLock();
-        return;
-    }
+    
+    ListNode tempTdcChannelList;
+    ListInit(&tempTdcChannelList);
+    
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (listenMod != item->listenMod) {
             continue;
         }
-        OnSesssionOpenFailProc(item);
         ListDelete(&item->node);
         sessionList->cnt--;
-        SoftBusFree(item);
+
+        ListAdd(&tempTdcChannelList, &item->node);
     }
     ReleaseSessonConnLock();
+
+    NotifyTdcChannelStopProc(&tempTdcChannelList);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc end");
 }
 

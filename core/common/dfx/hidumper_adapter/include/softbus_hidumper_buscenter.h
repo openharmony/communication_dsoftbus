@@ -17,7 +17,20 @@
 #define SOFTBUS_HIDUMPER_BUSCENTER_H
 
 #include "softbus_hidumper.h"
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 int32_t SoftBusHiDumperBusCenterInit(void);
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperBusCenterDeInit(void);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_HIDUMPER_BUSCENTER_H */

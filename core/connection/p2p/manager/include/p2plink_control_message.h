@@ -20,9 +20,20 @@
 #include "cJSON.h"
 #include "p2plink_device.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root);
 int32_t P2pLinkSendHandshake(P2pLinkAuthId *chan, char *myMac, char *myIp);
 int32_t P2pLinkSendDisConnect(const P2pLinkAuthId *chan, const char *myMac);
 int32_t P2pLinkSendReuse(P2pLinkAuthId *chan, char *myMac);
 void P2pLinkonAuthChannelClose(int64_t authId);
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* P2PLINK_CONTROL_MESSAGE_H */

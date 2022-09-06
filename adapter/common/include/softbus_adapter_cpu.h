@@ -27,7 +27,7 @@ extern "C" {
 #define MB() BARRIER()
 #define WMB() BARRIER()
 #define RMB() BARRIER()
-#elif defined __ICCARM__
+#elif defined(__ICCARM__) || defined(__x86_64__)
 #define MB()
 #define WMB()
 #define RMB()
