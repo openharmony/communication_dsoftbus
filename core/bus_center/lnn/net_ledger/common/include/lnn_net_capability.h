@@ -25,6 +25,7 @@ extern "C" {
 
 uint32_t LnnGetNetCapabilty(void);
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type);
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type);
 
 #ifdef __cplusplus
 }

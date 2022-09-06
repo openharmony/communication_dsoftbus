@@ -325,3 +325,21 @@ int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
     }
     return SOFTBUS_OK;
 }
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    WifiLinkedInfo result;
+    GetLinkedInfo(&result);
+    if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand failed.");
+        return BAND_UNKNOWN;
+    }
+    if (result.band == 1) {
+        return BAND_24G;
+    } else if (result.band == 2) {
+        return BAND_5G;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand success.");
+        return BAND_UNKNOWN;
+    }
+}
