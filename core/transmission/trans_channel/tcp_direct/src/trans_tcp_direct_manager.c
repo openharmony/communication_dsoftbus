@@ -35,12 +35,12 @@
 
 #define HANDSHAKE_TIMEOUT 19
 
-static void OnSessionOpenFailProc(const SessionConn *node)
+static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
         node->channelId, node->serverSide, node->status);
     if (node->serverSide == false) {
-        if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->channelId) != SOFTBUS_OK) {
+        if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->channelId, errCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify channel open fail err");
         }
     }
@@ -63,7 +63,7 @@ static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
     SessionConn *nextItem = NULL;
     
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
-        OnSessionOpenFailProc(item);
+        OnSessionOpenFailProc(item, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         TransSrvDelDataBufNode(item->channelId);
 
         SoftBusFree(item);
@@ -111,7 +111,7 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
     SessionConn *nextItem = NULL;
     
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
-        OnSessionOpenFailProc(item);
+        OnSessionOpenFailProc(item, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
         
         SoftBusFree(item);
