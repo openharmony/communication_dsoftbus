@@ -59,7 +59,7 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, udpChannelList, UdpChannelInfo, node) {
         if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel time out, notify open failed.");
-            (void)NotifyUdpChannelOpenFailed(&(udpChannel->info));
+            (void)NotifyUdpChannelOpenFailed(&(udpChannel->info), SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         } else if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close udp channel time out, notify close.");
             (void)NotifyUdpChannelClosed(&(udpChannel->info));

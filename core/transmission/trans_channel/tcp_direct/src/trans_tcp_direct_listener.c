@@ -203,7 +203,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     if (ret != SOFTBUS_OK) {
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
-        NotifyChannelOpenFailed(channelId);
+        NotifyChannelOpenFailed(channelId, ret);
     } else {
         CloseTcpDirectFd(fd);
     }
@@ -249,7 +249,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start verify session fail.");
             DelTrigger(conn->listenMod, fd, READ_TRIGGER);
             ConnShutdownSocket(fd);
-            NotifyChannelOpenFailed(conn->channelId);
+            NotifyChannelOpenFailed(conn->channelId, ret);
             TransDelSessionConnById(conn->channelId);
             TransSrvDelDataBufNode(conn->channelId);
         }

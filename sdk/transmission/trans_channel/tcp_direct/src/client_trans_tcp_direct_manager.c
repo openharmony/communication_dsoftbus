@@ -237,9 +237,9 @@ void TransTdcManagerDeinit(void)
     PendingDeinit(PENDING_TYPE_DIRECT);
 }
 
-int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId)
+int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
-    return ClientTransTdcOnSessionOpenFailed(channelId);
+    return ClientTransTdcOnSessionOpenFailed(channelId, errCode);
 }
 
 int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len)

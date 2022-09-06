@@ -60,7 +60,7 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
 void ClientTransUdpMgrDeinit(void);
 
 int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort);
-int32_t TransOnUdpChannelOpenFailed(int32_t channelId);
+int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode);
 int32_t TransOnUdpChannelClosed(int32_t channelId);
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);
 

@@ -163,9 +163,9 @@ int32_t SoftBusClientStub::OnChannelOpened(const char *sessionName, const Channe
     return TransOnChannelOpened(sessionName, info);
 }
 
-int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType)
+int32_t SoftBusClientStub::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    return TransOnChannelOpenFailed(channelId, channelType);
+    return TransOnChannelOpenFailed(channelId, channelType, errCode);
 }
 
 int32_t SoftBusClientStub::OnChannelLinkDown(const char *networkId, int32_t routeType)
@@ -286,7 +286,13 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
         return SOFTBUS_ERR;
     }
 
-    int ret = OnChannelOpenFailed(channelId, channelType);
+    int32_t errCode;
+    if (!data.ReadInt32(errCode)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    
+    int ret = OnChannelOpenFailed(channelId, channelType, errCode);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner write reply failed!");

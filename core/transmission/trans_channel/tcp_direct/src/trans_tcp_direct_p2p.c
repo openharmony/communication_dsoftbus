@@ -85,7 +85,7 @@ static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
     SessionConn *nextItem = NULL;
     
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, sessionConnList, SessionConn, node) {
-        (void)NotifyChannelOpenFailed(item->channelId);
+        (void)NotifyChannelOpenFailed(item->channelId, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
 
         SoftBusFree(item);
@@ -146,10 +146,10 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
     return SOFTBUS_OK;
 }
 
-static void OnChannelOpenFail(int32_t channelId)
+static void OnChannelOpenFail(int32_t channelId, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFail: channelId=%d", channelId);
-    NotifyChannelOpenFailed(channelId);
+    NotifyChannelOpenFailed(channelId, errCode);
     TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFail end");
@@ -222,7 +222,7 @@ static void OnAuthConnOpened(uint32_t requestId, int64_t authId)
     return;
 EXIT_ERR:
     if (channelId != INVALID_CHANNEL_ID) {
-        OnChannelOpenFail(channelId);
+        OnChannelOpenFail(channelId, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
     }
 }
 
@@ -243,7 +243,7 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     channelId = conn->channelId;
     ReleaseSessonConnLock();
 
-    OnChannelOpenFail(channelId);
+    OnChannelOpenFail(channelId, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnAuthConnOpenFailed end");
     return;
 }
@@ -398,7 +398,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 EXIT_ERR:
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pReply fail");
     if (channelId != INVALID_CHANNEL_ID) {
-        OnChannelOpenFail(channelId);
+        OnChannelOpenFail(channelId, SOFTBUS_TRANS_HANDSHAKE_ERROR);
     }
     return SOFTBUS_ERR;
 }

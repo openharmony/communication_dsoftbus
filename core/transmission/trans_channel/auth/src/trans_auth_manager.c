@@ -153,9 +153,9 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &channelInfo);
 }
 
-static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t channelId)
+static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t channelId, int32_t errCode)
 {
-    return g_cb->OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_AUTH);
+    return g_cb->OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_AUTH, errCode);
 }
 
 static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t channelId)
@@ -320,7 +320,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
 EXIT_ERR:
     AuthCloseChannel(authId);
     DelAuthChannelInfoByChanId(info.appInfo.myData.channelId);
-    (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.channelId);
+    (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.channelId, ret);
     return;
 }
 
