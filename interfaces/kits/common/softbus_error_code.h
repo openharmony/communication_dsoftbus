@@ -13,6 +13,29 @@
  * limitations under the License.
  */
 
+/**
+ * @addtogroup SoftBus
+ * @{
+ *
+ * @brief Provides high-speed, secure communication between devices.
+ *
+ * This module implements unified distributed communication capability management between nearby devices, and provides
+ * link-independent device discovery and transmission interfaces to support service publishing and data transmission.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+/** @} */
+
+/**
+ * @file softbus_error_code.h
+ *
+ * @brief Declares error code
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+
 #ifndef SOFTBUS_ERROR_CODE_H
 #define SOFTBUS_ERROR_CODE_H
 
