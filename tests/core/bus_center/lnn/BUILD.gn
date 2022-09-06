@@ -19,6 +19,9 @@ module_output_path = "dsoftbus/LNN"
 ohos_unittest("LNNTest") {
   module_out_path = module_output_path
   sources = [
+    "net_builder/lnn_node_weight_test.cpp",
+    "net_builder/lnn_sync_info_manager_test.cpp",
+    "net_builder/lnn_topo_manager_test.cpp",
     "unittest/lane_test.cpp",
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/net_builder_test.cpp",
@@ -73,6 +76,38 @@ ohos_unittest("LNNTest") {
   }
 }
 
+ohos_unittest("SqliteTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/sqlite3_utils_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gtest_main",
+    "//third_party/sqlite:sqlite",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 native_source_path = rebase_path("$dsoftbus_root_path")
 dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
 enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
@@ -84,7 +119,10 @@ enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 group("unittest") {
   testonly = true
-  deps = [ ":LNNTest" ]
+  deps = [
+    ":LNNTest",
+    ":SqliteTest",
+  ]
   if (enhanced_test) {
     deps += [
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_channel_rating:unittest",

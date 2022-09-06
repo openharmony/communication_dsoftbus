@@ -290,6 +290,14 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
+static char ToUpperCase(char ch)
+{
+    if (ch >= 'a' && ch <= 'z') {
+        return ch - 'a' + 'A';
+    }
+    return ch;
+}
+
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {

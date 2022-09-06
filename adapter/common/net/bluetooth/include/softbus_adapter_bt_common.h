@@ -63,6 +63,13 @@ typedef enum {
     SOFTBUS_BR_STATE_TURN_OFF
 } SoftBusBtStackState;
 
+typedef enum {
+    SOFTBUS_ACL_STATE_CONNECTED = 0x0,
+    SOFTBUS_ACL_STATE_DISCONNECTED,
+    SOFTBUS_ACL_STATE_LE_CONNECTED,
+    SOFTBUS_ACL_STATE_LE_DISCONNECTED,
+} SoftBusAclState;
+
 typedef struct {
     unsigned char addr[BT_ADDR_LEN];
 } SoftBusBtAddr;
@@ -79,6 +86,7 @@ typedef enum {
 
 typedef struct {
     void (*OnBtStateChanged)(int listenerId, int state);
+    void (*OnBtAclStateChanged)(int listenerId, const SoftBusBtAddr *addr, int aclState);
 } SoftBusBtStateListener;
 
 int SoftBusEnableBt(void);

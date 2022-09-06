@@ -20,6 +20,8 @@
 
 #include "bus_center_event.h"
 #include "lnn_event_monitor_impl.h"
+#include "lnn_devicename_info.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
@@ -32,6 +34,7 @@ typedef enum {
     MONITOR_IMPL_BT_STATE_TYPE,
     MONITOR_IMPL_DRIVER_TYPE,
     MONITOR_IMPL_SCREENSTATE_TYPE,
+    MONITOR_IMPL_DEVICENAME_TYPE,
     MONITOR_IMPL_MAX_TYPE,
 } MonitorImplType;
 
@@ -43,6 +46,7 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitBtStateMonitorImpl,
     LnnInitDriverMonitorImpl,
     LnnInitScreenStateMonitorImpl,
+    LnnInitDeviceNameMonitorImpl,
 };
 
 static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {

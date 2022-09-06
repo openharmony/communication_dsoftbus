@@ -35,6 +35,16 @@ int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
     return SOFTBUS_OK;
 }
 
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
+{
+    if (capability == NULL || type >= BIT_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *capability = (*capability) & (~(1 << (uint32_t)type));
+    return SOFTBUS_OK;
+}
+
 uint32_t LnnGetNetCapabilty(void)
 {
     uint32_t capability = 0;

@@ -256,3 +256,24 @@ int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId)
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return SOFTBUS_ERR;
 }
+
+int32_t TransGetChannelInfoByLaneId(uint32_t laneId, int32_t *channelId, int32_t *channelType)
+{
+    if ((channelId == NULL) || (channelType == NULL) || (g_channelLaneList == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    TransLaneInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
+        if (item->laneId == laneId) {
+            *channelId = item->channelId;
+            *channelType = item->channelType;
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+    return SOFTBUS_ERR;
+}

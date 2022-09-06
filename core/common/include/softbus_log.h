@@ -27,10 +27,10 @@ extern "C" {
 #endif
 #endif
 
-#ifndef __ICCARM__
-#define SOFTBUS_DPRINTF(fd, fmt, ...) dprintf(fd, fmt, ##__VA_ARGS__)
-#else
+#if defined(__ICCARM__) || defined(__LITEOS_M__)
 #define SOFTBUS_DPRINTF(fd, fmt, ...)
+#else
+#define SOFTBUS_DPRINTF(fd, fmt, ...) dprintf(fd, fmt, ##__VA_ARGS__)
 #endif
 
 typedef enum {
@@ -53,6 +53,7 @@ const char *AnonyDevId(char **outName, const char *inName);
 #define UUID_ANONYMIZED_LENGTH 4
 #define NETWORKID_ANONYMIZED_LENGTH 4
 #define UDID_ANONYMIZED_LENGTH 4
+#define MACADDR_ANONYMIZED_LENGTH 5
 
 const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength);
 
@@ -69,6 +70,11 @@ static inline const char *AnonymizesNetworkID(const char *input)
 static inline const char *AnonymizesUDID(const char *input)
 {
     return Anonymizes(input, UDID_ANONYMIZED_LENGTH);
+}
+
+static inline const char *AnonymizesMac(const char *input)
+{
+    return Anonymizes(input, MACADDR_ANONYMIZED_LENGTH);
 }
 
 #ifdef __cplusplus

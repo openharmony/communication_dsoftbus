@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_discovery_manager.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_ohos_account.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
@@ -345,18 +346,18 @@ static void OnAccountChanged(void)
 
 static void OnGroupCreated(const char *groupId)
 {
-    (void)groupId;
     RestartCoapDiscovery();
     OnAccountChanged();
+    LnnHbOnAuthGroupCreated(groupId);
 }
 
 static void OnGroupDeleted(const char *groupId)
 {
-    (void)groupId;
     OnAccountChanged();
+    LnnHbOnAuthGroupDeleted(groupId);
 }
 
-static VerifyCallback g_verifyCb = {
+static GroupChangeListener g_groupChangeListener = {
     .onGroupCreated = OnGroupCreated,
     .onGroupDeleted = OnGroupDeleted,
 };
@@ -406,9 +407,9 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
 
-    ret = AuthRegCallback(BUSCENTER_MONITOR, &g_verifyCb);
+    ret = RegGroupChangeListener(&g_groupChangeListener);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth callback fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register group change listener fail");
         return ret;
     }
 

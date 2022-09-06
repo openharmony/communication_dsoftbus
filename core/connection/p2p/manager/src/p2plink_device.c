@@ -540,15 +540,10 @@ void P2pLinkDevClean(void)
 
 static int32_t P2pLinkDevicingDump(int fd)
 {
-    char connInfoPeerMac[P2P_MAC_LEN];
-    char connectingMyIp[P2P_IP_LEN];
-    char connectingpeerIp[P2P_IP_LEN];
-    char connectingPeerMac[P2P_MAC_LEN];
-    (void)memset_s(connInfoPeerMac, sizeof(connInfoPeerMac), 0, sizeof(connInfoPeerMac));
-    (void)memset_s(connectingMyIp, sizeof(connectingMyIp), 0, sizeof(connectingMyIp));
-    (void)memset_s(connectingpeerIp, sizeof(connectingpeerIp), 0, sizeof(connectingpeerIp));
-    (void)memset_s(connectingPeerMac, sizeof(connectingPeerMac), 0, sizeof(connectingPeerMac));
-
+    char connInfoPeerMac[P2P_MAC_LEN] = {0};
+    char connectingMyIp[P2P_IP_LEN] = {0};
+    char connectingpeerIp[P2P_IP_LEN] = {0};
+    char connectingPeerMac[P2P_MAC_LEN] = {0};
     ListNode *item = NULL;
     SOFTBUS_DPRINTF(fd, "\n-----------------P2pLinkDevicing Info-------------------\n");
     LIST_FOR_EACH(item, &g_connectingDevices) {
@@ -577,12 +572,9 @@ static int32_t P2pLinkDevicingDump(int fd)
 
 static int32_t P2pLinkDevicedDump(int fd)
 {
-    char connectiedPeerMac[P2P_MAC_LEN];
-    char connectiedPeerIp[P2P_IP_LEN];
-    char connectiedlocalIp[P2P_IP_LEN];
-    (void)memset_s(connectiedPeerMac, sizeof(connectiedPeerMac), 0, sizeof(connectiedPeerMac));
-    (void)memset_s(connectiedPeerIp, sizeof(connectiedPeerIp), 0, sizeof(connectiedPeerIp));
-    (void)memset_s(connectiedlocalIp, sizeof(connectiedlocalIp), 0, sizeof(connectiedlocalIp));
+    char connectiedPeerMac[P2P_MAC_LEN] = {0};
+    char connectiedPeerIp[P2P_IP_LEN] = {0};
+    char connectiedlocalIp[P2P_IP_LEN] = {0};
 
     ListNode *item = NULL;
     SOFTBUS_DPRINTF(fd, "\n-----------------P2pLinkDeviced Info-------------------\n");

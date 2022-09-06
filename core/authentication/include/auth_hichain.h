@@ -13,22 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef AUTH_P2P_H
-#define AUTH_P2P_H
+#ifndef AUTH_HICHAIN_H
+#define AUTH_HICHAIN_H
 
 #include <stdint.h>
-#include "auth_manager.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
 #endif
+#endif
 
-int32_t AuthP2pInit(void);
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
-bool IsWiFiLink(const AuthManager *auth);
-bool IsP2PLink(const AuthManager *auth);
+typedef struct {
+    void (*onGroupCreated)(const char *groupId);
+    void (*onGroupDeleted)(const char *groupId);
+    void (*onDeviceNotTrusted)(const char *udid);
+} TrustDataChangeListener;
+int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
+void UnregTrustDataChangeListener(void);
+
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid);
+int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
+
+void HichainDestroy(void);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
 #endif
-#endif /* AUTH_P2P_H */
+#endif
+#endif /* AUTH_HICHAIN_H */

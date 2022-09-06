@@ -19,6 +19,12 @@
 #include <stdint.h>
 #include "common_list.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define SOFTBUS_MODULE_NAME_LEN 32
 #define SOFTBUS_MODULE_HELP_LEN 128
 #define SOFTBUS_DUMP_VAR_NAME_LEN 32
@@ -51,4 +57,10 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
 int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv);
 int32_t SoftBusHiDumperModuleInit(void);
 void SoftBusHiDumperModuleDeInit(void);
-#endif
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
+#endif /* SOFTBUS_HIDUMPER_H */

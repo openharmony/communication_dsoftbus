@@ -401,7 +401,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
  * @tc.name: PublishLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
- * @tc.require: I5I7B9
+ * @tc.require: I5I7B9 I5PTUS
  */
 HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
 {
@@ -476,7 +476,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
  * @tc.name: RefreshLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
- * @tc.require: I5I7B9
+ * @tc.require: I5I7B9 I5PTUS
  */
 HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
 {

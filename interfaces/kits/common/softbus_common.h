@@ -118,10 +118,17 @@ extern "C" {
 #define MAX_ACCOUNT_HASH_LEN 96
 
 /**
- * @brief Indicates the maximum length of the account ID hash code in HEX calculated by SHA-256.
+ * @brief Indicates the maximum length of the hash code in HEX calculated by SHA-256.
  *
  */
 #define SHA_256_HASH_LEN 32
+
+/**
+ * @brief Indicates the maximum length of the hash code in string format calculated by SHA-256,
+ * including the terminating null character <b>\0</b>.
+ *
+ */
+#define SHA_256_HEX_HASH_LEN 65
 
 /**
  * @brief Indicates the maximum length of the capability data in <b>PublishInfo</b> and <b>SubscribeInfo</b>.
@@ -421,6 +428,8 @@ typedef struct {
     DeviceType devType;
     /** Device name. Its maximum length is specified by {@link DISC_MAX_DEVICE_NAME_LEN}. */
     char devName[DISC_MAX_DEVICE_NAME_LEN];
+    /** Device Online Status **/
+    bool isOnline;
     /** Number of available connections */
     unsigned int addrNum;
     /** Connection information. For details, see {@link ConnectAddr}. */

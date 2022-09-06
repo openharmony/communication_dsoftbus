@@ -28,6 +28,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "softbus_datahead_transform.h"
+#include "softbus_adapter_socket.h"
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
@@ -42,7 +43,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
         return SOFTBUS_ERR;
     }
 
-    msg->msgHead.chiper = *ptr;
+    msg->msgHead.cipher = *ptr;
     ptr += sizeof(int8_t);
     msg->msgHead.peerId = *(int16_t *)ptr;
     ptr += sizeof(uint16_t);
@@ -54,96 +55,95 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     return SOFTBUS_OK;
 }
 
-int32_t GetRemoteUuidByBtMac(const char *peerMac, char *uuid, int32_t len)
+static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, uint32_t size)
 {
-    NodeBasicInfo *info = NULL;
-    int32_t num = 0;
+    if (size < PROXY_CHANNEL_HEAD_LEN) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy head not enough");
+        return;
+    }
+    uint32_t offset = 0;
+    *buf = msgHead->type;
+    offset += sizeof(uint8_t);
+    *(buf + offset) = msgHead->cipher;
+    offset += sizeof(uint8_t);
+    *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->myId);
+    offset += sizeof(uint16_t);
+    *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->peerId);
+    offset += sizeof(uint16_t);
+    *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->reserved);
+    offset += sizeof(uint16_t);
+}
 
-    if (LnnGetAllOnlineNodeInfo(&info, &num) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
+static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "LnnGetNetworkIdByBtMac fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "LnnGetRemoteStrInfo UDID fail");
         return SOFTBUS_ERR;
     }
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "no online node");
-        return SOFTBUS_NOT_FIND;
+    return SOFTBUS_OK;
+}
+
+static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
+{
+    ConnectionInfo info = {0};
+    if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnGetConnectionInfo fail, connId=%u", connId);
+        return SOFTBUS_ERR;
     }
-    if (num == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "num is 0");
-        SoftBusFree(info);
-        return SOFTBUS_NOT_FIND;
-    }
-    for (int32_t i = 0; i < num; i++) {
-        char btMac[BT_MAC_LEN] = {0};
-        char *tmpNetworkId = info[i].networkId;
-        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_BT_MAC, btMac, BT_MAC_LEN) != SOFTBUS_OK) {
-            continue;
-        }
-        if (Strnicmp(peerMac, btMac, BT_MAC_LEN) == 0) {
-            if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_UUID, uuid, len) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get remote uuid fail");
-                SoftBusFree(info);
-                return SOFTBUS_ERR;
+    switch (info.type) {
+        case CONNECT_TCP:
+            connInfo->type = AUTH_LINK_TYPE_WIFI;
+            if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info.socketInfo.addr) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip fail.");
+                return SOFTBUS_MEM_ERR;
             }
-            SoftBusFree(info);
-            return SOFTBUS_OK;
-        }
-    }
-
-    SoftBusFree(info);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetRemoteUuidByBtMac no find");
-    return SOFTBUS_NOT_FIND;
-}
-
-static int32_t GetConnectOptionByConnId(uint32_t connId, bool isBle, bool isAuthServer, ConnectOption *option)
-{
-    char uuid[UUID_BUF_LEN] = {0};
-    if (TransProxyGetConnectOption(connId, option) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connect option fail connId[%d]", connId);
-        return SOFTBUS_ERR;
-    }
-    if (isBle && option->type == CONNECT_BR) {
-        if (GetRemoteUuidByBtMac(option->brOption.brMac, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uuid by btmac fail");
+            break;
+        case CONNECT_BR:
+            connInfo->type = AUTH_LINK_TYPE_BR;
+            if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, info.brInfo.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy brMac fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unexpected connType: %d.", info.type);
             return SOFTBUS_ERR;
-        }
-        if (AuthGetActiveBleConnectOption(uuid, isAuthServer, option) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get ble auth connect option fail");
-            return SOFTBUS_ERR;
-        }
     }
     return SOFTBUS_OK;
 }
 
-static int32_t GetChiperParam(ProxyMessage *msg, bool *isBle, bool *isAuthServer)
+static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
 {
-    uint8_t chiper = 0;
-    if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
-        *isAuthServer = !((msg->msgHead.chiper & AUTH_SERVER_SIDE) != 0);
-        *isBle = ((msg->msgHead.chiper & USE_BLE_CIPHER) != 0);
-        if (*isAuthServer) {
-            chiper |= AUTH_SERVER_SIDE;
-        }
-        if (*isBle) {
-            chiper |= USE_BLE_CIPHER;
-        }
-        msg->chiper = chiper;
-        return SOFTBUS_OK;
+    AuthConnInfo connInfo;
+    if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connInfo fail connId[%d]", connId);
+        return AUTH_INVALID_ID;
     }
-
-    if (TransProxyGetChiper(msg->msgHead.myId, &chiper) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get chiper fail, msgType=%d", msg->msgHead.type);
-        return SOFTBUS_ERR;
+    bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
+    if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
+        char udid[UDID_BUF_LEN] = {0};
+        if (GetRemoteUdidByBtMac(connInfo.info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udid by btmac fail");
+            return AUTH_INVALID_ID;
+        }
+        if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
+            connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udid hash fail");
+            return AUTH_INVALID_ID;
+        }
+        connInfo.type = AUTH_LINK_TYPE_BLE;
     }
-    *isAuthServer = ((chiper & AUTH_SERVER_SIDE) != 0);
-    *isBle = ((chiper & USE_BLE_CIPHER) != 0);
-    return SOFTBUS_OK;
+    bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
+    return AuthGetIdByConnInfo(&connInfo, isAuthServer);
 }
 
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
-    OutBuf deBuf = {0};
-    ConnectOption option;
-    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: invalid message length(%d)", len);
         return SOFTBUS_ERR;
@@ -151,113 +151,85 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     if (TransProxyParseMessageHead(data, len, msg) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    bool isEncrypted = ((msg->msgHead.chiper & ENCRYPTED) != 0);
-    bool isBle = false;
-    bool isAuthServer = false;
-    if (GetChiperParam(msg, &isBle, &isAuthServer) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get chiper fail connId[%d]", msg->connId);
-        return SOFTBUS_ERR;
-    }
 
+    bool isEncrypted = ((msg->msgHead.cipher & ENCRYPTED) != 0);
     if (isEncrypted) {
-        if (GetConnectOptionByConnId(msg->connId, isBle, isAuthServer, &option) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetConnectOptionByConnId fail connId[%d]", msg->connId);
+        if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "prxoy recv handshake cipher: 0x%02x", msg->msgHead.cipher);
+            msg->authId = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher);
+        } else {
+            msg->authId = TransProxyGetAuthId(msg->msgHead.myId);
+        }
+        if (msg->authId == AUTH_INVALID_ID) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "get authId for decrypt fail, connId[%d], myId[%d], type[%d]",
+                msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_ERR;
         }
-        deBuf.buf = SoftBusCalloc((uint32_t)len - PROXY_CHANNEL_HEAD_LEN);
-        if (deBuf.buf == NULL) {
+        uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
+        uint8_t *decData = SoftBusCalloc(decDataLen);
+        if (decData == NULL) {
             return SOFTBUS_ERR;
         }
-        deBuf.bufLen = (uint32_t)len - PROXY_CHANNEL_HEAD_LEN;
-        if (AuthDecrypt(&option, (isAuthServer ? CLIENT_SIDE_FLAG : SERVER_SIDE_FLAG),
-            (uint8_t *)(data + PROXY_CHANNEL_HEAD_LEN), (uint32_t)len - PROXY_CHANNEL_HEAD_LEN, &deBuf) != SOFTBUS_OK) {
-            SoftBusFree(deBuf.buf);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg decrypt fail isServer");
+        if (AuthDecrypt(msg->authId, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
+            decData, &decDataLen) != SOFTBUS_OK) {
+            SoftBusFree(decData);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse msg decrypt fail");
             return SOFTBUS_ERR;
         }
-        msg->data = (char *)deBuf.buf;
-        msg->dateLen = (int32_t)deBuf.outLen;
+        msg->data = (char *)decData;
+        msg->dateLen = (int32_t)decDataLen;
     }
-
     return SOFTBUS_OK;
 }
 
-static uint8_t *PackPlaintextMessage(ProxyMessageHead *msg, const uint8_t *payload, uint32_t payloadLen,
-    uint32_t *outLen)
+static int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 {
-    ProxyMessageHead proxyMessageHead;
     uint32_t connHeadLen = ConnGetHeadSize();
-    uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen;
+    uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + dataInfo->inLen;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc proxy buf fail");
-        return NULL;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc proxy buf fail, myId[%d]", msg->myId);
+        return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
-        return NULL;
-    }
-    PackProxyMessageHead(&proxyMessageHead);
-    if (memcpy_s(buf + connHeadLen, size - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
-        SoftBusFree(buf);
-        return NULL;
-    }
+    TransProxyPackMessageHead(msg, buf + connHeadLen, PROXY_CHANNEL_HEAD_LEN);
     if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, size - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
-        payload, payloadLen) != EOK) {
+        dataInfo->inData, dataInfo->inLen) != EOK) {
         SoftBusFree(buf);
-        return NULL;
+        return SOFTBUS_MEM_ERR;
     }
-    *outLen = size;
-    return buf;
+    dataInfo->outData = buf;
+    dataInfo->outLen = size;
+    return SOFTBUS_OK;
 }
 
-static uint8_t *PackEncrypedMessage(ProxyMessageHead *msg, uint32_t connId,
-    const uint8_t *payload, uint32_t payloadLen, uint32_t *outLen)
+static int32_t PackEncryptedMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo)
 {
-    OutBuf encBuf = {0};
-    ConnectOption option;
-    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    uint32_t connHeadLen = ConnGetHeadSize();
-    bool isAuthServer = ((msg->chiper & AUTH_SERVER_SIDE) != 0);
-    bool isBle = ((msg->chiper & USE_BLE_CIPHER) != 0);
-    ProxyMessageHead proxyMessageHead;
-    if (GetConnectOptionByConnId(connId, isBle, isAuthServer, &option) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetConnectOptionByConnId fail connId[%u]", connId);
-        return NULL;
+    if (authId == AUTH_INVALID_ID) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid authId, myId[%d]", msg->myId);
+        return SOFTBUS_INVALID_PARAM;
     }
-
-    uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + payloadLen + AuthGetEncryptHeadLen();
+    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN + AuthGetEncryptSize(dataInfo->inLen);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc enc buf fail connId[%u]", connId);
-        return NULL;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc enc buf fail, myId[%d]", msg->myId);
+        return SOFTBUS_MALLOC_ERR;
     }
-    encBuf.buf = buf + PROXY_CHANNEL_HEAD_LEN + connHeadLen;
-    encBuf.bufLen = size - PROXY_CHANNEL_HEAD_LEN - connHeadLen;
-    AuthSideFlag side = isAuthServer ? SERVER_SIDE_FLAG : CLIENT_SIDE_FLAG;
-    if (AuthEncrypt(&option, &side, (uint8_t *)payload, payloadLen, &encBuf) != SOFTBUS_OK) {
+    TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
+    uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
+    uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
+    if (AuthEncrypt(authId, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
         SoftBusFree(buf);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg encrypt fail");
-        return NULL;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg encrypt fail, myId[%d]", msg->myId);
+        return SOFTBUS_ENCRYPT_ERR;
     }
-
-    if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
-        return NULL;
-    }
-    PackProxyMessageHead(&proxyMessageHead);
-    if (memcpy_s(buf + connHeadLen, size - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
-        SoftBusFree(buf);
-        return NULL;
-    }
-    if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, size - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
-        encBuf.buf, encBuf.outLen) != EOK) {
-        SoftBusFree(buf);
-        return NULL;
-    }
-    *outLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + encBuf.outLen;
-    return buf;
+    dataInfo->outData = buf;
+    dataInfo->outLen = size;
+    return SOFTBUS_OK;
 }
 
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId, ProxyDataInfo *dataInfo)
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo)
 {
     if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -267,13 +239,14 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId, ProxyDataI
             "TransProxyPackMessage, payload: ", (const char *)dataInfo->inData, dataInfo->inLen);
     }
 
-    if (msg->chiper == 0) {
-        dataInfo->outData = PackPlaintextMessage(msg, dataInfo->inData, dataInfo->inLen, &dataInfo->outLen);
+    int32_t ret;
+    if ((msg->cipher & ENCRYPTED) == 0) {
+        ret = PackPlaintextMessage(msg, dataInfo);
     } else {
-        dataInfo->outData = PackEncrypedMessage(msg, connId, dataInfo->inData, dataInfo->inLen, &dataInfo->outLen);
+        ret = PackEncryptedMessage(msg, authId, dataInfo);
     }
-    if (dataInfo->outData == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack proxy msg fail connId[%u]", connId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack proxy msg fail, myId[%d]", msg->myId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -357,16 +357,12 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
         if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] == false) {
             return true;
         }
-        unsigned char accountHash[SHORT_USER_ID_HASH_LEN] = {0};
-        if (DiscBleGetShortUserIdHash(accountHash, SHORT_USER_ID_HASH_LEN) != SOFTBUS_OK) {
+        unsigned char accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
+        if (DiscBleGetShortUserIdHash(accountIdHash, SHORT_USER_ID_HASH_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash error");
             return false;
         }
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "my account %x %x",
-            accountHash[0], accountHash[1]);
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "peer account %x %x",
-            foundInfo->accountHash[0], foundInfo->accountHash[1]);
-        if (memcmp(accountHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == EOK) {
+        if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
         return false;
@@ -560,7 +556,8 @@ static SoftBusScanListener g_scanListener = {
 };
 
 static SoftBusBtStateListener g_stateChangedListener = {
-    .OnBtStateChanged = BleOnStateChanged
+    .OnBtStateChanged = BleOnStateChanged,
+    .OnBtAclStateChanged = NULL,
 };
 
 static int32_t GetMaxExchangeFreq(void)
@@ -685,8 +682,8 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     advData->advData[POS_FLAG_AD_TYPE] = FLAG_AD_TYPE;
     advData->advData[POS_FLAG_AD_DATA] = FLAG_AD_DATA;
     advData->advData[POS_AD_TYPE] = AD_TYPE;
-    advData->advData[POS_UUID] = BLE_UUID & BYTE_MASK;
-    advData->advData[POS_UUID + 1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
+    advData->advData[POS_UUID] = (char)(BLE_UUID & BYTE_MASK);
+    advData->advData[POS_UUID + 1] = (char)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK);
     advData->advData[POS_PACKET_LENGTH] = advData->advLength - POS_PACKET_LENGTH - 1;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advData->advLength:%d advLength:%d", advData->advLength, advLength);
     if (memcpy_s(&advData->advData[ADV_HEAD_LEN], advLength, boardcastData->data.advData, advLength) != EOK) {
@@ -1762,12 +1759,9 @@ static int32_t BleInfoDump(int fd)
 
 static int32_t BleAdvertiserDump(int fd)
 {
-    char bleMac[BT_MAC_LEN];
-    char hash[UDID_HASH_LEN];
-    char peerUid[MAX_ACCOUNT_HASH_LEN];
-    (void)memset_s(bleMac, sizeof(bleMac), 0, sizeof(bleMac));
-    (void)memset_s(hash, sizeof(hash), 0, sizeof(hash));
-    (void)memset_s(peerUid, sizeof(peerUid), 0, sizeof(peerUid));
+    char bleMac[BT_MAC_LEN] = {0};
+    char hash[UDID_HASH_LEN] = {0};
+    char peerUid[MAX_ACCOUNT_HASH_LEN] = {0};
     SOFTBUS_DPRINTF(fd, "\n-----------------BleAdvertiser Info-------------------\n");
     for (int i = 0; i < NUM_ADVERTISER; i++) {
         SOFTBUS_DPRINTF(fd, "BleAdvertiser advId                     : %d\n", g_bleAdvertiser[i].advId);

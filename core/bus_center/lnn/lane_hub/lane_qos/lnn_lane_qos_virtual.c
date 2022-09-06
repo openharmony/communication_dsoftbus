@@ -39,6 +39,13 @@ void LnnReportLaneIdStatsInfo(const LaneIdStatsInfo *statsList, uint32_t listSiz
     return;
 }
 
+void LnnReportRippleData(uint32_t laneId, const LnnRippleData *data)
+{
+    (void)laneId;
+    (void)data;
+    return;
+}
+
 int32_t LnnRequestQosOptimization(const uint32_t *laneList, uint32_t listSize, int32_t *result, uint32_t resultSize)
 {
     (void)laneList;

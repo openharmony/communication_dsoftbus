@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,12 +212,17 @@ int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetwo
 
 int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
-    return QosReportExecute(channelId, chanType, appType, quality);
+    return TransRequestQos(channelId, chanType, appType, quality);
 }
 
 int32_t SoftBusServer::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
 {
     return TransStreamStats(channelId, channelType, data);
+}
+
+int32_t SoftBusServer::RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
+{
+    return TransRippleStats(channelId, channelType, data);
 }
 
 int32_t SoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)

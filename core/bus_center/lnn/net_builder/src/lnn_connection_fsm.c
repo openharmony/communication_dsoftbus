@@ -22,7 +22,6 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_exchange_device_info.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
@@ -32,12 +31,13 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define STATE_AUTH_INDEX 0
-#define STATE_SYNC_DEVICE_INFO_INDEX 1
-#define STATE_CLEAN_INVALID_CONN_INDEX 2
-#define STATE_ONLINE_INDEX 3
-#define STATE_LEAVING_INDEX 4
-#define STATE_NUM_MAX (STATE_LEAVING_INDEX + 1)
+typedef enum {
+    STATE_AUTH_INDEX = 0,
+    STATE_CLEAN_INVALID_CONN_INDEX,
+    STATE_ONLINE_INDEX,
+    STATE_LEAVING_INDEX,
+    STATE_NUM_MAX,
+} ConnFsmStateIndex;
 
 #define SECOND_TO_MSENC 1000
 #define MILLISECOND_TO_MICRO 1000
@@ -51,22 +51,18 @@
 
 typedef enum {
     FSM_MSG_TYPE_JOIN_LNN,
-    FSM_MSG_TYPE_AUTH_KEY_GENERATED,
     FSM_MSG_TYPE_AUTH_DONE,
-    FSM_MSG_TYPE_SYNC_DEVICE_INFO,
-    FSM_MSG_TYPE_SYNC_DEVICE_INFO_DONE,
-    FSM_MSG_TYPE_LEAVE_INVALID_CONN = 5,
+    FSM_MSG_TYPE_LEAVE_INVALID_CONN,
     FSM_MSG_TYPE_LEAVE_LNN,
     FSM_MSG_TYPE_NOT_TRUSTED,
-    FSM_MSG_TYPE_DISCONNECT,
+    FSM_MSG_TYPE_DISCONNECT = 5,
     FSM_MSG_TYPE_JOIN_LNN_TIMEOUT,
-    FSM_MSG_TYPE_SYNC_OFFLINE_DONE = 10,
+    FSM_MSG_TYPE_SYNC_OFFLINE_DONE,
     FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
     FSM_MSG_TYPE_INITIATE_ONLINE,
 } StateMessageType;
 
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
-static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static void OnlineStateEnter(FsmStateMachine *fsm);
 static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
@@ -77,11 +73,6 @@ static FsmState g_states[STATE_NUM_MAX] = {
     [STATE_AUTH_INDEX] = {
         .enter = NULL,
         .process = AuthStateProcess,
-        .exit = NULL,
-    },
-    [STATE_SYNC_DEVICE_INFO_INDEX] = {
-        .enter = NULL,
-        .process = SyncDeviceInfoStateProcess,
         .exit = NULL,
     },
     [STATE_CLEAN_INVALID_CONN_INDEX] = {
@@ -238,7 +229,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
             relation[connInfo->addr.type], true);
     } else {
         NotifyJoinResult(connFsm, networkId, retCode);
-        (void)AuthHandleLeaveLNN(connInfo->authId);
+        AuthHandleLeaveLNN(connInfo->authId);
     }
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
@@ -306,7 +297,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
         LnnNotifyOnlineState(false, &basic);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
-    (void)AuthHandleLeaveLNN(connInfo->authId);
+    LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
     connFsm->isDead = true;
     LnnRequestCleanConnFsm(connFsm->id);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
@@ -330,9 +321,10 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
     }
 }
 
-static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
+static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
+    AuthConnInfo authConn;
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
     if (CheckDeadFlag(connFsm, true)) {
@@ -344,8 +336,9 @@ static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
         return SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]begin join request", connFsm->id);
-    connInfo->authId = AuthVerifyDevice(LNN, &connInfo->addr);
-    if (connInfo->authId <= 0) {
+    connInfo->requestId = AuthGenRequestId();
+    (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback()) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, (int32_t)connInfo->authId);
         rc = SOFTBUS_ERR;
@@ -353,54 +346,67 @@ static int32_t OnJoinLNNInAuth(LnnConnectionFsm *connFsm)
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
     }
-    SoftBusLog(
-        SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]verify request authId=%" PRId64, connFsm->id, connInfo->authId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "[id=%u]verify request id=%u", connFsm->id, connInfo->requestId);
     return rc;
 }
 
-static int32_t OnAuthKeyGeneratedInAuth(LnnConnectionFsm *connFsm)
+static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-
-    if (CheckDeadFlag(connFsm, true)) {
+    SoftBusSysTime times;
+    (void)SoftBusGetTime(&times);
+    NodeInfo *nodeInfo = connInfo->nodeInfo;
+    nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
+        (uint64_t)times.usec / HB_TIME_FACTOR;
+    nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
+    nodeInfo->authSeqNum = connInfo->authId;
+    connInfo->nodeInfo->authSeq[LnnConvAddrTypeToDiscType(connInfo->addr.type)] = connInfo->authId;
+    nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
+    nodeInfo->relation[connInfo->addr.type]++;
+    if (AuthGetDeviceUuid(connInfo->authId, nodeInfo->uuid, sizeof(nodeInfo->uuid)) != SOFTBUS_OK ||
+        nodeInfo->uuid[0] == '\0') {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill uuid fail");
         return SOFTBUS_ERR;
     }
-    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_ACTIVE) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]active auth success, transact to syn_device_info state, authId=%" PRIu64,
-            connFsm->id, connInfo->authId);
-        LnnFsmTransactState(&connFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO_INDEX);
-        LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_DEVICE_INFO, NULL);
-    } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]passive auth success, transact to syn_device_info state, authId=%" PRIu64,
-            connFsm->id, connInfo->authId);
-        LnnFsmTransactState(&connFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO_INDEX);
-        LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_DEVICE_INFO, NULL);
-        LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT,
-            NULL, JOIN_LNN_TIMEOUT_LEN);
+    if (connInfo->addr.type == CONNECTION_ADDR_ETH || connInfo->addr.type == CONNECTION_ADDR_WLAN) {
+        if (strcpy_s(nodeInfo->connectInfo.deviceIp, MAX_ADDR_LEN, connInfo->addr.info.ip.ip) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill deviceIp fail");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    if (strcpy_s(connInfo->peerNetworkId, sizeof(connInfo->peerNetworkId), nodeInfo->networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill networkId fail");
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t OnAuthDoneInAuth(LnnConnectionFsm *connFsm, int32_t *retCode)
+static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
-    if (CheckDeadFlag(connFsm, true)) {
-        return SOFTBUS_ERR;
-    }
     if (retCode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth result flag is null", connFsm->id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth result is null", connFsm->id);
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", auth result=%d",
-        connFsm->id, connInfo->authId, *retCode);
-    if (*retCode == SOFTBUS_OK) {
+    if (CheckDeadFlag(connFsm, true)) {
         SoftBusFree(retCode);
         return SOFTBUS_ERR;
     }
-    CompleteJoinLNN(connFsm, NULL, *retCode);
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", result=%d",
+        connFsm->id, connInfo->authId, *retCode);
+    if (*retCode == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]auth passed, authId=%" PRId64, connFsm->id, connInfo->authId);
+        (void)LnnFillConnInfo(connInfo);
+        LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
+        LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]auth failed, requestId=%u, reason=%d", connFsm->id, connInfo->requestId, *retCode);
+        CompleteJoinLNN(connFsm, NULL, *retCode);
+    }
     SoftBusFree(retCode);
     return SOFTBUS_OK;
 }
@@ -418,13 +424,10 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth process message: %d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
-            OnJoinLNNInAuth(connFsm);
-            break;
-        case FSM_MSG_TYPE_AUTH_KEY_GENERATED:
-            OnAuthKeyGeneratedInAuth(connFsm);
+            OnJoinLNN(connFsm);
             break;
         case FSM_MSG_TYPE_AUTH_DONE:
-            OnAuthDoneInAuth(connFsm, (int32_t *)para);
+            OnAuthDone(connFsm, (int32_t *)para);
             break;
         case FSM_MSG_TYPE_DISCONNECT:
             OnJoinFail(connFsm, SOFTBUS_NETWORK_AUTH_DISCONNECT);
@@ -434,200 +437,6 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
             break;
         case FSM_MSG_TYPE_LEAVE_LNN:
             TryCancelJoinProcedure(connFsm);
-            break;
-        default:
-            FreeUnhandledMessage(msgType, para);
-            return false;
-    }
-    return true;
-}
-
-static int32_t OnSyncDeviceInfo(LnnConnectionFsm *connFsm)
-{
-    uint8_t *buf = NULL;
-    uint32_t bufSize;
-    int32_t rc;
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-    AuthDataHead head;
-    ConnectOption option;
-    AuthType authType;
-
-    if (CheckDeadFlag(connFsm, true)) {
-        return SOFTBUS_ERR;
-    }
-    if (LnnConvertAddrToOption(&connInfo->addr, &option) == false) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]convert addr to option failed", connFsm->id);
-        return SOFTBUS_ERR;
-    }
-    authType = (option.type == CONNECT_TCP) ? AUTH_WIFI : AUTH_BT;
-    buf = LnnGetExchangeNodeInfo((int32_t)connInfo->authId, authType, SOFT_BUS_NEW_V1, &bufSize, &head.flag);
-    if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]pack local device info fail", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_AUTH_PACK_DEVID_FAILED);
-        return SOFTBUS_ERR;
-    }
-
-    head.dataType = DATA_TYPE_SYNC;
-    head.flag = AUTH_INFO_UNCOMPRESS_FLAG;
-    if (option.type == CONNECT_TCP) {
-        head.module = MODULE_AUTH_CONNECTION;
-    } else {
-        head.module = HICHAIN_SYNC;
-    }
-    head.authId = connInfo->authId;
-    head.seq = connInfo->authId;
-    rc = AuthPostData(&head, buf, bufSize);
-    if (rc != SOFTBUS_OK) {
-        CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
-    }
-    SoftBusFree(buf);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]sync device info process result: %d", connFsm->id, rc);
-    return rc;
-}
-
-static void ParsePeerConnInfo(LnnConntionInfo *connInfo)
-{
-    connInfo->nodeInfo->heartbeatTimeStamp = (uint64_t)LnnUpTimeMs();
-    connInfo->nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
-    connInfo->nodeInfo->authSeqNum = connInfo->authId;
-    connInfo->nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
-    connInfo->nodeInfo->relation[connInfo->addr.type]++;
-}
-
-static int32_t ParsePeerNodeInfo(LnnRecvDeviceInfoMsgPara *para, LnnConntionInfo *connInfo)
-{
-    ParseBuf parseBuf;
-    int32_t rc = SOFTBUS_OK;
-    ConnectOption option;
-    AuthType authType;
-    do {
-        if (connInfo->nodeInfo == NULL) {
-            connInfo->nodeInfo = SoftBusCalloc(sizeof(NodeInfo));
-            if (connInfo->nodeInfo == NULL) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc node info fail");
-                rc = SOFTBUS_MALLOC_ERR;
-                break;
-            }
-        }
-        if (LnnConvertAddrToOption(&connInfo->addr, &option) == false) {
-            rc = SOFTBUS_ERR;
-            break;
-        }
-        parseBuf.buf = para->data;
-        parseBuf.len = para->len;
-        authType = (option.type == CONNECT_TCP) ? AUTH_WIFI : AUTH_BT;
-        if (LnnParsePeerNodeInfo(&option, authType, connInfo->nodeInfo, &parseBuf,
-            para->side, connInfo->peerVersion) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unpack peer device info fail");
-            rc = SOFTBUS_NETWORK_UNPACK_DEV_INFO_FAILED;
-            break;
-        }
-        ParsePeerConnInfo(connInfo);
-        if (strncpy_s(connInfo->nodeInfo->uuid, UUID_BUF_LEN, para->uuid, strlen(para->uuid)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s uuid failed");
-            rc = SOFTBUS_MEM_ERR;
-            break;
-        }
-        if (option.type == CONNECT_TCP) {
-            if (strncpy_s(connInfo->nodeInfo->connectInfo.deviceIp, IP_LEN, connInfo->addr.info.ip.ip,
-                strlen(connInfo->addr.info.ip.ip)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s deviceIp failed");
-                rc = SOFTBUS_MEM_ERR;
-            }
-        }
-    } while (false);
-
-    if (rc != SOFTBUS_OK) {
-        SoftBusFree(connInfo->nodeInfo);
-        connInfo->nodeInfo = NULL;
-    }
-    return rc;
-}
-
-static int32_t OnSyncDeviceInfoDone(LnnConnectionFsm *connFsm, LnnRecvDeviceInfoMsgPara *para)
-{
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-    int32_t ret;
-
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]peer device info msg para is null", connFsm->id);
-        return SOFTBUS_ERR;
-    }
-    if (CheckDeadFlag(connFsm, true)) {
-        SoftBusFree(para);
-        return SOFTBUS_ERR;
-    }
-    ret = ParsePeerNodeInfo(para, connInfo);
-    if (ret != SOFTBUS_OK || strncpy_s(connInfo->peerNetworkId, NETWORK_ID_BUF_LEN,
-        connInfo->nodeInfo->networkId, strlen(connInfo->nodeInfo->networkId)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]ParsePeerNodeInfo error", connFsm->id);
-        CompleteJoinLNN(connFsm, NULL, (ret != SOFTBUS_OK) ? ret : SOFTBUS_MEM_ERR);
-        SoftBusFree(para);
-        return SOFTBUS_ERR;
-    }
-    SoftBusFree(para);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]recv device info from %s, wait for auth done",
-        connFsm->id, connInfo->nodeInfo->deviceInfo.deviceName);
-    return SOFTBUS_OK;
-}
-
-static int32_t OnAuthDoneInSyncInfo(LnnConnectionFsm *connFsm, int32_t *retCode)
-{
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-
-    if (retCode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth result flag is null", connFsm->id);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (CheckDeadFlag(connFsm, true)) {
-        SoftBusFree(retCode);
-        return SOFTBUS_ERR;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", auth result=%d",
-        connFsm->id, connInfo->authId, *retCode);
-    if (*retCode == SOFTBUS_OK) {
-        LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
-        LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
-    } else {
-        CompleteJoinLNN(connFsm, NULL, *retCode);
-    }
-    SoftBusFree(retCode);
-    return SOFTBUS_OK;
-}
-
-static bool SyncDeviceInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
-{
-    LnnConnectionFsm *connFsm = NULL;
-
-    if (!CheckStateMsgCommonArgs(fsm)) {
-        FreeUnhandledMessage(msgType, para);
-        return false;
-    }
-    connFsm = TO_CONN_FSM(fsm);
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]sync device info process message: %d",
-        connFsm->id, msgType);
-    switch (msgType) {
-        case FSM_MSG_TYPE_SYNC_DEVICE_INFO:
-            OnSyncDeviceInfo(connFsm);
-            break;
-        case FSM_MSG_TYPE_SYNC_DEVICE_INFO_DONE:
-            OnSyncDeviceInfoDone(connFsm, (LnnRecvDeviceInfoMsgPara *)para);
-            break;
-        case FSM_MSG_TYPE_AUTH_DONE:
-            OnAuthDoneInSyncInfo(connFsm, (int32_t *)para);
-            break;
-        case FSM_MSG_TYPE_LEAVE_LNN:
-            TryCancelJoinProcedure(connFsm);
-            break;
-        case FSM_MSG_TYPE_NOT_TRUSTED:
-            OnJoinFail(connFsm, SOFTBUS_NETWORK_DEV_NOT_TRUST);
-            break;
-        case FSM_MSG_TYPE_DISCONNECT:
-            OnJoinFail(connFsm, SOFTBUS_NETWORK_AUTH_DISCONNECT);
-            break;
-        case FSM_MSG_TYPE_JOIN_LNN_TIMEOUT:
-            OnJoinFail(connFsm, SOFTBUS_NETWORK_JOIN_TIMEOUT);
             break;
         default:
             FreeUnhandledMessage(msgType, para);
@@ -882,6 +691,10 @@ static void ConnectionFsmDinitCallback(FsmStateMachine *fsm)
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
+    if (connFsm == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connFsm is NULL!");
+        return;
+    }
     if (connFsm->stopCallback) {
         connFsm->stopCallback(connFsm);
     }
@@ -939,6 +752,9 @@ void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     if (connFsm->connInfo.cleanInfo != NULL) {
         SoftBusFree(connFsm->connInfo.cleanInfo);
     }
+    if (connFsm->connInfo.nodeInfo != NULL) {
+        SoftBusFree(connFsm->connInfo.nodeInfo);
+    }
     SoftBusFree(connFsm);
 }
 
@@ -978,14 +794,6 @@ int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
 
-int32_t LnnSendAuthKeyGenMsgToConnFsm(LnnConnectionFsm *connFsm)
-{
-    if (!CheckInterfaceCommonArgs(connFsm, true)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_KEY_GENERATED, NULL);
-}
-
 int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode)
 {
     int32_t *para = NULL;
@@ -1000,18 +808,6 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode
     }
     *para = retCode;
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para);
-}
-
-int32_t LnnSendPeerDevInfoToConnFsm(LnnConnectionFsm *connFsm, const LnnRecvDeviceInfoMsgPara *para)
-{
-    if (!CheckInterfaceCommonArgs(connFsm, true)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (para == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]recv peer device info is null", connFsm->id);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_DEVICE_INFO_DONE, (void *)para);
 }
 
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)

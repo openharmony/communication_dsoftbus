@@ -49,12 +49,13 @@ static int32_t PublishResultTransfer(int32_t retCode)
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
-    (void)pkgName;
-    (void)addtions;
-    if (LnnGetOnlineStateById(device->devId, CATEGORY_UDID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device has online");
+    DeviceInfo newDevice;
+    if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy new device info error");
+        return SOFTBUS_ERR;
     }
-    LnnOnRefreshDeviceFound(device);
+    LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
+    LnnOnRefreshDeviceFound(&newDevice);
     return SOFTBUS_OK;
 }
 

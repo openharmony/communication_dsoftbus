@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,14 +143,15 @@ EXIT_ERR:
 
 static ChannelType TransGetChannelType(const SessionParam *param, const LaneConnInfo *connInfo)
 {
-    LaneTransType transType = TransGetLaneTransTypeBySession((SessionType)param->attr->dataType);
+    LaneTransType transType = TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
         return CHANNEL_TYPE_BUTT;
     }
 
     if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE) {
         return CHANNEL_TYPE_PROXY;
-    } else if (transType == LANE_T_FILE || transType == LANE_T_STREAM) {
+    } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO ||
+        transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
     } else if (transType == LANE_T_MSG) {
         return CHANNEL_TYPE_PROXY;
@@ -350,10 +351,62 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
     LaneIdStatsInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.laneId = laneId;
-    info.statsType = LANE_T_STREAM;
+    info.statsType = LANE_T_COMMON_VIDEO;
     FrameSendStats *stats = &info.statsInfo.stream.frameStats;
     ConvertStreamStats(data, stats);
     LnnReportLaneIdStatsInfo(&info, 1); /* only report stream stats */
+    return SOFTBUS_OK;
+}
+
+int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+{
+    uint32_t laneId;
+    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, transRequestQos cannot be processed");
+        return SOFTBUS_ERR;
+    }
+    int32_t result = 0;
+    if (quality == QOS_IMPROVE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans requestQos");
+        ret = LnnRequestQosOptimization(&laneId, 1, &result, 1);
+    } else if (quality == QOS_RECOVER) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans cancel Qos");
+        LnnCancelQosOptimization(&laneId, 1);
+        ret = SOFTBUS_OK;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "requestQos quality[%d] invalid", quality);
+        ret = SOFTBUS_ERR;
+    }
+
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "request Qos fail,type:%d, err:%d", quality, ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
+{
+    (void)channelType;
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rippleStats data is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t laneId;
+    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, streamStatsInfo cannot be processed");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "transRippleStats channelId:%d, laneId:0x%x", channelId, laneId);
+    LnnRippleData rptdata;
+    (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
+    if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy fail");
+        return SOFTBUS_ERR;
+    }
+    LnnReportRippleData(laneId, &rptdata);
     return SOFTBUS_OK;
 }
 

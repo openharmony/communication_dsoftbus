@@ -21,11 +21,15 @@
 #include "data_ability_helper.h"
 #include "data_ability_predicates.h"
 #include "data_ability_observer_stub.h"
+#include "lnn_devicename_info.h"
+#include "lnn_async_callback_utils.h"
 #include "iservice_registry.h"
+#include "message_handler.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "system_ability_definition.h"
 
+static const int32_t DELAY_LEN = 100000;
 static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
@@ -147,4 +151,14 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
     g_eventHandler = handler;
     OHOS::BusCenter::CreateDataAbilityHelperInstance();
     return SOFTBUS_OK;
+}
+
+int32_t LnnInitDeviceNameMonitorImpl(void)
+{
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, UpdateDeviceName, NULL, DELAY_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init DeviceName LnnAsyncCallbackDelayHelper fail");
+    }
+    return ret;
 }
