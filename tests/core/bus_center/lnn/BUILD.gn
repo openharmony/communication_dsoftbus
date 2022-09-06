@@ -19,6 +19,8 @@ module_output_path = "dsoftbus/LNN"
 ohos_unittest("LNNTest") {
   module_out_path = module_output_path
   sources = [
+    "net_builder/lnn_connection_fsm_test.cpp",
+    "net_builder/lnn_net_builder_test.cpp",
     "net_builder/lnn_node_weight_test.cpp",
     "net_builder/lnn_sync_info_manager_test.cpp",
     "net_builder/lnn_topo_manager_test.cpp",
