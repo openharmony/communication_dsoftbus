@@ -33,11 +33,11 @@ int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num)
 {
     (void)info;
     (void)num;
-    return SOFTBUS_NOT_IMPLEMENT;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnBleFastOfflineOnceBegin(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnBleFastOfflineOnceBegin virtual ok!");
-    return SOFTBUS_NOT_IMPLEMENT;
+    return SOFTBUS_OK;
 }
