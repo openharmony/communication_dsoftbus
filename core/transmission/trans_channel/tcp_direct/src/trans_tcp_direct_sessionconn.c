@@ -40,9 +40,11 @@ uint64_t TransTdcGetNewSeqId(void)
     static uint64_t seq = 0;
     seq += TRANS_SEQ_STEP;
 
+    uint64_t retseq = seq;
+
     ReleaseSessonConnLock();
 
-    return seq;
+    return retseq;
 }
 
 int32_t GenerateTdcChannelId(void)
