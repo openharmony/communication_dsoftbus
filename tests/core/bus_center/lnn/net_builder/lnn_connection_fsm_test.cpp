@@ -23,6 +23,10 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
+constexpr uint16_t PORT = 1000;
+constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
+
 namespace OHOS {
 using namespace testing::ext;
 
@@ -52,8 +56,14 @@ void LnnConnectionFsmTest::TearDown()
 {
 }
 
-LnnConnectionFsm *CreateConnectionFsm(){
-    ConnectionAddr target;
+LnnConnectionFsm *CreateConnectionFsm()
+{
+    ConnectionAddr target = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
+    memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&target);
     EXPECT_TRUE(connFsm != nullptr);
     return connFsm;
