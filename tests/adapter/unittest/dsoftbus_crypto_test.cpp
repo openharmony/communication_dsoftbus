@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <securec.h>
 #include "gtest/gtest.h"
 
 #include "softbus_errcode.h"
@@ -28,6 +28,8 @@ protected:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
+    static unsigned char encodeStr[100];
+    static size_t encodeLen;
 };
 void DsoftbusCryptoTest::SetUpTestCase(void)
 {
@@ -41,7 +43,8 @@ void DsoftbusCryptoTest::SetUp()
 void DsoftbusCryptoTest::TearDown()
 {
 }
-
+unsigned char DsoftbusCryptoTest::encodeStr[100];
+size_t DsoftbusCryptoTest::encodeLen;
 /*
 * @tc.name: SoftBusBase64Encode001
 * @tc.desc: parameters is Legal
@@ -55,6 +58,9 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode001, TestSize.Level0)
     size_t olen = 10;
     int32_t ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), &olen, (unsigned char *)src, sizeof(src));
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    encodeLen = olen;
+    memcpy_s(encodeStr, olen, dst, olen);
 }
 
 /*
@@ -98,7 +104,6 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-#if HAVE_PRO
 /*
 * @tc.name: SoftBusBase64Decode001
 * @tc.desc: parameters is Legal
@@ -108,14 +113,10 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Encode003, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusBase64Decode001, TestSize.Level0)
 {
     char dst[100];
-    char src[] = "abcde";
-    size_t dlen = 1;
     size_t olen = 10;
-    size_t slen = 1;
-    int32_t ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, (unsigned char *)src, slen);
+    int32_t ret = SoftBusBase64Decode((unsigned char *)dst, sizeof(dst), &olen, encodeStr, encodeLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-#endif
 
 /*
 * @tc.name: SoftBusBase64Decode002
@@ -268,7 +269,6 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-#if HAVE_PRO
 /*
 * @tc.name: SoftBusEncryptData001
 * @tc.desc: all valid param
@@ -278,16 +278,18 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusGenerateRandomArrayTest002, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-#endif
 
 /*
 * @tc.name: SoftBusEncryptData002
@@ -332,7 +334,6 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-#if HAVE_PRO
 /*
 * @tc.name: SoftBusEncryptDataWithSeq001
 * @tc.desc: all valid param
@@ -342,17 +343,19 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptData003, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     int32_t seqNum = 1;
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)input,
                                             inLen, (unsigned char*)encryptData, &encryptLen, seqNum);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-#endif
 
 /*
 * @tc.name: SoftBusEncryptDataWithSeq002
@@ -419,7 +422,6 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-#if HAVE_PRO
 /*
 * @tc.name: SoftBusDecryptData001
 * @tc.desc: all valid param
@@ -429,14 +431,17 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusEncryptDataWithSeq004, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptData(&cipherKey, (unsigned char*)encryptData,
@@ -453,15 +458,18 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData001, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
     uint32_t inLen1 = 0;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptData(nullptr, (unsigned char*)encryptData,
@@ -484,14 +492,17 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData002, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptData(&cipherKey, (unsigned char*)encryptData,
@@ -511,15 +522,18 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptData003, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
     int32_t seqNum = 1;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptDataWithSeq(&cipherKey, (unsigned char*)encryptData,
@@ -536,15 +550,18 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq001, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
     int32_t seqNum = 1;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptDataWithSeq(nullptr, (unsigned char*)encryptData,
@@ -564,16 +581,19 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq002, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     uint32_t encryptLen1 = 0;
     char decryptData[32];
     uint32_t decryptLen = 32;
     int32_t seqNum = 1;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptDataWithSeq(&cipherKey, (unsigned char*)encryptData,
@@ -590,15 +610,18 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq003, TestSize.Level0)
 HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, TestSize.Level0)
 {
     AesGcmCipherKey cipherKey;
-    cipherKey.keyLen = 32;
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     char input[32];
     uint32_t inLen = 32;
-    char encryptData[32];
-    uint32_t encryptLen = 32;
+    char encryptData[32 + OVERHEAD_LEN];
+    uint32_t encryptLen = 32 + OVERHEAD_LEN;
     char decryptData[32];
     uint32_t decryptLen = 32;
     int32_t seqNum = 1;
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char*)input,
                                      inLen, (unsigned char*)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusDecryptDataWithSeq(&cipherKey, (unsigned char*)encryptData,
@@ -608,5 +631,4 @@ HWTEST_F(DsoftbusCryptoTest, SoftBusDecryptDataWithSeq004, TestSize.Level0)
                                     encryptLen, (unsigned char*)decryptData, nullptr, seqNum);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
-#endif
 }
