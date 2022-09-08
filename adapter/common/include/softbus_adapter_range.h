@@ -24,14 +24,14 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_BT_ADDR_LEN 6
+#define SOFTBUS_DEV_IDENTITY_LEN 96
 // valid value of power is [-128, 10], 11 is considered to be illegal.
 #define SOFTBUS_ILLEGAL_BLE_POWER 11
 
 typedef struct {
     int32_t rssi;
     int8_t power;
-    char addr[SOFTBUS_BT_ADDR_LEN];
+    char identity[SOFTBUS_DEV_IDENTITY_LEN];
 } SoftBusRangeParam;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);
