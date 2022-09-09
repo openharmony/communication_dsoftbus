@@ -372,7 +372,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
     }
     printf("maxConnNum: %d\n", maxConnNum);
     EXPECT_EQ(port, TcpStartListening(&info));
-    while (TcpGetConnNum() < maxConnNum) {
+    while (i < maxConnNum) {
         EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
         sleep(1);
         i += 2;

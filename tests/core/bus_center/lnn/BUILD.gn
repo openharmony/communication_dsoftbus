@@ -30,6 +30,7 @@ ohos_unittest("LNNTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
