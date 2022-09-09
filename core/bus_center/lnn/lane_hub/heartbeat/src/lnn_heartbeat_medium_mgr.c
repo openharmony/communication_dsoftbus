@@ -240,10 +240,6 @@ static bool HbIsSameAccount(const char *accountHash, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB IsSameAccount get local accountHash fail");
         return true;
     }
-    if (LnnIsDefaultOhosAccount(localAccountHash, SHA_256_HASH_LEN)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB no login account, ignore this receive data");
-        return false;
-    }
     if (memcmp(accountHash, localAccountHash, len) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsNotSameAccount. [my %02x %02x : peer %02x %02x]",
             localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
