@@ -1055,6 +1055,7 @@ static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
 
 static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t len)
 {
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectId=%d receive basicInfo data",connInfo->connId);
     cJSON *data = NULL;
     data = cJSON_Parse(value + TYPE_HEADER_SIZE);
     if (data == NULL) {
@@ -1115,7 +1116,7 @@ static void BleOnDataReceived(bool isBleConn, BleHalConnInfo halConnInfo, uint32
         ConnPktHead *head = (ConnPktHead *)value;
         UnpackConnPktHead(head);
         if (head->module == MODULE_CONNECTION) {
-            cJSON *data = NULL;
+            cJSON *data = NULL;      
             data = cJSON_Parse(value + sizeof(ConnPktHead));
             if (data == NULL) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[receive data invalid]");
