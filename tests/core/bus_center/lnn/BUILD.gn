@@ -21,6 +21,7 @@ ohos_unittest("LNNTest") {
   sources = [
     "net_builder/lnn_connection_fsm_test.cpp",
     "net_builder/lnn_net_builder_test.cpp",
+    "net_builder/lnn_network_info_test.cpp",
     "net_builder/lnn_node_weight_test.cpp",
     "net_builder/lnn_sync_info_manager_test.cpp",
     "net_builder/lnn_topo_manager_test.cpp",
@@ -30,6 +31,7 @@ ohos_unittest("LNNTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
