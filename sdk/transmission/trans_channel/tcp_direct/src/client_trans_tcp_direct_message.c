@@ -428,6 +428,7 @@ static int32_t TransTdcProcAllData(int32_t channelId)
         }
         uint32_t bufLen = node->w - node->data;
         if (bufLen == 0) {
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_OK;
         }
         if (bufLen < DC_DATA_HEAD_SIZE) {
