@@ -36,7 +36,9 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
     if (capability == NULL || msg == NULL || len < BITS) {
         return SOFTBUS_ERR;
     }
-    *capability = (*(msg + 3) << BITS*3) | (*(msg + 2) << BITS*3) | (*(msg + 1) << BITS) | *(msg);
+    for (uint32_t i = 0; i < BITLEN; i++) {
+        *capability = *capability | (*(msg + i) << BITS*i);
+    }
     return SOFTBUS_OK;
 }
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
@@ -125,6 +127,22 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
     SoftBusFree(msg);
 }
 
+static void WifiStateProcess(uint32_t netCapability, bool isSend)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi state change netCapability= %d, isSend = %d",
+            netCapability, isSend);
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+        return;
+    }
+    if (!isSend) {
+        return;
+    }
+    uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
+    SendNetCapabilityToRemote(netCapability, type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "WifiStateEventHandler exit");
+    return;
+}
+
 static void WifiStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
@@ -166,19 +184,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
         default:
             break;
     }
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi state change netCapability= %d, isSend = %d",
-            netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
-        return;
-    }
-    if (!isSend) {
-        return;
-    }
-
-    uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
-    SendNetCapabilityToRemote(netCapability, type);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "WifiStateEventHandler exit");
+    WifiStateProcess(netCapability, isSend);
     return;
 }
 
