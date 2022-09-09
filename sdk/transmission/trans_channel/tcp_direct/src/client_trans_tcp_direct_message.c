@@ -427,9 +427,6 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_ERR;
         }
         uint32_t bufLen = node->w - node->data;
-        if (bufLen == 0) {
-            return SOFTBUS_OK;
-        }
         if (bufLen < DC_DATA_HEAD_SIZE) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head not enough, recv biz head next time.");
             SoftBusMutexUnlock(&g_tcpDataList->lock);
