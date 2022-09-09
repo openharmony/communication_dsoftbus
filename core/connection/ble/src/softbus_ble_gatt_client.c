@@ -678,8 +678,8 @@ static void BleGattcMsgHandler(SoftBusMessage *msg)
 
 static void BleGattcConnStateCallback(int32_t clientId, int32_t state, int32_t status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnStateCallback ble gattc id=%d,state=%d\n",
-        clientId, status);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnStateCallback ble gattc id=%d,state=%d,status=%d\n",
+        clientId, state, status);
     if (state == SOFTBUS_BT_CONNECT) {
         SoftBusMessage *msg = BleClientConnCreateLoopMsg(CLIENT_CONNECTED, clientId, status, NULL);
         if (msg == NULL) {
@@ -696,9 +696,9 @@ static void BleGattcConnStateCallback(int32_t clientId, int32_t state, int32_t s
     }
 }
 
-static void BleGattcSearchServiceCallback(int32_t clientId, int status)
+static void BleGattcSearchServiceCallback(int32_t clientId, int32_t status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcSearchServiceCallback id=%d,state=%d\n",
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcSearchServiceCallback id=%d,status=%d\n",
         clientId, status);
     SoftBusMessage *msg = BleClientConnCreateLoopMsg(CLIENT_SERVICE_SEARCHED, clientId, status, NULL);
     if (msg == NULL) {
