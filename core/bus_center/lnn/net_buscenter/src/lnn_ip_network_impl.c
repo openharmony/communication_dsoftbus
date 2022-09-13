@@ -317,7 +317,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet->status == LNN_SUBNET_RUNNING) {
-        EhIpAddrChangeEventHandler();
+        LnnIpAddrChangeEventHandler();
         CloseIpLink();
         LnnStopPublish();
         LnnStopDiscovery();
