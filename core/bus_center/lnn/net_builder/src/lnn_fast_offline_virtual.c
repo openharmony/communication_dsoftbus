@@ -42,7 +42,7 @@ int32_t LnnBleFastOfflineOnceBegin(void)
     return SOFTBUS_OK;
 }
 
-void EhIpAddrChangeEventHandler(void)
+void LnnIpAddrChangeEventHandler(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "EhIpAddrChangeEventHandler virtual ok!");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnIpAddrChangeEventHandler virtual ok!");
 }

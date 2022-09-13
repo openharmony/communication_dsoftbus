@@ -32,7 +32,7 @@ int32_t LnnInitFastOffline(void);
 void LnnDeinitFastOffline(void);
 int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num);
 int32_t LnnBleFastOfflineOnceBegin(void);
-void EhIpAddrChangeEventHandler(void);
+void LnnIpAddrChangeEventHandler(void);
 
 #ifdef __cplusplus
 }
