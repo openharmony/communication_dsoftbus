@@ -1,11 +1,13 @@
 # 分布式软总线组件<a name="ZH-CN_TOPIC_0000001103650648"></a>
 
--   [简介](#section13587125816351)
--   [系统架构](#section13587185873516)
--   [目录](#section161941989596)
--   [约束](#section119744591305)
--   [说明](#section1312121216216)
-    -   [使用说明](#section1698318421816)
+- [分布式软总线组件<a name="ZH-CN_TOPIC_0000001103650648"></a>](#分布式软总线组件)
+  - [简介<a name="section13587125816351"></a>](#简介)
+  - [系统架构<a name="section13587185873516"></a>](#系统架构)
+  - [目录<a name="section161941989596"></a>](#目录)
+  - [约束<a name="section119744591305"></a>](#约束)
+  - [说明<a name="section1312121216216"></a>](#说明)
+    - [使用说明<a name="section1698318421816"></a>](#使用说明)
+  - [相关仓<a name="section1371113476307"></a>](#相关仓)
 
 -   [相关仓](#section1371113476307)
 
@@ -15,44 +17,45 @@
 
 -   发现连接：提供基于Wifi、蓝牙等通信方式的设备发现连接能力。
 -   设备组网：提供统一的设备组网和拓扑管理能力，为数据传输提供已组网设备信息。
--   数据传输：提供数据传输通道，支持消息、字节数据传输等能力。
+-   数据传输：提供数据传输通道，支持消息、字节、流、文件的数据传输能力。
 
 业务方通过使用分布式软总线提供的API实现设备间的高速通信，不用关心通信细节，进而实现业务平台的高效部署与运行能力。
 
 ## 系统架构<a name="section13587185873516"></a>
 
+![](figures/dsoftbus-architecture_zh.png)  
 **图 1**  分布式软总线组件架构图<a name="fig4460722185514"></a>  
-
-
-![](figures/dsoftbus-architecture_zh.png)
 
 ## 目录<a name="section161941989596"></a>
 
 分布式软总线组件主要代码目录结构如下：
 
 ```
-/foundation/communication/dsoftbus
-├── interfaces            # 接口代码
+//foundation/communication/dsoftbus
 ├── adapter               # 适配层代码
+├── components            # 依赖组件代码
 ├── core                  # 核心代码
-│   ├── common            # 通用代码
-│   ├── authentication    # 认证代码
-│   ├── bus_center        # 组网代码
-│   ├── connection        # 连接代码
-│   ├── discovery         # 发现代码
-│   ├── transmission      # 传输代码
-│   └── frame             # 框架代码
+│   ├── adapter           # 适配层代码
+│   ├── authentication    # 认证代码
+│   ├── bus_center        # 组网代码
+│   ├── common            # 通用代码
+│   ├── connection        # 连接代码
+│   ├── discovery         # 发现代码
+│   ├── frame             # 框架代码
+│   └── transmission      # 传输代码
+├── interfaces            # 对外接口代码
 ├── sdk                   # 运行业务进程代码
-│   ├── bus_center        # 组网代码
-│   ├── discovery         # 发现代码
-│   ├── transmission      # 传输代码
-│   └── frame             # 框架代码
-└── components            # 依赖组件代码
+│   ├── bus_center        # 组网代码
+│   ├── discovery         # 发现代码
+│   ├── frame             # 框架代码
+│   └── transmission      # 传输代码
+├── tests                 # 测试代码
+└── tools                 # 工具代码
 ```
 
 ## 约束<a name="section119744591305"></a>
 
--   组网设备需在同一局域网中。
+-   组网设备需在同一局域网中 或者 距离相近的近场设备间。
 -   组网之前，需先完成设备绑定，绑定流程参见安全子系统中说明。
 
 ## 说明<a name="section1312121216216"></a>
@@ -60,7 +63,7 @@
 ### 使用说明<a name="section1698318421816"></a>
 
 >**须知：** 
->使用跨设备通信时，必须添加权限ohos.permission.DISTRIBUTED\_DATASYNC，该权限类型为 _**dangerous**_ 。
+>使用跨设备通信时，必须添加权限`ohos.permission.DISTRIBUTED_DATASYNC`和`ohos.permission.DISTRIBUTED_SOFTBUS_CENTER`，该权限类型为 _**dangerous**_ 。
 
 >设备主动发现手机时，手机需打开超级终端的允许被“附近设备”发现开关（设置-超级终端-我的设备-允许被发现-附近设备），才能被设备发现。
 
@@ -73,19 +76,19 @@
     ```
     // 发布回调
     typedef struct {
-        void (*OnPublishSuccess)(int publishId); //发布成功时回调
-        void (*OnPublishFail)(int publishId, PublishFailReason reason);//发布失败时回调
-    } IPublishCallback;
+        /** Callback for publish result */
+        void (*OnPublishResult)(int publishId, PublishResult reason);
+    } IPublishCb;
     
     // 发布服务
-    int PublishService(const char *pkgName, const PublishInfo *info, const IPublishCallback *cb);
+    int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
     ```
 
-2.  上层应用不再需要对外发布自身能力时，调用UnpublishService接口注销服务。
+2.  上层应用不再需要对外发布自身能力时，调用StopPublishLNN接口注销服务。
 
     ```
     // 注销服务
-    int UnPublishService(const char *pkgName, int publishId);
+    int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
     ```
 
 
@@ -96,23 +99,23 @@
     ```
     // 发现回调
     typedef struct {
-        void (*OnDeviceFound)(const DeviceInfo *device); //发现设备回调
-        void (*OnDiscoverFailed)(int subscribeId, DiscoveryFailReason failReason); //启动发现失败回调
-        void (*OnDiscoverySuccess)(int subscribeId); //启动发现成功回调
-    } IDiscoveryCallback;
+        /** Callback that is invoked when a device is found */
+        void (*OnDeviceFound)(const DeviceInfo *device);
+        /** Callback for a subscription result */
+        void (*OnDiscoverResult)(int32_t refreshId, RefreshResult reason);
+    } IRefreshCallback;
     
     // 发现服务
-    int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscoveryCallback *cb);
+    int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
     ```
 
 2.  当软总线发现到设备时，通过回调接口通知业务所发现的设备信息。
-3.  上层应用不再需要发现时，调用StopDiscovery接口停止设备发现。
+3.  上层应用不再需要发现时，调用StopRefreshLNN接口停止设备发现。
 
     ```
-    // 停止服务
-    int StopDiscovery(const char *pkgName, int subscribeId);
+    // 停止发现
+    int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
     ```
-
 
 **2、组网**
 
@@ -198,7 +201,6 @@
     int32_t UnregNodeDeviceStateCb(INodeStateCb *callback);
     ```
 
-
 **3、传输**
 
 1.  创建会话服务，并设置会话相关回调，用户可在回调中处理打开/关闭和消息接收事件。
@@ -218,36 +220,64 @@
     int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener* listener);
     ```
 
-2.  创建会话 ，用于收发数据。
+2.  [可选] 如果需要完成文件的发送和接收，可以注册文件传输回调， 用户可在回调中处理文件发送/接收事件。
+
+    ```
+    // 文件发送回调
+    typedef struct {
+        int (*OnSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
+        int (*OnSendFileFinished)(int sessionId, const char *firstFile);
+        void (*OnFileTransError)(int sessionId);
+    } IFileSendListener;
+
+    // 注册文件发送回调
+    int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
+
+    // 文件接收回调
+    typedef struct {
+        int (*OnReceiveFileStarted)(int sessionId, const char *files, int fileCnt);
+        int (*OnReceiveFileProcess)(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal);
+        void (*OnReceiveFileFinished)(int sessionId, const char *files, int fileCnt);
+        void (*OnFileTransError)(int sessionId);
+    } IFileReceiveListener;
+
+    // 注册文件接收回调
+    int SetFileReceiveListener(const char *pkgName, const char *sessionName,const IFileReceiveListener *recvListener, const char *rootDir);
+    ```
+
+3.  创建会话 ，用于收发数据。
 
     ```
     // 创建会话
     int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId, const char *groupId, const SessionAttribute* attr);
     ```
 
-3.  通过sessionId向对端设备发送数据。
+4. 通过sessionId向对端设备发送数据。
 
     ```
     // 发送字节数据
     int SendBytes(int sessionId, const void *data, unsigned int len);
     // 发送消息数据
     int SendMessage(int sessionId, const void *data, unsigned int len);
+    // 发送流数据
+    int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
+    // 发送文件
+    int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
     ```
 
-4.  通过sessionId关闭会话。
+5. 通过sessionId关闭会话。
 
     ```
     // 关闭会话
     void CloseSession(int sessionId);
     ```
 
-5.  删除会话服务。
+6. 删除会话服务。
 
     ```
     // 删除会话服务
     int RemoveSessionServer(const char *pkgName, const char *sessionName);
     ```
-
 
 ## 相关仓<a name="section1371113476307"></a>
 
