@@ -739,7 +739,7 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
         SoftBusGattsDisconnect(binAddr, halId);
     } else {
         client->state = BLE_CONNECTION_STATE_CLOSING;
-        int32_t halId = server->halConnId;
+        int32_t halId = client->halConnId;
         (void)SoftBusMutexUnlock(&g_connectionLock);
         SoftBusGattClientDisconnect(halId);
     }
