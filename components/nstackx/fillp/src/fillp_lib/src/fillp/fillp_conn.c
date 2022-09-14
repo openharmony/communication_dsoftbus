@@ -1108,7 +1108,6 @@ static void ConnectingHandleFinInput(struct FillpPcb *pcb, struct FtSocket *sock
     FillpDisableConnRetryCheckTimer(&conn->pcb->fpcb);
 
     if (flags->verSet) {
-        FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_VERSION_MISMATCH);
         sock->coreErrType[MSG_TYPE_DO_CONNECT] = ERR_REMOTE_REJECT_VERSION;
     } else {
         sock->coreErrType[MSG_TYPE_DO_CONNECT] = ERR_REMOTE_REJECT_OR_CLOSE;
@@ -1284,7 +1283,7 @@ static void FillpHandleFin(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, F
             }
 
             /* RST case */
-            FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_FIN_INPUT);
+            FillpDfxSockLinkAndQosNotify(sock, FILLP_DFX_LINK_FIN_INPUT);
             if (flags.wrSet && flags.rdSet) {
                 FillpHandleFinRst(conn, sock);
                 return;

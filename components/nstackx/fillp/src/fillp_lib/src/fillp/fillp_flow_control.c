@@ -392,7 +392,7 @@ void FillpFcCycle(void *arg)
         FILLP_LOGERR("Keep alive timeout, fillp_sock_id:%d,detaTime:%lld,keepAliveTime:%u(ms)",
             sock->index, detaTime, sock->resConf.common.keepAliveTime);
 
-        FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_KEEPALIVE_TIMEOUT);
+        FillpDfxSockLinkAndQosNotify(sock, FILLP_DFX_LINK_KEEPALIVE_TIMEOUT);
         SpungeShutdownSock(sock, SPUNGE_SHUT_RDWR);
         sock->errEvent |= SPUNGE_EPOLLERR;
         SpungeEpollEventCallback(sock, (FILLP_INT)SPUNGE_EPOLLIN | (FILLP_INT)SPUNGE_EPOLLERR, 1);
