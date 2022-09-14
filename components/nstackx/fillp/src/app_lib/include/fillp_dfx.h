@@ -17,13 +17,13 @@
 #define FILLP_DFX_H
 
 #include "fillptypes.h"
+#include "sockets.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
-    FILLP_DFX_LINK_VERSION_MISMATCH,
     FILLP_DFX_LINK_RETRANSMIT_OUT,
     FILLP_DFX_LINK_KEEPALIVE_TIMEOUT,
     FILLP_DFX_LINK_IP_REMOVED,
@@ -38,8 +38,9 @@ typedef enum {
     FILLP_DFX_PKT_EVT_MAX,
 } FillpDfxPktEvtType;
 
-void FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb);
-void FillpDfxSockLinkAndQosNotify(FILLP_INT sockIdx, FillpDfxLinkEvtType evtType);
+void FillpDfxDoEvtCbSet(void *softObj, FillpDfxEventCb evtCb);
+FILLP_INT FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb);
+void FillpDfxSockLinkAndQosNotify(const struct FtSocket *sock, FillpDfxLinkEvtType evtType);
 void FillpDfxPktNotify(FILLP_INT sockIdx, FillpDfxPktEvtType evtType, FILLP_UINT32 dropCnt);
 
 #ifdef FILLP_ENABLE_DFX_HIDUMPER
