@@ -707,7 +707,7 @@ static void BleGattcSearchServiceCallback(int32_t clientId, int32_t status)
     g_bleClientAsyncHandler.looper->PostMessage(g_bleClientAsyncHandler.looper, msg);
 }
 
-static void BleGattcRegisterNotificationCallback(int32_t clientId, int status)
+static void BleGattcRegisterNotificationCallback(int32_t clientId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcRegisterNotificationCallback id=%d,status=%d\n",
         clientId, status);
