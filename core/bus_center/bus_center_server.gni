@@ -64,8 +64,9 @@ bus_center_server_external_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    bus_center_server_src +=
-        [ "$dsoftbus_root_path/core/bus_center/ipc/mini/lnn_bus_center_ipc.c" ]
+    bus_center_server_src += [
+      "$dsoftbus_root_path/core/bus_center/ipc/mini/lnn_bus_center_ipc.c",
+    ]
   } else {
     bus_center_server_src += [
       "$dsoftbus_root_path/core/bus_center/ipc/small/src/bus_center_client_proxy.c",
