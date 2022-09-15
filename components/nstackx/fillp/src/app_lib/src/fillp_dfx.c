@@ -136,23 +136,23 @@ static const FillpDfxEventParam g_fillpDfxEvtParam[FILLP_DFX_EVT_DFX_MAX][FILLP_
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "totalReceivedPkt",
+            .paramName = "TOTAL_RECV_PKT",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "totalReceivedBytes",
+            .paramName = "TOTAL_RECV_BYTES",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "totalSendPkt",
+            .paramName = "TOTAL_SEND_PKT",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "totalSendBytes",
+            .paramName = "TOTAL_SEND_BYTES",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "jitter",
+            .paramName = "JITTER",
         },
     },
 };
@@ -630,7 +630,10 @@ static struct FtSocket *FillpDfxGetSock(FILLP_INT sockIndex, void *softObj, Fill
     return sock;
 }
 
-static FILLP_INT FillpDumpShowSockQos(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+typedef FILLP_INT (*FillpDumpSockDataShowCb)(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len);
+
+static FILLP_INT FillpDumpShowSockData(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump,
+    FillpDumpSockDataShowCb showCb)
 {
     FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
     FILLP_UINT32 len = 0;
@@ -639,13 +642,18 @@ static FILLP_INT FillpDumpShowSockQos(FILLP_INT sockIndex, void *softObj, FillpD
         return FILLP_FAILURE;
     }
 
-    FILLP_INT isOk = DoShowSockQos(sock, data, &len);
+    FILLP_INT isOk = showCb(sock, data, &len);
     (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
     if (isOk != FILLP_SUCCESS) {
         return FILLP_FAILURE;
     }
     dump(softObj, data, len);
     return FILLP_SUCCESS;
+}
+
+static FILLP_INT FillpDumpShowSockQos(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+{
+    return FillpDumpShowSockData(sockIndex, softObj, dump, DoShowSockQos);
 }
 
 static FILLP_INT DoShowFrameStats(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len)
@@ -660,20 +668,7 @@ static FILLP_INT DoShowFrameStats(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
 
 static FILLP_INT FillpDumpShowFrameStats(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
 {
-    FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
-    FILLP_UINT32 len = 0;
-    struct FtSocket *sock = FillpDfxGetSock(sockIndex, softObj, dump, data, &len);
-    if (sock == FILLP_NULL_PTR) {
-        return FILLP_FAILURE;
-    }
-
-    FILLP_INT isOk = DoShowFrameStats(sock, data, &len);
-    (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
-    if (isOk != FILLP_SUCCESS) {
-        return FILLP_FAILURE;
-    }
-    dump(softObj, data, len);
-    return FILLP_SUCCESS;
+    return FillpDumpShowSockData(sockIndex, softObj, dump, DoShowFrameStats);
 }
 
 static FILLP_INT FillpDumpMgtMsgCb(FILLP_INT optVal, void *softObj, FillpDfxDumpFunc dump)
