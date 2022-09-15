@@ -108,6 +108,10 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
     nowTime = times.sec * HB_TIME_FACTOR + times.usec / HB_TIME_FACTOR;
     DumpGearModeSettingList(nowTime, gearModeList);
     LIST_FOR_EACH_ENTRY_SAFE(info, nextInfo, gearModeList, GearModeStorageInfo, node) {
+        if (*gearModeCnt == 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from setting list is empty");
+            return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
+        }
         if (info->lifetimeStamp < nowTime && info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
             ListDelete(&info->node);
             SoftBusFree((void *)info->callerId);
@@ -170,13 +174,12 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
     }
-    if (GetGearModeFromSettingList(mode, &paramMgr->gearModeList, &paramMgr->gearModeCnt) != SOFTBUS_OK) {
+    int32_t ret = GetGearModeFromSettingList(mode, &paramMgr->gearModeList, &paramMgr->gearModeCnt);
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode from setting list err");
-        (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-        return SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime, ListNode *list, const GearMode *mode)
@@ -277,7 +280,6 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
     const GearMode *mode)
 {
     bool isRemoved = true;
-    bool wakeupFlag = false;
     LnnHeartbeatType registedHbType = msgPara->hbType;
 
     (void)LnnVisitHbTypeSet(VisitClearUnRegistedHbType, &registedHbType, NULL);
@@ -290,16 +292,18 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once is beginning, hbType:%d", msgPara->hbType);
         return SOFTBUS_OK;
     }
-    wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
+    bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin fail, hbType:%d", registedHbType);
         return SOFTBUS_ERR;
     }
-    if (LnnPostSendEndMsgToHbFsm(hbFsm, registedHbType, HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
+    bool isRelayV0 = msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0;
+    if (LnnPostSendEndMsgToHbFsm(hbFsm, registedHbType, isRelayV0 ? HB_SEND_RELAY_LEN :
+        HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", registedHbType);
         return SOFTBUS_ERR;
     }
-    if (msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0) {
+    if (isRelayV0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB send once but dont check status, hbType:%d", registedHbType);
         return SOFTBUS_OK;
     }
@@ -716,6 +720,11 @@ bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
 int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
 {
     return LnnPostTransStateMsgToHbFsm(g_hbFsm, isMasterNode ? EVENT_HB_AS_MASTER_NODE : EVENT_HB_AS_NORMAL_NODE);
+}
+
+int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
+{
+    return LnnPostUpdateSendInfoMsgToHbFsm(g_hbFsm, type);
 }
 
 int32_t LnnHbStrategyInit(void)

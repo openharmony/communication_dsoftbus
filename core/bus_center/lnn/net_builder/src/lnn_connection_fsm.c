@@ -21,6 +21,7 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
@@ -166,6 +167,7 @@ static void ReportResult(const char *udid, ReportCategory report)
             break;
         case REPORT_ONLINE:
             LnnNotifyOnlineState(true, &basic);
+            LnnInsertSpecificTrustedDevInfo(udid);
             break;
         case REPORT_NONE:
             /* fall-through */
