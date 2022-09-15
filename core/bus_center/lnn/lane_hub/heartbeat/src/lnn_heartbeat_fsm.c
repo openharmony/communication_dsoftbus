@@ -55,6 +55,7 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
 static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *para);
+static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para);
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
@@ -73,6 +74,7 @@ static LnnHeartbeatStateHandler g_normalNodeHandler[] = {
     {EVENT_HB_AS_NORMAL_NODE, OnTransHbFsmState},
     {EVENT_HB_IN_NONE_STATE, OnTransHbFsmState},
     {EVENT_HB_SET_MEDIUM_PARAM, OnSetMediumParam},
+    {EVENT_HB_UPDATE_SEND_INFO, OnUpdateSendInfo},
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
 };
 
@@ -85,6 +87,7 @@ static LnnHeartbeatStateHandler g_masterNodeHandler[] = {
     {EVENT_HB_AS_NORMAL_NODE, OnTransHbFsmState},
     {EVENT_HB_IN_NONE_STATE, OnTransHbFsmState},
     {EVENT_HB_SET_MEDIUM_PARAM, OnSetMediumParam},
+    {EVENT_HB_UPDATE_SEND_INFO, OnUpdateSendInfo},
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
 };
 
@@ -534,6 +537,14 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
     }
     SoftBusFree(para);
     return ret;
+}
+
+static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para)
+{
+    (void)fsm;
+    (void)msgType;
+
+    return LnnHbMediumMgrUpdateSendInfo((LnnHeartbeatUpdateInfoType)(uintptr_t)para);
 }
 
 static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
@@ -986,4 +997,13 @@ int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDe
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type)
+{
+    if (hbFsm == NULL || type <= UPDATE_HB_INFO_MIN || type >= UPDATE_HB_MAX_INFO) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post update info msg get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_UPDATE_SEND_INFO, (void *)(uintptr_t)type);
 }

@@ -1574,6 +1574,10 @@ int32_t LnnInitNetBuilderDelay(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
     LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
+    if (LnnInitFastOffline() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fast offline init fail!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1593,6 +1597,7 @@ void LnnDeinitNetBuilder(void)
     LnnDeinitTopoManager();
     LnnDeinitP2p();
     LnnDeinitSyncInfoManager();
+    LnnDeinitFastOffline();
     g_netBuilder.isInit = false;
 }
 
