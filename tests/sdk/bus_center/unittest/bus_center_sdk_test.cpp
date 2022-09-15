@@ -40,7 +40,6 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void AddPermission();
 };
 
 void BusCenterSdkTest::SetUpTestCase()

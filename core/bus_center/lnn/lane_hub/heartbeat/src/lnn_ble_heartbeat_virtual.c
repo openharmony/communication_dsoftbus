@@ -49,6 +49,14 @@ static int32_t SetBleMediumParam(const LnnHeartbeatMediumParam *param)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+static int32_t UpdateBleSendInfo(LnnHeartbeatUpdateInfoType type)
+{
+    (void)type;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl update send info");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 static int32_t StopBleHeartbeat(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat stop");
@@ -67,6 +75,7 @@ static LnnHeartbeatMediumMgr g_bleMgr = {
     .onSendOneHbBegin = BleHeartbeatOnceBegin,
     .onSendOneHbEnd = BleHeartbeatOnceEnd,
     .onSetMediumParam = SetBleMediumParam,
+    .onUpdateSendInfo = UpdateBleSendInfo,
     .onStopHbByType = StopBleHeartbeat,
     .deinit = DeinitBleHeartbeat,
 };
