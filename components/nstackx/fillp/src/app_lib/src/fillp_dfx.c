@@ -312,7 +312,7 @@ void FillpDfxSockLinkAndQosNotify(const struct FtSocket *sock, FillpDfxLinkEvtTy
     args.linkEvt.linkEvtType = evtType;
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_LINK_EXCEPTION);
 
-    if (sock->netconn->state < CONN_STATE_CLOSING) {
+    if (sock->netconn->state == CONN_STATE_CONNECTED) {
         FillpDfxSockQosNotify(sock);
     }
 
@@ -526,8 +526,7 @@ static FILLP_INT32 DoShowSockList(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
     FILLP_INT ipLen = IpAddrAnonymousFormat(localAddr, sizeof(localAddr),
         (const struct sockaddr *)local, sizeof(struct sockaddr_in6));
     if (ipLen == NSTACKX_EFAILED) {
-        FILLP_LOGERR("Anonymous localAddr failed");
-        return FILLP_FAILURE;
+        (void)strcpy_s(localAddr, INET6_ADDRSTRLEN, "NONE");
     }
 
     if (sock->netconn->state > CONN_STATE_LISTENING) {
