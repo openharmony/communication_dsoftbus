@@ -31,7 +31,7 @@ ohos_benchmarktest("DiscoveryTest") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
   ]
-  external_deps = ["c_utils:utils"]
+  external_deps = [ "c_utils:utils" ]
 }
 group("benchmarktest") {
   testonly = true
