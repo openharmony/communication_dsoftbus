@@ -146,10 +146,10 @@ typedef struct {
 } BleOption;
 
 static ScanSetting g_scanTable[FREQ_BUTT] = {
-    {60, 3000},
-    {60, 600},
-    {60, 240},
-    {1000, 1000}
+    {SOFTBUS_BLE_SCAN_WINDOW_P2, SOFTBUS_BLE_SCAN_INTERVAL_P2},
+    {SOFTBUS_BLE_SCAN_WINDOW_P10, SOFTBUS_BLE_SCAN_INTERVAL_P10},
+    {SOFTBUS_BLE_SCAN_WINDOW_P25, SOFTBUS_BLE_SCAN_INTERVAL_P25},
+    {SOFTBUS_BLE_SCAN_WINDOW_P100, SOFTBUS_BLE_SCAN_INTERVAL_P100}
 };
 
 static DiscInnerCallback *g_discBleInnerCb = NULL;
@@ -332,7 +332,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     }
     (void)SoftBusMutexLock(&g_bleInfoLock);
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "don't match passive publish capBitMap");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_DBG, "don't match passive publish capBitMap");
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
@@ -1623,6 +1623,52 @@ static int32_t DiscBleLooperInit(void)
     return SOFTBUS_OK;
 }
 
+static void DiscFreeBleScanFilter(SoftBusBleScanFilter **filter)
+{
+    if (*filter == NULL) {
+        return;
+    }
+    if ((*filter)->serviceData != NULL) {
+        SoftBusFree((*filter)->serviceData);
+        (*filter)->serviceData = NULL;
+    }
+    if ((*filter)->serviceDataMask != NULL) {
+        SoftBusFree((*filter)->serviceDataMask);
+        (*filter)->serviceDataMask = NULL;
+    }
+    SoftBusFree(*filter);
+}
+
+static void DiscBleSetScanFilter(int32_t listenerId)
+{
+    SoftBusBleScanFilter *filter = NULL;
+
+    filter = (SoftBusBleScanFilter *)SoftBusCalloc(sizeof(SoftBusBleScanFilter));
+    filter->serviceData = (unsigned char *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+    filter->serviceDataMask = (unsigned char *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+    if (filter == NULL || filter->serviceData == NULL || filter->serviceDataMask == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "calloc scan filter fail");
+        DiscFreeBleScanFilter(&filter);
+        return;
+    }
+    filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
+    filter->serviceData[0] = BLE_UUID & BYTE_MASK;
+    filter->serviceData[1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
+    filter->serviceData[UUID_LEN + POS_VERSION] = BLE_VERSION;
+    filter->serviceData[UUID_LEN + POS_BUSINESS] = DISTRIBUTE_BUSINESS;
+    filter->serviceData[UUID_LEN + POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
+    filter->serviceDataMask[0] = BYTE_MASK;
+    filter->serviceDataMask[1] = BYTE_MASK;
+    filter->serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
+    if (SoftBusSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set scan filter fail");
+        DiscFreeBleScanFilter(&filter);
+        return;
+    }
+}
+
 static int32_t InitBleListener(void)
 {
     g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
@@ -1630,6 +1676,7 @@ static int32_t InitBleListener(void)
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
         return SOFTBUS_ERR;
     }
+    DiscBleSetScanFilter(g_bleListener.scanListenerId);
     return SOFTBUS_OK;
 }
 
