@@ -69,8 +69,8 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t 
 
 int32_t OpenTransaction(DbContext *ctx);
 int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type);
-int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len);
-int32_t UpdateDbPassword(DbContext *ctx, const char *password, uint32_t len);
+int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len);
+int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len);
 
 int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value);
 int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value);
