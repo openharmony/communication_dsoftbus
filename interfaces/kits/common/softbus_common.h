@@ -25,6 +25,7 @@
  * @since 1.0
  * @version 1.0
  */
+/** @} */
 
 /**
  * @file softbus_common.h
