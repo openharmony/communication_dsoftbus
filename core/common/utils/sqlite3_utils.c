@@ -518,11 +518,11 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
     return rc;
 }
 
-int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len)
+int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
-    if (!CheckDbContextParam(ctx) || password == NULL || password[0] == '\0' || strlen(password) != len) {
+    if (!CheckDbContextParam(ctx) || password == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -534,11 +534,11 @@ int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateDbPassword(DbContext *ctx, const char *password, uint32_t len)
+int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
-    if (!CheckDbContextParam(ctx) || password == NULL || password[0] == '\0' || strlen(password) != len) {
+    if (!CheckDbContextParam(ctx) || password == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
