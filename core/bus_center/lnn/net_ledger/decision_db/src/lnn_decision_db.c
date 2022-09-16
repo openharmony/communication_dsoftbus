@@ -19,15 +19,124 @@
 
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_file_utils.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_huks_utils.h"
 #include "sqlite3_utils.h"
 
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+
+#define LNN_DB_KEY_LEN 1024
+#define LNN_DB_KEY_AILAS "dsoftbus_decision_db_key_alias"
+
+static struct HksBlob g_keyAlias = {sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS};
+
+static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
+{
+    struct HksBlob plainData = {0};
+    struct HksBlob encryptData = {0};
+
+    encryptData.data = (uint8_t *)SoftBusCalloc(len);
+    if (encryptData.data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc encrypt dbKey fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    plainData.size = len;
+    plainData.data = dbKey;
+    if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt dbKey by huks fail");
+        SoftBusFree(encryptData.data);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "encrypt dbKey log for audit");
+    (void)memset_s(plainData.data, len, 0x0, len);
+    if (memcpy_s(dbKey, len, encryptData.data, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s dbKey fail");
+        SoftBusFree(encryptData.data);
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusFree(encryptData.data);
+    return SOFTBUS_OK;
+}
+
+static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
+{
+    struct HksBlob encryptData = {0};
+    struct HksBlob decryptData = {0};
+
+    decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
+    if (decryptData.data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc decrypt dbKey fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    encryptData.size = len;
+    encryptData.data = dbKey;
+    if (LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey by huks fail");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "decrypt dbKey log for audit");
+    return SOFTBUS_OK;
+}
+
+static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len)
+{
+    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN];
+
+    if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get dbKey save path fail");
+        return SOFTBUS_ERR;
+    }
+    do {
+        if (SoftBusAccessFile(dbKeyFilePath, SOFTBUS_F_OK) == SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "dbKey file is exist");
+            break;
+        }
+        if (LnnGenerateRandomByHuks(dbKey, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate random dbKey fail");
+            return SOFTBUS_ERR;
+        }
+        if (EncryptDecisionDbKey(dbKey, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt dbKey fail");
+            return SOFTBUS_ERR;
+        }
+        if (SoftBusWriteFile(dbKeyFilePath, (char *)dbKey, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write dbKey to file fail");
+            return SOFTBUS_ERR;
+        }
+    } while (false);
+    if (SoftBusReadFullFile(dbKeyFilePath, (char *)dbKey, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read dbKey from file fail");
+        return SOFTBUS_ERR;
+    }
+    if (DecryptDecisionDbKey(dbKey, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t EncryptDecisionDb(DbContext *ctx)
+{
+    uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
+
+    if (GetDecisionDbKey(dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get decision dbKey fail");
+        return SOFTBUS_ERR;
+    }
+    if (EncryptedDb(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt decision db fail");
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
+    return SOFTBUS_OK;
+}
 
 static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord *record)
 {
@@ -89,9 +198,15 @@ static void InsertTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
-    if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
-        (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
-    }
+    do {
+        if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
+            break;
+        }
+        if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
+            (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
+        }
+    } while (false);
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "close database failed.");
         SoftBusFree(udid);
@@ -121,13 +236,17 @@ static void RemoveTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
-    if (RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
-        (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
-    }
+    do {
+        if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
+            break;
+        }
+        if (RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
+            (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
+        }
+    } while (false);
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "close database failed.");
-        SoftBusFree(udid);
-        return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove udid:%s from trusted dev info table.", AnonymizesUDID(udid));
     SoftBusFree(udid);
@@ -187,9 +306,36 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
+static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHash,
+    char **udidArray, uint32_t *num)
+{
+    if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
+        *udidArray = NULL;
+        *num = 0;
+        return SOFTBUS_ERR;
+    }
+    *num = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash);
+    if (*num == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "get none trusted dev info");
+        *udidArray = NULL;
+        return SOFTBUS_OK;
+    }
+    *udidArray = (char *)SoftBusCalloc(*num * UDID_BUF_LEN);
+    if (*udidArray == NULL) {
+        *num = 0;
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
+        (uint8_t **)udidArray, *num) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "query udidArray failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
 {
-    int32_t rc = SOFTBUS_ERR;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
     DbContext *ctx = NULL;
@@ -209,26 +355,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open database failed.");
         return SOFTBUS_ERR;
     }
-    do {
-        *num = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash);
-        if (*num == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "get none trusted dev info");
-            *udidArray = NULL;
-            rc = SOFTBUS_OK;
-            break;
-        }
-        *udidArray = (char *)SoftBusCalloc(*num * UDID_BUF_LEN);
-        if (*udidArray == NULL) {
-            rc = SOFTBUS_MALLOC_ERR;
-            break;
-        }
-        if (QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
-            (uint8_t **)udidArray, *num) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "query udidArray failed.");
-            break;
-        }
-        rc = SOFTBUS_OK;
-    } while (false);
+    int32_t rc = GetTrustedDevInfoRecord(ctx, accountHexHash, udidArray, num);
     if (rc != SOFTBUS_OK && *udidArray != NULL) {
         SoftBusFree(*udidArray);
         *udidArray = NULL;
@@ -251,6 +378,10 @@ static int32_t InitTrustedDevInfoTableDelay(void)
         return SOFTBUS_ERR;
     }
     do {
+        if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
+            break;
+        }
         if (CheckTableExist(ctx, TABLE_TRUSTED_DEV_INFO, &isExist) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check table exist failed.");
             break;
@@ -270,5 +401,9 @@ static int32_t InitTrustedDevInfoTableDelay(void)
 
 int32_t LnnInitDecisionDbDelay(void)
 {
+    if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate decision db huks key fail");
+        return SOFTBUS_ERR;
+    }
     return InitTrustedDevInfoTableDelay();
 }

@@ -32,7 +32,8 @@ typedef struct {
 static char g_storagePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
 static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
-    { LNN_FILE_ID_UUID, "/dsoftbus/uuid" }
+    { LNN_FILE_ID_UUID, "/dsoftbus/uuid" },
+    { LNN_FILE_ID_DB_KEY, "/dsoftbus/dbKey" },
 };
 
 static int32_t InitStorageConfigPath(void)
