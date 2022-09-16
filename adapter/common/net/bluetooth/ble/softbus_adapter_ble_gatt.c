@@ -801,7 +801,6 @@ static void FreeScanFilter(int listenerId)
         }
     }
     SoftBusFree(filter);
-    filter = g_scanListener[listenerId].filter = NULL;
 }
 
 int SoftBusRemoveScanListener(int listenerId)
