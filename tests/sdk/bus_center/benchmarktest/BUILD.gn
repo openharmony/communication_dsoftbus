@@ -23,7 +23,7 @@ ohos_benchmarktest("BusCenterTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/adapter/common/include",
   ]
@@ -38,8 +38,9 @@ ohos_benchmarktest("BusCenterTest") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+
+  external_deps = [ "c_utils:utils" ]
 }
 
 group("benchmarktest") {
