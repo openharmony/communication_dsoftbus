@@ -80,7 +80,7 @@ static int CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void *sr
     switch (type) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
         case SOFTBUS_EVT_PARAMTYPE_UINT8:
-            *(uint32_t *)dst = *(uint32_t *)src;
+            *(uint8_t *)dst = *(uint8_t *)src;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT16:
             *(uint16_t *)dst = *(uint16_t *)src;
@@ -133,11 +133,11 @@ static int NstackDfxEvtToSoftBusReportMsg(SoftBusEvtReportMsg *msg, const Nstack
         LOG_ERR("eventName mismatch, nstack event name %s", info->eventName);
         return SOFTBUS_ERR;
     }
-    if (info->type + 1 >= SOFTBUS_EVT_TYPE_BUTT) {
+    if (info->type >= SOFTBUS_EVT_TYPE_BUTT) {
         LOG_ERR("eventType mismatch, nstack event type %d", info->type);
         return SOFTBUS_ERR;
     }
-    msg->evtType = (SoftBusEvtType)(info->type + 1);
+    msg->evtType = (SoftBusEvtType)(info->type);
     if (info->paramNum != 0 && info->paramArray == NULL) {
         LOG_ERR("param mismatch, nstack paramNum %u paramArray is NULL", info->paramNum);
         return SOFTBUS_ERR;
