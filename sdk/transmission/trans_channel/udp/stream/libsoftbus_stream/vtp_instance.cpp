@@ -25,6 +25,7 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "stream_common.h"
+#include "softbus_hisysevt_nstack.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -156,7 +157,11 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
         return false;
     }
     isDestroyed_ = false;
-
+#ifdef FILLP_ENHANCED
+    if (static_cast<int>(FtSetDfxEventCb(NULL, DstreamHiEventCb)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "FtSetDfxEventCb set failed!");
+    }
+#endif
     packetNameArray_.push_back(pkgName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s success to init vtp instance", pkgName.c_str());
     return true;

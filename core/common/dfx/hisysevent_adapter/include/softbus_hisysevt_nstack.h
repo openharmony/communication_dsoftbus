@@ -15,10 +15,17 @@
 
 #ifndef SOFTBUS_ADAPTER_HISYSEVENT_NSTACK_H
 #define SOFTBUS_ADAPTER_HISYSEVENT_NSTACK_H
+#ifdef FILLP_ENHANCED
+#include "fillpinc.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef FILLP_ENHANCED
+void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info);
+#endif
 void NstackInitHiEvent(void);
 
 #ifdef __cplusplus

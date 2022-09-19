@@ -181,7 +181,7 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
     }
 }
 
-static void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
+void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(FillpDfxEvent)) != EOK) {
@@ -219,10 +219,6 @@ static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
 
 void NstackInitHiEvent(void)
 {
-    if (FtSetDfxEventCb(NULL, DstreamHiEventCb) != 0) {
-        LOG_ERR("FtSetDfxEventCb failed!");
-    }
-
     NSTACKX_DFileSetEventFunc(NULL, DFileHiEventCb);
     if (NSTACKX_DFinderSetEventFunc(NULL, DFinderHiEventCb) != 0) {
         LOG_ERR("NSTACKX_DFinderSetEventFunc failed!");
