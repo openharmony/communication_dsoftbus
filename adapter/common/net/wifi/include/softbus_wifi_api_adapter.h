@@ -61,6 +61,22 @@ typedef struct {
     int64_t timestamp;
 } SoftBusWifiScanInfo;
 
+typedef enum {
+    SOFTBUS_API_WIFI_DISCONNECTED,
+    SOFTBUS_API_WIFI_CONNECTED,
+} SoftBusWifiConnState;
+
+typedef struct {
+    char ssid[WIFI_MAX_SSID_LEN];
+    unsigned char bssid[WIFI_MAC_LEN];
+    int rssi;
+    int band;
+    int frequency;
+    SoftBusWifiConnState connState;
+    unsigned short disconnectedReason;
+    unsigned int ipAddress;
+} SoftBusWifiLinkedInfo;
+
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
 int32_t SoftBusDisconnectDevice(void);
@@ -71,6 +87,7 @@ int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size);
 int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb);
 int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num);
 SoftBusBand SoftBusGetLinkBand(void);
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info);
 
 #ifdef __cplusplus
 }

@@ -343,3 +343,19 @@ SoftBusBand SoftBusGetLinkBand(void)
         return BAND_UNKNOWN;
     }
 }
+
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+{
+    WifiLinkedInfo result;
+    if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkedInfo failed.");
+        return SOFTBUS_ERR;
+    }
+    info->frequency = result.frequency;
+    info->band = result.band;
+    info->connState = SOFTBUS_API_WIFI_DISCONNECTED;
+    if (result.connState == WIFI_CONNECTED) {
+        info->connState = SOFTBUS_API_WIFI_CONNECTED;
+    }
+    return SOFTBUS_OK;
+}
