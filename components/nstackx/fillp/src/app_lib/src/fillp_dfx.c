@@ -191,6 +191,10 @@ void FillpDfxDoEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
 
 FILLP_INT FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
 {
+    if ((g_spunge == FILLP_NULL_PTR) || (!g_spunge->hasInited)) {
+        FILLP_LOGERR("Fillp not init!");
+        return -1;
+    }
     FILLP_INT err;
     struct SpungeHiEventCbMsg msg;
 
@@ -549,6 +553,10 @@ static FILLP_INT32 DoShowSockList(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
 
 static FILLP_INT FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
 {
+    if ((g_spunge == FILLP_NULL_PTR) || (!g_spunge->hasInited) || (g_spunge->sockTable == FILLP_NULL_PTR)) {
+        FILLP_LOGERR("Fillp not init!");
+        return FILLP_FAILURE;
+    }
     struct FtSocket *sock = FILLP_NULL_PTR;
     FILLP_UINT32 len = 0;
 
