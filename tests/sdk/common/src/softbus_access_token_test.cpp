@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "softbus_common.h"
+#include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "softbus_access_token_test.h"
@@ -35,5 +36,6 @@ void SetAceessTokenPermission(const char* processName)
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
