@@ -143,13 +143,6 @@ DFILE_TRANS_COMPLETE_EVT:
 DFILE_ACCEPT_SOCKET_EVT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: accept socket}
 
-DFINDER_STATS:
-  __BASE: {type: STATISTIC, level: MINOR, desc: dfinder statistics}
-  INVALID_OPTION_CNT: {type: UINT64, desc: the count of invalid option}
-  BUILD_PKT_FAIL_CNT: {type: UINT64, desc: the count when building packet failed}
-  INVALID_RSP_CNT: {type: UINT64, desc: the count of invalid message}
-  OVER_DEVICE_LIMIT_CNT: {type: UINT64, desc: the count when the device number is over limit}
-  
 FILLP_LINK_EVT:
   __BASE: {type: FAULT, level: MINOR, desc: fillp link disconnect}
   SOCK_IDX: {type: UINT32, desc: fillp socket index}
