@@ -28,7 +28,7 @@
 #include "softbus_log.h"
 #include "softbus_hisysevt_nstack.h"
 
-#define MS_OF_DAY (5000)
+#define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0
 
 StatisticEvtReportFunc g_statisticEvtReportFunc[SOFTBUS_STATISTIC_EVT_BUTT] = {NULL};
