@@ -166,6 +166,10 @@ private:
 
     bool EnableJitterDetectionAlgo(int streamFd) const;
 
+    bool EnableDirectlySend(int streamFd) const;
+
+    bool EnableSemiReliable(int streamFd) const;
+
     void RegisterMetricCallback(bool isServer); /* register the metric callback function */
 
     static void AddStreamSocketLock(int fd, std::mutex &streamsocketlock);
@@ -184,7 +188,7 @@ private:
 
     void FillpAppStatistics();
 
-    void FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv metricList);
+    static void FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv* metricList);
 
     static std::map<int, std::mutex &> g_streamSocketLockMap;
     static std::map<int, std::shared_ptr<VtpStreamSocket>> g_streamSocketMap;
