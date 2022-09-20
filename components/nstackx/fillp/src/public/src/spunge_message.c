@@ -586,7 +586,7 @@ static void SpungeHandleMsgDoShutdown(void *value, struct SpungeInstance *inst)
         goto FINISH;
     }
 
-    FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_CLOSE);
+    FillpDfxSockLinkAndQosNotify(sock, FILLP_DFX_LINK_CLOSE);
     SpungeShutdownSock(sock, howValue);
 
     if (readShut && writeShut) {
@@ -689,7 +689,7 @@ static void SpungeHandleMsgClose(void *value, struct SpungeInstance *inst)
     conn->closeSet = 1;
     sock->allocState = SOCK_ALLOC_STATE_WAIT_TO_CLOSE;
 
-    FillpDfxSockLinkAndQosNotify(sock->index, FILLP_DFX_LINK_CLOSE);
+    FillpDfxSockLinkAndQosNotify(sock, FILLP_DFX_LINK_CLOSE);
     SpungeShutdownSock(sock, SPUNGE_SHUT_RDWR);
 
     SpungeCloseMsgFreeSrc(conn, sock);
@@ -849,6 +849,17 @@ static void SpungeHandleMsgSetKeepAlive(void *value, struct SpungeInstance *inst
     sock->coreErrType[MSG_TYPE_SET_KEEP_ALIVE] = ERR_OK;
 }
 
+static void SpungeHandleMsgSetHiEventCb(void *value, struct SpungeInstance *inst)
+{
+    struct SpungeHiEventCbMsg *msg = (struct SpungeHiEventCbMsg *)value;
+    if (value == FILLP_NULL_PTR) {
+        FILLP_LOGERR("value is NULL");
+        return;
+    }
+    FILLP_UNUSED_PARA(inst);
+    FillpDfxDoEvtCbSet(msg->softObj, msg->cb);
+}
+
 /*
 Description: Message handler
 Value Range: None
@@ -869,6 +880,7 @@ spungeMsgHandler g_msgHandler[MSG_TYPE_END] = {
     SpungeHandleMsgSetNackDelay,            /* MSG_TYPE_SET_NACK_DELAY */
     SpungeHandleMsgGetEvtInfo,              /* MSG_TYPE_GET_EVENT_INFO */
     SpungeHandleMsgSetKeepAlive,            /* MSG_TYPE_SET_KEEP_ALIVE */
+    SpungeHandleMsgSetHiEventCb,            /* MSG_TYPE_SET_HIEVENT_CB */
 };
 
 static FILLP_INT SpungeMsgCreatePoolCb(DympItemType *item)

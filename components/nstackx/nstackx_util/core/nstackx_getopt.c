@@ -83,9 +83,13 @@ static int32_t GetOptParseAttachArg(NstackGetOptMsg *optMsg, int32_t argc, const
     return NSTACKX_EOK;
 }
 
-static int32_t NstackCheckArg(int32_t argc, const char *const *argv)
+static int32_t NstackCheckArg(const NstackGetOptMsg *optMsg, int32_t argc, const char *const *argv)
 {
-    if (argc == 0 || argc > NSTACK_GETOPT_MAX_ARGC) {
+    if (optMsg == NULL) {
+        LOGE(TAG, "optMsg is NULL");
+        return NSTACKX_EFAILED;
+    }
+    if (argc <= 1 || argc > NSTACK_GETOPT_MAX_ARGC) {
         LOGE(TAG, "argc is invalid %u", argc);
         return NSTACKX_EFAILED;
     }
@@ -105,7 +109,7 @@ static int32_t NstackCheckArg(int32_t argc, const char *const *argv)
 
 int32_t NstackGetOpt(NstackGetOptMsg *optMsg, int32_t argc, const char *const *argv, const char *opts)
 {
-    if (NstackCheckArg(argc, argv) != NSTACKX_EOK) {
+    if (NstackCheckArg(optMsg, argc, argv) != NSTACKX_EOK) {
         return NSTACK_GETOPT_END_OF_STR;
     }
     int32_t currentOpt;
@@ -124,7 +128,7 @@ int32_t NstackGetOpt(NstackGetOptMsg *optMsg, int32_t argc, const char *const *a
     return currentOpt;
 }
 
-const char *NstackGetOptArgs(NstackGetOptMsg *optMsg)
+const char *NstackGetOptArgs(const NstackGetOptMsg *optMsg)
 {
     if (optMsg == NULL) {
         LOGE(TAG, "optMsg is NULL");
