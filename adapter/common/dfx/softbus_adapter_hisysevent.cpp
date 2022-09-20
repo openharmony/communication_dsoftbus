@@ -27,7 +27,7 @@
 static const char *g_demain = "DSOFTBUS";
 static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
-static void Convert2HiSysParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
+static init32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
 {
     switch (srcParam->paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
@@ -69,28 +69,30 @@ static void Convert2HiSysParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstPa
                 srcParam->paramValue.str) != EOK) {
                 SoftBusFree(dstParam->v.s);
                 HILOG_ERROR(SOFTBUS_HILOG_ID, "copy string var fail");
-                return;
+                return SOFTBUS_ERR;
             }
             break;
         default:
             break;
     }
+    return SOFTBUS_OK;
 }
 
-static void HiSysEventParamInit(SoftBusEvtReportMsg *msg)
+static int32_t HiSysEventParamInit(SoftBusEvtReportMsg *msg)
 {
     if (memset_s(g_dstParam, sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT, 0,
         sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "init  g_dstParam fail");
-        return;
+        return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < msg->paramNum; i++) {
         if (strcpy_s(g_dstParam[i].name, SOFTBUS_HISYSEVT_NAME_LEN, msg->paramArray[i].paramName) != EOK) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "copy param fail");
-            return;
+            return SOFTBUS_ERR;
         }
-        Convert2HiSysParam(&msg->paramArray[i], &g_dstParam[i]);
+        ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]);
     }
+    return SOFTBUS_OK;
 }
 
 static void HiSysEventParamDeInit(uint32_t size)
