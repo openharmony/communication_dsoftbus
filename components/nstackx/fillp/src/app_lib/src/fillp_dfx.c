@@ -14,14 +14,18 @@
  */
 
 #include "fillp_dfx.h"
+#include <limits.h>
 #include "sockets.h"
 #include "socket_common.h"
 #include "log.h"
 #include "res.h"
 #include "spunge.h"
 #include "securec.h"
-#include "nstackx_getopt.h"
 #include "log.h"
+#include "spunge_message.h"
+#include "nstackx_getopt.h"
+#include "nstackx_util.h"
+#include "nstackx_error.h"
 
 #define FILLP_DFX_PKT_EVT_DROP_THRESHOLD 1000
 static struct Hlist g_fillpDfxPktPraseFailList = {
@@ -55,11 +59,11 @@ typedef union {
     struct {
         FILLP_UINT32 sockIdx;
         FILLP_UINT32 rtt;
-        FILLP_UINT32 recvPktLoss; /* 0.01% */
-        FILLP_ULLONG recvRateBps; /* bps */
-        FILLP_UINT32 sendPktLoss; /* 0.01% */
-        FILLP_ULLONG sendRateBps; /* bps */
-        FILLP_LLONG jitter; /* ms */
+        FILLP_UINT32 totalReceivedPkt;
+        FILLP_UINT32 totalReceivedBytes;
+        FILLP_UINT32 totalSendPkt;
+        FILLP_UINT32 totalSendBytes;
+        FILLP_UINT32 jitter; /* ms */
     } sockQos;
 } FillpDfxEvtArgs;
 
@@ -132,22 +136,22 @@ static const FillpDfxEventParam g_fillpDfxEvtParam[FILLP_DFX_EVT_DFX_MAX][FILLP_
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "RECV_PKT_LOSS",
-        },
-        {
-            .type = FILLP_DFX_PARAM_TYPE_UINT64,
-            .paramName = "RECV_RATE_BPS",
+            .paramName = "TOTAL_RECV_PKT",
         },
         {
             .type = FILLP_DFX_PARAM_TYPE_UINT32,
-            .paramName = "SEND_PKT_LOSS",
+            .paramName = "TOTAL_RECV_BYTES",
         },
         {
-            .type = FILLP_DFX_PARAM_TYPE_UINT64,
-            .paramName = "SEND_RATE_BPS",
+            .type = FILLP_DFX_PARAM_TYPE_UINT32,
+            .paramName = "TOTAL_SEND_PKT",
         },
         {
-            .type = FILLP_DFX_PARAM_TYPE_UINT64,
+            .type = FILLP_DFX_PARAM_TYPE_UINT32,
+            .paramName = "TOTAL_SEND_BYTES",
+        },
+        {
+            .type = FILLP_DFX_PARAM_TYPE_UINT32,
             .paramName = "JITTER",
         },
     },
@@ -168,10 +172,10 @@ static void DfxEvtGetParamAddr(const FillpDfxEvtArgs *args, FillpDfxEvt evt, con
         [FILLP_DFX_EVT_SOCK_QOS_STATUS] = {
             &args->sockQos.sockIdx,
             &args->sockQos.rtt,
-            &args->sockQos.recvPktLoss,
-            &args->sockQos.recvRateBps,
-            &args->sockQos.sendPktLoss,
-            &args->sockQos.sendRateBps,
+            &args->sockQos.totalReceivedPkt,
+            &args->sockQos.totalReceivedBytes,
+            &args->sockQos.totalSendPkt,
+            &args->sockQos.totalSendBytes,
             &args->sockQos.jitter,
         },
     };
@@ -179,14 +183,30 @@ static void DfxEvtGetParamAddr(const FillpDfxEvtArgs *args, FillpDfxEvt evt, con
         (void *)paramValTmp[evt], sizeof(void *) * FILLP_EVT_MAX_PARA_NUM);
 }
 
-void FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
+void FillpDfxDoEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
 {
-    if (g_fillpDfxEvtCb != FILLP_NULL_PTR) {
-        FILLP_LOGERR("fillp dfx event callback already set!");
-        return;
-    }
     g_fillpDfxEvtCb = evtCb;
     g_fillpDfxSoftObj = softObj;
+}
+
+FILLP_INT FillpDfxEvtCbSet(void *softObj, FillpDfxEventCb evtCb)
+{
+    if ((g_spunge == FILLP_NULL_PTR) || (!g_spunge->hasInited)) {
+        FILLP_LOGERR("Fillp not init!");
+        return -1;
+    }
+    FILLP_INT err;
+    struct SpungeHiEventCbMsg msg;
+
+    msg.softObj = softObj;
+    msg.cb = evtCb;
+
+    err = SpungePostMsg(SPUNGE_GET_CUR_INSTANCE(), &msg, MSG_TYPE_SET_HIEVENT_CB, FILLP_TRUE);
+    if (err != ERR_OK) {
+        FILLP_LOGERR("Failed to post msg to fillp to set Hievent callback");
+        return -1;
+    }
+    return 0;
 }
 
 static void DfxEvtParamValCpy(void *dstVal, const void *srcVal, FillpDfxEventParamType type)
@@ -254,31 +274,24 @@ static void FillpDfxEvtNotify(const FillpDfxEvtArgs *args, FillpDfxEvt evt)
     free(msg.paramArray);
 }
 
-static void FillpDfxSockQosNotify(FILLP_INT sockIdx)
+static void FillpDfxSockQosNotify(const struct FtSocket *sock)
 {
     FillpDfxEvtArgs args;
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.sockQos.sockIdx = (FILLP_UINT32)sockIdx;
-    struct FtSocket *sock = SockApiGetAndCheck(sockIdx);
-    if (sock == FILLP_NULL_PTR) {
-        return;
-    }
-    if (sock->netconn == FILLP_NULL_PTR || sock->netconn->pcb == FILLP_NULL_PTR) {
-        (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
-        return;
-    }
+    args.sockQos.sockIdx = (FILLP_UINT32)sock->index;
 
-    struct FtNetconn *netconn = (struct FtNetconn *)(sock->netconn);
-    struct FillAppFcStastics *appFcStastics = &(netconn->pcb->fpcb.statistics.appFcStastics);
+    const struct FillpPcb *pcb = &sock->netconn->pcb->fpcb;
+    const struct FillpStatisticsTraffic *traffic = &(pcb->statistics.traffic);
+    const struct FillAppFcStastics *appFcStastics = &(pcb->statistics.appFcStastics);
 
     args.sockQos.rtt = appFcStastics->periodRtt;
-    args.sockQos.recvPktLoss = appFcStastics->periodRecvPktLossHighPrecision;
-    args.sockQos.recvRateBps = appFcStastics->periodRecvRateBps;
-    args.sockQos.sendPktLoss = appFcStastics->periodSendPktLossHighPrecision;
-    args.sockQos.sendRateBps = appFcStastics->periodSendRateBps;
-    args.sockQos.jitter = FILLP_UTILS_US2MS(sock->jitter);
+    args.sockQos.totalReceivedPkt = traffic->totalRecved;
+    args.sockQos.totalReceivedBytes = traffic->totalRecvedBytes;
 
-    (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
+    args.sockQos.totalSendPkt = traffic->totalSend;
+    args.sockQos.totalSendBytes = traffic->totalSendBytes;
+    args.sockQos.jitter = (FILLP_UINT32)FILLP_UTILS_US2MS(sock->jitter);
+
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_SOCK_QOS_STATUS);
 }
 
@@ -295,21 +308,19 @@ static FillpDfxPktParseFailNode *DfxGetPktPraseFailNode(FILLP_INT sockIdx)
     return FILLP_NULL_PTR;
 }
 
-void FillpDfxSockLinkAndQosNotify(FILLP_INT sockIdx, FillpDfxLinkEvtType evtType)
+void FillpDfxSockLinkAndQosNotify(const struct FtSocket *sock, FillpDfxLinkEvtType evtType)
 {
     FillpDfxEvtArgs args;
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.linkEvt.sockIdx = (FILLP_UINT32)sockIdx;
+    args.linkEvt.sockIdx = (FILLP_UINT32)sock->index;
     args.linkEvt.linkEvtType = evtType;
     FillpDfxEvtNotify(&args, FILLP_DFX_EVT_LINK_EXCEPTION);
 
-    if (evtType == FILLP_DFX_LINK_VERSION_MISMATCH) {
-        return;
+    if (sock->netconn->state == CONN_STATE_CONNECTED) {
+        FillpDfxSockQosNotify(sock);
     }
 
-    FillpDfxSockQosNotify(sockIdx);
-
-    FillpDfxPktParseFailNode *node = DfxGetPktPraseFailNode(sockIdx);
+    FillpDfxPktParseFailNode *node = DfxGetPktPraseFailNode(sock->index);
     if (node == FILLP_NULL_PTR) {
         return;
     }
@@ -319,7 +330,7 @@ void FillpDfxSockLinkAndQosNotify(FILLP_INT sockIdx, FillpDfxLinkEvtType evtType
         return;
     }
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.pktEvt.sockIdx = (FILLP_UINT32)sockIdx;
+    args.pktEvt.sockIdx = (FILLP_UINT32)sock->index;
     args.pktEvt.pktEvtType = FILLP_DFX_PKT_PARSE_FAIL;
     args.pktEvt.dropCnt = node->dropCnt;
     HlistDelNode(&node->node);
@@ -347,7 +358,7 @@ void FillpDfxPktNotify(FILLP_INT sockIdx, FillpDfxPktEvtType evtType, FILLP_UINT
     }
     FillpDfxEvtArgs args;
     (void)memset_s(&args, sizeof(args), 0, sizeof(args));
-    args.pktEvt.sockIdx = sockIdx;
+    args.pktEvt.sockIdx = (FILLP_UINT32)sockIdx;
     args.pktEvt.pktEvtType = evtType;
     if (evtType == FILLP_DFX_PKT_PARSE_FAIL) {
         args.pktEvt.dropCnt = node->dropCnt;
@@ -364,8 +375,7 @@ void FillpDfxPktNotify(FILLP_INT sockIdx, FillpDfxPktEvtType evtType, FILLP_UINT
 #define FILLP_DFX_DUMP_ONE_SOCK_BUF (102U)
 #define FILLP_DFX_DUMP_MAX_ARGC (20U)
 #define FILLP_DFX_DUMP_STRTOL_BASE (10)
-#define FUZZY_IN_ADDR(addr) ((uint8_t *)(addr))[0], ((uint8_t *)(addr))[1], ((uint8_t *)(addr))[2]
-#define FILLP_DFX_DUMP_IP_PROT_LEN (10)
+#define FILLP_DFX_DUMP_MAX_OPT_ARG_LEN (10U)
 
 #define FILLP_DUMP_MSG_ADD_CHECK(data, len, fmt, ...) do { \
     FILLP_INT ret = sprintf_s(data + len, FILLP_DFX_DUMP_BUF_LEN - len, fmt, ##__VA_ARGS__); \
@@ -390,14 +400,15 @@ static FILLP_INT DoShowHelp(FILLP_CHAR *data, FILLP_UINT32 *len)
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowHelp(void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowHelp(void *softObj, FillpDfxDumpFunc dump)
 {
     FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
     FILLP_UINT32 len = 0;
     if (DoShowHelp(data, &len) != FILLP_SUCCESS) {
-        return;
+        return FILLP_FAILURE;
     }
     dump(softObj, data, len);
+    return FILLP_SUCCESS;
 }
 
 static inline FILLP_INT DoShowVersion(FILLP_CHAR *data, FILLP_UINT32 *len)
@@ -406,14 +417,15 @@ static inline FILLP_INT DoShowVersion(FILLP_CHAR *data, FILLP_UINT32 *len)
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowVer(void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowVer(void *softObj, FillpDfxDumpFunc dump)
 {
     FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
     FILLP_UINT32 len = 0;
     if (DoShowVersion(data, &len) != FILLP_SUCCESS) {
-        return;
+        return FILLP_FAILURE;
     }
     dump(softObj, data, len);
+    return FILLP_SUCCESS;
 }
 
 static inline FILLP_INT DoShowLogLevel(FILLP_CHAR *data, FILLP_UINT32 *len)
@@ -422,14 +434,15 @@ static inline FILLP_INT DoShowLogLevel(FILLP_CHAR *data, FILLP_UINT32 *len)
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowLogLevel(void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowLogLevel(void *softObj, FillpDfxDumpFunc dump)
 {
     FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
     FILLP_UINT32 len = 0;
     if (DoShowLogLevel(data, &len) != FILLP_SUCCESS) {
-        return;
+        return FILLP_FAILURE;
     }
     dump(softObj, data, len);
+    return FILLP_SUCCESS;
 }
 
 static FILLP_INT32 DoShowSockConfigRes(FILLP_INT sockIndex, FILLP_CONST struct GlobalAppResource *resource,
@@ -450,13 +463,13 @@ static FILLP_INT32 DoShowSockConfigRes(FILLP_INT sockIndex, FILLP_CONST struct G
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "Enlarge pack interval falg: %hhu"CRLF, common->enlargePackIntervalFlag);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "Max receive buffer size: %u"CRLF, common->recvBufSize);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "Flow control: opposite set rate: %u"CRLF, fc->oppositeSetRate);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              use const stack send rate: %u"CRLF, fc->constRateEnbale);
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              use const stack send rate: %hhu"CRLF, fc->constRateEnbale);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              max send rate: %u Kbps"CRLF, fc->maxRate);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              max recv rate: %u Kbps"CRLF, fc->maxRecvRate);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              packet size: %u"CRLF, fc->pktSize);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              slow start: %u"CRLF, fc->slowStart);
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              packet size: %hu"CRLF, fc->pktSize);
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              slow start: %hhu"CRLF, fc->slowStart);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "Timer config: connection timeout: %u(s)"CRLF, common->connectTimeout);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              retry timeout: %u(s)"CRLF, common->connRetryTimeout);
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              retry timeout: %hu(s)"CRLF, common->connRetryTimeout);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "              disconnect retry timeout: %u(s)"CRLF,
         common->disconnectRetryTimeout);
     FILLP_DUMP_MSG_ADD_CHECK(data, *len, "------- End of socket config resource data -------"CRLF);
@@ -469,7 +482,7 @@ static inline FILLP_INT DumpInvalidSock(FILLP_INT sockIndex, FILLP_CHAR *data, F
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowSockResource(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowSockResource(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
 {
     FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
     FILLP_UINT32 len = 0;
@@ -478,45 +491,72 @@ static void FillpDumpShowSockResource(FILLP_INT sockIndex, void *softObj, FillpD
         if (DumpInvalidSock(sockIndex, data, &len) == FILLP_SUCCESS) {
             dump(softObj, data, len);
         }
-        return;
+        return FILLP_FAILURE;
     }
     
     FILLP_INT32 isOk = DoShowSockConfigRes(sockIndex, &sock->resConf, data, &len);
     (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
     if (isOk != FILLP_SUCCESS) {
-        return;
+        return FILLP_FAILURE;
     }
     dump(softObj, data, len);
+    return FILLP_SUCCESS;
 }
 
 static inline FILLP_INT32 DoShowSockListTitle(FILLP_CHAR *data, FILLP_UINT32 *len)
 {
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%5s\t %6s\t %6s\t %6s\t %6s\t %20s\t %20s\t %5s"CRLF,
-        "Sock", "Unsend", "Unack", "Redun", "Unrecv", "LocalIP", "PeerIP", "State");
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%5s\t %6s\t %6s\t %6s\t %6s\t %30s\t %5s\t %30s\t %5s\t %12s"CRLF,
+        "Sock", "Unsend", "Unack", "Redun", "Unrecv", "LocalIP", "Port", "PeerIP", "Port", "State");
     return FILLP_SUCCESS;
 }
+
+static const char *g_sockStateStr[CONN_STATE_CLOSED + 1] = {
+    "IDLE",
+    "LISTENING",
+    "CONNECTING",
+    "CONNECTED",
+    "CLOSING",
+    "CLOSED",
+};
 
 static FILLP_INT32 DoShowSockList(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len)
 {
     struct sockaddr_in *local = (struct sockaddr_in *)&sock->netconn->pcb->localAddr;
     struct sockaddr_in *peer = (struct sockaddr_in *)&sock->netconn->pcb->remoteAddr;
     const struct FillpSendPcb *sendPcb = &sock->netconn->pcb->fpcb.send;
-    FILLP_CHAR localAddr[INET_ADDRSTRLEN + FILLP_DFX_DUMP_IP_PROT_LEN];
-    FILLP_CHAR peerAddr[INET_ADDRSTRLEN + FILLP_DFX_DUMP_IP_PROT_LEN];
-    FILLP_UINT32 addrLen = 0;
-    FILLP_DUMP_MSG_ADD_CHECK(localAddr, addrLen, "%hhu.%hhu.%hhu.***:%hu",
-        FUZZY_IN_ADDR(&local->sin_addr), ntohs(local->sin_port));
-    addrLen = 0;
-    FILLP_DUMP_MSG_ADD_CHECK(peerAddr, addrLen, "%hhu.%hhu.%hhu.***:%hu",
-        FUZZY_IN_ADDR(&peer->sin_addr), ntohs(peer->sin_port));
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%5d\t %6u\t %6u\t %6u\t %6u\t %20s\t %20s\t %5hhu"CRLF,
-        sock->index, sendPcb->unSendList.size, sendPcb->unackList.size, sendPcb->redunList.nodeNum,
-        sendPcb->unrecvList.nodeNum, localAddr, peerAddr, sock->netconn->state);
+    FILLP_CHAR localAddr[INET6_ADDRSTRLEN];
+    FILLP_CHAR peerAddr[INET6_ADDRSTRLEN];
+
+    FILLP_INT ipLen = IpAddrAnonymousFormat(localAddr, sizeof(localAddr),
+        (const struct sockaddr *)local, sizeof(struct sockaddr_in6));
+    if (ipLen == NSTACKX_EFAILED) {
+        (void)strcpy_s(localAddr, INET6_ADDRSTRLEN, "NONE");
+    }
+
+    if (sock->netconn->state > CONN_STATE_LISTENING) {
+        ipLen = IpAddrAnonymousFormat(peerAddr, sizeof(peerAddr),
+            (const struct sockaddr *)peer, sizeof(struct sockaddr_in6));
+        if (ipLen == NSTACKX_EFAILED) {
+            FILLP_LOGERR("Anonymous remoteAddr failed");
+            return FILLP_FAILURE;
+        }
+    } else {
+        (void)strcpy_s(peerAddr, INET6_ADDRSTRLEN, "NONE");
+    }
+
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%5d\t %6u\t %6u\t %6u\t %6u\t %30s\t %5hu\t %30s\t %5hu\t %12s"CRLF,
+        sock->index, sendPcb->unSendList.size, sendPcb->unackList.count, sendPcb->redunList.nodeNum,
+        sendPcb->unrecvList.nodeNum, localAddr, FILLP_NTOHS(local->sin_port), peerAddr, FILLP_NTOHS(peer->sin_port),
+        g_sockStateStr[sock->netconn->state]);
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
 {
+    if ((g_spunge == FILLP_NULL_PTR) || (!g_spunge->hasInited) || (g_spunge->sockTable == FILLP_NULL_PTR)) {
+        FILLP_LOGERR("Fillp not init!");
+        return FILLP_FAILURE;
+    }
     struct FtSocket *sock = FILLP_NULL_PTR;
     FILLP_UINT32 len = 0;
 
@@ -524,11 +564,11 @@ static void FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
     if (data == FILLP_NULL_PTR) {
         const FILLP_CHAR *errMsg = "socket list dump buffer calloc failed!";
         dump(softObj, errMsg, strlen(errMsg) + 1);
-        return;
+        return FILLP_FAILURE;
     }
     if (DoShowSockListTitle(data, &len) != FILLP_SUCCESS) {
         free(data);
-        return;
+        return FILLP_FAILURE;
     }
 
     FILLP_UINT16 i;
@@ -545,49 +585,83 @@ static void FillpDumpShowSockList(void *softObj, FillpDfxDumpFunc dump)
         (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
         if (isOk != FILLP_SUCCESS) {
             free(data);
-            return;
+            return FILLP_FAILURE;
         }
     }
     dump(softObj, data, len);
     free(data);
+    return FILLP_SUCCESS;
 }
 
 static FILLP_INT DoShowSockQos(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len)
 {
-    struct FillAppFcStastics *appFcStastics = &(sock->netconn->pcb->fpcb.statistics.appFcStastics);
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%8s\t %18s\t %18s\t %16s\t %16s\t %10s"CRLF,
-        "Rtt(ms)", "RecvPktLoss(0.01%%)", "SendPktLoss(0.01%%)", "RecvRateBps(bps)", "SendRateBps(bps)", "Jetter(us)");
-    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%8u\t %18u\t %18u\t %16llu\t %16llu\t %10lld"CRLF,
+    const struct FillpPcb *pcb = &sock->netconn->pcb->fpcb;
+    const struct FillpStatisticsTraffic *traffic = &(pcb->statistics.traffic);
+    const struct FillAppFcStastics *appFcStastics = &(pcb->statistics.appFcStastics);
+    FILLP_UINT32 trafficLiveTime = (FILLP_UINT32)FILLP_UTILS_US2S(SYS_ARCH_GET_CUR_TIME_LONGLONG() -
+        pcb->connTimestamp);
+    trafficLiveTime = (trafficLiveTime == 0) ? 1 : trafficLiveTime;
+
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, CRLF"%8s\t %12s\t %13s\t %19s\t %18s\t %10s\t %10s\t %19s\t %19s\t %10s"CRLF,
+        "Rtt(ms)", "ReceivedPkt", "ReceivedBytes", "RecvPktLoss(0.01%)", "RecvBytesRate(Bps)",
+        "SendPkt", "SendBytes", "SendPktLoss(0.01%)", "SendBytesRate(Bps)", "Jetter(us)");
+    FILLP_DUMP_MSG_ADD_CHECK(data, *len, "%8u\t %12u\t %13u\t %19u\t %18u\t %10u\t %10u\t %19u\t %19u\t %10lld\t"CRLF,
         appFcStastics->periodRtt,
-        appFcStastics->periodRecvPktLossHighPrecision,
-        appFcStastics->periodSendPktLossHighPrecision,
-        appFcStastics->periodRecvRateBps,
-        appFcStastics->periodSendRateBps,
+        traffic->totalRecved,
+        traffic->totalRecvedBytes,
+        (traffic->totalRecved == 0) ? 0 :
+        (traffic->totalRecvLost * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalRecved),
+        traffic->totalRecvedBytes / trafficLiveTime,
+
+        traffic->totalSend,
+        traffic->totalSendBytes,
+        (traffic->totalSend == 0) ? 0 :
+        (traffic->totalRetryed * FILLP_RECV_PKT_LOSS_H_PERCISION * FILLP_RECV_PKT_LOSS_MAX / traffic->totalSend),
+        traffic->totalSendBytes / trafficLiveTime,
         sock->jitter);
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowSockQos(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+static struct FtSocket *FillpDfxGetSock(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump,
+    FILLP_CHAR *data, FILLP_UINT32 *len)
 {
-    FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
-    FILLP_UINT32 len = 0;
     struct FtSocket *sock = SockApiGetAndCheck(sockIndex);
     if (sock == FILLP_NULL_PTR || sock->netconn == FILLP_NULL_PTR || sock->netconn->pcb == FILLP_NULL_PTR) {
         if (sock != FILLP_NULL_PTR) {
             (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
         }
-        if (DumpInvalidSock(sockIndex, data, &len) == FILLP_SUCCESS) {
-            dump(softObj, data, len);
+        if (DumpInvalidSock(sockIndex, data, len) == FILLP_SUCCESS) {
+            dump(softObj, data, *len);
         }
-        return;
+        return FILLP_NULL_PTR;
+    }
+    return sock;
+}
+
+typedef FILLP_INT (*FillpDumpSockDataShowCb)(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len);
+
+static FILLP_INT FillpDumpShowSockData(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump,
+    FillpDumpSockDataShowCb showCb)
+{
+    FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
+    FILLP_UINT32 len = 0;
+    struct FtSocket *sock = FillpDfxGetSock(sockIndex, softObj, dump, data, &len);
+    if (sock == FILLP_NULL_PTR) {
+        return FILLP_FAILURE;
     }
 
-    FILLP_INT isOk = DoShowSockQos(sock, data, &len);
+    FILLP_INT isOk = showCb(sock, data, &len);
     (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
     if (isOk != FILLP_SUCCESS) {
-        return;
+        return FILLP_FAILURE;
     }
     dump(softObj, data, len);
+    return FILLP_SUCCESS;
+}
+
+static FILLP_INT FillpDumpShowSockQos(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+{
+    return FillpDumpShowSockData(sockIndex, softObj, dump, DoShowSockQos);
 }
 
 static FILLP_INT DoShowFrameStats(FILLP_CONST struct FtSocket *sock, FILLP_CHAR *data, FILLP_UINT32 *len)
@@ -600,29 +674,32 @@ static FILLP_INT DoShowFrameStats(FILLP_CONST struct FtSocket *sock, FILLP_CHAR 
     return FILLP_SUCCESS;
 }
 
-static void FillpDumpShowFrameStats(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
+static FILLP_INT FillpDumpShowFrameStats(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump)
 {
-    FILLP_CHAR data[FILLP_DFX_DUMP_BUF_LEN];
-    FILLP_UINT32 len = 0;
-    struct FtSocket *sock = SockApiGetAndCheck(sockIndex);
-    if (sock == FILLP_NULL_PTR || sock->netconn == FILLP_NULL_PTR || sock->netconn->pcb == FILLP_NULL_PTR) {
-        if (sock != FILLP_NULL_PTR) {
-            (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
-        }
-        if (DumpInvalidSock(sockIndex, data, &len) == FILLP_SUCCESS) {
-            dump(softObj, data, len);
-        }
-        return;
+    return FillpDumpShowSockData(sockIndex, softObj, dump, DoShowFrameStats);
+}
+
+static FILLP_INT FillpDumpMgtMsgCb(FILLP_INT optVal, void *softObj, FillpDfxDumpFunc dump)
+{
+    const FILLP_CHAR *successMsg = "management message set success";
+    const FILLP_CHAR *failMsg = "management message set fail";
+    if (FillpApiSetMgtMsgLog(optVal) != EOK) {
+        dump(softObj, failMsg, strlen(failMsg) + 1);
+        return FILLP_FAILURE;
     }
-    FILLP_INT isOk = DoShowFrameStats(sock, data, &len);
-    (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
-    if (isOk != FILLP_SUCCESS) {
-        return;
-    }
-    dump(softObj, data, len);
+    dump(softObj, successMsg, strlen(successMsg) + 1);
+    return FILLP_SUCCESS;
 }
 
 static const FILLP_CHAR *g_optString = "hlns:q:f:m:V";
+static const FILLP_CHAR *g_optErrMsg = "Parse option fail, please check your option!";
+typedef FILLP_INT (*FillpDumpOptCb)(FILLP_INT sockIndex, void *softObj, FillpDfxDumpFunc dump);
+typedef struct {
+    FILLP_INT opt;
+    const NstackGetOptMsg *optMsg;
+    void *softObj;
+    FillpDfxDumpFunc dump;
+} FillpDfxDumpOptArgs;
 
 static FILLP_INT FillpDfxCheckArg(FILLP_UINT32 argc, const FILLP_CHAR **argv, FillpDfxDumpFunc dump)
 {
@@ -630,7 +707,7 @@ static FILLP_INT FillpDfxCheckArg(FILLP_UINT32 argc, const FILLP_CHAR **argv, Fi
         FILLP_LOGERR("dump is null");
         return FILLP_FAILURE;
     }
-    if (argc == 0 || argc > FILLP_DFX_DUMP_MAX_ARGC) {
+    if (argc <= 1 || argc > FILLP_DFX_DUMP_MAX_ARGC) {
         FILLP_LOGERR("argc is invalid %u", argc);
         return FILLP_FAILURE;
     }
@@ -648,49 +725,120 @@ static FILLP_INT FillpDfxCheckArg(FILLP_UINT32 argc, const FILLP_CHAR **argv, Fi
     return FILLP_SUCCESS;
 }
 
+static FILLP_INT IsCommonOptArgLegal(const FILLP_CHAR *optArgs, FILLP_INT opt)
+{
+    if (optArgs == FILLP_NULL_PTR) {
+        return FILLP_FAILURE;
+    }
+    size_t len = strnlen(optArgs, FILLP_DFX_DUMP_MAX_OPT_ARG_LEN + 1);
+    if (len == 0 || len > FILLP_DFX_DUMP_MAX_OPT_ARG_LEN) {
+        return FILLP_FAILURE;
+    }
+    if (opt == 'm' && (len != 1 || (optArgs[0] != '0' && optArgs[0] != '1'))) {
+        return FILLP_FAILURE;
+    }
+
+    FILLP_UINT8 i;
+    for (i = 0; i < len; i++) {
+        if (optArgs[i] < '0' || optArgs[i] > '9') {
+            return FILLP_FAILURE;
+        }
+    }
+
+    return FILLP_SUCCESS;
+}
+
+static FILLP_INT FillpDfxDumpGetOptVal(const FillpDfxDumpOptArgs *optArgStr, FILLP_INT *optVal)
+{
+    const FILLP_CHAR *optArgs = NstackGetOptArgs(optArgStr->optMsg);
+    if (IsCommonOptArgLegal(optArgs, optArgStr->opt) != FILLP_SUCCESS) {
+        goto INVALID_ARG;
+    }
+    FILLP_LLONG val = strtoll(optArgs, FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
+    if (val > INT_MAX) {
+        goto INVALID_ARG;
+    }
+    *optVal = (FILLP_INT)val;
+    return FILLP_SUCCESS;
+
+INVALID_ARG:
+    optArgStr->dump(optArgStr->softObj, g_optErrMsg, strlen(g_optErrMsg) + 1);
+    (void)FillpDumpShowHelp(optArgStr->softObj, optArgStr->dump);
+    return FILLP_FAILURE;
+}
+
+static FILLP_INT FillpDfxDumpDealOptWithArgs(const FillpDfxDumpOptArgs *optArgStr, FillpDumpOptCb cb)
+{
+    FILLP_INT optVal;
+    if (FillpDfxDumpGetOptVal(optArgStr, &optVal) != FILLP_SUCCESS) {
+        return FILLP_FAILURE;
+    }
+    return cb(optVal, optArgStr->softObj, optArgStr->dump);
+}
+
+static FILLP_INT FillpDfxDumpDoParseOpt(const FillpDfxDumpOptArgs *optArgStr)
+{
+    FILLP_INT ret;
+    switch (optArgStr->opt) {
+        case 'h':
+            ret = FillpDumpShowHelp(optArgStr->softObj, optArgStr->dump);
+            break;
+        case 'l':
+            ret = FillpDumpShowLogLevel(optArgStr->softObj, optArgStr->dump);
+            break;
+        case 'n':
+            ret = FillpDumpShowSockList(optArgStr->softObj, optArgStr->dump);
+            break;
+        case 's':
+            ret = FillpDfxDumpDealOptWithArgs(optArgStr, FillpDumpShowSockResource);
+            break;
+        case 'q':
+            ret = FillpDfxDumpDealOptWithArgs(optArgStr, FillpDumpShowSockQos);
+            break;
+        case 'f':
+            ret = FillpDfxDumpDealOptWithArgs(optArgStr, FillpDumpShowFrameStats);
+            break;
+        case 'V':
+            ret = FillpDumpShowVer(optArgStr->softObj, optArgStr->dump);
+            break;
+        case 'm':
+            ret = FillpDfxDumpDealOptWithArgs(optArgStr, FillpDumpMgtMsgCb);
+            break;
+        default:
+            optArgStr->dump(optArgStr->softObj, g_optErrMsg, strlen(g_optErrMsg) + 1);
+            (void)FillpDumpShowHelp(optArgStr->softObj, optArgStr->dump);
+            ret = FILLP_FAILURE;
+    }
+    return ret;
+}
+
 FILLP_INT FillpDfxDump(FILLP_UINT32 argc, const FILLP_CHAR **argv, void *softObj, FillpDfxDumpFunc dump)
 {
     FILLP_INT opt = 0;
-    FILLP_INT ret = 0;
+    const FILLP_CHAR *dumpFailMsg = "dump show failed!";
     if (FillpDfxCheckArg(argc, argv, dump) != FILLP_SUCCESS) {
+        if (dump != NULL) {
+            dump(softObj, g_optErrMsg, strlen(g_optErrMsg) + 1);
+            (void)FillpDumpShowHelp(softObj, dump);
+        }
         return -1;
     }
 
+    FILLP_BOOL isParseOpt = FILLP_FALSE;
     NstackGetOptMsg optMsg;
     (void)NstackInitGetOptMsg(&optMsg);
-    while ((opt = NstackGetOpt(&optMsg, argc, argv, g_optString)) != NSTACK_GETOPT_END_OF_STR) {
-        switch (opt) {
-            case 'h':
-                FillpDumpShowHelp(softObj, dump);
-                break;
-            case 'l':
-                FillpDumpShowLogLevel(softObj, dump);
-                break;
-            case 'n':
-                FillpDumpShowSockList(softObj, dump);
-                break;
-            case 's':
-                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
-                FillpDumpShowSockResource(ret, softObj, dump);
-                break;
-            case 'q':
-                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
-                FillpDumpShowSockQos(ret, softObj, dump);
-                break;
-            case 'f':
-                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
-                FillpDumpShowFrameStats(ret, softObj, dump);
-                break;
-            case 'V':
-                FillpDumpShowVer(softObj, dump);
-                break;
-            case 'm':
-                ret = strtol(NstackGetOptArgs(&optMsg), FILLP_NULL_PTR, FILLP_DFX_DUMP_STRTOL_BASE);
-                (void)FillpApiSetMgtMsgLog(ret);
-                break;
-            default:
-                return -1;
+    while ((opt = NstackGetOpt(&optMsg, (FILLP_INT32)argc, argv, g_optString)) != NSTACK_GETOPT_END_OF_STR) {
+        isParseOpt = FILLP_TRUE;
+        FillpDfxDumpOptArgs optArgStr = {opt, &optMsg, softObj, dump};
+        if (FillpDfxDumpDoParseOpt(&optArgStr) != FILLP_SUCCESS) {
+            dump(softObj, dumpFailMsg, strlen(dumpFailMsg) + 1);
+            return -1;
         }
+    }
+    if (!isParseOpt) {
+        dump(softObj, g_optErrMsg, strlen(g_optErrMsg) + 1);
+        (void)FillpDumpShowHelp(softObj, dump);
+        return -1;
     }
     return 0;
 }

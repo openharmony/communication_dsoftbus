@@ -56,6 +56,11 @@ struct SpungeEvtInfoMsg {
     FtEventCbkInfo *info;
 };
 
+struct SpungeHiEventCbMsg {
+    void *softObj;
+    FillpDfxEventCb cb;
+};
+
 struct SpungeMsg {
     void *value;
     int msgType;
@@ -78,6 +83,7 @@ enum SpungeMsgType {
     MSG_TYPE_SET_NACK_DELAY,
     MSG_TYPE_GET_EVENT_INFO,
     MSG_TYPE_SET_KEEP_ALIVE,
+    MSG_TYPE_SET_HIEVENT_CB,
     MSG_TYPE_END
 };
 

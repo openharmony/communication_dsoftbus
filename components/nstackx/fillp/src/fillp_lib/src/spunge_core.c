@@ -32,6 +32,7 @@
 #include "spunge_message.h"
 #include "fillp_output.h"
 #include "fillp_input.h"
+#include "fillp_dfx.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -828,6 +829,7 @@ static void SpungZeroInstance(void)
     InitGlobalAppResourceDefault();
     FtFreeGlobalSpunge();
     FillpSysOsDeinit();
+    FillpDfxDoEvtCbSet(FILLP_NULL_PTR, FILLP_NULL_PTR);
 
     /* Signal or release deinit sem */
     if (hasDeinitBlked) {

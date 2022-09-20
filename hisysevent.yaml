@@ -158,8 +158,8 @@ FILLP_SOCK_QOS_EVT:
   __BASE: {type: STATISTIC, level: MINOR, desc: fillp socket Qos event}
   SOCK_IDX: {type: UINT32, desc: fillp socket index}
   RTT: {type: UINT32, desc: fillp socket rtt}
-  RECV_PKT_LOSS: {type: UINT32, desc: fillp socket recv package loss}
-  RECV_RATE_BPS: {type: UINT64, desc: fillp socket recv rate}
-  SEND_PKT_LOSS: {type: UINT32, desc: fillp socket send package loss}
-  SEND_RATE_BPS: {type: UINT64, desc: fillp socket send rate}
-  JITTER: {type: UINT64, desc: fillp socket jitter}
+  TOTAL_RECV_PKT: {type: UINT32, desc: fillp socket recv package num}
+  TOTAL_RECV_BYTES: {type: UINT32, desc: fillp socket recv bytes}
+  TOTAL_SEND_PKT: {type: UINT32, desc: fillp socket send package num}
+  TOTAL_SEND_BYTES: {type: UINT32, desc: fillp socket send bytes}
+  JITTER: {type: UINT32, desc: fillp socket jitter}
