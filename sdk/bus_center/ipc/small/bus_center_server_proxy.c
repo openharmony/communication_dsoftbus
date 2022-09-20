@@ -39,6 +39,7 @@ typedef enum {
     GET_ALL_META_NODE,
     SHIFT_LNN_GEAR,
     START_REFRESH_LNN,
+    START_PUBLISH_LNN,
 } FunID;
 
 typedef struct {
@@ -99,6 +100,9 @@ static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
             ReadInt32(reply, &(info->retCode));
             break;
         case START_REFRESH_LNN:
+            ReadInt32(reply, &(info->retCode));
+            break;
+        case START_PUBLISH_LNN:
             ReadInt32(reply, &(info->retCode));
             break;
         default:
@@ -388,14 +392,16 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
     }
     uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
     IpcIo request = {0};
+    Reply reply = {0};
+    reply.id = START_PUBLISH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
     WriteUint32(&request, infoLen);
     WriteBuffer(&request, info, infoLen);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, NULL, NULL);
-    if (ans != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "publish Lnn invoke failed[%d].", ans);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, NULL);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "publish Lnn invoke failed[%d, %d].", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
