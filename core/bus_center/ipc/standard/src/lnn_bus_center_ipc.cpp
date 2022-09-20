@@ -118,17 +118,6 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
     return SOFTBUS_OK;
 }
 
-static int32_t PublishResultTransfer(int32_t retCode)
-{
-    if (retCode == SOFTBUS_OK) {
-        return PUBLISH_LNN_SUCCESS;
-    } else if (retCode == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
-        return PUBLISH_LNN_NOT_SUPPORT_MEDIUM;
-    } else {
-        return PUBLISH_LNN_INTERNAL;
-    }
-}
-
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
@@ -217,7 +206,6 @@ int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTyp
     (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     ConvertVoidToPublishInfo(info, &pubInfo);
     int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
-    (void)ClientOnPublishLNNResult(pkgName, pubInfo.publishId, PublishResultTransfer(ret));
     return ret;
 }
 

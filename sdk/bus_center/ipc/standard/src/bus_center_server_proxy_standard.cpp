@@ -490,7 +490,12 @@ int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const void *info, 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN send request failed!");
         return SOFTBUS_IPC_ERR;
     }
-    return SOFTBUS_OK;
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN send error ret = %d!", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    return ret;
 }
 
 int32_t BusCenterServerProxy::StopPublishLNN(const char *pkgName, int32_t publishId)
