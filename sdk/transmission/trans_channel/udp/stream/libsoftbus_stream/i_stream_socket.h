@@ -87,6 +87,7 @@ protected:
     static constexpr int INT_TO_BYTE = 0xff;
     static constexpr int IPTOS_LOWDELAY = 0XBC;
     static constexpr int DEFAULT_UDP_BUFFER_SIZE = 512 * 1024;
+    static constexpr int DEFAULT_UDP_BUFFER_RCV_SIZE = 1024 * 1024;
     static constexpr int STREAM_BUFFER_THRESHOLD = 5;
 
     virtual int CreateAndBindSocket(IpAndPort &local) = 0;
