@@ -25,7 +25,7 @@
 #include "softbus_log.h"
 #include "v1_0/iwlan_interface.h"
 
-#define WLAN_SERVICE_NAME "wlan_hal_c_service"
+#define WLAN_SERVICE_NAME "wlan_interface_service"
 #define WLAN_IFNAME "wlan0"
 #define MEAS_TIME_PER_CHAN_MS (15)
 #define GET_MEAS_RESULT_DELAY_MS (1000)
@@ -51,7 +51,7 @@ static int32_t GetHdiInstance(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hdi instance already exists.");
         return SOFTBUS_OK;
     }
-    g_wlanObj = WlanInterfaceGetInstance(WLAN_SERVICE_NAME);
+    g_wlanObj = IWlanInterfaceGetInstance(WLAN_SERVICE_NAME, false);
     if (g_wlanObj == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan interface get instance fail.");
         return SOFTBUS_ERR;
@@ -61,7 +61,7 @@ static int32_t GetHdiInstance(void)
 
 static void ReleaseMeasResources(void)
 {
-    WlanInterfaceRelease(g_wlanObj);
+    IWlanInterfaceReleaseInstance(WLAN_SERVICE_NAME, g_wlanObj, false);
     g_wlanObj = NULL;
     SoftBusFree(g_channelList.buff);
     (void)memset_s(&g_channelList, sizeof(ChannelList), 0, sizeof(ChannelList));
