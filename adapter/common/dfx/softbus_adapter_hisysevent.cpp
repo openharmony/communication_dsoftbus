@@ -78,7 +78,7 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
     return SOFTBUS_OK;
 }
 
-static int32_t HiSysEventParamInit(SoftBusEvtReportMsg *msg)
+static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
 {
     if (memset_s(g_dstParam, sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT, 0,
         sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
@@ -138,7 +138,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     if (reportMsg == nullptr) {
         return SOFTBUS_ERR;
     }
-    HiSysEventParamInit(reportMsg);
+    ConvertMsgToHiSysEvent(reportMsg);
     OH_HiSysEvent_Write(g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
         g_dstParam, reportMsg->paramNum);
     HiSysEventParamDeInit(reportMsg->paramNum);
