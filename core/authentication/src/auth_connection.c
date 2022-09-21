@@ -511,6 +511,8 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
         case AUTH_LINK_TYPE_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
+        default:
+            break;
     }
     if (ret != SOFTBUS_OK) {
         RemoveConnConnectTimeout(requestId);

@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
 
 #ifndef LNN_NODE_WEIGHT_H
 #define LNN_NODE_WEIGHT_H
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
