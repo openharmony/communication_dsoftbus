@@ -25,6 +25,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_sync_info_manager.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -40,10 +41,12 @@ public:
 void LnnNetworkInfoTest::SetUpTestCase()
 {
     EXPECT_EQ(LnnInitBusCenterEvent(), SOFTBUS_OK);
+    EXPECT_EQ(LnnInitSyncInfoManager(), SOFTBUS_OK);
 }
 
 void LnnNetworkInfoTest::TearDownTestCase()
 {
+    LnnDeinitSyncInfoManager();
 }
 
 void LnnNetworkInfoTest::SetUp()
