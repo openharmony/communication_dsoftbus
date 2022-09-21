@@ -614,8 +614,8 @@ int32_t ClientDeleteSession(int32_t sessionId)
             }
             ListDelete(&(sessionNode->node));
             DestroySessionId();
-            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             SoftBusFree(sessionNode);
+            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             return SOFTBUS_OK;
         }
     }
@@ -1225,11 +1225,12 @@ void ClientCleanAllSessionWhenServerDeath(void)
     }
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if (IsListEmpty(&serverNode->sessionList)) {
             continue;
         }
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
             DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
             if (destroyNode == NULL) {
                 continue;
@@ -1242,7 +1243,6 @@ void ClientCleanAllSessionWhenServerDeath(void)
         }
     }
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-
     (void)ClientDestroySession(&destroyList);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "client destroy session cnt[%d].", destroyCnt);
 }
