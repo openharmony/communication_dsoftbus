@@ -26,6 +26,7 @@
 #define MAX_HELP_INFO_LEN (100)
 #define MAX_ID_LEN (10)
 #define DEC (10)
+#difine HIDUMPER_TRANS_ARG_NUM 2
 #define MODULE_NAME_TRAN "trans"
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
@@ -129,7 +130,7 @@ static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
 
 int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
-    if ((argc != 2) || (strcmp(argv[0], "-l") != 0)) {
+    if ((argc != HIDUMPER_TRANS_ARG_NUM) || (strcmp(argv[0], "-l") != 0)) {
         ShowTransDumpHelperInfo(fd);
         return SOFTBUS_OK;
     }

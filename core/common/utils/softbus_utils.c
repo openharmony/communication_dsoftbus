@@ -435,7 +435,7 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     int32_t ret;
     unsigned char hashResult[SHA_256_HASH_LEN] = {0};
     if (hashStrLen < HEXIFY_LEN(len / HEXIFY_UNIT_LEN)) {
-       SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid hashStrLen"); 
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid hashStrLen");
        return SOFTBUS_INVALID_PARAM;
     }
     if (str == NULL) {
@@ -447,7 +447,8 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
         return ret;
     }
-    ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult, len / HEXIFY_UNIT_LEN);
+    ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult,
+        len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bytes to str hash fail, ret=%d", ret);
         return ret;
