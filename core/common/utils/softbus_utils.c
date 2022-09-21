@@ -436,7 +436,7 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     unsigned char hashResult[SHA_256_HASH_LEN] = {0};
     if (hashStrLen < HEXIFY_LEN(len / HEXIFY_UNIT_LEN)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid hashStrLen");
-       return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (str == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
