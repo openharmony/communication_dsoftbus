@@ -89,7 +89,7 @@ bool GetSignalingMsgSwitch(void);
  */
 void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
 
-char *DataMasking(const char *data, uint32_t length, char delimiter);
+void DataMasking(const char *data, uint32_t length, char delimiter, char *container);
 int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,
     uint32_t hashStrLen);
 #ifdef __cplusplus

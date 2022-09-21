@@ -711,6 +711,7 @@ bool BrCheckActiveConnection(const ConnectOption *option)
 
 static int32_t BrConnectionInfoDump(int fd)
 {
+    char tempMac[BT_ADDR_LEN] = {0};
     if (pthread_mutex_lock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
@@ -722,9 +723,8 @@ static int32_t BrConnectionInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "connectionId                  : %d\n", itemNode->connectionId);
         SOFTBUS_DPRINTF(fd, "socketFd                      : %d\n", itemNode->socketFd);
         SOFTBUS_DPRINTF(fd, "sideType                      : %d\n", itemNode->sideType);
-        char *tempMac = DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER);
+        DataMasking(itemNode->mac, BT_ADDR_LEN, MAC_DELIMITER, tempMac);
         SOFTBUS_DPRINTF(fd, "btMac                         : %s\n", tempMac);
-        SoftBusFree(tempMac);
         SOFTBUS_DPRINTF(fd, "connect Queue State           : %d\n", itemNode->connectQueueState);
         SOFTBUS_DPRINTF(fd, "br state                      : %d\n", itemNode->state);
         SOFTBUS_DPRINTF(fd, "refCount                      : %d\n", itemNode->refCount);
