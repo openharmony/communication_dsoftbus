@@ -53,7 +53,7 @@ static ConnectFuncInterface *g_interface = nullptr;
 static ConnectResult g_result;
 static ConnectCallback g_cb;
 static int g_receivedDatalength = 0;
-static int g_ConnServerInit = 0;
+static int g_connServerInit = 0;
 
 void TcpOnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
@@ -110,13 +110,13 @@ void SoftbusTcpManagerTest::SetUp(void)
     g_result.OnConnectFailed = TcpOnConnectionFailed;
     g_connectionId = 0;
     g_receivedDatalength = 0;
-    g_ConnServerInit = ConnServerInit();
+    g_connServerInit = ConnServerInit();
 }
 
 void SoftbusTcpManagerTest::TearDown(void)
 {
     g_interface = nullptr;
-    g_ConnServerInit = 0;
+    g_connServerInit = 0;
 }
 
 void CreateServer(void *arg)
@@ -446,7 +446,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -490,7 +490,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -533,7 +533,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
@@ -577,7 +577,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
 {
-    int port= 6666;
+    int port = 6666;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
