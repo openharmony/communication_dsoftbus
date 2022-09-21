@@ -806,6 +806,32 @@ bool VtpStreamSocket::EnableJitterDetectionAlgo(int streamFd) const
 #endif
 }
 
+bool VtpStreamSocket::EnableDirectlySend(int streamFd) const
+{
+    int32_t enable = 1;
+    FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_DIRECTLY_SEND, &enable, sizeof(enable));
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "Fail to enable direct send for stream: %d, errorcode = %d", streamFd, FtGetErrno());
+        return false;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Success to enable direct send for stream: %d", streamFd);
+    return true;
+}
+
+bool VtpStreamSocket::EnableSemiReliable(int streamFd) const
+{
+    int32_t enable = 1;
+    FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SEMI_RELIABLE, &enable, sizeof(enable));
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "Fail to enable direct send for stream: %d, errorcode = %d", streamFd, FtGetErrno());
+        return false;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Success to enable direct send for stream: %d", streamFd);
+    return true;
+}
+
 void VtpStreamSocket::RegisterMetricCallback(bool isServer)
 {
     VtpStreamSocket::AddStreamSocketLock(streamFd_, streamSocketLock_);
@@ -1127,6 +1153,23 @@ void VtpStreamSocket::SetDefaultConfig(int fd)
 {
     if (!SetIpTos(fd, StreamAttr(static_cast<int>(IPTOS_LOWDELAY)))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "SetIpTos failed");
+    }
+
+    if (!EnableDirectlySend(fd)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "EnableDirectlySend failed");
+    }
+
+    if (!EnableSemiReliable(fd)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "EnableSemiReliable failed");
+    }
+
+    FILLP_BOOL enable = 1;
+    if (!FtConfigSet(FT_CONF_APP_DIFFER_TRANSMIT, &enable, &fd)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Set differ transmit failed");
+    }
+
+    if (!SetOption(RECV_BUF_SIZE, StreamAttr(static_cast<int>(DEFAULT_UDP_BUFFER_RCV_SIZE)))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Set recv buff failed");
     }
 
     if (!SetOption(SEND_BUF_SIZE, StreamAttr(static_cast<int>(DEFAULT_UDP_BUFFER_SIZE)))) {
