@@ -86,29 +86,32 @@ void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
-    char uidArr[MAX_ID_LEN];
-    char pidArr[MAX_ID_LEN];
-    (void)sprintf_s(uidArr, sizeof(uidArr), "%d", uid);
-    (void)sprintf_s(pidArr, sizeof(pidArr), "%d", pid);
+    char uidArr[MAX_ID_LEN] = {0};
+    char pidArr[MAX_ID_LEN] = {0};
+    char uidStr[MAX_ID_LEN] = {0};
+    char pidStr[MAX_ID_LEN] = {0};
+    if (sprintf_s(uidArr, MAX_ID_LEN, "%d", uid) < 0 || sprintf_s(pidArr, MAX_ID_LEN, "%d", pid) < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set uidArr or pidArr failed");
+        return;
+    }
 
-    char *uidStr = DataMasking(uidArr, sizeof(uidArr), ID_DELIMITER);
-    char *pidStr = DataMasking(pidArr, sizeof(pidArr), ID_DELIMITER);
-
+    DataMasking(uidArr, MAX_ID_LEN, ID_DELIMITER, uidStr);
+    DataMasking(pidArr, MAX_ID_LEN, ID_DELIMITER, pidStr);
     SOFTBUS_DPRINTF(fd, "PkgName               : %s\n", pkgName);
     SOFTBUS_DPRINTF(fd, "SessionName           : %s\n", sessionName);
     SOFTBUS_DPRINTF(fd, "PID                   : %s\n", uidStr);
     SOFTBUS_DPRINTF(fd, "UID                   : %s\n", pidStr);
-
-    SoftBusFree(uidStr);
-    SoftBusFree(pidStr);
 }
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
-    char *deviceId = DataMasking(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), ID_DELIMITER);
-    char *srcAddr = DataMasking(appInfo->myData.addr, sizeof(appInfo->myData.addr), IP_DELIMITER);
-    char *dstAddr = DataMasking(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), IP_DELIMITER);
+    char deviceId[DEVICE_ID_SIZE_MAX] = {0};
+    char srcAddr[MAX_SOCKET_ADDR_LEN] = {0};
+    char dstAddr[MAX_SOCKET_ADDR_LEN] = {0};
 
+    DataMasking(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, ID_DELIMITER, deviceId);
+    DataMasking(appInfo->myData.addr, MAX_SOCKET_ADDR_LEN, IP_DELIMITER, srcAddr);
+    DataMasking(appInfo->peerData.addr, MAX_SOCKET_ADDR_LEN, IP_DELIMITER, dstAddr);
     SOFTBUS_DPRINTF(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
     SOFTBUS_DPRINTF(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
     SOFTBUS_DPRINTF(fd, "PeerDeviceId          : %s\n", deviceId);
@@ -116,10 +119,6 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     SOFTBUS_DPRINTF(fd, "SourceAddress         : %s\n", srcAddr);
     SOFTBUS_DPRINTF(fd, "DestAddress           : %s\n", dstAddr);
     SOFTBUS_DPRINTF(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
-
-    SoftBusFree(deviceId);
-    SoftBusFree(srcAddr);
-    SoftBusFree(dstAddr);
 }
 
 static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {

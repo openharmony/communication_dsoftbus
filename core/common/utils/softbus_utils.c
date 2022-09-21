@@ -49,6 +49,9 @@
 #define IP_DELIMITER_FIRST 1
 #define IP_DELIMITER_THIRD 3
 #define GET_ID_HALF_LEN 2
+#define MAX_ID_LEN 65
+#define MAX_IP_LEN 48
+#define MAX_MAC_LEN 46
 
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
@@ -358,7 +361,12 @@ void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned
 
 void MacInstead(char *data, uint32_t length, char delimiter)
 {
+    if (length > MAX_MAC_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "MacInstead len is invalid");
+        return;
+    }
     int delimiterCnt = 0;
+    
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == MAC_DELIMITER_FOURTH) {
             break;
@@ -374,6 +382,10 @@ void MacInstead(char *data, uint32_t length, char delimiter)
 
 void IpInstead(char *data, uint32_t length, char delimiter)
 {
+    if (length > MAX_IP_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IpInstead len is invalid");
+        return;
+    }
     int delimiterCnt = 0;
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == IP_DELIMITER_THIRD) {
@@ -390,43 +402,41 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 
 void IdInstead(char *data, uint32_t length)
 {
+    if (length > MAX_ID_LEN) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IdInstead len is invalid");
+        return;
+    }
     uint32_t halfLen = length / GET_ID_HALF_LEN;
-    for (uint32_t i = 0; i < length; i++) {
+    for (int i = 0; i < length - 1; i++) {
         if (i > halfLen) {
             data[i] = '*';
         }
     }
 }
 
-char *DataMasking(const char *data, uint32_t length, char delimiter)
+void DataMasking(const char *data, uint32_t length, char delimiter, char *container)
 {
-    char* dataStr = (char*)SoftBusMalloc(length + 1);
-
-    if (dataStr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusMalloc failed");
-        return NULL;
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        return;
     }
-    (void)memset_s(dataStr, length + 1, 0, length + 1);
-    if (memcpy_s(dataStr, length, data, length) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DataMasking memcpy_s failed");
-            SoftBusFree(dataStr);
-            return NULL;
+    if (memcpy_s(container, length, data, length) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "container memcpy_s failed");
+        return;
     }
     switch (delimiter) {
         case MAC_DELIMITER:
-            MacInstead(dataStr, length, delimiter);
+            MacInstead(container, length, delimiter);
             break;
         case IP_DELIMITER:
-            IpInstead(dataStr, length, delimiter);
+            IpInstead(container, length, delimiter);
             break;
         case ID_DELIMITER:
-            IdInstead(dataStr, length);
+            IdInstead(container, length);
             break;
         default:
             break;
     }
-
-    return dataStr;
 }
 
 int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,

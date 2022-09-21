@@ -1296,6 +1296,10 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 
 static int32_t BleConnectionDump(int fd)
 {
+    char addr[BT_ADDR_LEN] = {0};
+    char bleMac[BT_MAC_LEN] = {0};
+    char deviceIdHash[UDID_HASH_LEN] = {0};
+    char peerDevId[UDID_BUF_LEN] = {0};
     if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_LOCK_ERR;
@@ -1306,32 +1310,25 @@ static int32_t BleConnectionDump(int fd)
         BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
         SOFTBUS_DPRINTF(fd, "halConnId                     : %d\n", itemNode->halConnId);
         SOFTBUS_DPRINTF(fd, "connId                        : %d\n", itemNode->connId);
-        char *addr = DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER);
+        DataMasking((char *)(itemNode->btBinaryAddr.addr), BT_ADDR_LEN, MAC_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "btMac                         : %s\n", addr);
-        SoftBusFree(addr);
         SOFTBUS_DPRINTF(fd, "Connection Info isAvailable   : %d\n", itemNode->info.isAvailable);
         SOFTBUS_DPRINTF(fd, "Connection Info isServer      : %d\n", itemNode->info.isServer);
         SOFTBUS_DPRINTF(fd, "Connection Info type          : %u\n", itemNode->info.type);
-        SOFTBUS_DPRINTF(fd, "BleInfo: \n");
-        char *bleMac = DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER);
+        DataMasking(itemNode->info.bleInfo.bleMac, BT_MAC_LEN, MAC_DELIMITER, bleMac);
         SOFTBUS_DPRINTF(fd, "BleInfo addr                  : %s\n", bleMac);
-        SoftBusFree(bleMac);
-        char *deviceIdHash = DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER);
+        DataMasking(itemNode->info.bleInfo.deviceIdHash, UDID_HASH_LEN, ID_DELIMITER, deviceIdHash);
         SOFTBUS_DPRINTF(fd, "BleInfo deviceIdHash          : %s\n", deviceIdHash);
-        SoftBusFree(deviceIdHash);
         SOFTBUS_DPRINTF(fd, "Connection state              : %d\n", itemNode->state);
         SOFTBUS_DPRINTF(fd, "Connection refCount           : %d\n", itemNode->refCount);
         SOFTBUS_DPRINTF(fd, "Connection mtu                : %d\n", itemNode->mtu);
         SOFTBUS_DPRINTF(fd, "Connection peerType           : %d\n", itemNode->peerType);
-        char *peerDevId = DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER);
+        DataMasking(itemNode->peerDevId, UDID_BUF_LEN, ID_DELIMITER, peerDevId);
         SOFTBUS_DPRINTF(fd, "Connection peerDevId          : %s\n", peerDevId);
-        SoftBusFree(peerDevId);
-        SOFTBUS_DPRINTF(fd, "request Info: \n");
         LIST_FOR_EACH(item, &itemNode->requestList) {
             BleRequestInfo *requestNode = LIST_ENTRY(item, BleRequestInfo, node);
             SOFTBUS_DPRINTF(fd, "request isUsed                : %u\n", requestNode->requestId);
         }
-        SOFTBUS_DPRINTF(fd, "Connection recvCache          : \n");
         for (int i = 0; i < MAX_CACHE_NUM_PER_CONN; i++) {
             SOFTBUS_DPRINTF(fd, "recvCache isUsed              : %d\n", itemNode->recvCache[i].isUsed);
             SOFTBUS_DPRINTF(fd, "recvCache timeStamp           : %d\n", itemNode->recvCache[i].timeStamp);

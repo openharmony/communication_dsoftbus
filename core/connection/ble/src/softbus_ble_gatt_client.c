@@ -839,6 +839,7 @@ int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int32_t BleGattcDump(int fd)
 {
+    char addr[UDID_BUF_LEN] = {0};
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
@@ -850,9 +851,8 @@ static int32_t BleGattcDump(int fd)
         BleGattcInfo *itemNode = LIST_ENTRY(item, BleGattcInfo, node);
         SOFTBUS_DPRINTF(fd, "clientId                  : %d\n", itemNode->clientId);
         SOFTBUS_DPRINTF(fd, "state                     : %d\n", itemNode->state);
-        char *addr = DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER);
+        DataMasking((char *)itemNode->peerAddr.addr, UDID_BUF_LEN, ID_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "btMac                     : %s\n", addr);
-        SoftBusFree(addr);
     }
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     return SOFTBUS_OK;
