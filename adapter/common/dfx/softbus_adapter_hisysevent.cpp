@@ -24,7 +24,7 @@
 #include "message_handler.h"
 #include "hisysevent_c.h"
 
-static const char *g_demain = "DSOFTBUS";
+static const char *g_domain = "DSOFTBUS";
 static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
 static init32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
@@ -139,7 +139,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         return SOFTBUS_ERR;
     }
     HiSysEventParamInit(reportMsg);
-    OH_HiSysEvent_Write(g_demain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
+    OH_HiSysEvent_Write(g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
         g_dstParam, reportMsg->paramNum);
     HiSysEventParamDeInit(reportMsg->paramNum);
     return SOFTBUS_OK;
