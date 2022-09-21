@@ -27,7 +27,7 @@
 static const char *g_domain = "DSOFTBUS";
 static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
-static init32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
+static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
 {
     switch (srcParam->paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
