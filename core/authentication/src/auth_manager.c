@@ -1148,6 +1148,8 @@ void AuthCloseConn(int64_t authId)
         case AUTH_LINK_TYPE_BLE:
             DisconnectAuthDevice(auth->connId);
             break;
+        default:
+            break;
     }
     DelAuthManager(auth, false);
     return;
