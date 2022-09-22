@@ -101,6 +101,19 @@ static void HandlerGetDeviceName(void)
     }
 }
 
+static void UpdataLocalFromSetting(void)
+{
+    char name[DEVICE_NAME_BUF_LEN] = {0};
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "UpdataLocalFromSetting enter");
+    if (LnnGetSettingDeviceName(name, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HandlerGetDeviceName fail");
+        return;
+    }
+    if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdataLocalFromSetting set device name fail");
+    }
+}
+
 void UpdateDeviceNameFromSetting(void)
 {
     LnnInitGetDeviceName(HandlerGetDeviceName);
@@ -109,6 +122,7 @@ void UpdateDeviceNameFromSetting(void)
 void UpdateDeviceName(void *p)
 {
     UpdateDeviceNameFromSetting();
+    UpdataLocalFromSetting();
 }
 
 int32_t LnnInitDevicename(void)
