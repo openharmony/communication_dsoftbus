@@ -614,8 +614,8 @@ int32_t ClientDeleteSession(int32_t sessionId)
             }
             ListDelete(&(sessionNode->node));
             DestroySessionId();
-            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             SoftBusFree(sessionNode);
+            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             return SOFTBUS_OK;
         }
     }
@@ -1208,4 +1208,41 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
     *crc = sessionNode->crc;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
+}
+
+void ClientCleanAllSessionWhenServerDeath(void)
+{
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client session server list not init.");
+        return;
+    }
+    uint32_t destroyCnt = 0;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client get session server list lock failed.");
+        return;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
+            if (destroyNode == NULL) {
+                continue;
+            }
+            ListAdd(&destroyList, &(destroyNode->node));
+            DestroySessionId();
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
+            ++destroyCnt;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    (void)ClientDestroySession(&destroyList);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "client destroy session cnt[%d].", destroyCnt);
 }
