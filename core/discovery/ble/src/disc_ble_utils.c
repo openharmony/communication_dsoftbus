@@ -75,19 +75,6 @@ bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint3
     return (capBitMap[index] >> (pos % INT32_MAX_BIT_NUM)) & 0x1 ? true : false;
 }
 
-bool CheckCapBitMapEqual(const uint32_t *srcBitMap, const uint32_t *dstBitMap, uint32_t capBitMapNum)
-{
-    if (srcBitMap == NULL || dstBitMap == NULL) {
-        return false;
-    }
-    for (uint32_t i = 0; i < capBitMapNum; i++) {
-        if (srcBitMap[i] != dstBitMap[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     if (capBitMap == NULL) {
@@ -113,18 +100,6 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
     capBitMap[index] = capBitMap[index] & mask;
 }
 
-int32_t DiscBleGetHwAccount(char *hwAccount)
-{
-    if (hwAccount == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    const char *account = "";
-    if (memcpy_s(hwAccount, strlen(account) + 1, account, strlen(account) + 1) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 {
     if (udid == NULL) {
@@ -132,7 +107,7 @@ int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local dev Id failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_ERR;    
     }
     return SOFTBUS_OK;
 }

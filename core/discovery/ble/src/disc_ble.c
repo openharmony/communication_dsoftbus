@@ -479,7 +479,6 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
 
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
 {
-    unsigned char distinguish[] = "ble rcv";
     (void)listenerId;
     if (scanResultData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "scanResultData is NULL");
@@ -493,6 +492,7 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
         return;
     }
     if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & DISTRIBUTE_BUSINESS) == DISTRIBUTE_BUSINESS) {
+        unsigned char distinguish[] = "ble rcv";
         SignalingMsgPrint(distinguish, advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
         ProcessDistributePacket(scanResultData);
     } else if ((advData[POS_BUSINESS + ADV_HEAD_LEN] & NEARBY_BUSINESS) == NEARBY_BUSINESS) {
@@ -569,16 +569,6 @@ static int32_t GetMaxExchangeFreq(void)
         }
     }
     return maxFreq;
-}
-
-bool GetSameAccount(void)
-{
-    for (uint32_t index = 0; index < CAPABILITY_MAX_BITNUM; index++) {
-        if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[index]) {
-            return true;
-        }
-    }
-    return false;
 }
 
 static bool GetWakeRemote(void)
@@ -1403,7 +1393,7 @@ static RecvMessage *GetRecvMessage(const char *key)
     if (key == NULL) {
         return NULL;
     }
-    RecvMessage *msg = NULL;
+    RecvMessage *msg;
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         if (memcmp((void *)key, (void *)msg->key, SHA_HASH_LEN) == 0) {
             return msg;
@@ -1418,7 +1408,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
         return SOFTBUS_INVALID_PARAM;
     }
     (void)SoftBusMutexLock(&g_recvMessageInfo.lock);
-    RecvMessage *msg = NULL;
+    RecvMessage *msg;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recv message cnt: %d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         for (uint32_t index = 0; index < len; index++) {

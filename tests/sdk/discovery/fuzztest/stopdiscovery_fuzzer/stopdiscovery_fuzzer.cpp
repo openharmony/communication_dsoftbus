@@ -45,7 +45,7 @@ void StopDiscoveryTest(const uint8_t* data, size_t size)
         .dataLen = sizeof("capdata3")
     };
 
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
