@@ -221,7 +221,7 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
         return SOFTBUS_ERR;
     }
     regmatch_t pmatch[PMATCH_SIZE];
-    (void)memset_s(pmatch, sizeof(regmatch_t) *PMATCH_SIZE, 0, sizeof(regmatch_t) *PMATCH_SIZE);
+    (void)memset_s(pmatch, sizeof(regmatch_t) * PMATCH_SIZE, 0, sizeof(regmatch_t) * PMATCH_SIZE);
     char *outexec = str;
     do {
         if (regexec(&preg, outexec, PMATCH_SIZE, pmatch, 0) != 0) {

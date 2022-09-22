@@ -164,7 +164,7 @@ BENCHMARK_REGISTER_F(BusCenterTest, RegNodeDeviceStateCbTestCase);
  * @tc.type: FUNC
  * @tc.require: UnregNodeDeviceStateCb normal operation
  */
-BENCHMARK_F (BusCenterTest, UnregNodeDeviceStateCbTestCase)(benchmark::State &state)
+BENCHMARK_F(BusCenterTest, UnregNodeDeviceStateCbTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         state.PauseTiming();
