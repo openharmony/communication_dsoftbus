@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "softbus_adapter_hisysevent.h"
+
 #include <string>
 #include <sstream>
 #include <securec.h>
@@ -20,79 +22,109 @@
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "message_handler.h"
-#include "softbus_adapter_hisysevent.h"
+#include "hisysevent_c.h"
 
-static const char* g_paramTypeTable[SOFTBUS_EVT_PARAMTYPE_BUTT] = {
-    "BOOL",
-    "UINT8",
-    "UINT16",
-    "INT32",
-    "UINT32",
-    "UINT64",
-    "FLOAT",
-    "DOUBLE",
-    "STRING"
-};
+static const char *g_domain = "DSOFTBUS";
+static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
-static const char* g_evtTypeTable[SOFTBUS_EVT_TYPE_BUTT] = {
-    "FAULT",
-    "STATISTIC",
-    "SECURITY",
-    "BEHAVIOR"
-};
-
-static void ReportParamValue(SoftBusEvtParam& evtParam)
+static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
 {
-    switch (evtParam.paramType) {
+    switch (srcParam->paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.b);
+            dstParam->t = HISYSEVENT_BOOL;
+            dstParam->v.b = srcParam->paramValue.b;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT8:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u8v);
+            dstParam->t = HISYSEVENT_UINT8;
+            dstParam->v.ui8 = srcParam->paramValue.u8v;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT16:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u16v);
+            dstParam->t = HISYSEVENT_UINT16;
+            dstParam->v.ui16 = srcParam->paramValue.u16v;
             break;
         case SOFTBUS_EVT_PARAMTYPE_INT32:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}d",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (int)evtParam.paramValue.i32v);
+            dstParam->t = HISYSEVENT_INT32;
+            dstParam->v.i32 = srcParam->paramValue.i32v;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT32:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}u",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned int)evtParam.paramValue.u32v);
+            dstParam->t = HISYSEVENT_UINT32;
+            dstParam->v.ui32 = srcParam->paramValue.u32v;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT64:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}llu",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], (unsigned long long)evtParam.paramValue.u64v);
+            dstParam->t = HISYSEVENT_UINT64;
+            dstParam->v.ui64 = srcParam->paramValue.u64v;
             break;
         case SOFTBUS_EVT_PARAMTYPE_FLOAT:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}f",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.f);
+            dstParam->t = HISYSEVENT_FLOAT;
+            dstParam->v.f = srcParam->paramValue.f;
             break;
         case SOFTBUS_EVT_PARAMTYPE_DOUBLE:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}lf",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.d);
+            dstParam->t = HISYSEVENT_DOUBLE;
+            dstParam->v.d = srcParam->paramValue.d;
             break;
         case SOFTBUS_EVT_PARAMTYPE_STRING:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "ParamName: %{public}s;  ParamNum: %{public}s;  ParamValue: %{public}s",
-                evtParam.paramName, g_paramTypeTable[evtParam.paramType], evtParam.paramValue.str);
+            dstParam->t = HISYSEVENT_STRING;
+            dstParam->v.s = (char *)SoftBusMalloc(sizeof(char) * strlen(srcParam->paramValue.str) + 1);
+            if (strcpy_s(dstParam->v.s, strlen(srcParam->paramValue.str) + 1,
+                srcParam->paramValue.str) != EOK) {
+                SoftBusFree(dstParam->v.s);
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "copy string var fail");
+                return SOFTBUS_ERR;
+            }
             break;
         default:
             break;
     }
+    return SOFTBUS_OK;
 }
 
-static void ConvertReportMsgToStr(SoftBusEvtReportMsg* reportMsg)
+static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
 {
-    HILOG_INFO(SOFTBUS_HILOG_ID, "EvtName: %{public}s;  EvtType: %{public}s;  ParamNum: %{public}d",
-        reportMsg->evtName, g_evtTypeTable[reportMsg->evtType], reportMsg->paramNum);
-
-    for (uint32_t i = 0; i < reportMsg->paramNum; i++) {
-        ReportParamValue(reportMsg->paramArray[i]);
+    if (memset_s(g_dstParam, sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT, 0,
+        sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "init  g_dstParam fail");
+        return SOFTBUS_ERR;
     }
+    for (uint32_t i = 0; i < msg->paramNum; i++) {
+        if (strcpy_s(g_dstParam[i].name, SOFTBUS_HISYSEVT_NAME_LEN, msg->paramArray[i].paramName) != EOK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "copy param fail");
+            return SOFTBUS_ERR;
+        }
+        ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]);
+    }
+    return SOFTBUS_OK;
+}
+
+static void HiSysEventParamDeInit(uint32_t size)
+{
+    for (uint32_t i = 0; i < size; i++) {
+        if (g_dstParam[i].t == HISYSEVENT_STRING && g_dstParam[i].v.s != NULL) {
+            SoftBusFree(g_dstParam[i].v.s);
+        }
+     }
+ }
+ 
+static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
+{
+    HiSysEventEventType hiSysEvtType;
+    switch (type) {
+        case SOFTBUS_EVT_TYPE_FAULT:
+            hiSysEvtType = HISYSEVENT_FAULT;
+            break;
+        case SOFTBUS_EVT_TYPE_STATISTIC:
+            hiSysEvtType = HISYSEVENT_STATISTIC;
+            break;
+        case SOFTBUS_EVT_TYPE_SECURITY:
+            hiSysEvtType = HISYSEVENT_SECURITY;
+            break;
+        case SOFTBUS_EVT_TYPE_BEHAVIOR:
+            hiSysEvtType = HISYSEVENT_BEHAVIOR;
+            break;
+        default:
+            hiSysEvtType = HISYSEVENT_STATISTIC;
+            break;
+    }
+    return hiSysEvtType;
 }
 
 #ifdef __cplusplus
@@ -106,9 +138,10 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     if (reportMsg == nullptr) {
         return SOFTBUS_ERR;
     }
-    
-    ConvertReportMsgToStr(reportMsg);
-
+    ConvertMsgToHiSysEvent(reportMsg);
+    OH_HiSysEvent_Write(g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
+        g_dstParam, reportMsg->paramNum);
+    HiSysEventParamDeInit(reportMsg->paramNum);
     return SOFTBUS_OK;
 }
 

@@ -37,7 +37,7 @@
 #           SoftBus hisysevent definition           #
 #####################################################
 
-domain: SOFTBUS
+domain: DSOFTBUS
 
 DISC_STARTUP:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: start discovery}
