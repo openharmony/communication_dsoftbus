@@ -25,8 +25,8 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_HISYSEVT_NAME_LEN  32
-#define SOFTBUS_HISYSEVT_PARAM_LEN 32
+#define SOFTBUS_HISYSEVT_NAME_LEN  33
+#define SOFTBUS_HISYSEVT_PARAM_LEN 33
 
 typedef enum {
     SOFTBUS_EVT_PARAM_ZERO = 0,
@@ -42,10 +42,10 @@ typedef enum {
 } SoftBusEvtParamNum;
 
 typedef enum {
-    SOFTBUS_EVT_TYPE_FAULT = 0,
-    SOFTBUS_EVT_TYPE_STATISTIC = 1,
-    SOFTBUS_EVT_TYPE_SECURITY = 2,
-    SOFTBUS_EVT_TYPE_BEHAVIOR = 3,
+    SOFTBUS_EVT_TYPE_FAULT = 1,
+    SOFTBUS_EVT_TYPE_STATISTIC = 2,
+    SOFTBUS_EVT_TYPE_SECURITY = 3,
+    SOFTBUS_EVT_TYPE_BEHAVIOR = 4,
 
     SOFTBUS_EVT_TYPE_BUTT
 } SoftBusEvtType;
@@ -106,4 +106,4 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif /* SOFTBUS_ADAPTER_HISYSEVENT_H */
