@@ -64,7 +64,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy_standard.cpp",
     "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
   ]
-  bus_center_manager_sdk_deps += [ "//utils/native/base:utils" ]
 }
 
 bus_center_sdk_src = bus_center_service_sdk_src + bus_center_manager_sdk_src
