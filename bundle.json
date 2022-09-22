@@ -17,6 +17,9 @@
         "small",
         "standard"
       ],
+      "hisysevent_config": [
+        "//foundation/communication/dsoftbus/hisysevent.yaml"
+      ],
       "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
         "dsoftbus_feature_conn_p2p",
@@ -80,9 +83,6 @@
               "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
             }
           }
-        ],
-        "hisysevent_config": [
-          "//foundation/communication/dsoftbus/hisysevent.yaml"
         ],
         "test": [
           "//foundation/communication/dsoftbus/tests/adapter/unittest:unittest",
