@@ -40,6 +40,9 @@
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
 
+#define CLIENTPORT 6666
+#difine SERVERPORT 6667
+
 static const int MAXLNE = 50;
 
 using namespace testing::ext;
@@ -124,7 +127,7 @@ void CreateServer(void *arg)
     int listenfd, connfd, n;
     struct sockaddr_in servaddr;
     char buff[MAXLNE];
-    unsigned int port = 6667;
+    unsigned int port = SERVERPORT;
     int defaultListen = 5;
 
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -188,7 +191,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BR;
@@ -237,7 +240,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager004, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -262,7 +265,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -297,8 +300,8 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
 {
     pthread_t pid;
 
-    int clientPort = 6666;
-    int serverPort = 6667;
+    int clientPort = CLIENTPORT;
+    int serverPort = SERVERPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = clientPort;
@@ -349,7 +352,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -393,7 +396,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -446,7 +449,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -490,7 +493,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_BLE;
@@ -533,7 +536,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
@@ -577,7 +580,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     uint32_t requestId = 1;
     ConnectOption option;
     option.type = CONNECT_P2P;
@@ -620,7 +623,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -648,7 +651,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -677,7 +680,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -705,7 +708,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -733,7 +736,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BR;
     info.socketOption.port = port;
@@ -761,7 +764,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -790,7 +793,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -818,7 +821,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -858,7 +861,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "127.0.0.1",
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -868,7 +871,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
     ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
     ASSERT_TRUE(ret == SOFTBUS_OK);
     port = tcp->GetSockPort(fd);
-    EXPECT_EQ(port, 6666);
+    EXPECT_EQ(port, CLIENTPORT);
     ConnCloseSocket(fd);
 };
 
@@ -889,7 +892,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -923,7 +926,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -954,7 +957,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -990,7 +993,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1030,7 +1033,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1055,7 +1058,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1083,7 +1086,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1111,7 +1114,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_BLE;
     info.socketOption.port = port;
@@ -1139,7 +1142,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1168,7 +1171,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1196,7 +1199,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1225,7 +1228,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1253,7 +1256,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1281,7 +1284,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_P2P;
     info.socketOption.port = port;
@@ -1312,7 +1315,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1338,7 +1341,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6667;
+    int port = SERVERPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1365,7 +1368,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1379,7 +1382,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1401,7 +1404,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1427,7 +1430,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1455,7 +1458,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "",
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1480,7 +1483,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1509,7 +1512,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
@@ -1534,7 +1537,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1556,7 +1559,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
 */
 HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
 {
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
@@ -1579,7 +1582,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
 
-    int port = 6666;
+    int port = CLIENTPORT;
     LocalListenerInfo info = {};
     info.type = CONNECT_TCP;
     info.socketOption.port = port;
