@@ -529,21 +529,6 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
  */
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
-/**
- * @brief Qos Report based on a session ID.
- *
- * @param sessionId Indicates the session ID.
- * @param appType Indicates the app type.
- * @param quality Indicates the qos quality mod, and can be set to QOS_IMPROVE.
- * The common error codes are as follows:
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the param is invalid.
- * @return Returns <b>SOFTBUS_TRANS_INVALID_SESSION_ID</b> if the param is invalid.
- * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
- * @since 1.0
- * @version 1.0
- */
-int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
-
 #ifdef __cplusplus
 }
 #endif

@@ -86,15 +86,6 @@ void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialState)
     }
 }
 
-void P2pLinkFsmStop(FsmStateMachine *fsm)
-{
-    if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unexpected state in stop msg process");
-        return;
-    }
-    fsm->currentState = NULL;
-}
-
 void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {

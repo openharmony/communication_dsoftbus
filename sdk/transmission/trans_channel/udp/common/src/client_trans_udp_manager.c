@@ -277,7 +277,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnUdpChannelOpenFailed(int32_t channelId)
+int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     UdpChannel channel;
     bool isFind = true;
@@ -300,7 +300,7 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId)
         return SOFTBUS_ERR;
     }
 
-    return g_sessionCb->OnSessionOpenFailed(channelId, CHANNEL_TYPE_UDP);
+    return g_sessionCb->OnSessionOpenFailed(channelId, CHANNEL_TYPE_UDP, errCode);
 }
 
 static int32_t ClosePeerUdpChannel(int32_t channelId)

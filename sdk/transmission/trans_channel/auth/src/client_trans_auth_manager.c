@@ -55,9 +55,9 @@ int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId)
+int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
-    int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_AUTH);
+    int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_AUTH, errCode);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err");
         return ret;

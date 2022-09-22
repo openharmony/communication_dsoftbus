@@ -282,7 +282,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     return ret;
 }
 
-int32_t NotifyChannelOpenFailed(int32_t channelId)
+int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {
@@ -297,7 +297,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId)
     }
 
     if (conn.serverSide == false) {
-        int ret = TransTdcOnChannelOpenFailed(pkgName, channelId);
+        int ret = TransTdcOnChannelOpenFailed(pkgName, channelId, errCode);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
             "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
         return ret;
@@ -314,6 +314,16 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
+
+    int errCode = SOFTBUS_OK;
+    if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive err reply msg");
+        if (NotifyChannelOpenFailed(channelId, errCode) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        return errCode;
+    }
+
     if (UnpackReply(reply, &conn.appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackReply failed");
         return SOFTBUS_ERR;
@@ -331,21 +341,8 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     return SOFTBUS_OK;
 }
 
-static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
-    int32_t errCode, uint32_t flags)
+static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
 {
-    char *reply = NULL;
-    if (errCode != SOFTBUS_OK) {
-        char *errDesc = "notifyChannelOpened";
-        reply = PackError(errCode, errDesc);
-    } else {
-        reply = PackReply(appInfo);
-    }
-    if (reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestReply get pack reply err");
-        return SOFTBUS_ERR;
-    }
-
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
@@ -353,7 +350,37 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
         .flags = (FLAG_REPLY | flags),
         .dataLen = strlen(reply),
     };
-    int32_t ret = TransTdcPostBytes(channelId, &packetHead, reply);
+    return TransTdcPostBytes(channelId, &packetHead, reply);
+}
+
+static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
+    uint32_t flags)
+{
+    char *reply = NULL;
+    reply = PackReply(appInfo);
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestReply get pack reply err");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
+
+    cJSON_free(reply);
+    return ret;
+}
+
+static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc,
+    int32_t errCode, uint32_t flags)
+{
+    char *reply = NULL;
+    reply = PackError(errCode, errDesc);
+    if (reply == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestError get pack reply err");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
+
     cJSON_free(reply);
     return ret;
 }
@@ -378,57 +405,82 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     SoftBusFree(anonyOutPeer);
 }
 
-static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
+static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
     SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
-        return SOFTBUS_ERR;
+        return NULL;
     }
     if (GetSessionConnById(channelId, conn) == NULL) {
         SoftBusFree(conn);
-        return SOFTBUS_INVALID_PARAM;
+        return NULL;
     }
     if (UnpackRequest(request, &conn->appInfo) != SOFTBUS_OK) {
         SoftBusFree(conn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackRequest error");
+        return NULL;
+    }
+    return conn;
+}
+
+static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
+    SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
+    if (conn == NULL) {
         return SOFTBUS_ERR;
     }
 
+    char *errDesc = NULL;
+    int32_t errCode;
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
-        SoftBusFree(conn);
-        return SOFTBUS_ERR;
+        errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+        errDesc = "Peer Device Session Not Create";
+        goto ERR_EXIT;
     }
 
     if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get Uuid By ChanId failed.");
-        SoftBusFree(conn);
-        return SOFTBUS_ERR;
+        errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
+        errDesc = "Get Uuid By ChanId failed";
+        goto ERR_EXIT;
     }
 
     if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
-        SoftBusFree(conn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
-        return SOFTBUS_ERR;
+        errCode = SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+        errDesc = "Set App Info By Id Failed";
+        goto ERR_EXIT;
     }
+
     OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest: myPid=%d, peerPid=%d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
 
-    int32_t ret = NotifyChannelOpened(channelId);
-    if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, ret, flags) != SOFTBUS_OK) {
+    if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Notify App Channel Opened Failed");
+        errCode = SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
+        errDesc = "Notify App Channel Opened Failed";
+        goto ERR_EXIT;
+    }
+    
+    if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequest reply err");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
+
     SoftBusFree(conn);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequest notify app err");
-        return SOFTBUS_ERR;
-    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest ok");
     return SOFTBUS_OK;
+
+ERR_EXIT:
+    if (OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequestError error");
+    }
+    SoftBusFree(conn);
+    return SOFTBUS_ERR;
 }
 
 static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg)

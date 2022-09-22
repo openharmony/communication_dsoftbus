@@ -215,3 +215,18 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo)
 
     return SOFTBUS_OK;
 }
+
+int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
+{
+    if ((msg == NULL) && (errCode == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackReplyErrCode Invalid param");
+        return SOFTBUS_ERR;
+    }
+
+    if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+

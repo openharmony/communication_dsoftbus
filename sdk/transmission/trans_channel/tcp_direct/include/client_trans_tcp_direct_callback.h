@@ -33,7 +33,7 @@ int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo
 
 int32_t ClientTransTdcOnSessionClosed(int32_t channelId);
 
-int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId);
+int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode);
 
 int32_t ClientTransTdcOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type);

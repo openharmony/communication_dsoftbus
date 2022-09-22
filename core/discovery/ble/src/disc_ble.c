@@ -394,9 +394,9 @@ static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
         SoftBusRangeParam param = {
             .rssi = *(signed char *)(&rssi),
             .power = power,
-            .addr = {0}
+            .identity = {0}
         };
-        if (memcpy_s(param.addr, BT_ADDR_LEN, foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != EOK) {
+        if (memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, foundInfo->devId, DISC_MAX_DEVICE_ID_LEN) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "RangeDevice memcpy_s failed");
             return SOFTBUS_ERR;
         }

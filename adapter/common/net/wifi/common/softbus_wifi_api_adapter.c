@@ -334,9 +334,9 @@ SoftBusBand SoftBusGetLinkBand(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand failed.");
         return BAND_UNKNOWN;
     }
-    if (result.band == 1) {
+    if (result.band == BAND_24G) {
         return BAND_24G;
-    } else if (result.band == 2) {
+    } else if (result.band == BAND_5G) {
         return BAND_5G;
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand success.");

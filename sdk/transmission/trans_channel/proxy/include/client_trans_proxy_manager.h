@@ -32,7 +32,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
 
 int32_t ClientTransProxyOnChannelClosed(int32_t channelId);
 
-int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId);
+int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 int32_t ClientTransProxyOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type);

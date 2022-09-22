@@ -25,7 +25,7 @@
 #include "softbus_base_listener.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE 24
-#define AUTH_CONN_CONNECT_TIMEOUT_MS 5000
+#define AUTH_CONN_CONNECT_TIMEOUT_MS 10000
 
 typedef struct {
     uint32_t requestId;

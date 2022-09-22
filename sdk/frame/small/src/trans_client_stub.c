@@ -76,9 +76,11 @@ int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply)
     }
     int32_t channelId = 0;
     int32_t channelType = 0;
+    int32_t errCode = SOFTBUS_OK;
     ReadInt32(data, &channelId);
     ReadInt32(data, &channelType);
-    (void)TransOnChannelOpenFailed(channelId, channelType);
+    ReadInt32(data, &errCode);
+    (void)TransOnChannelOpenFailed(channelId, channelType, errCode);
     return SOFTBUS_OK;
 }
 

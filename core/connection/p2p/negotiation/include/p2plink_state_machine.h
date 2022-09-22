@@ -48,7 +48,6 @@ void P2pLinkFsmDeinit(FsmStateMachine *fsm);
 
 void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state);
 void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialState);
-void P2pLinkFsmStop(FsmStateMachine *fsm);
 void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param);
 void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param, uint64_t delayMs);
 void P2pLinkFsmMsgProcDelayDel(int32_t msgType);

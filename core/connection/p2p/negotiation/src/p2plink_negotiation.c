@@ -1097,7 +1097,7 @@ static void OnGroupConnectSuccess(bool isNeedDhcp)
     }
 
     if (g_p2pLinkNegoFsm.linkInfo.requestId == 0) {
-        int32_t ret = PostConnResponse(g_p2pLinkNegoFsm.linkInfo.authId, CONTENT_TYPE_RESULT, SOFTBUS_OK);
+        ret = PostConnResponse(g_p2pLinkNegoFsm.linkInfo.authId, CONTENT_TYPE_RESULT, SOFTBUS_OK);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fail to post connect success response, ret = %d.", ret);
             P2pLinkRemoveGcGroup();

@@ -513,6 +513,7 @@ int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, ListNode *pendings)
     }
 
     if (target == NULL) {
+        (void)pthread_mutex_unlock(&g_connectionLock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "get pending request failed, there is no %u conneciton", connId);
         return 0;
     }

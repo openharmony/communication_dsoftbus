@@ -40,9 +40,9 @@ int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t channelId)
     return g_channelCb.OnChannelClosed(pkgName, channelId, CHANNEL_TYPE_PROXY);
 }
 
-int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t channelId)
+int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode)
 {
-    return g_channelCb.OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_PROXY);
+    return g_channelCb.OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_PROXY, errCode);
 }
 
 int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t channelId,
