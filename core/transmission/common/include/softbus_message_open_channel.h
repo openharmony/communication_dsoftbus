@@ -51,6 +51,9 @@ char *PackReply(const AppInfo *appInfo);
 int UnpackReply(const cJSON *msg, AppInfo *appInfo);
 
 char *PackError(int errCode, const char *errDesc);
+
+int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -31,7 +31,7 @@ extern "C" {
 typedef struct {
     int32_t (*OnChannelOpened)(const char *pkgName, const char *sessionName, const ChannelInfo *channel);
     int32_t (*OnChannelClosed)(const char *pkgName, int32_t channelId, int32_t channelType);
-    int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t channelId, int32_t channelType);
+    int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode);
     int32_t (*OnDataReceived)(const char *pkgName, int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t type);
     int32_t (*OnQosEvent)(const char *pkgName, const QosParam *param);

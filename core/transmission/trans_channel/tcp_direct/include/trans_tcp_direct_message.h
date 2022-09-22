@@ -34,7 +34,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
 int32_t TransTdcProcessPacket(int32_t channelId);
 int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId);
 
-int32_t NotifyChannelOpenFailed(int32_t channelId);
+int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 #ifdef __cplusplus
 }

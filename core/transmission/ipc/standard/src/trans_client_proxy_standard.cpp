@@ -115,7 +115,7 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     return serverRet;
 }
 
-int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType)
+int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -134,6 +134,10 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
     }
     if (!data.WriteInt32(channelType)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write channel type failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(errCode)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write error code failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;

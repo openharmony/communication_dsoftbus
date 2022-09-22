@@ -110,7 +110,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     return ans;
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType)
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel open failed ipc server push");
     IpcIo io;
@@ -118,6 +118,7 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, channelId);
     WriteInt32(&io, channelType);
+    WriteInt32(&io, errCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed get svc failed.");

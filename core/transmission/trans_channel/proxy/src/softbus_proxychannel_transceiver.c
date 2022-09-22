@@ -181,7 +181,7 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             if (chan == NULL) {
                 return;
             }
-            OnProxyChannelOpenFailed(chan->channelId, &(chan->appInfo));
+            OnProxyChannelOpenFailed(chan->channelId, &(chan->appInfo), (int32_t)msg->arg1);
             break;
         case LOOP_OPENCLOSE_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
@@ -286,9 +286,9 @@ void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan)
     return;
 }
 
-void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan)
+void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode)
 {
-    SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_OPENFAIL_MSG, 0, 0, (char *)chan);
+    SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_OPENFAIL_MSG, errCode, 0, (char *)chan);
     if (msg == NULL) {
         if (chan != NULL) {
             SoftBusFree((void *)chan);

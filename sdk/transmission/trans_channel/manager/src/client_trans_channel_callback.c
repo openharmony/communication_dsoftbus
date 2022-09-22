@@ -59,19 +59,19 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     return ret;
 }
 
-int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
+int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return ClientTransAuthOnChannelOpenFailed(channelId);
+            return ClientTransAuthOnChannelOpenFailed(channelId, errCode);
         case CHANNEL_TYPE_PROXY:
-            return ClientTransProxyOnChannelOpenFailed(channelId);
+            return ClientTransProxyOnChannelOpenFailed(channelId, errCode);
         case CHANNEL_TYPE_TCP_DIRECT:
-            return ClientTransTdcOnChannelOpenFailed(channelId);
+            return ClientTransTdcOnChannelOpenFailed(channelId, errCode);
         case CHANNEL_TYPE_UDP:
-            return TransOnUdpChannelOpenFailed(channelId);
+            return TransOnUdpChannelOpenFailed(channelId, errCode);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }

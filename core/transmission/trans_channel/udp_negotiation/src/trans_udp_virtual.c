@@ -41,7 +41,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t NotifyUdpChannelOpenFailed(const AppInfo *info)
+int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     (void)info;
     return SOFTBUS_FUNC_NOT_SUPPORT;

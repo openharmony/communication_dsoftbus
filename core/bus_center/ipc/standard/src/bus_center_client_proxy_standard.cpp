@@ -26,7 +26,7 @@ int32_t BusCenterClientProxy::OnChannelOpened(const char *sessionName, const Cha
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType)
+int32_t BusCenterClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     return SOFTBUS_OK;
 }

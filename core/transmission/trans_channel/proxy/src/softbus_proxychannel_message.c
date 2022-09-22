@@ -19,6 +19,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -277,6 +278,26 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     return SOFTBUS_OK;
 }
 
+char *TransProxyPackHandshakeErrMsg(int32_t errCode)
+{
+    cJSON *root = NULL;
+    char *buf = NULL;
+
+    root = cJSON_CreateObject();
+    if (root == NULL) {
+        return NULL;
+    }
+
+    if (!AddNumberToJsonObject(root, ERR_CODE, errCode)) {
+        cJSON_Delete(root);
+        return NULL;
+    }
+
+    buf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    return buf;
+}
+
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
     cJSON *root = NULL;
@@ -374,6 +395,23 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     cJSON_Delete(root);
     return buf;
 }
+
+int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
+{
+    cJSON *root = cJSON_Parse(msg);
+    if ((root == NULL) && (errCode == NULL)) {
+        return SOFTBUS_ERR;
+    }
+
+    if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode)) {
+        cJSON_Delete(root);
+        return SOFTBUS_ERR;
+    }
+
+    cJSON_Delete(root);
+    return SOFTBUS_OK;
+}
+
 
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo)
 {

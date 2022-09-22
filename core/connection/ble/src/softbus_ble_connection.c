@@ -739,7 +739,7 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
         SoftBusGattsDisconnect(binAddr, halId);
     } else {
         client->state = BLE_CONNECTION_STATE_CLOSING;
-        int32_t halId = server->halConnId;
+        int32_t halId = client->halConnId;
         (void)SoftBusMutexUnlock(&g_connectionLock);
         SoftBusGattClientDisconnect(halId);
     }
@@ -1055,6 +1055,7 @@ static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
 
 static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t len)
 {
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectId=%d receive basicInfo data", connInfo->connId);
     cJSON *data = NULL;
     data = cJSON_Parse(value + TYPE_HEADER_SIZE);
     if (data == NULL) {
