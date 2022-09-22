@@ -117,7 +117,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
+int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
 {
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
@@ -132,7 +132,11 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
     msgHead.myId = chan->myId;
     msgHead.peerId = chan->peerId;
 
-    payLoad = TransProxyPackHandshakeAckMsg(chan);
+    if (retCode != SOFTBUS_OK) {
+        payLoad = TransProxyPackHandshakeErrMsg(retCode);
+    } else {
+        payLoad = TransProxyPackHandshakeAckMsg(chan);
+    }
     if (payLoad == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack handshake ack fail");
         return SOFTBUS_ERR;

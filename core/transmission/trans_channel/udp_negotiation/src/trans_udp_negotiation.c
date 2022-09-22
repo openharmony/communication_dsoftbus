@@ -137,7 +137,7 @@ int32_t NotifyUdpChannelClosed(const AppInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t NotifyUdpChannelOpenFailed(const AppInfo *info)
+int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel open failed.");
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
@@ -146,7 +146,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    ret = g_channelCb->OnChannelOpenFailed(pkgName, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
+    ret = g_channelCb->OnChannelOpenFailed(pkgName, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify udp channel open failed err.");
         return SOFTBUS_ERR;
@@ -255,6 +255,53 @@ static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
     return SOFTBUS_OK;
 }
 
+static int32_t sendUdpInfo(cJSON *replyMsg, int64_t authId, int64_t seq)
+{
+    char *msgStr = cJSON_PrintUnformatted(replyMsg);
+    if (msgStr == NULL) {
+        return SOFTBUS_ERR;
+    }
+    AuthTransData dataInfo = {
+        .module = MODULE_UDP_INFO,
+        .flag = FLAG_REPLY,
+        .seq = seq,
+        .len = strlen(msgStr) + 1,
+        .data = (const uint8_t *)msgStr,
+    };
+
+    int32_t ret = SOFTBUS_OK;
+    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
+        ret = SOFTBUS_ERR;
+    }
+    cJSON_free(msgStr);
+    return ret;
+}
+
+static int32_t SendReplyErrInfo(int errCode, char* errDesc, int64_t authId, int64_t seq)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info in.");
+    cJSON *replyMsg = cJSON_CreateObject();
+    if (replyMsg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create cjson object failed.");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransPackReplyErrInfo(replyMsg, errCode, errDesc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack request udp info failed.");
+        cJSON_Delete(replyMsg);
+        return SOFTBUS_ERR;
+    }
+
+    if (sendUdpInfo(replyMsg, authId, seq) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendReplyeErrInfo failed.");
+        cJSON_Delete(replyMsg);
+        return SOFTBUS_ERR;
+    }
+    cJSON_Delete(replyMsg);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply error info out.");
+    return SOFTBUS_OK;
+}
+
 static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info in.");
@@ -269,24 +316,14 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
         cJSON_Delete(replyMsg);
         return SOFTBUS_ERR;
     }
-    char *msgStr = cJSON_PrintUnformatted(replyMsg);
+    
+    if (sendUdpInfo(replyMsg, authId, seq) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendReplyeErrInfo failed.");
+        cJSON_Delete(replyMsg);
+        return SOFTBUS_ERR;
+    }
+    
     cJSON_Delete(replyMsg);
-    if (msgStr == NULL) {
-        return SOFTBUS_ERR;
-    }
-    AuthTransData dataInfo = {
-        .module = MODULE_UDP_INFO,
-        .flag = FLAG_REPLY,
-        .seq = seq,
-        .len = strlen(msgStr) + 1,
-        .data = (const uint8_t *)msgStr,
-    };
-    if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
-        cJSON_free(msgStr);
-        return SOFTBUS_ERR;
-    }
-    cJSON_free(msgStr);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info out.");
     return SOFTBUS_OK;
 }
@@ -320,7 +357,7 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetPkgNameBySessionName Failed, ret = %d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
     }
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
@@ -357,72 +394,88 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
 /**
  * don't care release resources when close status, after invoking process udp channel status.
  * */
-static void ProcessAbnormalUdpChannelState(const AppInfo *info, bool needClose)
+static void ProcessAbnormalUdpChannelState(const AppInfo *info, int32_t errCode, bool needClose)
 {
-    if (needClose) {
-        if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
-            (void)NotifyUdpChannelOpenFailed(info);
-        } else {
-            (void)NotifyUdpChannelClosed(info);
-        }
+    if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+        (void)NotifyUdpChannelOpenFailed(info, errCode);
         (void)TransDelUdpChannel(info->myData.channelId);
-    } else {
-        if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
-            (void)NotifyUdpChannelOpenFailed(info);
-            (void)TransDelUdpChannel(info->myData.channelId);
-        }
+    } else if (needClose) {
+        NotifyUdpChannelClosed(info);
+        (void)TransDelUdpChannel(info->myData.channelId);
     }
 }
 
+static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON *msg)
+{
+    /* receive reply message */
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive reply udp negotiation info.");
+    UdpChannelInfo channel;
+    (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
+
+    if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel negotiation status done failed.");
+        return;
+    }
+    if (TransGetUdpChannelBySeq(seq, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by seq failed.");
+        return;
+    }
+    int32_t errCode = SOFTBUS_OK;
+    if (TransUnpackReplyErrInfo(msg, &errCode) == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive err reply info");
+        ProcessAbnormalUdpChannelState(&(channel.info), errCode, false);
+        return;
+    }
+    if (TransUnpackReplyUdpInfo(msg, &(channel.info)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack reply udp info failed.");
+        ProcessAbnormalUdpChannelState(&(channel.info), SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
+        return;
+    }
+    if (ProcessUdpChannelState(&(channel.info), false) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed.");
+        ProcessAbnormalUdpChannelState(&(channel.info), SOFTBUS_IPC_ERR, false);
+        return;
+    }
+    TransUpdateUdpChannelInfo(seq, &(channel.info));
+}
+
+static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJSON *msg)
+{
+    /* receive request message */
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive request udp negotiation info.");
+    AppInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    char* errDesc = NULL;
+
+    int32_t ret = ParseRequestAppInfo(authId, msg, &info);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get appinfo failed. ret = %d", ret);
+        errDesc = "peer device session name not create";
+        goto ERR_EXIT;
+    }
+    ret = ProcessUdpChannelState(&info, true);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed. ret = %d", ret);
+        errDesc = "notify app error";
+        goto ERR_EXIT;
+    }
+    if (SendReplyUdpInfo(&info, authId, seq) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reply udp info failed.");
+        (void)TransDelUdpChannel(info.myData.channelId);
+    }
+    return;
+
+ERR_EXIT:
+    if (SendReplyErrInfo(ret, errDesc, authId, seq) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reply error info failed.");
+    }
+}
 static void TransOnExchangeUdpInfo(int64_t authId, int32_t isReply, int64_t seq, const cJSON *msg)
 {
     if (isReply) {
-        /* receive reply message */
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive reply udp negotiation info.");
-        UdpChannelInfo channel;
-        (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
-
-        if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_DONE) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel negotiation status done failed.");
-            return;
-        }
-        if (TransGetUdpChannelBySeq(seq, &channel) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by seq failed.");
-            return;
-        }
-        if (TransUnpackReplyUdpInfo(msg, &(channel.info)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack reply udp info failed.");
-            ProcessAbnormalUdpChannelState(&(channel.info), true);
-            return;
-        }
-        if (ProcessUdpChannelState(&(channel.info), false) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed.");
-            ProcessAbnormalUdpChannelState(&(channel.info), false);
-        }
-        TransUpdateUdpChannelInfo(seq, &(channel.info));
+        TransOnExchangeUdpInfoReply(authId, seq, msg);
     } else {
-        /* receive request message */
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "receive request udp negotiation info.");
-        AppInfo info;
-        (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-
-        if (ParseRequestAppInfo(authId, msg, &info) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get appinfo failed.");
-            return;
-        }
-        int32_t ret = ProcessUdpChannelState(&info, true);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed.");
-            if (ret == SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED) {
-                return;
-            }
-            ProcessAbnormalUdpChannelState(&info, false);
-            return;
-        }
-        if (SendReplyUdpInfo(&info, authId, seq) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reply udp info failed.");
-            ProcessAbnormalUdpChannelState(&info, false);
-        }
+        TransOnExchangeUdpInfoRequest(authId, seq, msg);
     }
 }
 
@@ -483,7 +536,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     }
     if (StartExchangeUdpInfo(channel, authId, channel->seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOnAuthConnOpened neg fail");
-        ProcessAbnormalUdpChannelState(&channel->info, true);
+        ProcessAbnormalUdpChannelState(&channel->info, true, SOFTBUS_TRANS_HANDSHAKE_ERROR);
         SoftBusFree(channel);
         goto EXIT_ERR;
     }
@@ -510,7 +563,7 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
         SoftBusFree(channel);
         return;
     }
-    ProcessAbnormalUdpChannelState(&channel->info, true);
+    ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
     SoftBusFree(channel);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpenFailed end");
     return;

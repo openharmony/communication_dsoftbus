@@ -869,10 +869,6 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         return REPORT_NONE;
     }
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
-    if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && (type == CONNECTION_ADDR_WLAN ||
-        type == CONNECTION_ADDR_ETH)) {
-        LnnBleFastOfflineOnceBegin();
-    }
     if (info->discoveryType != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
             info->discoveryType);

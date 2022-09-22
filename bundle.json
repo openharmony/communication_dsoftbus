@@ -45,7 +45,7 @@
           "ipc",
           "os_account",
           "relational_store",
-          "utils_base",
+          "c_utils",
           "wifi"
         ],
         "third_party": [

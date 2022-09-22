@@ -28,6 +28,7 @@ ohos_fuzztest("QosReportFuzzTest") {
     "//foundation/communication/dsoftbus/core/common/include",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
     "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]

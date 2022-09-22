@@ -125,7 +125,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
+int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
@@ -134,7 +134,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType)
     (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
 
     if (listener.OnSessionOpened != NULL) {
-        (void)listener.OnSessionOpened(sessionId, SOFTBUS_ERR);
+        (void)listener.OnSessionOpened(sessionId, errCode);
     }
 
     (void)ClientDeleteSession(sessionId);

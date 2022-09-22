@@ -36,7 +36,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransOnUdpChannelOpenFailed(int32_t channelId)
+int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     (void)channelId;
     return SOFTBUS_FUNC_NOT_SUPPORT;

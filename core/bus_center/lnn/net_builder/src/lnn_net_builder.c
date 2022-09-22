@@ -1502,17 +1502,8 @@ int32_t LnnUpdateNodeAddr(const char *addr)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitNetBuilder(void)
-{
-    if (g_netBuilder.isInit == true) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder repeatly");
-        return SOFTBUS_OK;
-    }
-    if (LnnInitSyncInfoManager() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync info manager fail");
-        return SOFTBUS_ERR;
-    }
-    LnnInitTopoManager();
+int32_t NodeInfoSync(void) 
+{   
     if (LnnInitP2p() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
         return SOFTBUS_ERR;
@@ -1525,6 +1516,21 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitDeviceName fail");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitNetBuilder(void)
+{
+    if (g_netBuilder.isInit == true) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder repeatly");
+        return SOFTBUS_OK;
+    }
+    if (LnnInitSyncInfoManager() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sync info manager fail");
+        return SOFTBUS_ERR;
+    }
+    LnnInitTopoManager();
+    NodeInfoSync();
     NetBuilderConfigInit();
     if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register auth verify listener fail");

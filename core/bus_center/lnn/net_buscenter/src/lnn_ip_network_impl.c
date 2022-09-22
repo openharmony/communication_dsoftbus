@@ -25,6 +25,7 @@
 #include "bus_center_manager.h"
 #include "disc_interface.h"
 #include "lnn_discovery_manager.h"
+#include "lnn_fast_offline.h"
 #include "lnn_ip_utils_adapter.h"
 #include "lnn_linkwatch.h"
 #include "lnn_net_builder.h"
@@ -316,6 +317,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet->status == LNN_SUBNET_RUNNING) {
+        LnnIpAddrChangeEventHandler();
         CloseIpLink();
         LnnStopPublish();
         LnnStopDiscovery();
