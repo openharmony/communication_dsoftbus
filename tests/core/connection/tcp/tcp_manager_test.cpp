@@ -41,7 +41,7 @@
 #include "softbus_utils.h"
 
 #define CLIENTPORT 6666
-#difine SERVERPORT 6667
+#define SERVERPORT 6667
 
 static const int MAXLNE = 50;
 
