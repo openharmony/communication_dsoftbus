@@ -108,7 +108,7 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
         return SOFTBUS_ERR;
     }
 
-    SoftBusClientInfoNode *clientInfo = NULL;
+    SoftBusClientInfoNode *clientInfo;
     LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
         if (strcmp(clientInfo->name, name) == 0) {
             svcId->handle = clientInfo->handle;
@@ -155,7 +155,7 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_ERR;
     }
-    SoftBusClientInfoNode *clientInfo = NULL;
+    SoftBusClientInfoNode *clientInfo;
     LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
         if (i < num) {
             svcId[i].handle = clientInfo->handle;

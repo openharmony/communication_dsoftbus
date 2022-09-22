@@ -427,6 +427,10 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_ERR;
         }
         uint32_t bufLen = node->w - node->data;
+        if (bufLen == 0) {
+            SoftBusMutexUnlock(&g_tcpDataList->lock);
+            return SOFTBUS_OK;
+        }
         if (bufLen < DC_DATA_HEAD_SIZE) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head not enough, recv biz head next time.");
             SoftBusMutexUnlock(&g_tcpDataList->lock);
@@ -477,11 +481,16 @@ int32_t TransTdcRecvData(int32_t channelId)
         return SOFTBUS_ERR;
     }
     int32_t ret = ConnRecvSocketData(node->fd, node->w, node->size - (node->w - node->data), 0);
-    if (ret <= 0) {
+    if (ret < 0) {
         SoftBusMutexUnlock(&g_tcpDataList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail.");
         return SOFTBUS_ERR;
     }
+    if (ret == 0) {
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
+        return SOFTBUS_OK;
+    }
+
     node->w += ret;
     SoftBusMutexUnlock(&g_tcpDataList->lock);
 

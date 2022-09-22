@@ -25,7 +25,7 @@ ohos_benchmarktest("TransTest") {
     "$dsoftbus_root_path/interfaces/kits/transmission",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/discovery/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/sdk/discovery/manager/include",
   ]
@@ -38,8 +38,9 @@ ohos_benchmarktest("TransTest") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+
+  external_deps = [ "c_utils:utils" ]
 }
 
 group("benchmarktest") {

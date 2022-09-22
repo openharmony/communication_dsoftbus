@@ -33,7 +33,7 @@ void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostHandshakeMsgToLoop(int32_t chanId);
 void TransProxyPostDisConnectMsgToLoop(uint32_t connId);
 void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
-void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan);
+void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId);

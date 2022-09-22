@@ -80,7 +80,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     if (item == NULL || g_tcpConnInfoList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    TcpConnInfoNode *temp = NULL;
+    TcpConnInfoNode *temp;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
@@ -252,8 +252,8 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
-    TcpConnInfoNode *item = NULL;
-    TcpConnInfoNode *next = NULL;
+    TcpConnInfoNode *item;
+    TcpConnInfoNode *next;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.fd == fd) {
             (void)memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode));
@@ -500,7 +500,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
 int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
 {
     (void)pid;
-    TcpConnInfoNode *item = NULL;
+    TcpConnInfoNode *item;
     if (data == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }

@@ -29,7 +29,7 @@ int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInf
 
 int32_t ClientTransAuthOnChannelClosed(int32_t channelId);
 
-int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId);
+int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type);

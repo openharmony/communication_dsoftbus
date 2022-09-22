@@ -332,7 +332,7 @@ static void AddCallbackToItem(DiscItem *itemNode, const InnerCallback *cb, const
         return;
     }
     if (type == SUBSCRIBE_SERVICE) {
-        itemNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
+        ite mNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
         return;
     }
     if ((itemNode->callback.innerCb.OnDeviceFound != NULL) && (cb->innerCb.OnDeviceFound == NULL)) {
@@ -459,8 +459,8 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
     DiscInfo *info, const ServiceType type)
 {
     bool isPackageNameExist = false;
-    DiscItem *itemNode = NULL;
-    DiscInfo *infoNode = NULL;
+    DiscItem *itemNode;
+    DiscInfo *infoNode;
 
     if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");
@@ -478,7 +478,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
-        AddCallbackToItem(itemNode, cb, type);
+          (itemNode, cb, type);
         isPackageNameExist = true;
         itemNode->infoNum++;
         info->item = itemNode;
@@ -1177,7 +1177,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &itemNode->InfoList, DiscInfo, node) {
-            IdContainer *container = CreateIdContainer(infoNode->id, itemNode->packageName);
+            container = CreateIdContainer(infoNode->id, itemNode->packageName);
             if (container == NULL) {
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
                 goto CLEANUP;
