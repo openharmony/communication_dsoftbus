@@ -30,7 +30,7 @@ static int32_t ParseReply(struct HdfSBuf *rspData, uint8_t *reply, uint32_t repl
     uint32_t dataSize;
 
     if (reply == NULL) {
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
     if (!HdfSbufReadBuffer(rspData, (const void **)&data, &dataSize)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read cmd reply fail");

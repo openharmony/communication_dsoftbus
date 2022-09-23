@@ -160,7 +160,7 @@ static void LnnSubscribeWifiService(void *para)
     if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice conn and power state success");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe wifiservice conn and power state success");
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice event fail");
         retry++;
