@@ -71,3 +71,9 @@ SoftBusBand SoftBusGetLinkBand(void)
 {
     return BAND_UNKNOWN;
 }
+
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+{
+    (void)info;
+    return SOFTBUS_OK;
+}
