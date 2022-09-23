@@ -252,8 +252,8 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_ERR;
     }
-    TcpConnInfoNode *item == NULL;
-    TcpConnInfoNode *next == NULL;
+    TcpConnInfoNode *item = NULL;
+    TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.fd == fd) {
             (void)memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode));
