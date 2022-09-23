@@ -98,7 +98,7 @@ static int CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void *sr
             if (strcpy_s(dst, SOFTBUS_HISYSEVT_PARAM_LEN, src) != EOK) {
                 LOG_ERR("softbus param string max %d, nstack param string %s",
                     SOFTBUS_HISYSEVT_PARAM_LEN, (char *)src);
-                return SOFTBUS_ERR;
+                return SOFTBUS_ERR;     
             }
             break;
         default:
