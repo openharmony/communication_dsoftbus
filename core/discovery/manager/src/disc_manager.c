@@ -334,7 +334,7 @@ static void AddCallbackToItem(DiscItem *itemNode, const InnerCallback *cb, const
     if (type == SUBSCRIBE_SERVICE) {
         itemNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
         return;
-    }      
+    }
     if ((itemNode->callback.innerCb.OnDeviceFound != NULL) && (cb->innerCb.OnDeviceFound == NULL)) {
         return;
     }
@@ -478,7 +478,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
-        (itemNode, cb, type);
+        AddCallbackToItem(itemNode, cb, type);
         isPackageNameExist = true;
         itemNode->infoNum++;
         info->item = itemNode;
