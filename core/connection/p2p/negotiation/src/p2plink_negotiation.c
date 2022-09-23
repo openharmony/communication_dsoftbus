@@ -1413,13 +1413,3 @@ int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
 
     return SOFTBUS_OK;
 }
-
-void P2pLinkNegoDeinit(void)
-{
-    (void)memset_s(&g_p2pLinkNegoCb, sizeof(P2pLinkNegoCb), 0, sizeof(P2pLinkNegoCb));
-    if (g_p2pLinkNegoFsm.fsm != NULL) {
-        P2pLinkFsmDeinit(g_p2pLinkNegoFsm.fsm);
-        SoftBusFree(g_p2pLinkNegoFsm.fsm);
-    }
-    (void)memset_s(&g_p2pLinkNegoFsm, sizeof(P2pLinkNegoFsm), 0, sizeof(P2pLinkNegoFsm));
-}

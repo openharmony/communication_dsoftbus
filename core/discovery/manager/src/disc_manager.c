@@ -332,9 +332,9 @@ static void AddCallbackToItem(DiscItem *itemNode, const InnerCallback *cb, const
         return;
     }
     if (type == SUBSCRIBE_SERVICE) {
-        ite mNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
+        itemNode->callback.serverCb.OnServerDeviceFound = cb->serverCb.OnServerDeviceFound;
         return;
-    }
+    }      
     if ((itemNode->callback.innerCb.OnDeviceFound != NULL) && (cb->innerCb.OnDeviceFound == NULL)) {
         return;
     }
