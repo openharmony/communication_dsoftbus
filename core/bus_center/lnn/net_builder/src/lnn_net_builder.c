@@ -1251,6 +1251,10 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not trusted udid is too long");
         return;
     }
+    if (!LnnGetOnlineStateById(peerUdid, CATEGORY_UDID)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "not trusted device has offline!");
+        return;
+    }
     NotTrustedDelayInfo *info  = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc NotTrustedDelayInfo fail");
