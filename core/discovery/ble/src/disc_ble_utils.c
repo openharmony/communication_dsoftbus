@@ -107,7 +107,7 @@ int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local dev Id failed.");
-        return SOFTBUS_ERR;    
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
