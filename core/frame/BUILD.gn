@@ -126,7 +126,6 @@ if (defined(ohos_lite)) {
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-        "//third_party/bounds_checking_function:libsec_shared",
       ]
     }
     executable("softbus_server") {

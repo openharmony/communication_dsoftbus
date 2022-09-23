@@ -58,8 +58,5 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy.cpp",
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy_standard.cpp",
   ]
-  trans_session_deps += [
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//utils/native/base:utils",
-  ]
+  trans_session_deps += [ "//utils/native/base:utils" ]
 }

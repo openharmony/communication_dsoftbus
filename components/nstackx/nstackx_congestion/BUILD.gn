@@ -40,10 +40,7 @@ if (defined(ohos_lite)) {
         "core/nstackx_congestion.c",
         "platform/liteos/sys_congestion.c",
       ]
-      deps = [
-        "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-        "//third_party/mbedtls",
-      ]
+      deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
     } else if (ohos_kernel_type == "linux") {
       cflags = [
         "-Wall",
@@ -63,10 +60,7 @@ if (defined(ohos_lite)) {
         "platform/unix/sys_congestion.c",
       ]
 
-      deps = [
-        "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-        "//third_party/mbedtls",
-      ]
+      deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
     }
   }
 } else {
@@ -95,7 +89,6 @@ if (defined(ohos_lite)) {
     deps = [
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/mbedtls",
     ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
