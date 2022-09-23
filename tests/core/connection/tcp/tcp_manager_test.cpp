@@ -957,7 +957,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6666,
+            .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
         }
