@@ -44,7 +44,7 @@ static int32_t GetTransHeader(char *value, uint32_t len, BleTransHeader *header)
     header->total = ntohl(tmpHeader->total);
     if ((header->size != len - sizeof(BleTransHeader)) ||
         (header->total < header->size + header->offset) ||
-        || (header->total > MAX_DATA_LEN)) {
+        (header->total > MAX_DATA_LEN)) {
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
