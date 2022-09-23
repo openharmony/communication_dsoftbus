@@ -478,7 +478,7 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
                 return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
             }
         }
-          (itemNode, cb, type);
+        (itemNode, cb, type);
         isPackageNameExist = true;
         itemNode->infoNum++;
         info->item = itemNode;
