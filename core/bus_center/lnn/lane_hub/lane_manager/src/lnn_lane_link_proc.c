@@ -66,9 +66,10 @@ static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const La
         return SOFTBUS_ERR;
     }
     LaneLinkInfo linkInfo;
+    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     int32_t ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_BT_MAC,
         linkInfo.linkInfo.br.brMac, BT_MAC_LEN);
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK || strlen(linkInfo.linkInfo.br.brMac) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteStrInfo brmac is failed");
         return SOFTBUS_ERR;
     }
