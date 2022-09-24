@@ -191,7 +191,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
  */
 HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
 {
-    const char *writeBuf="abcdef";
+    const char *writeBuf = "abcdef";
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 100;
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
@@ -239,7 +239,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
  */
 HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
 {
-    const char *writeBuf="abcdef";
+    const char *writeBuf = "abcdef";
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -252,7 +252,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
  */
 HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
 {
-    const char *writeBuf="abcdef";
+    const char *writeBuf = "abcdef";
     int32_t ret = SoftBusWriteFile(nullptr, writeBuf, strlen(writeBuf));
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
@@ -268,7 +268,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
  */
 HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
 {
-    const char *writeBuf="abcdef";
+    const char *writeBuf = "abcdef";
     int32_t len = 0;
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, len);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
