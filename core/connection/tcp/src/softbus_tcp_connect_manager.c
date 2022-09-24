@@ -80,7 +80,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     if (item == NULL || g_tcpConnInfoList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    TcpConnInfoNode *temp;
+    TcpConnInfoNode *temp = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
@@ -500,7 +500,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
 int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
 {
     (void)pid;
-    TcpConnInfoNode *item;
+    TcpConnInfoNode *item = NULL;
     if (data == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }

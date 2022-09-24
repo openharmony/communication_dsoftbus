@@ -59,7 +59,7 @@ int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    PendingPacket *pending;
+    PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
@@ -118,7 +118,7 @@ int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void 
         return SOFTBUS_ERR;
     }
     PendingPacket *pending = NULL;
-    PendingPacket *item;
+    PendingPacket *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
         if (item->id == id && item->seq == seq) {
             pending = item;

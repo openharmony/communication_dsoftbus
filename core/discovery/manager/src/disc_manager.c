@@ -459,8 +459,8 @@ static int32_t AddInfoToList(SoftBusList *serviceList, const char *packageName, 
     DiscInfo *info, const ServiceType type)
 {
     bool isPackageNameExist = false;
-    DiscItem *itemNode;
-    DiscInfo *infoNode;
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
 
     if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "lock failed");

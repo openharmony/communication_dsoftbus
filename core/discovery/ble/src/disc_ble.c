@@ -1393,7 +1393,7 @@ static RecvMessage *GetRecvMessage(const char *key)
     if (key == NULL) {
         return NULL;
     }
-    RecvMessage *msg;
+    RecvMessage *msg = NULL;
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         if (memcmp((void *)key, (void *)msg->key, SHA_HASH_LEN) == 0) {
             return msg;
