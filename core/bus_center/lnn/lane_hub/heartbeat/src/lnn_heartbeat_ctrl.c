@@ -138,8 +138,8 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
             param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P2;
-            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P2;
+            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
+            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl reset ble scan medium param get invalid state");
