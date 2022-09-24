@@ -78,6 +78,7 @@ typedef struct {
     char groupId[GROUP_ID_SIZE_MAX];
     char sessionKey[SESSION_KEY_LENGTH];
     char reqId[REQ_ID_SIZE_MAX];
+    char peerNetWorkId[DEVICE_ID_SIZE_MAX];
     RouteType routeType;
     BusinessType businessType;
     StreamType streamType;

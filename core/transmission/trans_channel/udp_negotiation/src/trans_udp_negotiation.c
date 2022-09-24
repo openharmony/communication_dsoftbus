@@ -16,6 +16,7 @@
 #include "trans_udp_negotiation.h"
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "p2plink_interface.h"
@@ -750,6 +751,20 @@ static void UdpModuleCb(int64_t authId, const AuthTransData *data)
     }
 }
 
+void TransUdpNodeOffLineProc(const LnnEventBasicInfo *info)
+{
+    if ((info == NULL) || (info->event != LNN_EVENT_NODE_ONLINE_STATE_CHANGED)) {
+        return;
+    }
+
+    LnnOnlineStateEventInfo *onlineStateInfo = (LnnOnlineStateEventInfo*)info;
+    if (onlineStateInfo->isOnline == true) {
+        return;
+    }
+
+    TransCloseUdpChannelByNetWorkId(onlineStateInfo->networkId);
+}
+
 int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 {
     g_channelCb = callback;
@@ -770,6 +785,12 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register udp callback to auth failed.");
         return SOFTBUS_ERR;
     }
+
+    if (LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, TransUdpNodeOffLineProc) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register udp Node offLine Proc failed.");
+        return SOFTBUS_ERR;
+    }
+
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel init success.");
     return SOFTBUS_OK;
 }
@@ -778,6 +799,8 @@ void TransUdpChannelDeinit(void)
 {
     TransUdpChannelMgrDeinit();
     UnregAuthTransListener(MODULE_UDP_INFO);
+    LnnUnregisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, TransUdpNodeOffLineProc);
+
     g_channelCb = NULL;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
 }
