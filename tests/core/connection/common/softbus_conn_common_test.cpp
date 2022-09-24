@@ -30,6 +30,7 @@
 using namespace testing::ext;
 
 static const int INVALID_FD = -1;
+static const int TEST_FD = 1;
 static pthread_mutex_t g_isInitedLock;
 static int g_count = 0;
 static int g_port = 6666;
@@ -88,6 +89,11 @@ int32_t DataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     return 0;
 }
+
+SocketAddr g_socketAddr = {
+    .addr = "127.0.0.1",
+    .port = g_port,
+};
 
 /*
 * @tc.name: testBaseListener001
@@ -1717,5 +1723,40 @@ HWTEST_F(SoftbusCommonTest, testThreadPool020, TestSize.Level1)
         ret = ThreadPoolDestroy(pool);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
+};
+
+/*
+* @tc.name: testSocket001
+* @tc.desc: test ConnGetLocalSocketPort port
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusCommonTest, testSocket001, TestSize.Level1)
+{
+    int ret;
+    ret = ConnGetLocalSocketPort(INVALID_FD);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+
+    ret = ConnGetLocalSocketPort(TEST_FD);
+    EXPECT_TRUE(ret < 0);
+};
+
+/*
+* @tc.name: testSocket002
+* @tc.desc: test ConnGetPeerSocketAddr param is invalid
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusCommonTest, testSocket002, TestSize.Level1)
+{
+    int ret;
+    ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 };
 }
