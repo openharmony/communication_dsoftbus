@@ -345,7 +345,7 @@ static void OnAuthMsgDataRecv(int32_t authId, const AuthChannelData *data)
         return;
     }
     if (NotifyOnDataReceived(authId, data->data, data->len) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv MODULE_AUTH_MSG err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth=%d recv MODULE_AUTH_MSG err", authId);
     }
 }
 
@@ -353,10 +353,10 @@ static void OnDisconnect(int32_t authId)
 {
     AuthChannelInfo dstInfo;
     if (GetChannelInfoByAuthId(authId, &dstInfo) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel already removed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth=%d channel already removed", authId);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv auth channel disconnect event.");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv auth=%d channel disconnect event.", authId);
     DelAuthChannelInfoByChanId(dstInfo.appInfo.myData.channelId);
     (void)NofifyCloseAuthChannel(dstInfo.appInfo.myData.pkgName, dstInfo.appInfo.myData.channelId);
 }
@@ -366,7 +366,7 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
     if (sessionName == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    appInfo->appType = APP_TYPE_NOT_CARE; // 存疑
+    appInfo->appType = APP_TYPE_NOT_CARE; // doubt
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = channelId;
     appInfo->myData.apiVersion = API_V2;
@@ -585,12 +585,11 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
         goto EXIT_ERR;
     }
     info->appInfo.myData.channelId = GenerateAuthChannelId();
+    SoftBusMutexUnlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo) != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&g_authChannelList->lock);
         goto EXIT_ERR;
     }
     info->isConnOptValid = false;
-    SoftBusMutexUnlock(&g_authChannelList->lock);
     return info;
 EXIT_ERR:
     SoftBusFree(info);
@@ -644,9 +643,9 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         if (channel->appInfo.myData.channelId != channelId) {
             continue;
         }
-        AuthCloseChannel(channel->authId);
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
+        AuthCloseChannel(channel->authId);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -711,7 +710,11 @@ int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
     AuthChannelInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
         if (info->appInfo.myData.channelId == channelId) {
-            memcpy_s(appInfo, sizeof(AppInfo), &info->appInfo, sizeof(AppInfo));
+            if (memcpy_s(appInfo, sizeof(AppInfo), &info->appInfo, sizeof(AppInfo)) != EOK) {
+                (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel appinfo memcpy fail");
+                return SOFTBUS_ERR;
+            }
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             return SOFTBUS_OK;
         }
