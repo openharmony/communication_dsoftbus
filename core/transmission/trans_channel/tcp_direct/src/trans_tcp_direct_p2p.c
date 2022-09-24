@@ -291,9 +291,8 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     char peerIp[IP_LEN] = {0};
     int32_t myPort = 0;
     char myIp[IP_LEN] = {0};
-    int32_t ret;
 
-    ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
+    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
     if (ret != SOFTBUS_OK) {
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "OnVerifyP2pRequest unpack fail");
         return ret;
@@ -352,9 +351,9 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftBusLog(
         SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply: authId=%" PRId64 ", seq=%" PRId64, authId, seq);
     SessionConn *conn = NULL;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t fd;
+    int32_t fd = -1;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -405,7 +404,7 @@ EXIT_ERR:
 
 static void OnAuthMsgProc(int64_t authId, int32_t flags, int64_t seq, const cJSON *json)
 {
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     if (flags == MSG_FLAG_REQUEST) {
         ret = OnVerifyP2pRequest(authId, seq, json);
     } else {
@@ -450,7 +449,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     SessionConn *conn = NULL;
     int32_t newChannelId;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     uint32_t requestId;
 
     conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);

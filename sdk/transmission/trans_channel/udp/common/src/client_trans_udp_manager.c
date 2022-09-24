@@ -48,7 +48,7 @@ static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
     UdpChannel *channelNode = NULL;
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channel->channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %d]",
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.channelId = %d.",
                 channel->channelId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_ERR;
@@ -84,7 +84,7 @@ int32_t TransDeleteUdpChannel(int32_t channelId)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found, channelId = %d.", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -104,7 +104,7 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *channel)
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channelId) {
             if (memcpy_s(channel, sizeof(UdpChannel), channelNode, sizeof(UdpChannel)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel memcpy_s failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;
             }
@@ -113,7 +113,7 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *channel)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found, channelId = %d.", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -138,7 +138,7 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found, channelId = %d.", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -146,14 +146,15 @@ static void OnUdpChannelOpened(int32_t channelId)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on udp channel opened memset failed.");
         return;
     }
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel[%d] failed.", channelId);
         return;
     }
     if (TransSetUdpChannelEnable(channelId, true) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel enable failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set udp channel[%d] enable failed.", channelId);
         return;
     }
     SessionType type = TYPE_BUTT;
@@ -165,7 +166,7 @@ static void OnUdpChannelOpened(int32_t channelId)
             type = TYPE_FILE;
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type=%d.", channel.businessType);
             return;
     }
     ChannelInfo info = {0};
@@ -252,7 +253,7 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
             break;
         default:
             (void)TransDeleteUdpChannel(newChannel->channelId);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport businessType.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport businessType=%d.", channel->businessType);
             break;
     }
     return ret;
@@ -271,7 +272,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
             TransCloseFileChannel(channel->dfileId);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport business type=%d.", channel->businessType);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -282,16 +283,16 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
     UdpChannel channel;
     bool isFind = true;
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed get udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed get channel[%d] failed.", channelId);
         isFind = false;
     }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed delete udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed del channel[%d] failed.", channelId);
     }
     if ((isFind) && (channel.isEnable)) {
         if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "TransOnUdpChannelOpenFailed delete business channel failed.");
+                "TransOnUdpChannelOpenFailed del business channel[%d] failed.", channelId);
             return SOFTBUS_ERR;
         }
     }
@@ -311,24 +312,22 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
 static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
 {
     UdpChannel channel;
-    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
-        return SOFTBUS_ERR;
-    }
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel get channel=%d failed.", channelId);
         return SOFTBUS_ERR;
     }
 
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans delete udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans del udp channel=%d failed.", channelId);
     }
 
     if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close peer udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans close peer udp channel=%d failed.", channelId);
     }
 
     if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel delete business channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel del business channel=%d failed.", channelId);
         return SOFTBUS_ERR;
     }
     
@@ -346,11 +345,9 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     UdpChannel channel;
-    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
-        return SOFTBUS_ERR;
-    }
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnUdpChannelQosEvent get channel=%d failed.", channelId);
         return SOFTBUS_ERR;
     }
     if (g_sessionCb->OnQosEvent != NULL) {
@@ -368,11 +365,9 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     const StreamFrameInfo *param)
 {
     UdpChannel channel;
-    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memset failed.");
-        return SOFTBUS_ERR;
-    }
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUdpChannelSendStream get channel=%d failed.", channelId);
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     if (!channel.isEnable) {
@@ -389,7 +384,7 @@ static void OnUdpChannelClosed(int32_t channelId)
     }
     g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans delete udp channel failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans delete udp channel=%d failed.", channelId);
     }
 }
 
@@ -499,7 +494,7 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        LOG_ERR("lock failed");
+        LOG_ERR("TransGetUdpChannelByFileId lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 

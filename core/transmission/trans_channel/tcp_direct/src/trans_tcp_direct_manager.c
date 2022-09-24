@@ -65,7 +65,6 @@ static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
         OnSessionOpenFailProc(item, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         TransSrvDelDataBufNode(item->channelId);
-
         SoftBusFree(item);
     }
 }
@@ -113,7 +112,6 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
         OnSessionOpenFailProc(item, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
-        
         SoftBusFree(item);
     }
 }
@@ -204,10 +202,10 @@ void TransTdcDeathCallback(const char *pkgName)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             ListDelete(&item->node);
-            SoftBusFree(item);
             sessionList->cnt--;
+            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
+            SoftBusFree(item);
             continue;
         }
     }

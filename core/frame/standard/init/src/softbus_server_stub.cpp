@@ -40,8 +40,9 @@ using namespace OHOS::Security::AccessToken;
 namespace OHOS {
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
-    char pkgName[PKG_NAME_SIZE_MAX];
-    if (TransGetPkgNameBySessionName(param->sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    if ((param == NULL) ||
+        (TransGetPkgNameBySessionName(param->sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession TransGetPkgNameBySessionName failed");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -62,11 +63,10 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 
 int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t channelType)
 {
-    char pkgName[PKG_NAME_SIZE_MAX];
-    char sessionName[SESSION_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    int32_t ret = SOFTBUS_OK;
     TransInfo info;
-    int32_t ret;
-
     info.channelId = channelId;
     info.channelType = channelType;
     ret = TransGetNameByChanId(&info, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
@@ -393,7 +393,6 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED);
-        
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
@@ -586,9 +585,7 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
     }
     if (!reply.WriteInt32(infoNum)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfoInner write infoNum failed!");
-        if (nodeInfo != nullptr) {
-            SoftBusFree(nodeInfo);
-        }
+        SoftBusFree(nodeInfo);
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
