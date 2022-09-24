@@ -183,8 +183,3 @@ int32_t P2pLinkMessageInit(void)
     }
     return SOFTBUS_OK;
 }
-
-void P2pLinkMessageDeinit(void)
-{
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2plink message deinit.");
-}

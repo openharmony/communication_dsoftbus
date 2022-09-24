@@ -1097,7 +1097,7 @@ static void OnGroupConnectSuccess(bool isNeedDhcp)
     }
 
     if (g_p2pLinkNegoFsm.linkInfo.requestId == 0) {
-        int32_t ret = PostConnResponse(g_p2pLinkNegoFsm.linkInfo.authId, CONTENT_TYPE_RESULT, SOFTBUS_OK);
+        ret = PostConnResponse(g_p2pLinkNegoFsm.linkInfo.authId, CONTENT_TYPE_RESULT, SOFTBUS_OK);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fail to post connect success response, ret = %d.", ret);
             P2pLinkRemoveGcGroup();
@@ -1412,14 +1412,4 @@ int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
     P2pLinkFsmStart(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_IDLE);
 
     return SOFTBUS_OK;
-}
-
-void P2pLinkNegoDeinit(void)
-{
-    (void)memset_s(&g_p2pLinkNegoCb, sizeof(P2pLinkNegoCb), 0, sizeof(P2pLinkNegoCb));
-    if (g_p2pLinkNegoFsm.fsm != NULL) {
-        P2pLinkFsmDeinit(g_p2pLinkNegoFsm.fsm);
-        SoftBusFree(g_p2pLinkNegoFsm.fsm);
-    }
-    (void)memset_s(&g_p2pLinkNegoFsm, sizeof(P2pLinkNegoFsm), 0, sizeof(P2pLinkNegoFsm));
 }

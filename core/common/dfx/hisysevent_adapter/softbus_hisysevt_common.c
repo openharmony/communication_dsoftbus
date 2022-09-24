@@ -87,7 +87,10 @@ typedef void (*HandleMessageFunc)(SoftBusMessage *msg);
 static inline SoftBusHandler* CreateHandler(SoftBusLooper *looper, HandleMessageFunc callback)
 {
     SoftBusHandler *handler = SoftBusMalloc(sizeof(SoftBusHandler));
-
+    if (handler == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create handler failed");
+        return NULL;
+    }
     handler->looper = looper;
     handler->name = "statisticEvtReportHandler";
     handler->HandleMessage = callback;
@@ -98,6 +101,10 @@ static inline SoftBusHandler* CreateHandler(SoftBusLooper *looper, HandleMessage
 static inline SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc callback)
 {
     SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc softbus message failed");
+        return NULL;
+    }
     SoftBusHandler *handler = CreateHandler(looper, callback);
 
     msg->what = MSG_STATISTIC_EVT_REPORT;

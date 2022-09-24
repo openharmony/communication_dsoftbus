@@ -95,7 +95,6 @@ typedef struct {
 } P2pLinkNegoCb;
 
 int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback);
-void P2pLinkNegoDeinit(void);
 
 void P2pLinkNegoStart(const P2pLinkNegoConnInfo *connInfo);
 void P2pLinkNegoStop(void);
