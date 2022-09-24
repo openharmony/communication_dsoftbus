@@ -83,6 +83,9 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 
 static int32_t GetUdpChannel(int32_t dfileId, UdpChannel *udpChannel)
 {
+    if (udpChannel == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     (void)memset_s(udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannelByFileId(dfileId, udpChannel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;

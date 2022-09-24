@@ -192,11 +192,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     transInfo->channelType = CHANNEL_TYPE_BUTT;
     LaneConnInfo connInfo;
     uint32_t laneId = 0;
-    AppInfo *appInfo = NULL;
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    appInfo = GetAppInfo(param);
+    AppInfo *appInfo = GetAppInfo(param);
     if (appInfo == NULL) {
         goto EXIT_ERR;
     }
@@ -230,9 +229,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
-    if (appInfo != NULL) {
-        SoftBusFree(appInfo);
-    }
+    SoftBusFree(appInfo);
     if (laneId != 0) {
         LnnFreeLane(laneId);
     }
@@ -277,9 +274,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo ok");
     return appInfo;
 EXIT_ERR:
-    if (appInfo != NULL) {
-        SoftBusFree(appInfo);
-    }
+    SoftBusFree(appInfo);
     return NULL;
 }
 

@@ -85,7 +85,9 @@ static void TransSrvDestroyDataBuf(void)
 
     ServerDataBuf *item = NULL;
     ServerDataBuf *next = NULL;
-    SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         ListDelete(&item->node);
         SoftBusFree(item->data);
@@ -126,7 +128,11 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
     }
     node->w = node->data;
 
-    SoftBusMutexLock(&(g_tcpSrvDataList->lock));
+    if (SoftBusMutexLock(&(g_tcpSrvDataList->lock)) != SOFTBUS_OK) {
+        SoftBusFree(node->data);
+        SoftBusFree(node);
+        return SOFTBUS_ERR;
+    }
     ListInit(&node->node);
     ListTailInsert(&g_tcpSrvDataList->list, &node->node);
     g_tcpSrvDataList->cnt++;
@@ -143,7 +149,9 @@ void TransSrvDelDataBufNode(int channelId)
 
     ServerDataBuf *item = NULL;
     ServerDataBuf *next = NULL;
-    SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
@@ -356,15 +364,13 @@ static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t
 static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
     uint32_t flags)
 {
-    char *reply = NULL;
-    reply = PackReply(appInfo);
+    char *reply = PackReply(appInfo);
     if (reply == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestReply get pack reply err");
         return SOFTBUS_ERR;
     }
 
     int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
-
     cJSON_free(reply);
     return ret;
 }
@@ -372,15 +378,13 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
 static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc,
     int32_t errCode, uint32_t flags)
 {
-    char *reply = NULL;
-    reply = PackError(errCode, errDesc);
+    char *reply = PackError(errCode, errDesc);
     if (reply == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequestError get pack reply err");
         return SOFTBUS_ERR;
     }
 
     int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
-
     cJSON_free(reply);
     return ret;
 }
@@ -425,7 +429,7 @@ static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
 
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d, seq=%d.", channelId, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
     if (conn == NULL) {
         return SOFTBUS_ERR;
@@ -485,7 +489,7 @@ ERR_EXIT:
 
 static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg)
 {
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     cJSON *json = cJSON_Parse(msg);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProcessMessage: json parse failed.");
@@ -583,7 +587,10 @@ static int32_t ProcessReceivedData(int32_t channelId)
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
 
-    SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
+        return SOFTBUS_ERR;
+    }
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL || node->data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "node is null.");
@@ -624,7 +631,10 @@ static int32_t ProcessReceivedData(int32_t channelId)
 
 static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
 {
-    SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
+        return SOFTBUS_ERR;
+    }
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
@@ -667,7 +677,10 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
 
 int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
 {
-    SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
+        return SOFTBUS_ERR;
+    }
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

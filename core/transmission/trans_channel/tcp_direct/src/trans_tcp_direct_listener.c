@@ -186,6 +186,7 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int events, int cfd, con
         ConnShutdownSocket(cfd);
         return ret;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "tdc conn event fd:%d, cId:%d, module:%d.", cfd, channelId, module);
     return SOFTBUS_OK;
 }
 
@@ -289,6 +290,5 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
 int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc(module);
-    int32_t ret = StopBaseListener(module);
-    return ret;
+    return StopBaseListener(module);
 }
