@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+
+#ifndef LNN_CONNECTION_FSM_H
+#define LNN_CONNECTION_FSM_H
+
 #include <stdint.h>
 
 #include "auth_interface.h"
@@ -21,9 +25,6 @@
 #include "lnn_state_machine.h"
 #include "softbus_bus_center.h"
 #include "softbus_hisysevt_bus_center.h"
-
-#ifndef LNN_CONNECTION_FSM_H
-#define LNN_CONNECTION_FSM_H
 
 #ifdef __cplusplus
 #if __cplusplus
