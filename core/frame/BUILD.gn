@@ -188,8 +188,11 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "//third_party/cJSON:cjson_static",
     ]
+    dsoftbus_server_common_external_deps =
+        bus_center_server_external_deps + disc_server_external_deps +
+        softbus_permission_external_deps + trans_session_external_deps
     if (is_standard_system) {
-      external_deps = bus_center_server_external_deps
+      external_deps = dsoftbus_server_common_external_deps
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
