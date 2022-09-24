@@ -31,7 +31,7 @@ extern "C" {
 
 uint32_t CalTcpConnectionId(int32_t fd);
 
-int32_t TcpGetConnNum(void);
+uint32_t TcpGetConnNum(void);
 
 int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 

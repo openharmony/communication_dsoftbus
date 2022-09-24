@@ -31,7 +31,6 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     if (msg->paramArray != NULL) {
         SoftBusFree(msg->paramArray);
     }
-    
     SoftBusFree(msg);
 }
 
@@ -46,6 +45,5 @@ SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
     if (msg->paramArray == NULL) {
         SoftbusFreeEvtReporMsg(msg);
     }
-    
     return msg;
 }

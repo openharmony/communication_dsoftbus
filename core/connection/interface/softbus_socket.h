@@ -35,7 +35,9 @@ extern "C" {
     ( \
     {   \
     long int __result; \
-    do __result = (long int) (expression); \
+    do { \
+        __result = (long int) (expression); \
+    } \
     while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
     __result; \
     } \
