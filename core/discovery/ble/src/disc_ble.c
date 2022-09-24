@@ -213,7 +213,7 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
             SoftbusBitmapSet(dstCap, g_bleTransCapabilityMap[i]);
         }
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %d,new= %d", *srcCap, *dstCap);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %u,new= %u", *srcCap, *dstCap);
 }
 
 static void ResetInfoUpdate(int adv)
@@ -241,7 +241,7 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
 
 static void BleAdvEnableCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvEnableCallback failed");
         return;
     }
@@ -251,7 +251,7 @@ static void BleAdvEnableCallback(int advId, int status)
 
 static void BleAdvDisableCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvDisableCallback failed");
         return;
     }
@@ -674,6 +674,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     if (advData->scanRspData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed");
         SoftBusFree(advData->advData);
+        advData->advData = NULL;
         return SOFTBUS_MALLOC_ERR;
     }
     unsigned short advLength = (boardcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : boardcastData->dataLen;
@@ -695,7 +696,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     advData->scanRspData[POS_COMPANY_ID] = COMPANY_ID & BYTE_MASK;
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
-        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
+        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], (RESP_DATA_MAX_LEN + RSP_HEAD_LEN),
             boardcastData->data.rspData, advData->scanRspLength) != EOK) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "memcpy err");
             return SOFTBUS_MEM_ERR;
@@ -905,7 +906,7 @@ static int32_t InitScanner(void)
 
 static int32_t GetScannerParam(int32_t freq, SoftBusBleScanParams *scanParam)
 {
-    if (freq >= FREQ_BUTT) {
+    if (freq >= FREQ_BUTT || freq < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     scanParam->scanInterval = (uint16_t)g_scanTable[freq].scanInterval;

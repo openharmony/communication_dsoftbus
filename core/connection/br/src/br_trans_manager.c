@@ -41,7 +41,8 @@ static int32_t ReceivedHeadCheck(BrConnectionInfo *conn)
         return SOFTBUS_ERR;
     }
 
-    if ((int32_t)(head->len) + pktHeadLen > conn->recvSize) {
+    if ((int32_t)(head->len) + pktHeadLen > conn->recvSize ||
+        (int32_t)(head->len) + pktHeadLen < 0) {
         conn->recvPos = 0;
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
             "[ReceivedHeadCheck]data too large. module=%d, seq=%" PRId64 ", datalen=%d",
