@@ -205,6 +205,47 @@ int32_t TransDelUdpChannel(int32_t channelId)
     return SOFTBUS_ERR;
 }
 
+static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
+{
+    UdpChannelInfo *udpChannel = NULL;
+    UdpChannelInfo *udpChannelNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, udpChannelList, UdpChannelInfo, node) {
+        (void)NotifyUdpChannelClosed(&udpChannel->info);
+
+        ListDelete(&(udpChannel->node));
+        SoftBusFree(udpChannel);
+    }
+}
+
+void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
+{
+    if ((g_udpChannelMgr == NULL) || (netWorkId == NULL)) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransCloseUdpChannelByAuId lock failed");
+        return;
+    }
+
+    ListNode udpDeleteChannelList;
+    ListInit(&udpDeleteChannelList);
+
+    UdpChannelInfo *udpChannel = NULL;
+    UdpChannelInfo *udpChannelNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, &g_udpChannelMgr->list, UdpChannelInfo, node) {
+        if (strcmp(udpChannel->info.peerNetWorkId, netWorkId) == 0) {
+            ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
+            ListDelete(&(udpChannel->node));
+            g_udpChannelMgr->cnt--;
+
+            ListAdd(&udpDeleteChannelList, &(udpChannel->node));
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
+
+    NotifyUdpChannelCloseInList(&udpDeleteChannelList);
+}
+
 int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
