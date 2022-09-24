@@ -1408,7 +1408,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
         return SOFTBUS_INVALID_PARAM;
     }
     (void)SoftBusMutexLock(&g_recvMessageInfo.lock);
-    RecvMessage *msg;
+    RecvMessage *msg = NULL;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "recv message cnt: %d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         for (uint32_t index = 0; index < len; index++) {
