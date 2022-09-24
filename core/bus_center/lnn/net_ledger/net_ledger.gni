@@ -43,12 +43,21 @@ bus_center_ledger_inc = [
 bus_center_ledger_deps = []
 bus_center_ledger_external_deps = []
 
+net_ledger_native_source_path = rebase_path("$dsoftbus_root_path")
+net_ledger_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
+net_ledger_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                  [
+                                    "$net_ledger_native_source_path",
+                                    "$net_ledger_dep_dir",
+                                  ],
+                                  "value")
+
 if (defined(ohos_lite)) {
   bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
   bus_center_ledger_deps +=
       [ "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk" ]
 } else {
-  if (dsoftbus_feature_lnn_heartbeat) {
+  if (net_ledger_enhanced) {
     bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c" ]
   } else {
     bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
