@@ -98,7 +98,7 @@ static inline SoftBusHandler* CreateHandler(SoftBusLooper *looper, HandleMessage
     return handler;
 }
 
-static inline SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc callback)
+static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc callback)
 {
     SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
