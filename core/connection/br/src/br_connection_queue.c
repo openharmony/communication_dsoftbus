@@ -193,7 +193,7 @@ int32_t BrEnqueueNonBlock(const void *msg)
         isListEmpty = false;
     }
     LockFreeQueue *lockFreeQueue = NULL;
-    BrQueue *item;
+    BrQueue *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_brQueueList, BrQueue, node) {
         if (item->pid == queueNode->pid) {
             lockFreeQueue = item->queue[priority];
