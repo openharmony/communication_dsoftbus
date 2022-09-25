@@ -1102,13 +1102,17 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     if (pkgName == NULL) {
         return container;
     }
-    int len = strlen(pkgName);
-    container->pkgName = SoftBusCalloc(len + 1);
+    uint32_t nameLen  = strlen(pkgName) + 1; 
+    container->pkgName = SoftBusCalloc(nameLen);
     if (container->pkgName == NULL) {
         SoftBusFree(container);
         return NULL;
     }
-    (void)memcpy_s(container->pkgName, len, pkgName, len);
+    if (strcpy_s(container->pkgName, nameLen , pkgName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer strcpy_s fail");
+        SoftBusFree(container);
+        return NULL;
+    }
     return container;
 }
 

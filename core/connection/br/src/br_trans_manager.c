@@ -64,7 +64,10 @@ static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "not a complete package, continue");
         return NULL;
     }
-
+    if (bufLen < 0 || packLen < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "bufLen or packLen invalid");
+        return NULL;
+    }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] a complete package packLen: %d", packLen);
     char *dataCopy = SoftBusMalloc(packLen);
     if (dataCopy == NULL) {
