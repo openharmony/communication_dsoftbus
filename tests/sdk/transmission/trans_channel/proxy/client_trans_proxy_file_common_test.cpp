@@ -53,13 +53,13 @@ void ClientTransProxyFileCommonTest::TearDownTestCase(void) {}
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
 {
     FileListBuffer bufferInfo = {0};
-    EXPECT_EQ(0, FileListToBuffer(g_fileSet1, sizeof(g_fileSet1)/ sizeof(const char *), &bufferInfo));
+    EXPECT_EQ(0, FileListToBuffer(g_fileSet1, sizeof(g_fileSet1) / sizeof(const char *), &bufferInfo));
 
     int32_t fileCount = 0;
     const char *oldFirstFileName = BufferToFileList(bufferInfo.buffer, bufferInfo.bufferSize, &fileCount);
 
     ASSERT_NE(oldFirstFileName, nullptr);
-    EXPECT_EQ(fileCount, sizeof(g_fileSet1)/ sizeof(const char *));
+    EXPECT_EQ(fileCount, sizeof(g_fileSet1) / sizeof(const char *));
 
     EXPECT_EQ(0, strcmp(oldFirstFileName, g_fileSet1[0]));
 
@@ -69,7 +69,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize.Level0)
 {
     FileListBuffer bufferInfo = {0};
-    EXPECT_NE(0, FileListToBuffer(nullptr, sizeof(g_fileSet1)/ sizeof(const char *), &bufferInfo));
+    EXPECT_NE(0, FileListToBuffer(nullptr, sizeof(g_fileSet1) / sizeof(const char *), &bufferInfo));
 
     EXPECT_EQ(bufferInfo.buffer, nullptr);
     EXPECT_EQ(bufferInfo.bufferSize, 0);

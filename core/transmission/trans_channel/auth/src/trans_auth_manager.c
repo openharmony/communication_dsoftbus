@@ -629,7 +629,6 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransPostAuthRequest failed");
         AuthCloseChannel(channel->authId);
         DelAuthChannelInfoByChanId(*channelId);
-        SoftBusFree(channel);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
