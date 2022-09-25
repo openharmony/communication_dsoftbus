@@ -194,7 +194,10 @@ static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult 
     dst->eventType = ConvertScanEventType(src->eventType);
     dst->dataStatus = ConvertScanDataStatus(src->dataStatus);
     dst->addrType = ConvertScanAddrType(src->addrType);
-    (void)memcpy_s(dst->addr.addr, BT_ADDR_LEN, src->addr.addr, BT_ADDR_LEN);
+    if (memcpy_s(dst->addr.addr, BT_ADDR_LEN, src->addr.addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConvertScanResult memcpy addr fail");
+        return;
+    }
     dst->primaryPhy = ConvertScanPhyType(src->primaryPhy);
     dst->secondaryPhy = ConvertScanPhyType(src->secondaryPhy);
     dst->advSid = src->advSid;
@@ -202,7 +205,10 @@ static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult 
     dst->rssi = src->rssi;
     dst->periodicAdvInterval = src->periodicAdvInterval;
     dst->directAddrType = ConvertScanAddrType(src->directAddrType);
-    (void)memcpy_s(dst->directAddr.addr, BT_ADDR_LEN, src->directAddr.addr, BT_ADDR_LEN);
+    if (memcpy_s(dst->directAddr.addr, BT_ADDR_LEN, src->directAddr.addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConvertScanResult memcpy directAddr fail");
+        return;
+    }
     dst->advLen = src->advLen;
     dst->advData = src->advData;
 }
@@ -256,7 +262,10 @@ static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
     dst->advType = ConvertAdvType(src->advType);
     dst->ownAddrType = 0x00;
     dst->peerAddrType = 0x00;
-    (void)memcpy_s(dst->peerAddr.addr, BT_ADDR_LEN, src->peerAddr.addr, BT_ADDR_LEN);
+    if (memcpy_s(dst->peerAddr.addr, BT_ADDR_LEN, src->peerAddr.addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConvertScanResult memcpy directAddr fail");
+        return;
+    }
     dst->channelMap = src->channelMap;
     dst->advFilterPolicy = ConvertAdvFilter(src->advFilterPolicy);
     dst->txPower = src->txPower;
