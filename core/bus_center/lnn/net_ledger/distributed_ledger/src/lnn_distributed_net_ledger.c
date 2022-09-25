@@ -1502,5 +1502,6 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
     RefreshDeviceInfoByDevId(device, addtions);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, online status=%d",addtions->medium, device->isOnline);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, online status=%d",
+        addtions->medium, device->isOnline);
 }

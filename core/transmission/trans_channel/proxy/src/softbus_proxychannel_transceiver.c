@@ -482,7 +482,6 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
             }
             case CONNECT_BLE:
                 if (strcmp(connInfo->bleOption.bleMac, item->connInfo.bleOption.bleMac) == 0) {
-                    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy error");
                     find = true;
                 }
                 break;
@@ -576,6 +575,7 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
     }
+    chan->type = conn->connInfo.type;
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         chan->reqId = (int32_t)conn->requestId;
         chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
