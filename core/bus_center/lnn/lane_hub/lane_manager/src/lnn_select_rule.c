@@ -66,7 +66,7 @@ static bool IsWlan2P4G(void)
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetWlanLinkedInfo fail, ret:%d", ret);
-        return false;   
+        return false;
     }
     if (info.band == 1) {
         return true;
