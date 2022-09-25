@@ -256,7 +256,10 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     TcpConnInfoNode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.fd == fd) {
-            (void)memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode));
+            if (memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetTcpInfoByFd:memcpy_s failed");
+                return SOFTBUS_ERR;
+            }
             (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             return SOFTBUS_OK;
         }
@@ -271,6 +274,7 @@ int32_t TcpOnDataEventOut(int32_t fd)
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
 
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
+        tcpInfo.info.socketInfo.moduleId = UNUSE_BUTT;
         (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
         ConnShutdownSocket(fd);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "TcpOnDataEventSocketOut fail %d", fd);
