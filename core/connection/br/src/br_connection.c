@@ -511,7 +511,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
         return SOFTBUS_ERR;
     }
     ListAdd(&newConnInfo->requestList, &requestInfo->node);
-    if (strcpy_s(newConnInfo->mac, sizeof(newConnInfo->mac), option->brOption.brMac) != EOK) {
+    if (strcpy_s(newConnInfo->mac, BT_MAC_LEN, option->brOption.brMac) != EOK) {
         ReleaseBrconnectionNode(newConnInfo);
         return SOFTBUS_ERR;
     }
@@ -604,7 +604,12 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
     newConnectionInfo->state = BR_CONNECTION_STATE_CONNECTED;
     connectionId = newConnectionInfo->connectionId;
     char mac[BT_MAC_LEN] = {0};
-    (void)memcpy_s(mac, BT_MAC_LEN, newConnectionInfo->mac, BT_MAC_LEN);
+    if (memcpy_s(mac, BT_MAC_LEN, newConnectionInfo->mac, BT_MAC_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrServer memcpy mac fail");
+        ReleaseBrconnectionNode(newConnectionInfo);
+        g_sppDriver->DisConnect(socketFd);
+        return connectionId;
+    }
     if (AddConnectionList(newConnectionInfo) != SOFTBUS_OK) {
         ListDelete(&newConnectionInfo->node);
         ReleaseBrconnectionNode(newConnectionInfo);
@@ -1029,7 +1034,7 @@ EXIT:
         ClientNoticeResultBrConnect(connInfoId, false, socketFd);
         ReleaseConnectionRefByConnId(connInfoId);
     }
-    SoftbusFree(args);
+    SoftBusFree(args);
     return;
 }
 
