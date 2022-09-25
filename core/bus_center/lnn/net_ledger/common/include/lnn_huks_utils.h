@@ -12,19 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LNN_OHOS_ACCOUNT_H
-#define LNN_OHOS_ACCOUNT_H
 
-#include <stdint.h>
+#ifndef LNN_HUKS_UTILS_H
+#define LNN_HUKS_UTILS_H
+
+#include "hks_api.h"
+#include "hks_param.h"
+#include "hks_type.h"
+
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
-bool LnnIsDefaultOhosAccount(void);
+#define LNN_HUKS_AES_COMMON_SIZE 1024
+
+int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
+int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias);
+int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
+int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
+int32_t LnnGenerateRandomByHuks(uint8_t *randomKey, uint32_t len);
+
+int32_t LnnInitHuksInterface(void);
+void LnnDeinitHuksInterface(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_OHOS_ACCOUNT_H */
+#endif
