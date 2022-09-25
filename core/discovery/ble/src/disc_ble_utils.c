@@ -201,7 +201,7 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash get local user id failed");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(hashStr, len, account, len) != EOK) {
+    if (len > SHORT_USER_ID_HASH_LEN || memcpy_s(hashStr, len, account, len) != EOK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash memcpy_s failed");
         return SOFTBUS_ERR;
     }
