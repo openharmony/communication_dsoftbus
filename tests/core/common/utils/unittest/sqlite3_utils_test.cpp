@@ -30,8 +30,8 @@ constexpr char DEVICE1_HASH[] = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d4
 constexpr char DEVICE2_HASH[] = "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35";
 constexpr char USER1_ID[] = "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce";
 constexpr char USER2_ID[] = "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a";
-constexpr char PASSWORD1[] = "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d";
-constexpr char PASSWORD2[] = "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683";
+constexpr uint8_t PASSWORD1[] = "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d";
+constexpr uint8_t PASSWORD2[] = "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683";
 
 static TrustedDevInfoRecord g_record1, g_record2, g_record3;
 
@@ -163,7 +163,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_001, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CheckTableExist(ctx, TABLE_TRUSTED_DEV_INFO, &isExist), SOFTBUS_OK);
     EXPECT_TRUE(!isExist);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
@@ -187,7 +187,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_002, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
@@ -200,7 +200,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_002, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
@@ -224,28 +224,28 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_003, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, strlen(PASSWORD2)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, sizeof(PASSWORD2)), SOFTBUS_OK);
     EXPECT_NE(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_NE(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, strlen(PASSWORD2)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, sizeof(PASSWORD2)), SOFTBUS_OK);
     EXPECT_NE(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_NE(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
@@ -263,28 +263,28 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_004, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_NE(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_NE(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_NE(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_NE(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
@@ -302,29 +302,29 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_005, TestSize.Level0
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
-    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD2, strlen(PASSWORD2)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(UpdateDbPassword(ctx, PASSWORD2, sizeof(PASSWORD2)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_NE(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_NE(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, strlen(PASSWORD2)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD2, sizeof(PASSWORD2)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
@@ -342,7 +342,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_001, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 0);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 0);
@@ -365,7 +365,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_002, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     EXPECT_NE(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
@@ -390,7 +390,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_001, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 1);
@@ -414,7 +414,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_002, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 1);
@@ -438,7 +438,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_003, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 1);
@@ -464,7 +464,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_001, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     num = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID);
@@ -493,7 +493,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_002, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record2), SOFTBUS_OK);
@@ -523,7 +523,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_001, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
@@ -547,7 +547,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
 
     EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
     ASSERT_TRUE(ctx != nullptr);
-    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, strlen(PASSWORD1)), SOFTBUS_OK);
+    EXPECT_EQ(EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1)), SOFTBUS_OK);
     EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
     EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
