@@ -1108,7 +1108,11 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
         SoftBusFree(container);
         return NULL;
     }
-    (void)memcpy_s(container->pkgName, len, pkgName, len);
+    if (strcpy(container->pkgName, len + 1 , pkgName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer strcpy_s fail");
+        SoftBusFree(container);
+        return NULL;
+    }
     return container;
 }
 
