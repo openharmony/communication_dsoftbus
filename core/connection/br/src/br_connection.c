@@ -511,7 +511,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
         return SOFTBUS_ERR;
     }
     ListAdd(&newConnInfo->requestList, &requestInfo->node);
-    if (strcpy_s(newConnInfo->mac, sizeof(newConnInfo->mac), option->brOption.brMac) != EOK) {
+    if (strcpy_s(newConnInfo->mac, BT_MAC_LEN, option->brOption.brMac) != EOK) {
         ReleaseBrconnectionNode(newConnInfo);
         return SOFTBUS_ERR;
     }
