@@ -1506,7 +1506,7 @@ int32_t LnnUpdateNodeAddr(const char *addr)
     return SOFTBUS_OK;
 }
 
-int32_t NodeInfoSync(void) 
+int32_t NodeInfoSync(void)
 {
     if (LnnInitP2p() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
