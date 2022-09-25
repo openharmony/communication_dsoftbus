@@ -123,6 +123,9 @@ int32_t ReCreateSessionServerToServer(void);
 void ClientTransRegLnnOffline(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
+
+void ClientCleanAllSessionWhenServerDeath(void);
+
 #ifdef __cplusplus
 }
 #endif
