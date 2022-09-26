@@ -345,7 +345,7 @@ static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, char *pkgNa
 int32_t SoftBusReportDiscStartupEvt(char *PackageName)
 {
     if (PackageName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");        
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
