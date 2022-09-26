@@ -362,6 +362,9 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash error");
             return false;
         }
+        if ((accountIdHash[0] & BYTE_MASK) == 0 && (accountIdHash[1] & BYTE_MASK) == 0) {
+            return false;
+        }
         if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
