@@ -33,12 +33,12 @@ if (dsoftbus_feature_lnn_net) {
     auth_server_src +=
         [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c" ]
   } else {
-    auth_server_src += [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection_virtual.c" ]
+    auth_server_src += [ "$dsoftbus_root_path/core/authentication/src/virtual/auth_tcp_connection_virtual.c" ]
   }
 } else {
   auth_server_src = [
-    "$authentication_path/src/auth_interface_virtual.c",
-    "$authentication_path/src/auth_tcp_connection_virtual.c",
+    "$authentication_path/src/virtual/auth_interface_virtual.c",
+    "$authentication_path/src/virtual/auth_tcp_connection_virtual.c",
   ]
 }
 auth_server_inc = [
