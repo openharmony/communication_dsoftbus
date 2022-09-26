@@ -24,6 +24,16 @@ extern "C" {
 #endif
 #endif
 
+// Bluetooth scan duty cycle, unit: ms
+#define SOFTBUS_BLE_SCAN_INTERVAL_P2 3000
+#define SOFTBUS_BLE_SCAN_INTERVAL_P10 600
+#define SOFTBUS_BLE_SCAN_INTERVAL_P25 240
+#define SOFTBUS_BLE_SCAN_INTERVAL_P100 1000
+#define SOFTBUS_BLE_SCAN_WINDOW_P2 60
+#define SOFTBUS_BLE_SCAN_WINDOW_P10 60
+#define SOFTBUS_BLE_SCAN_WINDOW_P25 60
+#define SOFTBUS_BLE_SCAN_WINDOW_P100 1000
+
 typedef enum {
     SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE = 0x00,
     SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED = 0x04,
@@ -90,6 +100,21 @@ typedef struct {
     unsigned char scanFilterPolicy;
 } SoftBusBleScanParams;
 
+typedef struct {
+    char *address;
+    char *deviceName;
+    unsigned int serviceUuidLength;
+    unsigned char *serviceUuid;
+    unsigned char *serviceUuidMask;
+    unsigned int serviceDataLength;
+    unsigned char *serviceData;
+    unsigned char *serviceDataMask;
+    unsigned int manufactureDataLength;
+    unsigned char *manufactureData;
+    unsigned char *manufactureDataMask;
+    unsigned short manufactureId;
+} SoftBusBleScanFilter;
+
 typedef enum {
     SOFTBUS_BLE_DATA_COMPLETE = 0x00,
     SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME = 0x01,
@@ -152,7 +177,9 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener);
 
 int SoftBusRemoveScanListener(int listenerId);
 
-int SoftBusStartScan(int listnerId, const SoftBusBleScanParams *param);
+int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize);
+
+int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param);
 
 int SoftBusStopScan(int listenerId);
 

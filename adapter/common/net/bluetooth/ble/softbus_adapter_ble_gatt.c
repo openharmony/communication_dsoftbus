@@ -24,6 +24,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 #define SOFTBUS_SCAN_CLIENT_ID 0
 #define ADV_MAX_NUM 4
@@ -40,8 +41,11 @@ typedef struct {
 
 typedef struct {
     bool isUsed;
+    bool isNeedReset;
     bool isScanning;
     SoftBusBleScanParams param;
+    SoftBusBleScanFilter *filter;
+    uint8_t filterSize;
     SoftBusScanListener *listener;
 } ScanListener;
 
@@ -174,6 +178,23 @@ static unsigned char ConvertScanType(unsigned char scanType)
     }
 }
 
+static int ConvertScanMode(unsigned short scanInterval, unsigned short scanWindow)
+{
+    if (scanInterval == SOFTBUS_BLE_SCAN_INTERVAL_P2 && scanWindow == SOFTBUS_BLE_SCAN_WINDOW_P2) {
+        return OHOS_BLE_SCAN_MODE_OP_P2_60_3000;
+    }
+    if (scanInterval == SOFTBUS_BLE_SCAN_INTERVAL_P10 && scanWindow == SOFTBUS_BLE_SCAN_WINDOW_P10) {
+        return OHOS_BLE_SCAN_MODE_OP_P10_60_600;
+    }
+    if (scanInterval == SOFTBUS_BLE_SCAN_INTERVAL_P25 && scanWindow == SOFTBUS_BLE_SCAN_WINDOW_P25) {
+        return OHOS_BLE_SCAN_MODE_OP_P25_60_240;
+    }
+    if (scanInterval == SOFTBUS_BLE_SCAN_INTERVAL_P100 && scanWindow == SOFTBUS_BLE_SCAN_WINDOW_P100) {
+        return OHOS_BLE_SCAN_MODE_OP_P100_1000_1000;
+    }
+    return OHOS_BLE_SCAN_MODE_LOW_POWER;
+}
+
 void ConvertScanParam(const SoftBusBleScanParams *src, BleScanParams *dst)
 {
     if (src == NULL || dst == NULL) {
@@ -184,6 +205,108 @@ void ConvertScanParam(const SoftBusBleScanParams *src, BleScanParams *dst)
     dst->scanType = ConvertScanType(src->scanType);
     dst->scanPhy = ConvertScanPhyType(src->scanPhy);
     dst->scanFilterPolicy = ConvertScanFilterPolicy(src->scanFilterPolicy);
+}
+
+static void SetAndGetSuitableScanConfig(int listenerId, const SoftBusBleScanParams *params, BleScanConfigs *configs)
+{
+    static int lastScanMode = OHOS_BLE_SCAN_MODE_LOW_POWER;
+
+    if (params == NULL || configs == NULL) {
+        return;
+    }
+    (void)memset_s(configs, sizeof(BleScanConfigs), 0x0, sizeof(BleScanConfigs));
+    g_scanListener[listenerId].param = *params;
+    for (int index = 0; index < SCAN_MAX_NUM; index++) {
+        if (!g_scanListener[index].isUsed || (!g_scanListener[index].isScanning && index != listenerId)) {
+            continue;
+        }
+        int scanMode = ConvertScanMode(g_scanListener[index].param.scanInterval,
+            g_scanListener[index].param.scanWindow);
+        if (scanMode > configs->scanMode) {
+            configs->scanMode = scanMode;
+        }
+    }
+    if (lastScanMode != configs->scanMode) {
+        g_scanListener[listenerId].isNeedReset = true;
+        lastScanMode = configs->scanMode;
+    }
+}
+
+static void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
+{
+#define HEX_STR_MULTIPLE_NUM 2
+   
+    if (nativeFilter == NULL || filterSize == 0) {
+        return;
+    }
+    while (filterSize-- > 0) {
+        if ((nativeFilter + filterSize) == NULL) {
+            continue;
+        }
+        int32_t len = (nativeFilter + filterSize)->serviceDataLength;
+        int32_t hexLen = (nativeFilter + filterSize)->serviceDataLength * HEX_STR_MULTIPLE_NUM + 1;
+        char *serviceData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
+        if (serviceData == NULL) {
+            continue;
+        }
+        char *serviceDataMask = (char *)SoftBusCalloc(sizeof(char) * hexLen);
+        if (serviceDataMask == NULL) {
+            SoftBusFree(serviceData);
+            serviceData = NULL;
+            continue;
+        }
+        (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
+        (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BLE Scan Filter id:%d [serviceData:%s, serviceDataMask:%s]",
+            filterSize, serviceData, serviceDataMask);
+        SoftBusFree(serviceData);
+        SoftBusFree(serviceDataMask);
+    }
+}
+
+static void GetAllNativeScanFilter(int thisListenerId, BleScanNativeFilter **nativeFilter, uint8_t *filterSize)
+{
+    uint8_t nativeSize = 0;
+
+    if (nativeFilter == NULL || filterSize == NULL) {
+        return;
+    }
+    for (int index = 0; index < SCAN_MAX_NUM; index++) {
+        if (!g_scanListener[index].isUsed || (!g_scanListener[index].isScanning && index != thisListenerId)) {
+            g_scanListener[index].isNeedReset = false;
+            continue;
+        }
+        g_scanListener[index].isNeedReset = true;
+        nativeSize += g_scanListener[index].filterSize;
+    }
+    *filterSize = nativeSize;
+    *nativeFilter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * nativeSize);
+    if (*nativeFilter == NULL) {
+        *filterSize = 0;
+        return;
+    }
+    for (int index = 0; index < SCAN_MAX_NUM; index++) {
+        if (!g_scanListener[index].isNeedReset) {
+            continue;
+        }
+        uint8_t size = g_scanListener[index].filterSize;
+        const SoftBusBleScanFilter *filter = g_scanListener[index].filter;
+        while (size-- > 0) {
+            nativeSize--;
+            (*nativeFilter + nativeSize)->address = (filter + size)->address;
+            (*nativeFilter + nativeSize)->deviceName = (filter + size)->deviceName;
+            (*nativeFilter + nativeSize)->manufactureData = (filter + size)->manufactureData;
+            (*nativeFilter + nativeSize)->manufactureDataLength = (filter + size)->manufactureDataLength;
+            (*nativeFilter + nativeSize)->manufactureDataMask = (filter + size)->manufactureDataMask;
+            (*nativeFilter + nativeSize)->manufactureId = (filter + size)->manufactureId;
+            (*nativeFilter + nativeSize)->serviceData = (filter + size)->serviceData;
+            (*nativeFilter + nativeSize)->serviceDataLength = (filter + size)->serviceDataLength;
+            (*nativeFilter + nativeSize)->serviceDataMask = (filter + size)->serviceDataMask;
+            (*nativeFilter + nativeSize)->serviceUuid = (filter + size)->serviceUuid;
+            (*nativeFilter + nativeSize)->serviceUuidLength = (filter + size)->serviceUuidLength;
+            (*nativeFilter + nativeSize)->serviceUuidMask = (filter + size)->serviceUuidMask;
+        }
+    }
 }
 
 static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult *dst)
@@ -632,10 +755,10 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
     }
     for (int index = 0; index < SCAN_MAX_NUM; index++) {
         if (!g_scanListener[index].isUsed) {
+            (void)memset_s(g_scanListener + index, sizeof(ScanListener), 0x0, sizeof(ScanListener));
             g_scanListener[index].isUsed = true;
+            g_scanListener[index].isNeedReset = true;
             g_scanListener[index].isScanning = false;
-            (void)memset_s(&g_scanListener[index].param, sizeof(SoftBusBleScanParams),
-                           0x0, sizeof(SoftBusBleScanParams));
             g_scanListener[index].listener = (SoftBusScanListener *)listener;
             SoftBusMutexUnlock(&g_scanerLock);
             return index;
@@ -643,6 +766,50 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
     }
     SoftBusMutexUnlock(&g_scanerLock);
     return SOFTBUS_ERR;
+}
+
+static void FreeScanFilter(int listenerId)
+{
+    uint8_t filterSize = g_scanListener[listenerId].filterSize;
+    SoftBusBleScanFilter *filter = g_scanListener[listenerId].filter;
+
+    if (filter == NULL || filterSize == 0) {
+        return;
+    }
+    if (!g_scanListener[listenerId].isUsed) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "ScanListener id:%d is not in use", listenerId);
+        return;
+    }
+    while (filterSize-- > 0) {
+        if ((filter + filterSize) == NULL) {
+            continue;
+        }
+        if ((filter + filterSize)->address != NULL) {
+            SoftBusFree((filter + filterSize)->address);
+        }
+        if ((filter + filterSize)->deviceName != NULL) {
+            SoftBusFree((filter + filterSize)->deviceName);
+        }
+        if ((filter + filterSize)->serviceUuid != NULL) {
+            SoftBusFree((filter + filterSize)->serviceUuid);
+        }
+        if ((filter + filterSize)->serviceUuidMask != NULL) {
+            SoftBusFree((filter + filterSize)->serviceUuidMask);
+        }
+        if ((filter + filterSize)->serviceData != NULL) {
+            SoftBusFree((filter + filterSize)->serviceData);
+        }
+        if ((filter + filterSize)->serviceDataMask != NULL) {
+            SoftBusFree((filter + filterSize)->serviceDataMask);
+        }
+        if ((filter + filterSize)->manufactureData != NULL) {
+            SoftBusFree((filter + filterSize)->manufactureData);
+        }
+        if ((filter + filterSize)->manufactureDataMask != NULL) {
+            SoftBusFree((filter + filterSize)->manufactureDataMask);
+        }
+    }
+    SoftBusFree(filter);
 }
 
 int SoftBusRemoveScanListener(int listenerId)
@@ -654,15 +821,20 @@ int SoftBusRemoveScanListener(int listenerId)
         return SOFTBUS_LOCK_ERR;
     }
     g_scanListener[listenerId].isUsed = false;
+    g_scanListener[listenerId].isNeedReset = true;
     g_scanListener[listenerId].isScanning = false;
     g_scanListener[listenerId].listener = NULL;
+    FreeScanFilter(listenerId);
     SoftBusMutexUnlock(&g_scanerLock);
     return SOFTBUS_OK;
 }
 
-static bool CheckNeedStartScan(void)
+static bool CheckNeedReStartScan(void)
 {
     for (int listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
+        if (g_scanListener[listenerId].isNeedReset) {
+            return true;
+        }
         if (g_scanListener[listenerId].isScanning) {
             return false;
         }
@@ -683,6 +855,27 @@ static bool CheckNeedStopScan(int listenerId)
     return true;
 }
 
+int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
+{
+    if (filter == NULL || filterSize == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_scanerLock) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!g_scanListener[listenerId].isUsed) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ScanListener id:%d is not in use", listenerId);
+        SoftBusMutexUnlock(&g_scanerLock);
+        return SOFTBUS_ERR;
+    }
+    FreeScanFilter(listenerId);
+    g_scanListener[listenerId].filter = filter;
+    g_scanListener[listenerId].filterSize = filterSize;
+    g_scanListener[listenerId].isNeedReset = true;
+    SoftBusMutexUnlock(&g_scanerLock);
+    return SOFTBUS_OK;
+}
+
 int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
 {
     if (param == NULL) {
@@ -696,9 +889,16 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
+    BleScanConfigs scanConfig;
+    SetAndGetSuitableScanConfig(listenerId, param, &scanConfig);
     int status = SOFTBUS_BT_STATUS_SUCCESS;
-    if (CheckNeedStartScan()) {
-        status = BleOhosStatusToSoftBus(BleStartScan());
+    if (CheckNeedReStartScan()) {
+        uint8_t filterSize = 0;
+        BleScanNativeFilter *nativeFilter = NULL;
+        GetAllNativeScanFilter(listenerId, &nativeFilter, &filterSize);
+        DumpBleScanFilter(nativeFilter, filterSize);
+        status = BleOhosStatusToSoftBus(BleStartScanEx(&scanConfig, nativeFilter, filterSize));
+        SoftBusFree(nativeFilter);
     }
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
         SoftBusMutexUnlock(&g_scanerLock);

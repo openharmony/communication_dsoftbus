@@ -26,7 +26,6 @@
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -177,10 +176,6 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
     }
-    if (LnnInitFastOffline() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fast offline init fail!");
-        return SOFTBUS_ERR;
-    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
     return SOFTBUS_OK;
 }
@@ -193,6 +188,5 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetworkManager();
     LnnDeinitBusCenterEvent();
     LnnDeinitNetLedger();
-    LnnDeinitFastOffline();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

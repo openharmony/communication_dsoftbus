@@ -15,6 +15,8 @@
 #include "lnn_ohos_account.h"
 
 #include <securec.h>
+
+#include "bus_center_manager.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "softbus_adapter_crypto.h"
@@ -64,11 +66,13 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
         accountInfo.second.uid_.c_str(), accountInfo.second.uid_.length());
 }
 
-bool LnnIsDefaultOhosAccount(const uint8_t *accountHash, uint32_t len)
+bool LnnIsDefaultOhosAccount(void)
 {
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
     uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};
 
-    if (accountHash == nullptr || len > SHA_256_HASH_LEN) {
+    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local accountHash fail");
         return false;
     }
     if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
@@ -76,5 +80,5 @@ bool LnnIsDefaultOhosAccount(const uint8_t *accountHash, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate default ohos account hash fail");
         return false;
     }
-    return memcmp(accountHash, defaultAccountHash, len) == 0;
+    return memcmp(localAccountHash, defaultAccountHash, SHA_256_HASH_LEN) == 0;
 }

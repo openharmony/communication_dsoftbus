@@ -32,7 +32,8 @@ typedef struct {
 static char g_storagePath[SOFTBUS_MAX_PATH_LEN] = {0};
 
 static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
-    { LNN_FILE_ID_UUID, "/dsoftbus/uuid" }
+    { LNN_FILE_ID_UUID, "/dsoftbus/uuid" },
+    { LNN_FILE_ID_DB_KEY, "/dsoftbus/dbKey" },
 };
 
 static int32_t InitStorageConfigPath(void)
@@ -52,6 +53,10 @@ static int32_t InitStorageConfigPath(void)
 
 int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
 {
+    if (path == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: path is null", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (strlen(g_storagePath) == 0) {
         if (InitStorageConfigPath() != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init storage config path fail");
