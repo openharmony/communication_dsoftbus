@@ -91,7 +91,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, 
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "[client] TransOnChannelClosed: channelId=%d, channelType=%d.", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:

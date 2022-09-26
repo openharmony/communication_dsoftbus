@@ -202,8 +202,8 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     peerIpPort.ip = param->peerIp;
     peerIpPort.port = param->peerPort;
 
-    int32_t ret = newAdaptor->GetStreamManager()->CreateStreamClientChannel(ipPort, peerIpPort, Communication::SoftBus::VTP,
-        param->type, newAdaptor->GetSessionKey());
+    int32_t ret = newAdaptor->GetStreamManager()->CreateStreamClientChannel(ipPort, peerIpPort,
+        Communication::SoftBus::VTP, param->type, newAdaptor->GetSessionKey());
     if (ret > 0) {
         newAdaptor->SetAliveState(true);
     } else {

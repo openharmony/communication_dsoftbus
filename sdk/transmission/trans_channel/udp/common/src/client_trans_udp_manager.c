@@ -283,11 +283,11 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
     UdpChannel channel;
     bool isFind = true;
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed get channel[%d] failed.", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "[%s] get channel[%d] failed.", __func__, channelId);
         isFind = false;
     }
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransOnUdpChannelOpenFailed del channel[%d] failed.", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "[%s] del channel[%d] failed.", __func__, channelId);
     }
     if ((isFind) && (channel.isEnable)) {
         if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {

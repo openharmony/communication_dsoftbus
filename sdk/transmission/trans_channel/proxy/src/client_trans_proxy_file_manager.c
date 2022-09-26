@@ -857,7 +857,6 @@ static int32_t SendOneFrameMiddle(SendListenerInfo *info, int32_t frameType)
 static int32_t SendOneFrameRear(SendListenerInfo *info, int32_t frameType)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendOneFrameMiddle invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->crc != APP_INFO_FILE_FEATURES_SUPPORT) {
