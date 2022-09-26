@@ -59,7 +59,7 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
         accountInfo.second.uid_ == DEFAULT_USER_ID ||
         accountInfo.second.uid_ == OHOS::AccountSA::DEFAULT_OHOS_ACCOUNT_UID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetOhosAccountInfo get default user id");
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
 
     return ConvertHexStringToBytes((unsigned char *)accountHash, len,
