@@ -124,10 +124,11 @@ void TransLaneMgrDeinit(void)
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *nextLaneItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
-        LnnFreeLane(laneItem->laneId);
         ListDelete(&(laneItem->node));
+        LnnFreeLane(laneItem->laneId);
         SoftBusFree(laneItem);
     }
+    g_channelLaneList->cnt = 0;
     (void)SoftBusMutexUnlock(&g_channelLaneList->lock);
     DestroySoftBusList(g_channelLaneList);
     g_channelLaneList = NULL;
@@ -195,11 +196,11 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
-            LnnFreeLane(laneItem->laneId);
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
-            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            LnnFreeLane(laneItem->laneId);
             SoftBusFree(laneItem);
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             return SOFTBUS_OK;
         }
     }
@@ -223,13 +224,13 @@ void TransLaneMgrDeathCallback(const char *pkgName)
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (strcmp(laneItem->pkgName, pkgName) == 0) {
-            LnnFreeLane(laneItem->laneId);
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
+            LnnFreeLane(laneItem->laneId);
+            SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
                 pkgName, laneItem->channelId, laneItem->channelType);
-            SoftBusFree(laneItem);
             return;
         }
     }
