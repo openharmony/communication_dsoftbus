@@ -85,7 +85,7 @@ static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len)
+static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
 {
     char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN];
 
@@ -94,7 +94,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len)
         return SOFTBUS_ERR;
     }
     do {
-        if (SoftBusAccessFile(dbKeyFilePath, SOFTBUS_F_OK) == SOFTBUS_OK) {
+        if (!isUpdate && SoftBusAccessFile(dbKeyFilePath, SOFTBUS_F_OK) == SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "dbKey file is exist");
             break;
         }
@@ -126,7 +126,7 @@ static int32_t EncryptDecisionDb(DbContext *ctx)
 {
     uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
 
-    if (GetDecisionDbKey(dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+    if (GetDecisionDbKey(dbKey, sizeof(dbKey), false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get decision dbKey fail");
         return SOFTBUS_ERR;
     }
@@ -134,6 +134,28 @@ static int32_t EncryptDecisionDb(DbContext *ctx)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt decision db fail");
         return SOFTBUS_ERR;
     }
+    (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDecisionDbKey(DbContext *ctx)
+{
+    uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
+
+    if (LnnDeleteKeyByHuks(&g_keyAlias) != SOFTBUS_OK ||
+        LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update decision db root key fail");
+        return SOFTBUS_ERR;
+    }
+    if (GetDecisionDbKey(dbKey, sizeof(dbKey), true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get decision dbKey fail");
+        return SOFTBUS_ERR;
+    }
+    if (UpdateDbPassword(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt decision db fail");
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "update dbKey log for audit");
     (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
     return SOFTBUS_OK;
 }
@@ -380,6 +402,10 @@ static int32_t InitTrustedDevInfoTableDelay(void)
     do {
         if (EncryptDecisionDb(ctx) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
+            break;
+        }
+        if (UpdateDecisionDbKey(ctx) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update database dbKey failed.");
             break;
         }
         if (CheckTableExist(ctx, TABLE_TRUSTED_DEV_INFO, &isExist) != SOFTBUS_OK) {
