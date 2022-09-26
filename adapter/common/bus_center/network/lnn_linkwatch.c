@@ -143,6 +143,9 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
 
 bool LnnIsLinkReady(const char *iface)
 {
+    if (iface == NULL) {
+        return false;
+    }
     struct ifinfomsg *info = NULL;
     struct {
         struct nlmsghdr hdr;

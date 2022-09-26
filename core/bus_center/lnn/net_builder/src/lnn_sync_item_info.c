@@ -108,7 +108,10 @@ void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, const uint
 {
     char udid[UDID_BUF_LEN];
     BssTransInfo *bssTranInfo = NULL;
-
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: msg is null", __func__);
+        return;
+    }
     if (type != LNN_INFO_TYPE_DEVICE_NAME) {
         return;
     }
