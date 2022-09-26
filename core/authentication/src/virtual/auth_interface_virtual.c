@@ -188,7 +188,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
 {
     (void)authId;
     (void)isServer;
-    return SOFTBUS_NOT_IMPLEMENT
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
@@ -196,14 +196,14 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     (void)authId;
     (void)uuid;
     (void)size;
-    return SOFTBUS_NOT_IMPLEMENT
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
 {
     (void)authId;
     (void)version;
-    return SOFTBUS_NOT_IMPLEMENT
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthInit(void)
