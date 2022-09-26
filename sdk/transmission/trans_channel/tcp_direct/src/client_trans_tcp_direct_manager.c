@@ -179,14 +179,8 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
     return item;
 }
 
-int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
 {
-    if (sessionName == NULL || channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] param invalid", __func__);
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = SOFTBUS_ERR;
-    TcpDirectChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
         return SOFTBUS_ERR;
@@ -194,11 +188,29 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channel->channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp direct channel[%d] already exist.", item->channelId);
-            goto EXIT_ERR;
+            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+            return SOFTBUS_ERR;
         }
     }
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    return SOFTBUS_OK;
+}
 
-    item = TransGetNewTcpChannel(channel);
+int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+{
+    if (sessionName == NULL || channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] param invalid", __func__);
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = SOFTBUS_ERR;
+    if (ClientTransCheckTdcChannelExist(channel->channelId) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
+        return SOFTBUS_ERR;
+    }
+    TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get new channel[%d] err.", channel->channelId);
         goto EXIT_ERR;

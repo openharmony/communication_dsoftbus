@@ -497,11 +497,8 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
     char sessionKey[BASE64KEY] = {0};
-    int32_t appType = 0;
     AppInfo *appInfo = &(chan->appInfo);
-    if (appInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
+    int32_t appType = 0;
 
     if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, &(appType)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chan->identity, sizeof(chan->identity)) ||
