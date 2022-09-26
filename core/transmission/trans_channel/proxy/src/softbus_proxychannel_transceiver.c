@@ -181,7 +181,7 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             if (chan == NULL) {
                 return;
             }
-            OnProxyChannelOpenFailed(chan->channelId, &(chan->appInfo), (int32_t)msg->arg1);
+            TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), (int32_t)msg->arg1);
             break;
         case LOOP_OPENCLOSE_MSG:
             chan = (ProxyChannelInfo *)msg->obj;

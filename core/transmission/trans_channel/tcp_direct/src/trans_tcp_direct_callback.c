@@ -35,11 +35,6 @@ int32_t TransTdcOnChannelOpened(const char *pkgName, const char *sessionName, co
     return g_channelCb.OnChannelOpened(pkgName, sessionName, channel);
 }
 
-int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t channelId)
-{
-    return g_channelCb.OnChannelClosed(pkgName, channelId, CHANNEL_TYPE_TCP_DIRECT);
-}
-
 int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode)
 {
     return g_channelCb.OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
