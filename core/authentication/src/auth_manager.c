@@ -838,10 +838,16 @@ static void HandleAuthData(const AuthConnInfo *connInfo,
     }
 }
 
-static void HandleDeviceInfoData(const AuthConnInfo *connInfo,
+static void HandleDeviceInfoData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data)
 {
-    int32_t ret = AuthSessionProcessDevInfoData(head->seq, data, head->len);
+    int32_t ret;
+    if (head->seq != 0) {
+        ret = AuthSessionProcessDevInfoData(head->seq, data, head->len);
+    } else {
+        /* To be compatible with ohos-3.1 and early. */
+        ret = AuthSessionProcessDevInfoDataByConnId(connId, !fromServer, data, head->len);
+    }
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "perform auth(=%"PRId64") session recv devInfo fail(=%d)", head->seq, ret);
@@ -911,7 +917,7 @@ static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool f
             HandleAuthData(connInfo, head, data);
             break;
         case DATA_TYPE_DEVICE_INFO:
-            HandleDeviceInfoData(connInfo, head, data);
+            HandleDeviceInfoData(connId, connInfo, fromServer, head, data);
             break;
         case DATA_TYPE_CLOSE_ACK:
             HandleCloseAckData(connId, connInfo, fromServer, head, data);
