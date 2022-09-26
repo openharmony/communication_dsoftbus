@@ -75,7 +75,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client process data fail");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client cId[%d] process data fail,", channelId);
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             ClientTransTdcOnSessionClosed(channelId);
@@ -89,7 +89,10 @@ int32_t TransTdcCreateListener(int32_t fd)
 {
     static bool isInitedFlag = false;
     TdcLockInit();
-    SoftBusMutexLock(&g_lock.lock);
+    if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcCreateListener lock failed.");
+        return SOFTBUS_ERR;
+    }
     if (isInitedFlag == false) {
         isInitedFlag = true;
 

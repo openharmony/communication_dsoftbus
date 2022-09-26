@@ -20,12 +20,14 @@
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
 static IClientSessionCallBack g_sessionCb;
 
 int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransTdcSetCallBack cb null.");
         return SOFTBUS_INVALID_PARAM;
     }
     g_sessionCb = *cb;
