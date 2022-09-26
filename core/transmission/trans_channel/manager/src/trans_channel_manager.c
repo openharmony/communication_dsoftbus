@@ -88,6 +88,34 @@ void TransChannelDeinit(void)
     TransReqLanePendingDeinit();
 }
 
+static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
+{
+    if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), param->groupId) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), param->sessionName) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(appInfo->peerNetWorkId, sizeof(appInfo->peerNetWorkId), param->peerDeviceId) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (TransGetPkgNameBySessionName(param->sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static AppInfo *GetAppInfo(const SessionParam *param)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo");
@@ -103,20 +131,11 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     } else if (param->attr->dataType == TYPE_FILE) {
         appInfo->businessType = BUSINESS_TYPE_FILE;
     }
-    if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), param->groupId) != EOK) {
-        goto EXIT_ERR;
-    }
-    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), param->sessionName) != EOK) {
-        goto EXIT_ERR;
-    }
-    if (TransGetPkgNameBySessionName(param->sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (CopyAppInfoFromSessionParam(appInfo, param) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
@@ -124,14 +143,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
-        goto EXIT_ERR;
-    }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
-        goto EXIT_ERR;
-    }
+
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
     return appInfo;
 EXIT_ERR:

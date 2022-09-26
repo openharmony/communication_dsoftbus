@@ -27,4 +27,7 @@ if (dsoftbus_feature_trans_udp == true) {
     "$udp_channel_path/src/trans_udp_channel_manager_virtual.c",
   ]
 }
-trans_udp_channel_inc = [ "$udp_channel_path/include" ]
+trans_udp_channel_inc = [
+  "$udp_channel_path/include",
+  "$dsoftbus_root_path/core/bus_center/service/include",
+]

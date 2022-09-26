@@ -90,11 +90,6 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    if (TransServerInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus trans server init failed.");
-        goto ERR_EXIT;
-    }
-
     if (AuthInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus auth init failed.");
         goto ERR_EXIT;
@@ -107,6 +102,11 @@ void InitSoftBusServer(void)
 
     if (BusCenterServerInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
+        goto ERR_EXIT;
+    }
+
+    if (TransServerInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus trans server init failed.");
         goto ERR_EXIT;
     }
 
