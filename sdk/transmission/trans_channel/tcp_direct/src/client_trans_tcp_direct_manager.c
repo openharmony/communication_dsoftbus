@@ -186,8 +186,8 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
-        if (item->channelId == channel->channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp direct channel[%d] already exist.", item->channelId);
+        if (item->channelId == channelId) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp direct channel[%d] already exist.", channelId);
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return SOFTBUS_ERR;
         }
