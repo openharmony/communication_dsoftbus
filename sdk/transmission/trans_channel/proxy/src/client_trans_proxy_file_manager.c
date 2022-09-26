@@ -1446,7 +1446,7 @@ static int32_t GetFileInfoByStartFrame(const FileFrame *fileFrame, const FileRec
         return SOFTBUS_ERR;
     }
     if (UnpackFileTransStartInfo((FileFrame *)fileFrame, info, file) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session[%s] unpack start info fail", info->sessionId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session[%d] unpack start info fail", info->sessionId);
         return SOFTBUS_ERR;
     }
     char *filePath = file->filePath;
