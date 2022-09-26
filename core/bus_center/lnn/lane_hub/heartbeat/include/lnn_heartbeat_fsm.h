@@ -43,6 +43,7 @@ typedef enum {
     EVENT_HB_CHECK_DEV_STATUS,
     EVENT_HB_STOP_SPECIFIC,
     EVENT_HB_SET_MEDIUM_PARAM,
+    EVENT_HB_UPDATE_SEND_INFO,
     EVENT_HB_MAX,
 } LnnHeartbeatEventType;
 
@@ -87,6 +88,7 @@ int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventTyp
 int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbeatMediumParam *para);
 int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
     uint64_t delayMillis);
+int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type);
 
 void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool *isRemoved);
 void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);

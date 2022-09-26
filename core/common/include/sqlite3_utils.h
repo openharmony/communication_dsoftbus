@@ -53,8 +53,10 @@ typedef enum {
     CLOSE_TRANS_ROLLBACK
 } CloseTransactionType;
 
+/* read supports multithreading, and write only supports single thread {@link LOOP_TYPE_DEFAULT}. */
 int32_t OpenDatabase(DbContext **ctx);
 int32_t CloseDatabase(DbContext *ctx);
+
 int32_t CreateTable(DbContext *ctx, TableNameID id);
 int32_t DeleteTable(DbContext *ctx, TableNameID id);
 int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist);
@@ -67,8 +69,8 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t 
 
 int32_t OpenTransaction(DbContext *ctx);
 int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type);
-int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len);
-int32_t UpdateDbPassword(DbContext *ctx, const char *password, uint32_t len);
+int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len);
+int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len);
 
 int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value);
 int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value);

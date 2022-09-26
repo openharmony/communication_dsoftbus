@@ -19,6 +19,7 @@
 #define INT32_MAX_BIT_NUM 32
 #define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
 
+#define BLE_SCAN_FILTER_LEN 7
 #define CUST_DATA_MAX_LEN 14
 #define SOFTBUS_BLE_CLIENT_ID 0x1
 
@@ -36,6 +37,7 @@
 #define POS_PACKET_LENGTH 3
 #define POS_AD_TYPE 4
 #define POS_UUID 5
+#define UUID_LEN 2
 #define ADV_HEAD_LEN 7
 #define RSP_HEAD_LEN 4
 

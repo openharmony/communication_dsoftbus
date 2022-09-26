@@ -153,7 +153,7 @@ static bool HbIsRepeatedRecvInfo(const char *udidHash, ConnectionAddrType type, 
 static int32_t GenerateHexStringHash(const unsigned char *str, uint32_t len, char *hashStr)
 {
     int32_t ret;
-    unsigned char hashResult[HB_SHA_HASH_LEN] = {0};
+    uint8_t hashResult[SHA_256_HASH_LEN] = {0};
 
     if (str == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB generate str hash invalid param");
@@ -232,24 +232,6 @@ static int32_t HbUpdateOfflineTimingByRecvInfo(const char *networkId, Connection
     return SOFTBUS_OK;
 }
 
-static bool HbIsSameAccount(const char *accountHash, uint32_t len)
-{
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
-
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB IsSameAccount get local accountHash fail");
-        return true;
-    }
-    if (memcmp(accountHash, localAccountHash, len) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsNotSameAccount. [my %02x %02x : peer %02x %02x]",
-            localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
-        return false;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB IsSameAccount. [my %02x %02x : peer %02x %02x]",
-        localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
-    return true;
-}
-
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_t masterWeight, LnnHeartbeatType hbType)
 {
     uint64_t nowTime;
@@ -268,9 +250,6 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
     if (HbSaveRecvTimeToRemoveRepeat(device, weight, masterWeight, nowTime) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB save recv time fail, udidHash:%s", device->devId);
         return SOFTBUS_ERR;
-    }
-    if (!HbIsSameAccount(device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN)) {
-        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X, "
@@ -436,10 +415,11 @@ void LnnDumpHbOnlineNodeList(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, nodeInfo i=%d", i);
             continue;
         }
+        char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo->deviceInfo.deviceTypeId);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpOnlineNodeList count:%d [i:%d, deviceName:%s, "
-            "deviceTypeId:%d, masterWeight:%d, discoveryType:%d, oldTimeStamp:%" PRIu64 "]", infoNum, i + 1,
-            nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId, nodeInfo->masterWeight,
-            nodeInfo->discoveryType, oldTimeStamp);
+            "deviceTypeId:%d, deviceTypeStr:%s, masterWeight:%d, discoveryType:%d, oldTimeStamp:%" PRIu64 "]",
+            infoNum, i + 1, nodeInfo->deviceInfo.deviceName, nodeInfo->deviceInfo.deviceTypeId,
+            deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo->masterWeight, nodeInfo->discoveryType, oldTimeStamp);
     }
     SoftBusFree(info);
 }
@@ -604,6 +584,22 @@ int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param fail, type=%d, ret=%d", param->type, ret);
         return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
+{
+    int32_t i;
+
+    for (i = 0; i < HB_MAX_TYPE_COUNT; ++i) {
+        if (g_hbMeidumMgr[i] == NULL || g_hbMeidumMgr[i]->onUpdateSendInfo == NULL) {
+            continue;
+        }
+        if (g_hbMeidumMgr[i]->onUpdateSendInfo(type) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager update send info fail, i=%d", i);
+            return SOFTBUS_ERR;
+        }
     }
     return SOFTBUS_OK;
 }
