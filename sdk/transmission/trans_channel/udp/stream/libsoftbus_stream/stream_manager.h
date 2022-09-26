@@ -109,9 +109,6 @@ private:
     StreamManager &operator=(const StreamManager &) = delete;
     StreamManager &operator=(StreamManager &&) = delete;
 
-    bool ChangeToOtherChannel(const IStreamSocket &target);
-    bool AddNextFrameFlag(Proto next);
-
     std::map<Proto, std::shared_ptr<IStreamSocket>> socketMap_;
     Proto curProtocol_ = VTP;
     std::shared_ptr<IStreamSocketListener> socketListener_ = nullptr;

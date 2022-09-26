@@ -90,27 +90,6 @@ TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info
     return NULL;
 }
 
-int32_t TransTdcCheckSeq(int32_t fd, int32_t seq)
-{
-    TcpDirectChannelInfo *item = NULL;
-
-    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
-    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
-        if (item->detail.fd == fd) {
-            if (!IsPassSeqCheck(&(item->detail.verifyInfo), seq)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "SeqCheck is false");
-                (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-                return SOFTBUS_ERR;
-            }
-            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-
-    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-    return SOFTBUS_ERR;
-}
-
 void TransTdcCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseTcpDirectChannel, channelId [%d]", channelId);
