@@ -51,14 +51,21 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void LnnHbOnAuthGroupCreated(const char *groupId)
+void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
-    (void)groupId;
+    (void)type;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub update send info");
 }
 
-void LnnHbOnAuthGroupDeleted(const char *groupId)
+void LnnHbOnAuthGroupCreated(void)
 {
-    (void)groupId;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group created");
+}
+
+void LnnHbOnAuthGroupDeleted(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group deleted");
 }
 
 int32_t LnnInitHeartbeat(void)
