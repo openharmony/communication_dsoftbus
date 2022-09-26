@@ -62,7 +62,6 @@ private:
     static void PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel, FILLP_UINT32 debugId, FILLP_CHAR *format,
         ...);
     static void PreSetFillpCoreParams();
-    static bool IsAllSocketsClosed();
 
     static bool isDebuged_;
     static std::vector<std::string> packetNameArray_;

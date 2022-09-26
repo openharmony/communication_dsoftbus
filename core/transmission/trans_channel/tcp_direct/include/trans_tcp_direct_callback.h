@@ -31,8 +31,6 @@ int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb);
 int32_t TransTdcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel);
 
-int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t channelId);
-
 int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode);
 
 int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len);

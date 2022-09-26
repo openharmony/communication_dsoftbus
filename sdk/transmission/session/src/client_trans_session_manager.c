@@ -39,8 +39,6 @@ typedef struct {
     void (*OnSessionClosed)(int sessionId);
 } DestroySessionInfo;
 
-void TransSessionTimer(void);
-
 int TransClientInit(void)
 {
     g_clientSessionServerList = CreateSoftBusList();
@@ -201,55 +199,6 @@ void TransClientDeinit(void)
     g_clientSessionServerList = NULL;
     ClientTransChannelDeinit();
     TransServerProxyDeInit();
-}
-
-void TransSessionTimer(void)
-{
-#define TRANS_SESSION_TIMEOUT (7 * 24) // hour
-#define TRANS_SESSION_COUNT_TIMEOUT (60 * 60) // count per hour
-    static int32_t count = 0;
-    count++;
-    if (count < TRANS_SESSION_COUNT_TIMEOUT) {
-        return;
-    }
-    count = 0;
-
-    if (g_clientSessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
-        return;
-    }
-
-    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
-        return;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    ListNode destroyList;
-    ListInit(&destroyList);
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (IsListEmpty(&(serverNode->sessionList))) {
-            continue;
-        }
-        SessionInfo *sessionNode = NULL;
-        SessionInfo *sessionNodeNext = NULL;
-        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(serverNode->sessionList), SessionInfo, node) {
-            sessionNode->timeout++;
-            if (sessionNode->timeout >= TRANS_SESSION_TIMEOUT) {
-                DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
-                if (destroyNode == NULL) {
-                    continue;
-                }
-                DestroySessionId();
-                ListDelete(&(sessionNode->node));
-                ListAdd(&destroyList, &(destroyNode->node));
-                SoftBusFree(sessionNode);
-            }
-        }
-    }
-    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
-    return;
 }
 
 static bool SessionServerIsExist(const char *sessionName)
