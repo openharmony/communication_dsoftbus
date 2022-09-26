@@ -247,7 +247,7 @@ uint32_t CreateListenerModule(void)
         if (g_listenerList[i] != NULL) {
             continue;
         }
-        int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
+        ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: create module %" PRIu32 " failed!ret=" PRId32,
                 __func__, i, ret);
@@ -803,31 +803,6 @@ static void InitListenerInfo(SoftbusBaseListenerInfo *listenerInfo)
     ListInit(&listenerInfo->node);
 }
 
-uint32_t RequireListenerModule(void)
-{
-    uint32_t moduleId = CONN_INVALID_LISTENER_MODULE_ID;
-    if (SoftBusMutexLock(&g_listenerListLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        return CONN_INVALID_LISTENER_MODULE_ID;
-    }
-
-    for (uint32_t i = 0; i < UNUSE_BUTT; i++) {
-        if (g_listenerList[i] != NULL) {
-            continue;
-        }
-
-        int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
-        if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:create listener failed! ret=%" PRId32, __func__, ret);
-            break;
-        }
-        moduleId = i;
-        break;
-    }
-
-    (void)SoftBusMutexUnlock(&g_listenerListLock);
-    return moduleId;
-}
 
 static int32_t AddTriggerToSet(int32_t fd, TriggerType triggerType)
 {

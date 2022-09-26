@@ -197,7 +197,6 @@ static void DevOnline(const P2pLinkGroup *group)
     ConnectedNode *nItem = NULL;
     char *onlineMacs = (char *)group->peerMacs;
     char *onlineMac = NULL;
-    int32_t ret;
 
     for (i = 0; i < group->peerMacNum; i++) {
         onlineMac = onlineMacs + i * sizeof(P2pLinkPeerMacList);
@@ -211,7 +210,7 @@ static void DevOnline(const P2pLinkGroup *group)
                 continue;
             }
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "other app use dev");
-            ret = strcpy_s(nItem->peerMac, sizeof(nItem->peerMac), onlineMac);
+            int32_t ret = strcpy_s(nItem->peerMac, sizeof(nItem->peerMac), onlineMac);
             if (ret != EOK) {
                 SoftBusFree(nItem);
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
@@ -334,12 +333,11 @@ static int32_t P2pLinkStateTimeOut(P2pLinkMangerState state)
 
 static void TimerPostReuse(ConnectingNode *item)
 {
-    int32_t ret;
     P2pLinkAuthId chan = {0};
 
     chan.inAuthId = item->connInfo.authId;
 
-    ret = P2pLinkSendReuse(&chan, P2pLinkGetMyMac());
+    int32_t ret = P2pLinkSendReuse(&chan, P2pLinkGetMyMac());
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link send reuse fail.");
         P2pLinkConningCallback(item, SOFTBUS_ERR, P2PLINK_P2P_SEND_REUSEFAIL);
@@ -356,7 +354,6 @@ static void TimerNegoWatingProcess(ConnectingNode *conningDev)
     ConnectedNode *connedDev = NULL;
     P2pLinkConnectInfo *requestInfo = NULL;
     P2pLinkNegoConnInfo negoInfo = {0};
-    int32_t ret;
 
     if (P2pLinkIsDisconnectState() == true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink is disconnecting, retry next time");
@@ -382,7 +379,7 @@ static void TimerNegoWatingProcess(ConnectingNode *conningDev)
         negoInfo.authId = requestInfo->authId;
         negoInfo.requestId = requestInfo->requestId;
         negoInfo.expectRole = requestInfo->expectedRole;
-        ret = strcpy_s(negoInfo.peerMac, sizeof(negoInfo.peerMac), requestInfo->peerMac);
+        int32_t ret = strcpy_s(negoInfo.peerMac, sizeof(negoInfo.peerMac), requestInfo->peerMac);
         if (ret != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
             return;
@@ -468,12 +465,10 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
 
 void P2pLinkAddConningDev(ConnectingNode *item)
 {
-    int32_t ret;
-
     ListAdd(&g_connectingDevices, &item->node);
     g_connectingCnt++;
     if (g_connectingTimer == 0) {
-        ret = P2pLoopProcDelay(P2pLinkTimerDevProc, 0, CONNING_TIMER_1S, P2PLOOP_CONNINGDEV_TIMER);
+        int32_t ret = P2pLoopProcDelay(P2pLinkTimerDevProc, 0, CONNING_TIMER_1S, P2PLOOP_CONNINGDEV_TIMER);
         if (ret == SOFTBUS_OK) {
             g_connectingTimer = 1;
         }
