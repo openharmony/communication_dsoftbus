@@ -175,21 +175,21 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
             msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_SUCCESS_COUNT) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_SUCCESS_COUNT);
                 break;
             }
             msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
             if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_SUCCESS_RATE) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_SUCCESS_RATE);
                 break;
             }
             msg->paramArray[EVT_INDEX_THREE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_THREE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_CONN_TYPE) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_CONN_TYPE);
                 break;
             }
@@ -243,21 +243,21 @@ static SoftBusEvtReportMsg *GetDurationMsg(LnnStatisticData *data)
             msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_AVG_DURATION) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_AVG_DURATION);
                 break;
             }
             msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_MAX_DURATION) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_MAX_DURATION);
                 break;
             }
             msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_MIN_DURATION) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_MIN_DURATION);
                 break;
             }
@@ -359,21 +359,21 @@ static int32_t MakeFaultEvt(SoftBusEvtReportMsg *msg)
         msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
         if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             FAULT_EVT_BUS_PARAM_ERROR) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     FAULT_EVT_BUS_PARAM_ERROR);
             break;
         }
         msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
         if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             FAULT_EVT_BUS_PARAM_ERROR_STR) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     FAULT_EVT_BUS_PARAM_ERROR_STR);
             break;
         }
         msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
         if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             BUS_CENTER_PARAM_CONN_TYPE) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_CONN_TYPE);
             break;
         }
