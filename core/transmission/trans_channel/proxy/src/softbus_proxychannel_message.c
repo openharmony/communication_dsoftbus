@@ -340,8 +340,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     cJSON *root = NULL;
     char *buf = NULL;
     AppInfo *appInfo = &(chan->appInfo);
-
-    if (appInfo->appType == APP_TYPE_NOT_CARE) {
+    if (appInfo == NULL || appInfo->appType == APP_TYPE_NOT_CARE) {
         return NULL;
     }
 
@@ -379,7 +378,9 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 {
     cJSON *root = 0;
     AppInfo *appInfo = &(chanInfo->appInfo);
-
+    if (appInfo == NULL) {
+        return SOFTBUS_ERR;
+    }
     root = cJSON_Parse(msg);
     if (root == NULL) {
         return SOFTBUS_ERR;

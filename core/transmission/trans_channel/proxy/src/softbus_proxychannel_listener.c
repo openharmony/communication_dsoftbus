@@ -55,7 +55,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
 
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
@@ -74,8 +74,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
 
 int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
-    int32_t ret;
-
+    int32_t ret = SOFTBUS_ERR;
     if (appInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -101,14 +100,13 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
 
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo)
 {
-    int32_t ret = SOFTBUS_OK;
-
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param1: channelId=%d, appType=%d",
-        channelId, appInfo->appType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
 
+    int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:
@@ -129,9 +127,10 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "param2: channelId=%d, appType=%d", channelId, appInfo->appType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "proxy channel closed: channelId=%d, appType=%d", channelId, appInfo->appType);
 
-    int32_t ret = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:
@@ -147,11 +146,9 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     return ret;
 }
 
-int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo,
-                                  const char *data, uint32_t len)
+int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data, uint32_t len)
 {
     int32_t ret = SOFTBUS_OK;
-
     if (appInfo == NULL || data == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -175,12 +172,10 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo,
 
 static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
 {
-    int ret;
-
+    int ret = SOFTBUS_ERR;
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
-    ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
-                             sizeof(appInfo->myData.deviceId));
+    ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local devid fail %d", ret);
         return SOFTBUS_ERR;
@@ -194,7 +189,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     }
 
     ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_UUID,
-                              appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err %d", ret);
         return SOFTBUS_GET_REMOTE_UUID_ERR;
