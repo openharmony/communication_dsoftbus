@@ -185,6 +185,7 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
         return SOFTBUS_ERR;
     }
+    TcpDirectChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "tcp direct channel[%d] already exist.", channelId);
