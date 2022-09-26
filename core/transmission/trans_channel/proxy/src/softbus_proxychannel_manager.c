@@ -182,7 +182,8 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
-    if (g_proxyChannelList == NULL) {
+    if ((chan == NULL) || (g_proxyChannelList == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy add channel param nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -239,9 +240,9 @@ void TransProxyDelChanByReqId(int32_t reqId)
         if ((item->reqId == reqId) &&
             (item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING)) {
             ListDelete(&(item->node));
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del item (%d)", item->channelId);
-            TransProxyPostOpenFailMsgToLoop(item, SOFTBUS_TRANS_PROXY_DISCONNECTED);
             g_proxyChannelList->cnt--;
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del channel(%d) by reqId.", item->channelId);
+            TransProxyPostOpenFailMsgToLoop(item, SOFTBUS_TRANS_PROXY_DISCONNECTED);
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
@@ -267,19 +268,17 @@ void TransProxyDelChanByChanId(int32_t chanlId)
             ListDelete(&(item->node));
             SoftBusFree(item);
             g_proxyChannelList->cnt--;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del chan info!");
-            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return;
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del channel(%d) by chanId!", chanlId);
     return;
 }
 
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 {
     ProxyChannelInfo *item = NULL;
-
     if (g_proxyChannelList == NULL) {
         return;
     }
@@ -304,11 +303,11 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
     if (TransProxyDelSliceProcessorByChannelId(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err, cId(%d).", channelId);
     }
 
     if (DelPendingPacket(channelId, PENDING_TYPE_PROXY) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pending pkt err, cId(%d).", channelId);
     }
 
     uint32_t connId = info->connId;
@@ -356,6 +355,7 @@ void TransProxyDelByConnId(uint32_t connId)
             ListDelete(&(removeNode->node));
             g_proxyChannelList->cnt--;
             ListAdd(&proxyChannelList, &removeNode->node);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans proxy del channel by connId(%d).", connId);
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
@@ -385,6 +385,7 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans proxy del channel by cId(%d).", channelId);
             return SOFTBUS_OK;
         }
     }
@@ -413,6 +414,7 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
             SoftBusFree(removeNode);
             g_proxyChannelList->cnt--;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans proxy reset channel(%d).", chanInfo->channelId);
             return SOFTBUS_OK;
         }
     }
@@ -728,6 +730,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessResetMsg calloc failed.");
         return;
     }
 
@@ -767,6 +770,7 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessKeepAlive calloc failed.");
         return;
     }
 
@@ -795,6 +799,7 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessKeepAliveAck calloc failed.");
         return;
     }
 
@@ -820,6 +825,7 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessDataRecv calloc failed.");
         return;
     }
 
@@ -892,7 +898,7 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
 
     (void)memcpy_s(&(chan->appInfo), sizeof(chan->appInfo), appInfo, sizeof(AppInfo));
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddChanItem fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy add channel[%d] fail.", channelId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -900,7 +906,7 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
 
 void TransProxyOpenProxyChannelSuccess(int32_t chanId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake msg");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "chanId[%d] send handshake msg.", chanId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         return;
@@ -915,7 +921,7 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
 
     if (TransProxyHandshake(chan) == SOFTBUS_ERR) {
         (void)TransProxyCloseConnChannel(chan->connId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "shake hand err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "chanId[%d] shake hand err.", chanId);
         OnProxyChannelOpenFailed(chan->channelId, &(chan->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
         TransProxyDelChanByChanId(chanId);
     }
@@ -946,7 +952,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     }
 
     if (TransProxyDelByChannelId(channelId, info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del channel err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy del channel:%d failed.", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID;
     }
@@ -965,13 +971,13 @@ int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen,
     }
 
     if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channelId err %d", channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy channel:%d failed.", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
 
     if (info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "status is err %d", info->status);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy channel status:%d is err.", info->status);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
     }
@@ -980,7 +986,8 @@ int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen,
     SoftBusFree(info);
     return ret;
 }
-void TransProxyTimerItemProc(const ListNode *proxyProcList)
+
+static void TransProxyTimerItemProc(const ListNode *proxyProcList)
 {
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -1004,7 +1011,7 @@ void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransProxyPostDisConnectMsgToLoop(connId);
         }
         if (removeNode->status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send keepalive channel %d ", removeNode->myId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send keepalive channel %d.", removeNode->myId);
             TransProxyPostKeepAliveMsgToLoop(removeNode);
         }
     }
@@ -1016,7 +1023,7 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt == 0) {
+    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt <= 0) {
         return;
     }
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
@@ -1111,6 +1118,7 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 
     if (RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, TransProxyTimerProc) != SOFTBUS_OK) {
         DestroySoftBusList(g_proxyChannelList);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy register timeout callback failed.");
         return SOFTBUS_ERR;
     }
 
@@ -1167,30 +1175,48 @@ void TransProxyManagerDeinit(void)
     PendingDeinit(PENDING_TYPE_PROXY);
 }
 
-void TransProxyDeathCallback(const char *pkgName)
+static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
-    if (g_proxyChannelList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy info error, info list is null.");
+    if ((destroyList == NULL) || IsListEmpty(destroyList)) {
         return;
     }
+
+    ProxyChannelInfo *destroyNode = NULL;
+    ProxyChannelInfo *nextDestroyNode = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, ProxyChannelInfo, node) {
+        ListDelete(&(destroyNode->node));
+        TransProxyResetPeer(destroyNode);
+        (void)TransProxyCloseConnChannel(destroyNode->connId);
+        SoftBusFree(destroyNode);
+    }
+    return;
+}
+
+void TransProxyDeathCallback(const char *pkgName)
+{
+    if ((pkgName == NULL) || (g_proxyChannelList == NULL)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or proxy channel list is null.");
+        return;
+    }
+
+    ListNode destroyList;
+    ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
-
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            TransProxyResetPeer(item);
-            (void)TransProxyCloseConnChannel(item->connId);
             ListDelete(&(item->node));
-            SoftBusFree(item);
             g_proxyChannelList->cnt--;
-            continue;
+            ListAdd(&destroyList, &(item->node));
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    TransProxyDestroyChannelList(&destroyList);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransProxyDeathCallback end.");
 }
 
 int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
