@@ -149,10 +149,10 @@ void SoftBusServerStub::InitMemberFuncMap()
 
 void SoftBusServerStub::InitMemberPermissionMap()
 {
-    memberPermissionMap_[SERVER_START_DISCOVERY] = nullptr;
-    memberPermissionMap_[SERVER_STOP_DISCOVERY] = nullptr;
-    memberPermissionMap_[SERVER_PUBLISH_SERVICE] = nullptr;
-    memberPermissionMap_[SERVER_UNPUBLISH_SERVICE] = nullptr;
+    memberPermissionMap_[SERVER_START_DISCOVERY] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_DISCOVERY] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_PUBLISH_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_UNPUBLISH_SERVICE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
     memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;

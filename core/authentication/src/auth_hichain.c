@@ -221,6 +221,7 @@ static const GroupAuthManager *InitHichain(void)
     const GroupAuthManager *gaIns = GetGaInstance();
     if (gaIns == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain GetGaInstance fail.");
+        DestroyDeviceAuthService();
         return NULL;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain init succ.");
