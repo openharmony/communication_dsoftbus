@@ -1432,7 +1432,7 @@ int32_t LnnInitDistributedLedger(void)
     return SOFTBUS_OK;
 }
 
-const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryType discType)
+const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
 {
     int32_t i;
     int32_t infoNum = 0;
@@ -1452,8 +1452,8 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, DiscoveryTy
     }
     for (i = 0; i < infoNum; ++i) {
         const NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL || !LnnHasDiscoveryType(nodeInfo, discType)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node online not have discType:%d", discType);
+        if (nodeInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "nodeInfo is null.");
             continue;
         }
         if (GenerateStrHashAndConvertToHexString((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
@@ -1476,7 +1476,7 @@ static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAd
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshDeviceInfoDevId parameter error");
         return;
     }
-    const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE);
+    const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
         return;
@@ -1492,7 +1492,7 @@ static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceIn
         device->isOnline = LnnGetOnlineStateById(device->devId, CATEGORY_UDID);
     }
     if (addtions->medium == BLE) {
-        device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId, DISCOVERY_TYPE_BLE)) != NULL) ? true : false;
+        device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId)) != NULL) ? true : false;
     }
 }
 
