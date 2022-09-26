@@ -116,7 +116,7 @@ static void DelTcpConnInfo(uint32_t connectionId)
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
-        if (item->connectionId == connectionId && g_tcpConnInfoList->cnt > 0) {
+        if (item->connectionId == connectionId) {
             (void)DelTrigger((ListenerModule)(item->info.socketInfo.moduleId), item->info.socketInfo.fd, RW_TRIGGER);
             ConnShutdownSocket(item->info.socketInfo.fd);
             ListDelete(&item->node);
