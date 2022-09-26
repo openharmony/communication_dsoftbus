@@ -19,7 +19,9 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_meta_node_ledger.h"
 #include "softbus_errcode.h"
@@ -41,12 +43,24 @@ int32_t LnnInitNetLedger(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node ledger fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitHuksInterface() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init huks interface fail!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
 int32_t LnnInitNetLedgerDelay(void)
 {
-    return LnnInitLocalLedgerDelay();
+    if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delay init local ledger fail!");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitDecisionDbDelay() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delay init decision db fail!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 void LnnDeinitNetLedger(void)
@@ -54,6 +68,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitMetaNodeLedger();
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
+    LnnDeinitHuksInterface();
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)

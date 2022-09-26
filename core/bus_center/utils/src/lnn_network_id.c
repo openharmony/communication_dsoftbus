@@ -34,7 +34,7 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
 
     rc = LnnGetFullStoragePath(LNN_FILE_ID_UUID, uuidFilePath, SOFTBUS_MAX_PATH_LEN);
     if (rc != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get uuid save path fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get uuid save path fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusReadFullFile(uuidFilePath, id, len) != SOFTBUS_OK) {

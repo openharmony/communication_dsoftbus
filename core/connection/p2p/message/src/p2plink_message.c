@@ -85,7 +85,7 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "recv msg = %s.", info->data);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "recv msg");
     cJSON *json = cJSON_Parse((char *)info->data);
     if (json == NULL) {
         SoftBusFree(info);

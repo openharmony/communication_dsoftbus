@@ -764,7 +764,11 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
-        info->authChannelId[i] = oldInfo->authChannelId[i];
+        if (oldInfo->authChannelId[i] != 0) {
+            info->authChannelId[i] = oldInfo->authChannelId[i];
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "Update authChannelId: %d, addrType=%d.", info->authChannelId[i], i);
     }
 }
 
@@ -868,6 +872,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
+    info->authChannelId[type] = 0;
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
@@ -1461,7 +1466,8 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
             continue;
         }
         if (memcmp(shortUdidHash, recvUdidHash, SHORT_UDID_HASH_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node shortUdidHash:%s is online", shortUdidHash);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node shortUdidHash:%s is online",
+                AnonymizesUDID((const char *)shortUdidHash));
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -1478,7 +1484,8 @@ static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAd
     }
     const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId);
     if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online",
+            AnonymizesUDID(device->devId));
         return;
     }
     if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {

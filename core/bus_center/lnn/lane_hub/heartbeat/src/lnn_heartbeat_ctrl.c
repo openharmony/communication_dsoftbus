@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_ohos_account.h"
 
+#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -40,11 +41,6 @@
 #endif
 
 #define HB_LOOPBACK_IP "127.0.0.1"
-
-#define HB_SCREEN_ON_BLE_SCAN_INTERVAL 600
-#define HB_SCREEN_ON_BLE_SCAN_WINDOW 60
-#define HB_SCREEN_OFF_BLE_SCAN_INTERVAL 3000
-#define HB_SCREEN_OFF_BLE_SCAN_WINDOW 60
 
 #define HB_SAME_AUTH_GROUP_INDEX 1
 #define HB_POINT_TO_POINT_INDEX 256
@@ -138,12 +134,12 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusScreenState state = (SoftBusScreenState)event->status;
     switch (state) {
         case SOFTBUS_SCREEN_ON:
-            param.info.ble.scanInterval = HB_SCREEN_ON_BLE_SCAN_INTERVAL;
-            param.info.ble.scanWindow = HB_SCREEN_ON_BLE_SCAN_WINDOW;
+            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
+            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = HB_SCREEN_OFF_BLE_SCAN_INTERVAL;
-            param.info.ble.scanWindow = HB_SCREEN_OFF_BLE_SCAN_WINDOW;
+            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
+            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl reset ble scan medium param get invalid state");
@@ -171,7 +167,6 @@ static bool HbHasTrustedDeviceRelation(void)
 {
     uint32_t sameGroupCnt, pointGroupCnt;
     char *accountGroups = NULL;
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
 
     /* device auth service inited by auth_manager.c */
     DeviceGroupManager *gmInstance = GetGmInstance();
@@ -190,13 +185,9 @@ static bool HbHasTrustedDeviceRelation(void)
         return false;
     }
     HbFreeAccountGroups(accountGroups);
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local account hash fail");
-        return false;
-    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl get sameGroupCnt: %u and pointGroupCnt: %u",
         sameGroupCnt, pointGroupCnt);
-    if (LnnIsDefaultOhosAccount(localAccountHash, SHA_256_HASH_LEN) && sameGroupCnt == 0 && pointGroupCnt == 0) {
+    if (LnnIsDefaultOhosAccount() && sameGroupCnt == 0 && pointGroupCnt == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB no login account, no trusted relationship");
         return false;
     }
@@ -207,6 +198,10 @@ static bool HbHasTrustedDeviceRelation(void)
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
+    if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium manager init fail");
+        return SOFTBUS_ERR;
+    }
     if (LnnStartNewHbStrategyFsm() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl start strategy fsm fail");
         return SOFTBUS_ERR;
@@ -268,9 +263,13 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-void LnnHbOnAuthGroupCreated(const char *groupId)
+void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
-    (void)groupId;
+    LnnUpdateSendInfoStrategy(type);
+}
+
+void LnnHbOnAuthGroupCreated(void)
+{
     int32_t ret;
 
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
@@ -288,9 +287,8 @@ void LnnHbOnAuthGroupCreated(const char *groupId)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group created.");
 }
 
-void LnnHbOnAuthGroupDeleted(const char *groupId)
+void LnnHbOnAuthGroupDeleted(void)
 {
-    (void)groupId;
     int32_t ret;
 
     ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
@@ -311,10 +309,6 @@ void LnnHbOnAuthGroupDeleted(const char *groupId)
 
 int32_t LnnInitHeartbeat(void)
 {
-    if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium manager init fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init fail!");
         return SOFTBUS_ERR;
