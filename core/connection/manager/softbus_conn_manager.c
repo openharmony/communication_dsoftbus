@@ -244,17 +244,15 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
 
 void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    int32_t i;
-    int32_t num;
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
 
-    num = GetAllListener(&node);
+    int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get node fail connId %u", connectionId);
         return;
     }
-    for (i = 0; i < num; i++) {
+    for (int32_t i = 0; i < num; i++) {
         listener = node + i;
         listener->callback.OnConnected(connectionId, info);
     }
@@ -264,16 +262,14 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
 void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    int32_t i;
-    int32_t num;
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
 
-    num = GetAllListener(&node);
+    int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         return;
     }
-    for (i = 0; i < num; i++) {
+    for (int32_t i = 0; i < num; i++) {
         listener = node + i;
         listener->callback.OnDisconnected(connectionId, info);
     }
