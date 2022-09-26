@@ -44,12 +44,6 @@
 
 typedef struct {
     int64_t authId;
-    int32_t pid;
-    char mac[P2P_MAC_LEN];
-} DisConnInfo;
-
-typedef struct {
-    int64_t authId;
     uint32_t requestId;
 } P2pAuthSuccessInfo;
 

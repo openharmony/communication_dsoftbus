@@ -55,15 +55,6 @@ void P2pLinkSetMyIp(const char *ip)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my ip.");
 }
 
-void P2pLinkSetMyMac(const char *mac)
-{
-    int32_t ret = strcpy_s(g_myMac, sizeof(g_myMac), mac);
-    if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
-    }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my mac");
-}
-
 char* P2pLinkGetMyIp(void)
 {
     return g_myIp;
@@ -71,11 +62,10 @@ char* P2pLinkGetMyIp(void)
 
 char* P2pLinkGetMyMac(void)
 {
-    int32_t ret;
     char myMac[P2P_MAC_LEN] = {0};
 
     if (g_macExpired == true) {
-        ret = P2pLinkGetBaseMacAddress(myMac, sizeof(myMac));
+        int32_t ret = P2pLinkGetBaseMacAddress(myMac, sizeof(myMac));
         if (ret == SOFTBUS_OK) {
             ret = strcpy_s(g_myMac, sizeof(g_myMac), myMac);
             if (ret != EOK) {
@@ -145,18 +135,6 @@ int32_t P2pLinkGetGoPort(void)
 void P2pLinkSetMyMacExpired(bool isExpired)
 {
     g_macExpired = isExpired;
-}
-
-void P2pLinkSetInterface(const char *name)
-{
-    if (strcpy_s(g_interface, sizeof(g_interface), name) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
-    }
-}
-
-char* P2pLinkGetInterface(void)
-{
-    return g_interface;
 }
 
 void P2pLinkSetState(bool state)
