@@ -29,13 +29,13 @@ extern "C" {
 #define HB_SHORT_UDID_HASH_LEN 8
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
 #define HB_SHORT_ACCOUNT_HASH_LEN 2
-#define HB_SHA_HASH_LEN 32
 #define HB_FSM_NAME_LEN 32
 
 #define HB_TIME_FACTOR (1000LL)
 #define HB_SEND_ONCE_LEN (10 * HB_TIME_FACTOR)
-#define HB_CHECK_DELAY_LEN (15 * HB_TIME_FACTOR)
-#define HB_CHECK_OFFLINE_TOLERANCE_LEN (5 * HB_TIME_FACTOR + HB_SEND_ONCE_LEN)
+#define HB_SEND_RELAY_LEN (4 * HB_TIME_FACTOR)
+#define HB_CHECK_DELAY_LEN HB_SEND_ONCE_LEN
+#define HB_CHECK_OFFLINE_TOLERANCE_LEN HB_SEND_ONCE_LEN
 #define HB_ENABLE_DELAY_LEN (2 * HB_TIME_FACTOR + HB_SEND_ONCE_LEN)
 #define HB_REMOVE_REPEAD_RECV_LEN HB_SEND_ONCE_LEN
 
@@ -58,6 +58,13 @@ typedef enum {
     STRATEGY_HB_RECV_SINGLE = 3,
     STRATEGY_HB_RECV_REMOVE_REPEAT,
 } LnnHeartbeatStrategyType;
+
+typedef enum {
+    UPDATE_HB_INFO_MIN = 0,
+    UPDATE_HB_ACCOUNT_INFO,
+    UPDATE_HB_NETWORK_INFO,
+    UPDATE_HB_MAX_INFO,
+} LnnHeartbeatUpdateInfoType;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);

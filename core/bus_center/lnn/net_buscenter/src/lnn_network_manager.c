@@ -336,25 +336,28 @@ static void OnAccountChanged(void)
         return;
     }
     if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged account not change");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "OnAccountChanged account not change");
         return;
     }
 
     LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 
 static void OnGroupCreated(const char *groupId)
 {
+    (void)groupId;
     RestartCoapDiscovery();
     OnAccountChanged();
-    LnnHbOnAuthGroupCreated(groupId);
+    LnnHbOnAuthGroupCreated();
 }
 
 static void OnGroupDeleted(const char *groupId)
 {
+    (void)groupId;
     OnAccountChanged();
-    LnnHbOnAuthGroupDeleted(groupId);
+    LnnHbOnAuthGroupDeleted();
 }
 
 static GroupChangeListener g_groupChangeListener = {

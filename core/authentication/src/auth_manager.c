@@ -24,6 +24,7 @@
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
+#include "lnn_decision_db.h"
 #include "softbus_adapter_mem.h"
 
 #define MAX_AUTH_VALID_PERIOD (30 * 60 * 1000L) /* 30 mins */
@@ -515,6 +516,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
 {
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
+    LnnDeleteSpecificTrustedDevInfo(peerUdid);
     if (g_verifyListener.onDeviceNotTrusted == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "onDeviceNotTrusted not set.");
         return;

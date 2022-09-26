@@ -57,19 +57,19 @@ typedef struct {
  * @brief The SQL statement of TrustedDeviceInfo table.
  *
  * This table is used to store the trusted relationship, and its name is TrustedDeviceInfo in {@link DATABASE_NAME}.
- * After each networking, record the udidhash value according to the device account.
+ * After each networking, record the udid value according to the device account.
  */
 #define TABLE_NAME_OF_TRUSTED_DEV_INFO "TrustedDeviceInfo"
 #define SQL_CREATE_TRUSTED_DEV_INFO_TABLE "CREATE TABLE IF NOT EXISTS "TABLE_NAME_OF_TRUSTED_DEV_INFO" \
     (accountHash TEXT NOT NULL, \
-    udidHash TEXT NOT NULL, \
-    primary key(accountHash, udidHash));"
+    udid TEXT NOT NULL, \
+    primary key(accountHash, udid));"
 #define SQL_INSERT_TRUSTED_DEV_INFO "INSERT INTO "TABLE_NAME_OF_TRUSTED_DEV_INFO" \
-    (accountHash, udidHash) VALUES (?, ?)"
-#define SQL_SEARCH_TRUSTED_DEV_INFO_BY_ID "SELECT udidHash FROM "TABLE_NAME_OF_TRUSTED_DEV_INFO" \
+    (accountHash, udid) VALUES (?, ?)"
+#define SQL_SEARCH_TRUSTED_DEV_INFO_BY_ID "SELECT udid FROM "TABLE_NAME_OF_TRUSTED_DEV_INFO" \
     WHERE accountHash = ?"
 #define SQL_REMOVE_TRUSTED_DEV_INFO_BY_ID "DELETE FROM "TABLE_NAME_OF_TRUSTED_DEV_INFO" \
-    WHERE accountHash = ? AND udidHash = ?"
+    WHERE accountHash = ? AND udid = ?"
 
 static int32_t BindInsertTrustedDevInfoCb(DbContext *ctx, int32_t paraNum, uint8_t *data);
 static int32_t BindSelectTrustedDevInfoCb(DbContext *ctx, int32_t paraNum, uint8_t *data);
@@ -180,7 +180,7 @@ static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindPara
     } else {
         ctx->state |= DB_STATE_QUERYING;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "QueryData done, state: %d", ctx->state);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "QueryData done, state: %d", ctx->state);
     return rc;
 }
 
@@ -194,7 +194,7 @@ static int32_t QueryDataNext(DbContext *ctx)
         (void)sqlite3_finalize(ctx->stmt);
         ctx->stmt = NULL;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "QueryDataNext done, state: %d", ctx->state);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "QueryDataNext done, state: %d", ctx->state);
     return rc;
 }
 
@@ -233,7 +233,8 @@ int32_t OpenDatabase(DbContext **ctx)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    rc = sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+    rc = sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE |
+        SQLITE_OPEN_NOMUTEX, NULL);
     if (rc != SQLITE_OK || sqlite == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "sqlite3_open_v2 fail: %s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
@@ -351,7 +352,7 @@ int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
     }
     (void)sqlite3_finalize(ctx->stmt);
     ctx->stmt = NULL;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "insert data done");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "insert data done");
     return rc;
 }
 
@@ -373,7 +374,7 @@ int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
     }
     (void)sqlite3_finalize(ctx->stmt);
     ctx->stmt = NULL;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "remove data done");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "remove data done");
     return rc;
 }
 
@@ -400,7 +401,7 @@ int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
     }
     (void)sqlite3_finalize(ctx->stmt);
     ctx->stmt = NULL;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "remove data done");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "remove data done");
     return rc;
 }
 
@@ -517,11 +518,11 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
     return rc;
 }
 
-int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len)
+int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
-    if (!CheckDbContextParam(ctx) || password == NULL || password[0] == '\0' || strlen(password) != len) {
+    if (!CheckDbContextParam(ctx) || password == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -533,11 +534,11 @@ int32_t EncryptedDb(DbContext *ctx, const char *password, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateDbPassword(DbContext *ctx, const char *password, uint32_t len)
+int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
-    if (!CheckDbContextParam(ctx) || password == NULL || password[0] == '\0' || strlen(password) != len) {
+    if (!CheckDbContextParam(ctx) || password == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
