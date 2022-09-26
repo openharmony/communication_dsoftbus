@@ -35,7 +35,7 @@ extern "C" {
 typedef struct {
     sqlite3 *db;
     sqlite3_stmt *stmt;
-    int32_t state;
+    uint32_t state;
 } DbContext;
 
 typedef enum {
