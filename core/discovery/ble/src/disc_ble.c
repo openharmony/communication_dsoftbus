@@ -1014,6 +1014,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             }
         }
         if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+            SoftBusFree(info->capabilityData[pos]);
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;
