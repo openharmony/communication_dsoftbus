@@ -26,7 +26,7 @@
 char *PackError(int errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
         return NULL;
     }
     cJSON *json =  cJSON_CreateObject();
@@ -52,7 +52,7 @@ char *PackError(int errCode, const char *errDesc)
 char *PackRequest(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param.", __func__);
         return NULL;
     }
 
@@ -100,7 +100,7 @@ char *PackRequest(const AppInfo *appInfo)
 int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
         return SOFTBUS_ERR;
     }
     int apiVersion = API_V1;
@@ -147,7 +147,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
         return NULL;
     }
     cJSON *json =  cJSON_CreateObject();
@@ -183,7 +183,7 @@ char *PackReply(const AppInfo *appInfo)
 int UnpackReply(const cJSON *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
         return SOFTBUS_ERR;
     }
 

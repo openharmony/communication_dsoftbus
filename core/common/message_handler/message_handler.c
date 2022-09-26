@@ -74,7 +74,7 @@ SoftBusMessage *MallocMessage(void)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusMalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "malloc SoftBusMessage failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc SoftBusMessage failed");
         return NULL;
     }
     (void)memset_s(msg, sizeof(SoftBusMessage), 0, sizeof(SoftBusMessage));

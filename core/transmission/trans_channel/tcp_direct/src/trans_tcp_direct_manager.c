@@ -155,10 +155,10 @@ void TransTdcDeathCallback(const char *pkgName)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
-            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             ListDelete(&item->node);
-            SoftBusFree(item);
             sessionList->cnt--;
+            DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
+            SoftBusFree(item);
             continue;
         }
     }

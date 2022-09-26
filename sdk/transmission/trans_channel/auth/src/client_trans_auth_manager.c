@@ -24,6 +24,7 @@ static IClientSessionCallBack g_sessionCb;
 int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthInit cb is null.");
         return SOFTBUS_INVALID_PARAM;
     }
     g_sessionCb = *cb;
@@ -33,12 +34,13 @@ int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
 int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthOnChannelOpened param invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session open fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session open fail, ret=%d.", ret);
         return ret;
     }
 
@@ -49,7 +51,7 @@ int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err[%d]. cid[%d].", ret, channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -59,7 +61,8 @@ int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_AUTH);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "notify session openfail ret[%d], cid[%d].", ret, channelId);
         return ret;
     }
 
@@ -74,7 +77,7 @@ int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     }
     int ret = g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_AUTH, data, len, type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify data recv err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify data recv err, ret[%d], cId[%d].", ret, channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -84,10 +87,10 @@ void ClientTransAuthCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseAuthChannel, channelId [%d]", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_AUTH) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server ipc close channel[%d] err.", channelId);
     }
     if (ClientTransAuthOnChannelClosed(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server auth close channel[%d] err.", channelId);
     }
 }
 

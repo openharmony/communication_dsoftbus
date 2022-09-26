@@ -29,7 +29,7 @@ static int SetReuseAddr(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEADDR error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd=%d set SO_REUSEADDR error", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -39,7 +39,7 @@ static int SetReusePort(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set SO_REUSEPORT error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd=%d set SO_REUSEPORT error", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -60,7 +60,7 @@ static int OpenTcpServer(const char *ip, int port)
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
         SOFTBUS_SOCK_CLOEXEC, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Create error");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Create error, ret=%d.", ret);
         return SOFTBUS_ERR;
     }
 
@@ -78,8 +78,8 @@ static int OpenTcpServer(const char *ip, int port)
 int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
-    if (myIP == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
+    if (myIP == NULL || filePort == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     int fd = OpenTcpServer(myIP, 0);

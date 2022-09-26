@@ -178,6 +178,7 @@ static int32_t OnConnectEvent(ListenerModule module, int events, int cfd, const 
         TcpShutDown(cfd);
         return ret;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "tdc conn event fd:%d, cId:%d, module:%d.", cfd, channelId, module);
     return SOFTBUS_OK;
 }
 

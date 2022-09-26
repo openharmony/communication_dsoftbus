@@ -252,7 +252,6 @@ static int32_t PackAndSendMsg(int64_t authId, bool isRequestMsg, const void *msg
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cjson unformatted failed.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "json msg = %s.", msgStr);
     if (P2pLinkSendMessage(authId, msgStr, strlen(msgStr) + 1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p link negotiation send message failed.");
         cJSON_free(msgStr);

@@ -86,7 +86,7 @@ void TransDelConnByConnId(uint32_t connId)
         if (removeNode->connId == connId) {
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del conn item");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del conn=%d item.", connId);
             g_proxyConnectionList->cnt--;
             break;
         }
@@ -117,17 +117,17 @@ int32_t TransDecConnRefByConnId(uint32_t connId)
                 SoftBusFree(removeNode);
                 g_proxyConnectionList->cnt--;
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref is 0");
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn=%d ref is 0.", connId);
                 return SOFTBUS_OK;
             } else {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "removeNode->ref %d", removeNode->ref);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn=%d removeNode->ref %d", connId, removeNode->ref);
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
                 return SOFTBUS_ERR;
             }
         }
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not find conn item");
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not find conn=%d item", connId);
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return SOFTBUS_OK;
 }
@@ -148,7 +148,7 @@ int32_t TransAddConnRefByConnId(uint32_t connId)
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId) {
             item->ref++;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add conn ref %d", item->ref);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add conn=%d ref %d.", connId, item->ref);
             break;
         }
     }
@@ -605,8 +605,7 @@ int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect
 
 int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int32_t chanNewId)
 {
-    ProxyChannelInfo *chan = NULL;
-    chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;

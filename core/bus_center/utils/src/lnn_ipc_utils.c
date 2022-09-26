@@ -19,6 +19,9 @@
 
 void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
 {
+    if (info == NULL || pubInfo == NULL) {
+        return;
+    }
     char *info1 = (char *)info;
     pubInfo->publishId = *(int32_t *)info1;
     info1 += sizeof(int32_t);
@@ -40,6 +43,9 @@ void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
 
 void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
 {
+    if (info == NULL || subInfo == NULL) {
+        return;
+    }
     char *info1 = (char *)info;
     subInfo->subscribeId = *(int32_t *)info1;
     info1 += sizeof(int32_t);

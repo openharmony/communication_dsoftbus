@@ -1121,6 +1121,7 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     } while (false);
     if (ret != SOFTBUS_OK && (*info != NULL)) {
         SoftBusFree(*info);
+        *info = NULL;
     }
     if (SoftBusMutexUnlock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unlock mutex fail!");

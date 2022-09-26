@@ -508,7 +508,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX) || recvListener == NULL) {
+        !IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX) || (recvListener == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
