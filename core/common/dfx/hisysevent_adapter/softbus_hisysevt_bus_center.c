@@ -168,7 +168,7 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
             msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
             if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_TOTAL_COUNT) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail", 
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
                     BUS_CENTER_PARAM_TOTAL_COUNT);
                 break;
             }
