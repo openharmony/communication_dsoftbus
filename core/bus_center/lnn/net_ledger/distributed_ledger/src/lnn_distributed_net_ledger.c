@@ -1466,7 +1466,8 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
             continue;
         }
         if (memcmp(shortUdidHash, recvUdidHash, SHORT_UDID_HASH_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node shortUdidHash:%s is online", shortUdidHash);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "node shortUdidHash:%s is online",
+                AnonymizesUDID((const char *)shortUdidHash));
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -1483,7 +1484,8 @@ static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAd
     }
     const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId);
     if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online", device->devId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online",
+            AnonymizesUDID(device->devId));
         return;
     }
     if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
