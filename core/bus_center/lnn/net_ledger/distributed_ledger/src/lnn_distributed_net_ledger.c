@@ -764,7 +764,11 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
-        info->authChannelId[i] = oldInfo->authChannelId[i];
+        if (oldInfo->authChannelId[i] != 0) {
+            info->authChannelId[i] = oldInfo->authChannelId[i];
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "Update authChannelId: %d, addrType=%d.", info->authChannelId[i], i);
     }
 }
 
@@ -868,6 +872,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
+    info->authChannelId[type] = 0;
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
