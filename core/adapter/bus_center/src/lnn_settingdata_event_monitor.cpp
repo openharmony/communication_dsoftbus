@@ -29,7 +29,7 @@
 #include "softbus_log.h"
 #include "system_ability_definition.h"
 
-static const int32_t DELAY_LEN = 100000;
+static const int32_t DELAY_LEN = 6000;
 static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
