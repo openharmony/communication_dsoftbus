@@ -28,7 +28,7 @@
 
 分布式软总线组件主要代码目录结构如下：
 
-```
+```text
 //foundation/communication/dsoftbus
 ├── adapter               # 适配层代码
 ├── components            # 依赖组件代码
@@ -71,7 +71,7 @@
 
 1.  上层应用需要对外发布自身能力时，调用服务发布接口发布自身能力。
 
-    ```
+    ```C
     // 发布回调
     typedef struct {
         /** Callback for publish result */
@@ -84,7 +84,7 @@
 
 2.  上层应用不再需要对外发布自身能力时，调用StopPublishLNN接口注销服务。
 
-    ```
+    ```C
     // 注销服务
     int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
     ```
@@ -94,7 +94,7 @@
 
 1.  上层应用需要发现特定能力设备时，调用发现接口启动发现。
 
-    ```
+    ```C
     // 发现回调
     typedef struct {
         /** Callback that is invoked when a device is found */
@@ -110,7 +110,7 @@
 2.  当软总线发现到设备时，通过回调接口通知业务所发现的设备信息。
 3.  上层应用不再需要发现时，调用StopRefreshLNN接口停止设备发现。
 
-    ```
+    ```C
     // 停止发现
     int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
     ```
@@ -119,7 +119,7 @@
 
 1.  发起组网请求，携带组网连接地址信息，并且提供组网执行结果回调函数。
 
-    ```
+    ```C
     // 组网连接地址
     typedef struct {
         ConnectionAddrType type;
@@ -159,7 +159,7 @@
 3.  使用传输相关接口进行数据传输。
 4.  发送退网请求，携带组网成功后返回的networkId，并且提供退网执行结果回调。
 
-    ```
+    ```C
     // 退网执行结果回调
     typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
     
@@ -170,7 +170,7 @@
 5.  等待退网完成，OnLeaveLNNResult\(\)的networkId和退网请求接口中的networkId互相匹配；retCode为0表示退网成功，否则退网失败。退网成功后，networkId变为无效值，后续不应该被继续使用。
 6.  使用节点（即设备）注册和注销接口，监听网络中节点状态变化等事件。
 
-    ```
+    ```C
     // 事件掩码
     #define EVENT_NODE_STATE_ONLINE 0x1
     #define EVENT_NODE_STATE_OFFLINE 0x02
@@ -203,7 +203,7 @@
 
 1.  创建会话服务，并设置会话相关回调，用户可在回调中处理打开/关闭和消息接收事件。
 
-    ```
+    ```C
     // 会话管理回调
     typedef struct {
         int (*OnSessionOpened)(int sessionId, int result);
@@ -220,7 +220,7 @@
 
 2.  [可选] 如果需要完成文件的发送和接收，可以注册文件传输回调， 用户可在回调中处理文件发送/接收事件。
 
-    ```
+    ```C
     // 文件发送回调
     typedef struct {
         int (*OnSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
@@ -245,14 +245,14 @@
 
 3.  创建会话 ，用于收发数据。
 
-    ```
+    ```C
     // 创建会话
     int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId, const char *groupId, const SessionAttribute* attr);
     ```
 
 4. 通过sessionId向对端设备发送数据。
 
-    ```
+    ```C
     // 发送字节数据
     int SendBytes(int sessionId, const void *data, unsigned int len);
     // 发送消息数据
@@ -265,14 +265,14 @@
 
 5. 通过sessionId关闭会话。
 
-    ```
+    ```C
     // 关闭会话
     void CloseSession(int sessionId);
     ```
 
 6. 删除会话服务。
 
-    ```
+    ```C
     // 删除会话服务
     int RemoveSessionServer(const char *pkgName, const char *sessionName);
     ```
