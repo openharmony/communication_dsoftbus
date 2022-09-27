@@ -332,7 +332,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     }
     (void)SoftBusMutexLock(&g_bleInfoLock);
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_DBG, "don't match passive publish capBitMap");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "don't match passive publish capBitMap");
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
