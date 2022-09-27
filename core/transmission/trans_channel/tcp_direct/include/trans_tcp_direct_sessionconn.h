@@ -65,8 +65,6 @@ void ReleaseSessonConnLock(void);
 
 SessionConn *GetSessionConnByRequestId(uint32_t requestId);
 
-SessionConn *GetSessionConnByChannelId(int32_t channelId);
-
 SessionConn *GetSessionConnByReq(int64_t req);
 
 SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid);
