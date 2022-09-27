@@ -128,7 +128,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
         SoftBusFree(item);
         (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cond init failed.");
-        return SOFTBUS_LOCK_ERR;
+        return SOFTBUS_ERR;
     }
     ListInit(&(item->node));
     ListAdd(&(g_reqLanePendingList->list), &(item->node));
@@ -528,6 +528,10 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
 
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
+    if (info == NULL || connOpt == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_ERR;
+    }
     if (info->type == LANE_P2P) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_WLAN_2P4G || info->type == LANE_WLAN_5G || info->type == LANE_ETH) {

@@ -57,9 +57,10 @@ void DestroyPendingPacket(void)
     (void)SoftBusMutexDestroy(&g_pendingLock);
 }
 
-int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
+static int32_t CheckPendingPacketExisted(uint32_t id, uint64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Check pending packet is exist, lock error.");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *pending = NULL;
@@ -70,10 +71,21 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
-    pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
+    (void)SoftBusMutexUnlock(&g_pendingLock);
+    return SOFTBUS_OK;
+}
+
+int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
+{
+    int32_t ret = CheckPendingPacketExisted(id, seq);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Check pending packet is exist, ret=%d.", ret);
+        return ret;
+    }
+
+    PendingPacket *pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateBrPendingPacket SoftBusCalloc fail");
-        (void)SoftBusMutexUnlock(&g_pendingLock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket SoftBusCalloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&pending->node);
@@ -84,16 +96,24 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
     pending->finded = false;
     if (SoftBusMutexInit(&pending->lock, NULL) != SOFTBUS_OK) {
         SoftBusFree(pending);
-        return SOFTBUS_LOCK_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket init lock fail");
+        return SOFTBUS_ERR;
     }
     if (SoftBusCondInit(&pending->cond) != SOFTBUS_OK) {
-        SoftBusMutexDestroy(&pending->lock);
-        SoftBusFree(pending);
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket condInit fail");
+        goto EXIT;
+    }
+    if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket lock fail");
+        goto EXIT;
     }
     ListTailInsert(&g_pendingList, &(pending->node));
     (void)SoftBusMutexUnlock(&g_pendingLock);
     return SOFTBUS_OK;
+EXIT:
+    SoftBusMutexDestroy(&pending->lock);
+    SoftBusFree(pending);
+    return SOFTBUS_ERR;
 }
 
 void DeletePendingPacket(uint32_t id, uint64_t seq)
