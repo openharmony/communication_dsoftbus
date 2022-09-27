@@ -299,8 +299,8 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
         LnnNotifyOnlineState(false, &basic);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
-    LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
     connFsm->isDead = true;
+    LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
     LnnRequestCleanConnFsm(connFsm->id);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]complete leave lnn, ready clean", connFsm->id);
 }
