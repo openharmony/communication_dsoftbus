@@ -49,7 +49,6 @@ if (defined(ohos_lite)) {
     diff_deps = [
       "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//build/lite/config/component/cJSON:cjson_shared",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
     build_type = "shared_library"
   }
@@ -74,7 +73,10 @@ if (defined(ohos_lite)) {
   }
 
   target(build_type, "softbus_utils") {
-    include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+    ]
     include_dirs += conn_common_inc + trans_common_inc
     dfx_src = [
       "dfx/hidumper_adapter/softbus_hidumper_trans_virtual.c",
@@ -123,6 +125,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     ]
     include_dirs += conn_common_inc + trans_common_inc
   }
@@ -161,7 +164,6 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson_static",
       "//third_party/sqlite:sqlite",
     ]
@@ -175,10 +177,7 @@ if (defined(ohos_lite)) {
       ]
     }
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     }
     part_name = "dsoftbus"
     subsystem_name = "communication"
