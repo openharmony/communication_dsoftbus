@@ -39,7 +39,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
     "//base/startup/init/interfaces/innerkits/include/syspara",
-    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
 
@@ -180,11 +179,8 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
     ]
-    public_deps = [
-      "//base/startup/init/interfaces/innerkits:libbegetutil",
-      "//third_party/bounds_checking_function:libsec_static",
-    ]
-
+    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
     native_source_path = rebase_path("$dsoftbus_root_path")
 
     ble_enhanced_impl =
@@ -214,7 +210,6 @@ if (defined(ohos_lite)) {
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [
-        "c_utils:utils",
         "hisysevent_native:libhisysevent",
         "hiviewdfx_hilog_native:libhilog",
       ]
