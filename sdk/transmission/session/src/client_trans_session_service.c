@@ -626,7 +626,7 @@ int32_t DisableSessionListener(int32_t sessionId)
 
 int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
 {
-    if (quality != QOS_IMPROVE) {
+    if (quality != QOS_IMPROVE && quality != QOS_RECOVER) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
