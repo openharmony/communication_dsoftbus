@@ -103,7 +103,7 @@ static void HiSysEventParamDeInit(uint32_t size)
         }
      }
  }
- 
+
 static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
 {
     HiSysEventEventType hiSysEvtType;
@@ -150,11 +150,9 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     if (msg == nullptr) {
         return;
     }
-
     if (msg->paramArray != nullptr) {
         SoftBusFree(msg->paramArray);
     }
-    
     SoftBusFree(msg);
 }
 
@@ -164,12 +162,10 @@ SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
     if (msg == nullptr) {
         return nullptr;
     }
-
     msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
     if (msg->paramArray == nullptr) {
         SoftbusFreeEvtReporMsg(msg);
     }
-    
     return msg;
 }
 

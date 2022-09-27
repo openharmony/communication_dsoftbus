@@ -79,7 +79,7 @@ SoftBusEvtReportMsg g_bleDuration;
 
 static int32_t InitSuccessRateStatisticMsg(SoftBusEvtReportMsg *msg)
 {
-    if (strcpy_s(msg->evtName, sizeof(msg->evtName), STATISTIC_EVT_BUS_CENTER_SUCCESS) != EOK) {
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_BUS_CENTER_SUCCESS) != EOK) {
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -90,7 +90,8 @@ static int32_t InitSuccessRateStatisticMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t InitDurationStatisticMsg(SoftBusEvtReportMsg *msg)
 {
-    if (strcpy_s(msg->evtName, sizeof(msg->evtName), STATISTIC_EVT_BUS_CENTER_DURATION) != EOK) {
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_BUS_CENTER_DURATION) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s evtname %s fail", STATISTIC_EVT_BUS_CENTER_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -165,23 +166,31 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
         }
         do {
             msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, sizeof(msg->paramArray[EVT_INDEX_ZERO].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_TOTAL_COUNT) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_TOTAL_COUNT);
                 break;
             }
             msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, sizeof(msg->paramArray[EVT_INDEX_ONE].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_SUCCESS_COUNT) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_SUCCESS_COUNT);
                 break;
             }
             msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, sizeof(msg->paramArray[EVT_INDEX_TWO].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_SUCCESS_RATE) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_SUCCESS_RATE);
                 break;
             }
             msg->paramArray[EVT_INDEX_THREE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_THREE].paramName, sizeof(msg->paramArray[EVT_INDEX_THREE].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_THREE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_CONN_TYPE) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_CONN_TYPE);
                 break;
             }
             return msg;
@@ -232,22 +241,28 @@ static SoftBusEvtReportMsg *GetDurationMsg(LnnStatisticData *data)
         }
         do {
             msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, sizeof(msg->paramArray[EVT_INDEX_ZERO].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_AVG_DURATION) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_AVG_DURATION);
                 break;
             }
             msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, sizeof(msg->paramArray[EVT_INDEX_ONE].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_MAX_DURATION) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_MAX_DURATION);
                 break;
             }
             msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, sizeof(msg->paramArray[EVT_INDEX_TWO].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_MIN_DURATION) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_MIN_DURATION);
                 break;
             }
             msg->paramArray[EVT_INDEX_THREE].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-            if (strcpy_s(msg->paramArray[EVT_INDEX_THREE].paramName, sizeof(msg->paramArray[EVT_INDEX_THREE].paramName),
+            if (strcpy_s(msg->paramArray[EVT_INDEX_THREE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
                 BUS_CENTER_PARAM_CONN_TYPE) != EOK) {
                 break;
             }
@@ -330,29 +345,36 @@ static int32_t ReportStatisticBleSuccessRataEvt(void)
 
 static int32_t MakeFaultEvt(SoftBusEvtReportMsg *msg)
 {
-    if (strcpy_s(msg->evtName, sizeof(msg->evtName), FAULT_EVT_BUS_CENTER) != EOK) {
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, FAULT_EVT_BUS_CENTER) != EOK) {
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
     msg->paramNum = SOFTBUS_EVT_PARAM_THREE;
     msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * msg->paramNum);
     if (msg->paramArray == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " make fault evt malloc fail");
         return SOFTBUS_ERR;
     }
     do {
         msg->paramArray[EVT_INDEX_ZERO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-        if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, sizeof(msg->paramArray[EVT_INDEX_ZERO].paramName),
+        if (strcpy_s(msg->paramArray[EVT_INDEX_ZERO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             FAULT_EVT_BUS_PARAM_ERROR) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    FAULT_EVT_BUS_PARAM_ERROR);
             break;
         }
         msg->paramArray[EVT_INDEX_ONE].paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
-        if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, sizeof(msg->paramArray[EVT_INDEX_ONE].paramName),
+        if (strcpy_s(msg->paramArray[EVT_INDEX_ONE].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             FAULT_EVT_BUS_PARAM_ERROR_STR) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    FAULT_EVT_BUS_PARAM_ERROR_STR);
             break;
         }
         msg->paramArray[EVT_INDEX_TWO].paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
-        if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, sizeof(msg->paramArray[EVT_INDEX_TWO].paramName),
+        if (strcpy_s(msg->paramArray[EVT_INDEX_TWO].paramName, SOFTBUS_HISYSEVT_PARAM_LEN,
             BUS_CENTER_PARAM_CONN_TYPE) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " strcpy_s param name %s fail",
+                    BUS_CENTER_PARAM_CONN_TYPE);
             break;
         }
         return SOFTBUS_OK;
