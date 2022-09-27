@@ -136,7 +136,8 @@ int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer)
 {
     (void)p2pMac;
     (void)type;
-    return isServer;
+    (void)isServer;
+    return AUTH_INVALID_ID;
 }
 
 uint32_t AuthGetEncryptSize(uint32_t inLen)
