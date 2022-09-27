@@ -92,12 +92,9 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
     bool type = true;
     int32_t ret = LnnRequestLeaveByAddrType(&type, CONNECTION_ADDR_MAX);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveByAddrType(&type, CONNECTION_ADDR_MAX);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -114,12 +111,9 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -133,12 +127,9 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
 {
     int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -152,12 +143,9 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0
 {
     int32_t ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -177,12 +165,9 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     int32_t ret = LnnNotifyNodeStateChanged(&target);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnNotifyNodeStateChanged(&target);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -196,15 +181,12 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnNotifyMasterElect(NETWORKID, MASTER_UDID, MASTER_WEIGHT);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     char *networkId = nullptr;
     ret = LnnNotifyMasterElect(networkId, MASTER_UDID, MASTER_WEIGHT);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnNotifyMasterElect(NETWORKID, MASTER_UDID, MASTER_WEIGHT);
-    LnnDeinitBusCenterEvent();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -219,8 +201,6 @@ HWTEST_F(LnnNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
     char *addr = nullptr;
     int32_t ret = LnnUpdateNodeAddr(addr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnInitBusCenterEvent();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnUpdateNodeAddr(MASTER_UDID);
@@ -229,6 +209,5 @@ HWTEST_F(LnnNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnUpdateNodeAddr(MASTER_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDeinitBusCenterEvent();
 }
 } // namespace OHOS
