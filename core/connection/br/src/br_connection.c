@@ -608,7 +608,7 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrServer memcpy mac fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
-        return connectionId;
+        return 0;
     }
     if (AddConnectionList(newConnectionInfo) != SOFTBUS_OK) {
         ListDelete(&newConnectionInfo->node);
