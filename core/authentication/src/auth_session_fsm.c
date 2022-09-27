@@ -504,12 +504,11 @@ static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
     return NULL;
 }
 
-static AuthFsm *GetAuthFsmByConnId(int64_t connId, bool isServer)
+static AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
-        if (item->info.connId != (uint64_t)connId ||
-            item->info.isServer != isServer) {
+        if (item->info.connId != connId || item->info.isServer != isServer) {
             continue;
         }
         if (item->isDead) {
@@ -520,7 +519,7 @@ static AuthFsm *GetAuthFsmByConnId(int64_t connId, bool isServer)
         return item;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-        "auth fsm not found by "CONN_INFO, CONN_DATA((uint64_t)connId));
+        "auth fsm not found by "CONN_INFO, CONN_DATA(connId));
     return NULL;
 }
 
@@ -553,6 +552,28 @@ static int32_t PostMessageToAuthFsm(int32_t msgType, int64_t authSeq, const uint
         return SOFTBUS_LOCK_ERR;
     }
     AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
+    if (authFsm == NULL) {
+        ReleaseAuthLock();
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    LnnFsmPostMessage(&authFsm->fsm, msgType, para);
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
+static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bool isServer,
+    const uint8_t *data, uint32_t len)
+{
+    MessagePara *para = NewMessagePara(data, len);
+    if (para == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (!RequireAuthLock()) {
+        SoftBusFree(para);
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthFsm *authFsm = GetAuthFsmByConnId(connId, isServer);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         SoftBusFree(para);
@@ -659,28 +680,20 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
 }
 
+int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
+}
+
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!RequireAuthLock()) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    MessagePara *para = NewMessagePara(data, len);
-    if (para == NULL) {
-        ReleaseAuthLock();
-        return SOFTBUS_MALLOC_ERR;
-    }
-    AuthFsm *authFsm = GetAuthFsmByConnId(connId, isServer);
-    if (authFsm == NULL) {
-        ReleaseAuthLock();
-        SoftBusFree(para);
-        return SOFTBUS_ERR;
-    }
-    LnnFsmPostMessage(&authFsm->fsm, FSM_MSG_RECV_CLOSE_ACK, para);
-    ReleaseAuthLock();
-    return SOFTBUS_OK;
+    return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
 }
 
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
