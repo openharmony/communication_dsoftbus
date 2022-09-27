@@ -30,6 +30,10 @@ constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
 namespace OHOS {
 using namespace testing::ext;
 
+static LnnConnectionFsm *CreateConnectionFsm();
+static LnnConnectionFsm *connFsm = nullptr;
+static LnnConnectionFsm *connFsm2 = nullptr;
+
 class LnnConnectionFsmTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -40,10 +44,16 @@ public:
 
 void LnnConnectionFsmTest::SetUpTestCase()
 {
+    LooperInit();
+    connFsm = CreateConnectionFsm();
+    connFsm2 = CreateConnectionFsm();
 }
 
 void LnnConnectionFsmTest::TearDownTestCase()
 {
+    LooperDeinit();
+    LnnDestroyConnectionFsm(connFsm);
+    LnnDestroyConnectionFsm(connFsm2);
 }
 
 void LnnConnectionFsmTest::SetUp()
@@ -79,11 +89,9 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
     ConnectionAddr *target = nullptr;
-    LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(target);
-    EXPECT_TRUE(connFsm == nullptr);
-    LooperDeinit();
+    LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target);
+    EXPECT_TRUE(fsm == nullptr);
 }
 
 /*
@@ -94,11 +102,9 @@ HWTEST_F(LnnConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = nullptr;
-    LnnDestroyConnectionFsm(connFsm);
-    EXPECT_TRUE(connFsm == nullptr);
-    LooperDeinit();
+    LnnConnectionFsm *fsm = nullptr;
+    LnnDestroyConnectionFsm(fsm);
+    EXPECT_TRUE(fsm == nullptr);
 }
 
 /*
@@ -109,34 +115,11 @@ HWTEST_F(LnnConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Lev
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = nullptr;
-    int32_t ret = LnnStartConnectionFsm(connFsm);
+    LnnConnectionFsm *fsm = nullptr;
+    int32_t ret = LnnStartConnectionFsm(fsm);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    connFsm = CreateConnectionFsm();
     ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
-}
-
-/*
-* @tc.name: LNN_STOP_CONNECTION_FSM_TEST_001
-* @tc.desc: test LnnStopConnectionFsm
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
-HWTEST_F(LnnConnectionFsmTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level0)
-{
-    LooperInit();
-    LnnConnectionFsm *connFsm = nullptr;
-    int32_t ret = LnnStopConnectionFsm(connFsm, FsmStopCallback);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    connFsm = CreateConnectionFsm();
-    ret = LnnStopConnectionFsm(connFsm, FsmStopCallback);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -147,12 +130,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level0
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendJoinRequestToConnFsm(connFsm);
+    int32_t ret = LnnSendJoinRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -163,13 +142,9 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
     int32_t retCode = 1;
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendAuthResultMsgToConnFsm(connFsm, retCode);
+    int32_t ret = LnnSendAuthResultMsgToConnFsm(connFsm2, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -180,12 +155,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendNotTrustedToConnFsm(connFsm);
+    int32_t ret = LnnSendNotTrustedToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -196,12 +167,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001, TestSiz
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendDisconnectMsgToConnFsm(connFsm);
+    int32_t ret = LnnSendDisconnectMsgToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -212,12 +179,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, Test
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendLeaveRequestToConnFsm(connFsm);
+    int32_t ret = LnnSendLeaveRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -228,12 +191,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendSyncOfflineFinishToConnFsm(connFsm);
+    int32_t ret = LnnSendSyncOfflineFinishToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
 }
 
 /*
@@ -244,11 +203,20 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
 */
 HWTEST_F(LnnConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, TestSize.Level0)
 {
-    LooperInit();
-    LnnConnectionFsm *connFsm = CreateConnectionFsm();
-    int32_t ret = LnnSendNewNetworkOnlineToConnFsm(connFsm);
+    int32_t ret = LnnSendNewNetworkOnlineToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDestroyConnectionFsm(connFsm);
-    LooperDeinit();
+}
+
+/*
+* @tc.name: LNN_STOP_CONNECTION_FSM_TEST_001
+* @tc.desc: test LnnStopConnectionFsm
+* @tc.type: FUNC
+* @tc.require: I5PRUD
+*/
+HWTEST_F(LnnConnectionFsmTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level0)
+{
+    LnnConnectionFsm *fsm = nullptr;
+    int32_t ret = LnnStopConnectionFsm(fsm, FsmStopCallback);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
