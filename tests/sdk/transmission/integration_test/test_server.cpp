@@ -101,7 +101,7 @@ static int ExecTestSuite(void)
         .OnQosEvent = EsOnQosEvent};
 
     int ret = CreateSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &listener);
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         LOG("%s:create session server failed!ret=%d", __func__, ret);
         return ret;
     }
@@ -115,6 +115,10 @@ static int ExecTestSuite(void)
 
     ret =
         SetFileReceiveListener(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME, &fileRecvListener, "/data/recv_files");
+    if (ret != SOFTBUS_OK) {
+        LOG("%s:set file receive listener failed! ret=%d", __func__, ret);
+        return ret;
+    }
 
     LOG("type x to exit:");
     char c = '0';
@@ -123,7 +127,7 @@ static int ExecTestSuite(void)
     } while (c != 'x');
 
     ret = RemoveSessionServer(ECHO_SERVICE_PKGNAME, ECHO_SERVICE_SESSION_NAME);
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         LOG("%s: remove session server failed! ret= %d", __func__, ret);
     }
 
@@ -135,7 +139,7 @@ int main(int argc, char * const *argv)
     LOG("%s:started", __func__);
 
     int ret = ExecTestSuite();
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         LOG("%s:test failed!ret=%d", __func__, ret);
     }
     return ret;

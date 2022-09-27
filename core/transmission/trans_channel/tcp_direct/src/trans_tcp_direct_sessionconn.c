@@ -116,22 +116,6 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
     return NULL;
 }
 
-SessionConn *GetSessionConnByChannelId(int32_t channelId)
-{
-    if (g_sessionConnList == NULL) {
-        return NULL;
-    }
-    SessionConn *item = NULL;
-    SessionConn *nextItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_sessionConnList->list, SessionConn, node) {
-        if (item->channelId == channelId) {
-            return item;
-        }
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%d", channelId);
-    return NULL;
-}
-
 SessionConn *GetSessionConnByReq(int64_t req)
 {
     if (g_sessionConnList == NULL) {

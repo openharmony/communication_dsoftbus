@@ -243,16 +243,5 @@ void VtpInstance::UpdateSocketStreamCount(bool add)
         isDestroyed_ = true;
     }
 }
-
-bool VtpInstance::IsAllSocketsClosed()
-{
-    std::lock_guard<std::mutex> guard(vtpLock_);
-
-    if (!socketStreamCount_) {
-        return true;
-    }
-
-    return false;
-}
 } // namespace SoftBus
 } // namespace Communication
