@@ -198,7 +198,8 @@ static const NodeInfo *HbGetOnlineNodeByRecvInfo(const char *recvUdidHash, const
             continue;
         }
         if (strncmp(udidHash, recvUdidHash, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node udidHash:%s is online", udidHash);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node udidHash:%s is online",
+                AnonymizesNetworkID(udidHash));
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -248,21 +249,22 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     if (HbSaveRecvTimeToRemoveRepeat(device, weight, masterWeight, nowTime) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB save recv time fail, udidHash:%s", device->devId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB save recv time fail, udidHash:%s",
+            AnonymizesUDID(device->devId));
         return SOFTBUS_ERR;
     }
     devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X, "
         "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, masterWeight:%d, nowTime:%" PRIu64 "]",
-        device->devId, device->devType, devTypeStr != NULL ? devTypeStr : "", device->addr[0].type, weight,
-        masterWeight, nowTime);
+        AnonymizesUDID(device->devId), device->devType, devTypeStr != NULL ? devTypeStr : "",
+        device->addr[0].type, weight, masterWeight, nowTime);
 
     const NodeInfo *nodeInfo = HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type);
     if (nodeInfo != NULL) {
         return HbUpdateOfflineTimingByRecvInfo(nodeInfo->networkId, device->addr[0].type, hbType, nowTime);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) find device, udidHash:%s, ConnectionAddrType:%02X",
-        device->devId, device->addr[0].type);
+        AnonymizesUDID(device->devId), device->addr[0].type);
     if (LnnNotifyDiscoveryDevice(device->addr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr recv process notify device found fail");
         return SOFTBUS_ERR;
@@ -283,7 +285,8 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     }
     nodeInfo = HbGetOnlineNodeByRecvInfo(udidHash, type);
     if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB recv higher weight udidhash:%s is not online yet", udidHash);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB recv higher weight udidhash:%s is not online yet",
+            AnonymizesUDID(udidHash));
         return SOFTBUS_OK;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, sizeof(masterUdid)) != SOFTBUS_OK) {
@@ -299,7 +302,8 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     if (isFromMaster) {
         LnnSetHbAsMasterNodeState(false);
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidHash:%s, weight:%d", udidHash, weight);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidHash:%s, weight:%d",
+        AnonymizesUDID(udidHash), weight);
     return SOFTBUS_OK;
 }
 
@@ -311,7 +315,7 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay get invalid param");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB mgr relay process, udidhash:%s", udidHash);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB mgr relay process, udidhash:%s", AnonymizesUDID(udidHash));
     if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay process fail");
         return;
@@ -382,8 +386,8 @@ void LnnDumpHbMgrRecvList(void)
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpRecvList count:%d [i:%d, udidHash:%s, "
             "deviceType:%s, ConnectionAddrType:%02X, weight:%d, masterWeight:%d, lastRecvTime:%" PRIu64 "]",
-            g_hbRecvList->cnt, dumpCount, item->device->devId, deviceType, item->device->addr[0].type,
-            item->weight, item->masterWeight, item->lastRecvTime);
+            g_hbRecvList->cnt, dumpCount, AnonymizesUDID(item->device->devId), deviceType,
+            item->device->addr[0].type, item->weight, item->masterWeight, item->lastRecvTime);
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
 }

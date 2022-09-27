@@ -519,7 +519,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
-        "Connect to server(addr:%s, server port:%d)", remote.ip.c_str(), remote.port);
+        "Connect to server(server port:%d)", remote.port);
     remoteIpPort_ = remote;
 
     struct sockaddr_in remoteSockAddr;
@@ -897,7 +897,7 @@ bool VtpStreamSocket::Accept()
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
-        "Accept a client(addr:%s, server port:%d)", remoteIpPort_.ip.c_str(), remoteIpPort_.port);
+        "Accept a client(server port:%d)", remoteIpPort_.port);
     SetDefaultConfig(fd);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
