@@ -487,23 +487,6 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyTransNetWorkMsg(ProxyMessageHead *msghead, const ProxyChannelInfo *info, const char *payLoad,
-    int payLoadLen, int priority)
-{
-    ProxyDataInfo dataInfo = {
-        .inData = (uint8_t *)payLoad,
-        .inLen = (uint32_t)payLoadLen,
-        .outData = NULL,
-        .outLen = 0,
-    };
-    if (TransProxyPackMessage(msghead, info->authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
-        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
-    }
-    return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
-        priority, info->appInfo.myData.pid);
-}
-
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag)
 {
     int ret = SOFTBUS_OK;

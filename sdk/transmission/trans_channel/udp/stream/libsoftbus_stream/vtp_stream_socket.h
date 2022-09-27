@@ -160,8 +160,6 @@ private:
 
     void NotifyStreamListener();
 
-    void GetCryptErrorReason(void) const;
-
     bool EnableBwEstimationAlgo(int streamFd, bool isServer) const;
 
     bool EnableJitterDetectionAlgo(int streamFd) const;
