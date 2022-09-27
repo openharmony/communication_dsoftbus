@@ -54,7 +54,7 @@ static InnerChannelListener g_listener[] = {
     },
 };
 
-static SocketCallback g_callback = { NULL, NULL, NULL};
+static SocketCallback g_callback = {NULL, NULL, NULL};
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -165,6 +165,7 @@ static int32_t RecvPacketHead(int32_t fd, SocketPktHead *head)
         if (len < 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "recv head fail(=%d).", ConnGetSocketError(fd));
             (void)DelTrigger(AUTH, fd, READ_TRIGGER);
+            ConnShutdownSocket(fd);
             NotifyDisconnected(fd);
         }
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "head not enough, len=%d, abandon it.", len);
@@ -247,7 +248,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t events,
     (void)module;
     (void)clientAddr;
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "exception occurred.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "exception occurred, fd=%d.", cfd);
         return SOFTBUS_ERR;
     }
     if (cfd < 0) {
