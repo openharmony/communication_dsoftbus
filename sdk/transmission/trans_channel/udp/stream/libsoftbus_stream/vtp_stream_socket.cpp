@@ -285,7 +285,7 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 #ifdef FILLP_SUPPORT_BW_DET
     if (info->evt == FT_EVT_BW_DET || info->evt == FT_EVT_JITTER_DET) {
         int32_t eventId = TRANS_STREAM_QUALITY_EVENT;
-        int32_t tvCount = 1;
+        int16_t tvCount = 1;
         QosTv metricList = {};
 
         FillSupportDet(fd, info, &metricList);
@@ -318,7 +318,7 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 void VtpStreamSocket::FillpAppStatistics()
 {
     int32_t eventId = TRANS_STREAM_QUALITY_EVENT;
-    int32_t tvCount = 1;
+    int16_t tvCount = 1;
     QosTv metricList = {};
     FillpStatisticsPcb fillpPcbStats = {};
     SoftBusSysTime fillpStatsGetTime = {0};
@@ -1524,11 +1524,6 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     }
 
     return outLen;
-}
-
-void VtpStreamSocket::GetCryptErrorReason(void) const
-{
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "Unsupport api");
 }
 } // namespace SoftBus
 } // namespace Communication

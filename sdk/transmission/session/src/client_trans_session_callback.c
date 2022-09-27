@@ -129,7 +129,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
-    int32_t sessionId;
+    int32_t sessionId = INVALID_SESSION_ID;
     ISessionListener listener = {0};
     (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
 
@@ -146,7 +146,7 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionClosed: channelId=%d, channelType=%d",
         channelId, channelType);
-    int32_t sessionId;
+    int32_t sessionId = INVALID_SESSION_ID;
     ISessionListener listener = {0};
     int32_t ret;
     (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
