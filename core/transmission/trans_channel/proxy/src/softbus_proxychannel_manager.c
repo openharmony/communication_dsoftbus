@@ -326,7 +326,7 @@ static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t err
         ListDelete(&(removeNode->node));
         if (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING ||
             removeNode->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
-            OnProxyChannelOpenFailed(removeNode->channelId, &(removeNode->appInfo), errCode);
+            TransProxyOpenProxyChannelFail(removeNode->channelId, &(removeNode->appInfo), errCode);
         } else {
             OnProxyChannelClosed(removeNode->channelId, &(removeNode->appInfo));
         }
@@ -598,7 +598,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 
     if ((info->appInfo.appType == APP_TYPE_NORMAL) || (info->appInfo.appType == APP_TYPE_AUTH)) {
-        (void)OnProxyChannelOpenFailed(info->channelId, &(info->appInfo), errCode);
+        (void)TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     }
 }
 
@@ -753,7 +753,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     }
 
     if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
-        OnProxyChannelOpenFailed(info->channelId, &(info->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
+        TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
     } else {
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
     }
@@ -922,7 +922,7 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     if (TransProxyHandshake(chan) == SOFTBUS_ERR) {
         (void)TransProxyCloseConnChannel(chan->connId);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "chanId[%d] shake hand err.", chanId);
-        OnProxyChannelOpenFailed(chan->channelId, &(chan->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
+        TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
         TransProxyDelChanByChanId(chanId);
     }
     SoftBusFree(chan);

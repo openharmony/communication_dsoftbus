@@ -25,7 +25,6 @@ typedef struct {
 
 int32_t InitPendingPacket(void);
 void DestroyPendingPacket(void);
-void ClearPendingPacketById(uint32_t id);
 int32_t CreatePendingPacket(uint32_t id, uint64_t seq);
 void DeletePendingPacket(uint32_t id, uint64_t seq);
 

@@ -162,17 +162,5 @@ void StreamManager::SetStreamRecvListener(std::shared_ptr<IStreamManagerListener
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SetStreamRecvListener %d protocol success", curProtocol_);
     }
 }
-
-bool StreamManager::ChangeToOtherChannel(const IStreamSocket &target)
-{
-    static_cast<void>(target);
-    return false;
-}
-
-bool StreamManager::AddNextFrameFlag(Proto next)
-{
-    static_cast<void>(next);
-    return false;
-}
 } // namespace SoftBus
 } // namespace Communication

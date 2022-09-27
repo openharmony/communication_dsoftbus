@@ -135,31 +135,6 @@ void DeletePendingPacket(uint32_t id, uint64_t seq)
     (void)SoftBusMutexUnlock(&g_pendingLock);
 }
 
-void ClearPendingPacketById(uint32_t id)
-{
-    if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClearPendingPacketById lock fail");
-        return;
-    }
-    PendingPacket *item = NULL;
-    PendingPacket *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_pendingList, PendingPacket, node) {
-        if (item->id == id) {
-            ListDelete(&item->node);
-            SoftBusMutexLock(&item->lock);
-            item->finded = false;
-            if (item->data.data != NULL) {
-                SoftBusFree(item->data.data);
-            }
-            SoftBusCondSignal(&item->cond);
-            SoftBusMutexUnlock(&item->lock);
-            SoftBusMutexDestroy(&item->lock);
-            SoftBusFree(item);
-        }
-    }
-    SoftBusMutexUnlock(&g_pendingLock);
-}
-
 static void ComputeWaitPendTime(uint32_t waitMillis, SoftBusSysTime *outtime)
 {
     SoftBusSysTime now;
