@@ -141,35 +141,6 @@ int SessionServiceImpl::RemovePermission(const std::string &busName)
     return RemovePermissionInner(busName.c_str());
 }
 
-int SessionServiceImpl::CreatNewSession(int sessionId)
-{
-    std::shared_ptr<Session> session = std::make_shared<SessionImpl>();
-    session->SetSessionId(sessionId);
-    char str[SESSION_NAME_SIZE_MAX];
-    int ret = GetMySessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    std::string mySessionName(str);
-    session->SetMySessionName(mySessionName);
-    ret = GetPeerSessionNameInner(sessionId, str, SESSION_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    std::string peerSessionName(str);
-    session->SetPeerSessionName(peerSessionName);
-    ret = GetPeerDeviceIdInner(sessionId, str, SESSION_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    std::string peerNetworkId(str);
-    session->SetPeerDeviceId(peerNetworkId);
-    session->SetIsServer(true);
-    std::lock_guard<std::mutex> autoLock(sessionMutex_);
-    sessionMap_.insert(std::pair<int, std::shared_ptr<Session>>(sessionId, session));
-    return SOFTBUS_OK;
-}
-
 int SessionServiceImpl::OpenSessionCallback(int sessionId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSessionCallback");
