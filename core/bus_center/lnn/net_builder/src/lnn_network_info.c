@@ -168,11 +168,8 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
             break;
         case SOFTBUS_WIFI_CONNECTED:
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
-            if (SoftBusGetLinkBand() == BAND_5G) {
-                (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-            } else {
-                (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
-            }
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
             break;
         case SOFTBUS_WIFI_DISCONNECTED:
             (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
