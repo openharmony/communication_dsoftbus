@@ -16,9 +16,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransTcpDirectCoreTest") {
+ohos_unittest("TransProxyChannelCoreTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/trans_tcp_direct_test.cpp" ]
+  sources = [ "unittest/trans_proxy_channel_test.cpp" ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -95,5 +95,5 @@ ohos_unittest("TransTcpDirectCoreTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":TransTcpDirectCoreTest" ]
+  deps = [ ":TransProxyChannelCoreTest" ]
 }
