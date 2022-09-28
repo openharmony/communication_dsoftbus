@@ -24,6 +24,7 @@
 #include "disc_manager.h"
 #include "discovery_service.h"
 #include "lnn_device_info.h"
+#include "lnn_ohos_account.h"
 #include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_ble_gatt.h"
@@ -362,7 +363,7 @@ static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash error");
             return false;
         }
-        if ((accountIdHash[0] & BYTE_MASK) == 0 && (accountIdHash[1] & BYTE_MASK) == 0) {
+        if (LnnIsDefaultOhosAccount()) {
             return false;
         }
         if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
