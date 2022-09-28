@@ -4516,9 +4516,13 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
  */
 HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
 {
+    int ret;
     DeviceInfo devInfo;
     DiscMgrInit();
-    DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+	
+    ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
+    TEST_ASSERT_TRUE(ret == 0);
+    
     devInfo.capabilityBitmap[0] = TEST_BITMAP_CAP;
     TestInnerDeviceFound(&devInfo, NULL);
     DiscMgrDeinit();
