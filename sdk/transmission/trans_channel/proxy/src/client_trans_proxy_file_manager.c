@@ -1481,7 +1481,6 @@ static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelI
     ListInit(&info->node);
     info->objRefCount = 1;
     info->recvFileInfo.fileFd = INVALID_FD;
-    // todo lock?
     ListTailInsert(&g_recvRecipientInfoList, &info->node);
     return info;
 }
