@@ -73,6 +73,8 @@ int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num);
 const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
+
 #ifdef __cplusplus
 }
 #endif

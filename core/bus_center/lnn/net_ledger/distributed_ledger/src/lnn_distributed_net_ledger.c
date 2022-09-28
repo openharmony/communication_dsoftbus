@@ -787,6 +787,34 @@ static void UpdateAuthSeq(const NodeInfo *oldInfo, NodeInfo *info)
     }
 }
 
+int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+{
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+
+    udid = LnnGetDeviceUdid(newInfo);
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no online node newInfo!");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI)) {
+        oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
+        oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
+        oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
+        oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
