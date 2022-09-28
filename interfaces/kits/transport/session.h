@@ -310,7 +310,7 @@ typedef struct {
 /**
  * @brief Creates a session server based on a package name and session name.
  *
- * A maximum of 18 session servers can be created.
+ * A maximum of 8 session servers can be created.
  *
  * @param pkgName Indicates the pointer to the package name, which can be used to check whether the
  * session server is in this package. The value cannot be empty and can contain a maximum of 64 characters.
