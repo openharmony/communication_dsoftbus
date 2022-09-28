@@ -293,7 +293,7 @@ int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
 
     ret = strcpy_s(localIp, localIpLen, tmpIp);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy myIp(%s) fail size %d", tmpIp, localIpLen);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy tmpIp fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
