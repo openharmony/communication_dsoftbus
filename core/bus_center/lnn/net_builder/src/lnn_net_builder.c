@@ -681,6 +681,10 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
+        msgPara->nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(msgPara->addr.type);
+        if (LnnUpdateNodeInfo(msgPara->nodeInfo) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnUpdateNodeInfo failed!");
+        }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "[id=%u]connection fsm exist, ignore VerifyPass event: %" PRId64, connFsm->id, msgPara->authId);
         rc = SOFTBUS_ERR;
