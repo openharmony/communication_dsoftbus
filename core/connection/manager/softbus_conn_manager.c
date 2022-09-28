@@ -104,6 +104,7 @@ static int32_t GetAllListener(ConnListenerNode **node)
     LIST_FOR_EACH_ENTRY(listenerNode, &g_listenerList->list, ConnListenerNode, node) {
         if (memcpy_s(*node + cnt, sizeof(ConnListenerNode), listenerNode, sizeof(ConnListenerNode)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mem error");
+            continue;
         }
         cnt++;
     }
@@ -161,7 +162,7 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
         return SOFTBUS_ERR;
     }
     item->moduleId = moduleId;
-    if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != 0) {
+    if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != EOK) {
         SoftBusFree(item);
         (void)SoftBusMutexUnlock(&g_listenerList->lock);
         return SOFTBUS_ERR;
@@ -242,16 +243,15 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
 
 void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    int32_t i, num;
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
 
-    num = GetAllListener(&node);
+    int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get node fail connId %u", connectionId);
         return;
     }
-    for (i = 0; i < num; i++) {
+    for (int32_t i = 0; i < num; i++) {
         listener = node + i;
         listener->callback.OnConnected(connectionId, info);
     }
@@ -261,15 +261,14 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
 void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    int32_t i, num;
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
 
-    num = GetAllListener(&node);
+    int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
         return;
     }
-    for (i = 0; i < num; i++) {
+    for (int32_t i = 0; i < num; i++) {
         listener = node + i;
         listener->callback.OnDisconnected(connectionId, info);
     }
@@ -320,7 +319,6 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     if (g_connManager[info->type]->ConnectDevice == NULL) {
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
-
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 
@@ -333,7 +331,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (data->len <= sizeof(ConnPktHead)) {
+    if (data->len <= sizeof(ConnPktHead) || data->len > INT32_MAX) {
         SoftBusFree(data->buf);
         return SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID;
     }
