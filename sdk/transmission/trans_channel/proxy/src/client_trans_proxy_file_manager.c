@@ -1871,10 +1871,6 @@ static int32_t ProcessFileTransResult(int32_t sessionId, const FileFrame *frame)
     uint32_t seq;
     int32_t result;
     uint32_t side;
-    if (frame == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ProcessFileTransResult invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (UnpackFileTransResultFrame(frame->data, frame->frameLength, &seq, &result, &side) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
