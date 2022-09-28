@@ -35,7 +35,7 @@ public:
     virtual ~StreamCommonData() = default;
 
     // 应用调用生成流数据。
-    int InitStreamData(std::unique_ptr<char[]> buffer, ssize_t bufSize, std::unique_ptr<char[]> extBuffer,
+    int InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t bufSize, std::unique_ptr<char[]> inputExt,
         ssize_t extSize);
 
     void SetTimeStamp(uint32_t timestamp) override
