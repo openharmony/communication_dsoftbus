@@ -14,6 +14,7 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ble_discovery_inc = [
+  "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/discovery/ble/include",
   "$dsoftbus_root_path/core/common/include",
 ]
