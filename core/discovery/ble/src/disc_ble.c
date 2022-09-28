@@ -1661,12 +1661,10 @@ static void DiscBleSetScanFilter(int32_t listenerId)
     filter->serviceData[1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     filter->serviceData[UUID_LEN + POS_VERSION] = BLE_VERSION;
     filter->serviceData[UUID_LEN + POS_BUSINESS] = DISTRIBUTE_BUSINESS;
-    filter->serviceData[UUID_LEN + POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
     filter->serviceDataMask[0] = BYTE_MASK;
     filter->serviceDataMask[1] = BYTE_MASK;
     filter->serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
-    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;
-    filter->serviceDataMask[UUID_LEN + POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;      
     if (SoftBusSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set scan filter fail");
         DiscFreeBleScanFilter(&filter);
