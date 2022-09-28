@@ -28,7 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {

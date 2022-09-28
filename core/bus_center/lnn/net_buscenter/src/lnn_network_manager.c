@@ -135,7 +135,7 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
     char *innerPtr = NULL;
     char *value1 = NULL;
     char *value2 = NULL;
-    if (buf == NULL || bufLen <= 0) {
+    if (buf == NULL || bufLen == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invaild!");
         return SOFTBUS_ERR;
     }
