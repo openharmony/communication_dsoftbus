@@ -678,8 +678,9 @@ StreamAttr VtpStreamSocket::GetOption(int type) const
         }
         if (type == NON_BLOCK) {
             attr = (this->*get)(static_cast<int>(streamFd_));
+        } else {
+            attr = (this->*get)(static_cast<int>(type));
         }
-        attr = (this->*get)(static_cast<int>(type));
     }
 
     PrintOptionInfo(type, attr);

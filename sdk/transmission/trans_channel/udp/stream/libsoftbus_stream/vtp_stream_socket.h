@@ -126,8 +126,8 @@ private:
     bool SetVtpStackConfigDelayed(int type, const StreamAttr &value);
     bool SetVtpStackConfig(int type, const StreamAttr &value);
     StreamAttr GetVtpStackConfig(int type) const;
-    bool SetNonBlockMode(int type, const StreamAttr &value);
-    StreamAttr GetNonBlockMode(int type) const;
+    bool SetNonBlockMode(int fd, const StreamAttr &value);
+    StreamAttr GetNonBlockMode(int fd) const;
     StreamAttr GetIp(int type) const;
     StreamAttr GetPort(int type) const;
     bool SetStreamType(int type, const StreamAttr &value);
