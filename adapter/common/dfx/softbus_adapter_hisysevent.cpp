@@ -152,6 +152,7 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     }
     if (msg->paramArray != nullptr) {
         SoftBusFree(msg->paramArray);
+        msg->paramArray = nullptr;
     }
     SoftBusFree(msg);
 }
@@ -165,6 +166,7 @@ SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
     msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
     if (msg->paramArray == nullptr) {
         SoftbusFreeEvtReporMsg(msg);
+        return nullptr;
     }
     return msg;
 }
