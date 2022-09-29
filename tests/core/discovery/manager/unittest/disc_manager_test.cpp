@@ -4519,7 +4519,6 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
     int ret;
     DeviceInfo devInfo;
     DiscMgrInit();
-	
     ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
     TEST_ASSERT_TRUE(ret == 0);
     
