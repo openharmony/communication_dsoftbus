@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "softbus_access_token_test.h"
 #include "discovery_service.h"
 
 using namespace testing::ext;
@@ -50,7 +51,9 @@ public:
 };
 
 void Disc_Test::SetUpTestCase(void)
-{}
+{
+    SetAceessTokenPermission("discTest");
+}
 
 void Disc_Test::TearDownTestCase(void)
 {}
