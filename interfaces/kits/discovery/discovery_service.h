@@ -127,7 +127,7 @@ typedef struct {
  * @param[in] cb Indicates the pointer to the service publishing callback.
  * For details, see {@link IPublishCallback}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
- * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent SoftBus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service is successfully published.
  * @deprecated Please use PublishLNN instead, for details, see {@link PublishLNN}.
@@ -141,7 +141,7 @@ int PublishService(const char *pkgName, const PublishInfo *info, const IPublishC
  * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param[in] publishId Indicates the service ID.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
- * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent SoftBus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service is successfully unpublished.
  * @deprecated Please use StopPublishLNN instead, for details, see {@link StopPublishLNN}.
  */
@@ -158,7 +158,7 @@ int UnPublishService(const char *pkgName, int publishId);
  * For details, see {@link SubscribeInfo}.
  * @param[in] cb Indicates the service subscription callback. For details, see {@link IDiscoveryCallback}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
- * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent SoftBus client fails to be initialized.
  * @return <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return <b>SOFTBUS_OK</b> if the service subscription is successful.
  * @deprecated Please use RefreshLNN instead, for details, see {@link RefreshLNN}.
@@ -171,7 +171,7 @@ int StartDiscovery(const char *pkgName, const SubscribeInfo *info, const IDiscov
  * @param[in] pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param[in] subscribeId Indicates the service ID.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
- * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent SoftBus client fails to be initialized.
  * @return <b>SOFTBUS_OK</b> if the service unsubscription is successful.
  * @deprecated Please use StopRefreshLNN instead, for details, see {@link StopRefreshLNN}.
  */
