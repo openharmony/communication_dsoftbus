@@ -75,19 +75,6 @@ bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint3
     return (capBitMap[index] >> (pos % INT32_MAX_BIT_NUM)) & 0x1 ? true : false;
 }
 
-bool CheckCapBitMapEqual(const uint32_t *srcBitMap, const uint32_t *dstBitMap, uint32_t capBitMapNum)
-{
-    if (srcBitMap == NULL || dstBitMap == NULL) {
-        return false;
-    }
-    for (uint32_t i = 0; i < capBitMapNum; i++) {
-        if (srcBitMap[i] != dstBitMap[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     if (capBitMap == NULL) {
@@ -111,18 +98,6 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
     }
     uint32_t mask = 0xffffffff ^ (0x1 << (pos % INT32_MAX_BIT_NUM));
     capBitMap[index] = capBitMap[index] & mask;
-}
-
-int32_t DiscBleGetHwAccount(char *hwAccount)
-{
-    if (hwAccount == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    const char *account = "";
-    if (memcpy_s(hwAccount, strlen(account) + 1, account, strlen(account) + 1) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
