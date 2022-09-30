@@ -1181,7 +1181,7 @@ static void DiscMgrInfoListDeinit(SoftBusList *itemList, const ServiceType type,
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &itemNode->InfoList, DiscInfo, node) {
-            IdContainer *container = CreateIdContainer(infoNode->id, itemNode->packageName);
+            container = CreateIdContainer(infoNode->id, itemNode->packageName);
             if (container == NULL) {
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "CreateIdContainer failed");
                 goto CLEANUP;
