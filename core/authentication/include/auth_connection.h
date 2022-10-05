@@ -39,7 +39,7 @@ int32_t AuthUnpackDeviceInfo(AuthManager *auth, uint8_t *data);
 char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient);
 void AuthTryCloseConnection(uint32_t connectionId);
 bool AuthOnTransmit(int64_t authId, const uint8_t *data, uint32_t len);
-void AuthSendCloseAck(uint32_t connectionId);
+void AuthSendCloseAck(uint32_t connectionId, AuthSideFlag side, int64_t authId);
 
 #ifdef __cplusplus
 }

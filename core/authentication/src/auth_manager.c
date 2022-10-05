@@ -798,12 +798,12 @@ static void AuthReportSyncDeviceInfoResults(AuthManager *auth, uint8_t *data, ui
         }
     } else if (auth->status == SYNC_FINISH) {
         /* For device info already received from peer device. */
-        AuthSendCloseAck(auth->connectionId);
+        AuthSendCloseAck(auth->connectionId, auth->side, auth->authId);
         auth->status = WAIT_CLOSE_ACK;
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "wait close ack from peer device, authId = %lld.", auth->authId);
     } else if (auth->status == WAIT_PEER_DEV_INFO) {
         /* For close ack already received from peer device. */
-        AuthSendCloseAck(auth->connectionId);
+        AuthSendCloseAck(auth->connectionId, auth->side, auth->authId);
         EventRemove(auth->id);
         auth->status = AUTH_PASSED;
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth passed, authId = %lld.", auth->authId);
