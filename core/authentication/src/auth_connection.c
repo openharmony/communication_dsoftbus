@@ -340,7 +340,7 @@ char *AuthGenDeviceLevelParam(const AuthManager *auth, bool isClient)
     return data;
 }
 
-void AuthSendCloseAck(uint32_t connectionId)
+void AuthSendCloseAck(uint32_t connectionId, AuthSideFlag side, int64_t authId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth finished, send close ack");
     const char *closeData = "close ack";
@@ -360,7 +360,7 @@ void AuthSendCloseAck(uint32_t connectionId)
     buf += sizeof(int32_t);
     *(int32_t *)buf = NONE;
     buf += sizeof(int32_t);
-    *(int64_t *)buf = 0;
+    *(int64_t *)buf = authId;
     buf += sizeof(int64_t);
     *(int32_t *)buf = 0;
     buf += sizeof(int32_t);
@@ -371,8 +371,8 @@ void AuthSendCloseAck(uint32_t connectionId)
         SoftBusFree(connPostData);
         return;
     }
-    info.side = (AuthSideFlag)0;
-    info.seq = 0;
+    info.side = side;
+    info.seq = GetSeq(side);
     info.connectionId = connectionId;
     info.connModule = MODULE_DEVICE_AUTH;
     if (PostDataByConn(&info, connPostData, postDataLen) != SOFTBUS_OK) {
