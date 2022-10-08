@@ -113,6 +113,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.peerSessionName = (char*)appInfo->peerData.sessionName;
     info.routeType = (int32_t)appInfo->routeType;
     info.streamType = (int32_t)appInfo->streamType;
+    info.isUdpFile = appInfo->fileProtocal == APP_INFO_UDP_FILE_PROTOCAL ? true : false;
     if (!isServerSide) {
         info.peerPort = appInfo->peerData.port;
         info.peerIp = (char*)appInfo->peerData.addr;

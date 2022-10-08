@@ -254,6 +254,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         data.ReadInt32(channel.businessType);
         channel.myIp = (char *)data.ReadCString();
         data.ReadInt32(channel.streamType);
+        data.ReadBool(channel.isUdpFile);
         if (!channel.isServer) {
             data.ReadInt32(channel.peerPort);
             channel.peerIp = (char *)data.ReadCString();
@@ -263,6 +264,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     data.ReadInt32(channel.encrypt);
     data.ReadInt32(channel.algorithm);
     data.ReadInt32(channel.crc);
+
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {

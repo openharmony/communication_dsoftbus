@@ -154,7 +154,9 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t fileSession;
-    (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, NSTACKX_WLAN_CAT_TCP);
+
+    uint32_t capabilityValue = channel->isUdpFile? NSTACKX_WLAN_CAT_DIRECT : NSTACKX_WLAN_CAT_TCP;
+    (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, capabilityValue);
     if (channel->isServer) {
         FileListener fileListener;
         (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
