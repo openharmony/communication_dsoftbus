@@ -31,16 +31,14 @@
 static void UpdateP2pGoGroup(const P2pLinkGroup *group)
 {
     char p2pIp[P2P_IP_LEN] = {0};
-    int32_t ret;
-    int32_t port;
 
     P2pLinkUpdateDeviceByMagicGroups(group);
     if (P2pLinkGetGoPort() <= 0) {
-        ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
+        int32_t ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my ip, ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
-            port = AuthStartListening(AUTH_LINK_TYPE_P2P, p2pIp, 0);
+            int32_t port = AuthStartListening(AUTH_LINK_TYPE_P2P, p2pIp, 0);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p auth chan port %d", port);
             P2pLinkSetGoPort(port);
         }
@@ -54,10 +52,9 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
 static void UpdateP2pGcGroup(void)
 {
     char p2pIp[P2P_IP_LEN] = {0};
-    int32_t ret;
 
     if (P2pLinkGetDhcpState() == true) {
-        ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
+        int32_t ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get dhcp ip ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
@@ -108,7 +105,6 @@ static void LoopP2pStateChanged(P2pLoopMsg msgType, void *arg)
 
 static void P2pStateChanged(bool state)
 {
-    int32_t ret;
     bool *arg = NULL;
 
     arg = (bool *)SoftBusCalloc(sizeof(bool));
@@ -117,7 +113,7 @@ static void P2pStateChanged(bool state)
         return;
     }
     *arg = state;
-    ret = P2pLoopProc(LoopP2pStateChanged, (void *)arg, P2PLOOP_BROADCAST_P2PSTATE_CHANGED);
+    int32_t ret = P2pLoopProc(LoopP2pStateChanged, (void *)arg, P2PLOOP_BROADCAST_P2PSTATE_CHANGED);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopP2pStateChanged Loop fail");
         SoftBusFree(arg);
@@ -205,7 +201,6 @@ static void LoopConnResult(P2pLoopMsg msgType, void *arg)
 
 static void ConnResult(P2pLinkConnState state)
 {
-    int32_t ret;
     P2pLinkConnState *arg = NULL;
 
     arg = (P2pLinkConnState *)SoftBusCalloc(sizeof(P2pLinkConnState));
@@ -216,7 +211,7 @@ static void ConnResult(P2pLinkConnState state)
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv connect result %d", state);
     *arg = state;
-    ret = P2pLoopProc(LoopConnResult, (void *)arg, P2PLOOP_BROADCAST_CONN_STATE);
+    int32_t ret = P2pLoopProc(LoopConnResult, (void *)arg, P2PLOOP_BROADCAST_CONN_STATE);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopConnResult Loop fail");
         SoftBusFree(arg);

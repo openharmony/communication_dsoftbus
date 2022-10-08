@@ -197,14 +197,6 @@ static void InnerP2pPeersChangedCallback(WifiP2pDevice* devices, int len)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "InnerP2pPeersChangedCallback len %d.", len);
 }
 
-void P2pLinkEnableStub(void)
-{
-    WifiErrorCode ret;
-
-    ret = EnableP2p();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wdf EnableP2p ret %d.", ret);
-}
-
 int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
 {
     WifiErrorCode ret;
