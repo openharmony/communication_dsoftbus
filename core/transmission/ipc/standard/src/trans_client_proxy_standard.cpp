@@ -92,6 +92,7 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         data.WriteInt32(channel->businessType);
         data.WriteCString(channel->myIp);
         data.WriteInt32(channel->streamType);
+        data.WriteBool(channel->isUdpFile);
         if (!channel->isServer) {
             data.WriteInt32(channel->peerPort);
             data.WriteCString(channel->peerIp);
@@ -101,6 +102,7 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     data.WriteInt32(channel->encrypt);
     data.WriteInt32(channel->algorithm);
     data.WriteInt32(channel->crc);
+
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {

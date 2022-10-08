@@ -132,6 +132,7 @@ typedef struct {
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;
+    bool isUdpFile;
 } ChannelInfo;
 
 #ifdef __cplusplus

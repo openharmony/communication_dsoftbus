@@ -30,6 +30,8 @@ extern "C" {
 #define APP_INFO_ALGORITHM_AES_GCM_256 0
 #define APP_INFO_ALGORITHM_CHACHA 1
 
+#define APP_INFO_UDP_FILE_PROTOCAL 0x5a
+
 typedef enum {
     API_UNKNOWN = 0,
     API_V1 = 1,
@@ -92,6 +94,7 @@ typedef struct {
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;
+    int32_t fileProtocal;
 } AppInfo;
 
 #ifdef __cplusplus
