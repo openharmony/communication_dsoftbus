@@ -33,7 +33,6 @@ void P2pLinkCommonClean(void);
 
 void P2pLinkSetMyMacExpired(bool isExpired);
 void P2pLinkSetMyIp(const char *ip);
-void P2pLinkSetMyMac(const char *mac);
 char* P2pLinkGetMyIp(void);
 char* P2pLinkGetMyMac(void);
 
@@ -45,9 +44,6 @@ char* P2pLinkGetGoMac(void);
 int32_t P2pLinkGetGoPort(void);
 void P2pLinkSetGcPort(int32_t port);
 int32_t P2pLinkGetGcPort(void);
-
-void P2pLinkSetInterface(const char *name);
-char* P2pLinkGetInterface(void);
 
 void P2pLinkSetState(bool state);
 bool P2pLinkIsEnable(void);

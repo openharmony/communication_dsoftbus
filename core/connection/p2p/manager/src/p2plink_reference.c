@@ -163,17 +163,6 @@ void P2pLinkDelPidMacRef(int32_t pid, const char *mac)
     }
 }
 
-int32_t P2pLinGetPidRefCnt(int32_t pid)
-{
-    RefPidItem *pItem = NULL;
-
-    pItem = FindPidItem(pid);
-    if (pItem == NULL) {
-        return 0;
-    }
-    return pItem->refCnt;
-}
-
 int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac)
 {
     RefPidItem *pItem = NULL;
@@ -221,7 +210,6 @@ void DisConnectByPid(int32_t pid)
     RefMacItem *mItem = NULL;
     RefMacItem *next = NULL;
     ConnectedNode *connedItem = NULL;
-    int32_t ret;
     int32_t i;
 
     pItem = FindPidItem(pid);
@@ -236,7 +224,7 @@ void DisConnectByPid(int32_t pid)
             continue;
         }
         for (i = 0; i < mItem->refCnt; i++) {
-            ret = P2pLinkSendDisConnect(&connedItem->chanId, P2pLinkGetMyMac());
+            int32_t ret = P2pLinkSendDisConnect(&connedItem->chanId, P2pLinkGetMyMac());
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "disconnect failed.");
             }
@@ -286,11 +274,10 @@ void P2pLinkRefClean(void)
 void P2pLinkMyP2pRefClean(void)
 {
     int32_t i;
-    int32_t ret;
     int32_t refCnt = P2pLinkGetMyP2pRef();
 
     for (i = 0; i < refCnt; i++) {
-        ret = P2pLinkSharelinkRemoveGroup();
+        int32_t ret = P2pLinkSharelinkRemoveGroup();
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "remove failed.");
         } else {

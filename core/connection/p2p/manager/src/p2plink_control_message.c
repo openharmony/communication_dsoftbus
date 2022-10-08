@@ -145,26 +145,6 @@ static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, uint32_t mac
     return SOFTBUS_OK;
 }
 
-char* P2pLinkPackWifiCfg(const char* wificfg)
-{
-    char *buf = NULL;
-    cJSON *root = NULL;
-
-    root = cJSON_CreateObject();
-    if (root == NULL) {
-        return NULL;
-    }
-
-    if (!AddNumberToJsonObject(root, KEY_COMMAND_TYPE, CMD_GC_WIFI_CONFIG_STATE_CHANGE) ||
-        !AddStringToJsonObject(root, KEY_SELF_WIFI_CONFIG, wificfg)) {
-        cJSON_Delete(root);
-        return NULL;
-    }
-    buf = cJSON_PrintUnformatted(root);
-    cJSON_Delete(root);
-    return buf;
-}
-
 static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_SELF_WIFI_CONFIG, wificfg, len)) {
