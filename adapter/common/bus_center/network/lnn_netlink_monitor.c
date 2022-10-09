@@ -156,7 +156,7 @@ static void *NetlinkMonitorThread(void *para)
     }
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(DEFAULT_NETLINK_RECVBUF * sizeof(uint8_t));
     if (buffer == NULL) {
-        close(sockFd);
+        SoftBusSocketClose(sockFd);
         return NULL;
     }
     while (true) {
@@ -190,7 +190,7 @@ static void *NetlinkMonitorThread(void *para)
             nlh = NLMSG_NEXT(nlh, len);
         }
     }
-    close(sockFd);
+    SoftBusSocketClose(sockFd);
     SoftBusFree(buffer);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread exit");
     return NULL;
