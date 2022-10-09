@@ -176,7 +176,7 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
     }
     *infoNum = reply.arg1;
     if (*infoNum < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", infoNum);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", *infoNum);
         return SOFTBUS_ERR;
     }
     int32_t infoSize = (*infoNum) * (int32_t)infoTypeLen;
