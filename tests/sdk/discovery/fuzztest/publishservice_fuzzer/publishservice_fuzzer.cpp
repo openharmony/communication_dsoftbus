@@ -14,9 +14,13 @@
  */
 
 #include "publishservice_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+
 #include "discovery_service.h"
+#include "softbus_adapter_mem.h"
 
 namespace OHOS {
 static int g_publishId = 0;
@@ -58,7 +62,17 @@ void PublishServiceTest(const uint8_t* data, size_t size)
         return;
     }
 
-    PublishService((const char*)data, &testInfo, &g_publishCb);
+    // add trailing '\0'
+    uint8_t *pkgName = (uint8_t *)SoftBusCalloc((size + 1) * sizeof(uint8_t));
+    if (pkgName == nullptr) {
+        return;
+    }
+    if (memcpy_s(pkgName, size + 1, data, size) != EOK) {
+        SoftBusFree(pkgName);
+        return;
+    }
+    PublishService((const char*)pkgName, &testInfo, &g_publishCb);
+    SoftBusFree(pkgName);
 }
 } // namespace OHOS
 
