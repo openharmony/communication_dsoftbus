@@ -578,7 +578,8 @@ int32_t TransTdcRecvData(int32_t channelId)
         return SOFTBUS_ERR;
     }
     if (len == 0 || len > g_dataBufferMaxLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client tdc[%d] free databuf len[%zu] invalid.", channelId, len);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "client tdc[%d] free databuf len[%zu] invalid.", channelId, len);
         return SOFTBUS_ERR;
     }
 
