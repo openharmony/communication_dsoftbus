@@ -255,6 +255,10 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
     if (!GetSignalingMsgSwitch()) {
         return;
     }
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: msg is null.");
+        return;
+    }
     if (packet == NULL || packetLen == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: packet is null.");
         return;
@@ -264,6 +268,9 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
         return;
     }
 
+#ifdef __LITEOS_M__
+    SoftBusLog(module, SOFTBUS_LOG_INFO, "%s******", msg);
+#else
     char pattern[REG_PATTERN_MAX_LEN] = {0};
     if (sprintf_s(pattern, REG_PATTERN_MAX_LEN, "%s|%s|%s|%s|%s",
         REG_ID_PATTERN, REG_IDT_PATTERN, REG_IP_PATTERN, REG_MAC_PATTERN, REG_KEY_PATTERN) < 0) {
@@ -276,6 +283,7 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
         SoftBusLog(module, SOFTBUS_LOG_INFO, "%s%s", msg, anonymizedOut);
         SoftBusFree(anonymizedOut);
     }
+#endif
 }
 
 const char *AnonyDevId(char **outName, const char *inName)
@@ -286,9 +294,13 @@ const char *AnonyDevId(char **outName, const char *inName)
     if (strlen(inName) < SESSION_NAME_DEVICE_ID_LEN) {
         return inName;
     }
+#ifdef __LITEOS_M__
+    return "******";
+#else
     if (AnonymizeString(outName, inName, strlen(inName), SESSION_NAME_DEVICE_PATTERN, ANONYMIZE_NORMAL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anony sessionname fail.");
         return "******";
     }
     return *outName;
+#endif
 }
