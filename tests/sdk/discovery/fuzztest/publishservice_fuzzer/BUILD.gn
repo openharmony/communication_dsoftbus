@@ -22,6 +22,7 @@ ohos_fuzztest("PublishServiceFuzzTest") {
   module_out_path = "dsoftbus/discovery"
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/publishservice_fuzzer"
   include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/include",
     "//foundation/communication/dsoftbus/core/common/inner_communication",
     "//foundation/communication/dsoftbus/core/common/include",
     "//foundation/communication/dsoftbus/interfaces/kits/discovery",
@@ -39,7 +40,10 @@ ohos_fuzztest("PublishServiceFuzzTest") {
   ]
   sources = [ "publishservice_fuzzer.cpp" ]
 
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [
+    "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+    "//foundation/communication/dsoftbus/sdk:softbus_client",
+  ]
 
   external_deps = [ "c_utils:utils" ]
 }
