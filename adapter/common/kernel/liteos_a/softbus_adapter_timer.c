@@ -73,7 +73,7 @@ void *SoftBusCreateTimer(void **timerId, unsigned int type)
 
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
-    if (timerId < 0) {
+    if (timerId == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
         return SOFTBUS_ERR;
     }
