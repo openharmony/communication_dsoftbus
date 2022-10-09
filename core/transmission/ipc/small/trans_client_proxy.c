@@ -93,6 +93,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
         WriteInt32(&io, channel->businessType);
         WriteString(&io, channel->myIp);
         WriteInt32(&io, channel->streamType);
+        WriteBool(&io, channel->isUdpFile);
         if (channel->isServer) {
             return OnUdpChannelOpenedAsServer(&svc, &io);
         }

@@ -15,6 +15,7 @@
 
 #include "trans_udp_negotiation_exchange.h"
 
+#include "regex.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
@@ -25,7 +26,30 @@
 #define BASE64_SESSION_KEY_LEN 45
 typedef enum {
     CODE_EXCHANGE_UDP_INFO = 6,
+    CODE_FILE_TRANS_UDP = 0x602
 } CodeType;
+
+#define ISHARE_SESSION_NAME "IShare*"
+
+static inline bool IsIShareSession(const char* sessionName)
+{
+    regex_t regComp;
+    if (regcomp(&regComp, ISHARE_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "regcomp failed.");
+        regfree(&regComp);
+        return false;
+    }
+    bool compare = regexec(&regComp, sessionName, 0, NULL, 0) == 0;
+    regfree(&regComp);
+    return compare;
+}
+
+static inline CodeType getCodeType(const AppInfo *appInfo)
+{
+    return ((appInfo->udpConnType == UDP_CONN_TYPE_P2P) &&
+        IsIShareSession(appInfo->myData.sessionName) && (IsIShareSession(appInfo->peerData.sessionName))) ?
+        CODE_FILE_TRANS_UDP : CODE_EXCHANGE_UDP_INFO;
+}
 
 int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 {
@@ -51,6 +75,12 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
     (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
+
+    int code = CODE_EXCHANGE_UDP_INFO;
+    (void)GetJsonObjectNumberItem(msg, "CODE", &code);
+    if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
+        appInfo->fileProtocal = APP_INFO_UDP_FILE_PROTOCAL;
+    }
 
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
@@ -97,6 +127,12 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", &(appInfo->udpChannelOptType));
     (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", &(appInfo->udpConnType));
 
+    int code = CODE_EXCHANGE_UDP_INFO;
+    (void)GetJsonObjectNumberItem(msg, "CODE", &code);
+    if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
+        appInfo->fileProtocal = APP_INFO_UDP_FILE_PROTOCAL;
+    }
+
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
@@ -142,7 +178,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     }
     (void)AddStringToJsonObject(msg, "SESSION_KEY", encodeSessionKey);
 
-    (void)AddNumberToJsonObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    (void)AddNumberToJsonObject(msg, "CODE", getCodeType(appInfo));
     (void)AddNumberToJsonObject(msg, "API_VERSION", appInfo->myData.apiVersion);
     (void)AddNumberToJsonObject(msg, "UID", appInfo->myData.uid);
     (void)AddNumberToJsonObject(msg, "PID", appInfo->myData.pid);
@@ -180,7 +216,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
             return SOFTBUS_ERR;
     }
 
-    (void)AddNumberToJsonObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    (void)AddNumberToJsonObject(msg, "CODE", getCodeType(appInfo));
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
     (void)AddNumberToJsonObject(msg, "UID", appInfo->myData.uid);
     (void)AddNumberToJsonObject(msg, "PID", appInfo->myData.pid);
