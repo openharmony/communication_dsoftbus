@@ -14,9 +14,13 @@
  */
 
 #include "stopdiscovery_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+
 #include "discovery_service.h"
+#include "softbus_adapter_mem.h"
 
 namespace OHOS {
 static int g_subscribeId = 0;
@@ -49,7 +53,17 @@ void StopDiscoveryTest(const uint8_t* data, size_t size)
         return;
     }
 
-    StopDiscovery((const char*)data, testInfo.subscribeId);
+    // add trailing '\0'
+    uint8_t *pkgName = (uint8_t *)SoftBusCalloc((size + 1) * sizeof(uint8_t));
+    if (pkgName == nullptr) {
+        return;
+    }
+    if (memcpy_s(pkgName, size + 1, data, size) != EOK) {
+        SoftBusFree(pkgName);
+        return;
+    }
+    StopDiscovery((const char*)pkgName, testInfo.subscribeId);
+    SoftBusFree(pkgName);
 }
 } // namespace OHOS
 

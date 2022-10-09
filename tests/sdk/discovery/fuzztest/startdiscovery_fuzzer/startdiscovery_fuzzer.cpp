@@ -14,9 +14,13 @@
  */
 
 #include "startdiscovery_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+
 #include "discovery_service.h"
+#include "softbus_adapter_mem.h"
 
 namespace OHOS {
 static int g_subscribeId = 0;
@@ -64,7 +68,17 @@ void StartDiscoveryTest(const uint8_t* data, size_t size)
         return;
     }
 
-    StartDiscovery((const char*)data, &testInfo, &g_subscribeCb);
+    // add trailing '\0'
+    uint8_t *pkgName = (uint8_t *)SoftBusCalloc((size + 1) * sizeof(uint8_t));
+    if (pkgName == nullptr) {
+        return;
+    }
+    if (memcpy_s(pkgName, size + 1, data, size) != EOK) {
+        SoftBusFree(pkgName);
+        return;
+    }
+    StartDiscovery((const char*)pkgName, &testInfo, &g_subscribeCb);
+    SoftBusFree(pkgName);
 }
 } // namespace OHOS
 
