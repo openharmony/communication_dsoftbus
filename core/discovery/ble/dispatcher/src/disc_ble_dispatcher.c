@@ -35,7 +35,7 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
     return NULL;
 }
 
-static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode, InterfaceFuncType type) 
+static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode, InterfaceFuncType type)
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
@@ -51,7 +51,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
     }
 }
 
-static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode, InterfaceFuncType type) 
+static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode, InterfaceFuncType type)
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
@@ -107,14 +107,14 @@ static int32_t BleDispatchStopPassiveDiscovery(const SubscribeOption *option)
     return BleDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-static void BleDispatchLinkStatusChanged(LinkStatus status) 
+static void BleDispatchLinkStatusChanged(LinkStatus status)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         g_dispatchers[i]->mediumInterface->LinkStatusChanged(status);
     }
 }
 
-static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type) 
+static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         g_dispatchers[i]->mediumInterface->UpdateLocalDeviceInfo(type);
@@ -136,7 +136,7 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
 
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
-    if ( discInnerCb == NULL) {
+    if (discInnerCb == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "discInnerCb err");
         return NULL;
     }
@@ -146,18 +146,18 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     if (softbusInterface == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscSoftbusBleInit err");
         return NULL;
-    } 
+    }
     g_dispatchers[g_dispatcherSize++] = softbusInterface;
     
     DiscoveryBleDispatcherInterface *shareInterface = DiscShareBleInit(discInnerCb);
     if (shareInterface == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscShareBleInit err");
         return NULL;
-    } 
+    }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
     
     return &g_discBleFrameFuncInterface;
-}  
+}
 
 DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b)
 {

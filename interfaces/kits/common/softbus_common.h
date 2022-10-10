@@ -284,7 +284,7 @@ typedef enum {
     /** Distributed middleware */
     DDMP_CAPABILITY_BITMAP,
     /** Osd capability */
-    OSD_CAPABILITY_BITMAP
+    OSD_CAPABILITY_BITMAP,
     /**Share capability */
     SHARE_CAPABILITY_BITMAP
 } DataBitMap;
