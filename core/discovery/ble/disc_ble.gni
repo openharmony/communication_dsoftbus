@@ -49,5 +49,4 @@ if (enhanced) {
     ble_discovery_src += [
       "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
     ]
-    D:\workspace\communication_dsoftbus_3\core\discovery\ble\share_ble\src\disc_share_ble_virtual.c
 }
