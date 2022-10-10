@@ -66,8 +66,8 @@ static void LinkStatusChanged(LinkStatus status)
 }
 
 static void UpdateLocalDeviceInfo(InfoTypeChanged type)
-{ 
-    return;  
+{
+    return;
 }
 
 static bool IsConcern(uint32_t capability)

@@ -166,7 +166,7 @@ static DiscBleListener g_bleListener = {
 };
 
 //g_conncernCapabilityMask support capability of this ble discovery
-static uint32_t g_concernCapabilityMask = 
+static uint32_t g_concernCapabilityMask =
     1 << HICALL_CAPABILITY_BITMAP |
     1 << PROFILE_CAPABILITY_BITMAP |
     1 << HOMEVISIONPIC_CAPABILITY_BITMAP |
@@ -1207,7 +1207,7 @@ static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_PASSIVE, STOP_DISCOVERY, (void *)option);
 }
 
-static bool BleIsConcern (uint32_t capability)
+static bool BleIsConcern(uint32_t capability)
 {
     return (capability & g_concernCapabilityMask) != 0;
 }
@@ -1676,7 +1676,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
     filter->serviceDataMask[0] = BYTE_MASK;
     filter->serviceDataMask[1] = BYTE_MASK;
     filter->serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
-    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;      
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;    
     if (SoftBusSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set scan filter fail");
         DiscFreeBleScanFilter(&filter);

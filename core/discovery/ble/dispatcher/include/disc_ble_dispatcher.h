@@ -37,6 +37,6 @@ void DiscBleDeinit(void);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif /* __cplusplus */ 
+#endif /* __cplusplus */
 #endif /* __cplusplus */
 #endif /* DISC_BLE_DISPATCHER_H */

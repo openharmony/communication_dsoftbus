@@ -46,6 +46,8 @@ typedef struct {
     int32_t unsubscribeCntB;
 } InterfaceFunCntB;
 
+#define IS_CONCERNA 1; 
+#define IS_CONCERNA 2;
 InterfaceFunCntA g_interfaceFunCntA = {
     .publishCntA = 0,
     .startScanCntA = 0,
@@ -71,7 +73,7 @@ InterfaceFunCntB g_interfaceFunCntB = {
 };
 static bool IsConcernA(uint32_t capability)
 {
-    if (capability == 1) {
+    if (capability == IS_CONCERNA) {
         return true;
     }
     return false;
@@ -79,7 +81,7 @@ static bool IsConcernA(uint32_t capability)
 
 static bool IsConcernB(uint32_t capability)
 {
-    if (capability == 2) {
+    if (capability == IS_CONCERNB) {
         return true;
     }
     return false;
@@ -307,24 +309,16 @@ public:
 };
 
 void DiscoveryBleDispatcherTest::SetUpTestCase(void)
-{
-    
-}
+{}
 
 void DiscoveryBleDispatcherTest::TearDownTestCase(void)
-{
-    
-}
+{}
 
 void DiscoveryBleDispatcherTest::SetUp(void)
-{
-
-}
+{}
 
 void DiscoveryBleDispatcherTest::TearDown(void)
-{
-
-}
+{}
 
 /*
 * @tc.name: testDiscDispatcher001
