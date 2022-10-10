@@ -505,7 +505,7 @@ void DestroyLooper(SoftBusLooper *looper)
 
 int LooperInit(void)
 {
-    SoftBusLooper *looper = CreateNewLooper("Loop-default");
+    SoftBusLooper *looper = CreateNewLooper("BusCenter");
     if (!looper) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init looper fail.");
         return -1;
