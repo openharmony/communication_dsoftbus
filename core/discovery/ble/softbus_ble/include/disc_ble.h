@@ -37,4 +37,4 @@ int BleTest(int argc, const char **argv);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* DISC_BLE_H */
