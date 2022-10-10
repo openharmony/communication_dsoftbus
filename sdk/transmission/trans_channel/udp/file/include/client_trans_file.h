@@ -23,6 +23,21 @@
 extern "C" {
 #endif
 
+#define SCHEMASEPARATORLENGTH 2
+#define SCHEMA_MAX_LENGTH 32
+
+typedef struct {
+    const char name[SCHEMA_MAX_LENGTH];
+    int (*OpenFd)(const char *filename, int32_t flag, int32_t mode);
+    int (*CloseFd)(int32_t fd);
+}FileSchema;
+
+typedef struct {
+    ListNode node;
+    char mySessionName[SESSION_NAME_SIZE_MAX];
+    FileSchema schema;
+}FileSchemaListener;
+
 void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort);
@@ -30,6 +45,14 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
 void TransCloseFileChannel(int32_t dfileId);
 
 int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+
+int32_t TransFileSchemaInit(void);
+
+void TransFileSchemaDeinit(void);
+
+int32_t CheckFileSchema(int32_t sessionId, FileSchemaListener *fileSchemaListener);
+
+int32_t SetSchemaCallback(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt);
 #ifdef __cplusplus
 }
 #endif
