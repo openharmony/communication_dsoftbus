@@ -118,6 +118,20 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     return SOFTBUS_OK;
 }
 
+int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSetNodeDataChangeFlag g_serverProxy is nullptr!\n");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->SetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSetNodeDataChangeFlag get node key info failed!\n");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     if (g_serverProxy == nullptr) {

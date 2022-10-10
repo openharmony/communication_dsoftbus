@@ -274,6 +274,34 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     return SOFTBUS_OK;
 }
 
+int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are nullptr!");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSetNodeDataChangeFlag g_serverProxy is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&request, pkgName);
+    WriteString(&request, networkId);
+    WriteInt16(&request, dataChangeFlag);
+    Reply reply = {0};
+    reply.id = GET_NODE_KEY_INFO;
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag invoke failed[%d].", ans);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join Lnn ipc client push.");

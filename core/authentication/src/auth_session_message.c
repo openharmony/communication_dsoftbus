@@ -63,6 +63,7 @@
 #define P2P_ROLE "P2P_ROLE"
 #define TRANSPORT_PROTOCOL "TRANSPORT_PROTOCOL"
 #define BLE_OFFLINE_CODE "OFFLINE_CODE"
+#define DATA_CHANGE_FLAG "NODE_DATA_CHANGE_FLAG"
 #define BUS_V1 1
 #define BUS_V2 2
 
@@ -186,6 +187,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         !AddStringToJsonObject(json, VERSION_TYPE, info->versionType) ||
         !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity) ||
         !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
+        !AddNumberToJsonObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !AddBoolToJsonObject(json, BLE_P2P, info->isBleP2p) ||
         !AddStringToJsonObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
         !AddNumber64ToJsonObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))  ||
@@ -226,6 +228,7 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     char getOfflineCodeResult[OFFLINE_CODE_LEN] = {0};
     (void)GetJsonObjectBoolItem(json, BLE_P2P, &info->isBleP2p);
     (void)GetJsonObjectNumberItem(json, P2P_ROLE, &info->p2pInfo.p2pRole);
+    (void)GetJsonObjectNumber16Item(json, DATA_CHANGE_FLAG, &info->dataChangeFlag);
     (void)GetJsonObjectStringItem(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN);
     (void)GetJsonObjectStringItem(json, BLE_OFFLINE_CODE, getOfflineCodeResult, OFFLINE_CODE_LEN);
     int32_t ret = ConvertHexStringToBytes(info->offlineCode, OFFLINE_CODE_BYTE_SIZE,

@@ -82,6 +82,20 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
     return true;
 }
 
+bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target)
+{
+    if (json == NULL || string == NULL || target == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
+        return false;
+    }
+    *target = (uint16_t)item->valuedouble;
+    return true;
+}
+
 bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {

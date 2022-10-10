@@ -96,6 +96,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
+        case NODE_KEY_DATA_CHANGE_FLAG:
+            return LnnGetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
@@ -125,6 +127,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
+        case NODE_KEY_DATA_CHANGE_FLAG:
+            return LnnGetRemoteNum16Info(networkId, NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
@@ -153,6 +157,28 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     }
 }
 
+int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
+{
+    bool isLocalNetworkId = false;
+    char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id fail");
+        return SOFTBUS_ERR;
+    }
+    if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
+        isLocalNetworkId = true;
+    }
+    if (isLocalNetworkId) {
+        return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, dataChangeFlag);
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote networkId");
+    return SOFTBUS_ERR;
+}
+
 int32_t LnnGetNodeKeyInfoLen(int32_t key)
 {
     switch (key) {
@@ -169,9 +195,11 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
         case NODE_KEY_DEV_NAME:
             return DEVICE_NAME_BUF_LEN;
         case NODE_KEY_NETWORK_CAPABILITY:
-            return NUM_BUF_SIZE;
+            return LNN_COMMON_LEN;
         case NODE_KEY_NETWORK_TYPE:
-            return NUM_BUF_SIZE;
+            return LNN_COMMON_LEN;
+        case NODE_KEY_DATA_CHANGE_FLAG:
+            return DATA_CHANGE_FLAG_BUF_LEN;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
@@ -247,7 +275,7 @@ int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_CAPABILITY;
     int32_t netCapacity = 0;
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, NUM_BUF_SIZE) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, LNN_COMMON_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netCapacity failed!");
         return SOFTBUS_ERR;
     }
@@ -260,7 +288,7 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_TYPE;
     int32_t netType = 0;
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, NUM_BUF_SIZE) != 0) {
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, LNN_COMMON_LEN) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netType failed!");
         return SOFTBUS_ERR;
     }
