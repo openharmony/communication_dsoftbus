@@ -46,8 +46,8 @@ typedef struct {
     int32_t unsubscribeCntB;
 } InterfaceFunCntB;
 
-#define IS_CONCERNA 1; 
-#define IS_CONCERNA 2;
+#define IS_CONCERNA 1
+#define IS_CONCERNB 2
 InterfaceFunCntA g_interfaceFunCntA = {
     .publishCntA = 0,
     .startScanCntA = 0,
@@ -92,7 +92,7 @@ static int32_t PublishA(const PublishOption *option)
     if (IsConcernA(option->capabilityBitmap[0])) {
         g_interfaceFunCntA.publishCntA = 1;
         return SOFTBUS_OK;
-    } 
+    }
     return SOFTBUS_ERR;
 }
 
@@ -101,7 +101,7 @@ static int32_t StartScanA(const PublishOption *option)
     if (IsConcernA(option->capabilityBitmap[0])) {
         g_interfaceFunCntA.startScanCntA = 1;
         return SOFTBUS_OK;
-    } 
+    }
     return SOFTBUS_ERR;
 }
 
@@ -150,7 +150,7 @@ static int32_t UnsubscribeA(const SubscribeOption *option)
     return SOFTBUS_ERR;
 }
 
-static int32_t StopAdvertiseA (const SubscribeOption *option)
+static int32_t StopAdvertiseA(const SubscribeOption *option)
 {
     if (IsConcernA(option->capabilityBitmap[0])) {
         g_interfaceFunCntA.stopAdvertiseCntA = 1;
@@ -160,13 +160,13 @@ static int32_t StopAdvertiseA (const SubscribeOption *option)
 }
 
 static void LinkStatusChangedA(LinkStatus status)
-{    
-    g_interfaceFunCntA.linkStatusChangedCntA = 1;  
+{
+    g_interfaceFunCntA.linkStatusChangedCntA = 1;
 }
 
 static void UpdateLocalDeviceInfoA(InfoTypeChanged type)
-{ 
-    g_interfaceFunCntA.updateLocalDeviceInfoCntA = 1;  
+{
+    g_interfaceFunCntA.updateLocalDeviceInfoCntA = 1;
 }
 
 static int32_t PublishB(const PublishOption *option)
@@ -244,9 +244,9 @@ static int32_t StopAdvertiseB(const SubscribeOption *option)
 static PublishOption g_pOption1 = {
     .freq = 1,
     .capabilityBitmap = {1},
-    .capabilityData = NULL, 
+    .capabilityData = NULL,
     .dataLen = 0,
-    .ranging = true       
+    .ranging = true     
 };
 
 static SubscribeOption g_sOption1 = {
@@ -261,9 +261,9 @@ static SubscribeOption g_sOption1 = {
 static PublishOption g_pOption2 = {
     .freq = 1,
     .capabilityBitmap = {2},
-    .capabilityData = NULL, 
+    .capabilityData = NULL,
     .dataLen = 0,
-    .ranging = true 
+    .ranging = true
 };
 
 static SubscribeOption g_sOption2 = {
@@ -278,7 +278,7 @@ static SubscribeOption g_sOption2 = {
 static PublishOption g_pOption3 = {
     .freq = 1,
     .capabilityBitmap = {3},
-    .capabilityData = NULL, 
+    .capabilityData = NULL,
     .dataLen = 0,
     .ranging = true
 };
@@ -308,6 +308,42 @@ public:
     void TearDown();
 };
 
+static DiscoveryFuncInterface funA = {
+    .Publish = PublishA,
+    .StartScan = StartScanA,
+    .Unpublish = UnpublishA,
+    .StopScan = StopScanA,
+    .StartAdvertise = StartAdvertiseA,
+    .Subscribe = SubscribeA,
+    .Unsubscribe = UnsubscribeA,
+    .StopAdvertise = StopAdvertiseA,
+    .LinkStatusChanged = LinkStatusChangedA,
+    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
+};
+
+static DiscoveryBleDispatcherInterface a = {
+    .IsConcern = IsConcernA,
+    .mediumInterface = &funA,
+};
+
+static DiscoveryFuncInterface funB = {
+    .Publish = PublishB,
+    .StartScan = StartScanB,
+    .Unpublish = UnpublishB,
+    .StopScan = StopScanB,
+    .StartAdvertise = StartAdvertiseB,
+    .Subscribe = SubscribeB,
+    .Unsubscribe = UnsubscribeB,
+    .StopAdvertise = StopAdvertiseB,
+    .LinkStatusChanged = LinkStatusChangedA,
+    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
+};
+
+static DiscoveryBleDispatcherInterface b = {
+    .IsConcern = IsConcernB,
+    .mediumInterface = &funB,
+};
+
 void DiscoveryBleDispatcherTest::SetUpTestCase(void)
 {}
 
@@ -321,46 +357,14 @@ void DiscoveryBleDispatcherTest::TearDown(void)
 {}
 
 /*
-* @tc.name: testDiscDispatcher001
+* @tc.name: testDiscPublish001
 * @tc.desc: test dispatcher
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher001, TestSize.Level1)
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 {
-    printf("testDiscDispatcher001\r\n");
-    DiscoveryFuncInterface FunA = {
-        .Publish = PublishA,
-        .StartScan = StartScanA,
-        .Unpublish = UnpublishA,
-        .StopScan = StopScanA,
-        .StartAdvertise = StartAdvertiseA,
-        .Subscribe = SubscribeA,
-        .Unsubscribe = UnsubscribeA,
-        .StopAdvertise = StopAdvertiseA,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface a = {
-        .IsConcern = IsConcernA,
-        .mediumInterface = &FunA,
-    };
-    DiscoveryFuncInterface FunB = {
-        .Publish = PublishB,
-        .StartScan = StartScanB,
-        .Unpublish = UnpublishB,
-        .StopScan = StopScanB,
-        .StartAdvertise = StartAdvertiseB,
-        .Subscribe = SubscribeB,
-        .Unsubscribe = UnsubscribeB,
-        .StopAdvertise = StopAdvertiseB,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface b = {
-        .IsConcern = IsConcernB,
-        .mediumInterface = &FunB,
-    };
+    printf("testDiscPublish001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
     int ret;
     int32_t beforeFunCntA;
@@ -403,6 +407,23 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
+};
+
+/*
+* @tc.name: testDiscovery001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
+{
+    printf("testDiscovery001\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
     beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
@@ -452,49 +473,16 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher001, TestSize.Level1)
     EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
 };
+
 /*
-* @tc.name: testDiscDispatcher002
+* @tc.name: testDiscPublish002
 * @tc.desc: test dispatcher
 * @tc.type: FUNC
 * @tc.require:
 */
-
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher002, TestSize.Level1)
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 {
-    printf("testDiscDispatcher002\r\n");
-    DiscoveryFuncInterface FunA = {
-        .Publish = PublishA,
-        .StartScan = StartScanA,
-        .Unpublish = UnpublishA,
-        .StopScan = StopScanA,
-        .StartAdvertise = StartAdvertiseA,
-        .Subscribe = SubscribeA,
-        .Unsubscribe = UnsubscribeA,
-        .StopAdvertise = StopAdvertiseA,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface a = {
-        .IsConcern = IsConcernA,
-        .mediumInterface = &FunA,
-    };
-    DiscoveryFuncInterface FunB = {
-        .Publish = PublishB,
-        .StartScan = StartScanB,
-        .Unpublish = UnpublishB,
-        .StopScan = StopScanB,
-        .StartAdvertise = StartAdvertiseB,
-        .Subscribe = SubscribeB,
-        .Unsubscribe = UnsubscribeB,
-        .StopAdvertise = StopAdvertiseB,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface b = {
-        .IsConcern = IsConcernB,
-        .mediumInterface = &FunB,
-    };
-
+    printf("testDiscPublish002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
     int ret;
     int32_t beforeFunCntA;
@@ -537,6 +525,23 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+};
+
+/*
+* @tc.name: testDiscovery002
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
+{
+    printf("testDiscovery002\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
     beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
@@ -588,50 +593,16 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher002, TestSize.Level1)
 };
 
 /*
-* @tc.name: testDiscDispatcher003
+* @tc.name: testDiscPublish003
 * @tc.desc: test dispatcher
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher003, TestSize.Level1)
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 {
     printf("testDiscDispatcher003\r\n");
-    DiscoveryFuncInterface FunA = {
-        .Publish = PublishA,
-        .StartScan = StartScanA,
-        .Unpublish = UnpublishA,
-        .StopScan = StopScanA,
-        .StartAdvertise = StartAdvertiseA,
-        .Subscribe = SubscribeA,
-        .Unsubscribe = UnsubscribeA,
-        .StopAdvertise = StopAdvertiseA,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface a = {
-        .IsConcern = IsConcernA,
-        .mediumInterface = &FunA,
-    };
-    DiscoveryFuncInterface FunB = {
-        .Publish = PublishB,
-        .StartScan = StartScanB,
-        .Unpublish = UnpublishB,
-        .StopScan = StopScanB,
-        .StartAdvertise = StartAdvertiseB,
-        .Subscribe = SubscribeB,
-        .Unsubscribe = UnsubscribeB,
-        .StopAdvertise = StopAdvertiseB,
-        .LinkStatusChanged = LinkStatusChangedA,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
-    };
-    DiscoveryBleDispatcherInterface b = {
-        .IsConcern = IsConcernB,
-        .mediumInterface = &FunB,
-    };
-
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
     int ret;
-    
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
     int32_t afterFunCntA;
@@ -699,7 +670,23 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscDispatcher003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
+};
 
+/*
+* @tc.name: testDiscovery003
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
+{
+    printf("testDiscovery003\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
     beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     ret = interface->StopAdvertise(&g_sOption3);
