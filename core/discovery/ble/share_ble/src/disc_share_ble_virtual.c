@@ -15,6 +15,10 @@
 
 #include "disc_share_ble.h"
 #include "stddef.h"
+#include "softbus_errcode.h"
+#include "disc_manager.h"
+#include "disc_ble.h"
+#include "disc_ble_dispatcher.h"
 
 static int32_t Publish(const PublishOption *option)
 {
@@ -91,7 +95,7 @@ DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb
         .IsConcern = IsConcern,
         .mediumInterface = &Fun,
     };
-    return sharebleInterface;
+    return &sharebleInterface;
 }
 
 void DiscShareBleDeinit(void)
