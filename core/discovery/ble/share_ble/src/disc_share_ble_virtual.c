@@ -61,8 +61,8 @@ static int32_t StopAdvertise(const SubscribeOption *option)
 }
 
 static void LinkStatusChanged(LinkStatus status)
-{    
-    return;  
+{
+    return;
 }
 
 static void UpdateLocalDeviceInfo(InfoTypeChanged type)
