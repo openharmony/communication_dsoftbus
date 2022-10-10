@@ -406,6 +406,8 @@ static void WrapperAdvEnableCallback(int advId, int status)
             advChannel->advCallback->AdvEnableCallback == NULL) {
             continue;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperAdvEnableCallback, inner-advId: %d, bt-advId: %d, "
+            "status: %d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = true;
             SoftBusCondSignal(&advChannel->cond);
@@ -426,6 +428,8 @@ static void WrapperAdvDisableCallback(int advId, int status)
             advChannel->advCallback->AdvDisableCallback == NULL) {
             continue;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperAdvDisableCallback, inner-advId: %d, bt-advId: %d, "
+            "status: %d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->advId = -1;
             advChannel->isAdvertising = false;
@@ -447,6 +451,8 @@ static void WrapperAdvDataCallback(int advId, int status)
             advChannel->advCallback->AdvDataCallback == NULL) {
             continue;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperAdvDataCallback, inner-advId: %d, bt-advId: %d, "
+            "status: %d", index, advId, st);
         advChannel->advCallback->AdvDataCallback(index, st);
         break;
     }
@@ -463,6 +469,8 @@ static void WrapperAdvUpdateCallback(int advId, int status)
             advChannel->advCallback->AdvUpdateCallback == NULL) {
             continue;
         }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperAdvUpdateCallback, inner-advId: %d, bt-advId: %d, "
+            "status: %d", index, advId, st);
         advChannel->advCallback->AdvUpdateCallback(index, st);
         break;
     }
@@ -679,6 +687,7 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
         return SOFTBUS_ERR;
     }
     if (g_advChannel[advId].isAdvertising) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "SoftBusStartAdv, wait condition inner-advId: %d", advId);
         SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, NULL);
     }
     int innerAdvId;
@@ -687,6 +696,8 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
     ConvertAdvParam(param, &dstParam);
     ConvertAdvData(&g_advChannel[advId].advData, &advData);
     int ret = BleStartAdvEx(&innerAdvId, advData, dstParam);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleStartAdvEx, inner-advId: %d, bt-advId: %d, "
+        "ret: %d", advId, innerAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
@@ -708,9 +719,13 @@ int SoftBusStopAdv(int advId)
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "SoftBusStopAdv, wait condition inner-advId: %d, "
+            "bt-advId: %d", advId, g_advChannel[advId].advId);
         SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, NULL);
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusStopAdv, inner-advId: %d, "
+        "bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
