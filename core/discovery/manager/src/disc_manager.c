@@ -15,7 +15,7 @@
 
 #include "disc_manager.h"
 #include "common_list.h"
-#include "disc_ble.h"
+#include "disc_ble_dispatcher.h"
 #include "disc_coap.h"
 #include "securec.h"
 #include "softbus.h"
@@ -46,13 +46,6 @@ typedef enum {
     SUBSCRIBE_INNER_SERVICE = 3,
     MAX_SERVICE = SUBSCRIBE_INNER_SERVICE,
 } ServiceType;
-
-typedef enum {
-    PUBLISH_FUNC = 0,
-    UNPUBLISH_FUNC = 1,
-    STARTDISCOVERTY_FUNC = 2,
-    STOPDISCOVERY_FUNC = 3
-} InterfaceFuncType;
 
 typedef union {
     PublishOption publishOption;
