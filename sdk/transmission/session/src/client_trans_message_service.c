@@ -16,6 +16,8 @@
 #include "client_trans_message_service.h"
 
 #include "client_trans_channel_manager.h"
+#include "client_trans_file.h"
+#include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -109,6 +111,13 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         return SOFTBUS_INVALID_PARAM;
     }
 
+    FileSchemaListener fileSchemaListener = {0};
+    if (CheckFileSchema(sessionId, &fileSchemaListener) == SOFTBUS_OK) {
+        if (SetSchemaCallback(fileSchemaListener.schema, sFileList, fileCnt) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set schema callback failed");
+            return SOFTBUS_ERR;
+        }
+    }
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;

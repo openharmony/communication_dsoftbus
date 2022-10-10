@@ -435,6 +435,7 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     g_sessionCb = callback;
     RegisterStreamCb(&g_udpChannelCb);
     TransFileInit();
+    TransFileSchemaInit();
     RegisterFileCb(&g_udpChannelCb);
     g_udpChannelMgr = CreateSoftBusList();
     if (g_udpChannelMgr == NULL) {
