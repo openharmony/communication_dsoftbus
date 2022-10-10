@@ -1676,7 +1676,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
     filter->serviceDataMask[0] = BYTE_MASK;
     filter->serviceDataMask[1] = BYTE_MASK;
     filter->serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
-    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;    
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;
     if (SoftBusSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "set scan filter fail");
         DiscFreeBleScanFilter(&filter);

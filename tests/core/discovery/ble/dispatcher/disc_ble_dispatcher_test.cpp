@@ -110,7 +110,7 @@ static int32_t UnpublishA(const PublishOption *option)
     if (IsConcernA(option->capabilityBitmap[0])) {
         g_interfaceFunCntA.unpublishCntA = 1;
         return SOFTBUS_OK;
-    } 
+    }
     return SOFTBUS_ERR;
 }
 
@@ -246,7 +246,7 @@ static PublishOption g_pOption1 = {
     .capabilityBitmap = {1},
     .capabilityData = NULL,
     .dataLen = 0,
-    .ranging = true     
+    .ranging = true
 };
 
 static SubscribeOption g_sOption1 = {
@@ -292,10 +292,8 @@ static SubscribeOption g_sOption3 = {
     .dataLen = 0
 };
 
-static LinkStatus status1 = LINK_STATUS_UP;
-static LinkStatus status2 = LINK_STATUS_DOWN;
-static InfoTypeChanged type1 = TYPE_NAME;
-static InfoTypeChanged type2 = TYPE_ACCOUNT;
+static LinkStatus status = LINK_STATUS_UP;
+static InfoTypeChanged type = TYPE_NAME;
 class DiscoveryBleDispatcherTest : public testing::Test {
 public:
     DiscoveryBleDispatcherTest()
@@ -460,18 +458,6 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
-
-    beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    interface->LinkStatusChanged(status1);
-    afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
-
-    beforeFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    interface->UpdateLocalDeviceInfo(type1);
-    afterFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
 };
 
 /*
@@ -578,18 +564,6 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
-
-    beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    interface->LinkStatusChanged(status2);
-    afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
-
-    beforeFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    interface->UpdateLocalDeviceInfo(type2);
-    afterFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
 };
 
 /*
@@ -643,6 +617,23 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
+};
+
+/*
+* @tc.name: testDiscovery003
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
+{
+    printf("testDiscovery003\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
     beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
@@ -670,23 +661,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
-};
 
-/*
-* @tc.name: testDiscovery003
-* @tc.desc: test dispatcher
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
-{
-    printf("testDiscovery003\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
-    int ret;
-    int32_t beforeFunCntA;
-    int32_t beforeFunCntB;
-    int32_t afterFunCntA;
-    int32_t afterFunCntB;
     beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     ret = interface->StopAdvertise(&g_sOption3);
@@ -695,17 +670,41 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
+};
 
+/*
+* @tc.name: testLinkStatusChanged001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
+{
+    printf("testLinkStatusChanged001\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int32_t beforeFunCntA;
+    int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    interface->LinkStatusChanged(status2);
+    interface->LinkStatusChanged(status);
     afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB, afterFunCntB);
+    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+};
 
+/*
+* @tc.name: testUpdateLocalDeviceInfo001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
+{
+    printf("testUpdateLocalDeviceInfo001\r\n");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int32_t beforeFunCntA;
+    int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    interface->UpdateLocalDeviceInfo(type2);
+    interface->UpdateLocalDeviceInfo(type);
     afterFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB, afterFunCntB);
+    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
 };
 }
