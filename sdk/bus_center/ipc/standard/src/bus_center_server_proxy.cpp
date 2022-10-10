@@ -132,6 +132,20 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
     return SOFTBUS_OK;
 }
 
+int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, unsigned int addrTypeLen)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinMetaNode g_serverProxy is nullptr!\n");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->JoinMetaNode(pkgName, addr, dataKey, addrTypeLen);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinMetaNode failed!\n");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     if (g_serverProxy == nullptr) {
@@ -141,6 +155,20 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     int ret = g_serverProxy->LeaveLNN(pkgName, networkId);
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN failed!\n");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
+{
+    if (g_serverProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveMetaNode g_serverProxy is nullptr!\n");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->LeaveMetaNode(pkgName, networkId);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveMetaNode failed!\n");
         return ret;
     }
     return SOFTBUS_OK;

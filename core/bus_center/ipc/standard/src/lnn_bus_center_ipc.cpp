@@ -45,7 +45,9 @@ struct LeaveLnnRequestInfo {
 
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
+static std::vector<JoinLnnRequestInfo *> g_joinMetaNodeRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
+static std::vector<LeaveLnnRequestInfo *> g_leaveMetaNodeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
@@ -58,6 +60,20 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
 {
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end(); ++iter) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            continue;
+        }
+        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsRepeatJoinMetaNodeRequest(const char *pkgName, const ConnectionAddr *addr)
+{
+    std::vector<JoinLnnRequestInfo *>::iterator iter;
+    for (iter = g_joinMetaNodeRequestInfo.begin(); iter != g_joinMetaNodeRequestInfo.end(); ++iter) {
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
             continue;
         }
@@ -84,10 +100,40 @@ static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
+static int32_t AddJoinMetaNodeInfo(const char *pkgName, const ConnectionAddr *addr)
+{
+    JoinLnnRequestInfo *info = new (std::nothrow) JoinLnnRequestInfo();
+    if (info == nullptr) {
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    info->addr = *addr;
+    g_joinMetaNodeRequestInfo.push_back(info);
+    return SOFTBUS_OK;
+}
+
 static bool IsRepeatLeaveLNNRequest(const char *pkgName, const char *networkId)
 {
     std::vector<LeaveLnnRequestInfo *>::iterator iter;
     for (iter = g_leaveLNNRequestInfo.begin(); iter != g_leaveLNNRequestInfo.end(); ++iter) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            continue;
+        }
+        if (strncmp(networkId, (*iter)->networkId, strlen(networkId)) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsRepeatLeaveMetaNodeRequest(const char *pkgName, const char *networkId)
+{
+    std::vector<LeaveLnnRequestInfo *>::iterator iter;
+    for (iter = g_leaveMetaNodeRequestInfo.begin(); iter != g_leaveMetaNodeRequestInfo.end(); ++iter) {
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
             continue;
         }
@@ -115,6 +161,26 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
         return SOFTBUS_MEM_ERR;
     }
     g_leaveLNNRequestInfo.push_back(info);
+    return SOFTBUS_OK;
+}
+
+static int32_t AddLeaveMetaNodeInfo(const char *pkgName, const char *networkId)
+{
+    LeaveLnnRequestInfo *info = new (std::nothrow) LeaveLnnRequestInfo();
+    if (info == nullptr) {
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    g_leaveMetaNodeRequestInfo.push_back(info);
     return SOFTBUS_OK;
 }
 
@@ -151,6 +217,27 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
     return ret;
 }
 
+int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+{
+    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+
+    (void)addrTypeLen;
+    if (pkgName == nullptr || connAddr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    if (IsRepeatJoinMetaNodeRequest(pkgName, connAddr)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
+        return SOFTBUS_ALREADY_EXISTED;
+    }
+    int32_t ret = MetaNodeServerJoin(connAddr, dataKey);
+    if (ret == SOFTBUS_OK) {
+        ret = AddJoinMetaNodeInfo(pkgName, connAddr);
+    }
+    return ret;
+}
+
 int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
@@ -165,6 +252,24 @@ int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
     int32_t ret = LnnServerLeave(networkId);
     if (ret == SOFTBUS_OK) {
         ret = AddLeaveLNNInfo(pkgName, networkId);
+    }
+    return ret;
+}
+
+int32_t MetaNodeIpcServerLeave(const char *pkgName, const char *networkId)
+{
+    if (pkgName == nullptr || networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    if (IsRepeatLeaveMetaNodeRequest(pkgName, networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
+        return SOFTBUS_ALREADY_EXISTED;
+    }
+    int32_t ret = MetaNodeServerLeave(networkId);
+    if (ret == SOFTBUS_OK) {
+        ret = AddLeaveMetaNodeInfo(pkgName, networkId);
     }
     return ret;
 }
@@ -273,6 +378,26 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     return SOFTBUS_OK;
 }
 
+int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+{
+    if (addr == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<JoinLnnRequestInfo *>::iterator iter;
+    for (iter = g_joinMetaNodeRequestInfo.begin(); iter != g_joinMetaNodeRequestInfo.end();) {
+        if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr)) {
+            ++iter;
+            continue;
+        }
+        ClientOnJoinMetaNodeResult((*iter)->pkgName, addr, addrTypeLen, networkId, retCode);
+        delete *iter;
+        iter = g_joinMetaNodeRequestInfo.erase(iter);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == nullptr) {
@@ -288,6 +413,25 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
         ClientOnLeaveLNNResult((*iter)->pkgName, networkId, retCode);
         delete *iter;
         iter = g_leaveLNNRequestInfo.erase(iter);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+{
+    if (networkId == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<LeaveLnnRequestInfo *>::iterator iter;
+    for (iter = g_leaveMetaNodeRequestInfo.begin(); iter != g_leaveMetaNodeRequestInfo.end();) {
+        if (strncmp(networkId, (*iter)->networkId, strlen(networkId))) {
+            ++iter;
+            continue;
+        }
+        ClientOnLeaveMetaNodeResult((*iter)->pkgName, networkId, retCode);
+        delete *iter;
+        iter = g_leaveMetaNodeRequestInfo.erase(iter);
     }
     return SOFTBUS_OK;
 }

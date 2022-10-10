@@ -30,6 +30,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_fast_offline.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_network_info.h"
@@ -71,6 +72,8 @@ typedef enum {
     MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
+    MSG_TYPE_JOIN_METANODE,
+    MSG_TYPE_LEAVE_METANODE,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -88,6 +91,7 @@ typedef struct {
     /* connection fsm list */
     ListNode fsmList;
     ListNode pendingList;
+    ListNode metaNodeList;
     /* connection count */
     int32_t connCount;
 
@@ -128,6 +132,11 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     ConnectionAddrType addrType;
 } SpecificLeaveMsgPara;
+
+typedef struct {
+    ConnectionAddr addr;
+    CustomData dataKey;
+} ConnectionAddrKey;
 
 static NetBuilder g_netBuilder;
 
@@ -177,6 +186,30 @@ static LnnConnectionFsm *FindConnectionFsmByAddr(const ConnectionAddr *addr)
 
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         if (LnnIsSameConnectionAddr(addr, &item->connInfo.addr)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static MetaJoinRequestNode *FindMetaNodeByAddr(const ConnectionAddr *addr)
+{
+    MetaJoinRequestNode *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
+        if (LnnIsSameConnectionAddr(addr, &item->addr)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static MetaJoinRequestNode *FindMetaNodeByRequestId(uint32_t requestId)
+{
+    MetaJoinRequestNode *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
+        if (item->requestId == requestId) {
             return item;
         }
     }
@@ -372,6 +405,22 @@ static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFai
     return true;
 }
 
+static MetaJoinRequestNode *TryJoinRequestMetaNode(const ConnectionAddr *addr, bool needReportFailure)
+{
+    MetaJoinRequestNode *request = NULL;
+
+    request = SoftBusCalloc(sizeof(MetaJoinRequestNode));
+    if (request == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc MetaNode join request fail, go on it");
+        return NULL;
+    }
+    ListInit(&request->node);
+    request->addr = *addr;
+    request->needReportFailure = needReportFailure;
+    ListTailInsert(&g_netBuilder.metaNodeList, &request->node);
+    return request;
+}
+
 static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr, bool needReportFailure)
 {
     int32_t rc = SOFTBUS_OK;
@@ -397,6 +446,20 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
     if (rc == SOFTBUS_OK) {
         connFsm->connInfo.flag |=
             (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+    }
+    return rc;
+}
+
+static int32_t PostJoinRequestToMetaNode(MetaJoinRequestNode *metaJoinNode, const ConnectionAddr *addr,
+    CustomData *dataKey, bool needReportFailure)
+{
+    int32_t rc = SOFTBUS_OK;
+    if (OnJoinMetaNode(metaJoinNode, dataKey) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PostJoin Request To MetaNode failed");
+        rc = SOFTBUS_ERR;
+        if (needReportFailure) {
+            MetaNodeNotifyJoinResult((ConnectionAddr *)addr, NULL, SOFTBUS_ERR);
+        }
     }
     return rc;
 }
@@ -441,9 +504,39 @@ static int32_t TrySendJoinLNNRequest(const ConnectionAddr *addr, bool needReport
     return rc;
 }
 
+static int32_t TrySendJoinMetaNodeRequest(const ConnectionAddrKey *addrDataKey, bool needReportFailure)
+{
+    if (addrDataKey == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: addrDataKey is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const ConnectionAddr *addr = &addrDataKey->addr;
+    CustomData dataKey = addrDataKey->dataKey;
+    MetaJoinRequestNode *metaJoinNode = NULL;
+    int32_t rc;
+    metaJoinNode = FindMetaNodeByAddr(addr);
+    if (metaJoinNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TrySendJoinMetaNodeRequest not find metaJoinNode");
+        metaJoinNode = TryJoinRequestMetaNode(addr, needReportFailure);
+        if (metaJoinNode == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join request is pending");
+            SoftBusFree((void *)addrDataKey);
+            return SOFTBUS_ERR;
+        }
+    }
+    rc = PostJoinRequestToMetaNode(metaJoinNode, addr, &dataKey, needReportFailure);
+    SoftBusFree((void *)addrDataKey);
+    return rc;
+}
+
 static int32_t ProcessJoinLNNRequest(const void *para)
 {
     return TrySendJoinLNNRequest((const ConnectionAddr *)para, true);
+}
+
+static int32_t ProcessJoinMetaNodeRequest(const void *para)
+{
+    return TrySendJoinMetaNodeRequest((const ConnectionAddrKey *)para, true);
 }
 
 static int32_t ProcessDevDiscoveryRequest(const void *para)
@@ -794,6 +887,46 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
     return rc;
 }
 
+static void LeaveMetaInfoToLedger(const MetaJoinRequestNode *metaInfo, const char *networkId)
+{
+    NodeInfo *info = NULL;
+    const char *udid = NULL;
+    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        return;
+    }
+    udid = LnnGetDeviceUdid(info);
+    if (LnnDeleteMetaInfo(udid, metaInfo->addr.type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnDeleteMetaInfo error");
+    }
+}
+
+static int32_t ProcessLeaveMetaNodeRequest(const void *para)
+{
+    const char *networkId = (const char *)para;
+    MetaJoinRequestNode *item = NULL;
+    MetaJoinRequestNode *next = NULL;
+    int rc = SOFTBUS_ERR;
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
+        if (strcmp(networkId, item->networkId) != 0) {
+            continue;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ProcessLeaveMetaNodeRequest can find networkId");
+        AuthConnInfo authConn;
+        LnnConvertAddrToAuthConnInfo(&item->addr, &authConn);
+        LeaveMetaInfoToLedger(item, networkId);
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    MetaNodeNotifyLeaveResult(networkId, SOFTBUS_OK);
+    SoftBusFree((void *)networkId);
+    return rc;
+}
+
 static int32_t ProcessSyncOfflineFinish(const void *para)
 {
     const char *networkId = (const char *)para;
@@ -1112,6 +1245,8 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessLeaveInvalidConn,
     ProcessLeaveByAddrType,
     ProcessLeaveSpecific,
+    ProcessJoinMetaNodeRequest,
+    ProcessLeaveMetaNodeRequest,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -1346,6 +1481,83 @@ AuthVerifyCallback *LnnGetVerifyCallback(void)
     return &g_verifyCallback;
 }
 
+static int32_t FillNodeInfo(MetaJoinRequestNode *metaNode, NodeInfo *info)
+{
+    if (metaNode == NULL || info ==NULL) {
+        return SOFTBUS_ERR;
+    }
+    SoftBusSysTime times;
+    (void)SoftBusGetTime(&times);
+    info->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
+        (uint64_t)times.usec / HB_TIME_FACTOR;
+    info->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
+    info->authSeqNum = metaNode->authId;
+    info->authSeq[LnnConvAddrTypeToDiscType(metaNode->addr.type)] = metaNode->authId;
+    info->authChannelId[metaNode->addr.type] = (int32_t)metaNode->authId;
+    info->relation[metaNode->addr.type]++;
+    if (AuthGetDeviceUuid(metaNode->authId, info->uuid, sizeof(info->uuid)) != SOFTBUS_OK ||
+        info->uuid[0] == '\0') {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill uuid fail");
+        return SOFTBUS_ERR;
+    }
+    if (metaNode->addr.type == CONNECTION_ADDR_ETH || metaNode->addr.type == CONNECTION_ADDR_WLAN) {
+        if (strcpy_s(info->connectInfo.deviceIp, MAX_ADDR_LEN, metaNode->addr.info.ip.ip) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill deviceIp fail");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    info->metaInfo.metaDiscType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
+    info->metaInfo.isMetaNode = true;
+    return SOFTBUS_OK;
+}
+
+void OnAuthMetaVerifyPassed(uint32_t requestId, int64_t authMetaId, const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed noteinfo = NULL");
+        return;
+    }
+    int32_t ret = SOFTBUS_ERR;
+    MetaJoinRequestNode *metaNode = FindMetaNodeByRequestId(requestId);
+    if (metaNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed not find metaNode");
+        goto NOTIFY_RESULT;
+    }
+    if (strcpy_s(metaNode->networkId, sizeof(metaNode->networkId), info->networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed copy networkId error");
+        goto NOTIFY_RESULT;
+    }
+    metaNode->authId = authMetaId;
+    NodeInfo *newInfo = DupNodeInfo(info);
+    if (newInfo == NULL) {
+        goto NOTIFY_RESULT;
+    }
+    if (FillNodeInfo(metaNode, newInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed FillNodeInfo error");
+        goto NODE_FREE;
+    }
+    ret = LnnAddMetaInfo(newInfo);
+NODE_FREE:
+    SoftBusFree(newInfo);
+NOTIFY_RESULT:
+    MetaNodeNotifyJoinResult(&metaNode->addr, info->networkId, ret);
+}
+
+void OnAuthMetaVerifyFailed(uint32_t requestId, int32_t reason)
+{
+    MetaNodeNotifyLeaveResult(NULL, SOFTBUS_ERR);
+}
+
+static AuthMetaVerifyCallback g_verifyMetaCallback = {
+    .OnAuthMetaVerifyPassed = OnAuthMetaVerifyPassed,
+    .OnAuthMetaVerifyFailed = OnAuthMetaVerifyFailed,
+};
+
+AuthMetaVerifyCallback *LnnGetVerifyMetaCallback(void)
+{
+    return &g_verifyMetaCallback;
+}
+
 static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
 {
     ConnectionAddr *para = NULL;
@@ -1360,6 +1572,23 @@ static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
         return NULL;
     }
     *para = *addr;
+    return para;
+}
+
+static ConnectionAddrKey *CreateConnectionAddrMsgParaKey(const ConnectionAddrKey *addrDataKey)
+{
+    ConnectionAddrKey *para = NULL;
+
+    if (addrDataKey == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addrDataKey is null");
+        return NULL;
+    }
+    para = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc connecton addrKey message fail");
+        return NULL;
+    }
+    *para = *addrDataKey;
     return para;
 }
 
@@ -1558,6 +1787,7 @@ int32_t LnnInitNetBuilder(void)
     }
     ListInit(&g_netBuilder.fsmList);
     ListInit(&g_netBuilder.pendingList);
+    ListInit(&g_netBuilder.metaNodeList);
     g_netBuilder.nodeType = NODE_TYPE_L;
     g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_netBuilder.looper == NULL) {
@@ -1631,6 +1861,31 @@ int32_t LnnServerJoin(ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
+int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *dataKey)
+{
+    ConnectionAddrKey addrDataKey = {
+        .addr = *addr,
+        .dataKey = *dataKey,
+    };
+    ConnectionAddrKey *para = NULL;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "MetaNodeServerJoin enter!");
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_NO_INIT;
+    }
+    para = CreateConnectionAddrMsgParaKey(&addrDataKey);
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare join lnn message fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (PostMessageToHandler(MSG_TYPE_JOIN_METANODE, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post join lnn message failed");
+        SoftBusFree(para);
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnServerLeave(const char *networkId)
 {
     char *para = NULL;
@@ -1646,6 +1901,28 @@ int32_t LnnServerLeave(const char *networkId)
         return SOFTBUS_MALLOC_ERR;
     }
     if (PostMessageToHandler(MSG_TYPE_LEAVE_LNN, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave lnn message failed");
+        SoftBusFree(para);
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t MetaNodeServerLeave(const char *networkId)
+{
+    char *para = NULL;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "MetaNodeServerLeave enter!");
+    if (g_netBuilder.isInit == false) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
+        return SOFTBUS_NO_INIT;
+    }
+    para = CreateNetworkIdMsgPara(networkId);
+    if (para == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare leave lnn message fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (PostMessageToHandler(MSG_TYPE_LEAVE_METANODE, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave lnn message failed");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;

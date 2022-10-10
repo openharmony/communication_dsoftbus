@@ -179,11 +179,33 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
 
 int32_t DiscClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
+    (void)addr;
+    (void)addrTypeLen;
+    (void)networkId;
+    (void)retCode;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+{
+    (void)addr;
+    (void)addrTypeLen;
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 
 int32_t DiscClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
 {
+    (void)networkId;
+    (void)retCode;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscClientProxy::OnLeaveMetaNodeResult(const char *networkId, int retCode)
+{
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 

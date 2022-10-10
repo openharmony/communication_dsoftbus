@@ -98,6 +98,17 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     return SOFTBUS_OK;
 }
 
+int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+    const char *networkId, int32_t retCode)
+{
+    (void)pkgName;
+    (void)addr;
+    (void)addrTypeLen;
+    (void)networkId;
+    (void)retCode;
+    return SOFTBUS_OK;
+}
+
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int retCode)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLeaveLNNResult callback ipc server push.");
@@ -123,6 +134,14 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int retCode)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 

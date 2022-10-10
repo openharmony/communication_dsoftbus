@@ -54,8 +54,12 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnChannelQosEventInner;
     memberFuncMap_[CLIENT_ON_JOIN_RESULT] =
         &SoftBusClientStub::OnJoinLNNResultInner;
+    memberFuncMap_[CLIENT_ON_JOIN_METANODE_RESULT] =
+        &SoftBusClientStub::OnJoinMetaNodeResultInner;
     memberFuncMap_[CLIENT_ON_LEAVE_RESULT] =
         &SoftBusClientStub::OnLeaveLNNResultInner;
+    memberFuncMap_[CLIENT_ON_LEAVE_METANODE_RESULT] =
+        &SoftBusClientStub::OnLeaveMetaNodeResultInner;
     memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] =
         &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] =
@@ -451,6 +455,38 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnJoinMetaNodeResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t addrTypeLen;
+    if (!data.ReadUint32(addrTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read addr type length failed!");
+        return SOFTBUS_ERR;
+    }
+    void *addr = (void *)data.ReadRawData(addrTypeLen);
+    if (addr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read addr failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retCode;
+    if (!data.ReadInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read retCode failed!");
+        return SOFTBUS_ERR;
+    }
+    const char *networkId = nullptr;
+    if (retCode == 0) {
+        networkId = data.ReadCString();
+        if (networkId == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read networkId failed!");
+            return SOFTBUS_ERR;
+        }
+    }
+    int32_t retReply = OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner notify join result failed!");
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *networkId = data.ReadCString();
@@ -466,6 +502,25 @@ int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessagePar
     int32_t retReply = OnLeaveLNNResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner notify leave result failed!");
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnLeaveMetaNodeResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *networkId = data.ReadCString();
+    if (networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner read networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retCode;
+    if (!data.ReadInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner read retCode failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = OnLeaveMetaNodeResult(networkId, retCode);
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner notify leave result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -603,9 +658,20 @@ int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, con
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
+int32_t SoftBusClientStub::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+{
+    (void)addrTypeLen;
+    return MetaNodeOnJoinResult(addr, networkId, retCode);
+}
+
 int32_t SoftBusClientStub::OnLeaveLNNResult(const char *networkId, int retCode)
 {
     return LnnOnLeaveResult(networkId, retCode);
+}
+
+int32_t SoftBusClientStub::OnLeaveMetaNodeResult(const char *networkId, int retCode)
+{
+    return MetaNodeOnLeaveResult(networkId, retCode);
 }
 
 int32_t SoftBusClientStub::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
