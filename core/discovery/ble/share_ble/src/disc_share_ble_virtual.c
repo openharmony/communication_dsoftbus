@@ -77,7 +77,6 @@ static bool IsConcern(uint32_t capability)
 
 DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
 {
-
     (void)discInnerCb;
     DiscoveryFuncInterface Fun = {
         .Publish = Publish,
