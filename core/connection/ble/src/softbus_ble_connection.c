@@ -628,6 +628,7 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
 
         targetNode->state = BLE_CONNECTION_STATE_CLOSING;
     }
+    
     (void)SoftBusMutexUnlock(&g_connectionLock);
     if (targetNode == NULL) {
         return;
@@ -675,6 +676,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
 
         targetNode->state = BLE_CONNECTION_STATE_CONNECTED;
     }
+
     (void)SoftBusMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
     if (peerRef > 0) {
@@ -1338,6 +1340,7 @@ static int32_t BleConnectionRemoveMessageFunc(const SoftBusMessage *msg, void *a
     }
     return SOFTBUS_ERR;
 }
+
 static int BleConnLooperInit(void)
 {
     g_bleConnectAsyncHandler.name = "ble_conn_handler";
