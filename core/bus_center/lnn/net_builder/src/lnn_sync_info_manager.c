@@ -443,39 +443,71 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
     return SOFTBUS_OK;
 }
 
-static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
+static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
 {
-    SyncChannelInfo *info = NULL;
-    bool createChannelInfo = false;
-
-    info = FindSyncChannelInfoByNetworkId(networkId);
+    SyncChannelInfo *info = CreateSyncChannelInfo(networkId);
     if (info == NULL) {
-        info = CreateSyncChannelInfo(networkId);
-        if (info == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        createChannelInfo = true;
+        return SOFTBUS_MALLOC_ERR;
     }
+    info->clientChannelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId);
     if (info->clientChannelId == INVALID_CHANNEL_ID) {
-        info->clientChannelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId);
-        if (info->clientChannelId == INVALID_CHANNEL_ID) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open sync info channel fail");
-            return SOFTBUS_ERR;
-        }
-        SoftBusGetTime(&info->accessTime);
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open sync info channel: %d", info->clientChannelId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open sync info channel fail");
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
     }
-    ListNodeInsert(&info->syncMsgList, &msg->node);
-    if (info->isClientOpened) {
-        SendSyncInfoMsg(info, msg);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open sync info channel: %d", info->clientChannelId);
+    SoftBusGetTime(&info->accessTime);
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync info lock fail");
+        SoftBusFree(info);
+        return SOFTBUS_LOCK_ERR;
     }
-    if (createChannelInfo) {
+    SyncChannelInfo *item = FindSyncChannelInfoByNetworkId(networkId);
+    if (item == NULL) {
+        ListNodeInsert(&info->syncMsgList, &msg->node);
         if (IsListEmpty(&g_syncInfoManager.channelInfoList)) {
             (void)LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
                 CloseUnusedChannel, NULL, UNUSED_CHANNEL_CLOSED_DELAY);
         }
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
+    } else {
+        ListNodeInsert(&item->syncMsgList, &msg->node);
+        if (item->clientChannelId == INVALID_CHANNEL_ID) {
+            item->clientChannelId = info->clientChannelId;
+            item->accessTime = info->accessTime;
+        } else {
+            (void)TransCloseNetWorkingChannel(info->clientChannelId);
+            if (item->isClientOpened) {
+                SendSyncInfoMsg(item, msg);
+            }
+        }
+        SoftBusFree(info);
     }
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    return SOFTBUS_OK;
+}
+
+static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
+{
+    SyncChannelInfo *info = NULL;
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync info lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    info = FindSyncChannelInfoByNetworkId(networkId);
+    if (info == NULL) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return SendSyncInfoByNewChannel(networkId, msg);
+    }
+    if (info->clientChannelId == INVALID_CHANNEL_ID) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return SendSyncInfoByNewChannel(networkId, msg);
+    }
+    ListNodeInsert(&info->syncMsgList, &msg->node);
+    if (info->isClientOpened) {
+        SendSyncInfoMsg(info, msg);
+    }
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     return SOFTBUS_OK;
 }
 
@@ -494,15 +526,9 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     if (syncMsg == NULL) {
         return SOFTBUS_ERR;
     }
-    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync info lock fail");
-        SoftBusFree(syncMsg);
-        return SOFTBUS_LOCK_ERR;
-    }
     rc = TrySendSyncInfoMsg(networkId, syncMsg);
     if (rc != SOFTBUS_OK) {
         SoftBusFree(syncMsg);
     }
-    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     return rc;
 }
