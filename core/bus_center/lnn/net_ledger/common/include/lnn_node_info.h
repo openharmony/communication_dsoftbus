@@ -65,6 +65,11 @@ typedef struct {
 } P2pInfo;
 
 typedef struct {
+    bool isMetaNode;
+    uint32_t metaDiscType;
+} MetaInfo;
+
+typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
     char versionType[VERSION_MAX_LEN]; // compatible nearby
     char uuid[UUID_BUF_LEN]; // compatible nearby
@@ -91,6 +96,8 @@ typedef struct {
     char accountHash[SHA_256_HASH_LEN];
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     int64_t authSeq[DISCOVERY_TYPE_COUNT];
+    MetaInfo metaInfo;
+    uint32_t AuthTypeValue;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

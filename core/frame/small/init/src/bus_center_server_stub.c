@@ -69,6 +69,13 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+int32_t ServerJoinMetaNode(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_OK;
+}
+
 int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerLeaveLNN ipc server pop.");
@@ -89,6 +96,13 @@ int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerLeaveLNN failed.");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerLeaveMetaNode(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
     return SOFTBUS_OK;
 }
 

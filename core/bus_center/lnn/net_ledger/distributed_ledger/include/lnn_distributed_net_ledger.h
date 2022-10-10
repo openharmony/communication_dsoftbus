@@ -74,7 +74,8 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
-
+int32_t LnnAddMetaInfo(NodeInfo *info);
+int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type);
 #ifdef __cplusplus
 }
 #endif

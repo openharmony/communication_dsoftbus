@@ -169,6 +169,52 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     return serverRet;
 }
 
+int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+{
+    if (pkgName == nullptr || addr == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write InterfaceToken failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write client name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteUint32(addrTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr type length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteRawData(addr, addrTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteRawData(dataKey, sizeof(CustomData))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_JOIN_METANODE, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode send request failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode read serverRet failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return serverRet;
+}
+
 int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
@@ -207,6 +253,49 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     ret = reply.ReadInt32(serverRet);
     if (!ret) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveLNN read serverRet failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::LeaveMetaNode(const char *pkgName, const char *networkId)
+{
+    if (pkgName == nullptr || networkId == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveMetaNode write InterfaceToken failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = data.WriteCString(pkgName);
+    if (!ret) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveMetaNode write client name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    ret = data.WriteCString(networkId);
+    if (!ret) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveMetaNode write networkId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(SERVER_LEAVE_METANODE, data, reply, option);
+    if (err != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveMetaNode send request failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    ret = reply.ReadInt32(serverRet);
+    if (!ret) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LeaveMetaNode read serverRet failed!");
         return SOFTBUS_IPC_ERR;
     }
     return serverRet;

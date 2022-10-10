@@ -353,6 +353,15 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     return rc;
 }
 
+int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
+{
+    (void)metaJoinNode;
+    (void)dataKey;
+    int32_t rc;
+    rc = SOFTBUS_OK;
+    return rc;
+}
+
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
     SoftBusSysTime times;

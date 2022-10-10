@@ -114,6 +114,47 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if ((retCode == 0 && networkId == nullptr) || addr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(addrTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteRawData(addr, addrTypeLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
+        return SOFTBUS_ERR;
+    }
+    if (retCode == 0 && !data.WriteCString(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_JOIN_METANODE_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResult send request failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -142,6 +183,39 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
     MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_LEAVE_RESULT, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult send request failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterClientProxy::OnLeaveMetaNodeResult(const char *networkId, int retCode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(retCode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_LEAVE_METANODE_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResult send request failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

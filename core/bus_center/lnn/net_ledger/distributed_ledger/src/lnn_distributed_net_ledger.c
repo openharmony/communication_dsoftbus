@@ -21,10 +21,12 @@
 
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_lane_info.h"
 #include "lnn_map.h"
+#include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
@@ -73,6 +75,26 @@ typedef struct {
 } DistributedNetLedger;
 
 static DistributedNetLedger g_distributedNetLedger;
+
+int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
+{
+    if (authTypeValue == NULL || type >= BIT_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *authTypeValue = (*authTypeValue) | (1 << (uint32_t)type);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnClearAuthTypeValue(uint32_t *authTypeValue, AuthType type)
+{
+    if (authTypeValue == NULL || type >= BIT_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *authTypeValue = (*authTypeValue) & (~(1 << (uint32_t)type));
+    return SOFTBUS_OK;
+}
 
 static NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id)
 {
@@ -442,6 +464,14 @@ static int32_t DlGetDeviceType(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetAuthType(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((uint32_t *)buf) = info->AuthTypeValue;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetDeviceName(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -670,6 +700,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
+    {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
     {NUM_KEY_PROXY_PORT, DlGetProxyPort},
@@ -815,6 +846,62 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     return SOFTBUS_OK;
 }
 
+int32_t LnnAddMetaInfo(NodeInfo *info)
+{
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+    udid = LnnGetDeviceUdid(info);
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAddMetaInfo lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo != NULL) {
+        MetaInfo temp = info->metaInfo;
+        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAddMetaInfo copy fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_MEM_ERR;
+        }
+        info->metaInfo.isMetaNode = true;
+        info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
+    }
+    LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
+    LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
+{
+    NodeInfo *info = NULL;
+    DiscoveryType discType = LnnConvAddrTypeToDiscType(type);
+    if (discType == DISCOVERY_TYPE_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeleteMetaInfo type error fail!");
+        return SOFTBUS_ERR;
+    }
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeleteAddMetaInfo lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DeleteAddMetaInfo para error!");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    info->metaInfo.metaDiscType = (uint32_t)info->metaInfo.metaDiscType & ~(1 << (uint32_t)discType);
+    if (info->metaInfo.metaDiscType == 0) {
+        info->metaInfo.isMetaNode = false;
+    }
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -862,6 +949,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         MergeLnnInfo(oldInfo, info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
+    LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isOffline) {
@@ -909,6 +997,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         return REPORT_NONE;
     }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "need to report offline.");
     return REPORT_OFFLINE;
