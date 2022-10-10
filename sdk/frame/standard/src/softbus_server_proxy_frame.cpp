@@ -123,12 +123,13 @@ static int32_t ServerProxyInit(void)
 
 void ClientDeathProcTask(void)
 {
-    std::lock_guard<std::mutex> lock(g_mutex);
-    if (g_serverProxy != nullptr && g_clientDeath != nullptr) {
-       g_serverProxy->RemoveDeathRecipient(g_clientDeath);
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        if (g_serverProxy != nullptr && g_clientDeath != nullptr) {
+            g_serverProxy->RemoveDeathRecipient(g_clientDeath);
+        }
+        g_serverProxy = nullptr;
     }
-    g_serverProxy = nullptr;
-
     ClientCleanAllSessionWhenServerDeath();
 
     while (g_serverProxy == nullptr) {
