@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "common_list.h"
+#include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_mem.h"
@@ -58,6 +59,7 @@
 #define TYPE_HEADER_SIZE 4
 #define INVALID_CLIENID (-1)
 #define BLE_CONNECTION_INFO "BleConnectionInfo"
+#define CONNECTED_WAIT_TIME (2 * 1000)
 
 typedef enum {
     BLE_CONNECTION_STATE_CONNECTING = 0,
@@ -73,6 +75,14 @@ typedef enum {
     TYPE_BASIC_INFO = 1,
     TYPE_DEV_INFO = 2,
 } BleNetMsgType;
+
+typedef enum {
+    BLE_CONNECTION_DISCONNECT_OUT,
+} BleConnectionLoopMsg;
+
+static SoftBusHandler g_bleConnectAsyncHandler = {
+    .name = "g_bleConnectAsyncHandler"
+};
 
 typedef struct {
     int32_t type;
@@ -91,6 +101,7 @@ static SoftBusMutex g_connectionLock;
 static void PackRequest(int32_t delta, uint32_t connectionId);
 static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType);
 static int32_t BleConnectionDump(int fd);
+static int32_t BleConnectionRemoveMessageFunc(const SoftBusMessage *msg, void *args);
 
 static uint32_t AllocBleConnectionIdLocked()
 {
@@ -128,7 +139,7 @@ static BleConnectionInfo* CreateBleConnectionNode(void)
     ListInit(&newConnectionInfo->requestList);
     newConnectionInfo->connId = AllocBleConnectionIdLocked();
     newConnectionInfo->mtu = BLE_GATT_ATT_MTU_DEFAULT_PAYLOAD;
-    newConnectionInfo->refCount = 1;
+    newConnectionInfo->refCount = 0;
     newConnectionInfo->info.isAvailable = 1;
     newConnectionInfo->info.type = CONNECT_BLE;
     return newConnectionInfo;
@@ -277,7 +288,6 @@ static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t reque
     }
     int connectionId = itemNode->connId;
 
-    (void)SoftBusMutexUnlock(&g_connectionLock);
     if (result->OnConnectSuccessed != NULL) {
         result->OnConnectSuccessed(
             requestId, connectionId, &connectionInfo);
@@ -604,6 +614,21 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
             break;
         }
     }
+    if (targetNode != NULL && refCount <= 0) {
+        SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+        if (msg == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "bleConnectionCreateLoopMsg SoftBusCalloc failed");
+            (void)SoftBusMutexUnlock(&g_connectionLock);
+            return;
+        }
+        msg->what = BLE_CONNECTION_DISCONNECT_OUT;
+        msg->arg1 = connectionId;
+        msg->handler = &g_bleConnectAsyncHandler;
+        g_bleConnectAsyncHandler.looper->PostMessageDelay(g_bleConnectAsyncHandler.looper, msg, CONNECTED_WAIT_TIME);
+
+        targetNode->state = BLE_CONNECTION_STATE_CLOSING;
+    }
+    
     (void)SoftBusMutexUnlock(&g_connectionLock);
     if (targetNode == NULL) {
         return;
@@ -645,6 +670,13 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return;
     }
+    if (peerRef > 0 && targetNode->state == BLE_CONNECTION_STATE_CLOSING) {
+        g_bleConnectAsyncHandler.looper->RemoveMessageCustom(g_bleConnectAsyncHandler.looper,
+            &g_bleConnectAsyncHandler, BleConnectionRemoveMessageFunc, (void*)(uintptr_t)connectionId);
+
+        targetNode->state = BLE_CONNECTION_STATE_CONNECTED;
+    }
+
     (void)SoftBusMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
     if (peerRef > 0) {
@@ -692,6 +724,8 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
             BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
             if (itemNode->connId == connectionId) {
                 if (itemNode->state == BLE_CONNECTION_STATE_CLOSING) {
+                    g_bleConnectAsyncHandler.looper->RemoveMessageCustom(g_bleConnectAsyncHandler.looper,
+                        &g_bleConnectAsyncHandler, BleConnectionRemoveMessageFunc, (void*)(uintptr_t)connectionId);
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_CHANGE");
                     itemNode->state = BLE_CONNECTION_STATE_CONNECTED;
                 }
@@ -813,7 +847,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
 static void BleDeviceConnectPackRequest(int32_t value, int32_t connId)
 {
     int32_t data = value;
-    while (--data > 0) {
+    while (data-- > 0) {
         (void)PackRequest(CONNECT_REF_INCRESE, connId);
     }
 }
@@ -1259,10 +1293,78 @@ static SoftBusBleTransCalback g_bleTransCallback = {
     .GetBleConnInfoByHalConnId = GetBleConnInfoByHalConnId,
 };
 
+static void BleConnectionMsgHandler(SoftBusMessage *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, " 11ble gattc conn loop process msg type %d", msg->what);
+    switch (msg->what) {
+        case BLE_CONNECTION_DISCONNECT_OUT: {
+            uint32_t connectionId = (uint32_t)msg->arg1;
+            BleConnectionInfo *targetNode = NULL;
+            if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+                return;
+            }
+            ListNode *item = NULL;
+            LIST_FOR_EACH(item, &g_connection_list) {
+                BleConnectionInfo *itemNode = LIST_ENTRY(item, BleConnectionInfo, node);
+                if (itemNode->connId == connectionId) {
+                    targetNode = itemNode;
+                    break;
+                }
+            }
+            if (targetNode == NULL) {
+                (void)SoftBusMutexUnlock(&g_connectionLock);
+                return;
+            }
+            AbortConnection(targetNode->btBinaryAddr, targetNode->halConnId, targetNode->info.isServer);
+            (void)SoftBusMutexUnlock(&g_connectionLock);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+static int32_t BleConnectionRemoveMessageFunc(const SoftBusMessage *msg, void *args)
+{
+    if (msg == NULL || args == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnectionRemoveMessageFunc invalid param");
+        return SOFTBUS_ERR;
+    }
+    uint64_t clientId = (uint64_t)(uintptr_t)args;
+    if ((msg->what == BLE_CONNECTION_DISCONNECT_OUT) && (msg->arg1 == clientId)) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
+static int BleConnLooperInit(void)
+{
+    g_bleConnectAsyncHandler.name = "ble_conn_handler";
+    g_bleConnectAsyncHandler.HandleMessage = BleConnectionMsgHandler;
+    g_bleConnectAsyncHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (g_bleConnectAsyncHandler.looper == NULL ||
+        g_bleConnectAsyncHandler.looper->PostMessage == NULL ||
+        g_bleConnectAsyncHandler.looper->PostMessageDelay == NULL ||
+        g_bleConnectAsyncHandler.looper->RemoveMessageCustom == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create looper failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBle]");
     int32_t ret;
+    ret = BleConnLooperInit();
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnLooperInit failed: %d", ret);
+        return NULL;
+    }
     ret = SoftBusGattServerInit(&g_bleServerConnCalback);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerInit failed: %d", ret);
