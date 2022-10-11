@@ -613,6 +613,14 @@ int32_t TransServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networ
     return SOFTBUS_OK;
 }
 
+int32_t TransServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {

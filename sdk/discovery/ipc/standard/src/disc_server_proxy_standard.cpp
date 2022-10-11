@@ -311,6 +311,14 @@ int32_t DiscServerProxy::GetNodeKeyInfo(const char *pkgName, const char *network
     return SOFTBUS_OK;
 }
 
+int32_t DiscServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
 int32_t DiscServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {
