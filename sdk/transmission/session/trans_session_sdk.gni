@@ -57,5 +57,5 @@ if (schema_enhanced) {
       "//foundation/communication/dsoftbus/dsoftbus_enhance/sdk/transmission/session/src/trans_schema.gni")
 
   trans_session_sdk_src += schema_src
-  bus_center_server_inc += schema_inc
+  trans_session_sdk_inc += schema_inc
 }
