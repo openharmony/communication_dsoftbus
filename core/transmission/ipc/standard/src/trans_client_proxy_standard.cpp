@@ -143,17 +143,13 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed send request failed");
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
