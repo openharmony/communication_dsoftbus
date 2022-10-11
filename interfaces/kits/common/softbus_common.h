@@ -161,7 +161,17 @@ extern "C" {
  */
 #define DISC_MAX_DEVICE_ID_LEN 96
 
-#define NUM_BUF_SIZE 4
+/**
+ * @brief Indicates the maximum length of the network commmon length <b>IDiscoveryCallback</b>.
+ *
+ */
+#define LNN_COMMON_LEN 4
+
+/**
+ * @brief Indicates the maximum length of the device database status in <b>INodeStateCb</b>.
+ *
+ */
+#define DATA_CHANGE_FLAG_BUF_LEN 2
 
 /**
  * @brief Indicates the maximum length of the node address.
@@ -169,6 +179,11 @@ extern "C" {
  */
 #define SHORT_ADDRESS_MAX_LEN 8
 
+/**
+ * @brief Indicates the maximum num of the node status.
+ *
+ */
+#define NODE_STATUS_MAX_NUM 32
 /**
  * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
  *

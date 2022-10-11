@@ -130,6 +130,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] = &SoftBusServerStub::GetAllOnlineNodeInfoInner;
     memberFuncMap_[SERVER_GET_LOCAL_DEVICE_INFO] = &SoftBusServerStub::GetLocalDeviceInfoInner;
     memberFuncMap_[SERVER_GET_NODE_KEY_INFO] = &SoftBusServerStub::GetNodeKeyInfoInner;
+    memberFuncMap_[SERVER_SET_NODE_DATA_CHANGE_FLAG] = &SoftBusServerStub::SetNodeDataChangeFlagInner;
     memberFuncMap_[SERVER_START_TIME_SYNC] = &SoftBusServerStub::StartTimeSyncInner;
     memberFuncMap_[SERVER_STOP_TIME_SYNC] = &SoftBusServerStub::StopTimeSyncInner;
     memberFuncMap_[SERVER_QOS_REPORT] = &SoftBusServerStub::QosReportInner;
@@ -166,6 +167,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_LOCAL_DEVICE_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SET_NODE_DATA_CHANGE_FLAG] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
@@ -686,6 +688,31 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     SoftBusFree(buf);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *clientName = data.ReadCString();
+    if (clientName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag read clientName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    const char *networkId = data.ReadCString();
+    if (networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag read networkId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int16_t changeFlag;
+    if (!data.ReadInt16(changeFlag)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag read key failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = SetNodeDataChangeFlag(clientName, networkId, changeFlag);
+    if (!reply.WriteInt32(retReply)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
     return SOFTBUS_OK;
 }
 

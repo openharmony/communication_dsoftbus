@@ -14,16 +14,27 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 bus_center_sdk_test_src = [ "bus_center_sdk_test.cpp" ]
+softbus_center_sdk_test_src = [ "softbus_center_sdk_test.cpp" ]
 bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/discovery/interface",
+  "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/tests/sdk/common/include",
+  "//commonlibrary/c_utils/base/include",
   "//third_party/bounds_checking_function/include",
 ]
 bus_center_sdk_test_deps = [
+  "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
+  "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+  "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
   "//third_party/bounds_checking_function:libsec_static",
 ]
 
@@ -49,6 +60,16 @@ if (defined(ohos_lite)) {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = bus_center_sdk_test_src
+      include_dirs = bus_center_sdk_test_inc
+      deps = bus_center_sdk_test_deps
+      deps += [ "$hilog_lite_deps_path" ]
+    }
+  }
+  if (ohos_build_type == "debug") {
+    unittest("SoftbusCenterSdkTest") {
+      output_extension = "bin"
+      output_dir = "$root_out_dir/test/unittest/dsoftbus"
+      sources = softbus_center_sdk_test_src
       include_dirs = bus_center_sdk_test_inc
       deps = bus_center_sdk_test_deps
       deps += [ "$hilog_lite_deps_path" ]
@@ -84,8 +105,36 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("SoftbusCenterSdkTest") {
+    module_out_path = module_output_path
+    sources = softbus_center_sdk_test_src
+    include_dirs = bus_center_sdk_test_inc
+    include_dirs += [
+      "unittest/common/",
+      "//commonlibrary/c_utils/base/include",
+    ]
+    deps = bus_center_sdk_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
   group("unittest") {
     testonly = true
-    deps = [ ":BusCenterSdkTest" ]
+    deps = [
+      ":BusCenterSdkTest",
+      ":SoftbusCenterSdkTest",
+    ]
   }
 }
