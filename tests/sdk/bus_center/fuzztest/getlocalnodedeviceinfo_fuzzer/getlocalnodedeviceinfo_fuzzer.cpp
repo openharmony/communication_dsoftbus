@@ -15,17 +15,23 @@
 
 #include "getlocalnodedeviceinfo_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
+
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
             return true;
         }
         NodeBasicInfo localNodeinfo;
-        GetLocalNodeDeviceInfo((const char *)data, &localNodeinfo);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        GetLocalNodeDeviceInfo((const char *)tmp, &localNodeinfo);
         return true;
     }
 }

@@ -15,10 +15,12 @@
 
 #include "getallnodedeviceinfo_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
+
     bool GetAllNodeDeviceInfoTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
@@ -26,7 +28,11 @@ namespace OHOS {
         }
         NodeBasicInfo *info = nullptr;
         int32_t infoNum;
-        int ret = GetAllNodeDeviceInfo((const char *)data, &info, &infoNum);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        int ret = GetAllNodeDeviceInfo((const char *)tmp, &info, &infoNum);
         if (ret == SOFTBUS_OK && info != nullptr) {
             FreeNodeInfo(info);
         }

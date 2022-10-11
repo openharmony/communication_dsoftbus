@@ -15,6 +15,7 @@
 
 #include "publishlnn_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -61,7 +62,11 @@ namespace OHOS {
             return true;
         }
         GenRanPublishInfo(data, size);
-        int32_t ret = PublishLNN((const char *)data, &g_pInfo, &g_publishCb);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        int32_t ret = PublishLNN((const char *)tmp, &g_pInfo, &g_publishCb);
         if (ret == SOFTBUS_OK) {
             StopPublishLNN((const char *)data, g_pInfo.publishId);
         }
