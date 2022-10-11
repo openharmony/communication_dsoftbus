@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "disc_share_ble.h"
+#include "stddef.h"
+#include "softbus_errcode.h"
+#include "disc_manager.h"
+#include "disc_ble.h"
+#include "disc_ble_dispatcher.h"
+
+static int32_t Publish(const PublishOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t StartScan(const PublishOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t Unpublish(const PublishOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t StopScan(const PublishOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t StartAdvertise(const SubscribeOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t Subscribe(const SubscribeOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t Unsubscribe(const SubscribeOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static int32_t StopAdvertise(const SubscribeOption *option)
+{
+    return SOFTBUS_ERR;
+}
+
+static void LinkStatusChanged(LinkStatus status)
+{
+    return;
+}
+
+static void UpdateLocalDeviceInfo(InfoTypeChanged type)
+{
+    return;
+}
+
+static bool IsConcern(uint32_t capability)
+{
+    return false;
+}
+
+DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
+{
+    (void)discInnerCb;
+    DiscoveryFuncInterface Fun = {
+        .Publish = Publish,
+        .StartScan = StartScan,
+        .Unpublish = Unpublish,
+        .StopScan = StopScan,
+        .StartAdvertise = StartAdvertise,
+        .Subscribe = Subscribe,
+        .Unsubscribe = Unsubscribe,
+        .StopAdvertise = StopAdvertise,
+        .LinkStatusChanged = LinkStatusChanged,
+        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfo,
+    };
+    DiscoveryBleDispatcherInterface sharebleInterface = {
+        .IsConcern = IsConcern,
+        .mediumInterface = &Fun,
+    };
+    return &sharebleInterface;
+}
+
+void DiscShareBleDeinit(void)
+{
+    return;
+}

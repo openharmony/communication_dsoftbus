@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #define CAPABILITY_NUM 1
-#define CAPABILITY_MAX_BITNUM 8
+#define CAPABILITY_MAX_BITNUM 16
 
 typedef struct {
     int32_t freq;
@@ -43,6 +43,13 @@ typedef struct {
     unsigned char *capabilityData;
     uint32_t dataLen;
 } SubscribeOption;
+
+typedef enum {
+    PUBLISH_FUNC = 0,
+    UNPUBLISH_FUNC = 1,
+    STARTDISCOVERTY_FUNC = 2,
+    STOPDISCOVERY_FUNC = 3
+} InterfaceFuncType;
 
 typedef struct {
     int32_t (*Publish)(const PublishOption *option);
