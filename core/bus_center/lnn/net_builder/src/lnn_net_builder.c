@@ -1521,25 +1521,27 @@ void OnAuthMetaVerifyPassed(uint32_t requestId, int64_t authMetaId, const NodeIn
     MetaJoinRequestNode *metaNode = FindMetaNodeByRequestId(requestId);
     if (metaNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed not find metaNode");
-        goto NOTIFY_RESULT;
+        return;
     }
-    if (strcpy_s(metaNode->networkId, sizeof(metaNode->networkId), info->networkId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed copy networkId error");
-        goto NOTIFY_RESULT;
-    }
-    metaNode->authId = authMetaId;
-    NodeInfo *newInfo = DupNodeInfo(info);
-    if (newInfo == NULL) {
-        goto NOTIFY_RESULT;
-    }
-    if (FillNodeInfo(metaNode, newInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed FillNodeInfo error");
-        goto NODE_FREE;
-    }
-    ret = LnnAddMetaInfo(newInfo);
-NODE_FREE:
-    SoftBusFree(newInfo);
-NOTIFY_RESULT:
+
+    do {
+        if (strcpy_s(metaNode->networkId, sizeof(metaNode->networkId), info->networkId) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed copy networkId error");
+            break;
+        }
+        metaNode->authId = authMetaId;
+        NodeInfo *newInfo = DupNodeInfo(info);
+        if (newInfo == NULL) {
+            break;
+        }
+        if (FillNodeInfo(metaNode, newInfo) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAuthMetaVerifyPassed FillNodeInfo error");
+            SoftBusFree(newInfo);
+            break;
+        }
+        ret = LnnAddMetaInfo(newInfo);
+        SoftBusFree(newInfo);
+    } while (0);
     MetaNodeNotifyJoinResult(&metaNode->addr, info->networkId, ret);
 }
 
