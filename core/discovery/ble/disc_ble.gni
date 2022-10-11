@@ -13,18 +13,36 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+disc_dep_dir = "dsoftbus_enhance/core/discovery/ble/share_ble"
+enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                       [
+                         "$native_source_path",
+                         "$disc_dep_dir",
+                       ],
+                       "value")
+
 ble_discovery_inc = [
-  "$dsoftbus_root_path/core/adapter/bus_center/include",
-  "$dsoftbus_root_path/core/discovery/ble/include",
+  "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+  "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
+  "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/common/include",
 ]
+
 ble_discovery_deps = []
+
 if (dsoftbus_feature_disc_ble == false) {
-  ble_discovery_src =
-      [ "$dsoftbus_root_path/core/discovery/ble/src/disc_ble_virtual.c" ]
+  ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
 } else {
   ble_discovery_src = [
-    "$dsoftbus_root_path/core/discovery/ble/src/disc_ble_utils.c",
-    "$dsoftbus_root_path/core/discovery/ble/src/disc_ble.c",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
   ]
+}
+
+if (enhanced) {
+  ble_discovery_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/src/disc_share_ble.c" ]
+} else {
+  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
 }

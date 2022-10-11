@@ -299,7 +299,9 @@ typedef enum {
     /** Distributed middleware */
     DDMP_CAPABILITY_BITMAP,
     /** Osd capability */
-    OSD_CAPABILITY_BITMAP
+    OSD_CAPABILITY_BITMAP,
+    /**Share capability */
+    SHARE_CAPABILITY_BITMAP
 } DataBitMap;
 
 /**
@@ -326,6 +328,7 @@ static const CapabilityMap g_capabilityMap[] = {
     {DVKIT_CAPABILITY_BITMAP, (char *)"dvKit"},
     {DDMP_CAPABILITY_BITMAP, (char *)"ddmpCapability"},
     {OSD_CAPABILITY_BITMAP, (char *)"osdCapability"},
+    {SHARE_CAPABILITY_BITMAP, (char *)"share"},
 };
 
 /**
