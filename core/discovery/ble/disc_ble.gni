@@ -15,12 +15,12 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 disc_dep_dir = "dsoftbus_enhance/core/discovery/ble/share_ble"
-enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                       [
-                         "$native_source_path",
-                         "$disc_dep_dir",
-                       ],
-                       "value")
+enhanced_share = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                             [
+                               "$native_source_path",
+                               "$disc_dep_dir",
+                             ],
+                             "value")
 
 ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
@@ -41,7 +41,7 @@ if (dsoftbus_feature_disc_ble == false) {
   ]
 }
 
-if (enhanced) {
+if (enhanced_share) {
   ble_discovery_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/src/disc_share_ble.c" ]
 } else {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
