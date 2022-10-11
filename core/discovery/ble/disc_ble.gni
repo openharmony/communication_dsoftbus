@@ -42,7 +42,12 @@ if (dsoftbus_feature_disc_ble == false) {
 }
 
 if (enhanced_share) {
-  ble_discovery_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/src/disc_share_ble.c" ]
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/share_ble.gni")
+
+  ble_discovery_src += share_sources
+  ble_discovery_inc += share_include_dirs
+  ble_discovery_deps += share_deps
 } else {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
 }
