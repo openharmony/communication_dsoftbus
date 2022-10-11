@@ -25,6 +25,7 @@
 #include "lnn_state_machine.h"
 #include "softbus_bus_center.h"
 #include "softbus_hisysevt_bus_center.h"
+#include "lnn_net_builder.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -96,6 +97,7 @@ int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
 int64_t LnnUpTimeMs(void);
+int32_t OnJoinMetaNode(MetaJoinRequestNode *mateJoinNode, CustomData *dataKey);
 
 #ifdef __cplusplus
 #if __cplusplus

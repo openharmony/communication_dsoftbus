@@ -169,7 +169,24 @@ int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::JoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey,
+    uint32_t addrTypeLen)
+{
+    (void)pkgName;
+    (void)addr;
+    (void)dataKey;
+    (void)addrTypeLen;
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::LeaveLNN(const char *pkgName, const char *networkId)
+{
+    (void)pkgName;
+    (void)networkId;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::LeaveMetaNode(const char *pkgName, const char *networkId)
 {
     (void)pkgName;
     (void)networkId;

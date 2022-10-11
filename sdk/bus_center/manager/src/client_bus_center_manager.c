@@ -39,9 +39,21 @@ typedef struct {
 
 typedef struct {
     ListNode node;
+    ConnectionAddr addr;
+    OnJoinMetaNodeResult cb;
+} JoinMetaNodeCbListItem;
+
+typedef struct {
+    ListNode node;
     char networkId[NETWORK_ID_BUF_LEN];
     OnLeaveLNNResult cb;
 } LeaveLNNCbListItem;
+
+typedef struct {
+    ListNode node;
+    char networkId[NETWORK_ID_BUF_LEN];
+    OnLeaveMetaNodeResult cb;
+} LeaveMetaNodeCbListItem;
 
 typedef struct {
     ListNode node;
@@ -56,7 +68,9 @@ typedef struct {
 
 typedef struct {
     ListNode joinLNNCbList;
+    ListNode joinMetaNodeCbList;
     ListNode leaveLNNCbList;
+    ListNode leaveMetaNodeCbList;
     ListNode nodeStateCbList;
     ListNode timeSyncCbList;
     int32_t nodeStateCbListCnt;
@@ -105,6 +119,19 @@ static JoinLNNCbListItem *FindJoinLNNCbItem(ConnectionAddr *addr, OnJoinLNNResul
     return NULL;
 }
 
+static JoinMetaNodeCbListItem *FindJoinMetaNodeCbItem(ConnectionAddr *addr, OnJoinMetaNodeResult cb)
+{
+    JoinMetaNodeCbListItem *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.joinMetaNodeCbList, JoinMetaNodeCbListItem, node) {
+        if (IsSameConnectionAddr(&item->addr, addr) &&
+            (cb == NULL || cb == item->cb)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
 static int32_t AddJoinLNNCbItem(ConnectionAddr *target, OnJoinLNNResult cb)
 {
     JoinLNNCbListItem *item = NULL;
@@ -121,11 +148,40 @@ static int32_t AddJoinLNNCbItem(ConnectionAddr *target, OnJoinLNNResult cb)
     return SOFTBUS_OK;
 }
 
+static int32_t AddJoinMetaNodeCbItem(ConnectionAddr *target, OnJoinMetaNodeResult cb)
+{
+    JoinMetaNodeCbListItem *item = NULL;
+
+    item = (JoinMetaNodeCbListItem *)SoftBusMalloc(sizeof(*item));
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc join MetaNode cb list item");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&item->node);
+    item->addr = *target;
+    item->cb = cb;
+    ListAdd(&g_busCenterClient.joinMetaNodeCbList, &item->node);
+    return SOFTBUS_OK;
+}
+
 static LeaveLNNCbListItem *FindLeaveLNNCbItem(const char *networkId, OnLeaveLNNResult cb)
 {
     LeaveLNNCbListItem *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.leaveLNNCbList, LeaveLNNCbListItem, node) {
+        if (strcmp(item->networkId, networkId) == 0 &&
+            (cb == NULL || cb == item->cb)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static LeaveMetaNodeCbListItem *FindLeaveMetaNodeCbItem(const char *networkId, OnLeaveMetaNodeResult cb)
+{
+    LeaveMetaNodeCbListItem *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.leaveMetaNodeCbList, LeaveMetaNodeCbListItem, node) {
         if (strcmp(item->networkId, networkId) == 0 &&
             (cb == NULL || cb == item->cb)) {
             return item;
@@ -151,6 +207,26 @@ static int32_t AddLeaveLNNCbItem(const char *networkId, OnLeaveLNNResult cb)
     }
     item->cb = cb;
     ListAdd(&g_busCenterClient.leaveLNNCbList, &item->node);
+    return SOFTBUS_OK;
+}
+
+static int32_t AddLeaveMetaNodeCbItem(const char *networkId, OnLeaveMetaNodeResult cb)
+{
+    LeaveMetaNodeCbListItem *item = NULL;
+
+    item = (LeaveMetaNodeCbListItem *)SoftBusMalloc(sizeof(*item));
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc join MetaNode cb list item");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&item->node);
+    if (strncpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy network id fail");
+        SoftBusFree(item);
+        return SOFTBUS_ERR;
+    }
+    item->cb = cb;
+    ListAdd(&g_busCenterClient.leaveMetaNodeCbList, &item->node);
     return SOFTBUS_OK;
 }
 
@@ -374,7 +450,9 @@ int BusCenterClientInit(void)
     }
 
     ListInit(&g_busCenterClient.joinLNNCbList);
+    ListInit(&g_busCenterClient.joinMetaNodeCbList);
     ListInit(&g_busCenterClient.leaveLNNCbList);
+    ListInit(&g_busCenterClient.leaveMetaNodeCbList);
     ListInit(&g_busCenterClient.nodeStateCbList);
     ListInit(&g_busCenterClient.timeSyncCbList);
     g_busCenterClient.isInit = true;
@@ -455,6 +533,37 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     return rc;
 }
 
+int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinLNNResult cb)
+{
+    int32_t rc;
+
+    if (!g_busCenterClient.isInit) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join MetaNode not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join");
+    }
+    rc = SOFTBUS_ERR;
+    do {
+        if (FindJoinMetaNodeCbItem(target, cb) != NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");
+            rc = SOFTBUS_ALREADY_EXISTED;
+            break;
+        }
+        rc = ServerIpcJoinMetaNode(pkgName, target, dataKey, sizeof(*target));
+        if (rc != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : request join MetaNode");
+        } else {
+            rc = AddJoinMetaNodeCbItem(target, cb);
+        }
+    } while (false);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join MetaNode cb list in join");
+    }
+    return rc;
+}
+
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
     int32_t rc;
@@ -481,6 +590,36 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
     } while (false);
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock leave lnn cb list in leave");
+    }
+    return rc;
+}
+
+int32_t LeaveMetaNodeInner(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
+{
+    int32_t rc;
+
+    if (!g_busCenterClient.isInit) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : leave MetaNode not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock leave MetaNode cb list in leave");
+    }
+    rc = SOFTBUS_ERR;
+    do {
+        if (FindLeaveMetaNodeCbItem(networkId, cb) != NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : leave request already exist");
+            break;
+        }
+        rc = ServerIpcLeaveMetaNode(pkgName, networkId);
+        if (rc != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : request leave MetaNode");
+        } else {
+            rc = AddLeaveMetaNodeCbItem(networkId, cb);
+        }
+    } while (false);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock leave MetaNode cb list in leave");
     }
     return rc;
 }
@@ -740,6 +879,40 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
+int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
+{
+    JoinMetaNodeCbListItem *item = NULL;
+    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+
+    if (connAddr == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join result");
+    }
+    while ((item = FindJoinMetaNodeCbItem(addr, NULL)) != NULL) {
+        ListDelete(&item->node);
+        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join MetaNode cb list in join result");
+        }
+        if (item->cb != NULL) {
+            item->cb(connAddr, networkId, retCode);
+        }
+        SoftBusFree(item);
+        if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join result");
+        }
+    }
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join MetaNode cb list in join result");
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
 {
     LeaveLNNCbListItem *item = NULL;
@@ -771,6 +944,41 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
     }
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock leave lnn cb list in leave result");
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t MetaNodeOnLeaveResult(const char *networkId, int32_t retCode)
+{
+    LeaveMetaNodeCbListItem *item = NULL;
+
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: leave cb not init");
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock leave MetaNode cb list in leave result");
+    }
+    while ((item = FindLeaveMetaNodeCbItem(networkId, NULL)) != NULL) {
+        ListDelete(&item->node);
+        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock leave MetaNode cb list in leave result");
+        }
+        if (item->cb != NULL) {
+            item->cb(networkId, retCode);
+        }
+        SoftBusFree(item);
+        if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock leave MetaNode cb list in leave result");
+        }
+    }
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock leave MetaNode cb list in leave result");
     }
     return SOFTBUS_OK;
 }

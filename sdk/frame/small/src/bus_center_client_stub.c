@@ -55,6 +55,13 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+int32_t ClientOnJoinMetaNodeResult(IpcIo *data, IpcIo *reply)
+{
+    (void)data;
+    (void)reply;
+    return SOFTBUS_OK;
+}
+
 int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
@@ -74,6 +81,13 @@ int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnLeaveLNNResult LnnOnLeaveResult failed!");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
+{
+    (void)data;
+    (void)reply;
     return SOFTBUS_OK;
 }
 

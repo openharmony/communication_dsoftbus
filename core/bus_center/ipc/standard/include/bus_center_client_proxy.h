@@ -26,7 +26,10 @@ extern "C" {
 
 int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
+int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+    const char *networkId, int32_t retCode);
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode);
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode);

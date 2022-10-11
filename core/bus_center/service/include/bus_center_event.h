@@ -138,7 +138,10 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
 
 void LnnNotifyJoinResult(ConnectionAddr *addr,
     const char *networkId, int32_t retCode);
+void MetaNodeNotifyJoinResult(ConnectionAddr *addr,
+    const char *networkId, int32_t retCode);
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
+void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);

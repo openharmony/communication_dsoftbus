@@ -31,6 +31,16 @@ typedef enum {
     NODE_TYPE_L
 } NodeType;
 
+typedef struct {
+    ListNode node;
+    ConnectionAddr addr;
+    char networkId[NETWORK_ID_BUF_LEN];
+    int64_t authId;
+    uint32_t requestId;
+    uint32_t flag;
+    bool needReportFailure;
+} MetaJoinRequestNode;
+
 int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
@@ -46,6 +56,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
 int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
 AuthVerifyCallback *LnnGetVerifyCallback(void);
+AuthMetaVerifyCallback *LnnGetVerifyMetaCallback(void);
 
 #ifdef __cplusplus
 }

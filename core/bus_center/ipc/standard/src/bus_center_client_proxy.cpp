@@ -45,6 +45,21 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
 }
 
+int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+    const char *networkId, int32_t retCode)
+{
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
+        return SOFTBUS_ERR;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
+}
+
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -57,6 +72,20 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32
         return SOFTBUS_ERR;
     }
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
+}
+
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode)
+{
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
+        return SOFTBUS_ERR;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
+        return SOFTBUS_ERR;
+    }
+    return clientProxy->OnLeaveMetaNodeResult(networkId, retCode);
 }
 
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)

@@ -328,6 +328,15 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
     return SOFTBUS_OK;
 }
 
+int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, unsigned int addrTypeLen)
+{
+    (void)pkgName;
+    (void)addr;
+    (void)dataKey;
+    (void)addrTypeLen;
+    return SOFTBUS_OK;
+}
+
 int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "leave Lnn ipc client push.");
@@ -350,6 +359,13 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leave Lnn invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
+{
+    (void)pkgName;
+    (void)networkId;
     return SOFTBUS_OK;
 }
 

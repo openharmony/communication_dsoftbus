@@ -77,7 +77,9 @@ bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 
 int32_t LnnServerJoin(ConnectionAddr *addr);
+int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *dataKey);
 int32_t LnnServerLeave(const char *networkId);
+int32_t MetaNodeServerLeave(const char *networkId);
 
 LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
     const LnnPreferredLinkList *list, uint32_t laneNum);

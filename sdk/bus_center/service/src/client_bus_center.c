@@ -207,6 +207,19 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
     return JoinLNNInner(pkgName, target, cb);
 }
 
+int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinMetaNodeResult cb)
+{
+    if (pkgName == NULL || target == NULL || dataKey == NULL || cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return JoinMetaNodeInner(pkgName, target, dataKey, cb);
+}
+
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
     if (networkId == NULL || cb == NULL || pkgName == NULL) {
@@ -214,6 +227,15 @@ int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb
         return SOFTBUS_INVALID_PARAM;
     }
     return LeaveLNNInner(pkgName, networkId, cb);
+}
+
+int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
+{
+    if (networkId == NULL || cb == NULL || pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LeaveMetaNodeInner(pkgName, networkId, cb);
 }
 
 int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
