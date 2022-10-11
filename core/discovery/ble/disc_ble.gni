@@ -28,11 +28,11 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/common/include",
 ]
+
 ble_discovery_deps = []
+
 if (dsoftbus_feature_disc_ble == false) {
-  ble_discovery_src = [
-    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c",
-  ]
+  ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
 } else {
   ble_discovery_src = [
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
@@ -42,11 +42,7 @@ if (dsoftbus_feature_disc_ble == false) {
 }
 
 if (enhanced) {
-    ble_discovery_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/src/disc_share_ble.c",
-    ]
+  ble_discovery_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/src/disc_share_ble.c" ]
 } else {
-    ble_discovery_src += [
-      "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
-    ]
+  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
 }
