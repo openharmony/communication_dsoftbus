@@ -34,7 +34,6 @@
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
 
-#define NUM_BUF_SIZE 4
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
         if ((networkId) == NULL || (buf) == NULL) {                        \
@@ -517,7 +516,7 @@ static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
 static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -528,7 +527,7 @@ static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
 static int32_t DlGetSessionPort(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -539,7 +538,7 @@ static int32_t DlGetSessionPort(const char *networkId, void *buf, uint32_t len)
 static int32_t DlGetProxyPort(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -550,7 +549,7 @@ static int32_t DlGetProxyPort(const char *networkId, void *buf, uint32_t len)
 static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -561,7 +560,7 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
 static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -573,7 +572,7 @@ static int32_t DlGetMasterWeight(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
 
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -645,7 +644,7 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
 
-    if (len != NUM_BUF_SIZE) {
+    if (len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
@@ -654,6 +653,22 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     *((int32_t *)buf) = LnnGetP2pRole(info);
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (len != DATA_CHANGE_FLAG_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int16_t *)buf) = LnnGetDataChangeFlag(info);
     return SOFTBUS_OK;
 }
 
@@ -677,6 +692,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
     {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
     {NUM_KEY_P2P_ROLE, DlGetP2pRole},
+    {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
 };
 
 static char *CreateCnnCodeKey(const char *uuid, DiscoveryType type)
@@ -1144,7 +1160,40 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
     for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
         if (key == g_dlKeyTable[i].key) {
             if (g_dlKeyTable[i].getInfo != NULL) {
-                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, NUM_BUF_SIZE);
+                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, LNN_COMMON_LEN);
+                SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+                return ret;
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY NOT exist.");
+    return SOFTBUS_ERR;
+}
+
+int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info)
+{
+    uint32_t i;
+    int32_t ret;
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (key < NUM_KEY_BEGIN || key >= NUM_KEY_END) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "KEY error.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    for (i = 0; i < sizeof(g_dlKeyTable) / sizeof(DistributedLedgerKey); i++) {
+        if (key == g_dlKeyTable[i].key) {
+            if (g_dlKeyTable[i].getInfo != NULL) {
+                ret = g_dlKeyTable[i].getInfo(networkId, (void *)info, DATA_CHANGE_FLAG_BUF_LEN);
                 SoftBusMutexUnlock(&g_distributedNetLedger.lock);
                 return ret;
             }

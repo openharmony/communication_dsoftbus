@@ -201,6 +201,31 @@ int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerSetNodeDataChangeFlag ipc server pop.");
+    size_t length;
+    const char *pkgName = (const char*)ReadString(req, &length);
+    const char *networkId = (const char*)ReadString(req, &length);
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag read networkId failed!");
+        return SOFTBUS_ERR;
+    }
+    int16_t dataChangeFlag;
+    ReadInt16(req, &dataChangeFlag);
+    int32_t callingUid = GetCallingUid();
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerSetNodeDataChangeFlag no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    int32_t ret = LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerSetNodeDataChangeFlag get local info failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStartTimeSync ipc server pop.");

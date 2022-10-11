@@ -177,6 +177,23 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
+int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    if (pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return SetNodeDataChangeFlagInner(pkgName, networkId, dataChangeFlag);
+}
+
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {

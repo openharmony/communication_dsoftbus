@@ -35,8 +35,6 @@
 #define SOFTBUS_VERSION "hm.1.0.0"
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
-#define NUM_BUF_SIZE 4
-
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 
 typedef struct {
@@ -194,6 +192,15 @@ static int32_t UpdateLocalDeviceType(const void *buf)
     return SOFTBUS_ERR;
 }
 
+static int32_t UpdateNodeDataChangeFlag(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetDataChangeFlag(info, *(int16_t *)buf);
+}
+
 static int32_t LlGetDeviceName(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -212,7 +219,6 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
     }
     return SOFTBUS_OK;
 }
-
 
 static int32_t LlGetBtMac(void *buf, uint32_t len)
 {
@@ -295,7 +301,7 @@ static int32_t L1GetMasterNodeUdid(void *buf, uint32_t len)
 static int32_t LlGetAuthPort(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t port = LnnGetAuthPort(info);
@@ -318,7 +324,7 @@ static int32_t UpdateLocalAuthPort(const void *buf)
 static int32_t LlGetSessionPort(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = LnnGetSessionPort(info);
@@ -337,7 +343,7 @@ static int32_t UpdateLocalSessionPort(const void *buf)
 static int32_t LlGetProxyPort(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = LnnGetProxyPort(info);
@@ -356,7 +362,7 @@ static int32_t UpdateLocalProxyPort(const void *buf)
 static int32_t LlGetNetCap(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->netCapacity;
@@ -366,7 +372,7 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
 static int32_t LlGetNetType(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->discoveryType;
@@ -376,7 +382,7 @@ static int32_t LlGetNetType(void *buf, uint32_t len)
 static int32_t LlGetDeviceTypeId(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->deviceInfo.deviceTypeId;
@@ -387,7 +393,7 @@ static int32_t L1GetMasterNodeWeight(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
 
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->masterWeight;
@@ -432,10 +438,19 @@ static int32_t LlGetP2pGoMac(void *buf, uint32_t len)
 
 static int32_t L1GetP2pRole(void *buf, uint32_t len)
 {
-    if (buf == NULL || len != NUM_BUF_SIZE) {
+    if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = LnnGetP2pRole(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetNodeDataChangeFlag(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_CHANGE_FLAG_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int16_t *)buf) = LnnGetDataChangeFlag(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
@@ -732,7 +747,8 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
-    {BYTE_KEY_USERID_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount}
+    {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
+    {BYTE_KEY_USERID_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -875,6 +891,16 @@ int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
+}
+
+int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
+}
+
+int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
