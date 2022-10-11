@@ -486,8 +486,10 @@ static void P2pLinkCleanConningDev(void)
     ConnectingNode *conningNext = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
-        P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
-        P2pLinkDelConningDev(conningItem);
+        if (conningItem->state != P2PLINK_MANAGER_STATE_NEGO_WATING) {
+            P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
+            P2pLinkDelConningDev(conningItem);
+        }
     }
 }
 
