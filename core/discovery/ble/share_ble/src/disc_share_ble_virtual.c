@@ -78,7 +78,7 @@ static bool IsConcern(uint32_t capability)
 DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
 {
     (void)discInnerCb;
-    DiscoveryFuncInterface Fun = {
+    DiscoveryFuncInterface fun = {
         .Publish = Publish,
         .StartScan = StartScan,
         .Unpublish = Unpublish,
@@ -92,7 +92,7 @@ DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb
     };
     DiscoveryBleDispatcherInterface sharebleInterface = {
         .IsConcern = IsConcern,
-        .mediumInterface = &Fun,
+        .mediumInterface = &fun,
     };
     return &sharebleInterface;
 }
