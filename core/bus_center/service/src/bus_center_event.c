@@ -229,6 +229,16 @@ void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t re
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
+void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+{
+    if (addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : addr or networkId = null!");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify join MetaNode result :%d", retCode);
+    MetaNodeIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
+}
+
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
@@ -237,6 +247,16 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify leave LNN result %d", retCode);
     LnnIpcNotifyLeaveResult(networkId, retCode);
+}
+
+void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
+{
+    if (networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : networkId = null!");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify leave MetaNode result %d", retCode);
+    MetaNodeIpcNotifyLeaveResult(networkId, retCode);
 }
 
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin)

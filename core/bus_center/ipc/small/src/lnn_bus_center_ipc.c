@@ -377,6 +377,15 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     return SOFTBUS_OK;
 }
 
+int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+{
+    (void)addr;
+    (void)addrTypeLen;
+    (void)networkId;
+    (void)retCode;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
@@ -401,6 +410,13 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcNotifyLeaveResult release lock");
     }
+    return SOFTBUS_OK;
+}
+
+int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+{
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 

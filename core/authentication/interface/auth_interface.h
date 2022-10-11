@@ -65,6 +65,12 @@ typedef struct {
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } AuthConnInfo;
 
+typedef enum {
+    ONLINE_HICHAIN = 0,
+    ONLINE_METANODE,
+    ONLINE_MIX
+} AuthType;
+
 typedef struct {
     void (*onDeviceVerifyPass)(int64_t authId, const NodeInfo *info);
     void (*onDeviceNotTrusted)(const char *peerUdid);
@@ -77,6 +83,12 @@ typedef struct {
     void (*onVerifyPassed)(uint32_t requestId, int64_t authId, const NodeInfo *info);
     void (*onVerifyFailed)(uint32_t requestId, int32_t reason);
 } AuthVerifyCallback;
+
+typedef struct {
+    void (*OnAuthMetaVerifyPassed)(uint32_t requestId, int64_t authMetaId, const NodeInfo *info);
+    void (*OnAuthMetaVerifyFailed)(uint32_t requestId, int32_t reason);
+} AuthMetaVerifyCallback;
+
 uint32_t AuthGenRequestId(void);
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback);
 void AuthHandleLeaveLNN(int64_t authId);

@@ -25,7 +25,9 @@ extern "C" {
 #endif
 
 int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply);
+int32_t ClientOnJoinMetaNodeResult(IpcIo *data, IpcIo *reply);
 int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply);
+int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply);
 int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply);
 int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply);
 int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply);
