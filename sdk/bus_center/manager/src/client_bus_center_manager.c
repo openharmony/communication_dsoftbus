@@ -493,6 +493,15 @@ int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDevi
     return ret;
 }
 
+int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    int ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Server SetNodeDataChangeFlag failed, ret = %d", ret);
+    }
+    return ret;
+}
+
 int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 {
     int32_t rc;

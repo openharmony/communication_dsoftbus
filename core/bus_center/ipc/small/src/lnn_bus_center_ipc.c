@@ -275,6 +275,12 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
+int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    (void)pkgName;
+    return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
+}
+
 int32_t LnnIpcGetNodeKeyInfoLen(int32_t key)
 {
     return LnnGetNodeKeyInfoLen(key);

@@ -275,6 +275,25 @@ const char *LnnGetP2pMac(const NodeInfo *info)
     return info->p2pInfo.p2pMac;
 }
 
+int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->dataChangeFlag = dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
+uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return 0;
+    }
+    return info->dataChangeFlag;
+}
+
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 {
     if (info == NULL || goMac == NULL) {

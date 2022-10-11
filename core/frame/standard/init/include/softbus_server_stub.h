@@ -54,6 +54,7 @@ private:
     int32_t GetAllOnlineNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t QosReportInner(MessageParcel &data, MessageParcel &reply);

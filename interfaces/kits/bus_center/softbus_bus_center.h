@@ -90,6 +90,15 @@ extern "C" {
 #define EVENT_NODE_STATE_INFO_CHANGED 0x04
 
 /**
+ * @brief Indicates the mask bit for a LNN node running status change event.
+ * If you want to receive such events, set the mask bit in {@link INodeStateCb.events}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define EVENT_NODE_STATUS_CHANGED 0x05
+
+/**
  * @brief Indicates mask bits for {@link INodeStateCb.events}.
  *
  * @since 1.0
@@ -138,6 +147,7 @@ typedef enum {
     NODE_KEY_NETWORK_CAPABILITY,   /**< Network capability in number format */
     NODE_KEY_NETWORK_TYPE,        /**< Network type in number format */
     NODE_KEY_BLE_OFFLINE_CODE,   /**< Ble offlinecode in string format */
+    NODE_KEY_DATA_CHANGE_FLAG,
 } NodeDeviceInfoKey;
 
 /**
@@ -211,7 +221,7 @@ typedef enum {
 } TimeSyncFlag;
 
 /**
- * @brief Defines the basic information about a device.
+ * @brief Defines the basic information of a device.
  *
  * @since 1.0
  * @version 1.0
@@ -232,6 +242,33 @@ typedef enum {
     TYPE_NETWORK_ID = 0,  /**< Network ID change */
     TYPE_DEVICE_NAME,     /**< Device name change */
 } NodeBasicInfoType;
+
+/**
+ * @brief Defines the running status about a device.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    NodeBasicInfo basicInfo;
+    uint16_t authStatus;
+    uint16_t dataBaseStatus;
+    uint16_t meshType;
+    uint16_t reserved[NODE_STATUS_MAX_NUM-3];
+} NodeStatus;
+
+/**
+ * @brief Enumerates device information change types. For details, see {@link INodeStateCb.onNodeStatusChanged}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    TYPE_AUTH_STATUS = 2,  /**< certify status change */
+    TYPE_DATABASE_STATUS = 3, /**< database  change */
+    TYPE_MESH_TYPE = 4,    /**< lnn mesh typechange */
+    TYPE_STATUS_MAX = 5,   /**< max num */
+} NodeStatusType;
 
 /**
  * @brief time synchronize result.
@@ -360,6 +397,17 @@ typedef struct {
      * @version 1.0
      */
     void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info);
+    /**
+     * @brief Called when the running status of a device changes.
+     *
+     * @param type Indicates the device type. For details, see {@link NodeStatusType}.
+     * @param info Indicates the pointer to the new status of the device.
+     * For details, see {@link NodeStatus}.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status);
 } INodeStateCb;
 
 /**
@@ -618,6 +666,8 @@ void FreeNodeInfo(NodeBasicInfo *info);
  * @version 1.0
  */
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
+
+int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 
 /**
  * @brief Obtains a specified {@link NodeDeviceInfoKey} of an online device.

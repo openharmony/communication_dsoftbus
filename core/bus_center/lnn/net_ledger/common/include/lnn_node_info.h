@@ -98,6 +98,7 @@ typedef struct {
     int64_t authSeq[DISCOVERY_TYPE_COUNT];
     MetaInfo metaInfo;
     uint32_t AuthTypeValue;
+    uint16_t dataChangeFlag;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -124,6 +125,8 @@ int32_t LnnSetProxyPort(NodeInfo *info, int32_t port);
 int32_t LnnSetP2pRole(NodeInfo *info, int32_t role);
 int32_t LnnGetP2pRole(const NodeInfo *info);
 int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
+uint16_t LnnGetDataChangeFlag(const NodeInfo *info);
+int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag);
 const char *LnnGetP2pMac(const NodeInfo *info);
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);

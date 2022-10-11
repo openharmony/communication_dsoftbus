@@ -209,6 +209,11 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
     return LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
 
+int32_t SoftBusServer::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+{
+    return LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+}
+
 int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {

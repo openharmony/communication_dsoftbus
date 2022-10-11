@@ -302,9 +302,9 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_DEV_NAME,
         (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_CAPABILITY,
-        (uint8_t *)&netCapacity, NUM_BUF_SIZE) == SOFTBUS_OK);
+        (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_TYPE,
-        (uint8_t *)&netType, NUM_BUF_SIZE) == SOFTBUS_OK);
+        (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
     for (int i = 0; i < infoNum; i++) {
@@ -315,9 +315,9 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEV_NAME,
             (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_CAPABILITY,
-            (uint8_t *)&netCapacity, NUM_BUF_SIZE) == SOFTBUS_OK);
+            (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
         EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_TYPE,
-            (uint8_t *)&netType, NUM_BUF_SIZE) == SOFTBUS_OK);
+            (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
     }
     FreeNodeInfo(remoteNodeInfo);
 }
