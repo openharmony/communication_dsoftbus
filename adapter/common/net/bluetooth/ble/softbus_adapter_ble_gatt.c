@@ -27,8 +27,8 @@
 #include "softbus_utils.h"
 
 #define SOFTBUS_SCAN_CLIENT_ID 0
-#define ADV_MAX_NUM 4
-#define SCAN_MAX_NUM 3
+#define ADV_MAX_NUM 7
+#define SCAN_MAX_NUM 5
 
 typedef struct {
     int advId;
