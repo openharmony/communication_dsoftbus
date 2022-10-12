@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE = 0,
+    SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE = 1,
     SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
 
     SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT,
@@ -32,14 +32,23 @@ typedef enum {
 
 typedef enum {
     SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT = 0,
+    SOFTBUS_HISYSEVT_DISCOVER_NOT_INIT,
+    SOFTBUS_HISYSEVT_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_START_DISCOVER_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_STOP_DISCOVER_FAIL,
+    SOFTBUS_HISYSEVT_DISCOVER_COAP_CANCEL_CAP_FAIL,
+    SOFTBUS_HISYSEVT_ERR,
     SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT,
 }SoftBusDiscErrCode;
 
 int32_t SoftbusRecordDiscScanTimes(uint8_t medium);
 int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time);
-int32_t SoftbusRecordDiscFault(uint8_t medium, uint32_t errCode);
+int32_t SoftbusRecordDiscFault(uint8_t medium, int32_t errCode);
 int32_t InitDiscStatisticSysEvt(void);
-int32_t SoftBusReportDiscStartupEvt(char *PackageName);
+int32_t SoftBusReportDiscStartupEvt(const char *packageName);
 
 #ifdef __cplusplus
 #if __cplusplus

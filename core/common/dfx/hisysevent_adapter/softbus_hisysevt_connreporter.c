@@ -73,16 +73,15 @@ static int32_t InitConnEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     int32_t nRet = SOFTBUS_OK;
-    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
         nRet = InitConnItemMutexLock(i, &mutexAttr);
     }
-
     return nRet;
 }
 
 static inline void ClearConnTimeDur(void)
 {
-    for (int32_t i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
         memset_s(&g_connTimeDur[i].maxConnDur, sizeof(ConnTimeDur) - sizeof(SoftBusMutex),
             0, sizeof(ConnTimeDur) - sizeof(SoftBusMutex));
     }
@@ -91,12 +90,12 @@ static inline void ClearConnTimeDur(void)
 static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
 {
     if (SoftBusMutexLock(&g_connTimeDur[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_connTimeDur lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_connTimeDur lock fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CONN_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_CONN_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_CONN_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -105,7 +104,7 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
     SoftBusEvtParam *param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -113,7 +112,7 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_MAX_CONN_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MAX_CONN_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MAX_CONN_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_connTimeDur[medium].maxConnDur;
@@ -121,7 +120,7 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_MIN_CONN_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MIN_CONN_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MIN_CONN_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_connTimeDur[medium].minConnDur;
@@ -129,7 +128,7 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_AVG_CONN_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_AVG_CONN_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_AVG_CONN_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_connTimeDur[medium].avgConnDur;
@@ -142,20 +141,20 @@ static int32_t SoftBusReportConnTimeDurEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
-    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
         if (SoftBusCreateConnDurMsg(msg, i) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearConnTimeDur();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create conn time reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create conn time reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearConnTimeDur();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create conn time reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create conn time reportMsg fail");
             return SOFTBUS_ERR;
         }
     }
@@ -166,7 +165,7 @@ static int32_t SoftBusReportConnTimeDurEvt(void)
 
 static inline void ClearConnSuccRate(void)
 {
-    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
         memset_s(&g_connSuccRate[i].succTime, sizeof(ConnSuccRate) - sizeof(SoftBusMutex),
             0, sizeof(ConnSuccRate) - sizeof(SoftBusMutex));
     }
@@ -175,12 +174,12 @@ static inline void ClearConnSuccRate(void)
 static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
 {
     if (SoftBusMutexLock(&g_connSuccRate[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_connSuccRate lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_connSuccRate lock fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CONN_SUCC_RATE) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_CONN_SUCC_RATE);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_CONN_SUCC_RATE);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -189,7 +188,7 @@ static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t me
     SoftBusEvtParam *param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -197,7 +196,7 @@ static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_CONN_SUCC_TIMES) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_SUCC_TIMES);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_SUCC_TIMES);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_connSuccRate[medium].succTime;
@@ -205,7 +204,7 @@ static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_CONN_FAIL_TIMES) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_FAIL_TIMES);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_FAIL_TIMES);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_connSuccRate[medium].failTime;
@@ -213,7 +212,7 @@ static int32_t SoftBusCreateConnSuccRateMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_CONN_SUCC_RATE) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_SUCC_RATE);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", CONN_PARAM_CONN_SUCC_RATE);
         return SOFTBUS_ERR;
     }
     param->paramValue.f = g_connSuccRate[medium].succRate;
@@ -225,20 +224,20 @@ static int32_t SoftBusReportConnSuccRateEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
-    for (int i = 0; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP; i < SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT; i++) {
         if (SoftBusCreateConnSuccRateMsg(msg, i) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearConnSuccRate();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create conn succ reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create conn succ reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearConnSuccRate();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write conn succ reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "write conn succ reportMsg fail");
             return SOFTBUS_ERR;
         }
     }
@@ -254,7 +253,7 @@ static int32_t SoftBusCreateConnFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     }
 
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, FAULT_EVT_CONN_FAULT) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", FAULT_EVT_CONN_FAULT);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", FAULT_EVT_CONN_FAULT);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
@@ -263,7 +262,7 @@ static int32_t SoftBusCreateConnFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     SoftBusEvtParam *param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", CONN_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", CONN_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -271,7 +270,7 @@ static int32_t SoftBusCreateConnFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, CONN_PARAM_ERROR_CODE) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", CONN_PARAM_ERROR_CODE);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", CONN_PARAM_ERROR_CODE);
         return SOFTBUS_ERR;
     }
     param->paramValue.i32v = errCode;
@@ -299,7 +298,7 @@ int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode)
 int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time)
 {
     if (SoftBusMutexLock(&g_connSuccRate[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record conn info fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record conn info fail");
         return SOFTBUS_ERR;
     }
     
@@ -316,7 +315,7 @@ int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t
     }
 
     if (SoftBusMutexLock(&g_connTimeDur[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_connTimeDur lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_connTimeDur lock fail");
         return SOFTBUS_ERR;
     }
     
@@ -340,12 +339,9 @@ int32_t InitConnStatisticSysEvt(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Conn Statistic Evt Lock Init Fail!");
         return SOFTBUS_ERR;
     }
-    
     ClearConnTimeDur();
     ClearConnSuccRate();
-
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_CONN_DURATION, SoftBusReportConnTimeDurEvt);
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_CONN_SUCC_RATE, SoftBusReportConnSuccRateEvt);
-
     return SOFTBUS_OK;
 }
