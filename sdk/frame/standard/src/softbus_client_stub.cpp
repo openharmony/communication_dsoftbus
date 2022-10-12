@@ -298,13 +298,11 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
         return SOFTBUS_ERR;
     }
     
-    int ret = OnChannelOpenFailed(channelId, channelType, errCode);
-    bool res = reply.WriteInt32(ret);
-    if (!res) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner write reply failed!");
-        return SOFTBUS_ERR;
+    int32_t ret = OnChannelOpenFailed(channelId, channelType, errCode);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed failed! ret=%d.", ret);
     }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t SoftBusClientStub::OnChannelLinkDownInner(MessageParcel &data, MessageParcel &reply)
