@@ -98,7 +98,7 @@ void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
     P2pLinkUpdateInAuthId(requestInfo->peerMac, requestInfo->authId);
     if (P2pLinkIsDisconnectState() == true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2plink state is disconnecting");
-        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WAITING;
         P2pLinkAddConningDev(conningDev);
         return;
     }
@@ -120,7 +120,7 @@ void P2pLinkLoopConnectDevice(P2pLoopMsg msgType, void *arg)
 
     if (GetP2pLinkNegoStatus() != P2PLINK_NEG_IDLE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2p Link busy");
-        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        conningDev->state = P2PLINK_MANAGER_STATE_NEGO_WAITING;
         P2pLinkAddConningDev(conningDev);
         return;
     }
@@ -425,7 +425,7 @@ static void P2pLinkNegoFail(int32_t requestId, int32_t reason)
 
     if (reason == ERROR_BUSY) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev is busy");
-        item->state = P2PLINK_MANAGER_STATE_NEGO_WATING;
+        item->state = P2PLINK_MANAGER_STATE_NEGO_WAITING;
         return;
     }
 
