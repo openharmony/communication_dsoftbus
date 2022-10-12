@@ -28,6 +28,7 @@ disc_server_inc += [
   "$dsoftbus_root_path/core/discovery/ipc/include",
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/core/discovery/interface",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

@@ -35,7 +35,6 @@
 #define DISC_PARAM_ERROR_COUNTER "ERROR_COUNTER"
 #define DISC_PARAM_ERROR_CODE "ERROR_CODE"
 
-
 typedef struct {
     SoftBusMutex lock;
     uint32_t maxDiscDur;
@@ -55,6 +54,11 @@ typedef struct {
     uint32_t errCnt[SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT];
 } DiscFault;
 
+typedef struct {
+    int32_t originErrCode;
+    int32_t dstErrCode;
+} ErrorCodeMap;
+
 static FirstDiscTime g_firstDiscTime[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscScanTimes g_scanTimes[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static DiscFault g_discFault[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
@@ -62,16 +66,16 @@ static DiscFault g_discFault[SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT];
 static int32_t InitDiscItemMutexLock(uint32_t index, SoftBusMutexAttr *mutexAttr)
 {
     if (SoftBusMutexInit(&g_firstDiscTime[index].lock, mutexAttr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init g_firstDiscTime lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init g_firstDiscTime lock fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexInit(&g_scanTimes[index].lock, mutexAttr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init g_scanTimes lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init g_scanTimes lock fail");
         (void)SoftBusMutexDestroy(&g_firstDiscTime[index].lock);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexInit(&g_discFault[index].lock, mutexAttr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init g_discFault lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init g_discFault lock fail");
         (void)SoftBusMutexDestroy(&g_firstDiscTime[index].lock);
         (void)SoftBusMutexDestroy(&g_scanTimes[index].lock);
         return SOFTBUS_ERR;
@@ -83,7 +87,7 @@ static int32_t InitDiscEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     int32_t nRet = SOFTBUS_OK;
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         nRet = InitDiscItemMutexLock(i, &mutexAttr);
     }
 
@@ -92,7 +96,7 @@ static int32_t InitDiscEvtMutexLock(void)
 
 static inline void ClearFirstDiscTime(void)
 {
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         memset_s(&g_firstDiscTime[i].maxDiscDur, sizeof(FirstDiscTime) - sizeof(SoftBusMutex),
             0, sizeof(FirstDiscTime) - sizeof(SoftBusMutex));
     }
@@ -101,12 +105,12 @@ static inline void ClearFirstDiscTime(void)
 static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
 {
     if (SoftBusMutexLock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_firstDiscTime lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_firstDiscTime lock fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_FIRST_DISC_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_FIRST_DISC_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy evtname %s fail", STATISTIC_EVT_FIRST_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -115,7 +119,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -123,7 +127,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MAX_DISC_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MAX_DISC_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MAX_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_firstDiscTime[medium].maxDiscDur;
@@ -131,7 +135,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MIN_DISC_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MIN_DISC_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_MIN_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_firstDiscTime[medium].minDiscDur;
@@ -139,7 +143,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint8_t me
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_AVG_DISC_DURATION) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_AVG_DISC_DURATION);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy paramName %s fail", DISC_PARAM_AVG_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_firstDiscTime[medium].avgDiscDur;
@@ -152,14 +156,14 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearFirstDiscTime();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create first disc duration reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
@@ -175,7 +179,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
 
 static inline void ClearScanTimes(void)
 {
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         g_scanTimes[i].scanTimes = 0;
     }
 }
@@ -183,12 +187,12 @@ static inline void ClearScanTimes(void)
 static int32_t SoftBusCreateScanTimesMsg(SoftBusEvtReportMsg *msg, uint8_t medium)
 {
     if (SoftBusMutexLock(&g_scanTimes[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_scanTimes lock fail medium %d", medium);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_scanTimes lock fail medium %d", medium);
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_SCAN_TIMES) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", STATISTIC_EVT_SCAN_TIMES);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", STATISTIC_EVT_SCAN_TIMES);
         return SOFTBUS_ERR;
     }
 
@@ -198,7 +202,7 @@ static int32_t SoftBusCreateScanTimesMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -206,7 +210,7 @@ static int32_t SoftBusCreateScanTimesMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_SCAN_COUNTER) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_SCAN_COUNTER);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_SCAN_COUNTER);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_scanTimes[medium].scanTimes;
@@ -218,20 +222,20 @@ static int32_t SoftBusReportScanTimesEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_TWO);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         if (SoftBusCreateScanTimesMsg(msg, i) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearScanTimes();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create scan timers reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create scan timers reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearScanTimes();
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write scan times reportMsg fail");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "write scan times reportMsg fail");
             return SOFTBUS_ERR;
         }
     }
@@ -242,7 +246,7 @@ static int32_t SoftBusReportScanTimesEvt(void)
 
 static inline void ClearDiscFault(void)
 {
-    for (int i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         memset_s(&g_discFault[i].errCnt, sizeof(DiscFault) - sizeof(SoftBusMutex),
             0, sizeof(DiscFault) - sizeof(SoftBusMutex));
     }
@@ -251,11 +255,11 @@ static inline void ClearDiscFault(void)
 static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t medium, uint32_t errorCode)
 {
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add g_discFault lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "add g_discFault lock fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISC_FAULT) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s evt name %s fail", STATISTIC_EVT_DISC_FAULT);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s evt name %s fail", STATISTIC_EVT_DISC_FAULT);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -264,7 +268,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     SoftBusEvtParam *param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT8;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_MEDIUM) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_MEDIUM);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_MEDIUM);
         return SOFTBUS_ERR;
     }
     param->paramValue.u8v = medium;
@@ -272,7 +276,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_ERROR_CODE) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_ERROR_CODE);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_ERROR_CODE);
         return SOFTBUS_ERR;
     }
     param->paramValue.i32v = (int)errorCode;
@@ -280,7 +284,7 @@ static int32_t SoftBusCreateDiscFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_ERROR_COUNTER) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_ERROR_COUNTER);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_ERROR_COUNTER);
         return SOFTBUS_ERR;
     }
     param->paramValue.u32v = g_discFault[medium].errCnt[errorCode];
@@ -292,21 +296,22 @@ static int32_t SoftBusReportDiscFaultEvt(void)
 {
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
-    for (uint8_t i = 0; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
+    for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         for (int32_t k = 0; k < SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT; k++) {
-            if (SoftBusCreateDiscFaultMsg(msg, i, k) != SOFTBUS_OK) {
+            int32_t ret = SoftBusCreateDiscFaultMsg(msg, i, k);
+            if (ret == SOFTBUS_ERR) {
                 SoftbusFreeEvtReporMsg(msg);
                 ClearDiscFault();
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create disc fault msg fail");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create disc fault msg fail");
                 return SOFTBUS_ERR;
             }
             if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
                 SoftbusFreeEvtReporMsg(msg);
                 ClearDiscFault();
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write disc fault msg fail");
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "write disc fault msg fail");
                 return SOFTBUS_ERR;
             }
         }
@@ -317,11 +322,11 @@ static int32_t SoftBusReportDiscFaultEvt(void)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, char *pkgName)
+static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, const char *pkgName)
 {
     // event
-    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, BEHAVIOR_EVT_DISC_START) != EOF) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", BEHAVIOR_EVT_DISC_START);
+    if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, BEHAVIOR_EVT_DISC_START) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s evtname %s fail", BEHAVIOR_EVT_DISC_START);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_BEHAVIOR;
@@ -330,22 +335,23 @@ static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, char *pkgNa
     // param 0
     SoftBusEvtParam *param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_PARAM_DISC_PACKAGE_NAME) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_DISC_PACKAGE_NAME);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", DISC_PARAM_DISC_PACKAGE_NAME);
         return SOFTBUS_ERR;
     }
     param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
-    if (strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, pkgName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", pkgName);
-        SoftBusFree(msg->paramArray);
+    int32_t offset = strlen(pkgName) - SOFTBUS_HISYSEVT_PARAM_LEN;
+    offset = offset > 0 ? offset : 0;
+    if (strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, pkgName + offset) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", pkgName);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusReportDiscStartupEvt(char *PackageName)
+int32_t SoftBusReportDiscStartupEvt(const char *packageName)
 {
-    if (PackageName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create reportMsg fail");
+    if (packageName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create reportMsg fail");
         return SOFTBUS_ERR;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
@@ -354,7 +360,7 @@ int32_t SoftBusReportDiscStartupEvt(char *PackageName)
         return SOFTBUS_ERR;
     }
 
-    SoftbusCreateDiscStartupMsg(msg, PackageName);
+    SoftbusCreateDiscStartupMsg(msg, packageName);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
     if (ret != SOFTBUS_OK) {
@@ -366,7 +372,7 @@ int32_t SoftBusReportDiscStartupEvt(char *PackageName)
 int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
 {
     if (SoftBusMutexLock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record first disc time lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record first disc time lock fail");
         return SOFTBUS_ERR;
     }
     
@@ -380,7 +386,7 @@ int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
     g_firstDiscTime[medium].avgDiscDur = (uint32_t)(g_firstDiscTime[medium].totalDiscTime /
         g_firstDiscTime[medium].discCnt);
     if (SoftBusMutexUnlock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record first disc time unlock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record first disc time unlock fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -389,26 +395,49 @@ int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
 int32_t SoftbusRecordDiscScanTimes(uint8_t medium)
 {
     if (SoftBusMutexLock(&g_scanTimes[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record disc scan lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc scan lock fail");
         return SOFTBUS_ERR;
     }
     g_scanTimes[medium].scanTimes++;
     if (SoftBusMutexUnlock(&g_scanTimes[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record disc scan unlock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc scan unlock fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusRecordDiscFault(uint8_t medium, uint32_t errCode)
+static ErrorCodeMap g_error_map [SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT] = {
+    {SOFTBUS_TIMOUT, SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT},
+    {SOFTBUS_DISCOVER_NOT_INIT, SOFTBUS_HISYSEVT_DISCOVER_NOT_INIT},
+    {SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, SOFTBUS_HISYSEVT_DISCOVER_MANAGER_INNERFUNCTION_FAIL},
+    {SOFTBUS_DISCOVER_COAP_MERGE_CAP_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL},
+    {SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL},
+    {SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL},
+    {SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_START_DISCOVER_FAIL},
+    {SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_STOP_DISCOVER_FAIL},
+    {SOFTBUS_DISCOVER_COAP_CANCEL_CAP_FAIL, SOFTBUS_HISYSEVT_DISCOVER_COAP_CANCEL_CAP_FAIL},
+    {SOFTBUS_ERR, SOFTBUS_HISYSEVT_ERR},
+};
+
+static int32_t ErrCodeConvert(int32_t errCode)
+{
+    for (int32_t i = 0; i < SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT - 1; i++) {
+        if (errCode == g_error_map[i].originErrCode) {
+            return g_error_map[i].dstErrCode;
+        }
+    }
+    return SOFTBUS_HISYSEVT_ERR;
+}
+
+int32_t SoftbusRecordDiscFault(uint8_t medium, int32_t errCode)
 {
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record disc fault lock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc fault lock fail");
         return SOFTBUS_ERR;
     }
-    g_discFault[medium].errCnt[errCode]++;
+    g_discFault[medium].errCnt[ErrCodeConvert(errCode)]++;
     if (SoftBusMutexUnlock(&g_discFault[medium].lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "record disc fault unlock fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc fault unlock fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

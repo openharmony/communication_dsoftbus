@@ -38,6 +38,7 @@
 #include "softbus_utils.h"
 #include "softbus_adapter_range.h"
 #include "softbus_hidumper_disc.h"
+#include "softbus_hisysevt_discreporter.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -1635,6 +1636,7 @@ static int32_t DiscBleLooperInit(void)
     g_discBleHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_discBleHandler.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get looper fail");
+        SoftbusRecordDiscFault(BLE, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1689,6 +1691,7 @@ static int32_t InitBleListener(void)
     g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
     g_bleListener.scanListenerId = SoftBusAddScanListener(&g_scanListener);
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
+        SoftbusRecordDiscFault(BLE, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     DiscBleSetScanFilter(g_bleListener.scanListenerId);

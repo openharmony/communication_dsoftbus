@@ -19,6 +19,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
+#include "softbus_hisysevt_discreporter.h"
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = ClientIpcOnDeviceFound,
@@ -67,6 +68,7 @@ int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
     int32_t ret = DiscPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerPublishService failed");
+        SoftbusRecordDiscFault(info->medium, ret);
         (void)ClientIpcOnPublishFail(packageName, info->publishId, PublishErroCodeProcess(ret));
         return ret;
     }
@@ -92,6 +94,7 @@ int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerStartDiscovery failed");
+        SoftbusRecordDiscFault(info->medium, ret);
         (void)ClientIpcOnDiscoverFailed(packageName, info->subscribeId, DiscoveryErroCodeProcess(ret));
         return ret;
     }
