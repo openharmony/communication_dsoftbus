@@ -322,7 +322,7 @@ static int32_t P2pLinkStateTimeOut(P2pLinkMangerState state)
     switch (state) {
         case P2PLINK_MANAGER_STATE_REUSE:
             return TIMEOUT_WAIT_REUSE;
-        case P2PLINK_MANAGER_STATE_NEGO_WATING:
+        case P2PLINK_MANAGER_STATE_NEGO_WAITING:
             return TIMEOUT_RETRRY;
         case P2PLINK_MANAGER_STATE_NEGOING:
             return TIMEOUT_NEGOING;
@@ -351,7 +351,7 @@ static void TimerPostReuse(ConnectingNode *item)
     item->state = P2PLINK_MANAGER_STATE_REUSE;
 }
 
-static void TimerNegoWatingProcess(ConnectingNode *conningDev)
+static void TimerNegoWaitingProcess(ConnectingNode *conningDev)
 {
     ConnectedNode *connedDev = NULL;
     P2pLinkConnectInfo *requestInfo = NULL;
@@ -436,14 +436,14 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                     P2pLinkDelConningDev(item);
                 }
                 break;
-            case P2PLINK_MANAGER_STATE_NEGO_WATING:
+            case P2PLINK_MANAGER_STATE_NEGO_WAITING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_BUSY);
                     P2pLinkDelConningDev(item);
                     break;
                 }
-                TimerNegoWatingProcess(item);
+                TimerNegoWaitingProcess(item);
                 break;
             case P2PLINK_MANAGER_STATE_NEGOING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
@@ -486,8 +486,10 @@ static void P2pLinkCleanConningDev(void)
     ConnectingNode *conningNext = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
-        P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
-        P2pLinkDelConningDev(conningItem);
+        if (conningItem->state != P2PLINK_MANAGER_STATE_NEGO_WAITING) {
+            P2pLinkConningCallback(conningItem, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
+            P2pLinkDelConningDev(conningItem);
+        }
     }
 }
 
