@@ -68,7 +68,10 @@ namespace OHOS {
         if (callerId == nullptr) {
             return;
         }
-        memcpy_s(callerId, callerIdLen, data, size);
+        int ret = strncpy_s(callerId, callerIdLen, (const char *)data, size >= callerIdLen ? callerIdLen - 1 : size);
+        if (ret != EOK) {
+            return;
+        }
     };
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -78,7 +81,9 @@ namespace OHOS {
         }
         GenRanDiscInfo(data, size);
         ShiftLNNGear(TEST_PKG_NAME1, callerId, networkId, &g_mode);
-        free(callerId);
+        if (callerId != nullptr) {
+            free(callerId);
+        }
         return true;
     }
 }

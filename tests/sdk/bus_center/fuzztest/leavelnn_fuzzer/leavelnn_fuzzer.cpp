@@ -49,7 +49,11 @@ namespace OHOS {
         }
 
         GenRandAddr(data, size);
-        JoinLNN((const char *)data, &addr, OnJoinLNNResult);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        JoinLNN((const char *)tmp, &addr, OnJoinLNNResult);
         return true;
     }
 }

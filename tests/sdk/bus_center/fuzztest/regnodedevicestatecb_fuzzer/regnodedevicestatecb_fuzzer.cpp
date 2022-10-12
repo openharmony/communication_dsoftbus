@@ -15,6 +15,7 @@
 
 #include "regnodedevicestatecb_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -52,7 +53,11 @@ namespace OHOS {
             return true;
         }
         GenRanDiscInfo(data, size);
-        int32_t ret = RegNodeDeviceStateCb((const char *)data, &g_stateCb);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        int32_t ret = RegNodeDeviceStateCb((const char *)tmp, &g_stateCb);
         if (ret == SOFTBUS_OK) {
             UnregNodeDeviceStateCb(&g_stateCb);
         }

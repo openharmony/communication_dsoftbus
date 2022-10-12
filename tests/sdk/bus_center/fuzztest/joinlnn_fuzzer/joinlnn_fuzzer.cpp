@@ -49,12 +49,16 @@ namespace OHOS {
             return true;
         }
 
-        if (strnlen((const char *)data, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        if (strnlen((const char *)tmp, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
             return true;
         }
 
         GenRandAddr(data, size);
-        JoinLNN((const char *)data, &addr, OnJoinLNNResult);
+        JoinLNN((const char *)tmp, &addr, OnJoinLNNResult);
         return true;
     }
 }
