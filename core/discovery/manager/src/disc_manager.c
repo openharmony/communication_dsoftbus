@@ -24,6 +24,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_hisysevt_discreporter.h"
 #include "softbus_utils.h"
 
 static bool g_isInited = false;
@@ -32,6 +33,11 @@ static SoftBusList *g_discoveryInfoList = NULL;
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
 static DiscoveryFuncInterface *g_discBleInterface = NULL;
 static DiscInnerCallback g_discMgrMediumCb;
+static SoftBusSysTime g_firstDiscTime;
+static int64_t nowTime = 0;
+static bool g_firstDiscFlag = false;
+static bool g_onDeviceFound = false;
+#define SEC_TIME_PARAM 1000LL
 static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
 static const char *g_discModuleMap[] = {
     "MODULE_LNN",
@@ -119,6 +125,15 @@ static int32_t DiscInterfaceProcess(const InnerOption *option, const DiscoveryFu
 
 static int32_t DiscInterfaceByMedium(const DiscInfo *info, const InterfaceFuncType type)
 {
+    SoftbusRecordDiscScanTimes(info->medium);
+    if (g_firstDiscFlag == false) {
+        SoftBusGetTime(&g_firstDiscTime);
+        nowTime = g_firstDiscTime.sec * SEC_TIME_PARAM + (g_firstDiscTime.usec / SEC_TIME_PARAM);
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "First discovery time record start");
+        g_firstDiscFlag = true;
+        g_onDeviceFound = false;
+    }
+
     switch (info->medium) {
         case COAP:
             return DiscInterfaceProcess(&(info->option), g_discCoapInterface, info->mode, type);
@@ -228,6 +243,18 @@ static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
     }
     bool isCallLnn = GetCallLnnStatus();
     if (isCallLnn) {
+        if (g_onDeviceFound == false) {
+            int64_t tempTime = nowTime;
+            SoftBusGetTime(&g_firstDiscTime);
+            nowTime = g_firstDiscTime.sec * SEC_TIME_PARAM + (g_firstDiscTime.usec / SEC_TIME_PARAM);
+            nowTime -= tempTime;
+            if (SoftbusRecordFirstDiscTime(infoNode->medium, (uint32_t)nowTime) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "First discovery time record failed");
+            }
+            g_onDeviceFound = true;
+            g_firstDiscFlag = false;
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "First discovery time record finish");
+        }
         infoNode->item->callback.innerCb.OnDeviceFound(device, addtions);
     }
 }
@@ -598,6 +625,8 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
         return ret;
     }
 
+    ret = SoftBusReportDiscStartupEvt(packageName);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "send startup evt end, ret is %d", ret);
     ret = DiscInterfaceByMedium(info, STARTDISCOVERTY_FUNC);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "interface fail");

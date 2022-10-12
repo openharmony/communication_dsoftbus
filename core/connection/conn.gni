@@ -30,4 +30,5 @@ conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]

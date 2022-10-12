@@ -318,7 +318,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     }
 
     if (g_connManager[info->type]->ConnectDevice == NULL) {
-        SoftBusReportConnFaultEvt(info->type, SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT);
+        SoftBusReportConnFaultEvt(info->type, SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
