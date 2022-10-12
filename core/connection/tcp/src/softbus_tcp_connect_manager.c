@@ -33,6 +33,7 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 
 #define INVALID_DATA (-1)
 #define AUTH_P2P_KEEP_ALIVE_TIME 10
@@ -432,6 +433,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
+        SoftBusReportConnFaultEvt(option->type, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
 

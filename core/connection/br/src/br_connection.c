@@ -1023,6 +1023,7 @@ void BrConnectedEventHandle(bool isClient, uint32_t value)
     args->socketFd = socketFd;
     if (pthread_create(&tid, NULL, ConnBrRead, (void *)args) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create ConnBrRead failed");
+        SoftBusFree(args);
         goto EXIT;
     }
     return;
@@ -1034,7 +1035,6 @@ EXIT:
         ClientNoticeResultBrConnect(connInfoId, false, socketFd);
         ReleaseConnectionRefByConnId(connInfoId);
     }
-    SoftBusFree(args);
     return;
 }
 
