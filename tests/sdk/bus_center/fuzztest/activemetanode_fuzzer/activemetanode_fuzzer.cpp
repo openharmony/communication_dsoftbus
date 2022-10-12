@@ -37,7 +37,11 @@ namespace OHOS {
         GenMetaNodeConfig(data, size);
         char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
 
-        int ret = ActiveMetaNode((const char *)data, &meta, metaNodeId);
+        char tmp[65] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return true;
+        }
+        int ret = ActiveMetaNode((const char *)tmp, &meta, metaNodeId);
         if (ret == SOFTBUS_OK) {
             DeactiveMetaNode((const char *)data, metaNodeId);
         }
