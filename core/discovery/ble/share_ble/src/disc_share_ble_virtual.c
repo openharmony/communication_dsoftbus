@@ -75,26 +75,28 @@ static bool IsConcern(uint32_t capability)
     return false;
 }
 
+static DiscoveryFuncInterface g_fun = {
+    .Publish = Publish,
+    .StartScan = StartScan,
+    .Unpublish = Unpublish,
+    .StopScan = StopScan,
+    .StartAdvertise = StartAdvertise,
+    .Subscribe = Subscribe,
+    .Unsubscribe = Unsubscribe,
+    .StopAdvertise = StopAdvertise,
+    .LinkStatusChanged = LinkStatusChanged,
+    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfo,
+};
+
+static DiscoveryBleDispatcherInterface g_sharebleInterface = {
+    .IsConcern = IsConcern,
+    .mediumInterface = &g_fun,
+};
+
 DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
 {
     (void)discInnerCb;
-    DiscoveryFuncInterface fun = {
-        .Publish = Publish,
-        .StartScan = StartScan,
-        .Unpublish = Unpublish,
-        .StopScan = StopScan,
-        .StartAdvertise = StartAdvertise,
-        .Subscribe = Subscribe,
-        .Unsubscribe = Unsubscribe,
-        .StopAdvertise = StopAdvertise,
-        .LinkStatusChanged = LinkStatusChanged,
-        .UpdateLocalDeviceInfo =UpdateLocalDeviceInfo,
-    };
-    DiscoveryBleDispatcherInterface sharebleInterface = {
-        .IsConcern = IsConcern,
-        .mediumInterface = &fun,
-    };
-    return &sharebleInterface;
+    return &g_sharebleInterface;
 }
 
 void DiscShareBleDeinit(void)
