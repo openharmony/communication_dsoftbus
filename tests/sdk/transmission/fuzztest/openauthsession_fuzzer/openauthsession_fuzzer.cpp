@@ -16,6 +16,8 @@
 #include "openauthsession_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_def.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
@@ -26,11 +28,15 @@ const char *g_testSessionName   = "com.plrdtest.dsoftbus";
 
 void OpenAuthSessionTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size = 0)) {
+        return;
+    }
+    char tmp[PKG_NAME_SIZE_MAX + 1] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
         return;
     }
 
-    OpenAuthSession(g_testSessionName, &g_addr, -1, (const char*)data);
+    OpenAuthSession(g_testSessionName, &g_addr, -1, (const char*)tmp);
 }
 } // namespace OHOS
 
