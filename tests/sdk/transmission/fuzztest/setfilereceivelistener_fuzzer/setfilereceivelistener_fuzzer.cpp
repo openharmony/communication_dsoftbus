@@ -16,20 +16,28 @@
 #include "setfilereceivelistener_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_def.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
+
 void SetFileReceiveListenerTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size = 0)) {
         return;
     }
     char *sessionName = nullptr;
     IFileReceiveListener *recvListener = nullptr;
     char *rootDir = nullptr;
-    SetFileReceiveListener((const char *)data, sessionName, recvListener, rootDir);
+    char tmp[PKG_NAME_SIZE_MAX + 1] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+        return;
+    }
+
+    SetFileReceiveListener((const char *)tmp, sessionName, recvListener, rootDir);
 }
 } // namespace OHOS
 

@@ -25,11 +25,11 @@ namespace OHOS {
 void SendBytesTest(const uint8_t* data, size_t size)
 {
     int sessionId = -1;
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size = 0)) {
         return;
     }
 
-    SendBytes(sessionId, data, strlen((const char*)data));
+    SendBytes(sessionId, data, size);
 }
 } // namespace OHOS
 
