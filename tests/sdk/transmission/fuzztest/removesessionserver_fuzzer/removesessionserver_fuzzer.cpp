@@ -27,7 +27,7 @@ const char *g_sessionName = "objectstore";
 
 void RemoveSessionServerTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size = 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     char tmp[PKG_NAME_SIZE_MAX + 1] = {0};
