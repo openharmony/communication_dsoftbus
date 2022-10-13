@@ -131,13 +131,12 @@ static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
     return hiSysEvtType;
 }
 
-static int32_t InitHisEvtMutexLock()
+static void InitHisEvtMutexLock()
 {
     if (SoftBusMutexInit(&g_dfx_lock, NULL) != SOFTBUS_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "init HisEvtMutexLock fail");
-        return SOFTBUS_ERR;
+        return;
     }
-    return SOFTBUS_ERR;
 }
 
 #ifdef __cplusplus
@@ -152,7 +151,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         return SOFTBUS_ERR;
     }
     if (!g_init_lock) {
-        (void)InitHisEvtMutexLock();
+        InitHisEvtMutexLock();
     }
     if (SoftBusMutexLock(&g_dfx_lock) != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock failed", __func__);
