@@ -37,6 +37,7 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 
 #define BLE_GATT_SERVICE "bleGattService"
 
@@ -137,6 +138,7 @@ int32_t SoftBusGattServerStartService(void)
         int ret = SoftBusGattsStartService(g_gattService.svcId);
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsStartService failed");
+            SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_START_FAIL);
             g_gattService.state = BLE_GATT_SERVICE_ADDED;
         }
         (void)SoftBusMutexUnlock(&g_serviceStateLock);
@@ -170,6 +172,7 @@ int32_t SoftBusGattServerStopService(void)
     }
     (void)SoftBusMutexUnlock(&g_serviceStateLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "stop gatt service wrong state:%d", g_gattService.state);
+    SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_STOP_FAIL);
     return SOFTBUS_ERR;
 }
 
