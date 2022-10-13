@@ -24,6 +24,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_hisysevt_connreporter.h"
 
 typedef struct {
     uint32_t seq;
@@ -87,11 +88,13 @@ char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv invalid data");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DATA);
         return NULL;
     }
     BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv unknown device");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DEVICE);
         return NULL;
     }
     BleTransHeader header;
@@ -182,6 +185,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend  module:%d", module);
         ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLength + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
+            SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend BleHalSend failed");
             SoftBusFree(buff);
             return ret;
