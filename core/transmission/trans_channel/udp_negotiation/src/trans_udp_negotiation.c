@@ -249,7 +249,8 @@ static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
             }
             return AcceptUdpChannelAsClient(appInfo);
         case TYPE_UDP_CHANNEL_CLOSE:
-            return CloseUdpChannel(appInfo);
+            (void)CloseUdpChannel(appInfo);
+            break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid udp channel type.");
             return SOFTBUS_ERR;
