@@ -16,6 +16,8 @@
 #include "createsessionserver_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_def.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
@@ -43,11 +45,15 @@ static ISessionListener g_sessionlistener = {
 
 void CreateSessionServerTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size = 0)) {
+        return;
+    }
+    char tmp[PKG_NAME_SIZE_MAX + 1] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
         return;
     }
 
-    CreateSessionServer((const char*)data, g_sessionName, &g_sessionlistener);
+    CreateSessionServer((const char*)tmp, g_sessionName, &g_sessionlistener);
 }
 } // namespace OHOS
 
