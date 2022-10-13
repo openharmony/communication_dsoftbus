@@ -339,7 +339,7 @@ static int32_t SoftbusCreateDiscStartupMsg(SoftBusEvtReportMsg *msg, const char 
         return SOFTBUS_ERR;
     }
     param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
-    int32_t offset = strlen(pkgName) - SOFTBUS_HISYSEVT_PARAM_LEN;
+    int32_t offset = strlen(pkgName) - SOFTBUS_HISYSEVT_PARAM_LEN + 1;
     offset = offset > 0 ? offset : 0;
     if (strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, pkgName + offset) != EOK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy_s param name %s fail", pkgName);
