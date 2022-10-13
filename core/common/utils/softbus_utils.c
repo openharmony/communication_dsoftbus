@@ -407,7 +407,7 @@ void IdInstead(char *data, uint32_t length)
         return;
     }
     uint32_t halfLen = length / GET_ID_HALF_LEN;
-    for (int i = 0; i < length - 1; i++) {
+    for (uint32_t i = 0; i < length - 1; i++) {
         if (i > halfLen) {
             data[i] = '*';
         }

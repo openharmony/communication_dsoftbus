@@ -349,7 +349,8 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     return SOFTBUS_OK;
 }
 
-static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
+static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
+
 {
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
@@ -726,7 +727,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         if (item->channelId != channelId) {
             continue;
         }
-        int32_t freeLen = item->size - (item->w - item->data);
+        int32_t freeLen = (int32_t)(item->size) - (item->w - item->data);
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
