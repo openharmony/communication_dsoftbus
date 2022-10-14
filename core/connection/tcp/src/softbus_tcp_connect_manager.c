@@ -434,6 +434,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
         SoftBusReportConnFaultEvt(option->type, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_EVT_CONN_FAIL, 0);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
 
@@ -442,6 +443,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set keepalive fail, fd: %d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_ERR);
+            SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_EVT_CONN_FAIL, 0);
             return SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive successfully, fd: %d", fd);
@@ -451,12 +453,14 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
     if (WrapperAddTcpConnInfo(option, result, connectionId, requestId, fd) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_EVT_CONN_FAIL, 0);
         return SOFTBUS_ERR;
     }
     if (AddTrigger((ListenerModule)(option->socketOption.moduleId), fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         DelTcpConnNode(connectionId);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_EVT_CONN_FAIL, 0);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp connect add write trigger ok");
