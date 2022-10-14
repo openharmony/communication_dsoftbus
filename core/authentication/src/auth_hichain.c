@@ -307,8 +307,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
         if (ret != 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice need account service, retry time = %d, err = %d", i, ret);
             (void)SoftBusSleepMs(RETRY_MILLSECONDS);
-        }
-        else {
+        } else {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain authDevice sucess, time = %d", i);
             cJSON_free(authParams);
             return SOFTBUS_OK;
