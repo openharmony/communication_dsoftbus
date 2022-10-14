@@ -152,6 +152,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     }
     if (!g_init_lock) {
         InitHisEvtMutexLock();
+        g_init_lock = true;
     }
     if (SoftBusMutexLock(&g_dfx_lock) != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock failed", __func__);
