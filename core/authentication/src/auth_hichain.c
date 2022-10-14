@@ -24,6 +24,10 @@
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
+#define RETRY_TIMES 5
+#define RETRY_MILLSECONDS 500
+
+
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -299,14 +303,22 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "generate auth param fail.");
         return SOFTBUS_ERR;
     }
-    int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice fail(err = %d).", ret);
-        cJSON_free(authParams);
-        return SOFTBUS_ERR;
+    int32_t ret;
+    for (int i = 0; i < RETRY_TIMES; i++) {
+        ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
+        if (ret != 0) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice need account service, retry time = %d, err = %d", i, ret);
+            (void)SoftBusSleepMs(RETRY_MILLSECONDS);
+        }
+        else {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain authDevice sucess, time = %d", i);
+            cJSON_free(authParams);
+            return SOFTBUS_OK;
+        }
     }
+
     cJSON_free(authParams);
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
