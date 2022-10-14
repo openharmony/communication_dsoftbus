@@ -405,6 +405,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     if (GetBleConnInfoByAddr(option->bleOption.bleMac, &server, &client) != SOFTBUS_OK) {
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleConnInfoByAddr failed, requestId: %d", requestId);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -434,6 +435,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     }
     if (UpdataBleConnectionUnsafe(option, clientId, requestId) != SOFTBUS_OK) {
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);        
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
