@@ -607,6 +607,7 @@ static int32_t TransProxyOpenNewConnChannel(
     }
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     chan->reqId = (int32_t)reqId;
+    chan->isServer = 0;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     chan->type = connInfo->type;
     if (TransProxyCreateChanInfo(chan, channelId, appInfo) != SOFTBUS_OK) {
