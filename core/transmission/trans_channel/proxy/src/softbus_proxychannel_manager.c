@@ -312,7 +312,10 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
     uint32_t connId = info->connId;
     TransProxyPostResetPeerMsgToLoop(info);
-    TransProxyPostDisConnectMsgToLoop(connId);
+
+    if (info->isServer != 1) {
+        TransProxyPostDisConnectMsgToLoop(connId);
+    }
 }
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
