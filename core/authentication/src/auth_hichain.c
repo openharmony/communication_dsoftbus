@@ -27,8 +27,6 @@
 #define RETRY_TIMES 5
 #define RETRY_MILLSECONDS 500
 
-
-
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
     GroupType groupType;
