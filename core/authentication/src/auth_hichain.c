@@ -24,7 +24,7 @@
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
-#define RETRY_TIMES 5
+#define RETRY_TIMES 16
 #define RETRY_MILLSECONDS 500
 
 typedef struct {
@@ -305,7 +305,8 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
     for (int i = 0; i < RETRY_TIMES; i++) {
         ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
         if (ret != 0) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice need account service, retry time = %d, err = %d", i, ret);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                "hichain authDevice need account service, retry time = %d, err = %d", i, ret);
             (void)SoftBusSleepMs(RETRY_MILLSECONDS);
         } else {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain authDevice sucess, time = %d", i);
