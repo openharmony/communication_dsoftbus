@@ -34,6 +34,7 @@
 #include "softbus_utils.h"
 #include "softbus_hisysevt_connreporter.h"
 
+#define SOFTBUS_CONNECT_TIME  1343463
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
 static SoftBusList *g_listenerList = NULL;
 static bool g_isInited = false;
@@ -257,6 +258,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
         listener->callback.OnConnected(connectionId, info);
     }
     SoftBusFree(node);
+    SoftbusRecordConnInfo(info->type, SOFTBUS_EVT_CONN_SUCC, SOFTBUS_CONNECT_TIME);
     return;
 }
 

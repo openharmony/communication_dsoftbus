@@ -22,6 +22,7 @@
 #include "common_list.h"
 #include "message_handler.h"
 #include "securec.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_conn_manager.h"
@@ -37,6 +38,7 @@
 #include "time.h"
 #include "unistd.h"
 #include "wrapper_br_interface.h"
+
 
 #define DISCONN_DELAY_TIME 200
 #define BR_ACCEPET_WAIT_TIME 1000
@@ -523,6 +525,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDeviceFirstTime connId:%d, requestId:%d", connId, requestId);
     if (ConnBrOnEvent(ADD_CONN_BR_CLIENT_CONNECTED_MSG, (int32_t)connId, (int32_t)connId) != SOFTBUS_OK) {
         ReleaseConnectionRef(newConnInfo);
+        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -557,6 +560,7 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
         if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDevice connCount: %d", connCount);
             result->OnConnectFailed(requestId, 0);
+            SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
             ret = SOFTBUS_ERR;
         } else {
             ret = ConnectDeviceFirstTime(option, requestId, result);
