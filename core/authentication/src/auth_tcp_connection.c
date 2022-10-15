@@ -255,8 +255,14 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t events,
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ConnSetTcpKeepAlive(cfd, AUTH_KEEP_ALIVE_TIME_INTERVAL) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set keepalive fail!");
+        ConnShutdownSocket(cfd);
+        return SOFTBUS_ERR;
+    }
     if (AddTrigger(AUTH, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
+        ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
     NotifyConnected(cfd, false);
