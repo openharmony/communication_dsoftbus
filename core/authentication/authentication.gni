@@ -19,11 +19,11 @@ if (dsoftbus_feature_auth_account == true) {
 
 authentication_path = "$dsoftbus_root_path/core/authentication"
 native_source_path = rebase_path("$dsoftbus_root_path")
-dep_dir = "dsoftbus_enhance/core/authentication/src"
+auth_dir = "dsoftbus_enhance/core/authentication/src"
 enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        [
                          "$native_source_path",
-                         "$dep_dir",
+                         "$auth_dir",
                        ],
                        "value")
 
