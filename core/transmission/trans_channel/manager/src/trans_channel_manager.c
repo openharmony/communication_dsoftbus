@@ -502,3 +502,16 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
             return SOFTBUS_INVALID_PARAM;
     }
 }
+
+int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
+{
+    if (channelType != CHANNEL_TYPE_PROXY) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelType:%d error", channelType);
+        return SOFTBUS_ERR;
+    }
+    if (TransProxyGetConnIdByChanId(channelId, connId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy connId, channelId: %d", channelId);
+        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+    }
+    return SOFTBUS_OK;
+}
