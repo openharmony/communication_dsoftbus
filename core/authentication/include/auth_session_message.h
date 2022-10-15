@@ -21,12 +21,17 @@
 
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
+#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
+
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth);
+int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
+    NodeInfo *nodeInfo, bool isMetaAuth);
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len);
