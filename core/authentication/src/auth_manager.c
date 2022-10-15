@@ -30,35 +30,12 @@
 #define MAX_AUTH_VALID_PERIOD (30 * 60 * 1000L) /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
 
-typedef struct {
-    int32_t module;
-    AuthTransListener listener;
-} ModuleListener;
-
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
 
 static AuthVerifyListener g_verifyListener = {0};
 static GroupChangeListener g_groupChangeListener = {0};
-static ModuleListener g_moduleListener[] = {
-    {
-        .module = MODULE_P2P_LINK,
-        .listener = { NULL, NULL },
-    },
-    {
-        .module = MODULE_P2P_LISTEN,
-        .listener = { NULL, NULL },
-    },
-    {
-        .module = MODULE_UDP_INFO,
-        .listener = { NULL, NULL },
-    },
-    {
-        .module = MODULE_TIME_SYNC,
-        .listener = { NULL, NULL },
-    }
-};
-
+static AuthTransCallback g_transCallback = {0};
 /* Auth Manager */
 static AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
@@ -718,41 +695,6 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     }
 }
 
-static void NotifyTransDataReceived(int64_t authId,
-    const AuthDataHead *head, const uint8_t *data, uint32_t len)
-{
-    uint32_t i;
-    AuthTransListener *listener = NULL;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
-        if (g_moduleListener[i].module == head->module) {
-            listener = &(g_moduleListener[i].listener);
-            break;
-        }
-    }
-    if (listener == NULL || listener->onDataReceived == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: onDataReceived not found.");
-        return;
-    }
-    AuthTransData transData = {
-        .module = head->module,
-        .flag = head->flag,
-        .seq = head->seq,
-        .len = len,
-        .data = data,
-    };
-    listener->onDataReceived(authId, &transData);
-}
-
-static void NotifyTransDisconnected(int64_t authId)
-{
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
-        if (g_moduleListener[i].listener.onDisconnected != NULL) {
-            g_moduleListener[i].listener.onDisconnected(authId);
-        }
-    }
-}
-
 static void HandleReconnectResult(const AuthRequest *request, uint64_t connId, int32_t result)
 {
     if (result != SOFTBUS_OK) {
@@ -895,7 +837,9 @@ static void HandleConnectionData(uint64_t connId, const AuthConnInfo *connInfo, 
     auth->lastActiveTime = GetCurrentTimeMs();
     auth->connId = connId;
     ReleaseAuthLock();
-    NotifyTransDataReceived(authId, head, decData, decDataLen);
+    if (g_transCallback.OnDataReceived != NULL) {
+        g_transCallback.OnDataReceived(authId, head, decData, decDataLen);
+    }
     SoftBusFree(decData);
 }
 
@@ -941,7 +885,9 @@ static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
         if (authIds[i] == AUTH_INVALID_ID) {
             continue;
         }
-        NotifyTransDisconnected(authIds[i]);
+        if (g_transCallback.OnDisconnected != NULL) {
+            g_transCallback.OnDisconnected(authIds[i]);
+        }
         if (connInfo->type == AUTH_LINK_TYPE_WIFI || connInfo->type == AUTH_LINK_TYPE_P2P) {
             RemoveAuthManagerByAuthId(authIds[i]);
             NotifyDeviceDisconnect(authIds[i]);
@@ -1022,38 +968,6 @@ int32_t AuthFlushDevice(const char *uuid)
     return SOFTBUS_OK;
 }
 
-int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
-{
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: add listener, module = %d.", module);
-    if (listener == NULL || listener->onDataReceived == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthTrans: invalid listener.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
-        if (g_moduleListener[i].module == module) {
-            g_moduleListener[i].listener.onDataReceived = listener->onDataReceived;
-            g_moduleListener[i].listener.onDisconnected = listener->onDisconnected;
-            return SOFTBUS_OK;
-        }
-    }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthTrans: unknown module(=%d).", module);
-    return SOFTBUS_ERR;
-}
-
-void UnregAuthTransListener(int32_t module)
-{
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: remove listener, module=%d.", module);
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
-        if (g_moduleListener[i].module == module) {
-            g_moduleListener[i].listener.onDataReceived = NULL;
-            g_moduleListener[i].listener.onDisconnected = NULL;
-            return;
-        }
-    }
-}
-
 static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
@@ -1081,7 +995,7 @@ static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return SOFTBUS_OK;
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
+int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid uuid or connInfo.");
@@ -1105,7 +1019,7 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
+int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
     if (info == NULL || !CheckAuthConnCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1140,7 +1054,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return SOFTBUS_OK;
 }
 
-void AuthCloseConn(int64_t authId)
+void AuthDeviceCloseConn(int64_t authId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "close auth conn: authId=%" PRId64, authId);
     AuthManager *auth = GetAuthManagerByAuthId(authId);
@@ -1163,7 +1077,7 @@ void AuthCloseConn(int64_t authId)
     return;
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo)
 {
     if (dataInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "dataInfo is null.");
@@ -1211,7 +1125,7 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onGroupDeleted = NULL;
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection)
+int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection)
 {
     if (uuid == NULL || uuid[0] == '\0') {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "uuid is empty.");
@@ -1245,7 +1159,7 @@ int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection)
     return latestAuthId;
 }
 
-int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
+int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
 {
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "connInfo is null.");
@@ -1254,7 +1168,7 @@ int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     return GetAuthIdByConnInfo(connInfo, isServer);
 }
 
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer)
+int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer)
 {
     if (p2pMac == NULL || p2pMac[0] == '\0') {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "p2pMac is empty.");
@@ -1288,7 +1202,7 @@ uint32_t AuthGetDecryptSize(uint32_t inLen)
     return inLen - ENCRYPT_OVER_HEAD_LEN;
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetEncryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1307,7 +1221,7 @@ int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
     return SOFTBUS_OK;
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetDecryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1326,7 +1240,7 @@ int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
     return SOFTBUS_OK;
 }
 
-int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
+int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac)
 {
     if (p2pMac == NULL || p2pMac[0] == '\0') {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "p2pMac is empty.");
@@ -1341,7 +1255,7 @@ int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
     return UpdateAuthManagerByAuthId(authId, SetAuthP2pMac, &inAuth);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthDeviceGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
 {
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "connInfo is null.");
@@ -1356,7 +1270,7 @@ int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
     return SOFTBUS_OK;
 }
 
-int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer)
 {
     if (isServer == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "isServer is null.");
@@ -1371,7 +1285,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
     return SOFTBUS_OK;
 }
 
-int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
+int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     if (uuid == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "uuid is empty.");
@@ -1390,7 +1304,7 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return SOFTBUS_OK;
 }
 
-int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
+int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version)
 {
     if (version == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "version is null.");
@@ -1405,9 +1319,14 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
     return SOFTBUS_OK;
 }
 
-int32_t AuthInit(void)
+int32_t AuthDeviceInit(const AuthTransCallback *callback)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth init enter.");
+    if (callback == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "Auth notify trans callback is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_transCallback = *callback;
     ListInit(&g_authClientList);
     ListInit(&g_authServerList);
     if (AuthCommonInit() != SOFTBUS_OK) {
@@ -1441,7 +1360,7 @@ int32_t AuthInit(void)
     return SOFTBUS_OK;
 }
 
-void AuthDeinit(void)
+void AuthDeviceDeinit(void)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth deinit enter.");
     UnregTrustDataChangeListener();
