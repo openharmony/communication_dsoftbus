@@ -147,7 +147,7 @@ int32_t AuthMetaGetVersion(int64_t authId, SoftBusVersion *version)
 
 int32_t AuthMetaInit(const AuthTransCallback *callback)
 {
-    (void)callbak;
+    (void)callback;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta init");
     return SOFTBUS_OK;
 }
