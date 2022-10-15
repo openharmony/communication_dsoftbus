@@ -47,4 +47,5 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     uint16_t pkgLen, uint16_t sessionLen);
 void TransProxyDeathCallback(const char *pkgName);
 int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo);
+int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 #endif

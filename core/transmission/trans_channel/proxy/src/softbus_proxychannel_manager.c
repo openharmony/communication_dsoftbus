@@ -1247,3 +1247,31 @@ int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
     return SOFTBUS_ERR;
 }
 
+int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
+{
+    if (g_proxyChannelList == NULL) {
+        return SOFTBUS_ERR;
+    }
+    ProxyChannelInfo *item = NULL;
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            if (item->status == PROXY_CHANNEL_STATUS_COMPLETED || item->status ==
+                PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+                *connId = item->connId;
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+                return SOFTBUS_OK;
+            } else {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "g_proxyChannel status error");
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+                return SOFTBUS_ERR;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_ERR;
+}
+

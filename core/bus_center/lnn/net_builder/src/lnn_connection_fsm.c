@@ -31,6 +31,10 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_async_callback_utils.h"
+#include "trans_channel_manager.h"
+
+#define DATA_SIZE 32
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -357,8 +361,28 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
 {
     (void)metaJoinNode;
     (void)dataKey;
-    int32_t rc;
-    rc = SOFTBUS_OK;
+    if (metaJoinNode == NULL || dataKey == NULL) {
+        return SOFTBUS_ERR;
+    }
+    int32_t rc = SOFTBUS_OK;
+    int32_t connId = 0;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "channelId: %d, type: %d",
+        metaJoinNode->addr.info.session.channelId, metaJoinNode->addr.info.session.type);
+    if (metaJoinNode->addr.type == CONNECTION_ADDR_SESSION) {
+        rc = TransGetConnByChanId(metaJoinNode->addr.info.session.channelId,
+            metaJoinNode->addr.info.session.type, &connId);
+        if (rc != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnJoinMetaNode fail");
+            return SOFTBUS_ERR;
+        }
+        metaJoinNode->requestId = AuthGenRequestId();
+        if (AuthMetaStartVerify(connId, dataKey->data, DATA_SIZE,
+            metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
+                rc = SOFTBUS_ERR;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "AuthMetaStartVerify resultId=%d, requestId=%u", rc, metaJoinNode->requestId);
+    }
     return rc;
 }
 

@@ -17,6 +17,7 @@
 
 #include <string.h>
 
+#include "client_trans_session_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -216,6 +217,14 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *da
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         return ret;
+    }
+    if (target->type == CONNECTION_ADDR_SESSION) {
+        ret = ClientGetChannelBySessionId(target->info.session.sessionId, &target->info.session.channelId,
+            &target->info.session.type, NULL);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : get channel error!");
+            return ret;
+        }
     }
     return JoinMetaNodeInner(pkgName, target, dataKey, cb);
 }
