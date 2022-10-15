@@ -18,6 +18,14 @@ if (dsoftbus_feature_auth_account == true) {
 }
 
 authentication_path = "$dsoftbus_root_path/core/authentication"
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_dir = "dsoftbus_enhance/core/authentication/src"
+enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                       [
+                         "$native_source_path",
+                         "$dep_dir",
+                       ],
+                       "value")
 if (dsoftbus_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
@@ -29,8 +37,12 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_session_key.c",
     "$authentication_path/src/auth_session_message.c",
     "$authentication_path/src/auth_interface.c",
-    "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
   ]
+  if (enhanced) {
+    auth_server_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_meta_manager.c" ]
+  } else {
+    auth_server_src += [ "$authentication_path/src/virtual/auth_meta_manager_virtual.c" ]
+  }
   if (dsoftbus_feature_ip_auth) {
     auth_server_src +=
         [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c" ]
